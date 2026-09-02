@@ -26,7 +26,7 @@
       "id": 7914240170882312,
       "definition": {
         "type": "note",
-        "content": "**Useful Links**\n\n* [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka)\n* [Kafka Broker Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Consumer Integration Doc](https://docs.datadoghq.com/integrations/kafka-consumer/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [Data Streams Kafka Lag Dashboard](/dashboard/lists?q=Data%20Streams%20Monitoring%3A%20Kafka&p=1)\n* [KRaft Documentation](https://kafka.apache.org/documentation/#kraft)\n",
+        "content": "**Useful Links**\n\n* [Data Streams Monitoring](https://docs.datadoghq.com/data_streams/kafka/setup/)\n* [Kafka Broker Integration Doc](https://docs.datadoghq.com/integrations/kafka/?tab=host)\n* [Kafka Consumer Integration Doc](https://docs.datadoghq.com/integrations/kafka-consumer/?tab=host)\n* [Kafka Blog by Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)\n* [Data Streams Kafka Lag Dashboard](/dashboard/lists?q=Data%20Streams%20Monitoring%3A%20Kafka&p=1)\n* [KRaft Documentation](https://kafka.apache.org/documentation/#kraft)\n",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -1341,7 +1341,7 @@
             "id": 8236156193990667,
             "definition": {
               "type": "note",
-              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. \nOpen in [Data Streams Monitoring](/data-streams) or [Learn More](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).\n\nAssign the **topic** variable to view insights about a specific topic.",
+              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. \nOpen in [Data Streams Monitoring](/data-streams) or [Learn More](https://docs.datadoghq.com/data_streams/kafka/setup/).\n\nAssign the **topic** variable to view insights about a specific topic.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
