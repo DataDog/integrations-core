@@ -1,0 +1,2 @@
+appRG:ONLINE:node1::::::siteA
+dbRG:ONLINE:node2::::::siteA

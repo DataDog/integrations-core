@@ -1,0 +1,4 @@
+appRG:ERROR:node1
+appRG:OFFLINE:node2
+dbRG:OFFLINE:node1
+dbRG:ONLINE:node2

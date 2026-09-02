@@ -1,0 +1,13 @@
+HACMPcluster:
+        id = 1
+        name = "prodcluster"
+        nodename = "node1"
+        sec_level = "Standard"
+        highest_node_id = 2
+        highest_network_id = 2
+        highest_site_id = 0
+        handle = 2
+        cluster_version = 21
+        rg_distribution_policy = "node"
+        heartbeattype = "C"
+        udresolve = "yes"

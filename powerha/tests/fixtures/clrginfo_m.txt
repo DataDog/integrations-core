@@ -1,0 +1,7 @@
+-----------------------------------------------------------------------------
+Group Name     Application       Node             State
+-----------------------------------------------------------------------------
+appRG          appMonitor1       node1            ONLINE
+appRG          appMonitor1       node2            OFFLINE
+dbRG           dbMonitor1        node2            ONLINE
+dbRG           dbMonitor1        node1            FAILED

@@ -1,0 +1,7 @@
+Name  Mtu   Network     Address            Ipkts Ierrs    Opkts Oerrs  Coll
+en0   1500  link#2      a2.b4.c6.d8.e0.f1 1520349     0  1233221     0     0
+en0   1500  10.10.1     node1             1520349     0  1233221     0     0
+en1   1500  link#3      a2.b4.c6.d8.e0.f2  982133     0   842211     0     0
+en1   1500  10.10.2     node1-boot         982133     0   842211     0     0
+lo0   16896 link#1                          332211     0   332211     0     0
+lo0   16896 127         loopback            332211     0   332211     0     0

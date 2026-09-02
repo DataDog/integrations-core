@@ -1,0 +1,3 @@
+Subsystem         Group            PID          Status
+ clstrmgrES       cluster          6357296      active
+Current state: ST_BROKEN

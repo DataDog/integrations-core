@@ -1,0 +1,6 @@
+HACMPlogs:
+        name = "hacmp.out"
+        value = "/var/hacmp/log"
+        default = "/var/hacmp/log"
+        remote = 1
+        procdesc = "Cluster history log file"

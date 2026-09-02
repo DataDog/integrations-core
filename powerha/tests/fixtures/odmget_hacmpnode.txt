@@ -1,0 +1,15 @@
+HACMPnode:
+        name = "node1"
+        object = "TCPIP_LABEL"
+        value = ""
+        node_id = 1
+        node_handle = 1
+        version = 21
+
+HACMPnode:
+        name = "node2"
+        object = "TCPIP_LABEL"
+        value = ""
+        node_id = 2
+        node_handle = 2
+        version = 21

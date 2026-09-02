@@ -1,0 +1,5 @@
+Nov 3 14:22:10 EVENT START: node_down node1
+Nov 3 14:22:12 EVENT COMPLETED: node_down node1 0
+Nov 3 14:22:15 EVENT START: rg_move node2 1 RELEASE
+Nov 3 14:22:18 EVENT COMPLETED: rg_move node2 1 RELEASE 0
+Nov 3 14:22:20 EVENT START: node_up node1

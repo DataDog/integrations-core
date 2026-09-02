@@ -1,0 +1,32 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+powerha.application_monitor.count,gauge,,monitor,,The number of distinct application monitors configured across all resource groups.,0,powerha,application monitor count,,powerha_cluster:prodcluster
+powerha.application_monitor.online,gauge,,,,"Whether an application monitor reports its application as online on a given node. 1 if online, 0 otherwise.",1,powerha,application monitor online,,application:appMonitor1
+powerha.application_monitor.state,gauge,,,,Always 1; tagged with state to track an application monitor state on a given node over time.,0,powerha,application monitor state,,application:appMonitor1
+powerha.caa.disk_comms.up,gauge,,,,"Whether the CAA disk-based communication path to a peer node is up. 1 if up, 0 otherwise.",1,powerha,CAA disk comms up,,peer_node:node2
+powerha.caa.heartbeat_type,gauge,,,,Always 1; tagged with heartbeat_type to indicate the CAA cluster heartbeat mechanism in use.,0,powerha,CAA heartbeat type,,heartbeat_type:unicast
+powerha.caa.interface.state,gauge,,,,Always 1; tagged with state to track a CAA network interface state on a peer node over time.,0,powerha,CAA interface state,,interface:en0
+powerha.caa.interface.up,gauge,,,,"Whether a CAA-monitored network interface on a peer node is up. 1 if up, 0 otherwise.",1,powerha,CAA interface up,,interface:en0
+powerha.caa.points_of_contact,gauge,,,,The number of active CAA points of contact reported for a peer cluster node.,1,powerha,CAA points of contact,,peer_node:node2
+powerha.caa.san_comms.up,gauge,,,,"Whether the CAA SAN-based communication path to a peer node is up. 1 if up, 0 otherwise.",1,powerha,CAA SAN comms up,,peer_node:node2
+powerha.cluster.nodes,gauge,,node,,The number of nodes configured in the cluster (from the HACMPnode ODM object).,0,powerha,cluster nodes,,powerha_cluster:prodcluster
+powerha.cluster.nodes_up,gauge,,node,,The number of cluster nodes currently reporting a CAA state of UP.,1,powerha,cluster nodes up,,powerha_cluster:prodcluster
+powerha.cluster_manager.stable,gauge,,,,"Whether the cluster manager (clstrmgrES) is in the stable (ST_STABLE) state on this node. 1 if stable, 0 otherwise.",1,powerha,cluster manager stable,,powerha_cluster:prodcluster
+powerha.cluster_manager.state,gauge,,,,Always 1; tagged with state to track the current cluster manager state machine state over time.,0,powerha,cluster manager state,,state:st_stable
+powerha.network.interface.collisions.count,count,,,,The number of collisions on a network interface as reported by netstat -i.,0,powerha,network interface collisions,,interface:en0
+powerha.network.interface.errors_in.count,count,,packet,,The number of input errors on a network interface as reported by netstat -i.,0,powerha,network interface errors in,,interface:en0
+powerha.network.interface.errors_out.count,count,,packet,,The number of output errors on a network interface as reported by netstat -i.,0,powerha,network interface errors out,,interface:en0
+powerha.network.interface.packets_in.count,count,,packet,,The number of packets received on a network interface as reported by netstat -i.,0,powerha,network interface packets in,,interface:en0
+powerha.network.interface.packets_out.count,count,,packet,,The number of packets sent on a network interface as reported by netstat -i.,0,powerha,network interface packets out,,interface:en0
+powerha.network.interface.state,gauge,,,,Always 1; tagged with state to track a PowerHA-monitored network interface state over time.,0,powerha,network interface state,,interface:en0
+powerha.network.interface.up,gauge,,,,"Whether a PowerHA-monitored network interface is up. 1 if up, 0 otherwise.",1,powerha,network interface up,,interface:en0
+powerha.node.state,gauge,,,,Always 1; tagged with state to track a peer cluster node CAA state over time.,0,powerha,node state,,peer_node:node2
+powerha.node.up,gauge,,,,"Whether a peer cluster node is reporting a CAA state of UP. 1 if up, 0 otherwise.",1,powerha,node up,,peer_node:node2
+powerha.resource_group.count,gauge,,resource,,The number of distinct resource groups configured in the cluster.,0,powerha,resource group count,,powerha_cluster:prodcluster
+powerha.resource_group.online,gauge,,,,"Whether a resource group is online (or online/secondary) on a given node. 1 if online, 0 otherwise.",1,powerha,resource group online,,resource_group:appRG
+powerha.resource_group.state,gauge,,,,Always 1; tagged with state to track a resource group placement state on a given node over time.,0,powerha,resource group state,,resource_group:appRG
+powerha.volume_group.count,gauge,,volume,,The number of shared volume groups collected (after applying exclude_volume_groups).,0,powerha,volume group count,,powerha_cluster:prodcluster
+powerha.volume_group.online,gauge,,,,Whether a shared volume group is online. Always 1 for volume groups returned by lsvg -o.,1,powerha,volume group online,,volume_group:datavg
+powerha.volume_group.physical_volume.free_pps,gauge,,,,The number of free physical partitions on a physical volume.,0,powerha,physical volume free PPs,,physical_volume:hdisk2
+powerha.volume_group.physical_volume.state,gauge,,,,Always 1; tagged with state to track a physical volume state over time.,0,powerha,physical volume state,,physical_volume:hdisk2
+powerha.volume_group.physical_volume.total_pps,gauge,,,,The total number of physical partitions on a physical volume.,0,powerha,physical volume total PPs,,physical_volume:hdisk2
+powerha.volume_group.physical_volume.up,gauge,,,,"Whether a physical volume in a shared volume group is in the active state. 1 if active, 0 otherwise.",1,powerha,physical volume up,,physical_volume:hdisk2

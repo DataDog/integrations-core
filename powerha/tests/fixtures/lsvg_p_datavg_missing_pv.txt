@@ -1,0 +1,4 @@
+datavg:
+PV_NAME           PV STATE          TOTAL PPs   FREE PPs    FREE DISTRIBUTION
+hdisk2            active            511         200         102..00..00..98..00
+hdisk3            missing           511         511         102..102..102..102..103

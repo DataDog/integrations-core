@@ -1,0 +1,3 @@
+appvg:
+PV_NAME           PV STATE          TOTAL PPs   FREE PPs    FREE DISTRIBUTION
+hdisk5            active            255         64          51..00..00..13..00

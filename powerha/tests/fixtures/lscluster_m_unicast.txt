@@ -1,0 +1,26 @@
+Calling node query for all nodes...
+Node query number of nodes examined: 2
+
+Node name: node1
+        Cluster shorthand id for node: 1
+        UUID for node: 4a3b2c1d-1111-1111-1111-111111111111
+        State of node: UP NODE_LOCAL
+        Smoothed rtt to node: 0
+        Number of clusters node is a member in: 1
+        CLUSTER NAME     SHID    UUID
+        prodcluster        0       aaaa1111-2222-3333-4444-555566667777
+                Number of points_of_contact for node: 1
+                Point-of-contact interface & contact state
+                tcpsock->02     UP
+
+Node name: node2
+        Cluster shorthand id for node: 2
+        UUID for node: 4a3b2c1d-2222-2222-2222-222222222222
+        State of node: UP
+        Smoothed rtt to node: 8
+        Number of clusters node is a member in: 1
+        CLUSTER NAME     SHID    UUID
+        prodcluster        0       aaaa1111-2222-3333-4444-555566667777
+                Number of points_of_contact for node: 1
+                Point-of-contact interface & contact state
+                tcpsock->03     UP

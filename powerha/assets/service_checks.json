@@ -1,0 +1,160 @@
+[
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster"
+        ],
+        "check": "powerha.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent cannot query the local clstrmgrES cluster manager state (for example, PowerHA is not installed or not running on this node). Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster"
+        ],
+        "check": "powerha.cluster_manager.status",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "name": "Cluster Manager Status",
+        "description": "Returns `OK` if the clstrmgrES cluster manager is in the stable (ST_STABLE) state, `WARNING` if it is in a known transitional state (for example, during a failover event), and `CRITICAL` otherwise (for example, ST_BROKEN or an unrecognized state)."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "peer_node"
+        ],
+        "check": "powerha.node.status",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "name": "Node Status",
+        "description": "Returns `CRITICAL` if a cluster node reports a CAA state of DOWN in `lscluster -m`, `OK` if it reports UP, and `UNKNOWN` for any other reported state."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "resource_group"
+        ],
+        "check": "powerha.resource_group.status",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "name": "Resource Group Status",
+        "description": "Returns `OK` if a resource group is online on at least one node, `WARNING` if it is only in a transitional state (acquiring, releasing, or unmanaged), and `CRITICAL` if it is in the error state or not online anywhere."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "resource_group",
+            "application",
+            "monitor_node"
+        ],
+        "check": "powerha.application_monitor.status",
+        "statuses": [
+            "ok",
+            "warning",
+            "unknown",
+            "critical"
+        ],
+        "name": "Application Monitor Status",
+        "description": "Returns `OK` if an application monitor reports its application ONLINE, `WARNING` if OFFLINE, `CRITICAL` if FAILED, and `UNKNOWN` for any other reported state."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "peer_node",
+            "interface"
+        ],
+        "check": "powerha.caa.interface.status",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "name": "CAA Interface Status",
+        "description": "Returns `CRITICAL` if a CAA network interface reported by `lscluster -m` is DOWN, `OK` if UP, and `UNKNOWN` for any other reported state."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "peer_node"
+        ],
+        "check": "powerha.caa.san_comms.status",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "name": "CAA SAN Communication Status",
+        "description": "Returns `WARNING` if the CAA SAN-based communication path to a peer node (`clras sancomm_status`) is DOWN, `OK` otherwise. This is a redundant heartbeat path, so a single node's path being down does not indicate a critical cluster health issue on its own."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "peer_node"
+        ],
+        "check": "powerha.caa.disk_comms.status",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "name": "CAA Disk Communication Status",
+        "description": "Returns `WARNING` if the CAA disk-based communication path to a peer node (`clras dpcomm_status`) is DOWN, `OK` otherwise. This is a redundant heartbeat path, so a single node's path being down does not indicate a critical cluster health issue on its own."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "interface"
+        ],
+        "check": "powerha.network.interface.status",
+        "statuses": [
+            "ok",
+            "unknown",
+            "critical"
+        ],
+        "name": "Network Interface Status",
+        "description": "Returns `CRITICAL` if a PowerHA-monitored network interface reported by `netstat -i` is DOWN, `OK` if UP, and `UNKNOWN` for any other reported state."
+    },
+    {
+        "agent_version": "7.65.0",
+        "integration": "PowerHA",
+        "groups": [
+            "powerha_cluster",
+            "volume_group"
+        ],
+        "check": "powerha.volume_group.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Volume Group Status",
+        "description": "Returns `CRITICAL` if any physical volume in a shared volume group is not in the active state, `OK` otherwise."
+    }
+]

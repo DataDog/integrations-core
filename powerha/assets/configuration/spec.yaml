@@ -1,0 +1,104 @@
+name: PowerHA
+files:
+- name: powerha.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: cluster_name
+      description: |
+        Override the cluster name reported in the `powerha_cluster` tag. By default the check
+        discovers this by querying the `HACMPcluster` ODM object with `odmget`.
+      value:
+        display_default: null
+        type: string
+        example: prodcluster
+    - name: utilities_path
+      description: |
+        Directory containing the PowerHA cluster utilities (`clRGinfo`, `clfindres`).
+      value:
+        type: string
+        default: /usr/es/sbin/cluster/utilities
+    - name: clras_path
+      description: |
+        Path to the `clras` CAA diagnostics binary, used to check SAN-based and disk-based
+        cluster communication paths.
+      value:
+        type: string
+        default: /usr/lib/cluster/clras
+    - name: hacmp_out_path
+      description: |
+        Override the path to the `hacmp.out` cluster event log. By default the check resolves this
+        from the `HACMPlogs` ODM object. The `dd-agent` user must have read permission on this file
+        for `collect_cluster_events` to work.
+      value:
+        display_default: null
+        type: string
+        example: /var/hacmp/log/hacmp.out
+    - name: collect_resource_groups
+      description: |
+        Collect resource group placement and state via `clRGinfo -s` (falling back to the legacy
+        `clfindres -s` if unavailable).
+      value:
+        type: boolean
+        example: true
+    - name: collect_app_monitor_status
+      description: |
+        Collect application monitor status via `clRGinfo -m`. Disabled by default since it requires
+        an additional command invocation and application monitors are not configured on every cluster.
+      value:
+        type: boolean
+        example: false
+    - name: collect_caa_comms
+      description: |
+        Collect Cluster Aware AIX (CAA) topology and communication path health via `lscluster -m`
+        and `clras sancomm_status`/`clras dpcomm_status`.
+      value:
+        type: boolean
+        example: true
+    - name: collect_network_interfaces
+      description: |
+        Collect PowerHA-monitored network interface status via `netstat -i`.
+      value:
+        type: boolean
+        example: true
+    - name: collect_network_interface_counters
+      description: |
+        Also submit packet/error/collision counters for each network interface. Disabled by default
+        to avoid duplicating metrics already collected by the `network` check.
+      value:
+        type: boolean
+        example: false
+    - name: submit_ip_address_tag
+      description: |
+        Tag network interface metrics with the interface's current IP address. Disabled by default
+        because IP addresses can move between interfaces during a takeover, which would churn tags.
+      value:
+        type: boolean
+        example: false
+    - name: collect_volume_groups
+      description: |
+        Collect shared volume group and physical volume status via `lsvg -o` and `lsvg -p`.
+      value:
+        type: boolean
+        example: true
+    - name: exclude_volume_groups
+      description: |
+        Volume groups to exclude from collection, for example private/non-shared volume groups.
+      value:
+        type: array
+        items:
+          type: string
+        default:
+          - rootvg
+          - caavg_private
+    - name: collect_cluster_events
+      description: |
+        When the cluster manager is not in a stable state, look up the most recent event from the
+        `hacmp.out` log and include it in the `powerha.cluster_manager.status` service check message.
+      value:
+        type: boolean
+        example: true
+    - template: instances/default

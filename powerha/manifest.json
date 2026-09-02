@@ -1,0 +1,58 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e640ab7d-ab66-4144-9a83-88ba84fc6894",
+  "app_id": "powerha",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor IBM PowerHA SystemMirror (HACMP) cluster health, resource groups, and CAA communication paths.",
+    "title": "PowerHA",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::AIX",
+      "Category::OS & System",
+      "Category::Provisioning",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Queried Data Type::Service Checks",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Service Checks"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 88313762,
+      "source_type_name": "PowerHA",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "powerha.",
+        "check": "powerha.cluster_manager.stable",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "clstrmgrES"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
