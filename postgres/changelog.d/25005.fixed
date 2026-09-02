@@ -1,1 +1,0 @@
-Move incremental query metrics collection onto the shared query metrics primitives, so cache entries for statements that have left ``pg_stat_statements`` are dropped on every collection instead of only those that reported metrics.
