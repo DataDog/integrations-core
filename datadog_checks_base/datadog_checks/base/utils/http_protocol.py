@@ -8,7 +8,7 @@ Coordinate member and semantic changes across implementations until a second bac
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import timedelta
 from types import MappingProxyType
@@ -58,18 +58,31 @@ class HTTPRequestSnapshot:
 
 
 class HTTPResponse(Protocol):
-    status_code: int
-    content: bytes
-    text: str
-    headers: Mapping[str, str]
-    """Case-insensitive headers whose iteration casing is backend-defined."""
-    encoding: str | None
-    elapsed: timedelta
-    cookies: Mapping[str, str]
-    links: Mapping[str, Mapping[str, str]]
-    url: str
-    history: list[HTTPResponse]
+    @property
+    def status_code(self) -> int: ...
+    @property
+    def content(self) -> bytes: ...
+    @property
+    def text(self) -> str: ...
+    @property
+    def headers(self) -> Mapping[str, str]:
+        """Case-insensitive headers whose iteration casing is backend-defined."""
+        ...
 
+    @property
+    def encoding(self) -> str | None: ...
+    @encoding.setter
+    def encoding(self, value: str | None) -> None: ...
+    @property
+    def elapsed(self) -> timedelta: ...
+    @property
+    def cookies(self) -> Mapping[str, str]: ...
+    @property
+    def links(self) -> Mapping[str, Mapping[str, str]]: ...
+    @property
+    def url(self) -> str: ...
+    @property
+    def history(self) -> Sequence[HTTPResponse]: ...
     @property
     def ok(self) -> bool: ...
     @property
