@@ -82,6 +82,14 @@ class BaseProcessor[T: BaseMessage]:
         """
         raise error
 
+    def on_stop_requested(self) -> None:
+        """React to the bus being asked to wind down, by shortening work already in flight.
+
+        Called once per processor, before the bus acts on the request and possibly from a signal
+        handler, so it must not block or await. Raising is contained: the stop still happens and the
+        other processors are still told.
+        """
+
     def submit_message(self, message: BaseMessage) -> None:
         """Put *message* on the bus this processor was registered in, from any thread."""
         if self.bus is None:
@@ -197,12 +205,36 @@ class EventBusOrchestrator(ABC):
         control, such as a cancelled CI job, reaches ``finalize`` without waiting out the grace period.
         ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
         loop awaits them directly and would otherwise be held for as long as they take.
+
+        Every registered processor's :meth:`BaseProcessor.on_stop_requested` runs before this returns.
         """
         if self.stopping:
             return
 
         self._logger.info("Stop requested; the bus will wind down")
+        # Set before the hooks, so one that raises cannot leave the bus running.
         self._stopping.set()
+        self._notify_processors_of_stop()
+
+    def _notify_processors_of_stop(self) -> None:
+        for processor in self._registered_processors():
+            try:
+                processor.on_stop_requested()
+            except Exception as e:
+                # Swallowed rather than routed: the caller may be a signal handler, where raising loses
+                # the processors behind this one.
+                self._logger.error("on_stop_requested failed for '%s': %s", processor.name, e, exc_info=e)
+
+    def _registered_processors(self) -> list[Processor]:
+        """Every registered processor, once each, since ``_subscribers`` is keyed by message type.
+
+        Keyed by identity because a subclass defining ``__eq__`` would collide or be unhashable.
+        """
+        unique: dict[int, Processor] = {}
+        for processors in self._subscribers.values():
+            for processor in processors:
+                unique.setdefault(id(processor), processor)
+        return list(unique.values())
 
     def submit_message(self, message: BaseMessage):
         """Adds a message to the queue, from any thread.
