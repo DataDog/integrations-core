@@ -9,7 +9,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
-from ddev.utils.github_async.client import QUERY_MASK, failure_reason, with_query_masked
+from ddev.utils.github_async.client import QUERY_MASK, SHUTDOWN_REQUEST_TIMEOUT, failure_reason, with_query_masked
 from ddev.utils.github_async.retry import NO_RETRY
 from tests.utils.github_async.helpers import TOKEN, json_response, make_client
 from tests.utils.github_async.payloads import artifact, workflow_run_payload
@@ -95,6 +95,34 @@ async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, flo
         return json_response(workflow_run_payload())
 
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
+    await client.get_workflow_run("o", "r", 42, **call_kwargs)
+
+    assert captured["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), expected)
+
+
+@pytest.mark.parametrize(
+    ("call_kwargs", "expected"),
+    [
+        pytest.param({}, SHUTDOWN_REQUEST_TIMEOUT, id="caps-the-default"),
+        pytest.param({"timeout": 60.0}, SHUTDOWN_REQUEST_TIMEOUT, id="caps-a-longer-explicit-timeout"),
+        pytest.param({"timeout": 0.5}, 0.5, id="keeps-a-shorter-explicit-timeout"),
+    ],
+)
+async def test_shutting_down_caps_how_long_one_request_may_take(call_kwargs: dict[str, float], expected: float) -> None:
+    """A cleanup call has to fail in time for the next one to be tried at all.
+
+    The cap applies to an explicit timeout too: a caller asking for longer than the process has left
+    would spend the whole window on one request.
+    """
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["timeout"] = request.extensions["timeout"]
+        return json_response(workflow_run_payload())
+
+    client = AsyncGitHubClient(token=TOKEN, default_timeout=30.0, transport=httpx.MockTransport(handler))
+    client.enter_shutdown_mode()
+
     await client.get_workflow_run("o", "r", 42, **call_kwargs)
 
     assert captured["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), expected)

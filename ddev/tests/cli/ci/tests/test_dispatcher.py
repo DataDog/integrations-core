@@ -14,8 +14,7 @@ from pathlib import Path
 import pytest
 
 from ddev.cli.ci.tests.dispatcher import (
-    CANCELLED_MAX_RATE,
-    CANCELLED_MAX_WAIT_SECONDS,
+    CANCELLED_RATE_LIMITS,
     Dispatcher,
     DispatcherContext,
     RunContext,
@@ -236,10 +235,7 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
     assert dispatcher.cancelled
     # The cleanup competes with a ~10s kill using a bucket the run has been spending all along, so
     # without this it is paced for a run that still had its whole window ahead of it.
-    assert client.last_call("relax_rate_limits").kwargs == {
-        "max_wait_seconds": CANCELLED_MAX_WAIT_SECONDS,
-        "max_rate": CANCELLED_MAX_RATE,
-    }
+    assert client.last_call("enter_shutdown_mode").kwargs == {"rate_limits": CANCELLED_RATE_LIMITS}
     # The initial plan already created the comment, so the cancelled report edits that one.
     assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
@@ -250,14 +246,14 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
 
 
 @requires_signals
-def test_a_run_still_winds_down_when_the_rate_limiter_cannot_be_relaxed(client, tmp_path):
+def test_a_run_still_winds_down_when_shutdown_mode_cannot_be_entered(client, tmp_path):
     """The signal handler's own failures are invisible: the loop logs them and the next signal, which
     finds the run already cancelling, returns without retrying. So the stop cannot be left downstream
     of anything that might raise, or the run waits to be killed instead of winding down.
     """
     dispatcher = build_bus(client, tmp_path, [make_batch(make_job())])
     a_run_that_never_finishes(client)
-    client.mock_response("relax_rate_limits", RuntimeError("the limiter is not what we think it is"))
+    client.mock_response("enter_shutdown_mode", RuntimeError("the limiter is not what we think it is"))
 
     start = time.perf_counter()
     run_cancelled_by_sigint(dispatcher, client)

@@ -23,6 +23,7 @@ from ddev.utils.rate_limiting import (
     PacingReason,
     RateLimitEvent,
     RateLimitWaitAbandoned,
+    RelaxedRateLimits,
     SecondaryLimitEvent,
 )
 from tests.helpers.assertions import assert_blocks
@@ -705,6 +706,23 @@ async def test_instrumented_limiter_does_not_consume_bucket_token_during_governo
 def test_instrumented_limiter_observe_without_governor_does_not_raise():
     limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000))
     limiter.observe(make_snapshot(limit=100, remaining=50, reset_at=2000.0))
+
+
+@pytest.mark.parametrize(
+    ("limits", "message"),
+    [
+        pytest.param({"max_wait_seconds": -1.0, "max_rate": 10.0}, "max_wait_seconds must be zero", id="negative_wait"),
+        pytest.param({"max_wait_seconds": 2.0, "max_rate": 0.0}, "max_rate must be greater", id="zero_rate"),
+    ],
+)
+def test_relaxed_limits_that_would_block_forever_are_rejected(limits: dict[str, float], message: str) -> None:
+    """Relaxing exists to stop blocking, so values that block instead defeat the point of asking.
+
+    A rate of zero hands out no slots at all, which is the opposite of what a caller relaxing pacing
+    is asking for, and it would surface as a hang rather than an error.
+    """
+    with pytest.raises(ValueError, match=message):
+        RelaxedRateLimits(**limits)
 
 
 async def test_relaxing_stops_rationing_the_budget(clock: FakeClock, slept: list[float]) -> None:

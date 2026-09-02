@@ -22,6 +22,7 @@ from ddev.utils.rate_limiting import (
     PacingEvent,
     PacingReason,
     RateLimitEvent,
+    RelaxedRateLimits,
     SecondaryLimitEvent,
 )
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
@@ -236,6 +237,59 @@ async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatc
 
     assert len(calls) == 2
     assert type(exc_info.value) is httpx.HTTPStatusError
+
+
+async def test_shutting_down_does_not_wait_out_a_rate_limit_pause(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Re-acquiring the limiter is this layer's backoff, so its retries are a wait like any other.
+
+    Waiting out a reset spends a window the process does not have on one call, when the point of
+    shutting down is to give every remaining cleanup call a turn.
+    """
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    transport, calls = recording_transport([httpx.Response(403, headers={"retry-after": "5"})])
+    client = governed_client(clock, transport, max_rate_limit_retries=2)
+    client.enter_shutdown_mode()
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await client._rate_limited_request("GET", "/x")
+
+    assert len(calls) == 1
+
+
+async def test_shutting_down_leaves_pacing_alone_unless_asked() -> None:
+    """Pacing protects a budget shared with everything else using the token, so abandoning it is the
+    caller's call to make and not a side effect of shutting down.
+    """
+    limiter = InstrumentedAsyncLimiter(
+        AsyncLimiter(max_rate=1, time_period=1000), budget_governor=BudgetGovernor(), name="github"
+    )
+    client = AsyncGitHubClient(
+        token=TOKEN, rate_limiter=limiter, transport=httpx.MockTransport(lambda _: httpx.Response(200))
+    )
+
+    client.enter_shutdown_mode()
+
+    assert limiter.limiter.max_rate == 1
+    assert limiter.budget_governor is not None
+    assert limiter.budget_governor.reserve_fraction != 0.0
+
+
+async def test_shutting_down_relaxes_pacing_when_the_caller_asks() -> None:
+    """A caller that knows the budget outlives the process can spend what is left on cleanup."""
+    limiter = InstrumentedAsyncLimiter(
+        AsyncLimiter(max_rate=1, time_period=1000), budget_governor=BudgetGovernor(), name="github"
+    )
+    client = AsyncGitHubClient(
+        token=TOKEN, rate_limiter=limiter, transport=httpx.MockTransport(lambda _: httpx.Response(200))
+    )
+
+    client.enter_shutdown_mode(rate_limits=RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0))
+
+    assert limiter.limiter.max_rate == 10_000.0
+    assert limiter.budget_governor is not None
+    assert limiter.budget_governor.max_wait_seconds == 2.0
+    assert limiter.budget_governor.reserve_fraction == 0.0
 
 
 async def test_download_redirect_302_is_not_retried(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
