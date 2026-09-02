@@ -1,7 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$set_environment_variables = <<SCRIPT
+# The quoted heredoc delimiters (<<'...') keep Ruby from interpolating the rendered
+# content, so values like $HOME or #{...} reach the provisioning shell literally.
+$set_environment_variables = <<-'SCRIPT'
 tee "/etc/profile.d/myvars.sh" > "/dev/null" <<EOF
 
 export LOCAL_IP=$(hostname -I | cut -d ' ' -f 1)
@@ -24,11 +26,11 @@ Vagrant.configure("2") do |config|
 
     node.vm.provision "shell", inline: $set_environment_variables, run: "always"
 
-    node.vm.provision "shell", inline: <<-SHELL, run: "always"
+    node.vm.provision "shell", inline: <<-'SHELL', run: "always"
       sudo apt update
       {{ agent_install_env_vars_str }} bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
 {{ systemd_env_vars_str }}
-      sudo service datadog-agent start && echo "Agent started successfully"
+      sudo service datadog-agent restart && echo "Agent restarted successfully"
       echo "VM {{ vm_hostname }} is ready"
     SHELL
   end

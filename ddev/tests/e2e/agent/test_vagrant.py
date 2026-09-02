@@ -392,6 +392,38 @@ class TestStart:
         # …and the value is quoted and escaped per systemd EnvironmentFile syntax
         assert 'DD_TEST="a $HOME $(pwd) `pwd` \\"quoted\\" back\\\\slash"' in systemd_env_vars_str
 
+    def test_rendered_vagrantfile_preserves_literal_values(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        mock_env_data_storage,
+        mock_platform_run,
+        vagrant_env_cleanup,
+    ):
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        # Uses the real template (no mock), so the assertions run against the
+        # actual Vagrantfile content and cover the Jinja and Ruby heredoc layers.
+        agent = VagrantAgent(app, get_integration('glusterfs'), 'py3.12', {}, config_file)
+        agent.start(
+            agent_build='',
+            local_packages={},
+            env_vars={'DD_TEST': 'a $HOME $(pwd) `pwd` "quoted" back\\slash'},
+        )
+
+        vagrantfile = (temp_dir / 'vagrant' / 'dd-vagrant-glusterfs-py3.12' / 'Vagrantfile').read_text()
+        # Non-interpolating Ruby heredocs keep the values from being expanded by Ruby
+        assert "<<-'SHELL'" in vagrantfile
+        assert "<<-'SCRIPT'" in vagrantfile
+        # …and the value is quoted and escaped per systemd EnvironmentFile syntax
+        assert 'DD_TEST="a $HOME $(pwd) `pwd` \\"quoted\\" back\\\\slash"' in vagrantfile
+        # The service is restarted after the EnvironmentFile is written so a process
+        # already started by the install script also receives the variables
+        assert 'sudo service datadog-agent restart' in vagrantfile
+
     @pytest.mark.parametrize(
         'guest_os, expected_systemd_env_vars_str',
         [
