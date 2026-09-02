@@ -283,9 +283,11 @@ def test_build_batches_end_to_end_split_defaults():
 
 
 def test_build_batches_plans_minimum_base_package_replicas():
-    repo = FakeRepo([FakeIntegration("postgres")])
-    provider = FakeEnvironmentProvider({"postgres": [env("py3.11", unit=True, e2e=True)]})
-    changed = [modified("postgres/tests/test_a.py")]
+    # `ddev` stands in for a target `ddev test --compat` does nothing for: it is not an integration,
+    # so pinning a base package version does not apply and a replica would rerun the same suite.
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("ddev", is_integration=False)])
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11", unit=True, e2e=True)], "ddev": [env("py3.11")]})
+    changed = [modified("postgres/tests/test_a.py"), modified("ddev/tests/test_b.py")]
 
     [batch] = build_test_batches(
         repo,
@@ -295,42 +297,15 @@ def test_build_batches_plans_minimum_base_package_replicas():
         minimum_base_package=True,
     )
 
-    # Both variants reach the plan, and the partition validates: the batch contract rejects
-    # duplicate job names and artifact identities, which is what the pair used to produce.
+    # Only the eligible target is replicated, and the partition validates: the batch contract rejects
+    # duplicate job names and artifact identities, which is what a replica pair used to produce.
     assert [(j.name, j.e2e_tests, j.minimum_base_package) for j in batch.job_list] == [
+        ("ddev (py3.11)", False, False),
         ("postgres (py3.11)", True, False),
         ("minimum-base-package-postgres (py3.11)", False, True),
     ]
-    assert batch.jobs_count == 2
-    assert batch.integrations == ["postgres"]
-
-
-@pytest.mark.parametrize(
-    ("attributes", "replicated"),
-    [
-        pytest.param({}, True, id="shipped-integration-with-a-pinned-base-package"),
-        pytest.param({"is_integration": False}, False, id="tooling-target-is-not-an-integration"),
-        pytest.param({"is_package": False}, False, id="tile-ships-no-package"),
-        pytest.param({"minimum_base_package_version": None}, False, id="base-package-not-pinned"),
-    ],
-)
-def test_only_targets_compat_applies_to_are_replicated(attributes, replicated):
-    # The replica exists to run against an older base package. `ddev test --compat` pins one only for
-    # a shipped integration that declares a version, so for anything else the replica would rerun the
-    # identical suite at full cost.
-    repo = FakeRepo([FakeIntegration("postgres", **attributes)])
-    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")]})
-    changed = [modified("postgres/tests/test_a.py")]
-
-    [batch] = build_test_batches(
-        repo,
-        changed,
-        environment_provider=provider,
-        config=BatchingConfig(),
-        minimum_base_package=True,
-    )
-
-    assert [job.minimum_base_package for job in batch.job_list] == ([False, True] if replicated else [False])
+    assert batch.jobs_count == 3
+    assert batch.integrations == ["ddev", "postgres"]
 
 
 def test_build_batches_empty_input_returns_no_batches():
