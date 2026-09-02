@@ -128,12 +128,23 @@ async def test_a_mutation_does_not_replay_a_request_that_may_have_landed(error: 
 # ---------------------------------------------------------------------------
 
 
-async def test_a_caller_can_turn_retrying_off_for_one_call() -> None:
+@pytest.mark.parametrize(
+    ("call_kwargs", "shutting_down"),
+    [
+        pytest.param({"retry": NO_RETRY}, False, id="per-call-policy"),
+        # The ladder outlives the process, and every attempt it schedules is time the next cleanup
+        # call does not get.
+        pytest.param({}, True, id="shutting-down"),
+    ],
+)
+async def test_retrying_can_be_turned_off(call_kwargs: dict[str, object], shutting_down: bool) -> None:
     transport, calls = recording_transport([httpx.Response(503), json_response(workflow_run_payload())])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
+    if shutting_down:
+        client.enter_shutdown_mode()
 
     with pytest.raises(httpx.HTTPStatusError):
-        await client.get_workflow_run("o", "r", 42, retry=NO_RETRY)
+        await client.get_workflow_run("o", "r", 42, **call_kwargs)
 
     assert len(calls) == 1
 
@@ -318,18 +329,6 @@ def test_tuning_a_policy_leaves_the_shared_default_alone() -> None:
 
     assert tuned.attempts == 1
     assert SAFE_RETRY.attempts == DEFAULT_ATTEMPTS
-
-
-async def test_shutting_down_takes_one_attempt_and_gives_up() -> None:
-    """The ladder outlives the process, and a 503 is what the widest policy would otherwise replay."""
-    transport, calls = recording_transport([httpx.Response(503), json_response(workflow_run_payload())])
-    client = AsyncGitHubClient(token=TOKEN, transport=transport)
-    client.enter_shutdown_mode()
-
-    with pytest.raises(httpx.HTTPStatusError):
-        await client.get_workflow_run("o", "r", 42)
-
-    assert len(calls) == 1
 
 
 @pytest.mark.parametrize(

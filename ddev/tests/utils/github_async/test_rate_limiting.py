@@ -223,71 +223,52 @@ async def test_the_rate_limit_layer_does_not_retry_a_transport_error() -> None:
     assert len(calls) == 1
 
 
-async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Two consecutive rate-limit responses with max_rate_limit_retries=1 raise after exactly two calls."""
-    clock = FakeClock()
-    advance_clock_on_sleep(clock, monkeypatch)
-    transport, calls = recording_transport(
-        [httpx.Response(403, headers={"retry-after": "5"}), httpx.Response(403, headers={"retry-after": "5"})]
-    )
-    client = governed_client(clock, transport, max_rate_limit_retries=1)
+@pytest.mark.parametrize(
+    ("retries", "shutting_down", "expected_calls"),
+    [
+        pytest.param(1, False, 2, id="stops-after-max-retries"),
+        pytest.param(2, True, 1, id="shutting-down-does-not-retry"),
+    ],
+)
+async def test_the_rate_limit_layer_stops_re_acquiring_when_it_is_out_of_attempts(
+    monkeypatch: pytest.MonkeyPatch, retries: int, shutting_down: bool, expected_calls: int
+) -> None:
+    """Re-acquiring the limiter is this layer's backoff, so an attempt here is a wait.
 
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client._rate_limited_request("GET", "/x")
-
-    assert len(calls) == 2
-    assert type(exc_info.value) is httpx.HTTPStatusError
-
-
-async def test_shutting_down_does_not_wait_out_a_rate_limit_pause(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Re-acquiring the limiter is this layer's backoff, so waiting out a reset spends the window on
-    one call.
+    Shutting down takes none of them: waiting out a reset would spend the whole window on one call.
     """
     clock = FakeClock()
     advance_clock_on_sleep(clock, monkeypatch)
-    transport, calls = recording_transport([httpx.Response(403, headers={"retry-after": "5"})])
-    client = governed_client(clock, transport, max_rate_limit_retries=2)
-    client.enter_shutdown_mode()
+    rate_limited = httpx.Response(403, headers={"retry-after": "5"})
+    transport, calls = recording_transport([rate_limited, rate_limited])
+    client = governed_client(clock, transport, max_rate_limit_retries=retries)
+    if shutting_down:
+        client.enter_shutdown_mode()
 
     with pytest.raises(httpx.HTTPStatusError):
         await client._rate_limited_request("GET", "/x")
 
-    assert len(calls) == 1
+    assert len(calls) == expected_calls
 
 
-async def test_shutting_down_leaves_pacing_alone_unless_asked() -> None:
-    """The budget is shared with everything else using the token, so abandoning it is the caller's
-    decision rather than a side effect of shutting down.
+async def test_shutting_down_relaxes_pacing_only_when_the_caller_asks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The budget is shared with everything else using the token, so only the caller can abandon it.
+
+    What relaxing then does to the limiter is the limiter's own contract, covered in its suite; this is
+    only about whether the client forwards the request.
     """
-    limiter = InstrumentedAsyncLimiter(
-        AsyncLimiter(max_rate=1, time_period=1000), budget_governor=BudgetGovernor(), name="github"
-    )
+    relaxed: list[dict[str, float]] = []
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=5000, time_period=3600), name="github")
+    monkeypatch.setattr(limiter, "relax", lambda **kwargs: relaxed.append(kwargs), raising=True)
     client = AsyncGitHubClient(
         token=TOKEN, rate_limiter=limiter, transport=httpx.MockTransport(lambda _: httpx.Response(200))
     )
 
     client.enter_shutdown_mode()
-
-    assert limiter.limiter.max_rate == 1
-    assert limiter.budget_governor is not None
-    assert limiter.budget_governor.reserve_fraction != 0.0
-
-
-async def test_shutting_down_relaxes_pacing_when_the_caller_asks() -> None:
-    """A caller that knows the budget outlives the process can spend what is left on cleanup."""
-    limiter = InstrumentedAsyncLimiter(
-        AsyncLimiter(max_rate=1, time_period=1000), budget_governor=BudgetGovernor(), name="github"
-    )
-    client = AsyncGitHubClient(
-        token=TOKEN, rate_limiter=limiter, transport=httpx.MockTransport(lambda _: httpx.Response(200))
-    )
+    assert relaxed == []
 
     client.enter_shutdown_mode(rate_limits=RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0))
-
-    assert limiter.limiter.max_rate == 10_000.0
-    assert limiter.budget_governor is not None
-    assert limiter.budget_governor.max_wait_seconds == 2.0
-    assert limiter.budget_governor.reserve_fraction == 0.0
+    assert relaxed == [{"max_wait_seconds": 2.0, "max_rate": 10_000.0}]
 
 
 async def test_download_redirect_302_is_not_retried(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:

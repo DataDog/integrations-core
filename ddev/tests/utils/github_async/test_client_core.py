@@ -81,13 +81,20 @@ async def test_context_manager_closes_on_exit() -> None:
 
 
 @pytest.mark.parametrize(
-    ("call_kwargs", "expected"),
+    ("call_kwargs", "shutting_down", "expected"),
     [
-        pytest.param({"timeout": 2.0}, 2.0, id="per-request-override"),
-        pytest.param({}, 5.0, id="constructor-default"),
+        pytest.param({"timeout": 2.0}, False, 2.0, id="per-request-override"),
+        pytest.param({}, False, 5.0, id="constructor-default"),
+        # Shutting down caps whatever the caller asked for, so a stalled cleanup call fails in time
+        # for the next one to be tried at all.
+        pytest.param({}, True, SHUTDOWN_REQUEST_TIMEOUT, id="shutdown-caps-the-default"),
+        pytest.param({"timeout": 60.0}, True, SHUTDOWN_REQUEST_TIMEOUT, id="shutdown-caps-a-longer-timeout"),
+        pytest.param({"timeout": 0.5}, True, 0.5, id="shutdown-keeps-a-shorter-timeout"),
     ],
 )
-async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, float], expected: float) -> None:
+async def test_request_timeout_forwarded_to_transport(
+    call_kwargs: dict[str, float], shutting_down: bool, expected: float
+) -> None:
     captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -95,30 +102,8 @@ async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, flo
         return json_response(workflow_run_payload())
 
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
-    await client.get_workflow_run("o", "r", 42, **call_kwargs)
-
-    assert captured["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), expected)
-
-
-@pytest.mark.parametrize(
-    ("call_kwargs", "expected"),
-    [
-        pytest.param({}, SHUTDOWN_REQUEST_TIMEOUT, id="caps-the-default"),
-        pytest.param({"timeout": 60.0}, SHUTDOWN_REQUEST_TIMEOUT, id="caps-a-longer-explicit-timeout"),
-        pytest.param({"timeout": 0.5}, 0.5, id="keeps-a-shorter-explicit-timeout"),
-    ],
-)
-async def test_shutting_down_caps_how_long_one_request_may_take(call_kwargs: dict[str, float], expected: float) -> None:
-    """A cleanup call has to fail in time for the next one to be tried at all."""
-    captured: dict[str, Any] = {}
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        captured["timeout"] = request.extensions["timeout"]
-        return json_response(workflow_run_payload())
-
-    client = AsyncGitHubClient(token=TOKEN, default_timeout=30.0, transport=httpx.MockTransport(handler))
-    client.enter_shutdown_mode()
-
+    if shutting_down:
+        client.enter_shutdown_mode()
     await client.get_workflow_run("o", "r", 42, **call_kwargs)
 
     assert captured["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), expected)
