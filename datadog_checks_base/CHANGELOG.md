@@ -21,7 +21,7 @@
 * Fix AIA chasing crashing when the CA Issuers response is DER-encoded. ([#24683](https://github.com/DataDog/integrations-core/pull/24683))
 * Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
 
-## 38.0.2 / 2026-08-26
+## 38.0.2 / 2026-08-26 / Agent 7.83.0
 
 ***Fixed***:
 
