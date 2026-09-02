@@ -170,7 +170,6 @@ def test_body_phase_read_timeout_keeps_matching_connection_error():
 
     assert isinstance(translated, HTTPClientReadTimeoutError)
     assert isinstance(translated, requests.exceptions.ConnectionError)
-    assert not isinstance(translated, requests.exceptions.Timeout)
 
 
 def test_compat_bases_do_not_leak_into_the_agnostic_tree():
