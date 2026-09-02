@@ -1372,6 +1372,8 @@ def test_negative_offset_outside_configured_partitions_is_silent(check, kafka_in
     # Assert on the rendered tuple list as a whole rather than on the excluded partition's absence.
     # A bare `not in` would also pass if the message stopped naming tuples altogether, and the
     # excluded partition's tuple is a substring-match away from the included one's.
+    # The endswith also pins the absence of the truncation note: nothing was dropped from a
+    # one-tuple report, so the cap must not be announced, and the note would land right here.
     assert warning.endswith("[('consumer_group1', 'topic1', 0, -2)]")
     # Partition 1 was filtered out before the negative check, so it is not in the denominator.
     assert "1 of 1 monitored committed offset(s)" in warning
@@ -1398,5 +1400,7 @@ def test_unexpected_negative_offset_report_is_capped(check, kafka_instance, dd_r
     # complete one; only the rendered tuple list is capped. Each tuple names the topic once.
     assert f"{affected} of {affected} monitored committed offset(s)" in warning
     assert warning.count("'topic1'") == MAX_REPORTED_NEGATIVE_OFFSETS
+    # The cap is announced only because it actually dropped tuples here.
+    assert warning.endswith(f"Only the first {MAX_REPORTED_NEGATIVE_OFFSETS} are shown.")
     # The cap governs the message only -- every affected partition still keeps its highwater mark.
     aggregator.assert_metric("kafka.broker_offset", count=affected)

@@ -256,21 +256,32 @@ class KafkaCheck(AgentCheck):
             payload['connect_api_status'] = connect_status
         self._emit_cluster_monitoring_event(payload)
 
-    def _warn_on_unexpected_negative_offsets(self, unexpected_negatives: list[tuple], monitored_offsets: int) -> None:
+    def _warn_on_unexpected_negative_offsets(
+        self,
+        unexpected_negatives: list[tuple[str, str, int, int]],
+        monitored_offsets: int,
+    ) -> None:
         if not unexpected_negatives:
             return
+        # Only mention the cap when it actually drops something. Naming it unconditionally makes the
+        # common one-or-two-offender case read as though the report were incomplete.
+        truncated_note = (
+            f" Only the first {MAX_REPORTED_NEGATIVE_OFFSETS} are shown."
+            if len(unexpected_negatives) > MAX_REPORTED_NEGATIVE_OFFSETS
+            else ""
+        )
         self.warning(
             "%d of %d monitored committed offset(s) hold an unexpected negative value and are being "
             "discarded: a committed offset is never negative, so these are not consumer positions. "
             "consumer_offset and consumer_lag will be missing for those partitions; broker_offset is "
-            "still reported. Showing up to %d as (consumer_group, topic, partition, offset): %s",
+            "still reported. Affected (consumer_group, topic, partition, offset): %s%s",
             len(unexpected_negatives),
             monitored_offsets,
-            MAX_REPORTED_NEGATIVE_OFFSETS,
             unexpected_negatives[:MAX_REPORTED_NEGATIVE_OFFSETS],
+            truncated_note,
         )
 
-    def get_consumer_offsets(self) -> tuple[dict, set]:
+    def get_consumer_offsets(self) -> tuple[dict[str, dict[tuple[str, int], int]], set[tuple[str, int]]]:
         """Collect the committed offsets of every monitored consumer group.
 
         Returns ``({consumer_group: {(topic, partition): offset}}, {(topic, partition)})``. The
