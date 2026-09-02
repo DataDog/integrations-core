@@ -25,6 +25,7 @@ ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
 # Separator between the artifact name's fields. Names are matched by reconstruction, not by
 # splitting, so the separator does not need to be absent from the field values.
 ARTIFACT_NAME_SEPARATOR = "_"
+MINIMUM_BASE_PACKAGE_PREFIX = "minimum-base-package-"
 
 
 @dataclass(frozen=True)
@@ -45,15 +46,19 @@ class BatchJob:
     unit_tests: bool
     e2e_tests: bool
     agent_image: str | None = None  # `None` when the job runs no E2E tests
+    # Runs against the oldest supported `datadog-checks-base` rather than the current one.
+    minimum_base_package: bool = False
+    coverage: bool = True  # `False` for a job that runs without `--cov`
 
     def artifact_name(self) -> str:
-        """Sanitized, deterministic name built from the job's target, environment, and platform.
+        """Sanitized, deterministic name built from the job's identity.
 
-        Those three fields are the job's identity, so the name is unique within a batch. An
-        environmentless job contributes no segment rather than an empty one.
+        Identity is target, environment, platform and the base package variant, so the name is unique
+        within a batch. An environmentless job contributes no segment rather than an empty one.
         """
         fields = (self.target, self.environment, self.platform)
-        return ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields if field)
+        name = ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields if field)
+        return f"{MINIMUM_BASE_PACKAGE_PREFIX}{name}" if self.minimum_base_package else name
 
 
 @dataclass
