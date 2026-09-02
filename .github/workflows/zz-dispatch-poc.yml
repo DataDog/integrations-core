@@ -1,0 +1,102 @@
+# Runs the Dispatcher against `zz-test-batch-poc.yml` so a full round trip can be observed on a real
+# pull request: plan, dispatch, poll, download artifacts, correlate, comment.
+#
+# Restricted to this branch's pull requests, because it exists to evaluate the batch workflow rather
+# than to test anything. It is deleted once AI-7128 has the real workflow.
+#
+# The ambient GITHUB_TOKEN is enough here: it can dispatch a workflow and write a comment on its own
+# repository. The privileged path, where the Dispatcher runs for any pull request and needs an
+# octo-sts token, is AI-7129.
+name: ZZ Dispatch POC
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/zz-dispatch-poc.yml
+      # The planner selects targets from changed files, and a workflow file selects none, so the
+      # pull request has to touch a target for there to be a batch at all.
+      - disk/**
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dispatch:
+    name: dispatch
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    permissions:
+      actions: write # dispatch the batch workflow and read its runs and artifacts
+      checks: write # one check run per batch
+      pull-requests: write # the run's comment
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The planner compares the tested commit against the target branch, so it needs history.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure ddev
+        run: |
+          ddev config set upgrade_check false
+          ddev config set repos.core .
+          ddev config set repo core
+
+      # The batch stays small by touching one target only. The dispatcher still sends the job list as
+      # raw JSON, which cannot carry a repository-wide batch within GitHub's 65,535-character input
+      # limit (AI-7126), and a small batch keeps the observed run readable. `disk` plans 2 jobs.
+      - name: Show the plan
+        env:
+          DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ddev ci dispatch-tests \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --base-sha "${{ github.event.pull_request.head.sha }}" \
+            --branch "${{ github.event.pull_request.head.ref }}" \
+            --target-branch "${{ github.event.pull_request.base.ref }}" \
+            --workflow zz-test-batch-poc.yml \
+            --dry-run
+
+      - name: Dispatch the batches
+        env:
+          DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ddev ci dispatch-tests \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --base-sha "${{ github.event.pull_request.head.sha }}" \
+            --branch "${{ github.event.pull_request.head.ref }}" \
+            --target-branch "${{ github.event.pull_request.base.ref }}" \
+            --workflow zz-test-batch-poc.yml \
+            --output-dir dispatcher-output
+
+      - name: Show what the run produced
+        if: always()
+        run: |
+          if [[ -d dispatcher-output ]]; then
+            find dispatcher-output -type f | sort
+          else
+            echo "no output directory"
+          fi
+
+      - name: Upload the run's output
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: dispatcher-output
+          path: dispatcher-output
+          if-no-files-found: warn

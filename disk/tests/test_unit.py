@@ -905,3 +905,7 @@ def test_legacy_device_exclusion_logic_no_name():
 
     assert c.exclude_disk(MockPart(device='', mountpoint='/run')) is True
     assert c.exclude_disk(MockPart(device='', mountpoint='/run/shm')) is False
+
+
+# Touched so this branch selects the `disk` target and the Dispatcher has a batch to run.
+# Removed with the POC workflows.
