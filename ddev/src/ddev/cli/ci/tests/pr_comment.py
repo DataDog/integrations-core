@@ -7,8 +7,9 @@ Branches only on ``ExecutionState``, ``Status`` and ``ProgressError``, so the co
 of the aggregate rather than a second source of truth. The one exception is the footer, which reads
 the run's own commit and URL from the environment.
 
-Laid out like the Datadog CI Visibility comment. Badge images are deliberately absent — those are SVGs
-on a host we do not publish to — so emoji carry the state.
+Laid out like the Datadog CI Visibility comment. Emoji carry the state rather than badge images, which
+would be SVGs on a host we do not publish to; the progress bar is the one image, drawn from pixels
+committed to this repository.
 """
 
 from __future__ import annotations
@@ -39,8 +40,15 @@ if TYPE_CHECKING:
 # an existing one to edit, so nothing else may write it.
 COMMENT_MARKER = "<!-- ddev-dispatcher-tests -->"
 
-# Width of the text progress bar, in cells.
-PROGRESS_BAR_WIDTH = 24
+# 1x1 solid-colour pixels the bar is drawn from, pinned to master: a fork's raw URL has no such file
+# until it rebases. See `.github/assets/README.md`.
+PROGRESS_BAR_ASSETS = "https://raw.githubusercontent.com/DataDog/integrations-core/master/.github/assets"
+
+# Rendered size of the whole bar, in pixels.
+PROGRESS_BAR_WIDTH = 240
+PROGRESS_BAR_HEIGHT = 10
+
+PROGRESS_BAR_SEGMENTS = ("passed", "failed", "skipped", "pending")
 
 # Terminal but unfinished, which no other state in a report expresses: the rest derive from `done`.
 CANCELLED_HEADING = "## 🚫 Dispatcher tests · cancelled"
@@ -263,20 +271,47 @@ def _totals(progress: DispatcherProgress) -> str:
     if pending:
         counts.append(f"⏳ {pending} pending")
 
-    bar = _progress_bar(progress.complete, progress.total, done=progress.done)
-    return f"`{bar}`  **{progress.complete}/{progress.total} jobs**\n{' · '.join(counts)}"
+    bar = _progress_bar(progress)
+    # Non-breaking space; markdown would collapse plain ones.
+    return f"{bar}\u00a0 **{progress.complete}/{progress.total} jobs**\n{' · '.join(counts)}"
 
 
-def _progress_bar(complete: int, total: int, *, done: bool) -> str:
-    """The bar never reads as full until the run really is done.
+def _progress_bar(progress: DispatcherProgress) -> str:
+    """One image per segment, scaled by ``width``, and nothing at all when no job was planned."""
+    pending = progress.total - progress.complete
+    # Every job in a retrying batch has reported, so `complete == total` is reachable while the run is
+    # unfinished, and a full bar there would contradict the heading next to it.
+    if not progress.done and not pending:
+        pending = 1
 
-    Every job in a retrying batch has reported, so ``complete == total`` happens well before the run
-    finishes; a full bar there would contradict the heading next to it.
-    """
-    filled = round(PROGRESS_BAR_WIDTH * complete / total) if total else 0
-    if not done:
-        filled = min(filled, PROGRESS_BAR_WIDTH - 1)
-    return "█" * filled + "░" * (PROGRESS_BAR_WIDTH - filled)
+    counts = (progress.passed, progress.failed, progress.skipped, pending)
+    total = max(progress.total, sum(counts))
+    if total <= 0:
+        return ""
+
+    # No whitespace between the tags: markdown renders it as a gap in the middle of the bar.
+    return "".join(
+        f'<img src="{PROGRESS_BAR_ASSETS}/progress-{segment}.png" '
+        f'width="{width}" height="{PROGRESS_BAR_HEIGHT}" alt="">'
+        for segment, width in zip(PROGRESS_BAR_SEGMENTS, _segment_widths(counts, total), strict=True)
+        if width
+    )
+
+
+def _segment_widths(counts: tuple[int, ...], total: int) -> list[int]:
+    """Pixel width per segment, summing to exactly ``PROGRESS_BAR_WIDTH``."""
+    widths = [round(PROGRESS_BAR_WIDTH * count / total) for count in counts]
+    # A segment rounded down to nothing would erase a result, such as one failure among hundreds.
+    for index, count in enumerate(counts):
+        if count and not widths[index]:
+            widths[index] = 1
+
+    # That floor and the rounding both drift, so the widest segment absorbs the difference.
+    drift = PROGRESS_BAR_WIDTH - sum(widths)
+    if drift:
+        widest = widths.index(max(widths))
+        widths[widest] = max(1, widths[widest] + drift)
+    return widths
 
 
 def _batch_table(progress: DispatcherProgress) -> str:

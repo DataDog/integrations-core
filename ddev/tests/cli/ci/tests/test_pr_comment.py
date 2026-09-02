@@ -19,6 +19,7 @@ from ddev.cli.ci.tests.pr_comment import (
     CANCELLED_HEADING,
     COMMENT_MARKER,
     FOOTER_RUNNING_NOTE,
+    PROGRESS_BAR_WIDTH,
     render_cancelled_notice,
     render_comment,
     render_compact_comment,
@@ -43,9 +44,9 @@ from tests.cli.ci.tests.helpers import (
 GITHUB_COMMENT_HARD_LIMIT = 65_536
 
 
-def _progress_bar_of(body: str) -> str:
-    """The rendered progress bar: the first inline-code span in the body."""
-    return body.split("`")[1]
+def _progress_bar_of(body: str) -> dict[str, int]:
+    """The rendered progress bar, as the pixel width of each segment it drew."""
+    return {segment: int(width) for segment, width in re.findall(r'progress-(\w+)\.png" width="(\d+)"', body)}
 
 
 # ---------------------------------------------------------------------------
@@ -278,7 +279,7 @@ def test_progress_signals_agree_with_each_other(done: bool):
     assert ("updates automatically" in body) is not done
     assert ("Dispatcher finished" in body) is done
     # A full bar next to "in progress" is the contradiction that would mislead most.
-    assert ("░" in _progress_bar_of(body)) is not done
+    assert ("pending" in _progress_bar_of(body)) is not done
 
 
 def test_a_retrying_run_with_every_job_reported_still_reads_as_unfinished():
@@ -309,8 +310,49 @@ def test_a_retrying_run_with_every_job_reported_still_reads_as_unfinished():
     # No pending jobs to report, so that clause is left out rather than printed as zero.
     assert "0 of 2 jobs have not reported" not in body
     # A full bar next to "in progress" is the contradiction this guards against.
-    assert "░" in _progress_bar_of(body)
+    assert "pending" in _progress_bar_of(body)
     assert "in progress" in body
+
+
+# ---------------------------------------------------------------------------
+# Progress bar
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("passed", "failed"),
+    [
+        pytest.param(1, 0, id="one-job"),
+        pytest.param(3, 1, id="even-split"),
+        pytest.param(199, 1, id="one-failure-among-hundreds"),
+        pytest.param(0, 7, id="all-failed"),
+    ],
+)
+def test_the_bar_is_exactly_its_width_and_never_drops_a_result(passed: int, failed: int):
+    """A short bar is cosmetic, but a segment rounded down to nothing erases a result.
+
+    One failure in two hundred jobs is where a reader most needs to see that anything failed at all.
+    """
+    jobs = [job_progress(attempt(), target=f"passed-{index}") for index in range(passed)]
+    jobs += [job_progress(attempt(Status.FAILURE), target=f"failed-{index}") for index in range(failed)]
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", *jobs, status=Status.FAILURE if failed else Status.SUCCESS),),
+        done=True,
+    )
+
+    widths = _progress_bar_of(render_comment(progress))
+
+    assert sum(widths.values()) == PROGRESS_BAR_WIDTH
+    assert bool(widths.get("passed")) is bool(passed)
+    assert bool(widths.get("failed")) is bool(failed)
+
+
+def test_a_run_with_nothing_planned_draws_no_bar():
+    """No jobs means no proportion to draw, and the batch table already says so in words."""
+    body = render_comment(DispatcherProgress(batches=(), done=True))
+
+    assert _progress_bar_of(body) == {}
+    assert "**0/0 jobs**" in body
 
 
 # ---------------------------------------------------------------------------
