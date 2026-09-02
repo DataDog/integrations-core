@@ -8,7 +8,7 @@ import ssl
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import requests
 from requests import exceptions as requests_exceptions
@@ -314,3 +314,7 @@ def create_https_adapter(
         return SSLContextHostHeaderAdapter(context)
 
     return SSLContextAdapter(context)
+
+
+if TYPE_CHECKING:
+    response: HTTPResponse = RequestsResponseAdapter(requests.Response())
