@@ -7,6 +7,7 @@ import asyncio
 import contextlib
 import logging
 import math
+import signal
 import threading
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
@@ -30,6 +31,9 @@ type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
 # How long the loop may block before re-reading the timeout and the stop flag.
 STOP_CHECK_INTERVAL = 1.0
+# What a process is asked to stop with: SIGINT from an interactive interrupt, SIGTERM from a scheduler
+# or CI runner cancelling the job.
+SHUTDOWN_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 
 class OrchestratorTimeout(Exception):
@@ -204,6 +208,41 @@ class EventBusOrchestrator(ABC):
         if not any(registered is processor for registered in self._processors):
             self._processors.append(processor)
 
+    def install_signal_handlers(self) -> None:
+        """Route :data:`SHUTDOWN_SIGNALS` to :meth:`on_shutdown_signal` for the life of the run.
+
+        Called by :meth:`initialize`. Override to handle a different set, or to do nothing where the
+        process has another owner for them.
+
+        Handling SIGINT here also means it stops arriving as ``KeyboardInterrupt``, so shutdown takes
+        the same path whichever signal comes first.
+        """
+        loop = asyncio.get_running_loop()
+        for received in SHUTDOWN_SIGNALS:
+            try:
+                loop.add_signal_handler(received, self.on_shutdown_signal, received)
+            except (NotImplementedError, RuntimeError) as e:
+                # Windows loops cannot do this at all, and no loop can off the main thread. Neither is
+                # worth failing a run over: the bus still stops, just not on a signal.
+                self._logger.debug("Not handling %s: %s", received.name, e)
+
+    def remove_signal_handlers(self) -> None:
+        """Undo :meth:`install_signal_handlers`. Called by :meth:`finalize`."""
+        loop = asyncio.get_running_loop()
+        for received in SHUTDOWN_SIGNALS:
+            with contextlib.suppress(NotImplementedError, RuntimeError):
+                loop.remove_signal_handler(received)
+
+    def on_shutdown_signal(self, received: signal.Signals) -> None:
+        """React to a shutdown signal by winding the bus down.
+
+        Runs as a loop callback rather than in signal context, so it may not block or await. Anything it
+        raises reaches the loop's exception handler, and a second signal will not retry it, so put what
+        must happen first. Override to add to this, calling ``super()``.
+        """
+        self._logger.warning("Received %s: the bus will wind down", received.name)
+        self.request_stop()
+
     def request_stop(self) -> None:
         """Ask the bus to wind down, from any thread.
 
@@ -284,6 +323,8 @@ class EventBusOrchestrator(ABC):
         Initializes the orchestrator.
         """
         self._running = True
+        # Before the hook, so a signal arriving during it winds the bus down rather than killing it.
+        self.install_signal_handlers()
         try:
             await self._bounded_by_stop(self.on_initialize(), HookName.ON_INITIALIZE)
         except (FatalProcessingError, asyncio.CancelledError):
@@ -329,6 +370,10 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_FINALIZE, e),
                 self.on_error,
             )
+        finally:
+            # A handler outlives the loop it was installed on, so leaving it behind would have a later
+            # bus in the same process deliver signals to this dead one.
+            self.remove_signal_handlers()
 
     async def _run_in_worker[T: BaseMessage](self, work: Callable[[T], None], message: T) -> None:
         """Run blocking work on the processor pool, tracked until it finishes.

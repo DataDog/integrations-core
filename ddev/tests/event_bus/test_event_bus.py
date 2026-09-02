@@ -6,6 +6,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import os
+import signal
+import sys
 import threading
 import time
 from collections.abc import Generator
@@ -29,6 +32,7 @@ from ddev.event_bus.exceptions import (
 )
 from ddev.event_bus.orchestrator import (
     DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
+    SHUTDOWN_SIGNALS,
     AsyncProcessor,
     BaseMessage,
     EventBusOrchestrator,
@@ -1221,6 +1225,20 @@ class StopRequester(AsyncProcessor[Memo]):
         self.submit_message(Memo("after_stop", subject="late"))
 
 
+class Signaller(AsyncProcessor[Memo]):
+    """Sends the process a real SIGINT while the bus is running."""
+
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.stop_notifications = 0
+
+    async def process_message(self, message: Memo):
+        os.kill(os.getpid(), signal.SIGINT)
+
+    def on_stop_requested(self):
+        self.stop_notifications += 1
+
+
 class StopWatcher(AsyncProcessor[TaskAssignment | Announcement]):
     def __init__(self, name: str, *, fail: bool = False):
         super().__init__(name)
@@ -1265,6 +1283,40 @@ def test_asking_to_stop_again_notifies_nobody_and_does_not_block():
     orchestrator.request_stop()
 
     assert watcher.stop_notifications == 1
+
+
+requires_signals = pytest.mark.skipif(sys.platform == "win32", reason="Windows loops cannot install these")
+
+
+@requires_signals
+def test_a_signal_winds_the_bus_down_instead_of_killing_it():
+    """Handling SIGINT is also what stops it arriving as `KeyboardInterrupt` mid-run."""
+    signaller = Signaller("signaller")
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(signaller, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+
+    try:
+        orchestrator.run()
+    except KeyboardInterrupt:  # pragma: no cover
+        pytest.fail("SIGINT reached the interpreter instead of the bus")
+
+    assert orchestrator.stopping
+    assert signaller.stop_notifications == 1
+
+
+@requires_signals
+def test_handlers_do_not_outlive_the_run_that_installed_them():
+    """Installing is process-wide, so a bus that left its handlers behind would have the next one's
+    signals delivered to a loop that is already closed, and nothing would wind down.
+    """
+    before = {received: signal.getsignal(received) for received in SHUTDOWN_SIGNALS}
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_teardown"), max_timeout=30, grace_period=0)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+
+    orchestrator.run()
+
+    assert {received: signal.getsignal(received) for received in SHUTDOWN_SIGNALS} == before
 
 
 def test_a_stop_is_not_derailed_by_a_processor_that_fails_to_wind_down():
