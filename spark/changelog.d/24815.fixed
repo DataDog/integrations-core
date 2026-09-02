@@ -1,1 +1,0 @@
-Suppress request read timeout errors for terminal Kubernetes pods.

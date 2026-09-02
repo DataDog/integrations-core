@@ -14,7 +14,6 @@ import pytest
 import urllib3
 from requests import ConnectionError, RequestException
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientReadTimeoutError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
@@ -1659,28 +1658,6 @@ def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, ca
     # Expect NO service check because we suppress errors for failed pods
     service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
     assert len(service_checks) == 0
-
-
-@pytest.mark.unit
-def test_body_read_timeout_terminal_phase(aggregator, dd_run_check, fake_http, caplog):
-    instance = DRIVER_CONFIG.copy()
-    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
-    fake_http.register_response(
-        'GET', join_url_dir(DRIVER_CONFIG['spark_url'], 'api/v1/version'), HTTPClientReadTimeoutError('timed out')
-    )
-    fake_http.register_response(
-        'GET', join_url_dir(DRIVER_CONFIG['spark_url'], SPARK_REST_PATH), HTTPClientReadTimeoutError('timed out')
-    )
-
-    c = SparkCheck('spark', {}, [instance])
-    with caplog.at_level(logging.DEBUG):
-        dd_run_check(c)
-
-    assert "Pod phase is terminal, suppressing request error" in caplog.text
-
-    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
-    assert len(service_checks) == 0
-    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.unit
