@@ -50,6 +50,42 @@ class IsolatedMetricLimitOpenMetricsCheck(MetricLimitOpenMetricsCheck):
             self.gauge('openmetrics.metric', value)
 
 
+class GeneratedScraperEndpointsCheck(OpenMetricsBaseCheckV2):
+    """Builds scrapers from custom endpoint options instead of an instance field.
+
+    Many v2 integrations (e.g. Cilium) synthesize scraper configurations from option
+    keys such as ``agent_endpoint``, so the metric limit hook must derive endpoints
+    from the actual scrapers rather than from a raw instance field.
+    """
+
+    def configure_scrapers(self) -> None:
+        endpoints = (self.instance.get('agent_endpoint'), self.instance.get('operator_endpoint'))
+        self.scrapers = {endpoint: None for endpoint in endpoints if endpoint}
+
+
+def test_metric_limit_issue_uses_generated_scraper_endpoints(datadog_agent: Any) -> None:
+    agent_endpoint = 'http://z-agent/metrics'
+    operator_endpoint = 'http://a-operator/metrics'
+    check = GeneratedScraperEndpointsCheck(
+        'openmetrics_test',
+        {},
+        [{'agent_endpoint': agent_endpoint, 'operator_endpoint': operator_endpoint, 'namespace': 'demo'}],
+    )
+    check.configure_scrapers()
+
+    check._on_metric_limit_state(True, 20, 5)
+
+    [issue] = reported_issues(datadog_agent)
+    assert 'openmetrics_endpoint' not in check.instance
+    assert issue['id'] == _issue_id('stubbed.hostname', 'openmetrics_test', (operator_endpoint, agent_endpoint), 'demo')
+    assert issue['title'] == 'Dropping 15 of 20 OpenMetrics metrics'
+    assert issue['extra']['endpoints'] == [operator_endpoint, agent_endpoint]
+    assert '2 configured endpoints' in issue['description']
+    assert 'totals cover the complete check run' in issue['description']
+    assert agent_endpoint in issue['description']
+    assert operator_endpoint in issue['description']
+
+
 def create_check(limit: int = 5, endpoint: str = ENDPOINT) -> MetricLimitOpenMetricsCheck:
     instance = {
         'openmetrics_endpoint': endpoint,
