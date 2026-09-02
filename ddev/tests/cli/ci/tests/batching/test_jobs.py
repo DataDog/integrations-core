@@ -27,7 +27,7 @@ def fake_resolver(python_version: str, platform: PlatformName) -> str:
         pytest.param("", True, False, id="environmentless"),
     ],
 )
-def test_each_environment_becomes_one_job_carrying_its_facets(environment_name, unit, e2e):
+def test_each_environment_becomes_one_job_carrying_its_facets(environment_name: str, unit: bool, e2e: bool):
     units = [make_unit(environment=env(environment_name, unit=unit, e2e=e2e))]
 
     [job] = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
@@ -82,14 +82,11 @@ def test_runner_labels_and_platform_are_preserved():
 def test_minimum_base_package_replica_is_planned_alongside_the_job():
     units = [make_unit("postgres", name="postgres (py3.13)", environment=env("py3.13", unit=True, e2e=True))]
 
-    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
+    original, replica = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
 
-    original, replica = jobs
-    # The replica substitutes the base package the unit tests import, so it runs unit tests only and
-    # needs no Agent image. Distinct name and artifact identity are what keep the pair's workflow
-    # correlation and downloaded artifacts from collapsing onto each other.
     assert (replica.unit_tests, replica.e2e_tests, replica.agent_image) == (True, False, None)
     assert replica.minimum_base_package and not replica.coverage
+    # A distinct name and artifact keep the pair from colliding in job correlation and on disk.
     assert replica.name != original.name
     assert replica.artifact_name() != original.artifact_name()
 
@@ -98,17 +95,15 @@ def test_minimum_base_package_replica_is_planned_alongside_the_job():
     ("requested", "supported", "unit", "replicated"),
     [
         pytest.param(True, True, True, True, id="requested-and-eligible"),
-        # Nothing asked for it: a run testing against a given Agent image has one base package
-        # version available, so it has no second variant to run and should pay nothing.
         pytest.param(False, True, True, False, id="not-requested"),
-        # `ddev test --compat` pins the base package only for a shipped integration that declares a
-        # version. For anything else it is a no-op, so the replica would rerun the same suite.
         pytest.param(True, False, True, False, id="target-does-not-support-it"),
         # Only unit tests import the base package, so an E2E-only job's replica has no work.
         pytest.param(True, True, False, False, id="job-runs-no-unit-tests"),
     ],
 )
-def test_a_replica_is_planned_only_when_requested_and_the_job_can_use_one(requested, supported, unit, replicated):
+def test_a_replica_is_planned_only_when_requested_and_the_job_can_use_one(
+    requested: bool, supported: bool, unit: bool, replicated: bool
+):
     units = [
         make_unit(
             environment=env("py3.13", unit=unit, e2e=not unit),
@@ -122,8 +117,6 @@ def test_a_replica_is_planned_only_when_requested_and_the_job_can_use_one(reques
 
 
 def test_a_replica_is_planned_per_eligible_unit_leaving_the_others_alone():
-    # The decision is per unit, so a mixed plan replicates only the eligible ones and keeps every
-    # job's position: the pair is adjacent, and an ineligible target contributes one job.
     units = [
         make_unit("postgres", name="postgres", environment=env("py3.13")),
         make_unit("ddev", name="ddev", environment=env("py3.13"), supports_minimum_base_package=False),

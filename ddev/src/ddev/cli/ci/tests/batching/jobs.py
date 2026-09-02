@@ -38,8 +38,7 @@ def expand_batch_jobs(
     fail a plan that would actually have used it.
 
     With *minimum_base_package*, a unit whose target supports it also yields a replica pinned to the
-    oldest supported base package, so a run that wants that coverage plans it instead of the workflow
-    making a second pass.
+    oldest supported base package.
     """
     jobs: list[BatchJob] = []
     for unit in units:
@@ -64,12 +63,10 @@ def expand_batch_jobs(
 
 
 def _minimum_base_package_replica(job: BatchJob) -> BatchJob | None:
-    """The minimum-base-package variant of *job*, or `None` when there is nothing for it to run.
+    """The minimum-base-package variant of *job*, or `None` when it would have nothing to run.
 
-    The variant only substitutes the base package the unit tests import, so it runs no E2E tests and
-    needs no Agent image. It also runs without coverage, because measuring an old base package says
-    nothing about the coverage of the code under test. A unit-less job would therefore have no work
-    left at all, so none is planned.
+    The variant only substitutes the base package the unit tests import, so it runs neither E2E tests
+    nor coverage, and a job without unit tests yields no variant at all.
     """
     if not job.unit_tests:
         return None

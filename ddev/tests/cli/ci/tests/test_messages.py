@@ -26,9 +26,7 @@ def test_artifact_name_built_from_target_env_platform():
 
 @pytest.mark.parametrize("field", ["name", "runner_labels", "unit_tests", "e2e_tests", "coverage"])
 def test_artifact_name_ignores_non_identifying_fields(field: str):
-    # The artifact identity is target + environment + platform + minimum_base_package; name/runner
-    # and the facet flags are not part of it (a single job carries its facets, so facets never
-    # distinguish two jobs, and coverage follows from the base package variant rather than naming it).
+    # A single job carries both facets, so no facet flag distinguishes two jobs.
     changed = {
         "name": "other-job",
         "runner_labels": ("windows-latest",),
@@ -48,7 +46,7 @@ def test_artifact_name_ignores_non_identifying_fields(field: str):
         ("minimum_base_package", True),
     ],
 )
-def test_artifact_name_varies_with_identifying_fields(field, value):
+def test_artifact_name_varies_with_identifying_fields(field: str, value: str | PlatformName | bool):
     assert make_job(**{field: value}).artifact_name() != make_job().artifact_name()
 
 

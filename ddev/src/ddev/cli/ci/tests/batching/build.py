@@ -94,10 +94,8 @@ def build_test_units(
 def supports_minimum_base_package(integration: Integration) -> bool:
     """Whether testing *integration* against the minimum base package differs from a normal run.
 
-    Mirrors the condition `ddev test --compat` applies before pinning the base package version. The
-    tooling targets (`ddev`, `datadog_checks_base` and friends) are not integrations, and an
-    integration that depends on `datadog-checks-base` without pinning a version has no older version
-    to test against. For all of those `--compat` is a no-op, so a replica would rerun the same suite.
+    Mirrors the condition `ddev test --compat` applies before pinning the base package version, so a
+    target it would not pin is never replicated.
     """
     return (
         integration.is_package and integration.is_integration and integration.minimum_base_package_version is not None

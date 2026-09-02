@@ -10,6 +10,7 @@ environment provider, so neither Git nor Hatch is ever invoked.
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -23,14 +24,20 @@ from ddev.cli.ci.tests.batching.build import (
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from ddev.cli.ci.tests.batching.units import ResolvedEnvironment
+    from ddev.cli.ci.tests.messages import BatchJob
 from tests.cli.ci.tests.helpers import DEFAULT_PYTHON_VERSION, FakeIntegration, FakeRegistry, env, jobs, modified
 
 
 class FakeConfig:
-    def __init__(self, ci=None):
+    def __init__(self, ci: dict[str, dict] | None = None):
         self._ci = ci or {}
 
-    def get(self, pointer, default=None):
+    def get(self, pointer: str, default: object = None) -> object:
         prefix = "/overrides/ci/"
         if pointer.startswith(prefix):
             return self._ci.get(pointer[len(prefix) :], default)
@@ -38,7 +45,12 @@ class FakeConfig:
 
 
 class FakeRepo:
-    def __init__(self, integrations, ci=None, name="core"):
+    def __init__(
+        self,
+        integrations: Sequence[FakeIntegration],
+        ci: dict[str, dict] | None = None,
+        name: str = "core",
+    ):
         self.name = name
         self.integrations = FakeRegistry(integrations)
         self.config = FakeConfig(ci)
@@ -47,17 +59,25 @@ class FakeRepo:
 class FakeEnvironmentProvider:
     """Returns pre-configured resolved environments per integration; ignores the platforms hint."""
 
-    def __init__(self, environments):
+    def __init__(self, environments: dict[str, list[ResolvedEnvironment]]):
         self._environments = environments
 
-    def __call__(self, integration, platforms):
+    def __call__(self, integration: FakeIntegration, platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]:
         return list(self._environments.get(integration.name, []))
 
 
 class EnvStub:
     """Minimal stand-in for ddev's Hatch ``Environment`` (no Hatch invocation)."""
 
-    def __init__(self, name, *, test_env=True, e2e_env=False, platforms=(), python=None):
+    def __init__(
+        self,
+        name: str,
+        *,
+        test_env: bool = True,
+        e2e_env: bool = False,
+        platforms: Sequence[str] = (),
+        python: str | None = None,
+    ):
         self.name = name
         self.test_env = test_env
         self.e2e_env = e2e_env
@@ -96,7 +116,7 @@ def test_build_end_to_end_direct_and_broad_overlap():
     ]
 
 
-def test_build_warns_about_a_target_with_no_testable_environment(caplog):
+def test_build_warns_about_a_target_with_no_testable_environment(caplog: pytest.LogCaptureFixture):
     repo = FakeRepo([FakeIntegration("ddev")])
     provider = FakeEnvironmentProvider({})
     changed = [modified("ddev/src/ddev/foo.py")]
@@ -109,7 +129,9 @@ def test_build_warns_about_a_target_with_no_testable_environment(caplog):
     assert "ddev has a hatch.toml but no testable environment" in caplog.text
 
 
-def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere(caplog):
+def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere(
+    caplog: pytest.LogCaptureFixture,
+):
     # A target declaring a platform that every environment is constrained away from is a weaker
     # version of the same contradiction: odd configuration, worth surfacing, not worth failing.
     repo = FakeRepo([FakeIntegration("disk")], ci={"disk": {"platforms": ["linux", "windows"]}})
@@ -174,7 +196,7 @@ def test_resolve_hatch_environments_includes_both_facets_and_excludes_neither():
 
 
 @pytest.mark.parametrize("python", ["3", "3.13t", "/usr/bin/python3.13", "three.thirteen"])
-def test_resolve_hatch_environments_rejects_a_python_that_is_not_major_minor(python):
+def test_resolve_hatch_environments_rejects_a_python_that_is_not_major_minor(python: str):
     # A unit-only environment never reaches the Agent image resolver, so this boundary is the only
     # place its version is checked.
     environments = [EnvStub("unit-only", test_env=True, e2e_env=False, python=python)]
@@ -287,25 +309,18 @@ def test_build_batches_end_to_end_split_defaults():
     ("attributes", "supported"),
     [
         pytest.param({}, True, id="shipped-integration-pinning-a-base-package-version"),
-        # `ddev` and `datadog_checks_base` are marked `is-integration = false` in the repo config.
+        # The tooling targets are `is-integration = false` in the repository configuration.
         pytest.param({"is_integration": False}, False, id="tooling-target"),
-        # A tile ships no package, so there is nothing to install an older base package against.
         pytest.param({"is_package": False}, False, id="tile-without-a-package"),
-        # `lparstats` depends on `datadog-checks-base` with no specifier: no older version to pin.
+        # `lparstats` depends on `datadog-checks-base` without a specifier.
         pytest.param({"minimum_base_package_version": None}, False, id="base-package-not-pinned"),
     ],
 )
-def test_supports_minimum_base_package_matches_what_compat_pins(attributes, supported):
-    # Mirrors the condition `ddev test --compat` applies before setting BASE_PACKAGE_VERSION. Getting
-    # it wrong either replicates targets whose replica reruns the same suite, or silently drops the
-    # replica for every real integration.
+def test_supports_minimum_base_package_matches_what_compat_pins(attributes: dict, supported: bool):
     assert supports_minimum_base_package(FakeIntegration("postgres", **attributes)) is supported
 
 
 def test_build_batches_plans_minimum_base_package_replicas():
-    # Wiring: the flag reaches expansion, eligibility is read off each integration, and the resulting
-    # partition validates. The batch contract rejects duplicate job names and artifact identities,
-    # which is exactly what a replica pair produced before the variant became part of job identity.
     repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("ddev", is_integration=False)])
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11", unit=True, e2e=True)], "ddev": [env("py3.11")]})
     changed = [modified("postgres/tests/test_a.py"), modified("ddev/tests/test_b.py")]
@@ -348,7 +363,7 @@ def test_build_batches_rejects_invalid_injected_strategy():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11"), env("py3.12")]})
     changed = [modified("postgres/tests/test_a.py")]
 
-    def dropping_strategy(jobs, *, config):
+    def dropping_strategy(jobs: Sequence[BatchJob], *, config: BatchingConfig) -> list[list[BatchJob]]:
         return [list(jobs[:-1])]  # loses the last job
 
     with pytest.raises(BatchValidationError, match="exactly once"):
@@ -405,7 +420,7 @@ def test_build_only_expands_the_whole_repository_for_the_core_repo():
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "datadog_checks_base": [env("py3.11")]})
     changed = [modified("datadog_checks_base/datadog_checks/base/utils/foo.py")]
 
-    def targets(repo):
+    def targets(repo: FakeRepo) -> set[str]:
         return {u.target for u in build_test_units(repo, changed, environment_provider=provider)}
 
     assert targets(FakeRepo(integrations)) == {"postgres", "datadog_checks_base"}

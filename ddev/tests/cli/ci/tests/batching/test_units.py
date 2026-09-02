@@ -26,7 +26,7 @@ from tests.cli.ci.tests.helpers import env
         pytest.param('My Integration', 'My Integration', id="allowed-unchanged"),
     ],
 )
-def test_normalize_job_name(raw, expected):
+def test_normalize_job_name(raw: str, expected: str):
     assert normalize_job_name(raw) == expected
 
 
@@ -43,12 +43,12 @@ def test_normalize_job_name(raw, expected):
         pytest.param([], ["AIX"], [PlatformName.LINUX], id="only-untestable-os-defaults-linux"),
     ],
 )
-def test_resolve_platforms(platform_override, supported_os, expected):
+def test_resolve_platforms(platform_override: list[str], supported_os: list[str], expected: list[PlatformName]):
     assert resolve_platforms(platform_override, supported_os, target="postgres") == expected
 
 
 @pytest.mark.parametrize("value", ["solaris", "Windows Server"])
-def test_resolve_platforms_rejects_an_unknown_platform_in_the_override(value):
+def test_resolve_platforms_rejects_an_unknown_platform_in_the_override(value: list[str]):
     with pytest.raises(PlanningError, match="Unsupported platform for `postgres`"):
         resolve_platforms([value], [], target="postgres")
 
@@ -103,7 +103,7 @@ def test_expand_rejects_a_target_with_no_environments():
         expand_test_units([TargetDefinition("postgres")])
 
 
-def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers(caplog):
+def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers(caplog: pytest.LogCaptureFixture):
     target = TargetDefinition(
         "sqlserver",
         platforms=(PlatformName.LINUX, PlatformName.WINDOWS),
@@ -130,8 +130,6 @@ def test_expand_carries_the_environment_python_version():
 
 
 def test_expand_carries_minimum_base_package_support_to_every_unit():
-    # Resolved once per target from its integration, then read per unit when jobs are expanded. If it
-    # were dropped here, no replica would ever be planned and the flag would silently do nothing.
     targets = [
         TargetDefinition(
             "postgres",

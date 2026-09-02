@@ -375,11 +375,9 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
 
 
 def test_minimum_base_package_replica_organizes_beside_its_original(tmp_path: Path):
-    # The pair shares target, environment and platform, so before the variant became part of the
-    # job's identity both wrote the same output files and one silently replaced the other.
+    # The pair shares target, environment and platform, so only the variant separates their output.
     artifacts = tmp_path / "artifacts" / "100"
     original_dir = _make_job_tree(artifacts, "ntp-job", e2e=False)
-    # The replica runs without `--cov`, so its bundle legitimately carries no coverage report.
     replica_dir = _make_job_tree(artifacts, "minimum-base-package-ntp-job", coverage=False, e2e=False)
 
     original = _batch_job("ntp (py3.13)")
@@ -404,8 +402,7 @@ def test_minimum_base_package_replica_organizes_beside_its_original(tmp_path: Pa
     assert (test_results_dir / "ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
     assert (test_results_dir / "minimum-base-package-ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
 
-    # The replica produces no coverage, and its absence is not an error: only the original's file
-    # is published, and both jobs still report a result.
+    # The replica reports no coverage, and its absence is not a lost artifact.
     coverage_files = sorted(path.name for path in (tmp_path / "out" / "coverage").iterdir())
     assert coverage_files == ["ntp_py3.13_linux.xml"]
 

@@ -102,9 +102,7 @@ class TargetDefinition:
     platforms: tuple[PlatformName, ...] = (PlatformName.LINUX,)
     runners: Mapping[str, Sequence[str]] = field(default_factory=dict)
     environments: tuple[ResolvedEnvironment, ...] = ()
-    # Whether `ddev test --compat` would pin this target's base package. Resolved from the
-    # integration itself, because only a shipped integration that pins a `datadog-checks-base`
-    # version has an older one to test against.
+    # Whether `ddev test --compat` would pin this target's base package.
     supports_minimum_base_package: bool = False
 
 

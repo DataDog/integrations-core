@@ -25,8 +25,6 @@ ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
 # Separator between the artifact name's fields. Names are matched by reconstruction, not by
 # splitting, so the separator does not need to be absent from the field values.
 ARTIFACT_NAME_SEPARATOR = "_"
-# Marks the jobs that run against the minimum supported base package. Matches the prefix
-# `test-target` gives those runs today, so artifacts stay recognizable across both paths.
 MINIMUM_BASE_PACKAGE_PREFIX = "minimum-base-package-"
 
 
@@ -48,20 +46,15 @@ class BatchJob:
     unit_tests: bool
     e2e_tests: bool
     agent_image: str | None = None  # `None` when the job runs no E2E tests
-    # Run against the oldest supported `datadog-checks-base` instead of the current one. Part of the
-    # job's identity: a plan can hold both variants of the same target/environment/platform, and
-    # they would otherwise share a name and an artifact and silently overwrite each other.
+    # Runs against the oldest supported `datadog-checks-base` rather than the current one.
     minimum_base_package: bool = False
-    # Whether the job is expected to produce a coverage report. The minimum-base-package variant
-    # runs without `--cov`, so the gatherer must not read its missing report as a lost artifact.
-    coverage: bool = True
+    coverage: bool = True  # `False` for a job that runs without `--cov`
 
     def artifact_name(self) -> str:
         """Sanitized, deterministic name built from the job's identity.
 
-        Identity is target, environment, platform, and whether the job runs against the minimum base
-        package, so the name is unique within a batch. An environmentless job contributes no segment
-        rather than an empty one.
+        Identity is target, environment, platform and the base package variant, so the name is unique
+        within a batch. An environmentless job contributes no segment rather than an empty one.
         """
         fields = (self.target, self.environment, self.platform)
         name = ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields if field)

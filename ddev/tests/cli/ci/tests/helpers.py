@@ -118,7 +118,7 @@ class FakeManifest:
     def __init__(self, classifier_tags: Sequence[str] = ()):
         self._classifier_tags = list(classifier_tags)
 
-    def get(self, pointer, default=None):
+    def get(self, pointer: str, default: object = None) -> object:
         if pointer == "/tile/classifier_tags":
             return list(self._classifier_tags)
         return default
