@@ -129,6 +129,27 @@ def test_expand_carries_the_environment_python_version():
     assert expand_test_units(targets)[0].environment.python_version == "3.11"
 
 
+def test_expand_carries_minimum_base_package_support_to_every_unit():
+    # Resolved once per target from its integration, then read per unit when jobs are expanded. If it
+    # were dropped here, no replica would ever be planned and the flag would silently do nothing.
+    targets = [
+        TargetDefinition(
+            "postgres",
+            environments=(env("py3.11"), env("py3.12")),
+            supports_minimum_base_package=True,
+        ),
+        TargetDefinition("ddev", environments=(env("py3.11"),)),
+    ]
+
+    units = expand_test_units(targets)
+
+    assert [(unit.target, unit.supports_minimum_base_package) for unit in units] == [
+        ("ddev", False),
+        ("postgres", True),
+        ("postgres", True),
+    ]
+
+
 def test_expand_multi_label_runner_is_a_single_selection():
     units = expand_test_units(
         [TargetDefinition("postgres", runners={"linux": ["label-a", "label-b"]}, environments=(env("postgres"),))]

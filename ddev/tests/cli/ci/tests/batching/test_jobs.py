@@ -94,28 +94,36 @@ def test_minimum_base_package_replica_is_planned_alongside_the_job():
     assert replica.artifact_name() != original.artifact_name()
 
 
-def test_jobs_are_not_replicated_by_default():
-    # A run that does not ask for it pays nothing: testing against a given Agent image, for one, has
-    # a single base package version available and so has no second variant to run.
-    units = [make_unit(environment=env("py3.13"))]
+@pytest.mark.parametrize(
+    ("requested", "supported", "unit", "replicated"),
+    [
+        pytest.param(True, True, True, True, id="requested-and-eligible"),
+        # Nothing asked for it: a run testing against a given Agent image has one base package
+        # version available, so it has no second variant to run and should pay nothing.
+        pytest.param(False, True, True, False, id="not-requested"),
+        # `ddev test --compat` pins the base package only for a shipped integration that declares a
+        # version. For anything else it is a no-op, so the replica would rerun the same suite.
+        pytest.param(True, False, True, False, id="target-does-not-support-it"),
+        # Only unit tests import the base package, so an E2E-only job's replica has no work.
+        pytest.param(True, True, False, False, id="job-runs-no-unit-tests"),
+    ],
+)
+def test_a_replica_is_planned_only_when_requested_and_the_job_can_use_one(requested, supported, unit, replicated):
+    units = [
+        make_unit(
+            environment=env("py3.13", unit=unit, e2e=not unit),
+            supports_minimum_base_package=supported,
+        )
+    ]
 
-    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=requested)
 
-    assert [job.minimum_base_package for job in jobs] == [False]
-
-
-def test_no_replica_for_a_job_that_runs_no_unit_tests():
-    # Only unit tests import the base package, so an E2E-only job's replica would run nothing.
-    units = [make_unit(environment=env("py3.13", unit=False, e2e=True))]
-
-    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
-
-    assert len(jobs) == 1
+    assert [job.minimum_base_package for job in jobs] == ([False, True] if replicated else [False])
 
 
-def test_only_units_whose_target_supports_it_are_replicated():
-    # `ddev test --compat` only pins the base package for a shipped integration that declares a
-    # version, so replicating anything else (`ddev`, `datadog_checks_base`) reruns the same suite.
+def test_a_replica_is_planned_per_eligible_unit_leaving_the_others_alone():
+    # The decision is per unit, so a mixed plan replicates only the eligible ones and keeps every
+    # job's position: the pair is adjacent, and an ineligible target contributes one job.
     units = [
         make_unit("postgres", name="postgres", environment=env("py3.13")),
         make_unit("ddev", name="ddev", environment=env("py3.13"), supports_minimum_base_package=False),
