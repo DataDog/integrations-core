@@ -68,7 +68,7 @@ jobs:
             --pr-number "${{ github.event.pull_request.number }}" \
             --base-sha "${{ github.event.pull_request.head.sha }}" \
             --branch "${{ github.event.pull_request.head.ref }}" \
-            --target-branch "${{ github.event.pull_request.base.ref }}" \
+            --target-branch "origin/${{ github.event.pull_request.base.ref }}" \
             --workflow zz-test-batch-poc.yml \
             --dry-run
 
@@ -80,7 +80,7 @@ jobs:
             --pr-number "${{ github.event.pull_request.number }}" \
             --base-sha "${{ github.event.pull_request.head.sha }}" \
             --branch "${{ github.event.pull_request.head.ref }}" \
-            --target-branch "${{ github.event.pull_request.base.ref }}" \
+            --target-branch "origin/${{ github.event.pull_request.base.ref }}" \
             --workflow zz-test-batch-poc.yml \
             --output-dir dispatcher-output
 
