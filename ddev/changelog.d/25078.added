@@ -1,0 +1,1 @@
+Tell processors when a stop is requested so they can shorten work in flight.

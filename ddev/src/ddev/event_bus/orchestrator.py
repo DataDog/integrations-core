@@ -82,6 +82,15 @@ class BaseProcessor[T: BaseMessage]:
         """
         raise error
 
+    def on_stop_requested(self) -> None:
+        """React to the bus being asked to wind down, by shortening work already in flight.
+
+        Called once per processor. :attr:`stopping` is already set and the bus may already be acting on
+        it, so this cannot assume anything is still running; shorten what is in flight rather than
+        expecting to run first. May be called from a signal handler, so it must not block or await.
+        Raising is contained: the stop still happens and the other processors are still told.
+        """
+
     def submit_message(self, message: BaseMessage) -> None:
         """Put *message* on the bus this processor was registered in, from any thread."""
         if self.bus is None:
@@ -160,8 +169,10 @@ class EventBusOrchestrator(ABC):
         # because the pool's own threads discard from it as they finish.
         self._sync_work: set[Future] = set()
         self._sync_work_lock = threading.Lock()
+        self._stop_claim = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
+        self._processors: list[Processor] = []
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
@@ -189,6 +200,9 @@ class EventBusOrchestrator(ABC):
         processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
+        # By identity: a subclass defining `__eq__` would otherwise drop a distinct processor.
+        if not any(registered is processor for registered in self._processors):
+            self._processors.append(processor)
 
     def request_stop(self) -> None:
         """Ask the bus to wind down, from any thread.
@@ -197,12 +211,29 @@ class EventBusOrchestrator(ABC):
         control, such as a cancelled CI job, reaches ``finalize`` without waiting out the grace period.
         ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
         loop awaits them directly and would otherwise be held for as long as they take.
+
+        Sets :attr:`stopping`, then runs every registered processor's
+        :meth:`BaseProcessor.on_stop_requested`. A second caller returns at once rather than waiting for
+        those to finish.
         """
-        if self.stopping:
+        # A one-shot latch, never released, so the first caller is the one that notifies. Non-blocking
+        # because a signal handler runs on the thread it interrupted: waiting here for a lock that
+        # thread already holds would deadlock it, and the handler is often the one for SIGTERM.
+        if not self._stop_claim.acquire(blocking=False):
             return
 
-        self._logger.info("Stop requested; the bus will wind down")
         self._stopping.set()
+        self._logger.info("Stop requested; the bus will wind down")
+        self._notify_processors_of_stop()
+
+    def _notify_processors_of_stop(self) -> None:
+        for processor in self._processors:
+            try:
+                processor.on_stop_requested()
+            except Exception as e:
+                # Swallowed rather than routed: the caller may be a signal handler, where raising loses
+                # the processors behind this one.
+                self._logger.error("on_stop_requested failed for '%s': %s", processor.name, e, exc_info=e)
 
     def submit_message(self, message: BaseMessage):
         """Adds a message to the queue, from any thread.

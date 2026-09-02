@@ -1221,6 +1221,66 @@ class StopRequester(AsyncProcessor[Memo]):
         self.submit_message(Memo("after_stop", subject="late"))
 
 
+class StopWatcher(AsyncProcessor[TaskAssignment | Announcement]):
+    def __init__(self, name: str, *, fail: bool = False):
+        super().__init__(name)
+        self.stop_notifications = 0
+        self._fail = fail
+
+    async def process_message(self, message: TaskAssignment | Announcement):
+        pass
+
+    def on_stop_requested(self):
+        self.stop_notifications += 1
+        if self._fail:
+            raise RuntimeError("this processor cannot wind down")
+
+
+@pytest.mark.parametrize(
+    "registrations",
+    [
+        pytest.param([[TaskAssignment, Announcement]], id="one-call-two-types"),
+        pytest.param([[TaskAssignment], [Announcement]], id="two-calls"),
+    ],
+)
+def test_a_processor_is_told_once_however_often_it_subscribed(registrations: list[list[type[BaseMessage]]]):
+    """Subscriptions are per message type, so notifying per subscription would repeat the hook."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_once"), max_timeout=30, grace_period=1)
+    for message_types in registrations:
+        orchestrator.register_processor(watcher, message_types)
+
+    orchestrator.request_stop()
+
+    assert watcher.stop_notifications == 1
+
+
+def test_asking_to_stop_again_notifies_nobody_and_does_not_block():
+    """The claim is a latch that is never released, so a second call must test it rather than wait."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_repeat"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(watcher, [TaskAssignment])
+
+    orchestrator.request_stop()
+    orchestrator.request_stop()
+
+    assert watcher.stop_notifications == 1
+
+
+def test_a_stop_is_not_derailed_by_a_processor_that_fails_to_wind_down():
+    """A signal handler is a valid caller, and there an escaping exception loses the stop itself."""
+    failing = StopWatcher("failing", fail=True)
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_failure"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(failing, [TaskAssignment])
+    orchestrator.register_processor(watcher, [Announcement])
+
+    orchestrator.request_stop()
+
+    assert orchestrator.stopping
+    assert watcher.stop_notifications == 1
+
+
 def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(
     secretary: Secretary, caplog: pytest.LogCaptureFixture
 ):
