@@ -65,10 +65,7 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
     HTTPClientConnectTimeoutError: _backend_compat_type(
         HTTPClientConnectTimeoutError, requests_exceptions.ConnectTimeout
     ),
-    # requests used ReadTimeout for headers and ConnectionError for body reads.
-    HTTPClientReadTimeoutError: _backend_compat_type(
-        HTTPClientReadTimeoutError, requests_exceptions.ReadTimeout, requests_exceptions.ConnectionError
-    ),
+    HTTPClientReadTimeoutError: _backend_compat_type(HTTPClientReadTimeoutError, requests_exceptions.ReadTimeout),
     HTTPClientConnectionError: _backend_compat_type(HTTPClientConnectionError, requests_exceptions.ConnectionError),
     HTTPClientInvalidURLError: _backend_compat_type(
         HTTPClientInvalidURLError,
@@ -80,6 +77,8 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
     HTTPClientSSLError: _backend_compat_type(HTTPClientSSLError, requests_exceptions.SSLError),
 }
 
+# requests wraps body read timeouts in ConnectionError rather than ReadTimeout.
+_COMPAT_BODY_READ_TIMEOUT_ERROR = _backend_compat_type(HTTPClientReadTimeoutError, requests_exceptions.ConnectionError)
 _COMPAT_INVALID_HEADER_ERROR = _backend_compat_type(HTTPClientRequestError, requests_exceptions.InvalidHeader)
 _COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
 
@@ -109,7 +108,7 @@ def _translate_requests_exception(exc: BaseException, *, response: HTTPResponse 
     if isinstance(exc, requests_exceptions.ConnectionError) and any(
         isinstance(cause, Urllib3ReadTimeoutError) for cause in (exc.__context__, exc.args[0] if exc.args else None)
     ):
-        return _COMPAT_EXCEPTIONS[HTTPClientReadTimeoutError](message, request=request)
+        return _COMPAT_BODY_READ_TIMEOUT_ERROR(message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError):
         return _COMPAT_EXCEPTIONS[HTTPClientConnectionError](message, request=request)
     if isinstance(exc, requests_exceptions.InvalidHeader):
