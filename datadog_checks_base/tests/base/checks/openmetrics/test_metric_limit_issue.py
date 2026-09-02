@@ -6,7 +6,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import ISSUE_NAME, _issue_id
 
 ENDPOINT = 'http://example.test/metrics'
@@ -48,6 +48,69 @@ class IsolatedMetricLimitOpenMetricsCheck(MetricLimitOpenMetricsCheck):
     def check(self, _: Any) -> None:
         for value in range(20):
             self.gauge('openmetrics.metric', value)
+
+
+class GeneratedScraperEndpointsCheck(OpenMetricsBaseCheckV2):
+    """Builds scrapers from custom endpoint options instead of an instance field.
+
+    Many v2 integrations (e.g. Cilium) synthesize scraper configurations from option
+    keys such as ``agent_endpoint``, so the metric limit hook must derive endpoints
+    from the actual scrapers rather than from a raw instance field.
+    """
+
+    def configure_scrapers(self) -> None:
+        endpoints = (self.instance.get('agent_endpoint'), self.instance.get('operator_endpoint'))
+        self.scrapers = {endpoint: None for endpoint in endpoints if endpoint}
+
+
+def test_metric_limit_issue_uses_generated_scraper_endpoints(datadog_agent: Any):
+    agent_endpoint = 'http://z-agent/metrics'
+    operator_endpoint = 'http://a-operator/metrics'
+    check = GeneratedScraperEndpointsCheck(
+        'openmetrics_test',
+        {},
+        [{'agent_endpoint': agent_endpoint, 'operator_endpoint': operator_endpoint, 'namespace': 'demo'}],
+    )
+    check.configure_scrapers()
+
+    check._on_metric_limit_state(True, 20, 5)
+
+    [issue] = reported_issues(datadog_agent)
+    assert 'openmetrics_endpoint' not in check.instance
+    assert issue['id'] == _issue_id('stubbed.hostname', 'openmetrics_test', (operator_endpoint, agent_endpoint), 'demo')
+    assert issue['title'] == 'Dropping 15 of 20 OpenMetrics metrics'
+    assert issue['extra']['endpoints'] == [operator_endpoint, agent_endpoint]
+    assert '2 configured endpoints' in issue['description']
+    assert 'totals cover the complete check run' in issue['description']
+    assert agent_endpoint in issue['description']
+    assert operator_endpoint in issue['description']
+    assert 'metrics / exclude_metrics' in issue['remediation']['steps'][0]['text']
+
+
+def test_v1_base_check_reports_metric_limit_issue(datadog_agent: Any):
+    """The legacy V1 base check reports the same issue with its own wording.
+
+    The V1 class derives the endpoint from ``prometheus_url`` and points users at
+    ``ignore_metrics``, while V2 uses ``exclude_metrics``.
+    """
+    check = OpenMetricsBaseCheck(
+        'openmetrics_test',
+        {},
+        [{'prometheus_url': ENDPOINT, 'metrics': ['*'], 'namespace': 'demo'}],
+    )
+
+    check._on_metric_limit_state(True, 20, 5)
+
+    [issue] = reported_issues(datadog_agent)
+    assert issue['id'] == _issue_id('stubbed.hostname', 'openmetrics_test', (ENDPOINT,), 'demo')
+    assert issue['issue_name'] == ISSUE_NAME
+    assert issue['issue_type'] == 'openmetrics_metrics_dropped_by_configured_limit'
+    assert issue['extra']['endpoints'] == [ENDPOINT]
+    assert issue['extra']['observed_contexts'] == 20
+    assert issue['extra']['dropped_contexts'] == 15
+    filter_step = issue['remediation']['steps'][0]['text']
+    assert 'metrics / ignore_metrics' in filter_step
+    assert 'metrics / exclude_metrics' not in filter_step
 
 
 def create_check(limit: int = 5, endpoint: str = ENDPOINT) -> MetricLimitOpenMetricsCheck:
