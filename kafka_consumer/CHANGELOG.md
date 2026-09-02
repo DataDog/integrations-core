@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 9.1.0 / 2026-09-02
+
+***Added***:
+
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+
+***Fixed***:
+
+* Discard broker and log-start offsets that come back negative, instead of reporting a negative ``kafka.broker_offset`` and firing a spurious negative consumer lag event for every partition on every run. ([#24814](https://github.com/DataDog/integrations-core/pull/24814))
+* Fix retention.ms and retention.bytes being dropped from topic config events when a topic has 30+ configs (e.g. tiered-storage topics). The configs were truncated because they sorted late alphabetically and the max_configs cap cut them, even though the corresponding metrics were still emitted. ([#25012](https://github.com/DataDog/integrations-core/pull/25012))
+
 ## 9.0.0 / 2026-08-05
 
 ***Changed***:
