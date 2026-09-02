@@ -22,7 +22,7 @@ def assert_all_metrics(aggregator):
     aggregator.assert_no_duplicate_metrics()
 
 
-def assert_collection(aggregator, tags, use_openmetrics, runs=1):
+def assert_collection(aggregator, tags, use_openmetrics, runs=1, exclude=()):
     metrics = set(METRICS)
     metrics.update(METRICS_OPTIONAL)
     metrics.add('is_leader')
@@ -73,6 +73,8 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1):
         if metric.startswith(tuple(METRICS_OPTIONAL)):
             at_least = 0
         metric = 'vault.{}'.format(metric)
+        if metric in exclude:
+            at_least = 0
 
         for tag in tags:
             try:

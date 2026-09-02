@@ -1,0 +1,1 @@
+Stop passing ``--explicit-package-bases`` when type checking ddev, so mypy resolves first-party imports instead of silently treating them as ``Any``.

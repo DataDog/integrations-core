@@ -74,6 +74,34 @@ CLUSTER_NAME_QUERY = (
 )
 
 
+def quote_string(value: str) -> str:
+    """Render a SQL string literal, escaping a cluster name that arrives as server-supplied data."""
+    escaped = value.replace('\\', '\\\\').replace("'", "\\'")
+    return f"'{escaped}'"
+
+
+def cluster_all_replicas(cluster: str, table: str) -> str:
+    """Reference a system table on every replica of a cluster.
+
+    Only Cloud names its cluster 'default'; a literal 'default' either raises UNKNOWN_CLUSTER or,
+    against the stock localhost-only 'default' cluster, silently returns the local node alone.
+    """
+    return f"clusterAllReplicas({quote_string(cluster)}, system.{table})"
+
+
+# The node serving the current connection. Read per emission rather than cached, since behind a
+# single endpoint the connection can land on a different node after any reconnect.
+CONNECT_NODE_QUERY = "SELECT hostName()"
+
+
+def cluster_nodes_query(cluster: str) -> str:
+    """Query listing every replica of a cluster currently serving traffic, one row per node.
+
+    skip_unavailable_shards keeps one unreachable node from failing the whole fan-out.
+    """
+    return f"SELECT hostName() FROM {cluster_all_replicas(cluster, 'one')} SETTINGS skip_unavailable_shards=1"
+
+
 HOSTING_TYPE_TAG = 'hosting_type'
 
 
@@ -90,8 +118,8 @@ CLOUD_MODE_QUERY = "SELECT value FROM system.settings WHERE name = 'cloud_mode'"
 SHARED_MERGE_TREE_QUERY = "SELECT count() FROM system.table_engines WHERE name = 'SharedMergeTree'"
 
 
-def cluster_aware_query(base: dict) -> dict:
-    """Build a cluster-aware variant that reads all replicas and tags each row per node.
+def cluster_aware_query(base: dict, cluster: str) -> dict:
+    """Build a cluster-aware variant that reads all replicas of a cluster and tags each row per node.
 
     Derives the SELECT list and table from the base query, whose shape is always
     ``SELECT <cols> FROM system.<table>[ <trailing clause>]``.
@@ -101,8 +129,7 @@ def cluster_aware_query(base: dict) -> dict:
     return {
         'name': base['name'],
         'query': (
-            f"{select}, hostName() AS {CLUSTER_NODE_TAG} "
-            f"FROM clusterAllReplicas('default', system.{table}){sep}{trailing}"
+            f"{select}, hostName() AS {CLUSTER_NODE_TAG} FROM {cluster_all_replicas(cluster, table)}{sep}{trailing}"
         ),
         'columns': [*base['columns'], {'name': CLUSTER_NODE_TAG, 'type': 'tag'}],
     }

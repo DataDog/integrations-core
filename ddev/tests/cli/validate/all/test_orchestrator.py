@@ -189,10 +189,7 @@ def test_on_finalize_logs_exception(mock_app):
 # --- on_finalize PR comment + step summary ---
 
 
-def test_on_finalize_writes_step_summary(mock_app, tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
+def test_on_finalize_writes_step_summary(mock_app, step_summary):
     mock_app.config.github.token = ""
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None)
     orch._results = {
@@ -200,7 +197,7 @@ def test_on_finalize_writes_step_summary(mock_app, tmp_path, monkeypatch):
     }
     asyncio.run(orch.on_finalize(exception=None))
 
-    content = summary_file.read_text(encoding="utf-8")
+    content = step_summary.read_text(encoding="utf-8")
     assert "Validation Report" in content
     assert "| Validation | Description | Status |" in content
     assert "| `config` |" in content
@@ -239,10 +236,7 @@ def test_on_finalize_pr_comment_omits_run_link_when_env_missing(mock_app, monkey
     assert "[View full run]" not in body
 
 
-def test_on_finalize_step_summary_does_not_include_run_link(mock_app, tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
+def test_on_finalize_step_summary_does_not_include_run_link(mock_app, step_summary):
     mock_app.config.github.token = "fake-token"
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
     orch._results = {
@@ -250,7 +244,7 @@ def test_on_finalize_step_summary_does_not_include_run_link(mock_app, tmp_path, 
     }
     asyncio.run(orch.on_finalize(exception=None))
 
-    content = summary_file.read_text(encoding="utf-8")
+    content = step_summary.read_text(encoding="utf-8")
     assert "[View full run]" not in content
 
 
@@ -289,9 +283,7 @@ def test_on_finalize_deletes_previous_validation_comments(mock_app):
     mock_app.github.post_pull_request_comment.assert_called_once()
 
 
-def test_on_finalize_includes_pr_warning_in_summary(mock_app, tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+def test_on_finalize_includes_pr_warning_in_summary(mock_app, step_summary, monkeypatch):
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
 
     mock_app.config.github.token = ""
@@ -301,7 +293,7 @@ def test_on_finalize_includes_pr_warning_in_summary(mock_app, tmp_path, monkeypa
     }
     asyncio.run(orch.on_finalize(exception=None))
 
-    content = summary_file.read_text(encoding="utf-8")
+    content = step_summary.read_text(encoding="utf-8")
     assert "could not determine PR number" in content
 
 

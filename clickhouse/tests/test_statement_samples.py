@@ -123,9 +123,7 @@ def test_create_samples_event(check_with_dbm):
 
     active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 5}]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+    event = samples._create_samples_event(rows, active_connections)
 
     # Verify event structure
     assert event['ddsource'] == 'clickhouse'
@@ -484,7 +482,7 @@ def test_buffer_collection_interval():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
@@ -529,7 +527,7 @@ def test_buffer_snapshot_skipped_below_min_version(server_version, expect_collec
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = server_version
+    check._dbms_version = server_version
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
@@ -565,7 +563,7 @@ def test_buffer_snapshot_stops_collecting_when_table_missing():
         'tags': ['test:clickhouse'],
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check._server_version = '24.8'
+    check._dbms_version = '24.8'
     samples = check.statement_samples
     samples._tags = ['test:clickhouse']
 
@@ -646,9 +644,7 @@ def test_create_buffer_event(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = samples._create_buffer_event(buffer_snapshot)
+    payload = samples._create_buffer_event(buffer_snapshot)
 
     # Verify event structure
     assert payload['ddsource'] == 'clickhouse'

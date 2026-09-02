@@ -84,7 +84,7 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
         dbm_instance.pop(k, None)
     dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._statement_samples._enabled == statement_samples_enabled
+    assert mysql_check.statement_samples._enabled == statement_samples_enabled
 
 
 @pytest.mark.integration
@@ -348,13 +348,13 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
 
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
-        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
-        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+        mock.patch.object(mysql_check.statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check.statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
     ):
         mock_agent.side_effect = obfuscate_sql
 
-        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
-        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+        assert mysql_check.statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check.statement_metrics._collect_per_statement_metrics([])
 
     assert len(rows) == 1
     assert rows[0]['query_signature'] == query_signature
@@ -397,13 +397,13 @@ def test_statement_metrics_baselines_new_prepared_statement_instance_before_merg
 
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
-        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
-        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+        mock.patch.object(mysql_check.statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check.statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
     ):
         mock_agent.side_effect = obfuscate_sql
 
-        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
-        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+        assert mysql_check.statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check.statement_metrics._collect_per_statement_metrics([])
 
     assert len(rows) == 1
     assert rows[0]['query_signature'] == query_signature
@@ -444,13 +444,13 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
 
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
-        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
-        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+        mock.patch.object(mysql_check.statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check.statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
     ):
         mock_agent.side_effect = obfuscate_sql
 
-        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
-        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+        assert mysql_check.statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check.statement_metrics._collect_per_statement_metrics([])
 
     # the reused id is a different statement => baselined, not merged with the stale row
     assert rows == []
@@ -643,7 +643,7 @@ def test_statement_samples_collect(
 
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     if explain_strategy:
-        mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
+        mysql_check.statement_samples._preferred_explain_strategies = [explain_strategy]
 
     with (
         mock.patch.object(
@@ -662,7 +662,7 @@ def test_statement_samples_collect(
         logger.debug("running first check")
         dd_run_check(mysql_check)
         aggregator.reset()
-        mysql_check._statement_samples._init_caches()
+        mysql_check.statement_samples._init_caches()
 
         # we deliberately want to keep the connection open for the duration of the test to ensure
         # the query remains in the events_statements_current and events_statements_history tables
@@ -729,10 +729,6 @@ def test_statement_samples_collect(
         assert event['timestamp'] is not None
         assert time.time() - event['timestamp'] < 60  # ensure the timestamp is recent
 
-    # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
-    # debug the test with --pdb
-    mysql_check._statement_samples._close_db_conn()
-
 
 @pytest.mark.parametrize(
     "statement,schema,expected_warnings",
@@ -770,9 +766,9 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
     # explain plans
     dbm_instance['query_samples']['enabled'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    mysql_check._statement_samples._preferred_explain_strategies = ['PROCEDURE']
-    mysql_check._statement_samples._tags = []
-    mysql_check._statement_samples._tags_str = ''
+    mysql_check.statement_samples._preferred_explain_strategies = ['PROCEDURE']
+    mysql_check.statement_samples._tags = []
+    mysql_check.statement_samples._tags_str = ''
 
     row = {
         'current_schema': schema,
@@ -786,7 +782,7 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
         'end_event_id': None,
     }
 
-    mysql_check._statement_samples._collect_plan_for_statement(row)
+    mysql_check.statement_samples._collect_plan_for_statement(row)
     dd_run_check(mysql_check)
 
     assert mysql_check.warnings == expected_warnings
@@ -805,8 +801,8 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check.global_variables._variables = {'performance_schema': 'OFF'}
 
     # Run this twice to confirm that duplicate warnings aren't added more than once
-    mysql_check._statement_metrics.collect_per_statement_metrics()
-    mysql_check._statement_metrics.collect_per_statement_metrics()
+    mysql_check.statement_metrics.collect_per_statement_metrics()
+    mysql_check.statement_metrics.collect_per_statement_metrics()
 
     # Run the check only so that recorded warnings are actually added
     dd_run_check(mysql_check)
@@ -825,8 +821,8 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
 
     # clear the warnings and rerun collect_per_statement_metrics
     mysql_check.warnings.clear()
-    mysql_check._statement_metrics.collect_per_statement_metrics()
-    mysql_check._statement_metrics.collect_per_statement_metrics()
+    mysql_check.statement_metrics.collect_per_statement_metrics()
+    mysql_check.statement_metrics.collect_per_statement_metrics()
     dd_run_check(mysql_check)
     assert mysql_check.warnings == []
 
@@ -840,10 +836,10 @@ def test_time_instrumentation_disabled(dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Mock the time instrumentation check to return False
-    with mock.patch.object(mysql_check._statement_samples, '_is_time_instrumentation_enabled', return_value=False):
+    with mock.patch.object(mysql_check.statement_samples, '_is_time_instrumentation_enabled', return_value=False):
         # Run this twice to confirm that duplicate warnings aren't added more than once
-        mysql_check._statement_samples._collect_statement_samples()
-        mysql_check._statement_samples._collect_statement_samples()
+        mysql_check.statement_samples._collect_statement_samples()
+        mysql_check.statement_samples._collect_statement_samples()
 
         # Run the check only so that recorded warnings are actually added
         dd_run_check(mysql_check)
@@ -858,8 +854,8 @@ def test_time_instrumentation_disabled(dbm_instance, dd_run_check):
 
     # clear the warnings and rerun with time instrumentation enabled
     mysql_check.warnings.clear()
-    mysql_check._statement_samples._collect_statement_samples()
-    mysql_check._statement_samples._collect_statement_samples()
+    mysql_check.statement_samples._collect_statement_samples()
+    mysql_check.statement_samples._collect_statement_samples()
     dd_run_check(mysql_check)
     # Should have no warnings when time instrumentation is enabled
     assert mysql_check.warnings == []
@@ -1001,21 +997,21 @@ def test_statement_samples_failed_explain_handling(
     dd_run_check(mysql_check)
 
     total_error_states = []
-    with closing(mysql_check._statement_samples._get_db_connection().cursor()) as cursor:
+    with closing(mysql_check.statement_samples._get_db_connection().cursor()) as cursor:
         if optimal_strategy_cached:
             # run a query in that schema which we know will succeed to ensure the optimal strategy is cached
-            _, error_states = mysql_check._statement_samples._explain_statement(
+            _, error_states = mysql_check.statement_samples._explain_statement(
                 cursor, DEFAULT_FQ_SUCCESS_QUERY, current_schema, DEFAULT_FQ_SUCCESS_QUERY, DEFAULT_FQ_SUCCESS_QUERY
             )
             assert not error_states
         else:
             # reset all internal caches to make sure there is no previously cached strategy
-            mysql_check._statement_samples._init_caches()
+            mysql_check.statement_samples._init_caches()
 
         aggregator.reset()
 
         for _ in range(attempt_count):
-            _, error_states = mysql_check._statement_samples._explain_statement(
+            _, error_states = mysql_check.statement_samples._explain_statement(
                 cursor, sql_text, current_schema, sql_text, sql_text
             )
             total_error_states.extend(error_states)
@@ -1083,53 +1079,6 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bo
     assert len(matching) > 0, "should have collected at least one matching event"
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
-    # confirm that async jobs stop on their own after the check has not been run for a while
-    dbm_instance['query_samples']['run_sync'] = False
-    dbm_instance['query_metrics']['run_sync'] = False
-    # low collection interval for a faster test
-    dbm_instance['min_collection_interval'] = 1
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
-    # make sure there were no unhandled exceptions
-    mysql_check._statement_samples._job_loop_future.result()
-    mysql_check._statement_metrics._job_loop_future.result()
-    for job in ['statement-metrics', 'statement-samples']:
-        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
-            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
-        aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop",
-            tags=expected_tags,
-        )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['query_samples']['run_sync'] = False
-    dbm_instance['query_metrics']['run_sync'] = False
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
-    mysql_check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    mysql_check._statement_samples._job_loop_future.result()
-    mysql_check._statement_metrics._job_loop_future.result()
-    assert not mysql_check._statement_samples._job_loop_future.running(), "samples thread should be stopped"
-    assert not mysql_check._statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
-    assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
-    assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
-    for job in ['statement-metrics', 'statement-samples']:
-        expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
-            expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
-        aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
-
-
 def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
@@ -1143,43 +1092,6 @@ def _expected_dbm_instance_tags(dbm_instance, check):
         if MYSQL_REPLICATION == 'classic':
             _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
     return _tags
-
-
-# the inactive job metrics are emitted from the main integrations
-# directly to metrics-intake, so they should also be properly tagged with a resource
-def _expected_dbm_job_err_tags(dbm_instance, check):
-    _tags = dbm_instance['tags'] + (
-        'database_hostname:{}'.format('stubbed.hostname'),
-        'database_instance:{}'.format('stubbed.hostname'),
-        'port:{}'.format(common.PORT),
-        'server:{}'.format(common.HOST),
-        'dd.internal.resource:database_instance:stubbed.hostname',
-        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-    )
-    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
-        _tags += ("server_uuid:{}".format(check.server_uuid),)
-    return _tags
-
-
-@pytest.mark.parametrize("statement_samples_enabled", [True, False])
-@pytest.mark.parametrize("statement_metrics_enabled", [True, False])
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled, statement_metrics_enabled):
-    dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
-    dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
-    mysql_check.cancel()
-    if statement_samples_enabled:
-        assert mysql_check._statement_samples._job_loop_future is not None
-        mysql_check._statement_samples._job_loop_future.result()
-    else:
-        assert mysql_check._statement_samples._job_loop_future is None
-    if statement_metrics_enabled:
-        assert mysql_check._statement_metrics._job_loop_future is not None
-        mysql_check._statement_metrics._job_loop_future.result()
-    else:
-        assert mysql_check._statement_metrics._job_loop_future is None
 
 
 @pytest.mark.integration
@@ -1211,12 +1123,12 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
             "UPDATE performance_schema.setup_consumers SET enabled='NO'  WHERE name = '{}';".format(consumer_to_disable)
         )
 
-    original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
+    original_enabled_consumers = mysql_check.statement_samples._get_enabled_performance_schema_consumers()
     assert consumer_to_disable not in original_enabled_consumers
 
     dd_run_check(mysql_check)
 
-    enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
+    enabled_consumers = mysql_check.statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
         # ensure that the consumer was re-enabled by the check run
         assert enabled_consumers == all_consumers
@@ -1230,7 +1142,7 @@ def test_normalize_queries(dbm_instance):
     check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Test the general case with a valid schema, digest and digest_text
-    assert check._statement_metrics._normalize_queries(
+    assert check.statement_metrics._normalize_queries(
         [
             {
                 'schema': 'network',
@@ -1258,7 +1170,7 @@ def test_normalize_queries(dbm_instance):
 
     # Test the case of null values for digest, schema and digest_text (which is what the row created when the table
     # is full returns)
-    assert check._statement_metrics._normalize_queries(
+    assert check.statement_metrics._normalize_queries(
         [
             {
                 'digest': None,
@@ -1300,7 +1212,7 @@ def test_statement_samples_calculate_timer_end(dbm_instance, timer_end, now, upt
         'now': now,
         'uptime': uptime,
     }
-    assert check._statement_samples._calculate_timer_end(row) == expected_timestamp
+    assert check.statement_samples._calculate_timer_end(row) == expected_timestamp
 
 
 @pytest.mark.unit
@@ -1336,10 +1248,10 @@ def test_has_sampled_since_completion(
     }
 
     # Calculate the query end time
-    query_end_time = mysql_check._statement_samples._calculate_timer_end(row)
+    query_end_time = mysql_check.statement_samples._calculate_timer_end(row)
 
     # Set the window size
-    mysql_check._statement_samples._seen_samples_ratelimiter = RateLimitingTTLCache(
+    mysql_check.statement_samples._seen_samples_ratelimiter = RateLimitingTTLCache(
         maxsize=10000,
         ttl=window_seconds,
     )
@@ -1347,4 +1259,4 @@ def test_has_sampled_since_completion(
     # Calculate event timestamp based on offset from query end time
     event_timestamp = query_end_time + event_timestamp_offset
 
-    assert mysql_check._statement_samples._has_sampled_since_completion(row, event_timestamp) == expected_result
+    assert mysql_check.statement_samples._has_sampled_since_completion(row, event_timestamp) == expected_result

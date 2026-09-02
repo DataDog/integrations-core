@@ -20,6 +20,12 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
+# The Agent image pins its apt mirror to a single cloud region. When the host runs in a different
+# cloud, package downloads crawl (~40 kB/s versus ~8 MB/s in CI), which is slow enough for
+# `start_commands` to exhaust the job timeout. Point apt at the generic archive instead.
+APT_MIRRORLIST_FILE = '/etc/apt/mirrorlist.main'
+APT_MIRROR = 'http://archive.ubuntu.com/ubuntu'
+
 
 @contextmanager
 def disable_integration_before_install(config_file):
@@ -128,6 +134,19 @@ class DockerAgent(AgentInterface):
         if return_code:
             self._show_logs()
             raise RuntimeError(error_message)
+
+    def _reset_apt_mirror(self) -> None:
+        """
+        Replace the Agent image's region-pinned apt mirror with the generic Ubuntu archive.
+
+        Best effort: images that ship no mirrorlist are left untouched and failures are ignored,
+        since this only affects how fast packages download.
+        """
+        self._captured_process(
+            self._format_command(
+                ['sh', '-c', f'test -f {APT_MIRRORLIST_FILE} && echo {APT_MIRROR} > {APT_MIRRORLIST_FILE}']
+            )
+        )
 
     def _show_logs(self, *, check: bool = False) -> None:
         self._run_command(['docker', 'logs', self._container_name], check=check)
@@ -264,6 +283,9 @@ class DockerAgent(AgentInterface):
             raise RuntimeError(
                 f'Unable to start Agent container `{self._container_name}`: {process.stdout.decode("utf-8")}'
             )
+
+        if not self._is_windows_container and (start_commands or post_install_commands):
+            self._reset_apt_mirror()
 
         if start_commands:
             for start_command in start_commands:

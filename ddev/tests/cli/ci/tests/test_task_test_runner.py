@@ -12,18 +12,19 @@ from typing import Any
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, Platform, TestBatch
-from ddev.cli.ci.tests.status import Status, conclusion_to_status
-from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
-from ddev.event_bus.orchestrator import BaseMessage
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
+from ddev.cli.ci.tests.status import Status, conclusion_to_check_run_conclusion, conclusion_to_status
+from ddev.cli.ci.tests.task_test_runner import CANCEL_REQUEST_TIMEOUT, TaskTestRunner, TestRunnerOptions
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
+    CheckRunConclusion,
     WorkflowJob,
     WorkflowJobsList,
     WorkflowRun,
 )
+from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
@@ -33,18 +34,6 @@ from tests.helpers.github_async import FakeAsyncGitHubClient
 
 def wrap(data: Any) -> GitHubResponse[Any]:
     return GitHubResponse(data=data, headers={})
-
-
-def make_job(name: str = "job-1", environment: str = "py3.13") -> BatchJob:
-    return BatchJob(
-        name=name,
-        target="ntp",
-        runner="ubuntu-latest",
-        environment=environment,
-        platform=Platform.LINUX,
-        unit_tests=True,
-        e2e_tests=False,
-    )
 
 
 DEFAULT_URL = object()
@@ -76,7 +65,7 @@ def artifacts_page(artifacts: list[Artifact]) -> GitHubResponse[ArtifactsList]:
     return wrap(ArtifactsList(total_count=len(artifacts), artifacts=list(artifacts)))
 
 
-def mock_artifacts(fake: FakeAsyncGitHubClient, artifacts: list[Artifact]) -> None:
+def mock_artifacts(fake: FakeAsyncGitHubClient, artifacts: list[Artifact]):
     fake.mock_response("list_workflow_run_artifacts", artifacts_page(artifacts))
 
 
@@ -90,7 +79,7 @@ def make_workflow_job(name: str, conclusion: str = "success") -> WorkflowJob:
     return WorkflowJob(id=1, run_id=123, name=name, status="completed", conclusion=conclusion)
 
 
-def mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]) -> None:
+def mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]):
     fake.mock_response("list_workflow_jobs", wrap(WorkflowJobsList(total_count=len(jobs), jobs=list(jobs))))
 
 
@@ -110,15 +99,8 @@ def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner
         client=client,  # type: ignore[arg-type]
         options=options,
     )
-    runner.queue = asyncio.Queue()
+    runner.bus = RecordingBus()  # type: ignore[assignment]
     return runner
-
-
-def drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
-    out: list[BaseMessage] = []
-    while not queue.empty():
-        out.append(queue.get_nowait())
-    return out
 
 
 def make_batch(batch_id: str = "batch-err") -> TestBatch:
@@ -148,7 +130,7 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
     )
     await runner.process_message(batch)
 
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -173,10 +155,28 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
         (None, Status.FAILURE),
     ],
 )
-def test_conclusion_to_status(conclusion: str | None, expected: Status) -> None:
+def test_conclusion_to_status(conclusion: str | None, expected: Status):
     result = conclusion_to_status(conclusion)
     assert result is expected
     assert isinstance(result, Status)
+
+
+@pytest.mark.parametrize(
+    ("conclusion", "expected"),
+    [
+        ("success", CheckRunConclusion.SUCCESS),
+        ("timed_out", CheckRunConclusion.TIMED_OUT),
+        (None, CheckRunConclusion.NEUTRAL),
+        ("startup_failure", CheckRunConclusion.FAILURE),
+    ],
+)
+def test_conclusion_to_check_run_conclusion(conclusion: str | None, expected: CheckRunConclusion):
+    """A workflow run's conclusion is a free-form string, a check run's is a closed set of eight.
+
+    `startup_failure` is a real workflow conclusion with no check-run member, so passing it through
+    would have GitHub reject the request that closes the check run.
+    """
+    assert conclusion_to_check_run_conclusion(conclusion) is expected
 
 
 # ---------------------------------------------------------------------------
@@ -185,7 +185,7 @@ def test_conclusion_to_status(conclusion: str | None, expected: Status) -> None:
 
 
 @pytest.mark.asyncio
-async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path) -> None:
+async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
     fake, _ = await run_happy_path(tmp_path)
 
     dispatch_calls = fake.calls_to("create_workflow_dispatch")
@@ -206,21 +206,29 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path) -> None
                     {
                         "name": "j1",
                         "target": "ntp",
-                        "runner": "ubuntu-latest",
+                        "runner_labels": ["ubuntu-22.04"],
                         "environment": "py3.13",
                         "platform": "linux",
+                        "python_version": "3.13",
                         "unit_tests": True,
                         "e2e_tests": False,
+                        "agent_image": None,
+                        "minimum_base_package": False,
+                        "coverage": True,
                         "artifact_name": "ntp_py3.13_linux",
                     },
                     {
                         "name": "j2",
                         "target": "ntp",
-                        "runner": "ubuntu-latest",
+                        "runner_labels": ["ubuntu-22.04"],
                         "environment": "py3.13",
                         "platform": "linux",
+                        "python_version": "3.13",
                         "unit_tests": True,
                         "e2e_tests": False,
+                        "agent_image": None,
+                        "minimum_base_package": False,
+                        "coverage": True,
                         "artifact_name": "ntp_py3.13_linux",
                     },
                 ]
@@ -230,7 +238,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path) -> None
 
 
 @pytest.mark.asyncio
-async def test_opens_check_run_with_head_sha_and_details_url(tmp_path: Path) -> None:
+async def test_opens_check_run_with_head_sha_and_details_url(tmp_path: Path):
     fake, _ = await run_happy_path(tmp_path)
 
     create_calls = fake.calls_to("create_check_run")
@@ -243,7 +251,7 @@ async def test_opens_check_run_with_head_sha_and_details_url(tmp_path: Path) -> 
 
 
 @pytest.mark.asyncio
-async def test_downloads_all_batch_artifacts(tmp_path: Path) -> None:
+async def test_downloads_all_batch_artifacts(tmp_path: Path):
     fake, _ = await run_happy_path(tmp_path)
 
     download_calls = fake.calls_to("download_artifact")
@@ -259,7 +267,7 @@ async def test_downloads_all_batch_artifacts(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_emits_batch_finished_with_run_metadata(tmp_path: Path) -> None:
+async def test_emits_batch_finished_with_run_metadata(tmp_path: Path):
     _, finished = await run_happy_path(tmp_path)
 
     assert finished.id == "msg-1"
@@ -272,7 +280,7 @@ async def test_emits_batch_finished_with_run_metadata(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_batch_finished_records_unmatched_correlation_when_no_match(tmp_path: Path) -> None:
+async def test_batch_finished_records_unmatched_correlation_when_no_match(tmp_path: Path):
     # The two jobs' artifact names collide and don't match the generic artifacts, and there is no
     # jobs API match, so both correlated facets are None while the per-facet file names are recorded.
     _, finished = await run_happy_path(tmp_path)
@@ -290,7 +298,28 @@ async def test_batch_finished_records_unmatched_correlation_when_no_match(tmp_pa
 
 
 @pytest.mark.asyncio
-async def test_closes_check_run_with_workflow_conclusion(tmp_path: Path) -> None:
+async def test_uses_batch_id_not_message_id_for_correlation(tmp_path: Path):
+    # The logical batch identity comes from batch_id; the message id is a separate identity and
+    # must not be used for the check-run name, the workflow inputs, or the emitted BatchFinished.
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    runner = make_runner(fake, tmp_path)
+
+    batch = TestBatch(id="msg-uuid-xyz", batch_id="batch-07", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
+    await runner.process_message(batch)
+
+    assert fake.calls_to("create_check_run")[0].kwargs["name"] == "test-batch/batch-07"
+    assert fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]["batch_id"] == "batch-07"
+
+    finished = drain_queue(runner.bus.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.id == "msg-uuid-xyz"
+    assert finished.batch_id == "batch-07"
+
+
+@pytest.mark.asyncio
+async def test_closes_check_run_with_workflow_conclusion(tmp_path: Path):
     fake, _ = await run_happy_path(tmp_path)
 
     update_calls = fake.calls_to("update_check_run")
@@ -307,7 +336,7 @@ async def test_closes_check_run_with_workflow_conclusion(tmp_path: Path) -> None
 
 
 @pytest.mark.asyncio
-async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
+async def test_process_message_correlates_batch_jobs(tmp_path: Path):
     # A failed multi-job run where j1 passed and j2 failed: each batch_jobs entry must carry its
     # own true per-job status and its artifact directory, resolved by the job's artifact name.
     # The two jobs differ in an artifact-relevant field (environment) so their base names differ.
@@ -322,7 +351,7 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
         TestBatch(id="batch-c", batch_id="batch-c", job_list=[j1, j2], jobs_count=2, integrations=["ntp"])
     )
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     assert finished.status == "failure"
 
@@ -340,7 +369,7 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) -> None:
+async def test_process_message_batch_job_without_workflow_match(tmp_path: Path):
     # A job present in the batch but absent from the workflow-run API response still yields a
     # well-formed entry: its artifact is located but workflow_job is None.
     job = make_job("j1")
@@ -354,7 +383,7 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) 
         TestBatch(id="batch-d", batch_id="batch-d", job_list=[job], jobs_count=1, integrations=["ntp"])
     )
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     [result] = finished.batch_jobs
     assert result.job == job
@@ -363,7 +392,7 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) 
 
 
 @pytest.mark.asyncio
-async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> None:
+async def test_process_message_batch_job_without_artifacts(tmp_path: Path):
     # A job with no artifacts on disk still yields a well-formed entry with artifact_name_path None.
     job = make_job("j1")
     fake = FakeAsyncGitHubClient()
@@ -376,7 +405,7 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> No
         TestBatch(id="batch-e", batch_id="batch-e", job_list=[job], jobs_count=1, integrations=["ntp"])
     )
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     [result] = finished.batch_jobs
     assert result.workflow_job is not None and result.workflow_job.conclusion == "success"
@@ -389,7 +418,7 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> No
 
 
 @pytest.mark.asyncio
-async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_path: Path) -> None:
+async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(fake, [])
@@ -400,14 +429,14 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
     # correlated job carrying no workflow job.
     await runner.process_message(make_batch())
 
-    finished = drain_queue(runner.queue)[0]
+    finished = drain_queue(runner.bus.queue)[0]
     assert isinstance(finished, BatchFinished)
     assert finished.status == "success"
     assert all(result.workflow_job is None for result in finished.batch_jobs)
 
 
 @pytest.mark.asyncio
-async def test_process_message_failure_path(tmp_path: Path) -> None:
+async def test_process_message_failure_path(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "failure"))
     mock_artifacts(fake, [make_artifact(1)])
@@ -417,7 +446,7 @@ async def test_process_message_failure_path(tmp_path: Path) -> None:
         TestBatch(id="batch-2", batch_id="batch-2", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
     )
 
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -430,7 +459,7 @@ async def test_process_message_failure_path(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_process_message_skipped_conclusion(tmp_path: Path) -> None:
+async def test_process_message_skipped_conclusion(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "skipped"))
     mock_artifacts(fake, [])
@@ -439,7 +468,7 @@ async def test_process_message_skipped_conclusion(tmp_path: Path) -> None:
     await runner.process_message(make_batch())
 
     # A "skipped" GitHub conclusion maps to a "skipped" BatchFinished and a "skipped" check run.
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -451,7 +480,7 @@ async def test_process_message_skipped_conclusion(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_process_message_polls_until_completed(tmp_path: Path) -> None:
+async def test_process_message_polls_until_completed(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     # Initial get + polls until "completed"; FIFO one-shots replay in order.
     for status in ("queued", "in_progress", "in_progress", "completed"):
@@ -464,14 +493,14 @@ async def test_process_message_polls_until_completed(tmp_path: Path) -> None:
     )
 
     assert len(fake.calls_to("get_workflow_run")) == 4
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
 
 
 @pytest.mark.asyncio
-async def test_process_message_skips_expired_artifacts(tmp_path: Path) -> None:
+async def test_process_message_skips_expired_artifacts(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(
@@ -495,7 +524,7 @@ async def test_process_message_skips_expired_artifacts(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_process_message_null_conclusion(tmp_path: Path) -> None:
+async def test_process_message_null_conclusion(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", None))
     mock_artifacts(fake, [])
@@ -504,7 +533,7 @@ async def test_process_message_null_conclusion(tmp_path: Path) -> None:
     await runner.process_message(make_batch())
 
     # A null GitHub conclusion maps to a "failure" BatchFinished and a "neutral" check run.
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -516,7 +545,7 @@ async def test_process_message_null_conclusion(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_process_message_emits_batch_finished_when_listing_artifacts_fails(tmp_path: Path) -> None:
+async def test_process_message_emits_batch_finished_when_listing_artifacts_fails(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     fake.mock_response("list_workflow_run_artifacts", RuntimeError("boom-list-artifacts"))
@@ -530,7 +559,7 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
     assert len(update_calls) == 1
     assert update_calls[0].kwargs["conclusion"] == "success"
 
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     finished = submitted[0]
     assert isinstance(finished, BatchFinished)
@@ -538,7 +567,7 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
 
 
 @pytest.mark.asyncio
-async def test_process_message_swallows_check_run_close_failure(tmp_path: Path) -> None:
+async def test_process_message_swallows_check_run_close_failure(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(fake, [make_artifact(1)])
@@ -549,14 +578,14 @@ async def test_process_message_swallows_check_run_close_failure(tmp_path: Path) 
     await runner.process_message(make_batch())
 
     assert len(fake.calls_to("update_check_run")) == 1
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
 
 
 @pytest.mark.asyncio
-async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path: Path) -> None:
+async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(fake, [make_artifact(1), make_artifact(2), make_artifact(3)])
@@ -576,7 +605,7 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
         "https://api.github.com/artifact/2/zip",
         "https://api.github.com/artifact/3/zip",
     ]
-    submitted = drain_queue(runner.queue)
+    submitted = drain_queue(runner.bus.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
@@ -590,7 +619,7 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
 
 @pytest.mark.parametrize("failure_point", ["create_workflow_dispatch", "get_workflow_run_initial"])
 @pytest.mark.asyncio
-async def test_failure_before_check_run_opens_does_not_create_check_run(tmp_path: Path, failure_point: str) -> None:
+async def test_failure_before_check_run_opens_does_not_create_check_run(tmp_path: Path, failure_point: str):
     boom = RuntimeError(f"boom-{failure_point}")
     fake = FakeAsyncGitHubClient()
     if failure_point == "create_workflow_dispatch":
@@ -608,7 +637,7 @@ async def test_failure_before_check_run_opens_does_not_create_check_run(tmp_path
 
 
 @pytest.mark.asyncio
-async def test_failure_mid_poll_closes_check_run_as_cancelled(tmp_path: Path) -> None:
+async def test_failure_mid_poll_closes_check_run_as_cancelled(tmp_path: Path):
     boom = RuntimeError("boom-mid-poll")
     fake = FakeAsyncGitHubClient()
     # Initial get succeeds (still running), the first poll raises.
@@ -628,7 +657,7 @@ async def test_failure_mid_poll_closes_check_run_as_cancelled(tmp_path: Path) ->
 
 
 @pytest.mark.asyncio
-async def test_failure_at_create_check_run_does_not_close_check_run(tmp_path: Path) -> None:
+async def test_failure_at_create_check_run_does_not_close_check_run(tmp_path: Path):
     boom = RuntimeError("boom-create-check-run")
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
@@ -644,18 +673,18 @@ async def test_failure_at_create_check_run_does_not_close_check_run(tmp_path: Pa
 
 
 @pytest.mark.asyncio
-async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: Path) -> None:
+async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: Path):
     boom = RuntimeError("boom-submit-message")
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(fake, [make_artifact(1)])
     runner = make_runner(fake, tmp_path)
 
-    class _BoomQueue:
-        def put_nowait(self, _: Any) -> None:
+    class _BoomBus:
+        def submit_message(self, _: Any):
             raise boom
 
-    runner.queue = _BoomQueue()  # type: ignore[assignment]
+    runner.bus = _BoomBus()  # type: ignore[assignment]
 
     with pytest.raises(RuntimeError, match="boom-submit-message"):
         await runner.process_message(make_batch())
@@ -666,3 +695,74 @@ async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: P
     assert len(update_calls) == 1
     assert update_calls[0].kwargs["status"] == "completed"
     assert update_calls[0].kwargs["conclusion"] == "success"
+
+
+async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):
+    """Nothing to cancel once a run reached a terminal state, and asking wastes a call.
+
+    Under cancellation the budget is a few seconds shared by every cleanup call, so spending one on a
+    run that is already done costs one that is not.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run()))
+    mock_artifacts(client, [])
+    mock_jobs(client, [])
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    await runner.process_message(make_batch(batch_id="batch-1"))
+    await runner.cancel_dispatched_runs()
+
+    assert client.calls_to("cancel_workflow_run") == []
+
+
+async def test_cancelling_a_run_does_not_wait_out_the_clients_default_timeout(tmp_path: Path):
+    """A GitHub that accepts the connection then stalls must not consume the whole teardown budget.
+
+    The retry policy's timeout bounds the ladder, not an attempt in flight, so without a per-request
+    timeout this inherits the client's 30s default. The process is killed after roughly ten, so one
+    stalled call would mean no run is cancelled at all.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
+    async with asyncio.timeout(5):
+        while not client.calls_to("create_check_run"):
+            await asyncio.sleep(0)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await runner.cancel_dispatched_runs()
+
+    assert client.last_call("cancel_workflow_run").kwargs["timeout"] == CANCEL_REQUEST_TIMEOUT
+
+
+async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tmp_path: Path):
+    """A dispatched run outlives the process that asked for it and keeps burning runner minutes.
+
+    The batch's own `finally` runs when its task is cancelled, so anything cleared there would be gone
+    before the cleanup looked, which is exactly when there is something to cancel.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    runner = make_runner(client, tmp_path)
+    runner.bus = RecordingBus()  # type: ignore[assignment]
+
+    task = asyncio.create_task(runner.process_message(make_batch(batch_id="batch-1")))
+    await asyncio.sleep(0)
+    # Bounded, so a regression that never creates the check run fails here instead of spinning until
+    # the CI job's own timeout, which reports nothing useful.
+    async with asyncio.timeout(5):
+        while not client.calls_to("create_check_run"):
+            await asyncio.sleep(0)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await runner.cancel_dispatched_runs()
+
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
