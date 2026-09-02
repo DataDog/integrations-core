@@ -79,6 +79,40 @@ def test_runner_labels_and_platform_are_preserved():
     assert (job.runner_labels, job.platform) == (("windows-2022", "x-large"), PlatformName.WINDOWS)
 
 
+def test_minimum_base_package_replica_is_planned_alongside_the_job():
+    units = [make_unit("postgres", name="postgres (py3.13)", environment=env("py3.13", unit=True, e2e=True))]
+
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
+
+    original, replica = jobs
+    # The replica substitutes the base package the unit tests import, so it runs unit tests only and
+    # needs no Agent image. Distinct name and artifact identity are what keep the pair's workflow
+    # correlation and downloaded artifacts from collapsing onto each other.
+    assert (replica.unit_tests, replica.e2e_tests, replica.agent_image) == (True, False, None)
+    assert replica.minimum_base_package and not replica.coverage
+    assert replica.name != original.name
+    assert replica.artifact_name() != original.artifact_name()
+
+
+def test_jobs_are_not_replicated_by_default():
+    # A run that does not ask for it pays nothing: testing against a given Agent image, for one, has
+    # a single base package version available and so has no second variant to run.
+    units = [make_unit(environment=env("py3.13"))]
+
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver)
+
+    assert [job.minimum_base_package for job in jobs] == [False]
+
+
+def test_no_replica_for_a_job_that_runs_no_unit_tests():
+    # Only unit tests import the base package, so an E2E-only job's replica would run nothing.
+    units = [make_unit(environment=env("py3.13", unit=False, e2e=True))]
+
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
+
+    assert len(jobs) == 1
+
+
 def test_multiple_units_expand_in_order_one_job_each():
     units = [
         make_unit(name="postgres (py3.11)", environment=env("py3.11")),

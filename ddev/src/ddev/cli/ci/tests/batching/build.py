@@ -98,6 +98,7 @@ def build_test_batches(
     config: BatchingConfig,
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
+    minimum_base_package: bool = False,
 ) -> list[TestBatch]:
     """Turn changed files into the complete, ordered list of `TestBatch` messages.
 
@@ -110,7 +111,7 @@ def build_test_batches(
         environment_provider=environment_provider,
         rules=rules,
     )
-    jobs = expand_batch_jobs(units)
+    jobs = expand_batch_jobs(units, minimum_base_package=minimum_base_package)
     job_groups = strategy(jobs, config=config)
     validate_batches(job_groups, jobs, config=config)
     return create_test_batches(job_groups)

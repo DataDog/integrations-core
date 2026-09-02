@@ -282,6 +282,29 @@ def test_build_batches_end_to_end_split_defaults():
     assert batch.jobs_count == 1
 
 
+def test_build_batches_plans_minimum_base_package_replicas():
+    repo = FakeRepo([FakeIntegration("postgres")])
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11", unit=True, e2e=True)]})
+    changed = [modified("postgres/tests/test_a.py")]
+
+    [batch] = build_test_batches(
+        repo,
+        changed,
+        environment_provider=provider,
+        config=BatchingConfig(),
+        minimum_base_package=True,
+    )
+
+    # Both variants reach the plan, and the partition validates: the batch contract rejects
+    # duplicate job names and artifact identities, which is what the pair used to produce.
+    assert [(j.name, j.e2e_tests, j.minimum_base_package) for j in batch.job_list] == [
+        ("postgres (py3.11)", True, False),
+        ("minimum-base-package-postgres (py3.11)", False, True),
+    ]
+    assert batch.jobs_count == 2
+    assert batch.integrations == ["postgres"]
+
+
 def test_build_batches_empty_input_returns_no_batches():
     repo = FakeRepo([FakeIntegration("postgres")])
     provider = FakeEnvironmentProvider({"postgres": [env("py3.11")]})

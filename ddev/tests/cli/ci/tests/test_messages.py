@@ -24,17 +24,29 @@ def test_artifact_name_built_from_target_env_platform():
     assert make_job().artifact_name() == "ntp_py3.13_linux"
 
 
-@pytest.mark.parametrize("field", ["name", "runner_labels", "unit_tests", "e2e_tests"])
+@pytest.mark.parametrize("field", ["name", "runner_labels", "unit_tests", "e2e_tests", "coverage"])
 def test_artifact_name_ignores_non_identifying_fields(field: str):
-    # The artifact identity is target + environment + platform; name/runner/facet flags are not part
-    # of it (a single job carries its facets, so facets never distinguish two jobs).
-    changed = {"name": "other-job", "runner_labels": ("windows-latest",), "unit_tests": False, "e2e_tests": True}[field]
+    # The artifact identity is target + environment + platform + minimum_base_package; name/runner
+    # and the facet flags are not part of it (a single job carries its facets, so facets never
+    # distinguish two jobs, and coverage follows from the base package variant rather than naming it).
+    changed = {
+        "name": "other-job",
+        "runner_labels": ("windows-latest",),
+        "unit_tests": False,
+        "e2e_tests": True,
+        "coverage": False,
+    }[field]
     assert make_job(**{field: changed}).artifact_name() == make_job().artifact_name()
 
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("target", "kafka"), ("environment", "py3.12"), ("platform", PlatformName.WINDOWS)],
+    [
+        ("target", "kafka"),
+        ("environment", "py3.12"),
+        ("platform", PlatformName.WINDOWS),
+        ("minimum_base_package", True),
+    ],
 )
 def test_artifact_name_varies_with_identifying_fields(field, value):
     assert make_job(**{field: value}).artifact_name() != make_job().artifact_name()

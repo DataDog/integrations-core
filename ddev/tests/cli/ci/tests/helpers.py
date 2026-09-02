@@ -77,6 +77,8 @@ def make_job(
     unit_tests: bool = True,
     e2e_tests: bool = False,
     agent_image: str | None = None,
+    minimum_base_package: bool = False,
+    coverage: bool = True,
 ) -> BatchJob:
     return BatchJob(
         name=name,
@@ -88,6 +90,8 @@ def make_job(
         unit_tests=unit_tests,
         e2e_tests=e2e_tests,
         agent_image=agent_image,
+        minimum_base_package=minimum_base_package,
+        coverage=coverage,
     )
 
 
