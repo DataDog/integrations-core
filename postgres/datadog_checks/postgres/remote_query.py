@@ -171,6 +171,8 @@ class RemoteQueryUploadLimits(BaseModel):
     max_columns: StrictInt = Field(alias='maxColumns', ge=1)
     max_schema_bytes: StrictInt = Field(alias='maxSchemaBytes', ge=1)
     max_pages: StrictInt = Field(alias='maxPages', ge=1)
+    # The delivery-injected timeout is authoritative only for instances that do not configure
+    # remote_queries.timeout_ms: the instance config owns the customer-DB-protective override.
     timeout_ms: StrictInt = Field(default=REMOTE_QUERY_DEFAULT_TIMEOUT_MS, alias='timeoutMs', ge=1)
 
     @model_validator(mode='after')
@@ -859,13 +861,16 @@ def produce_remote_query(
     """Execute the validated query once and return the compact run receipt.
 
     The query runs exactly once, through a named server-side cursor declared inside the
-    existing read-only transaction with the statement timeout applied; it is never wrapped in
-    a probe and never executed twice. Bounded row batches are fetched from the same cursor
-    and encoded one row at a time.
+    existing read-only transaction with the resolved statement timeout applied (the
+    instance-configured ``remote_queries.timeout_ms`` override, or the delivery-injected
+    limit when the instance does not configure one); it is never wrapped in a probe and
+    never executed twice. Bounded row batches are fetched from the same cursor and encoded
+    one row at a time.
     """
     delivery = request.result_delivery
     limits = delivery.limits
-    deadline = started_at + limits.timeout_ms / 1000
+    statement_timeout_ms = _resolve_statement_timeout_ms(check, limits)
+    deadline = started_at + statement_timeout_ms / 1000
 
     def guard() -> None:
         _raise_if_timed_out(deadline)
@@ -879,8 +884,9 @@ def produce_remote_query(
                 control.execute('BEGIN READ ONLY')
                 in_transaction = True
                 # SET statements do not accept bind parameters, so the timeout is inlined; it
-                # is a validated positive int from the server-injected limits, never raw text.
-                control.execute('SET LOCAL statement_timeout = {}'.format(limits.timeout_ms))
+                # is a validated positive int from the resolved instance override or the
+                # server-injected limits, never raw text.
+                control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
                 with conn.cursor(name=cursor_name) as server_cursor:
                     register_exact_loaders(server_cursor)
                     server_cursor.execute(request.query)
@@ -915,6 +921,24 @@ def produce_remote_query(
                         control.execute('ROLLBACK')
                     except Exception:
                         LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
+
+
+def _resolve_statement_timeout_ms(check: 'PostgreSql', limits: RemoteQueryUploadLimits) -> int:
+    """Resolve the statement timeout that protects the customer database for this run.
+
+    The instance config ``remote_queries.timeout_ms`` owns this DB-protective bound: it caps
+    how long the read-only remote query transaction may hold its snapshot on this instance's
+    database, and per-instance granularity is the point (a warehouse instance can allow
+    minutes while an OLTP instance allows seconds). When the instance does not configure it,
+    the delivery-injected ``limits.timeout_ms`` stays authoritative as the worker's legacy
+    fallback for unconfigured instances, so behavior is exactly as before. The delivery
+    limits object is never mutated; the value is resolved locally for each run.
+    """
+    config = getattr(check, '_config', None)
+    instance_timeout_ms = getattr(getattr(config, 'remote_queries', None), 'timeout_ms', None)
+    if isinstance(instance_timeout_ms, int) and instance_timeout_ms > 0:
+        return instance_timeout_ms
+    return limits.timeout_ms
 
 
 def _raise_if_timed_out(deadline: float) -> None:

@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import pytest
 
 from datadog_checks.postgres import remote_query
+from datadog_checks.postgres.config_models.instance import RemoteQueries
 from datadog_checks.postgres.remote_query import (
     RawJsonNumber,
     RawJsonNumberLoader,
@@ -990,6 +991,44 @@ def test_producer_executes_query_exactly_once_in_read_only_transaction_with_time
     ]
     assert control.executed[1][1] is None
     assert server.closed
+
+
+def test_producer_applies_instance_remote_queries_timeout_over_delivery_limit(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    fake = FakeUploadClient()
+    check = make_check(pool=pool, remote_queries=RemoteQueries(timeout_ms=300_000))
+
+    events = collect_events(valid_request(), check, client=fake)
+
+    assert_success(events)
+    control = pool.cursors[0]
+    # The instance-configured DB-protective timeout overrides the delivery-injected limit.
+    assert [entry[0] for entry in control.executed] == [
+        'BEGIN READ ONLY',
+        'SET LOCAL statement_timeout = 300000',
+        'ROLLBACK',
+    ]
+
+
+def test_statement_timeout_resolution_prefers_instance_timeout():
+    limits = remote_query.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
+    check = make_check(remote_queries=SimpleNamespace(timeout_ms=300_000))
+
+    assert remote_query._resolve_statement_timeout_ms(check, limits) == 300_000
+
+
+@pytest.mark.parametrize(
+    'remote_queries',
+    [None, SimpleNamespace(timeout_ms=None), SimpleNamespace(timeout_ms=0)],
+    ids=['section-unset', 'timeout-unset', 'timeout-non-positive'],
+)
+def test_statement_timeout_resolution_falls_back_to_delivery_limit(remote_queries):
+    limits = remote_query.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
+    check = make_check(remote_queries=remote_queries)
+
+    assert remote_query._resolve_statement_timeout_ms(check, limits) == 7_777
 
 
 def test_producer_rolls_back_transaction_on_failure(monkeypatch):
