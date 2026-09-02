@@ -22,6 +22,8 @@ from ddev.utils.github_async.models import (
     JobStepStatus,
     Label,
     PullRequest,
+    PullRequestFile,
+    PullRequestFileStatus,
     PullRequestReviewComment,
     PullRequestState,
     WorkflowDispatchResult,
@@ -39,6 +41,7 @@ from tests.utils.github_async.payloads import (
     full_pull_request_payload,
     issue_comment_payload,
     pr_review_comment_payload,
+    pull_request_file_payload,
     pull_request_payload,
     workflow_job,
     workflow_run_payload,
@@ -522,6 +525,51 @@ async def test_list_pull_requests_forwards_base_filter():
     client = make_client(httpx.MockTransport(handler))
     result = await client.list_pull_requests("o", "r", base="7.62.x")
     assert result.data[0].number == 1
+
+
+async def test_list_pull_request_files_success():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/pulls/25074/files"
+        assert request.url.params["per_page"] == "100"
+        # The response body is a bare array, not an object with a wrapper key.
+        return json_response(
+            [
+                pull_request_file_payload(filename="disk/tests/test_unit.py"),
+                pull_request_file_payload(filename="disk/removed.py", status="removed"),
+            ]
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_pull_request_files("owner", "repo", 25074)]
+
+    assert len(pages) == 1
+    files = pages[0].data
+    assert all(isinstance(changed, PullRequestFile) for changed in files)
+    assert [changed.filename for changed in files] == ["disk/tests/test_unit.py", "disk/removed.py"]
+    assert [changed.status for changed in files] == [PullRequestFileStatus.MODIFIED, PullRequestFileStatus.REMOVED]
+
+
+async def test_list_pull_request_files_follows_link_header():
+    """A pull request larger than one page must yield every file.
+
+    Stopping at the first page selects a subset of the targets to test and still reports success,
+    so the run goes green having never tested the rest of the change.
+    """
+    second_page_url = "https://api.github.com/repos/owner/repo/pulls/25074/files?page=2"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.params.get("page") == "2":
+            return json_response([pull_request_file_payload(filename="second.py")])
+        return json_response(
+            [pull_request_file_payload(filename="first.py")],
+            headers={"link": f'<{second_page_url}>; rel="next"'},
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_pull_request_files("owner", "repo", 25074)]
+
+    assert [changed.filename for page in pages for changed in page.data] == ["first.py", "second.py"]
 
 
 async def test_add_labels_to_issue_success() -> None:

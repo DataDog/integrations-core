@@ -25,6 +25,42 @@ class PullRequestState(StrEnum):
     CLOSED = auto()
 
 
+class PullRequestFileStatus(StrEnum):
+    """How a file was changed by a pull request.
+
+    The `diff-entry` schema declares `status` as
+    `enum: [added, removed, modified, renamed, copied, changed, unchanged]`.
+    Reference:
+    https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files
+    """
+
+    ADDED = auto()
+    REMOVED = auto()
+    MODIFIED = auto()
+    RENAMED = auto()
+    COPIED = auto()
+    CHANGED = auto()
+    UNCHANGED = auto()
+
+
+class PullRequestFile(BaseModel):
+    """One entry of a pull request's file list.
+
+    Only the fields needed to reconstruct a change are modelled; the schema's diff statistics and
+    blob URLs are ignored. `previous_filename` is populated for renames and copies, and is the
+    source path.
+
+    Field reference (the `diff-entry` schema):
+    https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    filename: str
+    status: PullRequestFileStatus
+    previous_filename: str | None = None
+
+
 class PullRequestRef(BaseModel):
     """A head or base branch reference on a pull request.
 
@@ -91,3 +127,8 @@ class PullRequest(BaseModel):
     # Branch references
     head: PullRequestRef | None = None
     base: PullRequestRef | None = None
+
+    # Diff totals. Required by the `pull-request` schema but absent from `pull-request-simple`,
+    # which is what the list endpoints return, so this stays optional. A caller listing a pull
+    # request's files needs it to tell a complete file list from a truncated one.
+    changed_files: int | None = None

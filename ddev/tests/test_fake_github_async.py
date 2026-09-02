@@ -314,6 +314,11 @@ MIRROR_CALLS = [
     ('update_issue_comment', lambda f, _: f.update_issue_comment('o', 'r', 3, 'edited'), {'comment_id': 3}),
     ('list_issue_comments', lambda f, _: first_page(f.list_issue_comments('o', 'r', 7)), {'issue_number': 7}),
     (
+        'list_pull_request_files',
+        lambda f, _: first_page(f.list_pull_request_files('o', 'r', 5)),
+        {'pull_number': 5},
+    ),
+    (
         'add_labels_to_issue',
         lambda f, _: f.add_labels_to_issue('o', 'r', 7, ['qa/skip-qa']),
         {'labels': ['qa/skip-qa']},

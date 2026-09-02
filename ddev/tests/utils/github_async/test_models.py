@@ -8,10 +8,16 @@ from ddev.utils.github_async.models import (
     GitHubUser,
     Label,
     PullRequest,
+    PullRequestFile,
+    PullRequestFileStatus,
     PullRequestRef,
     PullRequestState,
 )
-from tests.utils.github_async.payloads import full_pull_request_payload
+from tests.utils.github_async.payloads import (
+    full_pull_request_payload,
+    pull_request_file_payload,
+    pull_request_payload,
+)
 
 
 def test_pull_request_parses_full_response() -> None:
@@ -45,6 +51,31 @@ def test_pull_request_ignores_extra_fields() -> None:
     payload = full_pull_request_payload(mergeable_state="clean", additions=42, unknown_future_field={"nested": True})
     pr = PullRequest.model_validate(payload)
     assert pr.number == 42
+
+
+def test_pull_request_file_keeps_the_source_path_of_a_rename() -> None:
+    """A rename's source path is a changed path too, so losing it hides work that needs testing."""
+    payload = pull_request_file_payload(
+        filename="datadog_checks_base/renamed.py",
+        status="renamed",
+        previous_filename="datadog_checks_base/original.py",
+    )
+
+    changed = PullRequestFile.model_validate(payload)
+
+    assert changed.filename == "datadog_checks_base/renamed.py"
+    assert changed.status is PullRequestFileStatus.RENAMED
+    assert changed.previous_filename == "datadog_checks_base/original.py"
+
+
+def test_pull_request_changed_files_absent_from_abbreviated_payloads() -> None:
+    """The `pull-request-simple` schema the list endpoints return has no `changed_files`.
+
+    It is required by the `pull-request` schema, so modelling it as required would break parsing for
+    every endpoint that returns the abbreviated form.
+    """
+    assert PullRequest.model_validate(pull_request_payload()).changed_files is None
+    assert PullRequest.model_validate(full_pull_request_payload(changed_files=397)).changed_files == 397
 
 
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:

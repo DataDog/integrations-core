@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from .comment import PullRequestReviewComment as PullRequestReviewComment
     from .label import Label as Label
     from .pull_request import PullRequest as PullRequest
+    from .pull_request import PullRequestFile as PullRequestFile
+    from .pull_request import PullRequestFileStatus as PullRequestFileStatus
     from .pull_request import PullRequestRef as PullRequestRef
     from .pull_request import PullRequestState as PullRequestState
     from .user import GitHubUser as GitHubUser
@@ -60,6 +62,8 @@ MODULE_BY_NAME: dict[str, str] = {
     'JobStepStatus': 'workflow',
     'Label': 'label',
     'PullRequest': 'pull_request',
+    'PullRequestFile': 'pull_request',
+    'PullRequestFileStatus': 'pull_request',
     'PullRequestRef': 'pull_request',
     'PullRequestReviewComment': 'comment',
     'PullRequestState': 'pull_request',

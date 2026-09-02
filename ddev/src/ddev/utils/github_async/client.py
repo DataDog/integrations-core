@@ -43,6 +43,7 @@ from .models import (
     IssueComment,
     Label,
     PullRequest,
+    PullRequestFile,
     PullRequestReviewComment,
     WorkflowDispatchResult,
     WorkflowJobsList,
@@ -855,6 +856,49 @@ class AsyncGitHubClient:
             "GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout, retry=retry
         )
         return self._parse_response(response, PullRequest)
+
+    async def list_pull_request_files(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequestFile]]]:
+        """
+        Calls the GitHub API to list the files a pull request changes (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files
+
+        The endpoint stops at 3000 files and does not report that it did, so a caller that needs a
+        complete list must compare the number of files it received against ``changed_files`` on the
+        pull request itself.
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            pull_number: Pull request number.
+            per_page: Number of files per page (default 100, GitHub's maximum).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Applies per page. Defaults to the client's policy for replayable requests.
+
+        Returns:
+            AsyncIterator[GitHubResponse[list[PullRequestFile]]]: One page of files per iteration,
+            following Link headers until exhausted.
+        """
+        # The response body is a bare JSON array, so there is no wrapper model to validate against
+        # (unlike ``WorkflowJobsList``); each item is validated individually.
+        endpoint = f"/repos/{owner}/{repo}/pulls/{pull_number}/files"
+        async for response in self._paginated_request(
+            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+        ):
+            files = [PullRequestFile.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[PullRequestFile]].model_validate(
+                {"data": files, "headers": dict(response.headers)}
+            )
 
     async def list_pull_requests(
         self,
