@@ -1,0 +1,1 @@
+Add prepared statement statistics from PgBouncer 1.21+ (SHOW CLIENTS/SERVERS) and 1.24+ (SHOW STATS).

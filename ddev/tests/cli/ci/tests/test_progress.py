@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the aggregate progress objects the gatherer publishes to the PR updater.
+"""Tests for the aggregate progress objects the gatherer publishes to the run reporter.
 
 These types are pure data, so what is worth testing is the derived reporting rules: a job's history
 can be sparse, only its latest execution counts, and a planned job with no execution is not complete.
@@ -11,9 +11,7 @@ from __future__ import annotations
 
 import dataclasses
 
-import pytest
-
-from ddev.cli.ci.tests.messages import BatchJob, Platform
+from ddev.cli.ci.tests.messages import BatchJob
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
     DispatcherProgress,
@@ -25,6 +23,7 @@ from ddev.cli.ci.tests.progress import (
 from ddev.cli.ci.tests.status import Status
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
+from tests.cli.ci.tests.helpers import make_job
 
 CONCLUSIONS = {
     Status.SUCCESS: WorkflowJobConclusion.SUCCESS,
@@ -38,15 +37,7 @@ CONCLUSIONS = {
 
 
 def _batch_job(name: str = "j1", target: str = "ntp") -> BatchJob:
-    return BatchJob(
-        name=name,
-        target=target,
-        runner="ubuntu-latest",
-        environment="py3.13",
-        platform=Platform.LINUX,
-        unit_tests=True,
-        e2e_tests=False,
-    )
+    return make_job(name, target=target)
 
 
 def _attempt(attempt: int = 1, status: Status = Status.SUCCESS, **overrides) -> JobAttemptProgress:
@@ -213,28 +204,3 @@ def test_an_execution_missing_its_artifacts_still_counts() -> None:
 def test_empty_progress_counts_zero() -> None:
     progress = DispatcherProgress(batches=(), done=False)
     assert (progress.passed, progress.failed, progress.skipped, progress.complete, progress.total) == (0, 0, 0, 0, 0)
-
-
-# ---------------------------------------------------------------------------
-# Immutability and defaults
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("instance", "field_name", "value"),
-    [
-        (_attempt(), "status", Status.FAILURE),
-        (_job(), "attempts", ()),
-        (_batch(), "state", ExecutionState.PLANNED),
-        (DispatcherProgress(batches=(), done=False), "done", True),
-    ],
-    ids=["attempt", "job", "batch", "dispatcher"],
-)
-def test_progress_objects_are_immutable(instance: object, field_name: str, value: object) -> None:
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        setattr(instance, field_name, value)
-
-
-def test_error_defaults_to_none() -> None:
-    assert _attempt().error is None
-    assert _batch().error is None

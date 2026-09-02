@@ -11,14 +11,19 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ddev.cli.release.port_commit_workflow import (
+    BackportResult,
+    BackportStatus,
     CherryPickStep,
     CommitStep,
     CreatePullRequestStep,
+    PortOptions,
     PortStep,
     PortStepError,
     PreserveGeneratedFilesStep,
     SetupWorktreeStep,
     TeardownWorktreeStep,
+    _build_backport_failure_comment,
+    _build_retry_command,
     build_pr_body,
     derive_backport_bases,
     is_reset_to_target,
@@ -464,7 +469,7 @@ def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_g
     pr_call = fake_async_github.last_call('create_pull_request')
     assert pr_call.kwargs['owner'] == 'DataDog'
     assert pr_call.kwargs['repo'] == 'integrations-core'
-    assert pr_call.kwargs['title'] == '[Backport] Fix bug'
+    assert pr_call.kwargs['title'] == '[Backport master] Fix bug'
     assert pr_call.kwargs['head'] == 'alice/port-1234567890-to-master'
     assert pr_call.kwargs['base'] == 'master'
     assert pr_call.kwargs['draft'] is False
@@ -792,7 +797,7 @@ def test_command_fetches_commit_when_not_local(
         'create_pull_request',
         owner='DataDog',
         repo='integrations-core',
-        title='[Backport] Fix bug',
+        title='[Backport master] Fix bug',
         head=f'alice/port-{commit_sha[:10]}-to-master',
         base='master',
         body=mocker.ANY,
@@ -1086,6 +1091,8 @@ def test_command_from_pr_ports_every_backport_label(
     assert bases == ['7.62.x', '7.61.x']
     heads = [c.kwargs['head'] for c in fake_async_github.calls_to('create_pull_request')]
     assert heads == ['alice/port-1234567890-to-7.62.x', 'alice/port-1234567890-to-7.61.x']
+    titles = [c.kwargs['title'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert titles == ['[Backport 7.62.x] Fix bug', '[Backport 7.61.x] Fix bug']
 
 
 def test_command_from_pr_explicit_target_restricts_to_one_base(
@@ -1155,6 +1162,157 @@ def test_command_from_pr_aggregates_failures_and_continues(
     assert 'One or more backports failed' in result.output
     bases = [c.kwargs['base'] for c in fake_async_github.calls_to('create_pull_request')]
     assert bases == ['7.62.x', '7.61.x']
+
+
+def test_command_from_pr_comments_on_source_pr_when_a_base_fails(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A failed base posts a comment on the merged PR so the failure is visible off the workflow run."""
+    import httpx
+
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500)),
+        base='7.62.x',
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev(
+        'release', 'port-commit', '--from-pr', '23703', '--branch-prefix', 'backport', '--pr-labels', 'backport,bot'
+    )
+
+    assert result.exit_code == 1, result.output
+    comment_calls = fake_async_github.calls_to('create_issue_comment')
+    assert len(comment_calls) == 1
+    comment_call = comment_calls[0]
+    assert comment_call.kwargs['issue_number'] == 23703
+    body = comment_call.kwargs['body']
+    assert '7.62.x' in body
+    # The retry command echoes the flags this run used, so a manual retry reproduces the same
+    # backport branch/labels rather than the CLI defaults.
+    assert (
+        'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+        '--branch-prefix backport --pr-labels backport,bot'
+    ) in body
+    # Only the failed base is named; the base that ported cleanly is not mentioned.
+    assert '7.61.x' not in body
+
+
+def test_command_from_pr_does_not_comment_when_all_bases_succeed(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """The happy path leaves no comment on the source PR."""
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 0, result.output
+    fake_async_github.assert_not_called('create_issue_comment')
+
+
+def _port_options(**overrides) -> PortOptions:
+    """PortOptions with test defaults (backport prefix/labels, no flags); override per test."""
+    return PortOptions(
+        **{
+            'branch_prefix': 'backport',
+            'branch_suffix': None,
+            'pr_labels': 'backport,bot',
+            'no_pr': False,
+            'draft': False,
+            'verify': False,
+            'dry_run': False,
+            **overrides,
+        }
+    )
+
+
+def test_build_backport_failure_comment_formats_body() -> None:
+    """The comment builder is pure, so its Markdown can be asserted without the CLI or a GitHub client."""
+    failures = [
+        BackportResult(
+            base='7.62.x', status=BackportStatus.FAILED, detail='conflict in foo/a.py\nconflict in bar/b.py'
+        ),
+        BackportResult(base='7.61.x', status=BackportStatus.FAILED, detail=None),
+    ]
+
+    body = _build_backport_failure_comment(23703, failures, _port_options())
+
+    assert body.startswith('⚠️ Automatic backport of this PR failed for 2 target branch(es):')
+    # Each failed base gets a retry command echoing the run's own flags.
+    assert (
+        '- `7.62.x` — retry manually with `ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+        '--branch-prefix backport --pr-labels backport,bot`.'
+    ) in body
+    assert '--target-branch 7.61.x' in body
+    # Multi-line detail is fenced; a base without detail adds no fence of its own.
+    assert '  ```\n  conflict in foo/a.py\n  conflict in bar/b.py\n  ```' in body
+
+
+@pytest.mark.parametrize(
+    'overrides, base, present, absent',
+    [
+        pytest.param(
+            {'branch_suffix': 'to-7.62.x', 'no_pr': True, 'draft': True, 'verify': True, 'dry_run': True},
+            '7.62.x',
+            'ddev release port-commit --from-pr 23703 --target-branch 7.62.x '
+            '--branch-prefix backport --pr-labels backport,bot --branch-suffix to-7.62.x --no-pr --draft --verify',
+            '--dry-run',  # deliberately not echoed — a retry is meant to actually run
+            id='echoes-all-active-options',
+        ),
+        pytest.param(
+            {},
+            '7.62.x; rm -rf /',
+            "'7.62.x; rm -rf /'",  # shlex.join wraps the hostile token so a paste can't inject
+            '--target-branch 7.62.x; rm -rf /',
+            id='shell-quotes-hostile-base',
+        ),
+    ],
+)
+def test_build_retry_command(overrides, base, present, absent) -> None:
+    """The retry hint echoes every active option and shell-quotes user-controlled values."""
+    command = _build_retry_command(23703, base, _port_options(**overrides))
+
+    assert present in command
+    assert absent not in command
+
+
+def test_command_from_pr_comment_failure_does_not_mask_backport_result(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A failure posting the comment is warned, not raised — the backport result still stands."""
+    import httpx
+
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500)),
+        base='7.62.x',
+    )
+    fake_async_github.mock_response(
+        'create_issue_comment',
+        httpx.HTTPStatusError('nope', request=httpx.Request('POST', 'https://x'), response=httpx.Response(403)),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not post backport-failure comment' in result.output
+    assert 'One or more backports failed' in result.output
 
 
 def test_command_from_pr_summary_reports_every_status(

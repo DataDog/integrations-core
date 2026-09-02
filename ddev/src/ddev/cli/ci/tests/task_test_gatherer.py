@@ -45,6 +45,9 @@ if TYPE_CHECKING:
 # workflow-job conclusion, and a job with no correlated workflow job is a runner bug and raises.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
+# Every later update borrows the id of the ``BatchFinished`` that caused it. Revision ``0`` has no
+# cause, so it carries its own.
+INITIAL_UPDATE_MESSAGE_ID = "dispatcher-initial"
 
 
 class TaskTestGatherer(SyncProcessor[BatchFinished]):
@@ -79,13 +82,32 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             if not self._accepts(message.batch_id, log_extra):
                 return
 
-        gathered = [self._gather_job(batch_job_result, message) for batch_job_result in message.batch_jobs]
+        gathered: list[tuple[JobResult, JobAttemptProgress]] = []
+        for batch_job_result in message.batch_jobs:
+            # Checked per job because a repository-wide batch has hundreds, and this runs in a thread
+            # the bus cannot interrupt. Abandoned rather than partly registered: the batch stays
+            # planned, so the run reports what it is, unfinished.
+            if self.stopping:
+                self._logger.warning(
+                    "Gathering abandoned after %s of %s jobs: the bus is shutting down",
+                    len(gathered),
+                    len(message.batch_jobs),
+                    extra=log_extra,
+                )
+                return
+            gathered.append(self._gather_job(batch_job_result, message))
+
         results = [result for result, _ in gathered]
         status = self._build_workflow_status(message, results)
 
         # Register, bump the revision, and emit under one lock, so two batches finishing at once
         # cannot build a comment from half-updated state.
         with self._lock:
+            # The per-job check cannot see a flip during the last job or while the status was built,
+            # and this block is the publish gate: registering now would contradict a cancelled run.
+            if self.stopping:
+                self._logger.warning("Batch gathered but left unregistered: the bus is shutting down", extra=log_extra)
+                return
             # Re-checked: another thread may have gathered this batch while this one parsed.
             if not self._accepts(message.batch_id, log_extra):
                 return
@@ -96,7 +118,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             self._progress_by_batch[message.batch_id] = self._finished_batch_progress(planned, message, gathered)
             self._revision += 1
             revision = self._revision
-            done = all(batch.state is ExecutionState.FINISHED for batch in self._progress_by_batch.values())
+            done = self._done()
             self.submit_message(self.build_update_message(message.id, revision, done))
 
         self._logger.info(
@@ -117,14 +139,24 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             return False
         return True
 
-    def build_initial_update(self, message_id: str) -> UpdatePRComment:
+    @property
+    def progress(self) -> DispatcherProgress:
+        """The current aggregate snapshot, for a caller outside the message flow."""
+        with self._lock:
+            return DispatcherProgress(batches=tuple(self._progress_by_batch.values()), done=self._done())
+
+    def _done(self) -> bool:
+        """Whether every batch is terminal. Hold ``self._lock``."""
+        return all(batch.state is ExecutionState.FINISHED for batch in self._progress_by_batch.values())
+
+    def build_initial_update(self) -> UpdatePRComment:
         """Revision ``0``: the complete plan, before any batch has been dispatched.
 
         Returned rather than submitted: a processor can only submit once the bus has attached its
         queue, so the dispatcher entry point publishes this when it starts the bus.
         """
         with self._lock:
-            return self.build_update_message(message_id, revision=0, done=False)
+            return self.build_update_message(INITIAL_UPDATE_MESSAGE_ID, revision=0, done=False)
 
     def build_update_message(self, message_id: str, revision: int, done: bool) -> UpdatePRComment:
         """Build an ``UpdatePRComment`` for *revision*. Hold ``self._lock`` when state is live."""
@@ -223,7 +255,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         """Copy coverage and JUnit files into the output tree, prefixed by the job's
         target/environment/platform — the same fields that make ``BatchJob.artifact_name`` unique.
         """
-        prefix = f"{batch_job.target}-{batch_job.environment}-{batch_job.platform}"
+        prefix = batch_job.artifact_name()
 
         coverage_dir = self._output_base_path / "coverage"
         for index, coverage_file in enumerate(sorted(job_artifacts_path.rglob(COVERAGE_GLOB))):
@@ -234,7 +266,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         for junit_file in sorted(job_artifacts_path.rglob(JUNIT_GLOB)):
             self._copy(junit_file, test_results_dir / f"{prefix}-{junit_file.stem}.xml")
 
-    def _copy(self, source: Path, destination: Path) -> None:
+    def _copy(self, source: Path, destination: Path):
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         self._logger.debug("Organized artifact %s -> %s", source, destination)

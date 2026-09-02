@@ -21,7 +21,7 @@ class HookName(StrEnum):
 
 class ProcessorQueueError(Exception):
     """
-    Exception raised when a processor queue is not initialized.
+    Exception raised when a processor has not been registered in an event bus.
     """
 
     pass

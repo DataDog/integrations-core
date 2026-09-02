@@ -6,8 +6,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import threading
 import time
 from collections.abc import Generator
+from concurrent.futures import Executor, ThreadPoolExecutor
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
@@ -149,12 +151,14 @@ class MockOrchestrator(EventBusOrchestrator):
         max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         fail_fast: bool = False,
+        executor: Executor | None = None,
     ):
         super().__init__(
             logger=logger,
             max_timeout=max_timeout,
             grace_period=grace_period,
             fail_fast=fail_fast,
+            executor=executor,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -744,6 +748,211 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
     assert secretary.delivered_memos[0].id == "async_memo"
 
 
+class AsyncDelegator(AsyncProcessor[Memo]):
+    """Submits a follow-up from the loop thread."""
+
+    async def process_message(self, message: Memo):
+        self.submit_message(Announcement(id="delegated", announcement_type="Delegated"))
+
+
+class SyncDelegator(SyncProcessor[Memo]):
+    """Submits a follow-up from an executor thread."""
+
+    def process_message(self, message: Memo):
+        self.submit_message(Announcement(id="delegated", announcement_type="Delegated"))
+
+
+def test_a_worker_thread_submission_is_delivered(analyst: Analyst):
+    """A `SyncProcessor` submits from an executor thread, where `asyncio.Queue` can lose the put.
+
+    The real queue loses only the unlucky ones; this one loses every off-loop put, so delivery fails
+    deterministically rather than by winning a race.
+    """
+
+    class LoseOffLoopPuts(asyncio.Queue):
+        """Drops a put made anywhere but the loop thread, the worst case of the real race."""
+
+        def __init__(self, loop_thread: int):
+            super().__init__()
+            self._loop_thread = loop_thread
+
+        def put_nowait(self, item):
+            if threading.get_ident() != self._loop_thread:
+                return
+            super().put_nowait(item)
+
+    logger = logging.getLogger("test_thread_safe_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0.1)
+    # `asyncio.run` runs the loop on this thread, so this is the id the queue lets a put through on.
+    orchestrator._queue = LoseOffLoopPuts(threading.get_ident())
+    orchestrator.register_processor(SyncDelegator("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    orchestrator.run()
+
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+
+
+@pytest.mark.parametrize("delegator_class", [AsyncDelegator, SyncDelegator], ids=["async", "sync"])
+def test_a_processor_submission_survives_a_zero_grace_period(
+    analyst: Analyst, delegator_class: type[AsyncDelegator | SyncDelegator]
+):
+    """A follow-up is queued before the bus can decide it has nothing left to do.
+
+    Every put is now handed to the loop thread, so it happens after `submit_message` returns, and a
+    zero grace period stops the bus the moment the queue looks empty. Both kinds of processor are
+    covered because the callback that queues the message precedes the task completion that wakes the
+    bus by a different route for each.
+    """
+    logger = logging.getLogger("test_zero_grace_period")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0)
+    orchestrator.register_processor(delegator_class("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    orchestrator.run()
+
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+
+
+def test_an_on_initialize_submission_survives_a_zero_grace_period(secretary: Secretary):
+    """The bus reads what `on_initialize` submitted, with no grace period to fall back on.
+
+    Nothing awaits between the hook and the bus's first look at the queue, so a put deferred to a loop
+    callback would not have happened yet, and a zero grace period stops instead of waiting for it.
+    """
+    logger = logging.getLogger("test_initialize_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0)
+    orchestrator.register_processor(secretary, [Memo])
+
+    original_on_initialize = orchestrator.on_initialize
+
+    async def on_initialize_submitting():
+        await original_on_initialize()
+        orchestrator.submit_message(Memo("from_initialize"))
+
+    orchestrator.on_initialize = on_initialize_submitting  # type: ignore[method-assign]
+
+    orchestrator.run()
+
+    assert [message.id for message in secretary.delivered_memos] == ["from_initialize"]
+
+
+class SlowGatherer(SyncProcessor[Memo]):
+    """Outlives the bus, checking between units of work whether it should stop."""
+
+    def __init__(self, name: str, units: int = 40):
+        super().__init__(name)
+        self.units = units
+        self.units_done = 0
+        self.saw_stopping = False
+
+    def process_message(self, message: Memo):
+        for _ in range(self.units):
+            if self.stopping:
+                self.saw_stopping = True
+                return
+            time.sleep(0.05)
+            self.units_done += 1
+
+
+class UncooperativeGatherer(SyncProcessor[Memo]):
+    """Runs to completion whatever the bus is doing, as work that cannot be interrupted does."""
+
+    def __init__(self, name: str, units: int = 30):
+        super().__init__(name)
+        self.units = units
+        self.units_done = 0
+
+    def process_message(self, message: Memo):
+        for _ in range(self.units):
+            time.sleep(0.05)
+            self.units_done += 1
+
+
+@pytest.mark.parametrize("lend_executor", [False, True], ids=["own_pool", "borrowed_pool"])
+def test_a_sync_processor_outliving_the_timeout_is_waited_for(lend_executor: bool):
+    """`on_finalize` must not report while a processor is still mutating what it reports.
+
+    Cancelling the task cannot interrupt a thread, so without waiting the hook publishes a partial
+    snapshot and the processor finishes afterwards, once the run has already said what it found.
+    A pool lent by the caller runs the same work, so it needs the same wait.
+    """
+    gatherer = UncooperativeGatherer("gatherer", units=30)
+    observed: dict[str, int] = {}
+
+    class Bus(MockOrchestrator):
+        async def on_finalize(self, exception: Exception | None):
+            await super().on_finalize(exception)
+            observed["units_done"] = gatherer.units_done
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = Bus(
+            logging.getLogger("test_drain"),
+            max_timeout=0.5,
+            grace_period=0.1,
+            executor=lent if lend_executor else None,
+        )
+        orchestrator.register_processor(gatherer, [Memo])
+        orchestrator.submit_message(Memo("gather_me"))
+
+        orchestrator.run()
+
+    assert observed["units_done"] == gatherer.units
+
+
+def test_a_lent_executor_outlives_the_run_that_borrowed_it():
+    """The caller may reuse the pool it lent, so the bus must not retire what it does not own.
+
+    Rules out satisfying the wait above by shutting the pool down regardless of ownership.
+    """
+    gatherer = UncooperativeGatherer("gatherer", units=5)
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = MockOrchestrator(
+            logging.getLogger("test_lent_pool"), max_timeout=0.5, grace_period=0.1, executor=lent
+        )
+        orchestrator.register_processor(gatherer, [Memo])
+        orchestrator.submit_message(Memo("gather_me"))
+
+        orchestrator.run()
+
+        assert lent.submit(str, "still usable").result() == "still usable"
+
+
+def test_a_sync_processor_can_abandon_work_once_the_bus_stops():
+    """The stop flag is what makes a timeout bound a sync processor at all.
+
+    Without it the processor runs all its units however long the bus has been gone, which is the
+    difference between a run that overshoots by one unit of work and one that overshoots by a batch.
+    """
+    gatherer = SlowGatherer("gatherer", units=200)
+    orchestrator = MockOrchestrator(logging.getLogger("test_stopping"), max_timeout=0.3, grace_period=0.1)
+    orchestrator.register_processor(gatherer, [Memo])
+    orchestrator.submit_message(Memo("gather_me"))
+
+    orchestrator.run()
+
+    assert gatherer.saw_stopping
+    assert gatherer.units_done < gatherer.units
+
+
+def test_a_caller_provided_executor_outlives_the_bus():
+    """A caller that supplies an executor may reuse it, so the bus must not retire it."""
+    executor = ThreadPoolExecutor(max_workers=1)
+    orchestrator = MockOrchestrator(logging.getLogger("test_borrowed"), executor=executor, grace_period=0.1)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+    orchestrator.submit_message(Memo("memo"))
+
+    orchestrator.run()
+
+    assert executor.submit(lambda: "still usable").result() == "still usable"
+    executor.shutdown(wait=True)
+
+
 def test_processor_submit_without_bus():
     processor = Secretary("orphan")
     with pytest.raises(ProcessorQueueError, match="This processor has not been added"):
@@ -970,3 +1179,195 @@ def test_should_process_message_is_independent_per_processor(bare_orchestrator: 
     assert len(secretary.delivered_memos) == 2
     assert len(urgent_proc.processed) == 1
     assert urgent_proc.processed[0].id == "memo2"
+
+
+def brief_work(message: BaseMessage) -> None:
+    time.sleep(0.001)
+
+
+async def test_pending_sync_work_can_be_read_while_workers_finish_underneath_it():
+    """Each future's done callback discards on the worker thread that ran it, racing this snapshot.
+
+    Read straight off the live set, CPython raises `Set changed size during iteration`. That lands in
+    `_drain_executor`, which runs before the `try` around `on_finalize`, so the hook and every
+    error-policy path with it would be skipped.
+    """
+    with ThreadPoolExecutor(max_workers=16) as lent:
+        orchestrator = MockOrchestrator(logging.getLogger("test_sync_work"), executor=lent)
+        running = [
+            asyncio.create_task(orchestrator._run_in_worker(brief_work, Memo(id=str(index)))) for index in range(200)
+        ]
+        await asyncio.sleep(0)
+
+        for _ in range(500):
+            orchestrator._pending_sync_work()
+
+        await asyncio.gather(*running)
+
+    assert orchestrator._pending_sync_work() == set()
+
+
+class StopRequester(AsyncProcessor[Memo]):
+    """Asks the bus to stop from inside a processor, then submits as the runner's `finally` does."""
+
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.processed: list[Memo] = []
+
+    async def process_message(self, message: Memo):
+        self.processed.append(message)
+        assert self.bus is not None
+        self.bus.request_stop()
+        self.submit_message(Memo("after_stop", subject="late"))
+
+
+class StopWatcher(AsyncProcessor[TaskAssignment | Announcement]):
+    def __init__(self, name: str, *, fail: bool = False):
+        super().__init__(name)
+        self.stop_notifications = 0
+        self._fail = fail
+
+    async def process_message(self, message: TaskAssignment | Announcement):
+        pass
+
+    def on_stop_requested(self):
+        self.stop_notifications += 1
+        if self._fail:
+            raise RuntimeError("this processor cannot wind down")
+
+
+@pytest.mark.parametrize(
+    "registrations",
+    [
+        pytest.param([[TaskAssignment, Announcement]], id="one-call-two-types"),
+        pytest.param([[TaskAssignment], [Announcement]], id="two-calls"),
+    ],
+)
+def test_a_processor_is_told_once_however_often_it_subscribed(registrations: list[list[type[BaseMessage]]]):
+    """Subscriptions are per message type, so notifying per subscription would repeat the hook."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_once"), max_timeout=30, grace_period=1)
+    for message_types in registrations:
+        orchestrator.register_processor(watcher, message_types)
+
+    orchestrator.request_stop()
+
+    assert watcher.stop_notifications == 1
+
+
+def test_asking_to_stop_again_notifies_nobody_and_does_not_block():
+    """The claim is a latch that is never released, so a second call must test it rather than wait."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_repeat"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(watcher, [TaskAssignment])
+
+    orchestrator.request_stop()
+    orchestrator.request_stop()
+
+    assert watcher.stop_notifications == 1
+
+
+def test_a_stop_is_not_derailed_by_a_processor_that_fails_to_wind_down():
+    """A signal handler is a valid caller, and there an escaping exception loses the stop itself."""
+    failing = StopWatcher("failing", fail=True)
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_failure"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(failing, [TaskAssignment])
+    orchestrator.register_processor(watcher, [Announcement])
+
+    orchestrator.request_stop()
+
+    assert orchestrator.stopping
+    assert watcher.stop_notifications == 1
+
+
+def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
+    """A caller under a deadline it does not control cannot afford the grace period.
+
+    The dispatcher's default grace is 30s against the ~10s a cancelled CI job gets, so a stop that
+    lands while the bus sits idle has to interrupt that wait rather than be seen once it expires.
+    """
+    grace_period = 10.0
+    orchestrator = MockOrchestrator(logging.getLogger("test_request_stop"), max_timeout=60, grace_period=grace_period)
+    orchestrator.register_processor(secretary, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+    # From a thread, and only once the bus is already idle inside the grace wait.
+    threading.Timer(0.3, orchestrator.request_stop).start()
+
+    start = time.perf_counter()
+    with caplog.at_level(logging.INFO):
+        orchestrator.run()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < grace_period / 2
+    assert "finalize" in orchestrator.events
+    # Said at the exit, or this reads in the logs like the grace period expiring on its own.
+    assert "Stopping on request while idle." in caplog.text
+
+
+def test_work_submitted_after_a_stop_request_is_reported_rather_than_lost(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
+    """A stopping bus exits before draining its queue, so a late put is never read by anyone.
+
+    Processors submit follow-up work from `finally` blocks, and without refusing it at the door that
+    work disappears with nothing in the log to say the run dropped it.
+    """
+    requester = StopRequester("requester")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_guard"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(requester, [Memo])
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("memo1"))
+    with caplog.at_level(logging.WARNING):
+        orchestrator.run()
+
+    assert [message.id for message in requester.processed] == ["memo1"]
+    assert "Dropped Memo(after_stop)" in caplog.text
+
+
+def test_a_processor_is_not_dispatched_to_after_a_stop_request(secretary: Secretary):
+    """Both processors' tasks are created together, so the second is scheduled after the stop.
+
+    Refusing centrally is what makes that hold for every processor, including ones that never learn
+    to check the flag themselves.
+    """
+    requester = StopRequester("requester")
+    orchestrator = MockOrchestrator(logging.getLogger("test_dispatch_guard"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(requester, [Memo])
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("memo1"))
+    orchestrator.run()
+
+    assert [message.id for message in requester.processed] == ["memo1"]
+    assert secretary.delivered_memos == []
+
+
+def test_a_hook_waiting_on_io_does_not_hold_up_a_requested_stop(secretary: Secretary):
+    """The loop awaits this hook directly, so one waiting on I/O holds shutdown for as long as it takes.
+
+    A caller working to a deadline it does not control would never reach `finalize`, which is where the
+    run reports and cleans up.
+    """
+
+    class Bus(MockOrchestrator):
+        async def on_message_received(self, message: BaseMessage):
+            await super().on_message_received(message)
+            await asyncio.sleep(30)
+
+    orchestrator = Bus(logging.getLogger("test_hook_stop"), max_timeout=60, grace_period=1)
+    orchestrator.register_processor(secretary, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+    threading.Timer(0.3, orchestrator.request_stop).start()
+
+    start = time.perf_counter()
+    orchestrator.run()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 5
+    assert "finalize" in orchestrator.events
+    # Abandoned before dispatch, so the message it was about never reaches a processor.
+    assert secretary.delivered_memos == []
