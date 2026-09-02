@@ -543,6 +543,8 @@ def test_send_diff_metrics_to_dd_metric_shape():
     assert "name:dep1" in metrics[0]["tags"]
     assert "compression:uncompressed" in metrics[0]["tags"]
     assert "pr_number:123" in metrics[0]["tags"]
+    assert "name:path1.py" in metrics[1]["tags"]
+    assert "name_type:Integration(path1.py)" in metrics[1]["tags"]
 
 
 @pytest.mark.parametrize(

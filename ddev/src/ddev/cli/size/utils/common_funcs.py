@@ -900,10 +900,11 @@ def build_module_tags(
     """
     Builds the tag list shared by the per-module size and size_diff metrics.
     """
+    name = re.sub(r" \((?:NEW|DELETED)\)$", "", item["Name"])
     return [
-        f"name:{item['Name']}",
+        f"name:{name}",
         f"type:{item['Type']}",
-        f"name_type:{item['Type']}({item['Name']})",
+        f"name_type:{item['Type']}({name})",
         f"python_version:{item['Python_Version']}",
         f"module_version:{item['Version']}",
         f"platform:{item['Platform']}",
