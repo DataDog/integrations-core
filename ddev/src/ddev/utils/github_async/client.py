@@ -70,8 +70,7 @@ COMMENT_BODY_LIMIT = 65_536
 RUN_ALREADY_TERMINAL_STATUS = 409
 # The caller is a run being cancelled, so the whole ladder has to fit in the seconds it has left.
 CANCEL_RETRY_TIMEOUT = 5.0
-# Shutdown mode caps each request well inside the few seconds a killed process has left; the point is
-# to fail and move on to the next cleanup call, not to see this one through.
+# Inside the few seconds a killed process has left, so a stalled call fails and the next one still runs.
 SHUTDOWN_REQUEST_TIMEOUT = 3.0
 
 # How an expired signed URL presents from the artifact storage host.
@@ -287,20 +286,12 @@ class AsyncGitHubClient:
     # ------------------------------------------------------------------
 
     def _effective_timeout(self, timeout: float | None) -> float:
-        """The per-request timeout to use, capped once shutting down.
-
-        An explicit timeout is still capped: a caller that asked for longer than the process has left
-        would spend the whole window on one request.
-        """
+        """The per-request timeout, capped once shutting down even when the caller asked for longer."""
         requested = timeout if timeout is not None else self._default_timeout
         return min(requested, SHUTDOWN_REQUEST_TIMEOUT) if self._shutting_down else requested
 
     def _effective_retry(self, policy: RetryPolicy) -> RetryPolicy:
-        """`policy`, collapsed to a single attempt once shutting down.
-
-        A ladder spends the remaining time re-asking a question that will not be answered before the
-        process dies, and every attempt it schedules is one the next cleanup call does not get.
-        """
+        """`policy`, collapsed to a single attempt once shutting down."""
         return policy.replace(attempts=1) if self._shutting_down else policy
 
     def _retry_cause(self, policy: RetryPolicy) -> RetryCause:
@@ -395,18 +386,9 @@ class AsyncGitHubClient:
         **kwargs: Any,
     ) -> httpx.Response:
         effective_timeout = self._effective_timeout(timeout)
-        # Rate-limit-aware retry lives here, not in _execute_request: re-entering the limiter IS the
-        # backoff. The failed response's headers were observed inside _execute_request before the
-        # exception propagated, so the governor already holds the pause this very 403 armed;
-        # re-acquiring waits it out exactly (retry-after plus buffer for secondary limits, until
-        # reset for an exhausted window). Hence no sleeps or backoff math. A loop inside
-        # _execute_request would be wrong: it would retry while still holding the acquisition,
-        # without re-consulting the governor. Concurrent retries also serialize behind the same
-        # shared pause instead of stampeding, which is what GitHub's secondary-limit guidance asks
-        # for. RateLimitWaitAbandoned raised while (re-)acquiring propagates untouched from here: it
-        # is the caller-configured killswitch, and counting it as an attempt would defeat it.
-        # Re-acquiring the limiter is this layer's backoff, so its retries are a wait like any other
-        # and shutting down means not taking them.
+        # Re-acquiring the limiter is the backoff: the governor already holds the pause this 403 armed,
+        # observed in _execute_request before it raised. Never add a sleep here. RateLimitWaitAbandoned
+        # from the acquisition is the caller's killswitch, so it must not count as an attempt.
         rate_limit_retries = 0 if self._shutting_down else self._max_rate_limit_retries
         for attempt in range(rate_limit_retries + 1):
             async with self._rate_limiter:
@@ -415,11 +397,8 @@ class AsyncGitHubClient:
                         method, endpoint, effective_timeout, expect_redirect=expect_redirect, **kwargs
                     )
                 except httpx.HTTPStatusError as exc:
-                    # A rate-limit 403/429 is safe to retry for every endpoint, including
-                    # non-idempotent POSTs, precisely because GitHub rejected it without performing
-                    # the action. (Transport errors are never retried, and are not caught here: after
-                    # one we cannot know whether the action executed.) Give up on the last attempt or
-                    # on a non-rate-limit status, which waiting cannot fix.
+                    # Safe to replay even for non-idempotent endpoints: GitHub rejected the request
+                    # without performing the action.
                     is_rate_limit_response = self._is_rate_limit_response(exc.response)
                     if is_rate_limit_response:
                         if attempt == rate_limit_retries:
@@ -605,14 +584,12 @@ class AsyncGitHubClient:
     def enter_shutdown_mode(self, *, rate_limits: RelaxedRateLimits | None = None) -> None:
         """Size every subsequent request for a process that is about to be killed.
 
-        Caps each request at :data:`SHUTDOWN_REQUEST_TIMEOUT` and takes a single attempt at it, so
-        cleanup calls fail fast and the next one still gets a turn. Idempotent, because the signals
-        that lead here arrive more than once.
+        Caps each request at :data:`SHUTDOWN_REQUEST_TIMEOUT` and takes a single attempt at it.
+        Idempotent, because the signals that lead here arrive more than once.
 
-        Rate limiting is left alone unless `rate_limits` says otherwise: pacing protects a budget
-        shared with everything else using the token, and abandoning it is a decision only the caller
-        can make. Note that this means an acquisition can still block longer than the request itself;
-        pass `rate_limits` to bound that too. See :meth:`InstrumentedAsyncLimiter.relax`.
+        Pacing is left alone unless `rate_limits` says otherwise, since the budget it protects is
+        shared with everything else using the token. Without it an acquisition can still outlast the
+        request. See :meth:`InstrumentedAsyncLimiter.relax`.
         """
         self._shutting_down = True
         if rate_limits is not None:

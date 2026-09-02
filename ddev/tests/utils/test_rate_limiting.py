@@ -716,11 +716,7 @@ def test_instrumented_limiter_observe_without_governor_does_not_raise():
     ],
 )
 def test_relaxed_limits_that_would_block_forever_are_rejected(limits: dict[str, float], message: str) -> None:
-    """Relaxing exists to stop blocking, so values that block instead defeat the point of asking.
-
-    A rate of zero hands out no slots at all, which is the opposite of what a caller relaxing pacing
-    is asking for, and it would surface as a hang rather than an error.
-    """
+    """A rate of zero hands out no slots, so it would surface as a hang rather than an error."""
     with pytest.raises(ValueError, match=message):
         RelaxedRateLimits(**limits)
 

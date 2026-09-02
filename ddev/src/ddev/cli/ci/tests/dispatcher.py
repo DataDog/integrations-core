@@ -38,8 +38,7 @@ logger = logging.getLogger(__name__)
 CANCELLATION_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 # A call that cannot go out within this is one the process will not live to see answered.
-# A cancelled run abandons its own pacing: the budget it was rationing outlives the process, and the
-# few seconds left are better spent closing check runs than waiting for a slot.
+# A cancelled run abandons its pacing: the budget it was rationing outlives the process.
 CANCELLED_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
 
 
@@ -182,10 +181,8 @@ class Dispatcher(EventBusOrchestrator):
 
         self._cancelled = True
         self._logger.warning("Received %s: cancelling the run", received.name)
-        # Stop first: this runs as a signal-handler callback, so anything raised here goes to the
-        # loop's exception handler, and the second signal would find `_cancelled` already set and
-        # return without retrying. Shutdown mode still lands in time, because the stop only sets an
-        # event the loop acts on later, and it is what makes each batch close its check run.
+        # Stop first: anything raised here goes to the loop's exception handler, and the second signal
+        # returns early on `_cancelled`. The stop is what makes each batch close its check run.
         self.request_stop()
         self._client.enter_shutdown_mode(rate_limits=CANCELLED_RATE_LIMITS)
 

@@ -305,8 +305,8 @@ class BudgetGovernor:
 class RelaxedRateLimits:
     """How far to relax pacing for a process that will not live long enough to spend its budget.
 
-    Both values are needed together, so they travel as one argument: a rate with no wait cap still
-    blocks on a provider pause, and a cap with no rate still waits for a slot it need not have.
+    Paired because neither works alone: a rate with no wait cap still blocks on a provider pause, and
+    a cap with no rate still waits for a slot.
     """
 
     max_wait_seconds: float

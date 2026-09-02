@@ -109,11 +109,7 @@ async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, flo
     ],
 )
 async def test_shutting_down_caps_how_long_one_request_may_take(call_kwargs: dict[str, float], expected: float) -> None:
-    """A cleanup call has to fail in time for the next one to be tried at all.
-
-    The cap applies to an explicit timeout too: a caller asking for longer than the process has left
-    would spend the whole window on one request.
-    """
+    """A cleanup call has to fail in time for the next one to be tried at all."""
     captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:

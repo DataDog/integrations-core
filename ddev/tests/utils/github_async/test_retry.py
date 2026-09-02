@@ -321,11 +321,7 @@ def test_tuning_a_policy_leaves_the_shared_default_alone() -> None:
 
 
 async def test_shutting_down_takes_one_attempt_and_gives_up() -> None:
-    """The ladder outlives the process, and every attempt it schedules is time the next call loses.
-
-    A 503 is what the widest policy would replay, so it is the failure that proves the ladder is gone
-    rather than merely unreachable.
-    """
+    """The ladder outlives the process, and a 503 is what the widest policy would otherwise replay."""
     transport, calls = recording_transport([httpx.Response(503), json_response(workflow_run_payload())])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
     client.enter_shutdown_mode()

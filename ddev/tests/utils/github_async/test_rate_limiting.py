@@ -240,10 +240,8 @@ async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatc
 
 
 async def test_shutting_down_does_not_wait_out_a_rate_limit_pause(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Re-acquiring the limiter is this layer's backoff, so its retries are a wait like any other.
-
-    Waiting out a reset spends a window the process does not have on one call, when the point of
-    shutting down is to give every remaining cleanup call a turn.
+    """Re-acquiring the limiter is this layer's backoff, so waiting out a reset spends the window on
+    one call.
     """
     clock = FakeClock()
     advance_clock_on_sleep(clock, monkeypatch)
@@ -258,8 +256,8 @@ async def test_shutting_down_does_not_wait_out_a_rate_limit_pause(monkeypatch: p
 
 
 async def test_shutting_down_leaves_pacing_alone_unless_asked() -> None:
-    """Pacing protects a budget shared with everything else using the token, so abandoning it is the
-    caller's call to make and not a side effect of shutting down.
+    """The budget is shared with everything else using the token, so abandoning it is the caller's
+    decision rather than a side effect of shutting down.
     """
     limiter = InstrumentedAsyncLimiter(
         AsyncLimiter(max_rate=1, time_period=1000), budget_governor=BudgetGovernor(), name="github"
