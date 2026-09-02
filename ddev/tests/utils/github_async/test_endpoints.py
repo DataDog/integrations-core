@@ -537,6 +537,11 @@ async def test_list_pull_request_files_success():
             [
                 pull_request_file_payload(filename="disk/tests/test_unit.py"),
                 pull_request_file_payload(filename="disk/removed.py", status="removed"),
+                pull_request_file_payload(
+                    filename="disk/renamed.py",
+                    status="renamed",
+                    previous_filename="disk/original.py",
+                ),
             ]
         )
 
@@ -546,8 +551,18 @@ async def test_list_pull_request_files_success():
     assert len(pages) == 1
     files = pages[0].data
     assert all(isinstance(changed, PullRequestFile) for changed in files)
-    assert [changed.filename for changed in files] == ["disk/tests/test_unit.py", "disk/removed.py"]
-    assert [changed.status for changed in files] == [PullRequestFileStatus.MODIFIED, PullRequestFileStatus.REMOVED]
+    assert [changed.filename for changed in files] == [
+        "disk/tests/test_unit.py",
+        "disk/removed.py",
+        "disk/renamed.py",
+    ]
+    assert [changed.status for changed in files] == [
+        PullRequestFileStatus.MODIFIED,
+        PullRequestFileStatus.REMOVED,
+        PullRequestFileStatus.RENAMED,
+    ]
+    # A rename's source path is a changed path too, so a caller that loses it misses the work.
+    assert [changed.previous_filename for changed in files] == [None, None, "disk/original.py"]
 
 
 async def test_list_pull_request_files_follows_link_header():
