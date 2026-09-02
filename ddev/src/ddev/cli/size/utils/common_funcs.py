@@ -895,13 +895,18 @@ def initialize_dd_client(app: Application, org: str | None, key: str | None) -> 
 
 
 def build_module_tags(
-    item: FileDataEntryPlatformVersion, size_type: str, message: str, tickets: list[str], prs: list[str]
+    item: FileDataEntryPlatformVersion,
+    size_type: str,
+    message: str,
+    tickets: list[str],
+    prs: list[str],
+    change_type: str | None = None,
 ) -> list[str]:
     """
     Builds the tag list shared by the per-module size and size_diff metrics.
     """
     name = re.sub(r" \((?:NEW|DELETED)\)$", "", item["Name"])
-    return [
+    tags = [
         f"name:{name}",
         f"type:{item['Type']}",
         f"name_type:{item['Type']}({name})",
@@ -915,6 +920,20 @@ def build_module_tags(
         f"pr_number:{prs[-1]}",
         f"commit_message:{message}",
     ]
+    if change_type:
+        tags.append(f"change_type:{change_type}")
+    return tags
+
+
+def diff_change_type(name: str) -> str:
+    """
+    Classifies a diff entry's Name (as produced by get_diff) into "new", "deleted", or "changed".
+    """
+    if name.endswith(" (NEW)"):
+        return "new"
+    if name.endswith(" (DELETED)"):
+        return "deleted"
+    return "changed"
 
 
 def send_diff_metrics_to_dd(
@@ -944,7 +963,9 @@ def send_diff_metrics_to_dd(
             "metric": "datadog.agent_integrations.size_diff",
             "type": "gauge",
             "points": [(timestamp, item["Size_Bytes"])],
-            "tags": build_module_tags(item, size_type, message, tickets, prs),
+            "tags": build_module_tags(
+                item, size_type, message, tickets, prs, change_type=diff_change_type(item["Name"])
+            ),
         }
         for item in modules
     ]

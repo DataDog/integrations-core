@@ -524,6 +524,15 @@ def test_send_diff_metrics_to_dd_metric_shape():
             "Platform": "linux-aarch64",
             "Python_Version": "3.12",
         },
+        {
+            "Name": "path2.py (NEW)",
+            "Version": "1.0.0",
+            "Type": "Integration",
+            "Size_Bytes": 2000,
+            "Size": "+2000 B",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
     ]
 
     with (
@@ -537,14 +546,18 @@ def test_send_diff_metrics_to_dd_metric_shape():
         send_diff_metrics_to_dd(MagicMock(), "commit2", modules, None, "fake_key", False)
 
     metrics = mock_metric_send.call_args.kwargs["metrics"]
-    assert len(metrics) == 2
+    assert len(metrics) == 3
     assert {m["metric"] for m in metrics} == {"datadog.agent_integrations.size_diff"}
-    assert [m["points"] for m in metrics] == [[(1700000000, 500)], [(1700000000, -1000)]]
+    assert [m["points"] for m in metrics] == [[(1700000000, 500)], [(1700000000, -1000)], [(1700000000, 2000)]]
     assert "name:dep1" in metrics[0]["tags"]
     assert "compression:uncompressed" in metrics[0]["tags"]
     assert "pr_number:123" in metrics[0]["tags"]
+    assert "change_type:changed" in metrics[0]["tags"]
     assert "name:path1.py" in metrics[1]["tags"]
     assert "name_type:Integration(path1.py)" in metrics[1]["tags"]
+    assert "change_type:deleted" in metrics[1]["tags"]
+    assert "name:path2.py" in metrics[2]["tags"]
+    assert "change_type:new" in metrics[2]["tags"]
 
 
 @pytest.mark.parametrize(
