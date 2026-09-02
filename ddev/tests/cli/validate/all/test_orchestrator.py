@@ -118,6 +118,23 @@ class CapturingOrchestrator(ValidationOrchestrator):
         ("ci", None, []),
     ],
 )
+def test_signals_are_left_to_the_default_handling(mock_app):
+    """A validation is a subprocess run from a pool thread, so a requested stop cannot interrupt it and
+    the command would stay alive until the subprocess timeout instead of terminating.
+    """
+    orch = ValidationOrchestrator(app=mock_app, target=None, validations=["models"])
+    installed = []
+
+    async def install_with_a_live_loop():
+        loop = asyncio.get_running_loop()
+        with patch.object(loop, "add_signal_handler", side_effect=lambda sig, *_: installed.append(sig)):
+            orch.install_signal_handlers()
+
+    asyncio.run(install_with_a_live_loop())
+
+    assert installed == []
+
+
 def test_on_initialize_message_args(mock_app, validation: str, target: str | None, expect_args: list[str]):
     orch = CapturingOrchestrator(app=mock_app, validations=[validation], target=target)
     asyncio.run(orch.on_initialize())
