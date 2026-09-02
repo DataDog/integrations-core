@@ -25,6 +25,7 @@ from .utils.common_funcs import (
     get_files,
     get_valid_platforms,
     get_valid_versions,
+    initialize_dd_client,
     plot_treemap,
     print_table,
     send_diff_metrics_to_dd,
@@ -88,6 +89,8 @@ def diff(
                     raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
         if to_dd_org and to_dd_key:
             raise click.BadParameter("Specify either --to-dd-org or --to-dd-key, not both")
+        if to_dd_org or to_dd_key:
+            initialize_dd_client(app, to_dd_org, to_dd_key)
         repo_url = app.repo.path
 
         with GitRepo(repo_url) as gitRepo:

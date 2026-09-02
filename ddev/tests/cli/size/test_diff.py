@@ -242,8 +242,17 @@ def test_diff_invalid_platform_and_version(ddev):
         assert result.exit_code != 0
 
 
-@pytest.mark.parametrize("compressed", [False, True])
-def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies, compressed):
+@pytest.mark.parametrize(
+    "flag, value, expected_org, expected_key, compressed",
+    [
+        pytest.param("--to-dd-key", "fake_key", None, "fake_key", False, id="key"),
+        pytest.param("--to-dd-key", "fake_key", None, "fake_key", True, id="key_compressed"),
+        pytest.param("--to-dd-org", "default", "default", None, False, id="org"),
+    ],
+)
+def test_diff_sends_metrics_to_dd(
+    ddev, mock_size_diff_dependencies, flag, value, expected_org, expected_key, compressed
+):
     with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
         cli_args = [
             "size",
@@ -254,8 +263,8 @@ def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies, compressed)
             "linux-aarch64",
             "--python",
             "3.12",
-            "--to-dd-key",
-            "fake_key",
+            flag,
+            value,
         ]
         if compressed:
             cli_args.append("--compressed")
@@ -265,32 +274,10 @@ def test_diff_sends_metrics_to_dd(ddev, mock_size_diff_dependencies, compressed)
     mock_send.assert_called_once()
     app, commit, modules, org, key, sent_compressed = mock_send.call_args.args
     assert commit == "commit2"
-    assert org is None
-    assert key == "fake_key"
+    assert org == expected_org
+    assert key == expected_key
     assert sent_compressed is compressed
     assert modules
-
-
-def test_diff_sends_metrics_to_dd_with_org(ddev, mock_size_diff_dependencies):
-    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
-        result = ddev(
-            "size",
-            "diff",
-            "commit1",
-            "commit2",
-            "--platform",
-            "linux-aarch64",
-            "--python",
-            "3.12",
-            "--to-dd-org",
-            "default",
-        )
-
-    assert result.exit_code == 0, result.output
-    mock_send.assert_called_once()
-    app, commit, modules, org, key, compressed = mock_send.call_args.args
-    assert org == "default"
-    assert key is None
 
 
 def test_diff_no_dd_credentials_does_not_send(ddev, mock_size_diff_dependencies):
