@@ -92,13 +92,11 @@ files:
       value:
         type: boolean
         example: False
-      fleet_configurable: false
     - name: verify
       description: Indicates if a certificate is required and if it will be validated after a connection is established.
       value:
         type: boolean
         example: True
-      fleet_configurable: false
     - name: dbm
       description: |
         Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
@@ -106,7 +104,6 @@ files:
       value:
         type: boolean
         example: false
-      fleet_configurable: false
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -133,7 +130,6 @@ files:
       value:
         type: boolean
         example: false
-      fleet_configurable: false
     - name: use_legacy_queries
       description: Enable the legacy query set for collecting metrics. Set to `false` to disable.
       value:
@@ -156,7 +152,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the samples snapshot collection interval (in seconds). Each collection involves a single query to
@@ -164,7 +159,6 @@ files:
           value:
             type: number
             example: 1
-          fleet_configurable: false
         - name: payload_row_limit
           description: |
             Set the maximum number of active sessions to include in each samples snapshot.
@@ -190,7 +184,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves a single query to
@@ -199,7 +192,6 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -235,7 +227,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query completions collection interval (in seconds).
@@ -243,7 +234,6 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the maximum number of samples to collect per hour per unique query signature.

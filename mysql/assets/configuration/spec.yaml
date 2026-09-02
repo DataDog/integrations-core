@@ -581,7 +581,6 @@ files:
                 value:
                   type: boolean
                   example: true
-                fleet_configurable: false
               - name: collection_interval
                 description: |
                   Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -604,7 +603,6 @@ files:
                 value:
                   type: boolean
                   example: false
-                fleet_configurable: false
               - name: collection_interval
                 description: |
                   Set the database schema collection interval (in seconds). Defaults to 600 seconds.
@@ -816,7 +814,6 @@ files:
                 value:
                   type: boolean
                   example: true
-                fleet_configurable: false
               - name: collection_interval
                 description: |
                   Set the activity collection interval (in seconds).
