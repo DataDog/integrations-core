@@ -1,7 +1,9 @@
 {
-  "schema_version": 1,
-  "creation_policy": {
-    "allow_external_submission": true,
-    "allow_internal_submission": true
+  "source": "kubernetes",
+  "default_interface": "kubernetes",
+  "legacy": {
+    "source_id": 173,
+    "source_type_name": "Kubernetes",
+    "v1_enabled": false
   }
 }
