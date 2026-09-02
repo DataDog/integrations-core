@@ -16,6 +16,7 @@ from concurrent.futures import Executor, ThreadPoolExecutor
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
+from types import FrameType
 
 import pytest
 from pytest_mock import MockerFixture
@@ -1299,6 +1300,28 @@ def caught_rather_than_fatal(sent: signal.Signals) -> Generator[list[signal.Sign
     previous = signal.signal(sent, lambda *_: reached_the_process.append(sent))
     try:
         yield reached_the_process
+    finally:
+        signal.signal(sent, previous)
+
+
+@requires_signals
+@pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
+def test_a_run_gives_back_the_handler_it_displaced(sent: signal.Signals):
+    """Nothing says the bus owns the process: a caller may have its own handler and outlive the run.
+
+    `remove_signal_handler` restores the interpreter default rather than what was displaced, so without
+    putting it back the caller silently loses its handler to a run that ended normally.
+    """
+
+    def caller_handler(signum: int, frame: FrameType | None) -> None: ...
+
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_restore"), max_timeout=30, grace_period=0)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+    previous = signal.signal(sent, caller_handler)
+    try:
+        orchestrator.run()
+
+        assert signal.getsignal(sent) is caller_handler
     finally:
         signal.signal(sent, previous)
 
