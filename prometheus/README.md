@@ -142,7 +142,7 @@ Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager 
     - name: datadog
       webhook_configs: 
       - send_resolved: true
-        url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
+        url: https://{{< region-param key="dd_full_site" >}}/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
     route:
       group_by: ['alertname']
       group_wait: 10s
