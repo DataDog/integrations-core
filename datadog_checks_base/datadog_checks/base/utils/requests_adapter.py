@@ -80,6 +80,7 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
     HTTPClientSSLError: _backend_compat_type(HTTPClientSSLError, requests_exceptions.SSLError),
 }
 
+_COMPAT_INVALID_HEADER_ERROR = _backend_compat_type(HTTPClientRequestError, requests_exceptions.InvalidHeader)
 _COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
 
 
@@ -111,6 +112,8 @@ def _translate_requests_exception(exc: BaseException, *, response: HTTPResponse 
         return _COMPAT_EXCEPTIONS[HTTPClientReadTimeoutError](message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError):
         return _COMPAT_EXCEPTIONS[HTTPClientConnectionError](message, request=request)
+    if isinstance(exc, requests_exceptions.InvalidHeader):
+        return _COMPAT_INVALID_HEADER_ERROR(message, request=request)
     if isinstance(exc, requests_exceptions.ContentDecodingError):
         return _COMPAT_EXCEPTIONS[HTTPClientRequestError](message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):

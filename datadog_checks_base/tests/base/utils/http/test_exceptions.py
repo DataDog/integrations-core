@@ -96,7 +96,6 @@ def test_raise_for_status_maps_to_status_error():
         pytest.param(requests.exceptions.ConnectionError('refused'), HTTPClientConnectionError, id='connection-error'),
         pytest.param(requests.exceptions.ProxyError('proxy'), HTTPClientConnectionError, id='proxy-error'),
         pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPClientRequestError, id='content-decoding'),
-        pytest.param(requests.exceptions.InvalidHeader('multiple values'), HTTPClientRequestError, id='invalid-header'),
         pytest.param(requests.exceptions.HTTPError('500'), HTTPClientStatusError, id='http-error'),
         pytest.param(requests.exceptions.RequestException('generic'), HTTPClientRequestError, id='request-exception'),
         pytest.param(RuntimeError('not-requests'), HTTPClientError, id='non-requests-fallback'),
@@ -109,12 +108,14 @@ def test_translate_maps_requests_to_agnostic(raised, expected):
     )
 
 
-def test_invalid_header_leaves_the_value_error_family():
+def test_invalid_header_keeps_the_value_error_family():
     assert isinstance(requests.exceptions.InvalidHeader('multiple values'), ValueError)
 
     translated = _translate_requests_exception(requests.exceptions.InvalidHeader('multiple values'))
 
-    assert not isinstance(translated, ValueError)
+    assert isinstance(translated, HTTPClientRequestError)
+    assert isinstance(translated, requests.exceptions.InvalidHeader)
+    assert isinstance(translated, ValueError)
 
 
 @pytest.mark.parametrize(
