@@ -31,31 +31,31 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 db = [
-    "mmh3==5.2.1",
+    "mmh3==5.3.0",
 ]
 deps = [
     "binary==1.0.2",
     "cachetools==7.1.7",
-    "cryptography==50.0.0",
-    "ddtrace==4.12.2",
+    "cryptography==50.0.1",
+    "ddtrace==4.14.0",
     "jellyfish==1.2.1",
     "lazy-loader==0.5",
     "prometheus-client==0.26.0",
-    "protobuf==7.35.1",
-    "pydantic==2.13.4",
+    "protobuf==7.36.0",
+    "pydantic==2.13.5",
     "python-dateutil==2.9.0.post0",
     "pywin32==312; sys_platform == 'win32'",
     "pyyaml==6.0.3",
     "requests-toolbelt==1.0.0",
     "requests-unixsocket2==1.0.1",
     "requests==2.34.2",
-    "simplejson==4.1.1",
+    "simplejson==4.1.2",
     "urllib3==2.7.0",
-    "wrapt==2.3.0",
+    "wrapt==2.4.0",
 ]
 http = [
     "aws-requests-auth==0.4.3",
-    "botocore==1.43.67",
+    "botocore==1.43.83",
     "oauthlib==3.3.1",
     "pyjwt==2.13.0",
     "pyopenssl==26.4.0",
@@ -65,7 +65,7 @@ http = [
     "requests-oauthlib==2.0.0",
 ]
 json = [
-    "orjson==3.11.9",
+    "orjson==3.12.0",
 ]
 kube = [
     "kubernetes==35.0.0",
