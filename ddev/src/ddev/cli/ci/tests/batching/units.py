@@ -102,6 +102,10 @@ class TargetDefinition:
     platforms: tuple[PlatformName, ...] = (PlatformName.LINUX,)
     runners: Mapping[str, Sequence[str]] = field(default_factory=dict)
     environments: tuple[ResolvedEnvironment, ...] = ()
+    # Whether `ddev test --compat` would pin this target's base package. Resolved from the
+    # integration itself, because only a shipped integration that pins a `datadog-checks-base`
+    # version has an older one to test against.
+    supports_minimum_base_package: bool = False
 
 
 @dataclass(frozen=True)
@@ -119,6 +123,7 @@ class TestUnit:
     platform: PlatformName
     runner_labels: tuple[str, ...]
     environment: ResolvedEnvironment
+    supports_minimum_base_package: bool = False
 
 
 def normalize_job_name(job_name: str) -> str:
@@ -218,6 +223,7 @@ def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
                         platform=platform_id,
                         runner_labels=runner_labels,
                         environment=environment,
+                        supports_minimum_base_package=target.supports_minimum_base_package,
                     )
                 )
 

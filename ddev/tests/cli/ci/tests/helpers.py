@@ -56,6 +56,7 @@ def make_unit(
     platform: PlatformName = PlatformName.LINUX,
     runner_labels: tuple[str, ...] = DEFAULT_RUNNER_LABELS,
     environment: ResolvedEnvironment | None = None,
+    supports_minimum_base_package: bool = True,
 ) -> TestUnit:
     return TestUnit(
         target=target,
@@ -63,6 +64,7 @@ def make_unit(
         platform=platform,
         runner_labels=runner_labels,
         environment=environment if environment is not None else env(target, platform),
+        supports_minimum_base_package=supports_minimum_base_package,
     )
 
 
@@ -130,11 +132,17 @@ class FakeIntegration:
         is_testable: bool = True,
         display_name: str | None = None,
         classifier_tags: Sequence[str] = (),
+        is_package: bool = True,
+        is_integration: bool = True,
+        minimum_base_package_version: str | None = "37.0.0",
     ):
         self.name = name
         self.is_testable = is_testable
         self.display_name = display_name or name
         self.manifest = FakeManifest(classifier_tags)
+        self.is_package = is_package
+        self.is_integration = is_integration
+        self.minimum_base_package_version = minimum_base_package_version
 
 
 class FakeRegistry:

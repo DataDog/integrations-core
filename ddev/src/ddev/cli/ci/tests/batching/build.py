@@ -84,10 +84,24 @@ def build_test_units(
                 platforms=tuple(platforms),
                 runners=ci_override.get("runners", {}),
                 environments=environments,
+                supports_minimum_base_package=supports_minimum_base_package(integration),
             )
         )
 
     return expand_test_units(definitions)
+
+
+def supports_minimum_base_package(integration: Integration) -> bool:
+    """Whether testing *integration* against the minimum base package differs from a normal run.
+
+    Mirrors the condition `ddev test --compat` applies before pinning the base package version. The
+    tooling targets (`ddev`, `datadog_checks_base` and friends) are not integrations, and an
+    integration that depends on `datadog-checks-base` without pinning a version has no older version
+    to test against. For all of those `--compat` is a no-op, so a replica would rerun the same suite.
+    """
+    return (
+        integration.is_package and integration.is_integration and integration.minimum_base_package_version is not None
+    )
 
 
 def build_test_batches(

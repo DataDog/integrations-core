@@ -37,8 +37,9 @@ def expand_batch_jobs(
     every job ran against. A job with no E2E tests gets no image, so an unresolvable one can only
     fail a plan that would actually have used it.
 
-    With *minimum_base_package*, each unit also yields a replica pinned to the oldest supported base
-    package, so a run that wants that coverage plans it instead of the workflow making a second pass.
+    With *minimum_base_package*, a unit whose target supports it also yields a replica pinned to the
+    oldest supported base package, so a run that wants that coverage plans it instead of the workflow
+    making a second pass.
     """
     jobs: list[BatchJob] = []
     for unit in units:
@@ -55,8 +56,9 @@ def expand_batch_jobs(
             agent_image=_resolve_agent_image(unit, agent_image_resolver),
         )
         jobs.append(job)
-        if minimum_base_package and (replica := _minimum_base_package_replica(job)) is not None:
-            jobs.append(replica)
+        if minimum_base_package and unit.supports_minimum_base_package:
+            if (replica := _minimum_base_package_replica(job)) is not None:
+                jobs.append(replica)
 
     return jobs
 

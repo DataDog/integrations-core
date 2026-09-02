@@ -113,6 +113,32 @@ def test_no_replica_for_a_job_that_runs_no_unit_tests():
     assert len(jobs) == 1
 
 
+def test_no_replica_for_a_target_that_does_not_support_it():
+    # `ddev test --compat` only pins the base package for a shipped integration that declares a
+    # version, so replicating anything else (`ddev`, `datadog_checks_base`) reruns the same suite.
+    units = [make_unit("ddev", environment=env("py3.13"), supports_minimum_base_package=False)]
+
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
+
+    assert len(jobs) == 1
+    assert not jobs[0].minimum_base_package
+
+
+def test_only_supporting_targets_are_replicated_in_a_mixed_plan():
+    units = [
+        make_unit("postgres", name="postgres", environment=env("py3.13")),
+        make_unit("ddev", name="ddev", environment=env("py3.13"), supports_minimum_base_package=False),
+    ]
+
+    jobs = expand_batch_jobs(units, agent_image_resolver=fake_resolver, minimum_base_package=True)
+
+    assert [(job.target, job.minimum_base_package) for job in jobs] == [
+        ("postgres", False),
+        ("postgres", True),
+        ("ddev", False),
+    ]
+
+
 def test_multiple_units_expand_in_order_one_job_each():
     units = [
         make_unit(name="postgres (py3.11)", environment=env("py3.11")),
