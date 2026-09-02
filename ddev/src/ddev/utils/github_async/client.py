@@ -585,7 +585,8 @@ class AsyncGitHubClient:
         """Size every subsequent request for a process that is about to be killed.
 
         Caps each request at :data:`SHUTDOWN_REQUEST_TIMEOUT` and takes a single attempt at it.
-        Idempotent, because the signals that lead here arrive more than once.
+        Idempotent, because the signals that lead here arrive more than once. One request, so an
+        operation spanning several stays the caller's to bound.
 
         Pacing is left alone unless `rate_limits` says otherwise, since the budget it protects is
         shared with everything else using the token. Without it an acquisition can still outlast the

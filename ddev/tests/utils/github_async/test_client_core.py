@@ -89,7 +89,12 @@ async def test_context_manager_closes_on_exit() -> None:
         # for the next one to be tried at all.
         pytest.param({}, True, SHUTDOWN_REQUEST_TIMEOUT, id="shutdown-caps-the-default"),
         pytest.param({"timeout": 60.0}, True, SHUTDOWN_REQUEST_TIMEOUT, id="shutdown-caps-a-longer-timeout"),
-        pytest.param({"timeout": 0.5}, True, 0.5, id="shutdown-keeps-a-shorter-timeout"),
+        pytest.param(
+            {"timeout": SHUTDOWN_REQUEST_TIMEOUT / 2},
+            True,
+            SHUTDOWN_REQUEST_TIMEOUT / 2,
+            id="shutdown-keeps-a-shorter-timeout",
+        ),
     ],
 )
 async def test_request_timeout_forwarded_to_transport(
