@@ -493,4 +493,6 @@ def _unavailable_count(progress: DispatcherProgress) -> int:
 
 
 def _job_label(job: JobProgress) -> str:
-    return f"{job.job.target} / {job.job.environment} / {job.job.platform}"
+    label = f"{job.job.target} / {job.job.environment} / {job.job.platform}"
+    # Only the base package variant separates a replica from its ordinary job.
+    return f"{label} / minimum base package" if job.job.minimum_base_package else label

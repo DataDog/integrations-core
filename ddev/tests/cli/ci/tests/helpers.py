@@ -208,10 +208,20 @@ TOTAL_JOBS = 10
 
 
 def batch_job(
-    target: str = "redis", environment: str = "py3.12", platform: PlatformName = PlatformName.LINUX
+    target: str = "redis",
+    environment: str = "py3.12",
+    platform: PlatformName = PlatformName.LINUX,
+    *,
+    minimum_base_package: bool = False,
 ) -> BatchJob:
-    """A job as the renderer sees it. Only target, environment and platform reach the output."""
-    return make_job(f"{target}-{environment}-{platform}", target=target, environment=environment, platform=platform)
+    """A job as the renderer sees it: only its identity fields reach the output."""
+    return make_job(
+        f"{target}-{environment}-{platform}",
+        target=target,
+        environment=environment,
+        platform=platform,
+        minimum_base_package=minimum_base_package,
+    )
 
 
 def failing_report(*test_names: str) -> JUnitReport:
@@ -256,8 +266,16 @@ def attempt(
     )
 
 
-def job_progress(*attempts: JobAttemptProgress, target: str = "redis", environment: str = "py3.12") -> JobProgress:
-    return JobProgress(job=batch_job(target=target, environment=environment), attempts=attempts)
+def job_progress(
+    *attempts: JobAttemptProgress,
+    target: str = "redis",
+    environment: str = "py3.12",
+    minimum_base_package: bool = False,
+) -> JobProgress:
+    return JobProgress(
+        job=batch_job(target=target, environment=environment, minimum_base_package=minimum_base_package),
+        attempts=attempts,
+    )
 
 
 def batch_progress(

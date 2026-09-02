@@ -425,6 +425,21 @@ def test_job_level_error_is_reported_against_the_job():
     assert "redis / py3.12 / linux</code> — no artifacts" in body
 
 
+def test_a_replica_is_distinguishable_from_its_ordinary_job():
+    # The pair shares target, environment and platform, so without the variant a reader cannot tell
+    # which of the two failed.
+    ordinary = job_progress(attempt(Status.FAILURE, failed_steps=("Run unit tests",)))
+    replica = job_progress(attempt(Status.FAILURE, failed_steps=("Run unit tests",)), minimum_base_package=True)
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", ordinary, replica, status=Status.FAILURE),), done=True
+    )
+
+    body = render_comment(progress)
+
+    assert "<code> redis / py3.12 / linux </code>" in body
+    assert "<code> redis / py3.12 / linux / minimum base package </code>" in body
+
+
 # ---------------------------------------------------------------------------
 # Safety: escaping, structure, budget, degenerate input
 # ---------------------------------------------------------------------------
