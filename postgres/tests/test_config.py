@@ -7,6 +7,7 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres.config import (
@@ -709,3 +710,38 @@ def test_do_query_both_schedule_and_interval_parsed(mock_check, minimal_instance
     query = config.data_observability.queries[0]
     assert query.schedule == '0 * * * *'
     assert query.interval_seconds == 3600
+
+
+# ---------------------------------------------------------------------------
+# Remote Queries — instance config tests
+# ---------------------------------------------------------------------------
+
+
+def test_remote_queries_section_defaults_to_none(mock_check, minimal_instance):
+    """The remote_queries section is optional and injects no forced timeout default."""
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.remote_queries is None
+
+
+@pytest.mark.parametrize('timeout_ms', [1, 30_000, 600_000])
+def test_remote_queries_timeout_ms_accepted(mock_check, minimal_instance, timeout_ms):
+    """A positive integer timeout_ms is carried through to the instance config."""
+    minimal_instance['remote_queries'] = {'timeout_ms': timeout_ms}
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.remote_queries.timeout_ms == timeout_ms
+
+
+@pytest.mark.parametrize('timeout_ms', [0, -30_000])
+def test_remote_queries_timeout_ms_rejected_below_minimum(mock_check, minimal_instance, timeout_ms):
+    """A timeout_ms below the minimum of 1 fails config validation."""
+    minimal_instance['remote_queries'] = {'timeout_ms': timeout_ms}
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    with pytest.raises(ValidationError):
+        build_config(check=mock_check)
