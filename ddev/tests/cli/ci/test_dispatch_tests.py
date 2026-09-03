@@ -178,7 +178,7 @@ def test_a_base_ref_narrows_an_ambiguous_head_sha(ddev, github, planned):
 def test_a_base_ref_without_a_head_sha_is_refused(ddev, github, planned):
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pr-base-ref', 'master', '--dry-run')
 
-    assert result.exit_code == 1
+    assert result.exit_code == 2
     assert 'only narrows which pull request' in result.output
     planned.assert_not_called()
 
@@ -219,7 +219,7 @@ def test_only_one_run_can_be_named(ddev, github, planned, options: list[str]):
     """Taking one and ignoring the rest would test one commit and report against another."""
     result = ddev('ci', 'dispatch-tests', *options, '--dry-run')
 
-    assert result.exit_code == 1
+    assert result.exit_code == 2
     assert 'name different runs' in result.output
     planned.assert_not_called()
 
@@ -267,7 +267,7 @@ def test_a_dry_run_dispatches_nothing(ddev, github, planned):
 def test_a_reference_that_is_neither_a_number_nor_a_url_is_refused(ddev, planned):
     result = ddev('ci', 'dispatch-tests', '--pr', 'not-a-pull-request', '--dry-run')
 
-    assert result.exit_code == 1
+    assert result.exit_code == 2
     assert 'neither a pull request number nor a pull request URL' in result.output
     planned.assert_not_called()
 

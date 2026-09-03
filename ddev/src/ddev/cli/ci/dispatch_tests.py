@@ -198,6 +198,10 @@ def validate_options(
     none. Only a dry run of a commit on the default branch needs none: it plans from local git and
     talks to nobody. A pull request needs one even for a dry run, because both its own fields and
     its diff are read from the API.
+
+    A malformed invocation raises `UsageError` (exit code 2), so a caller can tell it from a run
+    that started and failed. A missing token is not one: the options were right, the environment
+    is not.
     """
     from ddev.utils.github import parse_pull_request_reference
 
@@ -205,16 +209,16 @@ def validate_options(
     if commit is not None:
         named.append('`--commit`')
     if len(named) > 1:
-        app.abort(f'{", ".join(named)} name different runs, so only one can be passed.')
+        raise click.UsageError(f'{", ".join(named)} name different runs, so only one can be passed.')
 
     if pr_base_ref is not None and pr_head_sha is None:
-        app.abort('`--pr-base-ref` only narrows which pull request `--pr-head-sha` resolves to.')
+        raise click.UsageError('`--pr-base-ref` only narrows which pull request `--pr-head-sha` resolves to.')
 
     requested_pr = None
     if pull_request is not None:
         requested_pr = parse_pull_request_reference(pull_request)
         if requested_pr is None:
-            app.abort(f'`{pull_request}` is neither a pull request number nor a pull request URL.')
+            raise click.UsageError(f'`{pull_request}` is neither a pull request number nor a pull request URL.')
 
     tests_a_pull_request = pull_request is not None or pr_head_sha is not None
     token = app.config.github.token
