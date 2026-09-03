@@ -1,0 +1,1 @@
+Move expensive per-database metric collection off the check runner and isolate database failures.
