@@ -272,7 +272,7 @@ class HTTPCheck(AgentCheck):
         if ssl_expire and parsed_uri.scheme == "https":
             if peer_cert is not None:
                 status, days_left, seconds_left, msg = self._inspect_cert(peer_cert, instance)
-            elif use_cert_from_response:
+            elif use_cert_from_response and r is not None:
                 msg = 'Unable to retrieve the peer certificate from the HTTP response.'
                 self.log.debug(msg)
                 status, days_left, seconds_left = AgentCheck.UNKNOWN, None, None

@@ -180,6 +180,36 @@ def test_missing_response_cert_does_not_open_second_connection(aggregator, fake_
     assert message in caplog.text
 
 
+def test_request_failure_still_reports_expired_certificate(aggregator, fake_http):
+    instance = {
+        'name': 'request_failure',
+        'url': 'https://example.com',
+        'timeout': 1,
+        'use_cert_from_response': True,
+    }
+    message = 'certificate has expired'
+    fake_http.register_response('GET', instance['url'], HTTPClientSSLError(message))
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    with mock.patch.object(
+        check,
+        'check_cert_expiration',
+        return_value=(AgentCheck.CRITICAL, 0, 0, message),
+    ):
+        check.check(instance)
+
+    tags = ['url:https://example.com', 'instance:request_failure']
+    aggregator.assert_metric('http.ssl.days_left', value=0, tags=tags, count=1)
+    aggregator.assert_metric('http.ssl.seconds_left', value=0, tags=tags, count=1)
+    aggregator.assert_service_check(
+        HTTPCheck.SC_SSL_CERT,
+        status=AgentCheck.CRITICAL,
+        tags=tags,
+        message=message,
+        count=1,
+    )
+
+
 def test_http_outcome_tag_absent_by_default(aggregator, fake_http):
     """Without `enable_http_outcome_tag`, no metric carries an `http_outcome` tag."""
     check, instance = _make_check()
