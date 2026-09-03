@@ -34,6 +34,9 @@ class CadvisorScraper(object):
         # The scraper needs its own logger
         self.log = logging.getLogger(__name__)
 
+        # Legacy cAdvisor uses a separate node-local endpoint, so give it an isolated HTTP client.
+        self._cadvisor_http = self.create_http_client({'skip_proxy': True})
+
     def detect_cadvisor(self, kubelet_url, cadvisor_port):
         """
         Tries to connect to the cadvisor endpoint, with given params
@@ -47,7 +50,7 @@ class CadvisorScraper(object):
         url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
         # A 3xx means the legacy endpoint exists; its redirect target may still return 4xx.
-        r = self.http.head(url, timeout=1, allow_redirects=False)  # SKIP_HTTP_VALIDATION
+        r = self._cadvisor_http.head(url, timeout=1, allow_redirects=False)
         r.raise_for_status()
 
         return url
@@ -64,7 +67,7 @@ class CadvisorScraper(object):
         self._update_metrics(instance, cadvisor_url, pod_list, pod_list_utils)
 
     def _retrieve_cadvisor_metrics(self, cadvisor_url, timeout=10):
-        return self.http.get(cadvisor_url, timeout=timeout).json()
+        return self._cadvisor_http.get(cadvisor_url, timeout=timeout).json()
 
     def _update_metrics(self, instance, cadvisor_url, pod_list, pod_list_utils):
         metrics = self._retrieve_cadvisor_metrics(cadvisor_url)
