@@ -24,6 +24,7 @@ from tests.utils.github_async.payloads import (
     full_pull_request_payload,
     issue_comment_payload,
     pr_review_comment_payload,
+    pull_request_file_payload,
     pull_request_payload,
     workflow_job,
     workflow_run_payload,
@@ -169,6 +170,18 @@ ENDPOINT_CALLS = [
     EndpointCase(
         "list_pull_requests",
         lambda c: c.list_pull_requests("o", "r"),
+        lambda: json_response([pull_request_payload(number=1)]),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_pull_request_files",
+        lambda c: first_page(c.list_pull_request_files("o", "r", 5)),
+        lambda: json_response([pull_request_file_payload()]),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_commit_pulls",
+        lambda c: first_page(c.list_commit_pulls("o", "r", "abc123")),
         lambda: json_response([pull_request_payload(number=1)]),
         default_retry="safe",
     ),

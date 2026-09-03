@@ -51,6 +51,7 @@ from ddev.utils.github_async.models import (
     IssueComment,
     Label,
     PullRequest,
+    PullRequestFile,
     PullRequestReviewComment,
     WorkflowDispatchResult,
     WorkflowJobsList,
@@ -150,6 +151,10 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         # Default to "no existing PRs" so the --from-pr idempotency check does not skip a base
         # unless a test explicitly registers an existing backport PR.
         'list_pull_requests': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        # An empty page; tests that need changed files register their own list of PullRequestFile.
+        'list_pull_request_files': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        # Default to "this commit belongs to no open pull request", the same shape a closed one gives.
+        'list_commit_pulls': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         'create_workflow_dispatch': lambda: GitHubResponse(
             data=WorkflowDispatchResult(
                 workflow_run_id=123,
@@ -424,6 +429,72 @@ class FakeAsyncGitHubClient:
         response = self._resolve_response(
             'list_issue_comments',
             {'owner': owner, 'repo': repo, 'issue_number': issue_number, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            yield page
+
+    async def list_commit_pulls(
+        self,
+        owner: str,
+        repo: str,
+        commit_sha: str,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequest]]]:
+        """Async-generator mirror.
+
+        A page is itself a list of pull requests, so pages are registered explicitly: one
+        `GitHubResponse` for one page, a list of them for several.
+        """
+        self._record(
+            'list_commit_pulls',
+            owner=owner,
+            repo=repo,
+            commit_sha=commit_sha,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_commit_pulls',
+            {'owner': owner, 'repo': repo, 'commit_sha': commit_sha, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            yield page
+
+    async def list_pull_request_files(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequestFile]]]:
+        """Async-generator mirror.
+
+        A page is itself a list of files, so pages are registered explicitly: one `GitHubResponse`
+        for one page, a list of them for several.
+        """
+        self._record(
+            'list_pull_request_files',
+            owner=owner,
+            repo=repo,
+            pull_number=pull_number,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_pull_request_files',
+            {'owner': owner, 'repo': repo, 'pull_number': pull_number, 'per_page': per_page, 'timeout': timeout},
         )
         if isinstance(response, BaseException):
             raise response

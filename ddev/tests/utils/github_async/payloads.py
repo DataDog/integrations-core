@@ -107,6 +107,27 @@ def pr_review_comment_payload(
     }
 
 
+def pull_request_file_payload(
+    filename: str = "datadog_checks_base/setup.py",
+    status: str = "modified",
+    **extra: Any,
+) -> dict[str, Any]:
+    """A `diff-entry` payload, including the diff statistics the model deliberately ignores."""
+    return {
+        "sha": "bbcd538c8e72b8c175046e27cc8f907076331401",
+        "filename": filename,
+        "status": status,
+        "additions": 3,
+        "deletions": 1,
+        "changes": 4,
+        "blob_url": f"https://github.com/owner/repo/blob/abc/{filename}",
+        "raw_url": f"https://github.com/owner/repo/raw/abc/{filename}",
+        "contents_url": f"https://api.github.com/repos/owner/repo/contents/{filename}",
+        "patch": "@@ -1 +1 @@",
+        **extra,
+    }
+
+
 def pull_request_payload(number: int = 1, html_url: str | None = None, **extra: Any) -> dict[str, Any]:
     return {
         "number": number,

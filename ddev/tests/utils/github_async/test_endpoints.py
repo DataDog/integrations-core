@@ -22,6 +22,8 @@ from ddev.utils.github_async.models import (
     JobStepStatus,
     Label,
     PullRequest,
+    PullRequestFile,
+    PullRequestFileStatus,
     PullRequestReviewComment,
     PullRequestState,
     WorkflowDispatchResult,
@@ -39,6 +41,7 @@ from tests.utils.github_async.payloads import (
     full_pull_request_payload,
     issue_comment_payload,
     pr_review_comment_payload,
+    pull_request_file_payload,
     pull_request_payload,
     workflow_job,
     workflow_run_payload,
@@ -522,6 +525,69 @@ async def test_list_pull_requests_forwards_base_filter():
     client = make_client(httpx.MockTransport(handler))
     result = await client.list_pull_requests("o", "r", base="7.62.x")
     assert result.data[0].number == 1
+
+
+async def test_list_pull_request_files_success():
+    """Spans two pages because stopping at the first would plan a subset of the targets and still
+    report success, so the run would go green having never tested the rest of the change.
+    """
+    second_page_url = "https://api.github.com/repos/owner/repo/pulls/25074/files?page=2"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/pulls/25074/files"
+        if request.url.params.get("page") == "2":
+            return json_response(
+                [
+                    pull_request_file_payload(
+                        filename="disk/renamed.py",
+                        status="renamed",
+                        previous_filename="disk/original.py",
+                    )
+                ]
+            )
+        assert request.url.params["per_page"] == "100"
+        # The response body is a bare array, not an object with a wrapper key.
+        return json_response(
+            [
+                pull_request_file_payload(filename="disk/tests/test_unit.py"),
+                pull_request_file_payload(filename="disk/removed.py", status="removed"),
+            ],
+            headers={"link": f'<{second_page_url}>; rel="next"'},
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_pull_request_files("owner", "repo", 25074)]
+
+    assert len(pages) == 2
+    files = [changed for page in pages for changed in page.data]
+    assert all(isinstance(changed, PullRequestFile) for changed in files)
+    assert [changed.filename for changed in files] == [
+        "disk/tests/test_unit.py",
+        "disk/removed.py",
+        "disk/renamed.py",
+    ]
+    assert [changed.status for changed in files] == [
+        PullRequestFileStatus.MODIFIED,
+        PullRequestFileStatus.REMOVED,
+        PullRequestFileStatus.RENAMED,
+    ]
+    # A rename's source path is a changed path too, so a caller that loses it misses the work.
+    assert [changed.previous_filename for changed in files] == [None, None, "disk/original.py"]
+
+
+async def test_list_commit_pulls_success():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/commits/31014335d4/pulls"
+        assert request.url.params["per_page"] == "100"
+        # The abbreviated `pull-request-simple` form, which is what this endpoint returns.
+        return json_response([pull_request_payload(number=25082)])
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_commit_pulls("owner", "repo", "31014335d4")]
+
+    assert [pull.number for page in pages for pull in page.data] == [25082]
 
 
 async def test_add_labels_to_issue_success() -> None:
