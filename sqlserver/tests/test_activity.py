@@ -23,6 +23,7 @@ from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 from datadog_checks.sqlserver.const import (
+    DATABASE_METRICS_CONTEXT_INFO,
     STATIC_INFO_SERVERNAME,
 )
 from datadog_checks.sqlserver.utils import construct_use_statement
@@ -43,6 +44,19 @@ def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
+
+
+@pytest.mark.unit
+def test_activity_query_excludes_async_database_metrics_sessions(dbm_instance):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    cursor = mock.MagicMock()
+    cursor.description = []
+    cursor.fetchall.return_value = []
+
+    check.activity._get_activity(cursor, DM_EXEC_REQUESTS_COLS, '', '')
+
+    query = cursor.execute.call_args.args[0]
+    assert "ISNULL(req.context_info, 0x) != {}".format(DATABASE_METRICS_CONTEXT_INFO) in query
 
 
 @pytest.fixture
