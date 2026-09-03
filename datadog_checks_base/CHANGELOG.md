@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.3.1 / 2026-09-03
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
 ## 38.3.0 / 2026-09-02
 
 ***Added***:
