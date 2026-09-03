@@ -1456,3 +1456,79 @@ def test_collect_execution_plans_toggle(instance_docker, collect_plans_value, ex
         mock_collect_plans.assert_called_once()
     else:
         mock_collect_plans.assert_not_called()
+
+
+def _plan_row(suffix: str) -> dict[str, object]:
+    return {
+        'query_signature': f'query-{suffix}',
+        'query_hash': f'query-hash-{suffix}',
+        'query_plan_hash': f'plan-hash-{suffix}',
+        'plan_handle': f'plan-handle-{suffix}',
+        'text': 'SELECT 1',
+        'dd_tables': [],
+        'dd_commands': ['SELECT'],
+        'dd_comments': [],
+        'database_name': 'master',
+        'is_proc': False,
+        'is_encrypted': False,
+        'procedure_signature': None,
+        'procedure_name': None,
+    }
+
+
+@pytest.mark.unit
+def test_plan_lookup_failure_allows_later_rows_and_retry(aggregator, instance_docker):
+    """A failed plan lookup does not stop later rows or suppress its retry."""
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'enforce_collection_interval_deadline': False,
+    }
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    failed_row = _plan_row('failed')
+    later_row = _plan_row('later')
+    plan = ('<ShowPlanXML/>', False)
+
+    with mock.patch.object(
+        check.statement_metrics,
+        '_load_plan',
+        side_effect=[RuntimeError('plan lookup timed out'), plan, plan],
+    ) as load_plan:
+        first_pass = list(check.statement_metrics._collect_plans([failed_row, later_row], mock.Mock(), float('inf')))
+        retry_pass = list(check.statement_metrics._collect_plans([failed_row], mock.Mock(), float('inf')))
+
+    assert [event['db']['query_signature'] for event in first_pass] == [later_row['query_signature']]
+    assert [event['db']['query_signature'] for event in retry_pass] == [failed_row['query_signature']]
+    assert [call.args[0] for call in load_plan.call_args_list] == [
+        failed_row['plan_handle'],
+        later_row['plan_handle'],
+        failed_row['plan_handle'],
+    ]
+    aggregator.assert_metric(
+        'dd.sqlserver.statements.error',
+        value=1,
+        tags=check.debug_tags() + ["error:load-plan-<class 'RuntimeError'>"],
+    )
+
+
+@pytest.mark.unit
+def test_plan_lookup_failure_during_cancellation_propagates(instance_docker):
+    """Cancellation during a failing plan lookup still aborts plan collection."""
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'enforce_collection_interval_deadline': False,
+    }
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    def cancel_during_lookup(*_args):
+        check.statement_metrics._cancel_event.set()
+        raise RuntimeError('connection closed')
+
+    with (
+        mock.patch.object(check.statement_metrics, '_load_plan', side_effect=cancel_during_lookup),
+        pytest.raises(Exception, match='Job loop cancelled'),
+    ):
+        list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
