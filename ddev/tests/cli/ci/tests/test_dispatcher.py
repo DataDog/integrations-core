@@ -17,7 +17,6 @@ from ddev.cli.ci.tests.dispatcher import (
     CANCELLED_RATE_LIMITS,
     Dispatcher,
     DispatcherContext,
-    RunContext,
 )
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING
@@ -35,7 +34,6 @@ pytestmark = pytest.mark.usefixtures("step_summary")
 CONTEXT = DispatcherContext(
     owner="DataDog",
     repo="integrations-core",
-    run_context=RunContext.PR,
     checkout_sha="refs/pull/42/merge",
     base_sha="head-sha",
     branch="a-branch",

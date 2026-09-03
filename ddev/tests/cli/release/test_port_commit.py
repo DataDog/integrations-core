@@ -336,7 +336,7 @@ def test_create_pull_request_step(app_mock: MagicMock, fake_async_github: FakeAs
     app_mock.config.github.token = 'ghp_test'
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=7, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=7, html_url='https://github.com/x/pr/1', changed_files=1),
     )
 
     step = CreatePullRequestStep(
@@ -448,6 +448,7 @@ def _merged_pr(number=23703, merge_commit_sha=None, backport_bases=(), extra_lab
         merged=True,
         merge_commit_sha=merge_commit_sha or FULL_SHA_FOR_TESTS,
         labels=labels,
+        changed_files=1,
     )
 
 
@@ -455,7 +456,7 @@ def test_command_happy_path(ddev: CliRunner, mocker: MockerFixture, fake_async_g
     run_mock = _setup_command_mocks(mocker)
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -500,7 +501,7 @@ def test_command_lowercases_branch_name(
     run_mock = _setup_command_mocks(mocker)
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'AAraKKe'})
@@ -560,7 +561,7 @@ def test_create_pull_request_step_propagates_authentication_failure_when_labelin
     app_mock.config.github.token = 'ghp_test'
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=7, html_url='https://github.com/x/pr/7'),
+        PullRequest(number=7, html_url='https://github.com/x/pr/7', changed_files=1),
     )
     fake_async_github.mock_response(
         'add_labels_to_issue',
@@ -602,7 +603,7 @@ def test_command_uses_central_handler_on_label_authentication_failure(
     _setup_command_mocks(mocker)
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     fake_async_github.mock_response(
         'add_labels_to_issue',
@@ -781,7 +782,7 @@ def test_command_fetches_commit_when_not_local(
     )
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -829,7 +830,7 @@ def test_command_resolves_pr_input(
     fake_async_github.mock_response('get_pull_request', _merged_pr(number=23703))
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -854,6 +855,7 @@ def test_command_aborts_when_pr_not_merged(
             html_url='https://github.com/DataDog/integrations-core/pull/23703',
             merged=False,
             merge_commit_sha=None,
+            changed_files=1,
         ),
     )
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -947,7 +949,7 @@ def test_command_falls_back_to_commit_on_pr_not_found(
     mocker.patch('ddev.utils.git.GitRepository.log', return_value=[{'hash': full_sha, 'subject': 'Fix bug'}])
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -1012,7 +1014,7 @@ def test_command_non_interactive_skips_confirmation(
     _setup_command_mocks(mocker)
     fake_async_github.mock_response(
         'create_pull_request',
-        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+        PullRequest(number=1, html_url='https://github.com/x/pr/1', changed_files=1),
     )
     confirm = mocker.patch('click.confirm', return_value=False)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
@@ -1070,6 +1072,7 @@ def test_derive_backport_bases(label_names: list[str], expected: list[str]) -> N
         number=1,
         html_url='https://github.com/DataDog/integrations-core/pull/1',
         labels=[Label(id=idx, name=name) for idx, name in enumerate(label_names, start=1)],
+        changed_files=1,
     )
     assert derive_backport_bases(pr) == expected
 

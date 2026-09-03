@@ -188,7 +188,7 @@ ENDPOINT_CALLS = [
     EndpointCase(
         "create_pull_request",
         lambda c: c.create_pull_request("o", "r", "t", "h", "b"),
-        lambda: json_response(pull_request_payload(number=1), status_code=201),
+        lambda: json_response(full_pull_request_payload(number=1), status_code=201),
         default_retry="mutating",
     ),
     EndpointCase(

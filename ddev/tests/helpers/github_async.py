@@ -14,7 +14,7 @@ Quick reference:
         # Sticky default for all matching calls
         fake_async_github.mock_response(
             'create_pull_request',
-            PullRequest(number=5, html_url='https://github.com/x/pr/5'),
+            PullRequest(number=5, html_url='https://github.com/x/pr/5', changed_files=1),
         )
 
         # Partial match: only PR #5 gets the override
@@ -116,7 +116,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
     """Built-in default responses used when no `mock_response` matches a call."""
     return {
         'create_pull_request': lambda: GitHubResponse(
-            data=PullRequest(number=1, html_url='https://github.com/test/repo/pull/1'),
+            data=PullRequest(number=1, html_url='https://github.com/test/repo/pull/1', changed_files=1),
             headers={},
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
