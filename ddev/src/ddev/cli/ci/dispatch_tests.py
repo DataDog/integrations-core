@@ -38,6 +38,12 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     help='Head commit of the pull request to test, resolved to its pull request. What `workflow_run` provides.',
 )
 @click.option(
+    '--pr-base-ref',
+    default=None,
+    metavar='BRANCH',
+    help='Base branch of the pull request, when a head commit heads more than one.',
+)
+@click.option(
     '--commit',
     default=None,
     metavar='SHA',
@@ -68,6 +74,7 @@ def dispatch_tests(
     app: Application,
     pull_request: str | None,
     pr_head_sha: str | None,
+    pr_base_ref: str | None,
     commit: str | None,
     tags: str | None,
     repository: str | None,
@@ -97,6 +104,7 @@ def dispatch_tests(
         app,
         pull_request=pull_request,
         pr_head_sha=pr_head_sha,
+        pr_base_ref=pr_base_ref,
         commit=commit,
         dry_run=dry_run,
     )
@@ -113,6 +121,7 @@ def dispatch_tests(
         repo=repo,
         requested_pr=requested_pr,
         pr_head_sha=pr_head_sha,
+        pr_base_ref=pr_base_ref,
         commit=commit,
         token=token,
         all_targets=all_targets,
@@ -179,6 +188,7 @@ def validate_options(
     *,
     pull_request: str | None,
     pr_head_sha: str | None,
+    pr_base_ref: str | None,
     commit: str | None,
     dry_run: bool,
 ) -> tuple[int | None, str]:
@@ -196,6 +206,9 @@ def validate_options(
         named.append('`--commit`')
     if len(named) > 1:
         app.abort(f'{", ".join(named)} name different runs, so only one can be passed.')
+
+    if pr_base_ref is not None and pr_head_sha is None:
+        app.abort('`--pr-base-ref` only narrows which pull request `--pr-head-sha` resolves to.')
 
     requested_pr = None
     if pull_request is not None:
@@ -233,6 +246,7 @@ def resolve_run(
     repo: str,
     requested_pr: int | None,
     pr_head_sha: str | None,
+    pr_base_ref: str | None,
     commit: str | None,
     token: str,
     all_targets: bool,
@@ -247,6 +261,7 @@ def resolve_run(
             repo=repo,
             requested_pr=requested_pr,
             pr_head_sha=pr_head_sha,
+            pr_base_ref=pr_base_ref,
             token=token,
             all_targets=all_targets,
         )
@@ -276,6 +291,7 @@ def resolve_pull_request_run(
     repo: str,
     requested_pr: int | None,
     pr_head_sha: str | None,
+    pr_base_ref: str | None,
     token: str,
     all_targets: bool,
 ) -> ResolvedRun | None:
@@ -298,10 +314,21 @@ def resolve_pull_request_run(
                     'A pull request run needs either a number or a head commit, and this run reported '
                     'neither. `resolve_run` dispatched to the wrong resolver.'
                 )
-                number = await resolve_pull_request_number(client, owner, repo, pr_head_sha)
-                if number is None:
-                    app.display_info(f'{pr_head_sha} belongs to no open pull request, so there is nothing to test.')
+                numbers = await resolve_pull_requests_headed_by(client, owner, repo, pr_head_sha, pr_base_ref)
+                if not numbers:
+                    app.display_info(
+                        f'{pr_head_sha} heads no open pull request, so there is nothing to test. A commit that '
+                        'later commits have superseded reports here too, since testing it would plan the newer '
+                        'revision against the older one.'
+                    )
                     return None
+                if len(numbers) > 1:
+                    listed = ', '.join(f'#{number}' for number in sorted(numbers))
+                    app.abort(
+                        f'{pr_head_sha} heads {len(numbers)} open pull requests ({listed}), so which one this run '
+                        'is testing is ambiguous. Pass `--pr-base-ref` to name the base branch.'
+                    )
+                number = numbers[0]
 
             pull = (await client.get_pull_request(owner, repo, number)).data
             if pull.head is None or pull.base is None:
@@ -333,19 +360,30 @@ def resolve_pull_request_run(
         app.abort(f'Could not read the pull request to test: {error}')
 
 
-async def resolve_pull_request_number(client: AsyncGitHubClient, owner: str, repo: str, head_sha: str) -> int | None:
-    """Return the open pull request whose head is *head_sha*, or None when there is none.
+async def resolve_pull_requests_headed_by(
+    client: AsyncGitHubClient, owner: str, repo: str, head_sha: str, base_ref: str | None
+) -> list[int]:
+    """Return the open pull requests whose head *is* `head_sha`, narrowed to `base_ref` when given.
 
-    A fork's head resolves too, because the base repository keeps it as `refs/pull/<n>/head`.
+    A commit stays associated with its pull request after later commits land on the branch, so a
+    pull request whose head has moved on is not a match: testing it would plan the newer revision
+    while reporting against the older one. A fork's head resolves too, because the base repository
+    keeps it as `refs/pull/<n>/head`.
     """
     from ddev.utils.github_async.models import PullRequestState
 
+    matches = []
     async for page in client.list_commit_pulls(owner, repo, head_sha):
         for pull in page.data:
-            if pull.state is PullRequestState.OPEN:
-                return pull.number
+            if pull.state is not PullRequestState.OPEN or pull.head is None or pull.base is None:
+                continue
+            if not pull.head.sha.startswith(head_sha):
+                continue
+            if base_ref is not None and pull.base.ref != base_ref:
+                continue
+            matches.append(pull.number)
 
-    return None
+    return matches
 
 
 def build_plan(

@@ -15,13 +15,19 @@ PR_NUMBER = 4242
 HEAD_SHA = 'head-sha-aaa'
 
 
-def pull_request(state: str = 'open', changed_files: int | None = 1) -> PullRequest:
+def pull_request(
+    state: str = 'open',
+    changed_files: int | None = 1,
+    number: int = PR_NUMBER,
+    head_sha: str = HEAD_SHA,
+    base_ref: str = 'a-target-branch',
+) -> PullRequest:
     return PullRequest(
-        number=PR_NUMBER,
-        html_url=f'https://github.com/DataDog/integrations-core/pull/{PR_NUMBER}',
+        number=number,
+        html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
         state=state,
-        head={'ref': 'hs/a-branch', 'sha': HEAD_SHA},
-        base={'ref': 'a-target-branch', 'sha': 'base-sha-bbb'},
+        head={'ref': 'hs/a-branch', 'sha': head_sha},
+        base={'ref': base_ref, 'sha': 'base-sha-bbb'},
         changed_files=changed_files,
     )
 
@@ -101,9 +107,63 @@ def test_a_head_sha_belonging_to_no_open_pull_request_dispatches_nothing(ddev, g
     result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
 
     assert result.exit_code == 0, result.output
-    assert 'belongs to no open pull request' in result.output
+    assert 'heads no open pull request' in result.output
     planned.assert_not_called()
     github.assert_not_called('create_workflow_dispatch')
+
+
+def test_a_commit_that_is_no_longer_the_head_dispatches_nothing(ddev, github, planned):
+    """A commit stays associated with its pull request once later commits land on the branch.
+
+    Testing it anyway would read the newer head and diff while reporting against the older commit,
+    so the run would test one revision and attribute it to another.
+    """
+    github.mock_response('list_commit_pulls', pulls_page(pull_request(head_sha='a-newer-sha')))
+
+    result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
+
+    assert result.exit_code == 0, result.output
+    assert 'heads no open pull request' in result.output
+    planned.assert_not_called()
+    github.assert_not_called('create_workflow_dispatch')
+
+
+def test_a_head_sha_heading_several_pull_requests_is_refused(ddev, github, planned):
+    """Choosing one would plan against its base and comment on it, so a run that cannot say which
+    pull request it is testing must not run.
+    """
+    github.mock_response(
+        'list_commit_pulls',
+        pulls_page(pull_request(number=1), pull_request(number=2, base_ref='7.62.x')),
+    )
+
+    result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
+
+    assert result.exit_code == 1
+    assert 'heads 2 open pull requests (#1, #2)' in result.output
+    planned.assert_not_called()
+    github.assert_not_called('create_workflow_dispatch')
+
+
+def test_a_base_ref_narrows_an_ambiguous_head_sha(ddev, github, planned):
+    github.mock_response(
+        'list_commit_pulls',
+        pulls_page(pull_request(number=1), pull_request(number=2, base_ref='7.62.x')),
+    )
+    github.mock_response('get_pull_request', pull_request(number=2, base_ref='7.62.x'))
+
+    result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA, '--pr-base-ref', '7.62.x', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert github.last_call('get_pull_request').kwargs['pull_number'] == 2
+
+
+def test_a_base_ref_without_a_head_sha_is_refused(ddev, github, planned):
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pr-base-ref', 'master', '--dry-run')
+
+    assert result.exit_code == 1
+    assert 'only narrows which pull request' in result.output
+    planned.assert_not_called()
 
 
 def test_a_pull_request_that_is_no_longer_open_dispatches_nothing(ddev, github, planned):
