@@ -13,7 +13,7 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext, RunContext
+    from ddev.cli.ci.tests.dispatcher import DispatcherContext
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.utils.git import ChangedFile
@@ -44,11 +44,10 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     help='Commit on the default branch to test, compared with its first parent. Defaults to the local HEAD.',
 )
 @click.option(
-    '--context',
-    'run_context',
-    type=click.Choice(['pr', 'master', 'agent-test', 'release']),
+    '--tags',
     default=None,
-    help='Kind of run, reported as a monitoring tag. Defaults to `pr` when testing a pull request, `master` otherwise.',
+    metavar='"KEY:VALUE ..."',
+    help='Tags the run reports itself under, separated by spaces. Their meaning is the caller\'s to decide.',
 )
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
@@ -70,7 +69,7 @@ def dispatch_tests(
     pull_request: str | None,
     pr_head_sha: str | None,
     commit: str | None,
-    run_context: str | None,
+    tags: str | None,
     repository: str | None,
     all_targets: bool,
     minimum_base_package: bool,
@@ -90,7 +89,7 @@ def dispatch_tests(
     from pathlib import Path
 
     from ddev.cli.ci.tests.batching.build import HatchEnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext, RunContext, build_dispatcher
+    from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.utils.github import resolve_owner_repo
 
@@ -117,7 +116,6 @@ def dispatch_tests(
         commit=commit,
         token=token,
         all_targets=all_targets,
-        run_context=RunContext(run_context) if run_context else None,
     )
     if run is None:
         return
@@ -137,7 +135,7 @@ def dispatch_tests(
     context = DispatcherContext(
         owner=owner,
         repo=repo,
-        run_context=run.run_context,
+        tags=tuple(tags.split()) if tags else (),
         checkout_sha=run.checkout_sha,
         base_sha=run.base_sha,
         branch=run.branch,
@@ -220,7 +218,6 @@ class ResolvedRun:
     ``changed_files`` is None when the plan does not come from a comparison, which is `--all`.
     """
 
-    run_context: RunContext
     base_sha: str
     checkout_sha: str
     branch: str
@@ -239,18 +236,12 @@ def resolve_run(
     commit: str | None,
     token: str,
     all_targets: bool,
-    run_context: RunContext | None,
 ) -> ResolvedRun | None:
     """Resolve what to test, or None when there is nothing to do.
 
     A pull request that is no longer open is the one such case: nothing to test at that point, and
     no open pull request to report to either.
-
-    `run_context` only labels the run. What is compared, and against what, follows from which input
-    named the run, so the two cannot contradict each other.
     """
-    from ddev.cli.ci.tests.dispatcher import RunContext
-
     if requested_pr is not None or pr_head_sha is not None:
         return resolve_pull_request_run(
             app,
@@ -260,7 +251,6 @@ def resolve_run(
             pr_head_sha=pr_head_sha,
             token=token,
             all_targets=all_targets,
-            run_context=run_context or RunContext.PR,
         )
 
     tested_commit = commit or app.repo.git.latest_commit().sha
@@ -274,7 +264,6 @@ def resolve_run(
             app.abort(str(error))
 
     return ResolvedRun(
-        run_context=run_context or RunContext.MASTER,
         base_sha=tested_commit,
         checkout_sha=tested_commit,
         branch=app.repo.git.current_branch(),
@@ -291,7 +280,6 @@ def resolve_pull_request_run(
     pr_head_sha: str | None,
     token: str,
     all_targets: bool,
-    run_context: RunContext,
 ) -> ResolvedRun | None:
     """Read the pull request and its changed files from the API, in one client session."""
     import asyncio
@@ -331,7 +319,6 @@ def resolve_pull_request_run(
                 changed_files = await changes_in_pull_request(client, owner, repo, pull.number, pull.changed_files)
 
             return ResolvedRun(
-                run_context=run_context,
                 base_sha=pull.head.sha,
                 checkout_sha=f'refs/pull/{pull.number}/merge',
                 branch=pull.head.ref,
@@ -403,7 +390,6 @@ def build_plan(
 def display_plan(app: Application, context: DispatcherContext, batches: list[TestBatch]) -> None:
     app.display_header('Dispatcher plan')
     app.display_pair('Repository', f'{context.owner}/{context.repo}')
-    app.display_pair('Context', context.run_context.value)
     app.display_pair('Branch', context.branch)
     app.display_pair('Base commit', context.base_sha)
     app.display_pair('Checkout ref', context.checkout_sha)
@@ -411,6 +397,8 @@ def display_plan(app: Application, context: DispatcherContext, batches: list[Tes
         app.display_pair('Pull request', str(context.pr_number))
     if context.target_branch is not None:
         app.display_pair('Target branch', context.target_branch)
+    if context.tags:
+        app.display_pair('Tags', ' '.join(context.tags))
     app.display_pair('Workflow', f'{context.workflow} @ {context.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)
