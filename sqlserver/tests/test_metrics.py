@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
-from unittest import mock
 
 import pytest
 
@@ -422,11 +421,7 @@ def test_check_db_fragmentation_metrics(
         instance_docker_metrics['autodiscovery_include'] = AUTODISCOVERY_DBS
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
-    with mock.patch(
-        'datadog_checks.sqlserver.database_metrics.base.SqlserverDatabaseMetricsBase._database_collection_start_offset',
-        return_value=0,
-    ):
-        dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
 
     tags = sqlserver_check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),

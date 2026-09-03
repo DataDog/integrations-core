@@ -635,11 +635,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    with mock.patch(
-        'datadog_checks.sqlserver.database_metrics.base.SqlserverDatabaseMetricsBase._database_collection_start_offset',
-        return_value=0,
-    ):
-        dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
         tags_by_key = dict([t.split(':', 1) for t in m.tags])
@@ -657,11 +653,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
 def test_table_size_metrics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    with mock.patch(
-        'datadog_checks.sqlserver.database_metrics.base.SqlserverDatabaseMetricsBase._database_collection_start_offset',
-        return_value=0,
-    ):
-        dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.table.row_count"):
         tags_by_key = dict([t.split(':', 1) for t in m.tags])
@@ -1047,11 +1039,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
         execute_query(query, params)
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    with mock.patch(
-        'datadog_checks.sqlserver.database_metrics.base.SqlserverDatabaseMetricsBase._database_collection_start_offset',
-        return_value=0,
-    ):
-        dd_run_check(check)
+    dd_run_check(check)
     expected_tags = (
         check._config.tags
         + [
@@ -1172,11 +1160,7 @@ def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_dock
 
     # Run the check
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    with mock.patch(
-        'datadog_checks.sqlserver.database_metrics.base.SqlserverDatabaseMetricsBase._database_collection_start_offset',
-        return_value=0,
-    ):
-        dd_run_check(check)
+    dd_run_check(check)
 
     # Verify that table size metrics are emitted for the cities table
     expected_table_tags = [f'table:{table_name}', f'schema:{schema_name}', f'database:{database_name}']
