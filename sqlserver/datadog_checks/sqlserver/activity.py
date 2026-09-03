@@ -19,7 +19,11 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.const import (
+    DATABASE_METRICS_CONTEXT_INFO,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
+)
 from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 10
@@ -85,6 +89,7 @@ FROM sys.dm_exec_sessions sess
     {input_buffer_join}
 WHERE
     sess.session_id != @@spid AND
+    ISNULL(req.context_info, 0x) != {database_metrics_context_info} AND
     sess.status != 'sleeping'
 """,
 ).strip()
@@ -249,6 +254,7 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
+            database_metrics_context_info=DATABASE_METRICS_CONTEXT_INFO,
             proc_char_limit=self._config.stored_procedure_characters_limit,
             tail_text_size=TAIL_TEXT_SIZE,
             input_buffer_columns=input_buffer_columns,

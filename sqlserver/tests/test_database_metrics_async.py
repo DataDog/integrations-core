@@ -8,6 +8,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import DATABASE_METRICS_CONTEXT_INFO
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverDatabaseFilesMetrics,
     SqlserverDBFragmentationMetrics,
@@ -78,12 +79,15 @@ def test_async_database_metrics_job_uses_dedicated_connection_and_continues_afte
 
     job._execute_query_raw = execute_query
     check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    cursor = mock.MagicMock()
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(cursor))
     check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
 
     job.run_job()
 
     assert query_databases == ['database1', 'database2']
     check.connection.open_managed_default_connection.assert_called_once_with('dbm-database-metrics-')
+    cursor.execute.assert_called_once_with("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
     check.connection.restore_current_database_context.assert_called_once_with('dbm-database-metrics-')
     check.count.assert_called_once()
     assert check.count.call_args.args[:2] == ('dd.sqlserver.async_job.error', 1)
@@ -108,6 +112,7 @@ def test_async_database_metrics_job_stops_between_databases_when_cancelled(init_
 
     job._execute_query_raw = execute_query
     check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(mock.MagicMock()))
     check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
 
     with pytest.raises(Exception, match='Job loop cancelled'):

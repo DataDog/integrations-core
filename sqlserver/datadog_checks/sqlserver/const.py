@@ -67,6 +67,10 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
 AZURE_SERVER_SUFFIX = ".database.windows.net"
 SQLSERVER_PARAMETER_LIMIT = 2100
 
+# Identifies the dedicated connection used by the async database metrics job so DBM activity
+# collection can exclude the integration's own expensive queries.
+DATABASE_METRICS_CONTEXT_INFO = '0x64617461646f672d64617461626173652d6d657472696373'
+
 
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+from datadog_checks.sqlserver.const import DATABASE_METRICS_CONTEXT_INFO
 from datadog_checks.sqlserver.utils import construct_use_statement, raise_if_cancelled
 
 from .base import SqlserverDatabaseMetricsBase
@@ -78,6 +79,8 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
     def run_job(self) -> None:
         raise_if_cancelled(self._cancel_event)
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
+                cursor.execute("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
             with self._check.connection.restore_current_database_context(self._conn_key_prefix):
                 for database_metric in self.database_metrics:
                     self._execute_database_metric(database_metric)
