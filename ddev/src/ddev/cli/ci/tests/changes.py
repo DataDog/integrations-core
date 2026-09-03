@@ -44,6 +44,8 @@ def changes_in_commit(git: GitRepository, commit: str) -> list[ChangedFile]:
             f"Could not compare {commit} with its parent: {error}\n"
             "The checkout needs the parent commit, which `fetch-depth: 2` provides."
         ) from error
+    except ValueError as error:
+        raise ChangeResolutionError(f"Could not read the diff of {commit}: {error}") from error
 
 
 async def changes_in_pull_request(

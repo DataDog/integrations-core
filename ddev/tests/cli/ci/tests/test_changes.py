@@ -16,7 +16,7 @@ from ddev.utils.github_async.models import PullRequestFile
 class RecordingGit:
     """Stand-in for `GitRepository` that records the comparison it was asked for."""
 
-    def __init__(self, changed: tuple[ChangedFile, ...] = (), error: OSError | None = None):
+    def __init__(self, changed: tuple[ChangedFile, ...] = (), error: Exception | None = None):
         self.changed = list(changed)
         self.error = error
         self.calls: list[tuple[str, str | None]] = []
@@ -53,11 +53,20 @@ def test_a_commit_is_compared_with_its_first_parent():
     assert git.calls == [("abc123^1", "abc123")]
 
 
-def test_a_commit_whose_parent_is_missing_says_what_would_fix_it():
-    """The usual cause is a depth-1 checkout, which the message has to be able to point at."""
-    git = RecordingGit(error=OSError("fatal: ambiguous argument 'abc123^1'"))
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    [
+        pytest.param(OSError("fatal: ambiguous argument 'abc123^1'"), "fetch-depth: 2", id="parent-missing"),
+        pytest.param(ValueError("Malformed diff line: 'M'"), "Could not read the diff", id="unparsable-diff"),
+    ],
+)
+def test_a_comparison_git_cannot_answer_is_reported_as_a_change_resolution_failure(error: Exception, expected: str):
+    """Both reach the CLI as a message: the depth-1 checkout that causes the first is the common
+    case and the message has to point at it, and neither should surface as a traceback.
+    """
+    git = RecordingGit(error=error)
 
-    with pytest.raises(ChangeResolutionError, match="fetch-depth: 2"):
+    with pytest.raises(ChangeResolutionError, match=expected):
         changes_in_commit(git, "abc123")
 
 
