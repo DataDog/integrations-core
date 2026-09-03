@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pytest
 
+from ddev.cli.ci.tests.dispatcher import RunContext
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest, PullRequestFile
 from tests.cli.ci.tests.helpers import make_batch, make_job
@@ -214,3 +215,44 @@ def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
     assert result.exit_code == 0, result.output
     github.assert_not_called('list_pull_request_files')
     assert planned.call_args.kwargs['changed_files'] is None
+
+
+@pytest.mark.parametrize('run_context', list(RunContext), ids=lambda member: member.value)
+def test_every_run_context_is_accepted(ddev, github, planned, run_context: RunContext):
+    """`--context` restates its choices as literals, because `RunContext` lives in a module too
+    heavy to import while building the decorator. Parameterizing over the enum catches a member
+    added there and never wired up.
+    """
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--context', run_context.value, '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert f'Context -> {run_context.value}' in result.output
+
+
+@pytest.mark.parametrize(
+    ('options', 'expected'),
+    [
+        (['--pr', str(PR_NUMBER)], RunContext.PR),
+        (['--commit', 'a-sha'], RunContext.MASTER),
+    ],
+    ids=['pull-request', 'commit'],
+)
+def test_the_kind_of_run_defaults_to_what_named_it(
+    ddev, github, planned, local_changes, options: list[str], expected: RunContext
+):
+    result = ddev('ci', 'dispatch-tests', *options, '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert f'Context -> {expected.value}' in result.output
+
+
+def test_a_pull_request_can_be_reported_under_another_kind_of_run(ddev, github, planned):
+    """An agent test or a release run still tests a pull request, so the label is set apart from
+    what the run compares.
+    """
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--context', 'agent-test', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Context -> agent-test' in result.output
+    # The label does not change where the diff came from.
+    assert github.last_call('list_pull_request_files').kwargs['pull_number'] == PR_NUMBER

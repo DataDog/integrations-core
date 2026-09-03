@@ -43,6 +43,13 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     metavar='SHA',
     help='Commit on the default branch to test, compared with its first parent. Defaults to the local HEAD.',
 )
+@click.option(
+    '--context',
+    'run_context',
+    type=click.Choice(['pr', 'master', 'agent-test', 'release']),
+    default=None,
+    help='Kind of run, reported as a monitoring tag. Defaults to `pr` when testing a pull request, `master` otherwise.',
+)
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
 @click.option(
@@ -63,6 +70,7 @@ def dispatch_tests(
     pull_request: str | None,
     pr_head_sha: str | None,
     commit: str | None,
+    run_context: str | None,
     repository: str | None,
     all_targets: bool,
     minimum_base_package: bool,
@@ -82,7 +90,7 @@ def dispatch_tests(
     from pathlib import Path
 
     from ddev.cli.ci.tests.batching.build import HatchEnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
+    from ddev.cli.ci.tests.dispatcher import DispatcherContext, RunContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.utils.github import resolve_owner_repo
 
@@ -109,6 +117,7 @@ def dispatch_tests(
         commit=commit,
         token=token,
         all_targets=all_targets,
+        run_context=RunContext(run_context) if run_context else None,
     )
     if run is None:
         return
@@ -230,11 +239,15 @@ def resolve_run(
     commit: str | None,
     token: str,
     all_targets: bool,
+    run_context: RunContext | None,
 ) -> ResolvedRun | None:
     """Resolve what to test, or None when there is nothing to do.
 
     A pull request that is no longer open is the one such case: nothing to test at that point, and
     no open pull request to report to either.
+
+    `run_context` only labels the run. What is compared, and against what, follows from which input
+    named the run, so the two cannot contradict each other.
     """
     from ddev.cli.ci.tests.dispatcher import RunContext
 
@@ -247,6 +260,7 @@ def resolve_run(
             pr_head_sha=pr_head_sha,
             token=token,
             all_targets=all_targets,
+            run_context=run_context or RunContext.PR,
         )
 
     tested_commit = commit or app.repo.git.latest_commit().sha
@@ -260,7 +274,7 @@ def resolve_run(
             app.abort(str(error))
 
     return ResolvedRun(
-        run_context=RunContext.MASTER,
+        run_context=run_context or RunContext.MASTER,
         base_sha=tested_commit,
         checkout_sha=tested_commit,
         branch=app.repo.git.current_branch(),
@@ -277,6 +291,7 @@ def resolve_pull_request_run(
     pr_head_sha: str | None,
     token: str,
     all_targets: bool,
+    run_context: RunContext,
 ) -> ResolvedRun | None:
     """Read the pull request and its changed files from the API, in one client session."""
     import asyncio
@@ -285,7 +300,6 @@ def resolve_pull_request_run(
     from pydantic import ValidationError
 
     from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_pull_request
-    from ddev.cli.ci.tests.dispatcher import RunContext
     from ddev.utils.github_async import async_github_client
     from ddev.utils.github_async.models import PullRequestState
     from ddev.utils.github_errors import GitHubAuthenticationError
@@ -294,7 +308,12 @@ def resolve_pull_request_run(
         async with async_github_client(token=token) as client:
             number = requested_pr
             if number is None:
-                assert pr_head_sha is not None
+                # `resolve_run` only comes here when one of the two was given, and `validate_options`
+                # has already refused both at once.
+                assert pr_head_sha is not None, (
+                    'A pull request run needs either a number or a head commit, and this run reported '
+                    'neither. `resolve_run` dispatched to the wrong resolver.'
+                )
                 number = await resolve_pull_request_number(client, owner, repo, pr_head_sha)
                 if number is None:
                     app.display_info(f'{pr_head_sha} belongs to no open pull request, so there is nothing to test.')
@@ -312,7 +331,7 @@ def resolve_pull_request_run(
                 changed_files = await changes_in_pull_request(client, owner, repo, pull.number, pull.changed_files)
 
             return ResolvedRun(
-                run_context=RunContext.PR,
+                run_context=run_context,
                 base_sha=pull.head.sha,
                 checkout_sha=f'refs/pull/{pull.number}/merge',
                 branch=pull.head.ref,
