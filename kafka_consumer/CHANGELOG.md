@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.1.1 / 2026-09-03
+
+***Fixed***:
+
+* Skip partitions with no committed offset instead of reporting a negative offset and inflated `kafka.consumer_lag`. ([#24938](https://github.com/DataDog/integrations-core/pull/24938))
+
 ## 9.1.0 / 2026-09-02
 
 ***Added***:
