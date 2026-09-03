@@ -7,12 +7,14 @@ import asyncio
 import contextlib
 import logging
 import math
+import signal
 import threading
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from concurrent.futures import wait as wait_for_futures
 from dataclasses import dataclass
+from types import FrameType
 from typing import assert_never, cast
 
 from .exceptions import (
@@ -26,10 +28,16 @@ from .exceptions import (
 )
 
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
+# What `signal.getsignal` hands back: a Python callable, one of the `SIG_*` constants, or None for a
+# handler installed outside Python.
+type SignalHandler = Callable[[int, FrameType | None], object] | int | signal.Handlers | None
 
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
 # How long the loop may block before re-reading the timeout and the stop flag.
 STOP_CHECK_INTERVAL = 1.0
+# What a process is asked to stop with: SIGINT from an interactive interrupt, SIGTERM from a scheduler
+# or CI runner cancelling the job.
+SHUTDOWN_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 
 class OrchestratorTimeout(Exception):
@@ -178,6 +186,8 @@ class EventBusOrchestrator(ABC):
         self._running = False
         self._loop: asyncio.AbstractEventLoop | None = None
         self._stopping = threading.Event()
+        self._displaced_signal_handlers: dict[signal.Signals, SignalHandler] = {}
+        self._interrupted = False
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -203,6 +213,58 @@ class EventBusOrchestrator(ABC):
         # By identity: a subclass defining `__eq__` would otherwise drop a distinct processor.
         if not any(registered is processor for registered in self._processors):
             self._processors.append(processor)
+
+    def install_signal_handlers(self) -> None:
+        """Route :data:`SHUTDOWN_SIGNALS` to :meth:`on_shutdown_signal` for the life of the run.
+
+        Called by :meth:`initialize`. Override to handle a different set, or to do nothing where the
+        process has another owner for them.
+
+        One handler per signal, despite the name: this replaces whatever was installed rather than
+        chaining onto it, so two buses in a process would leave only the second one hearing anything.
+        For SIGINT what it replaces is the handler that raises ``KeyboardInterrupt``, which is what
+        makes shutdown take the same path whichever signal comes first. Whatever is displaced is put
+        back by :meth:`remove_signal_handlers`.
+        """
+        loop = asyncio.get_running_loop()
+        for received in SHUTDOWN_SIGNALS:
+            displaced = signal.getsignal(received)
+            try:
+                loop.add_signal_handler(received, self.on_shutdown_signal, received)
+            except (NotImplementedError, RuntimeError) as e:
+                # Windows loops cannot do this at all, and no loop can off the main thread. Neither is
+                # worth failing a run over: the bus still stops, just not on a signal.
+                self._logger.debug("Not handling %s: %s", received.name, e)
+            else:
+                # Recorded only once installed, so a partial install cannot have teardown write back a
+                # handler this never displaced.
+                self._displaced_signal_handlers[received] = displaced
+
+    def remove_signal_handlers(self) -> None:
+        """Undo :meth:`install_signal_handlers`. Called by :meth:`finalize`.
+
+        ``remove_signal_handler`` restores the interpreter default rather than what was displaced, so a
+        run would otherwise leave a caller that had its own handler without one.
+        """
+        loop = asyncio.get_running_loop()
+        while self._displaced_signal_handlers:
+            received, displaced = self._displaced_signal_handlers.popitem()
+            with contextlib.suppress(NotImplementedError, RuntimeError):
+                loop.remove_signal_handler(received)
+            # None means the handler was not installed from Python, which `signal` refuses to take back.
+            if displaced is not None:
+                signal.signal(received, displaced)
+
+    def on_shutdown_signal(self, received: signal.Signals) -> None:
+        """React to a shutdown signal by winding the bus down.
+
+        Runs as a loop callback rather than in signal context, so it may not block or await. Anything it
+        raises reaches the loop's exception handler, and a second signal will not retry it, so put what
+        must happen first. Override to add to this, calling ``super()``.
+        """
+        self._interrupted = self._interrupted or received == signal.SIGINT
+        self._logger.warning("Received %s: the bus will wind down", received.name)
+        self.request_stop()
 
     def request_stop(self) -> None:
         """Ask the bus to wind down, from any thread.
@@ -252,7 +314,7 @@ class EventBusOrchestrator(ABC):
         else:
             self._queue.put_nowait(message)
 
-    def run(self):
+    def run(self, *, propagate_keyboard_interrupt: bool = False):
         """
         Launch the orchestrator and start consuming messages from the message queue.
 
@@ -265,8 +327,17 @@ class EventBusOrchestrator(ABC):
           - [hook] on_message_received(message)
         - finalize()
           - [hook] on_finalize(exc_info)
+
+        Args:
+            propagate_keyboard_interrupt: Re-raise ``KeyboardInterrupt`` after a run interrupted by
+                SIGINT has wound down. Handling the signal is what stops the interpreter raising it, and
+                with it whatever the caller does about one, such as Click's abort. Off by default: a bus
+                that wound down cleanly has not failed. Callers that read state off the bus afterwards,
+                or report the outcome themselves, want it off.
         """
         asyncio.run(self._entry_point())
+        if self._interrupted and propagate_keyboard_interrupt:
+            raise KeyboardInterrupt
 
     async def _entry_point(self):
         exception = None
@@ -284,6 +355,8 @@ class EventBusOrchestrator(ABC):
         Initializes the orchestrator.
         """
         self._running = True
+        # Before the hook, so a signal arriving during it winds the bus down rather than killing it.
+        self.install_signal_handlers()
         try:
             await self._bounded_by_stop(self.on_initialize(), HookName.ON_INITIALIZE)
         except (FatalProcessingError, asyncio.CancelledError):
@@ -329,6 +402,10 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_FINALIZE, e),
                 self.on_error,
             )
+        finally:
+            # A handler outlives the loop it was installed on, so leaving it behind would have a later
+            # bus in the same process deliver signals to this dead one.
+            self.remove_signal_handlers()
 
     async def _run_in_worker[T: BaseMessage](self, work: Callable[[T], None], message: T) -> None:
         """Run blocking work on the processor pool, tracked until it finishes.

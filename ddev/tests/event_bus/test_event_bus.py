@@ -6,6 +6,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import os
+import signal
+import sys
 import threading
 import time
 from collections.abc import Generator
@@ -13,6 +16,7 @@ from concurrent.futures import Executor, ThreadPoolExecutor
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
+from types import FrameType
 
 import pytest
 from pytest_mock import MockerFixture
@@ -1221,6 +1225,21 @@ class StopRequester(AsyncProcessor[Memo]):
         self.submit_message(Memo("after_stop", subject="late"))
 
 
+class Signaller(AsyncProcessor[Memo]):
+    """Sends the process a real signal while the bus is running."""
+
+    def __init__(self, name: str, send: signal.Signals):
+        super().__init__(name)
+        self._send = send
+        self.stop_notifications = 0
+
+    async def process_message(self, message: Memo):
+        os.kill(os.getpid(), self._send)
+
+    def on_stop_requested(self):
+        self.stop_notifications += 1
+
+
 class StopWatcher(AsyncProcessor[TaskAssignment | Announcement]):
     def __init__(self, name: str, *, fail: bool = False):
         super().__init__(name)
@@ -1265,6 +1284,99 @@ def test_asking_to_stop_again_notifies_nobody_and_does_not_block():
     orchestrator.request_stop()
 
     assert watcher.stop_notifications == 1
+
+
+requires_signals = pytest.mark.skipif(sys.platform == "win32", reason="Windows loops cannot install these")
+
+
+@contextmanager
+def caught_rather_than_fatal(sent: signal.Signals) -> Generator[list[signal.Signals]]:
+    """Record *sent* instead of letting its default action end the process.
+
+    A bus that stopped installing handlers would otherwise kill the test session rather than fail a
+    test: SIGTERM's default is death, and nothing can catch that.
+    """
+    reached_the_process: list[signal.Signals] = []
+    previous = signal.signal(sent, lambda *_: reached_the_process.append(sent))
+    try:
+        yield reached_the_process
+    finally:
+        signal.signal(sent, previous)
+
+
+@requires_signals
+@pytest.mark.parametrize(
+    ("sent", "propagate", "expectation"),
+    [
+        pytest.param(signal.SIGINT, True, pytest.raises(KeyboardInterrupt), id="sigint-propagates"),
+        pytest.param(signal.SIGINT, False, does_not_raise(), id="sigint-suppressed"),
+        # Nothing in the interpreter raises for SIGTERM, so there is nothing to hand back.
+        pytest.param(signal.SIGTERM, True, does_not_raise(), id="sigterm-has-no-exception"),
+    ],
+)
+def test_an_interrupted_run_hands_the_interrupt_back_once_it_has_wound_down(
+    sent: signal.Signals, propagate: bool, expectation: AbstractContextManager
+):
+    """Handling SIGINT is what stops `KeyboardInterrupt` reaching the caller, and with it whatever the
+    caller does about one: Click turns it into `Aborted!` and exit 1, so a caller that wants that back
+    asks for it here.
+
+    Raised after the wind-down rather than instead of it, so the cleanup still happens first.
+    """
+    signaller = Signaller("signaller", sent)
+    orchestrator = MockOrchestrator(logging.getLogger("test_interrupt_propagation"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(signaller, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+
+    with caught_rather_than_fatal(sent), expectation:
+        orchestrator.run(propagate_keyboard_interrupt=propagate)
+
+    # Whatever the caller sees, the bus wound down first rather than being cut short.
+    assert orchestrator.stopping
+    assert signaller.stop_notifications == 1
+
+
+@requires_signals
+@pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
+def test_a_run_gives_back_the_handler_it_displaced(sent: signal.Signals):
+    """Nothing says the bus owns the process: a caller may have its own handler and outlive the run.
+
+    `remove_signal_handler` restores the interpreter default rather than what was displaced, so without
+    putting it back the caller silently loses its handler to a run that ended normally.
+    """
+
+    def caller_handler(signum: int, frame: FrameType | None) -> None: ...
+
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_restore"), max_timeout=30, grace_period=0)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+    previous = signal.signal(sent, caller_handler)
+    try:
+        orchestrator.run()
+
+        assert signal.getsignal(sent) is caller_handler
+    finally:
+        signal.signal(sent, previous)
+
+
+@requires_signals
+@pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
+def test_a_signal_reaches_the_bus_rather_than_the_process(sent: signal.Signals):
+    """Both defaults end a run, differently: SIGINT raises `KeyboardInterrupt` where it lands and
+    SIGTERM kills outright, so the fallback keeps a regression reportable rather than fatal.
+
+    The bus having handled the signal is what leaves that fallback untouched.
+    """
+    signaller = Signaller("signaller", sent)
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(signaller, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+
+    with caught_rather_than_fatal(sent) as reached_the_process:
+        orchestrator.run()
+
+    assert reached_the_process == []
+    assert orchestrator.stopping
+    assert signaller.stop_notifications == 1
 
 
 def test_a_stop_is_not_derailed_by_a_processor_that_fails_to_wind_down():
