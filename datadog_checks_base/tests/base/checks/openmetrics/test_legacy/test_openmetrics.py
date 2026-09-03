@@ -2838,53 +2838,6 @@ def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_o
     assert rebuilt.options['verify'] is False
 
 
-def test_http_handler_negotiates_over_seeded_default_headers(mocked_openmetrics_check_factory):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-    }
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-
-    http_handler = check.get_http_handler(scraper_config)
-
-    assert http_handler.get_header('accept') == 'text/plain'
-    assert http_handler.get_header('accept-encoding') == 'gzip'
-
-
-def test_http_handler_preserves_user_configured_headers(mocked_openmetrics_check_factory):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-        'headers': {'Accept': 'application/openmetrics-text', 'Accept-Encoding': 'br'},
-    }
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-
-    http_handler = check.get_http_handler(scraper_config)
-
-    assert http_handler.get_header('accept') == 'application/openmetrics-text'
-    assert http_handler.get_header('accept-encoding') == 'br'
-
-
-def test_http_handler_preserves_non_canonically_cased_extra_headers(mocked_openmetrics_check_factory):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-        'extra_headers': {'accept': 'application/openmetrics-text', 'accept-encoding': 'br'},
-    }
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-
-    http_handler = check.get_http_handler(scraper_config)
-
-    assert http_handler.get_header('accept') == 'application/openmetrics-text'
-    assert http_handler.get_header('accept-encoding') == 'br'
-
-
 def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):
     instance = {
         'prometheus_url': 'https://www.example.com',

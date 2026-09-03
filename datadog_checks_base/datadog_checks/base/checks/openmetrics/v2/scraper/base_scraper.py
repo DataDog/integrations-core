@@ -23,7 +23,6 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.headers import DEFAULT_ACCEPT
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientTimeoutError
 
 
@@ -222,12 +221,14 @@ class OpenMetricsScraper:
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
-        if self.http.get_header('Accept') in (None, DEFAULT_ACCEPT):
-            if self._use_latest_spec:
-                accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-            else:
-                accept_header = 'text/plain'
-            self.http.set_header('Accept', accept_header)
+        if self._use_latest_spec:
+            accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+        else:
+            accept_header = 'text/plain'
+
+        # Request the appropriate exposition format
+        if self.http.options['headers'].get('Accept') == '*/*':
+            self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
