@@ -336,6 +336,14 @@ def resolve_pull_request_run(
             if pull.state is not PullRequestState.OPEN:
                 app.display_info(f'Pull request {pull.number} is not open, so there is nothing to test.')
                 return None
+            # A commit pushed between resolving the number and reading the pull request would leave
+            # this describing a newer revision than the one asked for.
+            if pr_head_sha is not None and not pull.head.sha.startswith(pr_head_sha):
+                app.display_info(
+                    f'Pull request {pull.number} has moved on from {pr_head_sha} to {pull.head.sha}, so there is '
+                    'nothing to test: the run for the newer commit covers it.'
+                )
+                return None
 
             changed_files = None
             if not all_targets:

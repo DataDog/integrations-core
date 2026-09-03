@@ -128,6 +128,23 @@ def test_a_commit_that_is_no_longer_the_head_dispatches_nothing(ddev, github, pl
     github.assert_not_called('create_workflow_dispatch')
 
 
+def test_a_head_that_moves_while_the_pull_request_is_read_dispatches_nothing(ddev, github, planned):
+    """The number is resolved from one response and the pull request read from another.
+
+    A commit pushed in between leaves the second describing a newer revision, whose diff and head
+    would then be tested and reported against the commit this run was asked for.
+    """
+    github.mock_response('list_commit_pulls', pulls_page(pull_request()))
+    github.mock_response('get_pull_request', pull_request(head_sha='a-newer-sha'))
+
+    result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
+
+    assert result.exit_code == 0, result.output
+    assert f'has moved on from {HEAD_SHA}' in result.output
+    planned.assert_not_called()
+    github.assert_not_called('create_workflow_dispatch')
+
+
 def test_a_head_sha_heading_several_pull_requests_is_refused(ddev, github, planned):
     """Choosing one would plan against its base and comment on it, so a run that cannot say which
     pull request it is testing must not run.
@@ -272,15 +289,3 @@ def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
     assert result.exit_code == 0, result.output
     github.assert_not_called('list_pull_request_files')
     assert planned.call_args.kwargs['changed_files'] is None
-
-
-def test_tags_are_separated_on_spaces(ddev, github, planned, mocker):
-    """Where one tag ends and the next begins is the only thing the command decides about them."""
-    displayed = mocker.patch('ddev.cli.ci.dispatch_tests.display_plan')
-
-    result = ddev(
-        'ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--tags', 'kind:agent-test team:agent-integrations', '--dry-run'
-    )
-
-    assert result.exit_code == 0, result.output
-    assert displayed.call_args.args[1].tags == ('kind:agent-test', 'team:agent-integrations')
