@@ -9,6 +9,7 @@ from datetime import timedelta
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
+from datadog_checks.base.utils.headers import get_default_headers
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
 
@@ -157,7 +158,8 @@ class FakeHTTPClient:
         self.options: dict[str, Any] = {
             'auth': None,
             'cert': None,
-            'headers': {},
+            # A real client always seeds these, and checks negotiate against the seeded values.
+            'headers': get_default_headers(),
             'proxies': None,
             'timeout': (10.0, 10.0),
             'verify': True,

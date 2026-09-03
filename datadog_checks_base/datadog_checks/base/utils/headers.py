@@ -5,18 +5,14 @@ from collections.abc import MutableMapping
 
 from datadog_checks.base.agent import datadog_agent
 
-# Seeded defaults count as unset when negotiating a more specific value.
-DEFAULT_ACCEPT = '*/*'
-DEFAULT_ACCEPT_ENCODING = 'gzip, deflate'
-
 
 def _get_common_headers():
     return {  # Required by the HTTP spec. If missing, some websites may return junk (eg 404 responses).
-        'Accept': DEFAULT_ACCEPT,
+        'Accept': '*/*',
         # Allow websites to send compressed responses.
         # (In theory, not including this header allows servers to send anything, but in practice servers are
         # typically conservative and send plain text, i.e. uncompressed responses.)
-        'Accept-Encoding': DEFAULT_ACCEPT_ENCODING,
+        'Accept-Encoding': 'gzip, deflate',
         # NOTE: we don't include a 'Connection' header. This is equivalent to using the spec-specific default
         # behavior, i.e. 'keep-alive' for HTTP/1.1, and 'close' for HTTP/1.0.
     }

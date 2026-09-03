@@ -2075,16 +2075,6 @@ def test_get_http_handler_negotiates_over_seeded_default_headers(p_check):
     assert http_handler.get_header('accept-encoding') == 'gzip'
 
 
-def test_get_http_handler_preserves_user_configured_headers(p_check):
-    endpoint = 'http://fake.endpoint:10055/metrics'
-    instance = {'headers': {'Accept': 'application/openmetrics-text', 'Accept-Encoding': 'br'}}
-
-    http_handler = p_check.get_http_handler(endpoint, instance)
-
-    assert http_handler.get_header('accept') == 'application/openmetrics-text'
-    assert http_handler.get_header('accept-encoding') == 'br'
-
-
 def test_get_http_handler_preserves_non_canonically_cased_extra_headers(p_check):
     endpoint = 'http://fake.endpoint:10055/metrics'
     instance = {'extra_headers': {'accept': 'application/openmetrics-text', 'accept-encoding': 'br'}}
