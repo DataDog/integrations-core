@@ -66,7 +66,9 @@ class WorkflowRun(BaseModel):
 
     The `workflow-run` schema declares `status` and `conclusion` as plain
     nullable strings with no `enum`, so they are intentionally kept as free-form
-    strings rather than modeled as a StrEnum.
+    strings rather than modeled as a StrEnum. `status` is also in the schema's
+    `required` list, so it is typed `str | None` with no default: the key is
+    always present and only its value may be null.
     Reference:
     https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run
     """
@@ -75,7 +77,7 @@ class WorkflowRun(BaseModel):
 
     id: int
     name: str | None = None
-    status: str
+    status: str | None
     conclusion: str | None = None
     html_url: str
     created_at: str | None = None

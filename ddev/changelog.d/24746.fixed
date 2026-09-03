@@ -1,0 +1,1 @@
+Model the workflow run ``status`` field as nullable so runs without a status parse instead of raising a validation error.
