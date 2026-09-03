@@ -1,0 +1,1 @@
+Resolve a pull request's changed files through the GitHub API instead of local git.
