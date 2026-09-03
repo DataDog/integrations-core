@@ -62,8 +62,19 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
                 config.database_metrics_config['table_size_metrics'],
             )
         )
+        # `run_sync` matches the other DBM jobs: tests set it so a returned check implies the
+        # collection already happened, instead of racing a background thread.
+        run_sync = any(
+            metric_config.get('run_sync', False)
+            for metric_config in (
+                config.database_metrics_config['index_usage_metrics'],
+                config.database_metrics_config['db_fragmentation_metrics'],
+                config.database_metrics_config['table_size_metrics'],
+            )
+        )
         super().__init__(
             check,
+            run_sync=run_sync,
             enabled=enabled,
             expected_db_exceptions=tuple(EXPECTED_DB_EXCEPTIONS),
             min_collection_interval=config.min_collection_interval,
@@ -79,8 +90,6 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
     def run_job(self) -> None:
         raise_if_cancelled(self._cancel_event)
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
-                cursor.execute("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
             with self._check.connection.restore_current_database_context(self._conn_key_prefix):
                 for database_metric in self.database_metrics:
                     self._execute_database_metric(database_metric)
@@ -153,6 +162,11 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         fetch_multiple_results: bool = False,
     ) -> list[tuple]:
         with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
+            # CONTEXT_INFO is session state, and this job holds its connection for the length of a
+            # sweep -- up to tens of minutes on a large estate. A reconnect in that window would come
+            # back unmarked and put these queries into query-activity samples, so mark every cursor
+            # rather than marking the session once.
+            cursor.execute("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
             if db:
                 context = construct_use_statement(db)
                 self._log.debug("Changing async database metrics cursor context via use statement: %s", context)
