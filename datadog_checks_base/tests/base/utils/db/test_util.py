@@ -983,3 +983,27 @@ class TestTagManager:
 
         expected_tags = sorted(['test_key:UPPERCASE-VALUE', 'env:PRODUCTION', 'KEYLESS-TAG-UPPERCASE'])
         assert sorted(tag_manager.get_tags()) == expected_tags
+
+
+def test_rate_limiting_ttl_cache_would_acquire_does_not_consume_budget():
+    """
+    A failed attempt must not burn the key's budget.
+
+    Without `would_acquire`, callers had to `acquire` before doing the work the limit guards; if that
+    work then failed, the key was already marked seen and the retry was suppressed until the entry
+    expired -- so a transient error silently cost a full TTL of collection.
+    """
+    cache = RateLimitingTTLCache(maxsize=2, ttl=100)
+
+    assert cache.would_acquire('a') is True
+    assert cache.would_acquire('a') is True, "checking admission must be repeatable"
+    assert len(cache) == 0, "checking admission must not store the key"
+
+    assert cache.acquire('a') is True
+    assert cache.would_acquire('a') is False
+    assert cache.acquire('a') is False
+
+    # maxsize is honored by both, so a full cache admits nothing.
+    assert cache.acquire('b') is True
+    assert cache.would_acquire('c') is False
+    assert cache.acquire('c') is False
