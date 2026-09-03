@@ -43,9 +43,11 @@ class Query(object):
                         If the collection interval is greater than check collection interval,
                         the query will NOT BE RUN exactly at the collection interval.
                         The query will be run at the next check run after the collection interval has passed.
-                - (Optional) collection_start_offset (int): The delay (in seconds) before the query's first execution.
-                    This only applies when collection_interval is set. Subsequent executions remain separated by the
-                    collection interval.
+                - (Optional) collection_phase_offset (int): Where in the collection interval this query sits, in
+                    seconds. This only applies when collection_interval is set. The first execution is NOT delayed;
+                    the offset takes effect afterwards, so the query settles onto a cadence of one execution per
+                    collection interval phase-shifted by the offset. Use it to spread many same-interval queries
+                    across the interval instead of having them all fire in the same burst.
                 - (Optional) metric_prefix (str): The prefix to add to the metric name.
                     Note: If the metric prefix is None, the default metric prefix `<INTEGRATION>.` will be used.
                 - (Optional) params (Sequence): Bound parameters to pass alongside the query at execution time.
@@ -66,9 +68,8 @@ class Query(object):
         self.base_tags = None  # type: List[str]
         # The collecton interval (in seconds) of the query. If None, the query will be run every check run.
         self.collection_interval = None  # type: int
-        # The delay (in seconds) before the first query execution.
-        self.collection_start_offset = None  # type: int
-        self.__creation_time = get_timestamp()
+        # Where in the collection interval this query sits, in seconds. Applied after the first execution.
+        self.collection_phase_offset = None  # type: int
         # The last time the query was executed. If None, the query has never been executed.
         # This is only used when the collection_interval is not None.
         self.__last_execution_time = None  # type: float
@@ -258,17 +259,17 @@ class Query(object):
                 )
             collection_interval = int(collection_interval)
 
-        collection_start_offset = self.query_data.get('collection_start_offset')
-        if collection_start_offset is not None:
-            if not isinstance(collection_start_offset, (int, float)):
-                raise ValueError('field `collection_start_offset` for {} must be a number'.format(query_name))
-            elif int(collection_start_offset) < 0:
+        collection_phase_offset = self.query_data.get('collection_phase_offset')
+        if collection_phase_offset is not None:
+            if not isinstance(collection_phase_offset, (int, float)):
+                raise ValueError('field `collection_phase_offset` for {} must be a number'.format(query_name))
+            elif int(collection_phase_offset) < 0:
                 raise ValueError(
-                    'field `collection_start_offset` for {} must be a non-negative number after rounding'.format(
+                    'field `collection_phase_offset` for {} must be a non-negative number after rounding'.format(
                         query_name
                     )
                 )
-            collection_start_offset = int(collection_start_offset)
+            collection_phase_offset = int(collection_phase_offset)
 
         self.name = query_name
         self.query = query
@@ -277,7 +278,7 @@ class Query(object):
         self.extra_transformers = tuple(extra_data)
         self.base_tags = tags
         self.collection_interval = collection_interval
-        self.collection_start_offset = collection_start_offset
+        self.collection_phase_offset = collection_phase_offset
         self.metric_name_raw = metric_prefix is not None
         del self.query_data
 
@@ -293,10 +294,15 @@ class Query(object):
 
         now = get_timestamp()
         if self.__last_execution_time is None:
-            if self.collection_start_offset is not None and now - self.__creation_time < self.collection_start_offset:
-                return False
-
+            # Never executed: collect immediately, so a single check run still covers every query. The phase
+            # offset is charged against this first execution by backdating it, which puts the *next* execution
+            # at `now + offset` and every one after that an interval apart. That is what spreads a large set of
+            # same-interval queries out, without any of them going uncollected for a whole interval at startup.
             self.__last_execution_time = now
+            if self.collection_phase_offset:
+                self.__last_execution_time -= self.collection_interval - (
+                    self.collection_phase_offset % self.collection_interval
+                )
             return True
 
         if now - self.__last_execution_time >= self.collection_interval:

@@ -1,1 +1,1 @@
-Add support for delaying the first execution of interval-gated database queries.
+Add a collection phase offset so interval-gated database queries can be spread across their interval.

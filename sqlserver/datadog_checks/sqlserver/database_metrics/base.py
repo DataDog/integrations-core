@@ -78,23 +78,29 @@ class SqlserverDatabaseMetricsBase:
         return filters
 
     @staticmethod
-    def _database_collection_start_offset(
+    def _database_collection_phase_offset(
         database: str, database_count: int, collection_interval: int | None
     ) -> int | None:
+        '''
+        Return this database's slot within the collection interval, or None when spreading does not apply.
+
+        Derived from the database name rather than its position in the autodiscovered list so a database keeps
+        its slot across Agent restarts and does not get reshuffled when autodiscovery adds or removes another
+        database. Python's built-in hash() is randomized per process by PYTHONHASHSEED and cannot be used here.
+        '''
         if database_count <= 1 or collection_interval is None:
             return None
 
-        # Unlike Python's process-randomized hash(), SHA-256 keeps each database in the same slot across restarts.
         database_hash = hashlib.sha256(database.encode()).digest()
         return int.from_bytes(database_hash[:8], byteorder='big') % collection_interval
 
-    def _set_database_collection_start_offset(
+    def _set_database_collection_phase_offset(
         self, queries: list[dict], database: str, database_count: int, collection_interval: int | None
     ) -> None:
-        collection_start_offset = self._database_collection_start_offset(database, database_count, collection_interval)
-        if collection_start_offset is not None:
+        collection_phase_offset = self._database_collection_phase_offset(database, database_count, collection_interval)
+        if collection_phase_offset is not None:
             for query in queries:
-                query['collection_start_offset'] = collection_start_offset
+                query['collection_phase_offset'] = collection_phase_offset
 
     @property
     def query_executors(self) -> List[QueryExecutor]:
