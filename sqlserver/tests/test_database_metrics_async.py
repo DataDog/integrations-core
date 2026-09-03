@@ -87,11 +87,37 @@ def test_async_database_metrics_job_uses_dedicated_connection_and_continues_afte
 
     assert query_databases == ['database1', 'database2']
     check.connection.open_managed_default_connection.assert_called_once_with('dbm-database-metrics-')
-    cursor.execute.assert_called_once_with("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
     check.connection.restore_current_database_context.assert_called_once_with('dbm-database-metrics-')
     check.count.assert_called_once()
     assert check.count.call_args.args[:2] == ('dd.sqlserver.async_job.error', 1)
     assert 'database=database1' in caplog.text
+
+
+@pytest.mark.unit
+def test_async_database_metrics_marks_every_cursor_for_activity_exclusion(init_config, instance_docker_metrics):
+    """
+    Each cursor is marked before its query runs.
+
+    The marker is what keeps this job's own heavy queries out of query-activity samples. Setting it
+    once per sweep would be enough only if the connection never dropped; a sweep can run for tens of
+    minutes, and a reconnect would come back unmarked and start polluting the customer's activity
+    data. So the bug being guarded against is a marker that covers the first query but not the rest.
+    """
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    job = check.database_metrics_job
+    cursor = mock.MagicMock()
+    cursor.description = None
+    cursor.fetchall.return_value = []
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(cursor))
+
+    for _ in range(2):
+        job._execute_query_raw('select 1', db='database1')
+
+    marker = mock.call("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
+    assert cursor.execute.call_args_list.count(marker) == 2
+    # ...and it precedes the USE and the query itself on each pass.
+    assert cursor.execute.call_args_list[0] == marker
+    assert cursor.execute.call_args_list.index(marker, 1) < len(cursor.execute.call_args_list) - 1
 
 
 @pytest.mark.unit
