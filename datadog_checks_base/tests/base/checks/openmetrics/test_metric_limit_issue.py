@@ -63,7 +63,7 @@ class GeneratedScraperEndpointsCheck(OpenMetricsBaseCheckV2):
         self.scrapers = {endpoint: None for endpoint in endpoints if endpoint}
 
 
-def test_metric_limit_issue_uses_generated_scraper_endpoints(datadog_agent: Any) -> None:
+def test_metric_limit_issue_uses_generated_scraper_endpoints(datadog_agent: Any):
     agent_endpoint = 'http://z-agent/metrics'
     operator_endpoint = 'http://a-operator/metrics'
     check = GeneratedScraperEndpointsCheck(
