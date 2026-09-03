@@ -1,0 +1,1 @@
+Stagger per-database metric collection to avoid synchronized query bursts.
