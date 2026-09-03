@@ -83,7 +83,8 @@ _COMPAT_EXCEPTIONS: dict[type[HTTPClientError], type[HTTPClientError]] = {
 # requests wraps body read timeouts in ConnectionError rather than ReadTimeout.
 _COMPAT_BODY_READ_TIMEOUT_ERROR = _backend_compat_type(HTTPClientReadTimeoutError, requests_exceptions.ConnectionError)
 _COMPAT_INVALID_HEADER_ERROR = _backend_compat_type(HTTPClientRequestError, requests_exceptions.InvalidHeader)
-_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(json.JSONDecodeError, requests_exceptions.JSONDecodeError)
+# Requests must be first so its initializer populates request, response, and simplejson fields.
+_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(requests_exceptions.JSONDecodeError, json.JSONDecodeError)
 
 
 def _translate_requests_exception(exc: BaseException, *, response: HTTPResponse | None = None) -> HTTPClientError:
