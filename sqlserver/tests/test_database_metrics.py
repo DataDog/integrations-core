@@ -64,6 +64,108 @@ AUTODISCOVERY_FILTERED_INSTANCE_METRICS = [
     'sqlserver.database.backup_count',
 ]
 
+PER_DATABASE_STAGGERED_METRICS = [
+    pytest.param(
+        SqlserverIndexUsageMetrics,
+        'index_usage_metrics',
+        {'enabled': True, 'enabled_tempdb': False, 'collection_interval': 10},
+        id='index-usage',
+    ),
+    pytest.param(
+        SqlserverTableSizeMetrics,
+        'table_size_metrics',
+        {'enabled': True, 'collection_interval': 10},
+        id='table-size',
+    ),
+    pytest.param(
+        SqlserverDBFragmentationMetrics,
+        'db_fragmentation_metrics',
+        {'enabled': True, 'enabled_tempdb': False, 'collection_interval': 10},
+        id='fragmentation',
+    ),
+]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
+def test_per_database_metrics_execute_only_due_database_slots(
+    init_config, instance_docker_metrics, metrics_class, config_key, metric_config
+):
+    databases = ['master', 'msdb', 'database_1', 'database_2', 'database_3', 'database_4', 'delta']
+    instance_docker_metrics['database_metrics'] = {config_key: metric_config}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = 10
+    executed_databases = []
+
+    def execute_query_handler(_query, db=None, params=None):
+        executed_databases.append(db)
+        return []
+
+    now = 100
+    with mock.patch('datadog_checks.base.utils.db.query.get_timestamp', side_effect=lambda: now):
+        metrics = metrics_class(
+            config=sqlserver_check._config,
+            new_query_executor=sqlserver_check._new_query_executor,
+            server_static_info=STATIC_SERVER_INFO,
+            execute_query_handler=execute_query_handler,
+            databases=databases,
+        )
+        _ = metrics.query_executors
+        now += 2
+        metrics.execute()
+        assert executed_databases == ['msdb', 'database_1']
+
+        now += 9
+        metrics.execute()
+        now += 1
+        metrics.execute()
+
+    assert executed_databases.count('msdb') == 2
+    assert executed_databases.count('database_1') == 2
+    assert all(
+        executed_databases.count(database) == 1 for database in databases if database not in {'msdb', 'database_1'}
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
+def test_per_database_metric_slots_are_stable(
+    init_config, instance_docker_metrics, metrics_class, config_key, metric_config
+):
+    instance_docker_metrics['database_metrics'] = {config_key: metric_config}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = 10
+
+    def collect_offsets(databases: list[str]) -> dict[str, int | None]:
+        offsets = {}
+
+        def new_query_executor(queries: list[dict], **kwargs) -> mock.Mock:
+            database = kwargs['executor'].keywords['db']
+            offsets[database] = queries[0].get('collection_start_offset')
+            return mock.Mock()
+
+        metrics = metrics_class(
+            config=sqlserver_check._config,
+            new_query_executor=new_query_executor,
+            server_static_info=STATIC_SERVER_INFO,
+            execute_query_handler=mock.Mock(),
+            databases=databases,
+        )
+        metrics._build_query_executors()
+        return offsets
+
+    original_offsets = collect_offsets(['alpha', 'beta', 'gamma'])
+    reconstructed_offsets = collect_offsets(['alpha', 'beta', 'gamma'])
+    expanded_offsets = collect_offsets(['alpha', 'beta', 'gamma', 'delta'])
+
+    assert original_offsets == {'alpha': 4, 'beta': 5, 'gamma': 2}
+    assert reconstructed_offsets == original_offsets
+    assert {database: expanded_offsets[database] for database in original_offsets} == original_offsets
+    assert collect_offsets(['alpha']) == {'alpha': None}
+
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = None
+    assert collect_offsets(['alpha', 'beta']) == {'alpha': None, 'beta': None}
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
@@ -1148,7 +1250,8 @@ def test_sqlserver_index_usage_metrics(
 
     sqlserver_check._database_metrics = [index_usage_metrics]
 
-    dd_run_check(sqlserver_check)
+    with mock.patch.object(index_usage_metrics, '_database_collection_start_offset', return_value=0):
+        dd_run_check(sqlserver_check)
 
     if not include_index_usage_metrics:
         assert index_usage_metrics.enabled is False
@@ -1398,7 +1501,8 @@ def test_sqlserver_db_fragmentation_metrics(
 
     sqlserver_check._database_metrics = [db_fragmentation_metrics]
 
-    dd_run_check(sqlserver_check)
+    with mock.patch.object(db_fragmentation_metrics, '_database_collection_start_offset', return_value=0):
+        dd_run_check(sqlserver_check)
 
     if not include_db_fragmentation_metrics:
         assert db_fragmentation_metrics.enabled is False
@@ -1830,7 +1934,8 @@ def test_sqlserver_table_size_metrics(
 
     sqlserver_check._database_metrics = [table_size_metrics]
 
-    dd_run_check(sqlserver_check)
+    with mock.patch.object(table_size_metrics, '_database_collection_start_offset', return_value=0):
+        dd_run_check(sqlserver_check)
 
     if not include_table_size_metrics:
         assert table_size_metrics.enabled is False

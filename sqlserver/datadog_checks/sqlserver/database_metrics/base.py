@@ -4,6 +4,7 @@
 
 
 import copy
+import hashlib
 from typing import Callable, List, Optional
 
 from datadog_checks.base.log import get_check_logger
@@ -75,6 +76,25 @@ class SqlserverDatabaseMetricsBase:
             placeholders = ", ".join("?" for _ in params)
             filters.append((f"{column} IN ({placeholders})", params))
         return filters
+
+    @staticmethod
+    def _database_collection_start_offset(
+        database: str, database_count: int, collection_interval: int | None
+    ) -> int | None:
+        if database_count <= 1 or collection_interval is None:
+            return None
+
+        # Unlike Python's process-randomized hash(), SHA-256 keeps each database in the same slot across restarts.
+        database_hash = hashlib.sha256(database.encode()).digest()
+        return int.from_bytes(database_hash[:8], byteorder='big') % collection_interval
+
+    def _set_database_collection_start_offset(
+        self, queries: list[dict], database: str, database_count: int, collection_interval: int | None
+    ) -> None:
+        collection_start_offset = self._database_collection_start_offset(database, database_count, collection_interval)
+        if collection_start_offset is not None:
+            for query in queries:
+                query['collection_start_offset'] = collection_start_offset
 
     @property
     def query_executors(self) -> List[QueryExecutor]:
