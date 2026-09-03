@@ -8,7 +8,7 @@ from __future__ import annotations
 import pytest
 
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import PullRequest, PullRequestFile
+from ddev.utils.github_async.models import PullRequest, PullRequestFile, PullRequestSimple
 from tests.cli.ci.tests.helpers import make_batch, make_job
 
 PR_NUMBER = 4242
@@ -17,7 +17,7 @@ HEAD_SHA = 'head-sha-aaa'
 
 def pull_request(
     state: str = 'open',
-    changed_files: int | None = 1,
+    changed_files: int = 1,
     number: int = PR_NUMBER,
     head_sha: str = HEAD_SHA,
     base_ref: str = 'a-target-branch',
@@ -32,12 +32,28 @@ def pull_request(
     )
 
 
+def listed_pull_request(
+    number: int = PR_NUMBER,
+    head_sha: str = HEAD_SHA,
+    base_ref: str = 'a-target-branch',
+    state: str = 'open',
+) -> PullRequestSimple:
+    """What `list_commit_pulls` returns: no diff totals, so it cannot stand in for the full form."""
+    return PullRequestSimple(
+        number=number,
+        html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
+        state=state,
+        head={'ref': 'hs/a-branch', 'sha': head_sha},
+        base={'ref': base_ref, 'sha': 'base-sha-bbb'},
+    )
+
+
 def files_page(*files: PullRequestFile) -> GitHubResponse[list[PullRequestFile]]:
     return GitHubResponse[list[PullRequestFile]].model_validate({'data': list(files), 'headers': {}})
 
 
-def pulls_page(*pulls: PullRequest) -> GitHubResponse[list[PullRequest]]:
-    return GitHubResponse[list[PullRequest]].model_validate({'data': list(pulls), 'headers': {}})
+def pulls_page(*pulls: PullRequestSimple) -> GitHubResponse[list[PullRequestSimple]]:
+    return GitHubResponse[list[PullRequestSimple]].model_validate({'data': list(pulls), 'headers': {}})
 
 
 @pytest.fixture
@@ -92,7 +108,7 @@ def test_a_pull_request_supplies_the_whole_run_context(ddev, github, planned, re
 
 def test_a_head_sha_resolves_to_its_pull_request(ddev, github, planned):
     """`workflow_run` carries the head commit, not reliably a number, so the run resolves it."""
-    github.mock_response('list_commit_pulls', pulls_page(pull_request()))
+    github.mock_response('list_commit_pulls', pulls_page(listed_pull_request()))
 
     result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA, '--dry-run')
 
@@ -118,7 +134,7 @@ def test_a_commit_that_is_no_longer_the_head_dispatches_nothing(ddev, github, pl
     Testing it anyway would read the newer head and diff while reporting against the older commit,
     so the run would test one revision and attribute it to another.
     """
-    github.mock_response('list_commit_pulls', pulls_page(pull_request(head_sha='a-newer-sha')))
+    github.mock_response('list_commit_pulls', pulls_page(listed_pull_request(head_sha='a-newer-sha')))
 
     result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
 
@@ -134,7 +150,7 @@ def test_a_head_that_moves_while_the_pull_request_is_read_dispatches_nothing(dde
     A commit pushed in between leaves the second describing a newer revision, whose diff and head
     would then be tested and reported against the commit this run was asked for.
     """
-    github.mock_response('list_commit_pulls', pulls_page(pull_request()))
+    github.mock_response('list_commit_pulls', pulls_page(listed_pull_request()))
     github.mock_response('get_pull_request', pull_request(head_sha='a-newer-sha'))
 
     result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
@@ -151,7 +167,7 @@ def test_a_head_sha_heading_several_pull_requests_is_refused(ddev, github, plann
     """
     github.mock_response(
         'list_commit_pulls',
-        pulls_page(pull_request(number=1), pull_request(number=2, base_ref='7.62.x')),
+        pulls_page(listed_pull_request(number=1), listed_pull_request(number=2, base_ref='7.62.x')),
     )
 
     result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
@@ -165,7 +181,7 @@ def test_a_head_sha_heading_several_pull_requests_is_refused(ddev, github, plann
 def test_a_base_ref_narrows_an_ambiguous_head_sha(ddev, github, planned):
     github.mock_response(
         'list_commit_pulls',
-        pulls_page(pull_request(number=1), pull_request(number=2, base_ref='7.62.x')),
+        pulls_page(listed_pull_request(number=1), listed_pull_request(number=2, base_ref='7.62.x')),
     )
     github.mock_response('get_pull_request', pull_request(number=2, base_ref='7.62.x'))
 

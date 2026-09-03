@@ -46,6 +46,7 @@ from .models import (
     PullRequest,
     PullRequestFile,
     PullRequestReviewComment,
+    PullRequestSimple,
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
@@ -900,7 +901,7 @@ class AsyncGitHubClient:
         timeout: float | None = None,
         *,
         retry: RetryPolicy | None = None,
-    ) -> AsyncIterator[GitHubResponse[list[PullRequest]]]:
+    ) -> AsyncIterator[GitHubResponse[list[PullRequestSimple]]]:
         """
         Calls the GitHub API to list the pull requests associated with a commit (paginated).
 
@@ -920,16 +921,18 @@ class AsyncGitHubClient:
             retry: Applies per page. Defaults to the client's policy for replayable requests.
 
         Returns:
-            AsyncIterator[GitHubResponse[list[PullRequest]]]: One page of pull requests per iteration.
-            The endpoint returns the abbreviated form, so ``changed_files`` is unset on each.
+            AsyncIterator[GitHubResponse[list[PullRequestSimple]]]: One page of pull requests per
+            iteration, in the abbreviated form the list endpoints return.
         """
         # The response body is a bare JSON array, so there is no wrapper model to validate against.
         endpoint = f"/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
         async for response in self._paginated_request(
             "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
         ):
-            pulls = [PullRequest.model_validate(item) for item in response.json()]
-            yield GitHubResponse[list[PullRequest]].model_validate({"data": pulls, "headers": dict(response.headers)})
+            pulls = [PullRequestSimple.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[PullRequestSimple]].model_validate(
+                {"data": pulls, "headers": dict(response.headers)}
+            )
 
     async def list_pull_request_files(
         self,
@@ -985,7 +988,7 @@ class AsyncGitHubClient:
         timeout: float | None = None,
         *,
         retry: RetryPolicy | None = None,
-    ) -> GitHubResponse[list[PullRequest]]:
+    ) -> GitHubResponse[list[PullRequestSimple]]:
         """
         Calls the GitHub API to list pull requests in a repository.
 
@@ -1005,7 +1008,8 @@ class AsyncGitHubClient:
             retry: Defaults to the client's policy for replayable requests.
 
         Returns:
-            GitHubResponse[list[PullRequest]]: The validated pull requests on the first result page.
+            GitHubResponse[list[PullRequestSimple]]: The validated pull requests on the first result
+            page, in the abbreviated form the list endpoints return.
 
         Raises:
             ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
@@ -1019,8 +1023,10 @@ class AsyncGitHubClient:
         response = await self._request(
             "GET", f"/repos/{owner}/{repo}/pulls", timeout=timeout, retry=retry, params=params
         )
-        pulls = [PullRequest.model_validate(item) for item in response.json()]
-        return GitHubResponse[list[PullRequest]].model_validate({"data": pulls, "headers": dict(response.headers)})
+        pulls = [PullRequestSimple.model_validate(item) for item in response.json()]
+        return GitHubResponse[list[PullRequestSimple]].model_validate(
+            {"data": pulls, "headers": dict(response.headers)}
+        )
 
     async def create_pull_request(
         self,

@@ -25,6 +25,7 @@ from ddev.utils.github_async.models import (
     PullRequestFile,
     PullRequestFileStatus,
     PullRequestReviewComment,
+    PullRequestSimple,
     PullRequestState,
     WorkflowDispatchResult,
     WorkflowJob,
@@ -493,7 +494,7 @@ async def test_create_pull_request_success() -> None:
             "body": "Fix description",
             "draft": False,
         }
-        return json_response(pull_request_payload(number=42), status_code=201)
+        return json_response(full_pull_request_payload(number=42), status_code=201)
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master", "Fix description")
@@ -506,7 +507,7 @@ async def test_create_pull_request_draft_true_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["draft"] is True
-        return json_response(pull_request_payload(number=7), status_code=201)
+        return json_response(full_pull_request_payload(number=7), status_code=201)
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("o", "r", "T", "h", "b", draft=True)
@@ -543,15 +544,15 @@ async def test_list_pull_requests_success():
         assert request.url.params.get("head") == "owner:alice/backport-123-to-7.62.x"
         return json_response(
             [
-                full_pull_request_payload(number=5, state="closed", merged=True),
-                full_pull_request_payload(number=6, state="closed", merged=True),
+                pull_request_payload(number=5, state="closed"),
+                pull_request_payload(number=6, state="closed"),
             ]
         )
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.list_pull_requests("owner", "repo", state="all", head="owner:alice/backport-123-to-7.62.x")
     assert [pr.number for pr in result.data] == [5, 6]
-    assert all(isinstance(pr, PullRequest) for pr in result.data)
+    assert all(isinstance(pr, PullRequestSimple) for pr in result.data)
 
 
 async def test_list_pull_requests_empty_result():
