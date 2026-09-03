@@ -13,6 +13,7 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
+from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseMetricsAsyncJob
 from datadog_checks.sqlserver.utils import construct_use_statement
 
 from .common import (
@@ -45,6 +46,18 @@ def init_config_object_name():
 @pytest.fixture
 def init_config_alt_tables():
     return deepcopy(INIT_CONFIG_ALT_TABLES)
+
+
+@pytest.fixture(autouse=True)
+def run_database_metrics_synchronously(monkeypatch):
+    """Make async database metric results deterministic within each test."""
+    run_job_loop_original = SqlserverDatabaseMetricsAsyncJob.run_job_loop
+
+    def run_job_loop(job: SqlserverDatabaseMetricsAsyncJob, tags: list[str]) -> None:
+        job._run_sync = True
+        run_job_loop_original(job, tags)
+
+    monkeypatch.setattr(SqlserverDatabaseMetricsAsyncJob, 'run_job_loop', run_job_loop)
 
 
 @pytest.fixture(scope="session")
