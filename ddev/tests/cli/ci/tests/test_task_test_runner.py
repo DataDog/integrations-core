@@ -270,8 +270,9 @@ async def test_the_job_list_decodes_with_the_pipeline_the_workflow_runs(tmp_path
 
 
 @pytest.mark.asyncio
-async def test_a_batch_too_large_to_dispatch_is_refused(tmp_path: Path):
-    """GitHub rejects the dispatch itself, so the batch would never run and never be reported.
+async def test_a_batch_too_large_to_dispatch_is_refused_before_dispatching(tmp_path: Path):
+    """GitHub rejects an oversized dispatch, and a rejected one still opens a check run that
+    nothing will ever close, so the batch has to be refused before the request is made.
 
     Names are random rather than repetitive, so they survive compression and the batch really does
     exceed the limit.
@@ -279,25 +280,13 @@ async def test_a_batch_too_large_to_dispatch_is_refused(tmp_path: Path):
     jobs = [make_job(secrets.token_hex(150)) for _ in range(300)]
     batch = TestBatch(id="big", batch_id="batch-big", job_list=jobs, jobs_count=len(jobs), integrations=["ntp"])
     fake = FakeAsyncGitHubClient()
-    runner = TaskTestRunner(
-        "runner",
-        fake,
-        TestRunnerOptions(
-            owner="DataDog",
-            repo="integrations-core",
-            workflow_id="test-batch.yaml",
-            ref="master",
-            base_sha="base-sha-aaa",
-            checkout_sha="merge-sha-bbb",
-            artifacts_base_path=tmp_path,
-            poll_interval_seconds=0.0,
-        ),
-    )
+    runner = make_runner(fake, tmp_path)
 
     with pytest.raises(JobListTooLargeError, match=str(WORKFLOW_INPUTS_LIMIT)):
-        runner._build_inputs(batch)
+        await runner.process_message(batch)
 
     fake.assert_not_called("create_workflow_dispatch")
+    fake.assert_not_called("create_check_run")
 
 
 @pytest.mark.asyncio
