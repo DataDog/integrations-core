@@ -5,9 +5,16 @@ from typing import Any
 
 import pytest
 
-from datadog_checks.base.checks.openmetrics.metric_limit_issue import ISSUE_NAME
 from datadog_checks.openmetrics import OpenMetricsCheck
 
+# `metric_limit_issue` landed after the minimum supported datadog-checks-base
+# version (>=37.33.0), so skip cleanly when it is not available, e.g. during the
+# minimum base package nightlies.
+metric_limit_issue = pytest.importorskip(
+    'datadog_checks.base.checks.openmetrics.metric_limit_issue',
+    reason='requires a datadog-checks-base version that supports the OpenMetrics metric limit issue',
+)
+ISSUE_NAME = metric_limit_issue.ISSUE_NAME
 ISSUE_ID = 'openmetrics-dropped-config:40c8930ce3bf6455'
 ENDPOINT = 'http://localhost:10249/metrics'
 
