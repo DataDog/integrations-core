@@ -235,10 +235,12 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        started = self._schema_collector.collect_schemas()
-        if not started:
-            # TODO: Emit health event for over-long collection
-            self._log.warning("Previous schema collection still in progress, skipping this collection")
+        # Record the attempt before collecting rather than after. The job loop ticks at the GCD of
+        # every metadata sub-interval, so leaving this unset lets the gate in
+        # report_postgres_metadata pass on every tick, and recording it up front keeps a slow or
+        # failing collection from retrying in a tight loop.
+        self._last_schemas_query_time = time.time()
+        self._schema_collector.collect_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
