@@ -22,6 +22,7 @@ from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.utils.github_actions import write_step_summary
+from ddev.utils.rate_limiting import RelaxedRateLimits
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -37,8 +38,8 @@ logger = logging.getLogger(__name__)
 CANCELLATION_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 # A call that cannot go out within this is one the process will not live to see answered.
-CANCELLED_MAX_WAIT_SECONDS = 2.0
-CANCELLED_MAX_RATE = 10_000.0
+# A cancelled run abandons its pacing: the budget it was rationing outlives the process.
+CANCELLED_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
 
 
 class RunContext(StrEnum):
@@ -169,7 +170,7 @@ class Dispatcher(EventBusOrchestrator):
                 loop.remove_signal_handler(received)
 
     def _cancel(self, received: signal.Signals) -> None:
-        """Start winding down, and let the cleanup outrun the pacing built for a whole run.
+        """Start winding down, and size what is left for the seconds the process still has.
 
         Idempotent because both signals arrive on a cancelled job, seconds apart, and the second must
         not restart anything the first began.
@@ -180,12 +181,10 @@ class Dispatcher(EventBusOrchestrator):
 
         self._cancelled = True
         self._logger.warning("Received %s: cancelling the run", received.name)
-        # Stop first: this runs as a signal-handler callback, so anything raised here goes to the
-        # loop's exception handler, and the second signal would find `_cancelled` already set and
-        # return without retrying. Relaxing still lands in time, because the stop only sets an event
-        # the loop acts on later, and it is what makes each batch close its check run.
+        # Stop first: anything raised here goes to the loop's exception handler, and the second signal
+        # returns early on `_cancelled`. The stop is what makes each batch close its check run.
         self.request_stop()
-        self._client.relax_rate_limits(max_wait_seconds=CANCELLED_MAX_WAIT_SECONDS, max_rate=CANCELLED_MAX_RATE)
+        self._client.enter_shutdown_mode(rate_limits=CANCELLED_RATE_LIMITS)
 
     async def on_message_received(self, message: BaseMessage):
         self._logger.debug("Message received: %s(%s)", type(message).__name__, message.id)

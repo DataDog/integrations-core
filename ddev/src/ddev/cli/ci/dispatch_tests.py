@@ -43,6 +43,11 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 )
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
+@click.option(
+    '--minimum-base-package',
+    is_flag=True,
+    help='Also test every job against the oldest supported base package, as a second job per target.',
+)
 @click.option('--workflow', default=None, help='Workflow each batch is dispatched to.')
 @click.option('--workflow-ref', default=None, help='Ref the workflow definition is loaded from.')
 @click.option(
@@ -62,6 +67,7 @@ def dispatch_tests(
     run_context: str | None,
     repository: str | None,
     all_targets: bool,
+    minimum_base_package: bool,
     workflow: str | None,
     workflow_ref: str | None,
     output_dir: str | None,
@@ -119,6 +125,7 @@ def dispatch_tests(
         run_context=resolved_context,
         target_branch=target_branch,
         all_targets=all_targets,
+        minimum_base_package=minimum_base_package,
         environment_provider=HatchEnvironmentProvider(app.platform, config.default_python_version),
     )
     if not batches:
@@ -242,6 +249,7 @@ def build_plan(
     run_context: RunContext,
     target_branch: str | None,
     all_targets: bool,
+    minimum_base_package: bool,
     environment_provider: EnvironmentProvider,
 ) -> list[TestBatch]:
     """Build the batches this run must execute, aborting with a readable message on a bad plan.
@@ -279,6 +287,7 @@ def build_plan(
             environment_provider=environment_provider,
             config=config.batching,
             rules=rules,
+            minimum_base_package=minimum_base_package,
         )
     except PlanningError as error:
         app.abort(f'Could not build a test plan: {error}')

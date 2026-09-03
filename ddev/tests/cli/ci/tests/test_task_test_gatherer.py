@@ -374,6 +374,42 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
     assert (coverage_dir / "ntp_py3.13_windows.xml").is_file()
 
 
+def test_minimum_base_package_replica_organizes_beside_its_original(tmp_path: Path):
+    # The pair shares target, environment and platform, so only the variant separates their output.
+    artifacts = tmp_path / "artifacts" / "100"
+    original_dir = _make_job_tree(artifacts, "ntp-job", e2e=False)
+    replica_dir = _make_job_tree(artifacts, "minimum-base-package-ntp-job", coverage=False, e2e=False)
+
+    original = _batch_job("ntp (py3.13)")
+    replica = make_job(
+        "minimum-base-package-ntp (py3.13)",
+        target="ntp",
+        minimum_base_package=True,
+        coverage=False,
+    )
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [original, replica]})
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(original, _workflow_job(original.name, "success"), original_dir),
+                _batch_job_result(replica, _workflow_job(replica.name, "success"), replica_dir),
+            ],
+        )
+    )
+
+    test_results_dir = tmp_path / "out" / "test_results"
+    assert (test_results_dir / "ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
+    assert (test_results_dir / "minimum-base-package-ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
+
+    # The replica reports no coverage, and its absence is not a lost artifact.
+    coverage_files = sorted(path.name for path in (tmp_path / "out" / "coverage").iterdir())
+    assert coverage_files == ["ntp_py3.13_linux.xml"]
+
+    [status] = _registry(gatherer)
+    assert (status.success_count, status.failed_count) == (2, 0)
+
+
 def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path):
     # One job carries both facets (unit_tests and e2e_tests). Its bundle holds both a unit and an
     # E2E JUnit report plus coverage; the organized outputs are distinguished by filename within

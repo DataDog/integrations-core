@@ -213,6 +213,8 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                         "unit_tests": True,
                         "e2e_tests": False,
                         "agent_image": None,
+                        "minimum_base_package": False,
+                        "coverage": True,
                         "artifact_name": "ntp_py3.13_linux",
                     },
                     {
@@ -225,6 +227,8 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                         "unit_tests": True,
                         "e2e_tests": False,
                         "agent_image": None,
+                        "minimum_base_package": False,
+                        "coverage": True,
                         "artifact_name": "ntp_py3.13_linux",
                     },
                 ]

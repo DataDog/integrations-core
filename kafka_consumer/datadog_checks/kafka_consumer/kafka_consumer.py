@@ -16,11 +16,7 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
-from datadog_checks.kafka_consumer.constants import (
-    HIGH_WATERMARK,
-    KAFKA_INTERNAL_TOPICS,
-    OFFSET_INVALID,
-)
+from datadog_checks.kafka_consumer.constants import HIGH_WATERMARK, KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
 
@@ -271,7 +267,14 @@ class KafkaCheck(AgentCheck):
                 self.log.debug('RESULTS PARTITION: %s', partition)
                 self.log.debug('RESULTS OFFSET: %s', offset)
 
-                if offset == OFFSET_INVALID:
+                # A real committed offset is always a non-negative, monotonically increasing
+                # per-partition sequence number assigned by the broker. librdkafka reuses the
+                # same signed offset field for logical/sentinel values instead: OFFSET_BEGINNING
+                # (-2), OFFSET_END (-1), OFFSET_STORED (-1000), and OFFSET_INVALID (-1001) meaning
+                # "no committed offset". Checking `< 0` instead of `== OFFSET_INVALID` also covers
+                # any other negative sentinel librdkafka may return here.
+                # https://github.com/confluentinc/librdkafka/blob/master/src/rdkafka.h
+                if offset < 0:
                     continue
 
                 if (
