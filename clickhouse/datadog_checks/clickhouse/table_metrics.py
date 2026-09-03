@@ -82,9 +82,9 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         self._view_refreshes_permission_logged = False
         self._view_refreshes_skip = False
 
-    def cancel(self):
-        super(ClickhouseTableMetrics, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         if self._db_client:
@@ -95,6 +95,8 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             self._db_client = None
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
             self._db_client.set_client_setting('max_execution_time', self._collection_interval)
@@ -108,6 +110,10 @@ class ClickhouseTableMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):
         self._emit_table_size_gauges()
+        # _emit_table_size_gauges() swallows the cancellation raised by _execute_query, and the
+        # view refresh collection queries the check's client directly, so it needs its own check.
+        if self._cancel_event.is_set():
+            return
         self._collect_view_refresh_metrics()
 
     def _emit_table_size_gauges(self) -> None:

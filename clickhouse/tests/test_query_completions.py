@@ -149,9 +149,7 @@ def test_create_batched_payload_query_details(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_batched_payload(rows)
+    payload = query_completions._create_batched_payload(rows)
 
     # Verify payload has completions
     assert payload is not None
@@ -191,9 +189,7 @@ def test_create_batched_payload_carries_clickhouse_node(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_batched_payload(rows)
+    payload = query_completions._create_batched_payload(rows)
 
     query_details = payload['clickhouse_query_completions'][0]['query_details']
     assert query_details['clickhouse_node'] == 'ch-node-1'
@@ -214,9 +210,7 @@ def test_create_batched_payload_clickhouse_node_defaults_empty(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_batched_payload(rows)
+    payload = query_completions._create_batched_payload(rows)
 
     query_details = payload['clickhouse_query_completions'][0]['query_details']
     assert query_details['clickhouse_node'] == ''
@@ -244,9 +238,7 @@ def test_create_batched_payload_structure(check_with_dbm):
         },
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_batched_payload(rows)
+    payload = query_completions._create_batched_payload(rows)
 
     # Verify payload structure
     assert payload['ddsource'] == 'clickhouse'
@@ -276,9 +268,7 @@ def test_create_batched_payload_service_field(check_with_dbm, service):
         },
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = check_with_dbm.query_completions._create_batched_payload(rows)
+    payload = check_with_dbm.query_completions._create_batched_payload(rows)
 
     assert payload['service'] == service
 
@@ -358,8 +348,7 @@ def test_normalize_query_with_obfuscation(check_with_dbm):
     assert normalized_row['query_signature'] is not None
 
 
-@mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent')
-def test_checkpoint_persistence(mock_agent, check_with_dbm):
+def test_checkpoint_persistence(check_with_dbm):
     """Test checkpoint save and load functionality"""
     query_completions = check_with_dbm.query_completions
 
@@ -531,9 +520,7 @@ def test_create_flush_event_structure(check_with_flush):
         {'database': 'default', 'table': 'events', 'status': 'Ok', 'rows': 2, 'flush_latency_us': 250000},
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_flush_event(records)
+    payload = query_completions._create_flush_event(records)
 
     assert payload['ddsource'] == 'clickhouse'
     assert payload['dbm_type'] == DBM_TYPE_FLUSH

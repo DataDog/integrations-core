@@ -7,9 +7,11 @@ import asyncio
 import contextlib
 import logging
 import math
+import threading
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
-from concurrent.futures import Executor, ThreadPoolExecutor
+from concurrent.futures import Executor, Future, ThreadPoolExecutor
+from concurrent.futures import wait as wait_for_futures
 from dataclasses import dataclass
 from typing import assert_never, cast
 
@@ -26,6 +28,8 @@ from .exceptions import (
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
+# How long the loop may block before re-reading the timeout and the stop flag.
+STOP_CHECK_INTERVAL = 1.0
 
 
 class OrchestratorTimeout(Exception):
@@ -51,7 +55,8 @@ class BaseMessage:
 class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
         self.name = name
-        self.queue: asyncio.Queue[BaseMessage] | None = None
+        # Set by the bus at registration.
+        self.bus: EventBusOrchestrator | None = None
 
     async def on_success(self, message: T) -> None:
         pass
@@ -72,13 +77,26 @@ class BaseProcessor[T: BaseMessage]:
 
         The default implementation re-raises so unmodified processors fall through to
         the orchestrator-level ``fail_fast`` policy.
+
+        Can be cancelled part-way when the bus it belongs to is asked to stop.
         """
         raise error
 
     def submit_message(self, message: BaseMessage) -> None:
-        if self.queue is None:
+        """Put *message* on the bus this processor was registered in, from any thread."""
+        if self.bus is None:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
-        self.queue.put_nowait(message)
+
+        self.bus.submit_message(message)
+
+    @property
+    def stopping(self) -> bool:
+        """Whether the bus is shutting down.
+
+        A `SyncProcessor` runs in a thread, where cancelling its task cannot interrupt it, so long
+        work should check this between units and return rather than finish work nobody will read.
+        """
+        return self.bus is not None and self.bus.stopping
 
     def should_process_message(self, message: BaseMessage) -> bool:
         return True
@@ -134,12 +152,21 @@ class EventBusOrchestrator(ABC):
         self._logger = logger
         self._max_timeout = resolved_max_timeout
         self._grace_period = grace_period
+        # An executor we were given belongs to the caller, who may reuse it; one we made is ours to
+        # shut down, and nobody else can.
+        self._owns_executor = executor is None
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
+        # Work we put on the pool, so shutdown can wait for it whoever the pool belongs to. Guarded
+        # because the pool's own threads discard from it as they finish.
+        self._sync_work: set[Future] = set()
+        self._sync_work_lock = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._stopping = threading.Event()
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -152,17 +179,47 @@ class EventBusOrchestrator(ABC):
         if max_timeout <= grace_period:
             raise ValueError("max_timeout must be greater than grace_period")
 
+    @property
+    def stopping(self) -> bool:
+        """Whether the bus has begun shutting down, readable from any thread."""
+        return self._stopping.is_set()
+
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
-        processor.queue = self._queue
+        processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
 
+    def request_stop(self) -> None:
+        """Ask the bus to wind down, from any thread.
+
+        The loop acts on it within ``STOP_CHECK_INTERVAL``, so a caller under a deadline it does not
+        control, such as a cancelled CI job, reaches ``finalize`` without waiting out the grace period.
+        ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
+        loop awaits them directly and would otherwise be held for as long as they take.
+        """
+        if self.stopping:
+            return
+
+        self._logger.info("Stop requested; the bus will wind down")
+        self._stopping.set()
+
     def submit_message(self, message: BaseMessage):
+        """Adds a message to the queue, from any thread.
+
+        ``asyncio.Queue`` is not thread-safe, and a put it loses leaves the bus spinning on a message
+        it never reads, so while the bus runs the loop thread makes every put.
         """
-        Adds a message to the queue.
-        """
-        self._queue.put_nowait(message)
+        if self.stopping:
+            # Dropped rather than raised: processors submit from `finally` blocks, where raising would
+            # route an expected shutdown through the error policy.
+            self._logger.warning("Dropped %s(%s): the bus is shutting down", type(message).__name__, message.id)
+            return
+
+        if self._loop is not None and self._loop.is_running():
+            self._loop.call_soon_threadsafe(self._queue.put_nowait, message)
+        else:
+            self._queue.put_nowait(message)
 
     def run(self):
         """
@@ -197,7 +254,7 @@ class EventBusOrchestrator(ABC):
         """
         self._running = True
         try:
-            await self.on_initialize()
+            await self._bounded_by_stop(self.on_initialize(), HookName.ON_INITIALIZE)
         except (FatalProcessingError, asyncio.CancelledError):
             raise
         except Exception as e:
@@ -205,11 +262,19 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_INITIALIZE, e),
                 self.on_error,
             )
+        # Only now, so what the hook submitted is already queued. A deferred put is read because the
+        # callback that queues it precedes the task completion that wakes the loop, and the hook has
+        # no task to be ordered behind: a zero grace period would stop the bus before it ran.
+        self._loop = asyncio.get_running_loop()
 
     @abstractmethod
     async def on_initialize(self):  # pragma: no cover
         """
         Hook for subclasses to perform initial setup (e.g. submit initial messages).
+
+        Abandoned if :meth:`request_stop` is called, from any thread, while this is still waiting, so
+        it may be cancelled part-way and ``on_finalize`` then runs against whatever it had reached.
+        A hook that must finish what it starts should check :attr:`stopping` itself and return.
         """
         pass
 
@@ -220,6 +285,10 @@ class EventBusOrchestrator(ABC):
         In the case that the execution failed, the exception will be passed to the method
         """
         self._running = False
+        self._stopping.set()
+        # Before the hook, so it reports settled state: a sync processor still running would otherwise
+        # keep mutating what the hook has already published.
+        await self._drain_executor()
         try:
             await self.on_finalize(exception)
         except (FatalProcessingError, asyncio.CancelledError):
@@ -229,6 +298,53 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_FINALIZE, e),
                 self.on_error,
             )
+
+    async def _run_in_worker[T: BaseMessage](self, work: Callable[[T], None], message: T) -> None:
+        """Run blocking work on the processor pool, tracked until it finishes.
+
+        Tracked through the pool's own future rather than this call, because cancelling the caller
+        only cancels work the pool has not started yet; anything already running carries on.
+        """
+        future = self._executor.submit(work, message)
+        with self._sync_work_lock:
+            self._sync_work.add(future)
+        future.add_done_callback(self._forget_sync_work)
+        await asyncio.wrap_future(future)
+
+    def _forget_sync_work(self, future: Future) -> None:
+        """Drop work that has finished, called by the pool thread that finished it."""
+        with self._sync_work_lock:
+            self._sync_work.discard(future)
+
+    def _pending_sync_work(self) -> set[Future]:
+        """The work still on the pool.
+
+        Copied under the lock rather than iterated in place: the done callbacks run on worker threads,
+        so iterating the live set is iterating one another thread is mutating, which CPython raises on.
+        """
+        with self._sync_work_lock:
+            in_flight = set(self._sync_work)
+
+        return {future for future in in_flight if not future.done()}
+
+    async def _drain_executor(self) -> None:
+        """Wait for sync processors still running, and retire the pool if it is ours.
+
+        Cancelling a task cannot interrupt a `process_message` already running in a thread, and the
+        threads outlive the loop, so without this the process blocks on them at interpreter exit,
+        after the run has reported. Waiting here makes that time attributable instead.
+
+        Waiting is not conditional on ownership: a pool lent to us still runs our work, and the hook
+        reports state that work is still writing.
+        """
+        pending = self._pending_sync_work()
+        if pending:
+            self._logger.debug("Waiting for %s sync processor(s) still running...", len(pending))
+            await asyncio.to_thread(wait_for_futures, pending)
+
+        if self._owns_executor:
+            self._logger.debug("Retiring the processor thread pool...")
+            await asyncio.to_thread(self._executor.shutdown, wait=True)
 
     @abstractmethod
     async def on_finalize(self, exception: Exception | None):  # pragma: no cover
@@ -248,6 +364,10 @@ class EventBusOrchestrator(ABC):
         hook. To stop the bus entirely, raise :class:`FatalProcessingError`. Any
         other exception is wrapped as :class:`OrchestratorHookError` and routed
         through :meth:`on_error`.
+
+        Abandoned if :meth:`request_stop` is called, from any thread, while this is still waiting, in
+        which case the message is not dispatched. A hook that must finish what it starts should check
+        :attr:`stopping` itself and return.
         """
         pass
 
@@ -267,6 +387,9 @@ class EventBusOrchestrator(ABC):
 
         The default implementation re-raises so unmodified orchestrators fall through
         to the ``fail_fast`` policy.
+
+        Best-effort once a stop has been requested: whoever asked may be working to a deadline, and
+        the process can be killed before this returns. Keep it short.
         """
         raise error
 
@@ -322,7 +445,7 @@ class EventBusOrchestrator(ABC):
                 wait_set = running_tasks | {get_task}
                 # We use a small timeout to check for max_timeout periodically. If we leave this here blocking
                 # we can keep the loop alive much longer than the max_timeout.
-                done, _ = await asyncio.wait(wait_set, return_when=asyncio.FIRST_COMPLETED, timeout=1.0)
+                done, _ = await asyncio.wait(wait_set, return_when=asyncio.FIRST_COMPLETED, timeout=STOP_CHECK_INTERVAL)
 
                 current_get_task = get_task
                 if current_get_task in done:
@@ -354,10 +477,20 @@ class EventBusOrchestrator(ABC):
 
     async def __should_stop(self, start_time: float, running_tasks: set[asyncio.Task], get_task: asyncio.Task) -> bool:
         """
-        Checks whether the orchestrator should stop. This can happen in two ways:
+        Checks whether the orchestrator should stop. This can happen in three ways:
+        - A stop was requested
         - The max timeout is reached
         - The queue is empty and all processors have been completed and the grace period is reached
         """
+        # First, because a caller asking to stop outranks reporting a timeout it did not wait for.
+        if self.stopping:
+            self._logger.info(
+                "Stopping on request. A total of %s tasks were running.",
+                len(running_tasks),
+            )
+            get_task.cancel()
+            return True
+
         # Check first whether we are over the max timeout
         if self._remaining_time(start_time) <= 0:
             self._logger.error(
@@ -380,13 +513,55 @@ class EventBusOrchestrator(ABC):
                 # This ensures we wait for new message for a time period defined by grace_period
                 # but capped by max_timeout
                 wait_time = min(self._grace_period, remaining)
-                await asyncio.wait_for(asyncio.shield(get_task), timeout=wait_time)
-            except asyncio.TimeoutError:
-                get_task.cancel()
-                return True
+                if not await self.__wait_for_message(get_task, wait_time):
+                    if self.stopping:
+                        # Said here too, or a stop seen inside the wait leaves through this branch and
+                        # reads like the grace period simply expiring.
+                        self._logger.info("Stopping on request while idle.")
+                    get_task.cancel()
+                    return True
             except Exception:
                 # If the get_task failed, we return False to let the loop handle the exception
                 return False
+
+        return False
+
+    async def _bounded_by_stop(self, hook: Awaitable[None], name: HookName) -> None:
+        """Run a lifecycle hook the loop awaits directly, abandoning it if a stop is requested.
+
+        Without this a hook waiting on I/O holds the loop for as long as that takes, however long ago
+        the stop was asked for, and a caller with a deadline never reaches `finalize`.
+        """
+        work = asyncio.ensure_future(hook)
+        # Bounded by `asyncio.wait` rather than a sleeping waiter task: its timeout does not go through
+        # `asyncio.sleep`, so this cannot become a spin loop if something replaces that.
+        while not self.stopping:
+            done, _ = await asyncio.wait({work}, timeout=STOP_CHECK_INTERVAL)
+            if done:
+                # Awaited so a hook that failed still reaches the error policy rather than being lost
+                # with the future it failed in.
+                await work
+                return
+
+        work.cancel()
+        self._logger.warning("Abandoned %s: a stop was requested while it was still waiting", name)
+        with contextlib.suppress(asyncio.CancelledError):
+            await work
+
+    async def __wait_for_message(self, get_task: asyncio.Task, wait_time: float) -> bool:
+        """Whether a message arrived within ``wait_time``.
+
+        Waited out in slices rather than in one go, so a stop requested while the bus sits idle is
+        acted on promptly instead of after a grace period that can be far longer than the caller has.
+        """
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + wait_time
+        while (remaining := deadline - loop.time()) > 0:
+            if self.stopping:
+                return False
+            with contextlib.suppress(asyncio.TimeoutError):
+                await asyncio.wait_for(asyncio.shield(get_task), timeout=min(STOP_CHECK_INTERVAL, remaining))
+                return True
 
         return False
 
@@ -417,7 +592,7 @@ class EventBusOrchestrator(ABC):
         # directly from on_message_received skips dispatch for this message and
         # continues with the next one.
         try:
-            await self.on_message_received(msg)
+            await self._bounded_by_stop(self.on_message_received(msg), HookName.ON_MESSAGE_RECEIVED)
         except (asyncio.CancelledError, FatalProcessingError):
             raise
         except SkipMessageError as e:
@@ -483,12 +658,23 @@ class EventBusOrchestrator(ABC):
         and any on_success failure (wrapped as :class:`ProcessorHookError`)
         through the processor's ``on_error`` and applies the orchestrator's policy.
         """
+        if self.stopping:
+            # A task can be created before the stop and scheduled after it, so refusing here covers
+            # every processor without each having to check.
+            self._logger.warning(
+                "Not dispatching %s(%s) to %s: the bus is shutting down",
+                type(message).__name__,
+                message.id,
+                processor.name,
+            )
+            return
+
         try:
             match processor:
                 case AsyncProcessor():
                     await cast(AsyncProcessor, processor).process_message(message)
                 case SyncProcessor():
-                    await asyncio.get_running_loop().run_in_executor(self._executor, processor.process_message, message)
+                    await self._run_in_worker(processor.process_message, message)
                 case _:
                     assert_never(processor)
         except (FatalProcessingError, asyncio.CancelledError):

@@ -160,6 +160,25 @@ def temp_dir(tmp_path) -> Path:
     return path
 
 
+@pytest.fixture
+def step_summary(tmp_path, monkeypatch) -> Path:
+    """Redirect the GitHub Actions job summary to a temporary file and return it.
+
+    Request this in any test that reaches code calling `write_step_summary`. Without it, such a test
+    inherits the real `GITHUB_STEP_SUMMARY` when the suite runs inside a workflow and appends its
+    output to the job's own summary panel.
+    """
+    summary_file = Path(tmp_path, 'step-summary.md')
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY', str(summary_file))
+    return summary_file
+
+
+@pytest.fixture
+def without_step_summary(monkeypatch) -> None:
+    """Unset `GITHUB_STEP_SUMMARY`, for tests covering the no-summary-available path."""
+    monkeypatch.delenv('GITHUB_STEP_SUMMARY', raising=False)
+
+
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
     from unittest.mock import patch

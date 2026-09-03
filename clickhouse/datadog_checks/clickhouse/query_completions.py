@@ -10,11 +10,6 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import CollectAsyncInserts
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -147,6 +142,11 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         self._flush_max_rows = int(flush_config.max_samples_per_collection)
         self._flush_checkpoint = NodeCheckpoint(self, FLUSH_CHECKPOINT_CACHE_KEY, self._flush_collection_interval)
         self._last_flush_collection_time = 0.0
+
+    def shutdown(self) -> None:
+        super().shutdown()
+        # Holds the check and a bound method of this job, so dropping it releases both.
+        self._explain_plans = None
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
@@ -394,7 +394,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         payload = {
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'ddsource': 'clickhouse',
             'dbm_type': 'query_completion',
             'collection_interval': self._collection_interval,
@@ -540,7 +540,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         return {
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'ddsource': 'clickhouse',
             'dbm_type': DBM_TYPE_FLUSH,
             'collection_interval': self._flush_collection_interval,

@@ -5,13 +5,15 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 
+VERSION_2_0 = [2, 0, 0]
 VERSION_2_2 = [2, 2, 0]
 
 HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registryctl', 'portal', 'core', 'database']
 
 HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
 
-USERS_PATH = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
+# The v2.0 API, and with it this endpoint, landed in Harbor 2.0.
+USERS_PATH = '/api/users/' if HARBOR_VERSION < VERSION_2_0 else '/api/v2.0/users/'
 
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges

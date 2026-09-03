@@ -2,10 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -130,7 +126,7 @@ class DatabasesData:
         )
         base_event = {
             "host": None,
-            "agent_version": datadog_agent.get_version(),
+            "agent_version": self._check.agent_version,
             "dbms": self._check.dbms,
             "kind": "mysql_databases",
             "collection_interval": collection_interval,
@@ -144,11 +140,11 @@ class DatabasesData:
             config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
 
-    def shut_down(self):
-        self._data_submitter.submit()
-
     def _cursor_run(self, cursor, query, params=None):
         """Run the query, log it, and emit a metric on database error."""
+        cancel_event = getattr(self._metadata, '_cancel_event', None)
+        if cancel_event is not None and cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         try:
             params_repr = "({} params)".format(len(params)) if isinstance(params, list) else params
             self._log.debug("Running query [{}] params={}".format(query, params_repr))
@@ -279,7 +275,7 @@ class DatabasesData:
                     )
                 )
                 return
-            except Exception as e:
+            except pymysql.DatabaseError as e:
                 self._log.error(
                     "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e
@@ -287,13 +283,14 @@ class DatabasesData:
                 )
 
         # Check if we found databases but no tables across all of them.
-        # This happens when the datadog user has permissions to see databases
-        # but lacks SELECT privileges on the tables themselves, which prevents
-        # the agent from collecting table metadata.
+        # This happens when the datadog user has permissions to see databases but holds no privilege
+        # on the tables themselves. MySQL only exposes a table in INFORMATION_SCHEMA to users that
+        # hold some privilege on it, so without one the agent cannot collect table metadata.
         if db_infos and not self._data_submitter.any_tables_found:
             self._log.warning(
                 "No tables were found across any of the {} databases. This may indicate insufficient privileges "
-                "to view table metadata. The datadog user needs SELECT privileges on the tables.".format(len(db_infos))
+                "to view table metadata. The datadog user needs REFERENCES (or SELECT) privileges on the "
+                "tables.".format(len(db_infos))
             )
 
     @tracked_method(agent_check_getter=agent_check_getter)

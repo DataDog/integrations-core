@@ -19,11 +19,6 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import CollectPendingAsyncInserts, QuerySamples
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
@@ -193,10 +188,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         # Set once system.asynchronous_inserts is found to be missing, so we skip collection
         self._buffer_unavailable = False
 
-    def cancel(self):
-        """Cancel the job and clean up the dedicated client."""
-        super(ClickhouseStatementSamples, self).cancel()
+    def shutdown(self) -> None:
+        """Close the dedicated client, once the job loop has stopped."""
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         """Close the dedicated database client if it exists."""
@@ -223,6 +218,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         all nodes in the cluster.
         For self-hosted: Queries only the local node's system.processes.
         """
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
         start_time = time.time()
 
         try:
@@ -383,6 +381,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         For ClickHouse Cloud: Uses clusterAllReplicas to aggregate across all nodes.
         For self-hosted: Aggregates only the local node's connections.
         """
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
         try:
             start_time = time.time()
 
@@ -453,7 +454,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "clickhouse",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
@@ -534,6 +535,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             asynchronous_inserts_table=buffer_table,
             max_samples_per_collection=self._buffer_max_samples_per_collection,
         )
+
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
         try:
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()
@@ -656,7 +661,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         return {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "clickhouse",
             "kind": BUFFER_PAYLOAD_KIND,
             "min_collection_interval": self._buffer_collection_interval,
