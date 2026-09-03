@@ -32,7 +32,7 @@ from ddev.utils.github_async.models import (
     WorkflowRun,
 )
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
-from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
+from tests.utils.github_async.helpers import ENDPOINT_CALLS, first_page, json_response, make_client
 from tests.utils.github_async.payloads import (
     artifact,
     check_run_payload,
@@ -327,6 +327,60 @@ async def test_a_non_validation_status_is_never_read_as_too_long():
 
     assert not isinstance(exc_info.value, GitHubBodyTooLongError)
     assert exc_info.value.response.status_code == 500
+
+
+# Deliberately a literal rather than `MAX_PER_PAGE`, for the same reason as the comment-body limit.
+GITHUB_PAGE_SIZE_LIMIT = 100
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        pytest.param(
+            lambda client, size: first_page(client.list_workflow_run_artifacts("o", "r", 1, per_page=size)),
+            id="list_workflow_run_artifacts",
+        ),
+        pytest.param(
+            lambda client, size: first_page(client.list_workflow_jobs("o", "r", 42, per_page=size)),
+            id="list_workflow_jobs",
+        ),
+        pytest.param(
+            lambda client, size: first_page(client.list_issue_comments("o", "r", 7, per_page=size)),
+            id="list_issue_comments",
+        ),
+        pytest.param(lambda client, size: client.list_pull_requests("o", "r", per_page=size), id="list_pull_requests"),
+    ],
+)
+async def test_an_out_of_range_page_size_is_refused_before_the_request(call):
+    """GitHub serves 100 for a larger value instead of failing, so only this guard surfaces the mistake."""
+    requested = False
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requested
+        requested = True
+        return json_response([])
+
+    client = make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValueError, match="per_page"):
+        await call(client, GITHUB_PAGE_SIZE_LIMIT + 1)
+
+    assert requested is False
+
+
+@pytest.mark.parametrize(
+    ("per_page", "expectation"),
+    [
+        pytest.param(0, pytest.raises(ValueError), id="below-range"),
+        pytest.param(1, does_not_raise(), id="smallest-page"),
+        pytest.param(GITHUB_PAGE_SIZE_LIMIT, does_not_raise(), id="largest-page"),
+        pytest.param(GITHUB_PAGE_SIZE_LIMIT + 1, pytest.raises(ValueError), id="above-range"),
+    ],
+)
+async def test_the_accepted_page_sizes_are_one_to_githubs_maximum(per_page, expectation):
+    """A page size GitHub ignores, 0 included, is a caller mistake worth naming rather than silently sending."""
+    client = make_client(httpx.MockTransport(lambda request: json_response([])))
+    with expectation:
+        await client.list_pull_requests("o", "r", per_page=per_page)
 
 
 async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length():

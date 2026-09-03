@@ -66,6 +66,10 @@ DEFAULT_BASE_URL = "https://api.github.com"
 # number; neither the OpenAPI description nor the REST docs state it. Measured in UTF-8 bytes, which is
 # never below the character count GitHub means, so it errs only towards refusing a body it might take.
 COMMENT_BODY_LIMIT = 65_536
+# Every paginated endpoint this client calls takes the shared `per-page` parameter, described as
+# "The number of results per page (max 100)". The cap is not in the parameter's schema and GitHub does
+# not reject a larger value, it silently serves 100, so nothing but this check surfaces the mistake.
+MAX_PER_PAGE = 100
 # GitHub answers a cancel with 409 once the run has reached a terminal state, which is what was asked for.
 RUN_ALREADY_TERMINAL_STATUS = 409
 # The caller is a run being cancelled, so the whole ladder has to fit in the seconds it has left.
@@ -80,6 +84,16 @@ SIGNED_URL_EXPIRED_STATUS = 403
 QUERY_MASK = "***"  # noqa: S105
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+def _ensure_per_page_valid(per_page: int):
+    """Refuse a page size GitHub would not honour, before spending a request on it.
+
+    Raises:
+        ValueError: If *per_page* is outside 1..`MAX_PER_PAGE`.
+    """
+    if not 1 <= per_page <= MAX_PER_PAGE:
+        raise ValueError(f"per_page must be between 1 and {MAX_PER_PAGE}, got {per_page}")
 
 
 def _ensure_body_fits(body: str):
@@ -659,7 +673,11 @@ class AsyncGitHubClient:
 
         Returns:
             AsyncIterator[GitHubResponse[ArtifactsList]]: One page of artifacts per iteration.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request(
             "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
@@ -692,7 +710,11 @@ class AsyncGitHubClient:
 
         Returns:
             AsyncIterator[GitHubResponse[WorkflowJobsList]]: One page of jobs per iteration.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
         async for response in self._paginated_request(
             "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
@@ -822,7 +844,11 @@ class AsyncGitHubClient:
         Returns:
             AsyncIterator[GitHubResponse[list[IssueComment]]]: One page of comments per iteration,
             following Link headers until exhausted.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         # The response body is a bare JSON array, so there is no wrapper model to validate against
         # (unlike ``WorkflowJobsList``); each item is validated individually.
         endpoint = f"/repos/{owner}/{repo}/issues/{issue_number}/comments"
@@ -896,7 +922,11 @@ class AsyncGitHubClient:
 
         Returns:
             GitHubResponse[list[PullRequest]]: The validated pull requests on the first result page.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         params: dict[str, Any] = {"state": state, "per_page": per_page}
         if head is not None:
             params["head"] = head
