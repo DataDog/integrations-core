@@ -126,7 +126,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
                     query['query'] += object_name_filter
                     params.extend(self.db_fragmentation_object_names)
                 query['params'] = tuple(params)
-            self._set_database_collection_start_offset(queries, database, len(databases), self.collection_interval)
+            self._set_database_collection_phase_offset(queries, database, len(databases), self.collection_interval)
             executor = self.new_query_executor(
                 queries,
                 executor=functools.partial(self.execute_query_handler, db=database),

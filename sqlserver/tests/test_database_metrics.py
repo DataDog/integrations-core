@@ -88,13 +88,23 @@ PER_DATABASE_STAGGERED_METRICS = [
 
 @pytest.mark.unit
 @pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
-def test_per_database_metrics_execute_only_due_database_slots(
+def test_per_database_metrics_spread_across_the_collection_interval(
     init_config, instance_docker_metrics, metrics_class, config_key, metric_config
 ):
+    """
+    Every database is collected on the first pass, and from then on each one is collected once per
+    interval in its own slot rather than all of them together.
+
+    The bug this guards against is the burst: before phase offsets, all N databases were due on the
+    same pass forever, so a large estate did one enormous sweep per interval. Delaying the *first*
+    pass would be an equally bad failure, leaving databases uncollected for a whole interval after
+    startup, so that is asserted here too.
+    """
     databases = ['master', 'msdb', 'database_1', 'database_2', 'database_3', 'database_4', 'delta']
+    interval = 10
     instance_docker_metrics['database_metrics'] = {config_key: metric_config}
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
-    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = 10
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = interval
     executed_databases = []
 
     def execute_query_handler(_query, db=None, params=None):
@@ -111,20 +121,21 @@ def test_per_database_metrics_execute_only_due_database_slots(
             databases=databases,
         )
         _ = metrics.query_executors
-        now += 2
-        metrics.execute()
-        assert executed_databases == ['msdb', 'database_1']
 
-        now += 9
         metrics.execute()
-        now += 1
-        metrics.execute()
+        assert sorted(executed_databases) == sorted(databases), "the first pass must collect every database"
 
-    assert executed_databases.count('msdb') == 2
-    assert executed_databases.count('database_1') == 2
-    assert all(
-        executed_databases.count(database) == 1 for database in databases if database not in {'msdb', 'database_1'}
-    )
+        # Walk one full interval a second at a time, recording which databases came due on each tick.
+        per_tick = []
+        for _ in range(interval):
+            now += 1
+            executed_databases.clear()
+            metrics.execute()
+            per_tick.append(list(executed_databases))
+
+    collected = [db for tick in per_tick for db in tick]
+    assert sorted(collected) == sorted(databases), "each database is collected exactly once per interval"
+    assert max(len(tick) for tick in per_tick) < len(databases), "the databases must not all be due on one tick"
 
 
 @pytest.mark.unit
@@ -141,7 +152,7 @@ def test_per_database_metric_slots_are_stable(
 
         def new_query_executor(queries: list[dict], **kwargs) -> mock.Mock:
             database = kwargs['executor'].keywords['db']
-            offsets[database] = queries[0].get('collection_start_offset')
+            offsets[database] = queries[0].get('collection_phase_offset')
             return mock.Mock()
 
         metrics = metrics_class(
@@ -1250,8 +1261,7 @@ def test_sqlserver_index_usage_metrics(
 
     sqlserver_check._database_metrics = [index_usage_metrics]
 
-    with mock.patch.object(index_usage_metrics, '_database_collection_start_offset', return_value=0):
-        dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
 
     if not include_index_usage_metrics:
         assert index_usage_metrics.enabled is False
@@ -1501,8 +1511,7 @@ def test_sqlserver_db_fragmentation_metrics(
 
     sqlserver_check._database_metrics = [db_fragmentation_metrics]
 
-    with mock.patch.object(db_fragmentation_metrics, '_database_collection_start_offset', return_value=0):
-        dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
 
     if not include_db_fragmentation_metrics:
         assert db_fragmentation_metrics.enabled is False
@@ -1934,8 +1943,7 @@ def test_sqlserver_table_size_metrics(
 
     sqlserver_check._database_metrics = [table_size_metrics]
 
-    with mock.patch.object(table_size_metrics, '_database_collection_start_offset', return_value=0):
-        dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
 
     if not include_table_size_metrics:
         assert table_size_metrics.enabled is False

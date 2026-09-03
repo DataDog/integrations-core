@@ -119,7 +119,7 @@ class SqlserverTableSizeMetrics(SqlserverDatabaseMetricsBase):
                         query['query'] = query['query'].replace("    GROUP BY", table_name_filter + "\n    GROUP BY")
                         query['params'] = tuple(table_names)
                 queries.extend(batch_queries)
-            self._set_database_collection_start_offset(queries, database, len(databases), self.collection_interval)
+            self._set_database_collection_phase_offset(queries, database, len(databases), self.collection_interval)
             executor = self.new_query_executor(
                 queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
