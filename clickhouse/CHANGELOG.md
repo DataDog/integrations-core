@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.0 / 2026-09-02
+
+***Added***:
+
+* Add ClickHouse 26.3 support ([#24302](https://github.com/DataDog/integrations-core/pull/24302))
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+* Add the hosting type, the connection mode and the cluster node inventory to the ``database_instance`` metadata payload. ([#24889](https://github.com/DataDog/integrations-core/pull/24889))
+
+***Fixed***:
+
+* Add MarkCacheBytes to SystemMetrics query mapping for ClickHouse 25.x+ compatibility, where the metric was moved from system.asynchronous_metrics to system.metrics. ([#23677](https://github.com/DataDog/integrations-core/pull/23677))
+* Fix a crash on Altinity FIPS builds whose version string includes a non-numeric suffix (e.g. ``25.3.8.30001.altinityfips``). ([#24807](https://github.com/DataDog/integrations-core/pull/24807))
+* Fixes a duplicate query for Clickhouse server version. ([#24916](https://github.com/DataDog/integrations-core/pull/24916))
+* Fan out over the cluster the instance actually belongs to in single endpoint mode, instead of assuming it is named ``default``, and read local system tables when no cluster can be resolved. ([#24920](https://github.com/DataDog/integrations-core/pull/24920))
+* Manage the DBM async jobs through the ``DatabaseCheck`` registry. ([#24934](https://github.com/DataDog/integrations-core/pull/24934))
+* Cache the Agent version instead of resolving it for every payload. ([#25024](https://github.com/DataDog/integrations-core/pull/25024))
+
 ## 7.2.0 / 2026-08-05
 
 ***Added***:

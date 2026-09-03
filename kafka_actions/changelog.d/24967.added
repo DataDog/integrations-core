@@ -1,1 +1,0 @@
-Emit updated topic config to the event platform after a successful update_topic_config or delete_topic_config action, so the UI reflects changes immediately without waiting for the kafka_consumer check cache to expire.

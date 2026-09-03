@@ -1,1 +1,0 @@
-Cache the Agent version instead of resolving it for every payload.

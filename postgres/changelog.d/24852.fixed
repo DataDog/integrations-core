@@ -1,1 +1,0 @@
-Only tear the check down once when it is cancelled, and keep logging usable through the end of teardown.

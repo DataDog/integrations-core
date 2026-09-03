@@ -1,1 +1,0 @@
-Fix a crash in the query activity job when statement instruments have ``TIMED = NO`` and a thread has more than one ``events_statements_current`` row.

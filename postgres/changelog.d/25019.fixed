@@ -1,1 +1,0 @@
-Use a shared ``INSUFFICIENT_PRIVILEGE`` constant for the query text Postgres returns when a statement is not visible.
