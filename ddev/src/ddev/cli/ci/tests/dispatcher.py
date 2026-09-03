@@ -55,8 +55,6 @@ class DispatcherContext:
     workflow_ref: str
     target_branch: str | None = None
     pr_number: int | None = None
-    # Free-form `key:value` tags the run reports itself under. What they mean is the caller's to
-    # decide, so nothing here reads them.
     tags: tuple[str, ...] = ()
 
 

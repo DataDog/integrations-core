@@ -46,7 +46,6 @@ class FakeFilesClient:
 
 
 def test_a_commit_is_compared_with_its_first_parent():
-    """The comparison a push needs, and the only one a two-commit checkout can answer."""
     changed_file = ChangedFile(ChangeType.MODIFIED, "foo/bar.py")
     git = RecordingGit((changed_file,))
 
@@ -55,7 +54,7 @@ def test_a_commit_is_compared_with_its_first_parent():
 
 
 def test_a_commit_whose_parent_is_missing_says_what_would_fix_it():
-    """A depth-1 checkout has no parent to compare with, and the message has to name the fix."""
+    """The usual cause is a depth-1 checkout, which the message has to be able to point at."""
     git = RecordingGit(error=OSError("fatal: ambiguous argument 'abc123^1'"))
 
     with pytest.raises(ChangeResolutionError, match="fetch-depth: 2"):
@@ -77,7 +76,7 @@ async def test_a_pull_request_reads_every_page_of_its_diff():
 
 
 async def test_a_truncated_diff_aborts_rather_than_planning_a_subset():
-    """`pulls/{n}/files` stops at 3000 files without saying so, so the count is the only guard."""
+    """The endpoint truncates without saying so, so the count is the only thing that can catch it."""
     client = FakeFilesClient(file_page(PullRequestFile(filename="only.py", status="modified")))
 
     with pytest.raises(ChangeResolutionError, match="reports 2 changed files but the API listed 1"):
@@ -85,8 +84,8 @@ async def test_a_truncated_diff_aborts_rather_than_planning_a_subset():
 
 
 async def test_a_rename_selects_the_target_it_moved_away_from():
-    """`affected_paths` only returns the source for a RENAMED change, so a rename mapped to anything
-    else silently stops selecting the target that used to own the file.
+    """`affected_paths` returns the source only for a RENAMED change, so mapping a rename to
+    anything else stops selecting the target that used to own the file.
     """
     client = FakeFilesClient(
         file_page(

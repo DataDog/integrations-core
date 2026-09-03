@@ -96,7 +96,6 @@ def test_a_head_sha_resolves_to_its_pull_request(ddev, github, planned):
 
 
 def test_a_head_sha_belonging_to_no_open_pull_request_dispatches_nothing(ddev, github, planned):
-    """A closed pull request resolves to nothing, and there is nothing to test or report to."""
     github.mock_response('list_commit_pulls', pulls_page())
 
     result = ddev('ci', 'dispatch-tests', '--pr-head-sha', HEAD_SHA)
@@ -108,7 +107,7 @@ def test_a_head_sha_belonging_to_no_open_pull_request_dispatches_nothing(ddev, g
 
 
 def test_a_pull_request_that_is_no_longer_open_dispatches_nothing(ddev, github, planned):
-    """Nothing to test once it is closed, and no open pull request to comment on either."""
+    """Nothing to test at that point, and no open pull request to report to either."""
     github.mock_response('get_pull_request', pull_request(state='closed'))
 
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
@@ -160,7 +159,7 @@ def test_a_run_that_dispatches_needs_a_token_before_it_plans(ddev, planned, mock
 
 
 def test_a_dry_run_of_a_commit_needs_no_token(ddev, planned, local_changes, mocker):
-    """The only run that talks to nobody: a commit is compared with its parent by local git."""
+    """The only run that talks to nobody, since git answers the comparison."""
     mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': '', 'GH_TOKEN': '', 'GITHUB_TOKEN': ''})
 
     result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
@@ -170,7 +169,7 @@ def test_a_dry_run_of_a_commit_needs_no_token(ddev, planned, local_changes, mock
 
 
 def test_a_dry_run_of_a_pull_request_needs_a_token(ddev, planned, mocker):
-    """Its branch, commits and diff all come from the API, so there is no offline pull request run."""
+    """Its branch, commits and diff all come from the API, so there is no offline version of it."""
     mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': '', 'GH_TOKEN': '', 'GITHUB_TOKEN': ''})
 
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--dry-run')
@@ -208,7 +207,6 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, local_changes,
 
 
 def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
-    """`--all` decides which targets run without a comparison, so it reads no files."""
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--all', '--dry-run')
 
     assert result.exit_code == 0, result.output
@@ -217,9 +215,7 @@ def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
 
 
 def test_tags_are_separated_on_spaces(ddev, github, planned, mocker):
-    """One tag per space-separated word. What each means is the caller's to decide, so the only
-    thing this command can get wrong is where one tag ends and the next begins.
-    """
+    """Where one tag ends and the next begins is the only thing the command decides about them."""
     displayed = mocker.patch('ddev.cli.ci.dispatch_tests.display_plan')
 
     result = ddev(

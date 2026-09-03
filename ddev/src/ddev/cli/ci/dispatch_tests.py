@@ -237,10 +237,8 @@ def resolve_run(
     token: str,
     all_targets: bool,
 ) -> ResolvedRun | None:
-    """Resolve what to test, or None when there is nothing to do.
-
-    A pull request that is no longer open is the one such case: nothing to test at that point, and
-    no open pull request to report to either.
+    """Resolve what to test, or None when a pull request is no longer open and there is nothing
+    left to test or report to.
     """
     if requested_pr is not None or pr_head_sha is not None:
         return resolve_pull_request_run(
@@ -296,8 +294,6 @@ def resolve_pull_request_run(
         async with async_github_client(token=token) as client:
             number = requested_pr
             if number is None:
-                # `resolve_run` only comes here when one of the two was given, and `validate_options`
-                # has already refused both at once.
                 assert pr_head_sha is not None, (
                     'A pull request run needs either a number or a head commit, and this run reported '
                     'neither. `resolve_run` dispatched to the wrong resolver.'
@@ -340,8 +336,7 @@ def resolve_pull_request_run(
 async def resolve_pull_request_number(client: AsyncGitHubClient, owner: str, repo: str, head_sha: str) -> int | None:
     """Return the open pull request whose head is *head_sha*, or None when there is none.
 
-    A `workflow_run` event carries the head commit but not reliably a number, and a fork's head
-    resolves here because the base repository keeps it as `refs/pull/<n>/head`.
+    A fork's head resolves too, because the base repository keeps it as `refs/pull/<n>/head`.
     """
     from ddev.utils.github_async.models import PullRequestState
 
