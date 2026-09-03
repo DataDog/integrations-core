@@ -49,18 +49,19 @@ def changes_in_commit(git: GitRepository, commit: str) -> list[ChangedFile]:
 
 
 async def changes_in_pull_request(
-    client: AsyncGitHubClient, owner: str, repo: str, pull_number: int, expected_total: int | None
+    client: AsyncGitHubClient, owner: str, repo: str, pull_number: int, expected_total: int
 ) -> list[ChangedFile]:
     """Return the files a pull request changes, read from the API.
 
     The endpoint stops at 3000 files without reporting that it did, so a total that disagrees with
     `expected_total` (`changed_files` on the pull request) aborts rather than planning a subset.
+    A run with nothing to compare never reaches here, so the total is always a count to check.
     """
     files: list[PullRequestFile] = []
     async for page in client.list_pull_request_files(owner, repo, pull_number):
         files.extend(page.data)
 
-    if expected_total is not None and len(files) != expected_total:
+    if len(files) != expected_total:
         raise ChangeResolutionError(
             f"Pull request {pull_number} reports {expected_total} changed files but the API listed "
             f"{len(files)}. Planning from an incomplete list would leave part of the change untested."

@@ -1,1 +1,1 @@
-Resolve a pull request's changed files through the GitHub API instead of local git.
+Resolve a pull request's changed files through the GitHub API instead of local git, and split the pull request endpoints into the two schemas GitHub returns, so a listed pull request can no longer stand in for a full one.

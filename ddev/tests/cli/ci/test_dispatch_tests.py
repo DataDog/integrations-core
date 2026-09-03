@@ -222,6 +222,19 @@ def test_an_incomplete_diff_aborts_rather_than_testing_part_of_the_change(ddev, 
     planned.assert_not_called()
 
 
+def test_a_pull_request_that_changes_no_file_dispatches_nothing(ddev, github, planned):
+    """Listing the files of an empty diff would meet a count of 0 and read that as truncation."""
+    github.mock_response('get_pull_request', pull_request(changed_files=0))
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+
+    assert result.exit_code == 0, result.output
+    assert 'changes no file' in result.output
+    github.assert_not_called('list_pull_request_files')
+    planned.assert_not_called()
+    github.assert_not_called('create_workflow_dispatch')
+
+
 @pytest.mark.parametrize(
     'options',
     [

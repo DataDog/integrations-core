@@ -255,8 +255,10 @@ def resolve_run(
     token: str,
     all_targets: bool,
 ) -> ResolvedRun | None:
-    """Resolve what to test, or None when a pull request is no longer open and there is nothing
-    left to test or report to.
+    """Resolve what to test, or None when there is nothing left to test or report to.
+
+    Every such outcome says which one it was before returning, since from the outside a run that
+    resolved to nothing and a run that was never asked for anything look the same.
     """
     if requested_pr is not None or pr_head_sha is not None:
         return resolve_pull_request_run(
@@ -351,6 +353,11 @@ def resolve_pull_request_run(
 
             changed_files = None
             if not all_targets:
+                # Listing the files of an empty diff would meet a count of 0 and read it as the
+                # truncation the count exists to catch.
+                if pull.changed_files == 0:
+                    app.display_info(f'Pull request {pull.number} changes no file, so there is nothing to test.')
+                    return None
                 changed_files = await changes_in_pull_request(client, owner, repo, pull.number, pull.changed_files)
 
             return ResolvedRun(
