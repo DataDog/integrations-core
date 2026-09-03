@@ -616,7 +616,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -624,7 +623,6 @@ files:
           value:
             type: number
             example: 600
-          fleet_configurable: false
     - name: query_metrics
       description: Configure collection of query metrics
       fleet_configurable: true
@@ -1139,21 +1137,18 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
           value:
             type: number
             example: 600
-          fleet_configurable: false
         - name: max_tables
           description: |
             Set the maximum number of tables to collect. Defaults to 300.
           value:
             type: integer
             example: 300
-          fleet_configurable: false
         - name: max_execution_time
           deprecation:
             Agent version: 7.74.0
@@ -1164,7 +1159,6 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
     - name: schemas_collection
       deprecation:
         Agent version: 7.70.0
@@ -1221,7 +1215,6 @@ files:
             type: integer
             example: 3
             display_default: 3
-          fleet_configurable: false
         - name: query_completions
           description: |
             Configure the collection of completed queries from the `datadog_query_completions` XE session.
@@ -1249,7 +1242,6 @@ files:
               type: integer
               example: 1000
               display_default: 1000
-          fleet_configurable: false
         - name: query_errors
           description: |
             Configure the collection of query errors from the `datadog_query_errors` XE session.
@@ -1277,7 +1269,6 @@ files:
               type: integer
               example: 1000
               display_default: 1000
-          fleet_configurable: false
     - name: xe_collection
       deprecation:
         Agent version: 7.70.0
@@ -1364,21 +1355,18 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
           value:
             type: number
             example: 600
-          fleet_configurable: false
         - name: max_deadlocks
           description: |
             Set the maximum number of deadlocks to retrieve per collection.
           value:
             type: number
             example: 100
-          fleet_configurable: false
     - name: deadlocks_collection
       deprecation:
         Agent version: 7.70.0
