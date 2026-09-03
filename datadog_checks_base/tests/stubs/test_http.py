@@ -169,3 +169,49 @@ def test_fake_client_request_assertions():
 
     with pytest.raises(AssertionError, match='No recorded request matched'):
         client.assert_has_request(RecordedRequest(method='GET', url=url))
+
+
+def test_fake_client_records_each_request_when_the_caller_reuses_one_options_container():
+    client = FakeHTTPClient()
+    url = 'https://example.test/items'
+    for _ in range(3):
+        client.register_response('GET', url, FakeHTTPResponse())
+
+    params = {'take': 30}
+    for page in range(3):
+        params['skip'] = page * 30
+        client.get(url, params=params)
+
+    client.assert_requests(
+        [
+            RecordedRequest('GET', url, {'params': {'take': 30, 'skip': 0}}),
+            RecordedRequest('GET', url, {'params': {'take': 30, 'skip': 30}}),
+            RecordedRequest('GET', url, {'params': {'take': 30, 'skip': 60}}),
+        ]
+    )
+
+
+def test_fake_client_matches_registrations_made_before_a_match_option_changed():
+    client = FakeHTTPClient()
+    url = 'https://example.test/items'
+    first = FakeHTTPResponse(status_code=201)
+    second = FakeHTTPResponse(status_code=202)
+    match_options = {'params': {'page': 1}}
+    client.register_response('GET', url, first, match_options=match_options)
+    match_options['params']['page'] = 2
+    client.register_response('GET', url, second, match_options=match_options)
+
+    assert client.get(url, params={'page': 1}) is first
+    assert client.get(url, params={'page': 2}) is second
+    client.assert_all_responses_consumed()
+
+
+def test_fake_client_records_a_body_that_cannot_be_copied():
+    client = FakeHTTPClient()
+    url = 'https://example.test/upload'
+    client.register_response('POST', url, FakeHTTPResponse())
+    body = (chunk for chunk in (b'first', b'second'))
+
+    client.post(url, data=body)
+
+    assert client.requests[0].options['data'] is body

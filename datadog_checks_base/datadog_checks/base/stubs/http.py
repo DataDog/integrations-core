@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator, Mapping
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import timedelta
 from types import MappingProxyType
@@ -19,6 +20,17 @@ JSON_RESULT_UNSET = object()
 SUPPRESSED_AUTH = object()
 
 
+def _snapshot_options(options: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Copy the plain data in each option so the fake and its callers share no mutable state."""
+    return MappingProxyType(
+        {
+            # Bodies and authentication objects are not always copyable.
+            name: deepcopy(value) if isinstance(value, (Mapping, list, tuple)) else value
+            for name, value in options.items()
+        }
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class RecordedRequest:
     """A request captured by :class:`FakeHTTPClient`."""
@@ -29,7 +41,7 @@ class RecordedRequest:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, 'method', self.method.upper())
-        object.__setattr__(self, 'options', MappingProxyType(dict(self.options)))
+        object.__setattr__(self, 'options', _snapshot_options(self.options))
 
 
 @dataclass(frozen=True, slots=True)
@@ -199,7 +211,7 @@ class FakeHTTPClient:
                 method=method.upper(),
                 url=url,
                 outcome=response,
-                match_options=MappingProxyType(dict(match_options or {})),
+                match_options=_snapshot_options(match_options or {}),
             )
         )
 
