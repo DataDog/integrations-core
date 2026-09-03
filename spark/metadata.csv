@@ -119,6 +119,7 @@ spark.job.num_failed_tasks,count,,task,,Number of failed tasks in the applicatio
 spark.job.num_skipped_stages,count,,stage,,Number of skipped stages in the application,0,spark,jb nm skp stg,
 spark.job.num_skipped_tasks,count,,task,,Number of skipped tasks in the application,0,spark,jb nm skp tsk,
 spark.job.num_tasks,count,,task,,Number of tasks in the application,0,spark,jb nm tsk,
+spark.master.worker_count,gauge,,worker,,Number of workers registered with the standalone Spark master,0,spark,mstr wrk count,
 spark.rdd.count,count,,,,Number of RDDs,0,spark,rdd count,
 spark.rdd.disk_used,count,,byte,,Amount of disk space used by persisted RDDs in the application,0,spark,rdd dsk usd,
 spark.rdd.memory_used,count,,byte,,Amount of memory used in the application's persisted RDDs,0,spark,rdd mem usd,
