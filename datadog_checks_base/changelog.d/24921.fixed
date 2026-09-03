@@ -1,1 +1,0 @@
-Stop an OpenMetrics V2 instance that configures ``rename_labels`` from silently discarding the renames its check declares in ``get_default_config``. The instance's renames are now merged with the check's declared renames entry by entry, with the instance's own entries taking precedence, instead of replacing them wholesale.
