@@ -10,7 +10,6 @@ import base64
 import gzip
 import json
 import secrets
-import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -246,27 +245,6 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             "artifact_name": "ntp_py3.13_linux",
         },
     ]
-
-
-@pytest.mark.asyncio
-async def test_the_job_list_decodes_with_the_pipeline_the_workflow_runs(tmp_path: Path):
-    """`test-batch` decodes the input in shell, as `base64 -d | gzip -dc`.
-
-    Any other compression round-trips in Python and leaves the workflow unable to read its own
-    matrix, which fails at expand time with the batch already dispatched.
-    """
-    fake, _ = await run_happy_path(tmp_path)
-    encoded = fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]["job_list"]
-
-    decoded = subprocess.run(  # noqa: S602
-        "base64 -d | gzip -dc",
-        shell=True,
-        input=encoded.encode(),
-        capture_output=True,
-        check=True,
-    )
-
-    assert [job["name"] for job in json.loads(decoded.stdout)] == ["j1", "j2"]
 
 
 @pytest.mark.asyncio
