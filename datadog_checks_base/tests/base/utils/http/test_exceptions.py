@@ -25,6 +25,7 @@ from datadog_checks.base.utils.requests_adapter import (
     RequestsResponseAdapter,
     _backend_compat_type,
     _translate_requests_exception,
+    translate_http_errors,
 )
 
 from . import common
@@ -236,6 +237,22 @@ def test_translate_adapts_attached_backend_response():
     assert isinstance(translated.response, RequestsResponseAdapter)
     assert translated.response.status_code == 401
     assert translated.response.content == b'unauthorized'
+
+
+def test_re_entering_the_seam_leaves_a_translated_error_intact():
+    # Compatibility types inherit the requests bases, so an outer seam catches what an inner one translated.
+    backend_response = mock.Mock()
+    backend_response.status_code = 401
+    backend_response.request = None
+    backend_response.raw.connection.sock.getpeercert.return_value = b'der-bytes'
+    translated = _translate_requests_exception(requests.HTTPError('401 Client Error', response=backend_response))
+
+    with pytest.raises(HTTPClientStatusError) as exc_info:
+        with translate_http_errors():
+            raise translated
+
+    assert exc_info.value is translated
+    assert exc_info.value.response.get_peer_cert(binary_form=True) == b'der-bytes'
 
 
 def test_translate_converts_raw_request_to_agnostic_snapshot():
