@@ -576,6 +576,20 @@ async def test_list_pull_request_files_success():
     assert [changed.previous_filename for changed in files] == [None, None, "disk/original.py"]
 
 
+async def test_list_commit_pulls_success():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/commits/31014335d4/pulls"
+        assert request.url.params["per_page"] == "100"
+        # The abbreviated `pull-request-simple` form, which is what this endpoint returns.
+        return json_response([pull_request_payload(number=25082)])
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_commit_pulls("owner", "repo", "31014335d4")]
+
+    assert [pull.number for page in pages for pull in page.data] == [25082]
+
+
 async def test_add_labels_to_issue_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"

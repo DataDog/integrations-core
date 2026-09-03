@@ -319,6 +319,11 @@ MIRROR_CALLS = [
         {'pull_number': 5},
     ),
     (
+        'list_commit_pulls',
+        lambda f, _: first_page(f.list_commit_pulls('o', 'r', 'abc123')),
+        {'commit_sha': 'abc123'},
+    ),
+    (
         'add_labels_to_issue',
         lambda f, _: f.add_labels_to_issue('o', 'r', 7, ['qa/skip-qa']),
         {'labels': ['qa/skip-qa']},

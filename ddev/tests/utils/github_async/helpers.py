@@ -180,6 +180,12 @@ ENDPOINT_CALLS = [
         default_retry="safe",
     ),
     EndpointCase(
+        "list_commit_pulls",
+        lambda c: first_page(c.list_commit_pulls("o", "r", "abc123")),
+        lambda: json_response([pull_request_payload(number=1)]),
+        default_retry="safe",
+    ),
+    EndpointCase(
         "create_pull_request",
         lambda c: c.create_pull_request("o", "r", "t", "h", "b"),
         lambda: json_response(pull_request_payload(number=1), status_code=201),
