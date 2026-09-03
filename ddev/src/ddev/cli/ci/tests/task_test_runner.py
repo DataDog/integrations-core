@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import dataclasses
+import gzip
 import json
 import logging
 from dataclasses import dataclass
@@ -21,6 +23,36 @@ from ddev.utils.github_async.models import CheckRunConclusion, CheckRunStatus, W
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
 # goes quiet would hold this for the client's default and take every other cancellation with it.
 CANCEL_REQUEST_TIMEOUT = 3.0
+
+# GitHub rejects a workflow dispatch whose whole `inputs` object exceeds this.
+# https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
+WORKFLOW_INPUTS_LIMIT = 65535
+
+
+class JobListTooLargeError(Exception):
+    """Raised when a batch's inputs exceed what a workflow dispatch accepts.
+
+    Dispatching anyway fails the request, so the batch never runs and its jobs are never reported.
+    """
+
+    def __init__(self, batch_id: str, size: int):
+        super().__init__(
+            f"Batch {batch_id} needs {size} characters of workflow inputs, over GitHub's "
+            f"{WORKFLOW_INPUTS_LIMIT}. Lower `max_jobs_per_batch` so the plan splits further."
+        )
+        self.batch_id = batch_id
+        self.size = size
+
+
+def encode_job_list(jobs: list[dict[str, Any]]) -> str:
+    """Encode a batch's jobs for a workflow input, as gzip then base64.
+
+    A repository-wide batch is several times the 65,535-character input limit as plain JSON, and
+    compresses by around 17x. `mtime=0` keeps the result a function of the jobs alone, so the same
+    plan always encodes to the same string.
+    """
+    raw = json.dumps(jobs, separators=(",", ":")).encode()
+    return base64.b64encode(gzip.compress(raw, mtime=0)).decode()
 
 
 @dataclass(frozen=True)
@@ -180,12 +212,17 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         return jobs
 
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
-        return {
+        inputs = {
             "batch_id": message.batch_id,
             "checkout_sha": self._options.checkout_sha,
             "integrations": json.dumps(message.integrations),
-            "job_list": json.dumps([self._job_input(job) for job in message.job_list]),
+            "job_list": encode_job_list([self._job_input(job) for job in message.job_list]),
         }
+        size = sum(len(value) for value in inputs.values())
+        if size > WORKFLOW_INPUTS_LIMIT:
+            raise JobListTooLargeError(message.batch_id, size)
+
+        return inputs
 
     @staticmethod
     def _job_input(job: BatchJob) -> dict[str, Any]:
