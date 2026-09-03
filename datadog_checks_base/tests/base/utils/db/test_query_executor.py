@@ -192,15 +192,15 @@ class TestQueryExecutor:
             assert len(aggregator.metrics('test.metric_with_interval')) == 1
 
     @pytest.mark.parametrize('collection_interval', [10, None])
-    def test_query_with_collection_start_offset(self, aggregator, collection_interval):
-        """The first execution is delayed only for interval-gated queries without changing their cadence."""
+    def test_query_with_collection_phase_offset(self, aggregator, collection_interval):
+        """The offset shifts an interval-gated query's phase without delaying its first execution."""
         queries = [
             {
                 'name': 'query1',
                 'query': 'select 1',
                 'columns': [{'name': 'test.metric_with_offset', 'type': 'gauge'}],
                 'collection_interval': collection_interval,
-                'collection_start_offset': 4,
+                'collection_phase_offset': 4,
             }
         ]
         now = 100
@@ -208,22 +208,62 @@ class TestQueryExecutor:
             qe = QueryExecutor(mock_executor([[1]]), AgentCheck('test', {}, [{}]), queries)
             qe.compile_queries()
 
+            # The offset must not cost the query its first collection.
             qe.execute()
-            expected_initial_count = 1 if collection_interval is None else 0
-            aggregator.assert_metric('test.metric_with_offset', count=expected_initial_count)
+            aggregator.assert_metric('test.metric_with_offset', count=1)
 
-            now += 4
+            # Not yet due: the second execution lands at the offset, not at the full interval.
+            now += 3
             qe.execute()
-            expected_offset_count = 2 if collection_interval is None else 1
-            aggregator.assert_metric('test.metric_with_offset', count=expected_offset_count)
+            aggregator.assert_metric('test.metric_with_offset', count=1 if collection_interval else 2)
 
-            now += 9
-            qe.execute()
             now += 1
             qe.execute()
+            aggregator.assert_metric('test.metric_with_offset', count=2 if collection_interval else 3)
 
-        expected_count = 4 if collection_interval is None else 2
-        aggregator.assert_metric('test.metric_with_offset', count=expected_count)
+            # From there the cadence is one execution per interval, phase-shifted by the offset.
+            now += collection_interval - 1 if collection_interval else 1
+            qe.execute()
+            aggregator.assert_metric('test.metric_with_offset', count=2 if collection_interval else 4)
+
+            now += 1
+            qe.execute()
+            aggregator.assert_metric('test.metric_with_offset', count=3 if collection_interval else 5)
+
+    def test_collection_phase_offsets_spread_same_interval_queries(self, aggregator):
+        """Queries sharing an interval but given distinct offsets stop firing in the same burst."""
+        interval = 10
+        queries = [
+            {
+                'name': 'query{}'.format(offset),
+                'query': 'select 1',
+                'columns': [{'name': 'test.q{}'.format(offset), 'type': 'gauge'}],
+                'collection_interval': interval,
+                'collection_phase_offset': offset,
+            }
+            for offset in (0, 3, 7)
+        ]
+        now = 100
+        with mock.patch('datadog_checks.base.utils.db.query.get_timestamp', side_effect=lambda: now):
+            qe = QueryExecutor(mock_executor([[1]]), AgentCheck('test', {}, [{}]), queries)
+            qe.compile_queries()
+
+            qe.execute()  # first pass collects everything
+            for offset in (0, 3, 7):
+                aggregator.assert_metric('test.q{}'.format(offset), count=1)
+
+            # Walk a full interval one second at a time and record when each query fires again.
+            fired = {offset: [] for offset in (0, 3, 7)}
+            for step in range(1, interval + 1):
+                now += 1
+                aggregator.reset()
+                qe.execute()
+                for offset in (0, 3, 7):
+                    if aggregator.metrics('test.q{}'.format(offset)):
+                        fired[offset].append(step)
+
+            # Each query fires exactly once in the interval, and at its own second -- not all together.
+            assert fired == {0: [interval], 3: [3], 7: [7]}
 
     @pytest.mark.parametrize(
         'collection_interval, expected_exception',
@@ -251,20 +291,20 @@ class TestQueryExecutor:
         with pytest.raises(expected_exception):
             qe.compile_queries()
 
-    @pytest.mark.parametrize('collection_start_offset', [-1, 'test'])
-    def test_query_with_collection_start_offset_with_exception(self, collection_start_offset):
+    @pytest.mark.parametrize('collection_phase_offset', [-1, 'test'])
+    def test_query_with_collection_phase_offset_with_exception(self, collection_phase_offset):
         queries = [
             {
                 'name': 'query1',
                 'query': 'select 1',
                 'columns': [{'name': 'test.metric_with_interval', 'type': 'gauge'}],
                 'collection_interval': 10,
-                'collection_start_offset': collection_start_offset,
+                'collection_phase_offset': collection_phase_offset,
             }
         ]
         qe = QueryExecutor(mock_executor([[1]]), AgentCheck('test', {}, [{}]), queries)
 
-        with pytest.raises(ValueError, match='collection_start_offset'):
+        with pytest.raises(ValueError, match='collection_phase_offset'):
             qe.compile_queries()
 
     @pytest.mark.parametrize(
