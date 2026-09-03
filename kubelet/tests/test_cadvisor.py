@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base.stubs import tagger as tagger_stub
-from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.kubelet import KubeletCheck
 
@@ -37,6 +37,61 @@ def test_detect_cadvisor_nominal(fake_http):
     assert url == CADVISOR_URL
     fake_http.assert_requests([RecordedRequest('HEAD', CADVISOR_URL, options)])
     fake_http.assert_all_responses_consumed()
+
+
+def test_legacy_cadvisor_http_client_is_isolated_from_kubelet_config():
+    proxy = {'http': 'http://proxy.example:3128', 'https': 'http://proxy.example:3128'}
+    check = KubeletCheck(
+        'kubelet',
+        {},
+        [
+            {
+                'username': 'kubelet-user',
+                'password': 'kubelet-password',
+                'headers': {'Authorization': 'Bearer kubelet-token'},
+                'proxy': proxy,
+            }
+        ],
+    )
+
+    assert check.http.options['auth'] is not None
+    assert check.http.get_header('Authorization') == 'Bearer kubelet-token'
+    assert check.http.options['proxies'] == proxy
+    assert check._cadvisor_http.options['auth'] is None
+    assert check._cadvisor_http.get_header('Authorization') is None
+    assert check._cadvisor_http.options['proxies'] == {'http': '', 'https': ''}
+
+
+def test_legacy_cadvisor_requests_use_isolated_http_client(fake_http):
+    configured_http = FakeHTTPClient()
+    check = KubeletCheck('kubelet', {}, [{}])
+    check._http = configured_http
+
+    head_options = {'timeout': 1, 'allow_redirects': False}
+    fake_http.register_response(
+        'HEAD',
+        CADVISOR_URL,
+        FakeHTTPResponse(status_code=200),
+        match_options=head_options,
+    )
+    fake_http.register_response(
+        'GET',
+        CADVISOR_URL,
+        FakeHTTPResponse(json_result=[]),
+        match_options={'timeout': 10},
+    )
+
+    assert check.detect_cadvisor("http://kubelet:10250", 4192) == CADVISOR_URL
+    assert check._retrieve_cadvisor_metrics(CADVISOR_URL) == []
+
+    fake_http.assert_requests(
+        [
+            RecordedRequest('HEAD', CADVISOR_URL, head_options),
+            RecordedRequest('GET', CADVISOR_URL, {'timeout': 10}),
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
+    assert configured_http.requests == []
 
 
 def test_detect_cadvisor_404(fake_http):
