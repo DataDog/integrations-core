@@ -19,7 +19,7 @@ jobs:
     - uses: DataDog/slapr@4b5efe2ce585e45898bb88c4fa303e226e8199e4 # 1.0.0
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        SLACK_CHANNEL_ID: "${{ vars.[matrix.slack_channel_variable] }}"
+        SLACK_CHANNEL_ID: "${{ vars[matrix.slack_channel_variable] }}"
         SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
         SLAPR_BOT_USER_ID: "${{ vars.SLAPR_BOT_USER_ID }}"
         SLAPR_EMOJI_REVIEW_STARTED: "review_started"
