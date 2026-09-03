@@ -135,6 +135,9 @@ def translate_http_errors() -> Iterator[None]:
     try:
         yield
     except requests_exceptions.RequestException as exc:
+        # _backend_compat_type gives every translated error a requests base, so this clause matches them too.
+        if isinstance(exc, HTTPClientError):
+            raise
         raise _translate_requests_exception(exc) from exc
 
 
