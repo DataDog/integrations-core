@@ -23,7 +23,7 @@
     {
       "key": "account_id",
       "label": "Account ID",
-      "help": "Your RingCentral account ID (a 9-digit number). Leave as ~ to use the account of the currently authorized user.",
+      "help": "Your RingCentral account ID (a 9-digit number).",
       "required": true,
       "editable": true,
       "text": {}
