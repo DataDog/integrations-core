@@ -8,11 +8,14 @@ import ssl
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from requests import exceptions as requests_exceptions
 from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
+
+if TYPE_CHECKING:
+    from requests.adapters import _HostParams, _PoolKwargs
 
 from datadog_checks.base.utils import _http_utils
 
@@ -287,10 +290,11 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
         request: requests.PreparedRequest,
         verify: bool | str,
         cert: Any = None,
-    ) -> tuple[dict[str, Any], dict[str, Any]]:
+    ) -> tuple[_HostParams, _PoolKwargs]:
         """Include the managed SSL context in requests' connection-pool key."""
         host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
-        return host_params, {'ssl_context': self.ssl_context}
+        pool_kwargs = cast('_PoolKwargs', {'ssl_context': self.ssl_context})
+        return host_params, pool_kwargs
 
 
 def create_https_adapter(
