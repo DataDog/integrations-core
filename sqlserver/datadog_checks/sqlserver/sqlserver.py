@@ -37,19 +37,17 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseMetricsAsyncJob,
     SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
-    SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
-    SqlserverIndexUsageMetrics,
     SqlserverMasterFilesMetrics,
     SqlserverOsSchedulersMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
-    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
     SQLServerXESessionMetrics,
 )
@@ -185,6 +183,7 @@ class SQLServer(DatabaseCheck):
         self.agent_history = None
         self.deadlocks = None
         self.data_observability = None
+        self.database_metrics_job = self.register_async_job(SqlserverDatabaseMetricsAsyncJob(self, self._config))
         self._register_async_jobs()
 
         # XE Session Handlers, registered by initialize_xe_session_handlers()
@@ -235,6 +234,7 @@ class SQLServer(DatabaseCheck):
         """Release the resources this check holds for its whole lifetime."""
         self._query_manager = None
         self._database_metrics = None
+        self.database_metrics_job = None
         self.health = None
         self._connection = None
         self.tag_manager = None
@@ -968,10 +968,7 @@ class SQLServer(DatabaseCheck):
         # return the list of database metrics that are collected for each database
         return [
             SqlserverTempDBFileSpaceUsageMetrics,
-            SqlserverIndexUsageMetrics,
-            SqlserverDBFragmentationMetrics,
             SqlserverDatabaseFilesMetrics,
-            SqlserverTableSizeMetrics,
         ]
 
     @property
