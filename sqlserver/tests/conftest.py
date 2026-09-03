@@ -50,14 +50,25 @@ def init_config_alt_tables():
 
 @pytest.fixture(autouse=True)
 def run_database_metrics_synchronously(monkeypatch):
-    """Make async database metric results deterministic within each test."""
-    run_job_loop_original = SqlserverDatabaseMetricsAsyncJob.run_job_loop
+    """
+    Collect the heavy database metrics on the calling thread so a returned check implies collection.
 
-    def run_job_loop(job: SqlserverDatabaseMetricsAsyncJob, tags: list[str]) -> None:
-        job._run_sync = True
-        run_job_loop_original(job, tags)
+    Moving these collectors to an async job means `dd_run_check` no longer waits for them, which
+    makes every existing assertion about their metrics racy. The other DBM jobs solve this with a
+    `run_sync` instance option, so this forces that option on rather than reaching into the job.
 
-    monkeypatch.setattr(SqlserverDatabaseMetricsAsyncJob, 'run_job_loop', run_job_loop)
+    FIXME: this is autouse, so nothing in the suite exercises the threaded path except the tests in
+    test_database_metrics_async.py that opt out. Narrowing it to the tests that actually assert these
+    metrics needs a live SQL Server to verify and is tracked on the PR.
+    """
+    config_init_original = SqlserverDatabaseMetricsAsyncJob.__init__
+
+    def config_init(job, check, config, *args, **kwargs):
+        for key in ('index_usage_metrics', 'db_fragmentation_metrics', 'table_size_metrics'):
+            config.database_metrics_config[key]['run_sync'] = True
+        config_init_original(job, check, config, *args, **kwargs)
+
+    monkeypatch.setattr(SqlserverDatabaseMetricsAsyncJob, '__init__', config_init)
 
 
 @pytest.fixture(scope="session")
