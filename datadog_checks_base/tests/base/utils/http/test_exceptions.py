@@ -320,14 +320,18 @@ def test_json_parse_error_converges_to_stdlib():
     assert exc_info.value.pos == 0
 
 
-def test_json_parse_error_keeps_matching_requests_arms():
+def test_json_parse_error_preserves_requests_compatibility():
     transport = common.RequestsTransport()
     transport.respond(content=b'not json')
     http = common.create_requests_client(transport)
     wrapped = http.get('http://example.test/')
 
-    with pytest.raises(requests.exceptions.JSONDecodeError):
+    with pytest.raises(requests.exceptions.JSONDecodeError) as exc_info:
         wrapped.json()
+
+    assert exc_info.value.request is None
+    assert exc_info.value.response is None
+    assert exc_info.value.end is None
 
 
 def test_auth_token_fetch_error_maps_to_agnostic():
