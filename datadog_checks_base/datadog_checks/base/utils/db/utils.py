@@ -150,13 +150,23 @@ class RateLimitingTTLCache(TTLCache):
     TTLCache wrapper used for rate limiting by key
     """
 
+    def would_acquire(self, key):
+        """
+        :return: True if :meth:`acquire` would admit ``key`` right now, without consuming its budget
+
+        Use this when the work guarded by the rate limit can fail: check with ``would_acquire`` first,
+        do the work, and only ``acquire`` once it succeeded. Calling ``acquire`` up front would mark the
+        key as seen even when the work failed, suppressing retries until the entry expires.
+        """
+        if len(self) >= self.maxsize:
+            return False
+        return key not in self
+
     def acquire(self, key):
         """
         :return: True if the key has not yet reached its rate limit
         """
-        if len(self) >= self.maxsize:
-            return False
-        if key in self:
+        if not self.would_acquire(key):
             return False
         self[key] = True
         return True

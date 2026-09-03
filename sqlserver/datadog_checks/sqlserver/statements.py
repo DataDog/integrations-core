@@ -7,16 +7,6 @@ import copy
 import math
 import time
 
-try:
-    import pyodbc
-except ImportError:
-    pyodbc = None
-
-try:
-    import adodbapi
-except ImportError:
-    adodbapi = None
-
 from cachetools import TTLCache
 from lxml import etree as ET
 
@@ -33,17 +23,11 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+from datadog_checks.sqlserver.connection_errors import EXPECTED_DB_EXCEPTIONS
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 60
-
-EXPECTED_DB_EXCEPTIONS: list[type[Exception]] = [SQLConnectionError]
-if pyodbc is not None:
-    EXPECTED_DB_EXCEPTIONS.append(pyodbc.Error)
-if adodbapi is not None:
-    EXPECTED_DB_EXCEPTIONS.append(adodbapi.DatabaseError)
 
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
@@ -280,7 +264,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             check,
             run_sync=is_affirmative(self._config.statement_metrics_config.get('run_sync', False)),
             enabled=is_affirmative(self._config.statement_metrics_config.get('enabled', True)),
-            expected_db_exceptions=tuple(EXPECTED_DB_EXCEPTIONS),
+            expected_db_exceptions=EXPECTED_DB_EXCEPTIONS,
             min_collection_interval=self._config.min_collection_interval,
             dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
@@ -654,10 +638,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # we use the plan handle
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
-            if (
-                plan_key in self._seen_plans_ratelimiter
-                or len(self._seen_plans_ratelimiter) >= self._seen_plans_ratelimiter.maxsize
-            ):
+            # Check admission without consuming the plan's budget: a failed lookup below must not
+            # suppress this plan until the rate limiter entry expires.
+            if not self._seen_plans_ratelimiter.would_acquire(plan_key):
                 continue
             raise_if_cancelled(self._cancel_event)
             try:

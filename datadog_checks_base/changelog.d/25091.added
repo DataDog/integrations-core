@@ -1,0 +1,1 @@
+Add RateLimitingTTLCache.would_acquire to check admission without consuming a key's budget.
