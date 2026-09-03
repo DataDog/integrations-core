@@ -1,0 +1,1 @@
+Add a generic BFD session fragment (``bfdSessTable``/``bfdSessPerfTable``) to the Arista, Juniper, F5 BIG-IP, NEC Univerge, and generic Cisco profiles.
