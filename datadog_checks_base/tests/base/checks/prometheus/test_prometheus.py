@@ -12,8 +12,8 @@ import mock
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
-from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientError, HTTPClientStatusError
+from datadog_checks.checks.prometheus import PrometheusCheck, PrometheusScraper, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
@@ -360,10 +360,10 @@ def test_process_metric_filtered(mocked_prometheus_check):
     check.gauge.assert_not_called()
 
 
-def test_poll_protobuf(bin_data_path, fake_prometheus_http, mocked_prometheus_check):
+def test_poll_protobuf(bin_data_path, fake_http, mocked_prometheus_check):
     """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
-    fake_prometheus_http.register_response(
+    fake_http.register_response(
         'GET',
         FAKE_ENDPOINT,
         _file_response(bin_data_path, content_type=protobuf_content_type),
@@ -375,14 +375,14 @@ def test_poll_protobuf(bin_data_path, fake_prometheus_http, mocked_prometheus_ch
 
     assert len(messages) == 61
     assert messages[-1].name == 'process_virtual_memory_bytes'
-    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_poll_text_plain(fake_prometheus_http, mocked_prometheus_check, text_data):
+def test_poll_text_plain(fake_http, mocked_prometheus_check, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    _register_prometheus_text(fake_prometheus_http, text_data)
+    _register_prometheus_text(fake_http, text_data)
 
     response = check.poll(FAKE_ENDPOINT)
     messages = list(check.parse_metric_family(response))
@@ -390,8 +390,8 @@ def test_poll_text_plain(fake_prometheus_http, mocked_prometheus_check, text_dat
 
     assert len(messages) == 40
     assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
-    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
@@ -1314,9 +1314,9 @@ def test_parse_one_summary_with_none_values(p_check):
     assert expected_etcd_metric.__repr__() == current_metric.__repr__()
 
 
-def test_label_joins(fake_prometheus_http, ksm_text, sorted_tags_check):
+def test_label_joins(fake_http, ksm_text, sorted_tags_check):
     """Tests label join on text format"""
-    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {
@@ -1657,9 +1657,9 @@ def test_label_joins(fake_prometheus_http, ksm_text, sorted_tags_check):
         )
 
 
-def test_label_joins_gc(fake_prometheus_http, ksm_text, sorted_tags_check):
+def test_label_joins_gc(fake_http, ksm_text, sorted_tags_check):
     """Tests label join GC on text format"""
-    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1706,18 +1706,18 @@ def test_label_joins_gc(fake_prometheus_http, ksm_text, sorted_tags_check):
         assert 15 == len(check._label_mapping['pod'])
         text_data = ksm_text.replace('dd-agent-62bgh', 'dd-agent-1337')
 
-    _register_prometheus_text(fake_prometheus_http, text_data)
+    _register_prometheus_text(fake_http, text_data)
     check.process(FAKE_ENDPOINT)
     assert 'dd-agent-1337' in check._label_mapping['pod']
     assert 'dd-agent-62bgh' not in check._label_mapping['pod']
     assert 15 == len(check._label_mapping['pod'])
-    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST] * 3)
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_requests([PROMETHEUS_REQUEST] * 3)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_joins_missconfigured(fake_prometheus_http, ksm_text, sorted_tags_check):
+def test_label_joins_missconfigured(fake_http, ksm_text, sorted_tags_check):
     """Tests label join missconfigured label is ignored"""
-    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}}
@@ -1761,9 +1761,9 @@ def test_label_joins_missconfigured(fake_prometheus_http, ksm_text, sorted_tags_
         )
 
 
-def test_label_join_not_existing(fake_prometheus_http, ksm_text, sorted_tags_check):
+def test_label_join_not_existing(fake_http, ksm_text, sorted_tags_check):
     """Tests label join on non existing matching label is ignored"""
-    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1793,9 +1793,9 @@ def test_label_join_not_existing(fake_prometheus_http, ksm_text, sorted_tags_che
         )
 
 
-def test_label_join_metric_not_existing(fake_prometheus_http, ksm_text, sorted_tags_check):
+def test_label_join_metric_not_existing(fake_http, ksm_text, sorted_tags_check):
     """Tests label join on non existing metric is ignored"""
-    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1825,9 +1825,9 @@ def test_label_join_metric_not_existing(fake_prometheus_http, ksm_text, sorted_t
         )
 
 
-def test_label_join_with_hostname(fake_prometheus_http, ksm_text, sorted_tags_check):
+def test_label_join_with_hostname(fake_http, ksm_text, sorted_tags_check):
     """Tests label join and hostname override on a metric"""
-    with _registered_prometheus_text(fake_prometheus_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}}
@@ -1872,9 +1872,9 @@ def test_label_join_with_hostname(fake_prometheus_http, ksm_text, sorted_tags_ch
         )
 
 
-def test_health_service_check_ok(fake_prometheus_http, ksm_text):
+def test_health_service_check_ok(fake_http, ksm_text):
     """Tests endpoint health service check OK"""
-    _register_prometheus_text(fake_prometheus_http, ksm_text)
+    _register_prometheus_text(fake_http, ksm_text)
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
@@ -1883,33 +1883,40 @@ def test_health_service_check_ok(fake_prometheus_http, ksm_text):
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.OK, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
-    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing(fake_prometheus_http):
+@pytest.mark.parametrize(
+    'error_type',
+    [
+        pytest.param(HTTPClientConnectionError, id='connection-error'),
+        pytest.param(HTTPClientError, id='root-error'),
+    ],
+)
+def test_health_service_check_failing(fake_http, error_type):
     """Tests endpoint health service check failing"""
-    fake_prometheus_http.register_response(
+    fake_http.register_response(
         'GET',
         FAKE_ENDPOINT,
-        HTTPClientConnectionError('Connection failed'),
+        error_type('Connection failed'),
         match_options=PROMETHEUS_REQUEST_OPTIONS,
     )
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    with pytest.raises(HTTPClientConnectionError):
+    with pytest.raises(error_type):
         check.process(FAKE_ENDPOINT)
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
-    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing_on_status_error(fake_prometheus_http):
-    fake_prometheus_http.register_response(
+def test_health_service_check_failing_on_status_error(fake_http):
+    fake_http.register_response(
         'GET',
         FAKE_ENDPOINT,
         HTTPClientStatusError('503 Server Error'),
@@ -1926,8 +1933,8 @@ def test_health_service_check_failing_on_status_error(fake_prometheus_http):
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
-    fake_prometheus_http.assert_requests([PROMETHEUS_REQUEST])
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_requests([PROMETHEUS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_set_prometheus_timeout():
@@ -1975,10 +1982,7 @@ def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check, mocker
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
     fake_http = FakeHTTPClient()
-    create_http_client = mocker.patch(
-        'datadog_checks.base.checks.prometheus.mixins.create_http_client',
-        return_value=fake_http,
-    )
+    create_http_client = mocker.patch.object(check, 'create_http_client', return_value=fake_http)
 
     check.get_http_handler('https://httpbin.org/get', None)
 
@@ -2007,10 +2011,7 @@ def test_prometheus_http_config(mocker):
             FakeHTTPResponse(),
             match_options=PROMETHEUS_REQUEST_OPTIONS,
         )
-    create_http_client = mocker.patch(
-        'datadog_checks.base.checks.prometheus.mixins.create_http_client',
-        return_value=fake_http,
-    )
+    create_http_client = mocker.patch.object(check, 'create_http_client', return_value=fake_http)
 
     check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
     check.poll(instance_http['prometheus_endpoint'])
@@ -2024,12 +2025,7 @@ def test_prometheus_http_config(mocker):
         'ssl_ignore_warning': False,
         'ssl_ca_cert': None,
     }
-    create_http_client.assert_called_once_with(
-        expected_http_config,
-        init_config_http,
-        check.HTTP_CONFIG_REMAPPER,
-        check.log,
-    )
+    create_http_client.assert_called_once_with(expected_http_config)
     expected_request = RecordedRequest(
         'GET',
         instance_http['prometheus_endpoint'],
@@ -2037,6 +2033,22 @@ def test_prometheus_http_config(mocker):
     )
     fake_http.assert_requests([expected_request, expected_request])
     fake_http.assert_all_responses_consumed()
+
+
+def test_composed_prometheus_scraper_uses_owner_client_factory():
+    owner = mock.MagicMock()
+    fake_http = FakeHTTPClient()
+    owner.create_http_client.return_value = fake_http
+    scraper = PrometheusScraper(owner)
+    scraper.extra_headers = {}
+    scraper.ssl_cert = None
+    scraper.ssl_private_key = None
+    scraper.ssl_ca_cert = None
+
+    http_handler = scraper.get_http_handler(FAKE_ENDPOINT, {})
+
+    assert http_handler is fake_http
+    owner.create_http_client.assert_called_once()
 
 
 def test_get_http_handler_negotiates_over_seeded_default_headers(p_check):

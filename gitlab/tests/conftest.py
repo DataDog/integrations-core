@@ -111,7 +111,7 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data(fake_openmetrics_http: FakeHTTPClient):
+def mock_data(fake_http: FakeHTTPClient):
     fixtures_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
     with open(os.path.join(fixtures_dir, 'readiness_check.json'), 'r') as f:
         readiness_data = json.load(f)
@@ -131,27 +131,25 @@ def mock_data(fake_openmetrics_http: FakeHTTPClient):
             '{}?all=1'.format(GITLAB_READINESS_ENDPOINT) if use_openmetrics else GITLAB_READINESS_ENDPOINT
         )
         for _ in range(runs):
-            fake_openmetrics_http.register_response(
+            fake_http.register_response(
                 'GET',
                 GITLAB_PROMETHEUS_ENDPOINT,
                 _openmetrics_response(metrics_text),
                 match_options={'stream': True},
             )
             if include_gitaly:
-                fake_openmetrics_http.register_response(
+                fake_http.register_response(
                     'GET',
                     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
                     _openmetrics_response(gitaly_text),
                     match_options={'stream': True},
                 )
             if include_health:
-                fake_openmetrics_http.register_response(
-                    'GET', readiness_endpoint, FakeHTTPResponse(json_result=readiness_data)
-                )
-                fake_openmetrics_http.register_response('GET', GITLAB_LIVENESS_ENDPOINT, FakeHTTPResponse())
-                fake_openmetrics_http.register_response('GET', GITLAB_HEALTH_ENDPOINT, FakeHTTPResponse())
+                fake_http.register_response('GET', readiness_endpoint, FakeHTTPResponse(json_result=readiness_data))
+                fake_http.register_response('GET', GITLAB_LIVENESS_ENDPOINT, FakeHTTPResponse())
+                fake_http.register_response('GET', GITLAB_HEALTH_ENDPOINT, FakeHTTPResponse())
 
-        return fake_openmetrics_http
+        return fake_http
 
     return register_responses
 

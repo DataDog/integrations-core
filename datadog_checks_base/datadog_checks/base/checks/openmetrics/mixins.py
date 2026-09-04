@@ -18,9 +18,8 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientRequestError,
+    HTTPClientError,
     HTTPClientSSLError,
     HTTPClientStatusError,
 )
@@ -396,9 +395,7 @@ class OpenMetricsScraperMixin(object):
         if scraper_config['ssl_verify'] is False:
             scraper_config.setdefault('tls_ignore_warning', True)
 
-        http_handler = self._http_handlers[prometheus_url] = create_http_client(
-            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
+        http_handler = self._http_handlers[prometheus_url] = self.create_http_client(scraper_config)
 
         headers = http_handler.options['headers']
 
@@ -842,8 +839,7 @@ class OpenMetricsScraperMixin(object):
         except HTTPClientSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        # Auth-token fetching can raise HTTPClientStatusError, a sibling of HTTPClientRequestError.
-        except (IOError, HTTPClientRequestError, HTTPClientStatusError):
+        except (IOError, HTTPClientError):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise

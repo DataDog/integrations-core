@@ -85,24 +85,22 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_fake_openmetrics_http_routes_send_request(fake_openmetrics_http):
+def test_fake_http_routes_openmetrics_send_request(fake_http):
     url = 'https://example.test/metrics'
     response = FakeHTTPResponse(text='metric 1')
     headers = {'Authorization': 'Bearer token'}
-    fake_openmetrics_http.register_response('GET', url, response)
+    fake_http.register_response('GET', url, response)
     check = OpenMetricsFixtureCheck('test', {}, {}, [])
     scraper_config = check.create_scraper_configuration({'prometheus_url': url, 'namespace': 'test'})
 
     result = check.send_request(url, scraper_config, headers=headers)
 
     assert result is response
-    fake_openmetrics_http.assert_requests(
-        [RecordedRequest(method='GET', url=url, options={'headers': headers, 'stream': True})]
-    )
-    fake_openmetrics_http.assert_all_responses_consumed()
+    fake_http.assert_requests([RecordedRequest(method='GET', url=url, options={'headers': headers, 'stream': True})])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_fake_openmetrics_http_preserves_handler_cache_and_isolation(fake_openmetrics_http):
+def test_fake_http_preserves_openmetrics_handler_cache_and_isolation(fake_http):
     first_config = {'prometheus_url': 'https://example.test/first', 'namespace': 'test'}
     second_config = {'prometheus_url': 'https://example.test/second', 'namespace': 'test'}
     check = OpenMetricsFixtureCheck('test', {}, {}, [])
@@ -118,16 +116,16 @@ def test_fake_openmetrics_http_preserves_handler_cache_and_isolation(fake_openme
     assert second_handler.get_header('X-First-Only') is None
 
 
-def test_fake_prometheus_http_routes_poll(fake_prometheus_http):
+def test_fake_http_routes_prometheus_poll(fake_http):
     url = 'https://example.test/metrics'
     response = FakeHTTPResponse(text='metric 1')
-    fake_prometheus_http.register_response('GET', url, response)
+    fake_http.register_response('GET', url, response)
     check = PrometheusFixtureCheck('test', {}, {}, [])
 
     result = check.poll(url, headers={'X-Test': 'value'})
 
     assert result is response
-    fake_prometheus_http.assert_requests(
+    fake_http.assert_requests(
         [
             RecordedRequest(
                 method='GET',
@@ -146,10 +144,10 @@ def test_fake_prometheus_http_routes_poll(fake_prometheus_http):
             )
         ]
     )
-    fake_prometheus_http.assert_all_responses_consumed()
+    fake_http.assert_all_responses_consumed()
 
 
-def test_fake_prometheus_http_preserves_handler_cache_and_isolation(fake_prometheus_http):
+def test_fake_http_preserves_prometheus_handler_cache_and_isolation(fake_http):
     first_url = 'https://example.test/first'
     second_url = 'https://example.test/second'
     check = PrometheusFixtureCheck('test', {}, {}, [])
