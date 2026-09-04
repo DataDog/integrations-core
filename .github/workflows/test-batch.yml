@@ -61,6 +61,11 @@ on:
         required: false
         default: "standard"
         type: string
+      is_fork:
+        description: "Whether the tested commit comes from a fork. Withholds every credential when true"
+        required: false
+        default: "false"
+        type: string
 
 permissions: {}
 
@@ -181,7 +186,10 @@ jobs:
             echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
           } >> "$GITHUB_ENV"
 
+      # Skipped for a fork, so its code never runs in a job holding the key. The cost is no CI
+      # Visibility for fork pull requests, which is what `test-target` does today.
       - name: Get Datadog credentials
+        if: inputs.is_fork != 'true'
         id: dd-sts
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
@@ -220,16 +228,19 @@ jobs:
           minimum_base_package: ${{ matrix.minimum_base_package }}
           pytest_args: ${{ inputs.pytest_args }}
           context: ${{ inputs.context }}
+          is_fork: ${{ inputs.is_fork }}
+          # Every credential below is withheld from a fork. Each is optional in the action and
+          # no-ops when absent, so a fork batch runs the tests and skips what needs a secret.
           dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
           # A rate-limit lift for the ~70 api.github.com calls `ddev validate licenses` makes, not an
           # authorization requirement, so the ambient token is enough.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ inputs.is_fork != 'true' && secrets.GITHUB_TOKEN || '' }}
           # Read only by the sap_hana and weblogic setup scripts, so every other job runs without
           # them rather than seeing credentials it has no use for.
-          docker_username: ${{ (matrix.target == 'sap_hana' || matrix.target == 'weblogic') && secrets.DOCKER_USERNAME || '' }}
-          docker_token: ${{ (matrix.target == 'sap_hana' || matrix.target == 'weblogic') && secrets.DOCKER_ACCESS_TOKEN || '' }}
-          oracle_docker_username: ${{ matrix.target == 'weblogic' && secrets.ORACLE_DOCKER_USERNAME || '' }}
-          oracle_docker_password: ${{ matrix.target == 'weblogic' && secrets.ORACLE_DOCKER_PASSWORD || '' }}
+          docker_username: ${{ inputs.is_fork != 'true' && (matrix.target == 'sap_hana' || matrix.target == 'weblogic') && secrets.DOCKER_USERNAME || '' }}
+          docker_token: ${{ inputs.is_fork != 'true' && (matrix.target == 'sap_hana' || matrix.target == 'weblogic') && secrets.DOCKER_ACCESS_TOKEN || '' }}
+          oracle_docker_username: ${{ inputs.is_fork != 'true' && matrix.target == 'weblogic' && secrets.ORACLE_DOCKER_USERNAME || '' }}
+          oracle_docker_password: ${{ inputs.is_fork != 'true' && matrix.target == 'weblogic' && secrets.ORACLE_DOCKER_PASSWORD || '' }}
 
       # One flat directory per job, uploaded under the job's `artifact_name`. The gatherer rglobs
       # `test-*.xml` and `coverage*.xml` inside it, which is what `ddev test --junit` and `--cov`

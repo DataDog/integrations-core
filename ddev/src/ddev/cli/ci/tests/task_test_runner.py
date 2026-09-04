@@ -67,6 +67,7 @@ class TestRunnerOptions:
     checkout_sha: str
     artifacts_base_path: Path
     branch: str = ''
+    is_fork: bool = False
     poll_interval_seconds: float = 30.0
     pytest_args: str = ''
 
@@ -191,6 +192,9 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             # These two say which commit the results belong to, for CI Visibility and the check run.
             "head_sha": self._options.base_sha,
             "branch": self._options.branch,
+            # The batch withholds every credential when this is true, so it is sent on every dispatch
+            # rather than only when set: an absent input would default the workflow to trusting it.
+            "is_fork": str(self._options.is_fork).lower(),
             "integrations": json.dumps(message.integrations),
             "job_list": encode_job_list([self._job_input(job) for job in message.job_list]),
         }

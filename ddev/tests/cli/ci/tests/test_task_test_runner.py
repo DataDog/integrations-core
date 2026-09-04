@@ -89,7 +89,9 @@ def mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]):
     fake.mock_response("list_workflow_jobs", wrap(WorkflowJobsList(total_count=len(jobs), jobs=list(jobs))))
 
 
-def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path, pytest_args: str = "") -> TaskTestRunner:
+def make_runner(
+    client: FakeAsyncGitHubClient, tmp_path: Path, pytest_args: str = "", is_fork: bool = False
+) -> TaskTestRunner:
     options = TestRunnerOptions(
         owner="DataDog",
         repo="integrations-core",
@@ -100,6 +102,7 @@ def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path, pytest_args: str 
         artifacts_base_path=tmp_path,
         poll_interval_seconds=0.0,
         pytest_args=pytest_args,
+        is_fork=is_fork,
     )
     runner = TaskTestRunner(
         name="task-test-runner",
@@ -242,6 +245,23 @@ async def test_pytest_args_reach_the_batch_workflow(tmp_path: Path, pytest_args:
 
     inputs = fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]
     assert inputs.get("pytest_args") == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("is_fork", "expected"), [(True, "true"), (False, "false")])
+async def test_the_batch_is_told_whether_it_is_testing_a_fork(tmp_path: Path, is_fork: bool, expected: str):
+    """The batch withholds every credential on this input, so a fork dispatched without it hands a
+    fork's code the Datadog key and the Docker credentials. Sent either way, because an absent input
+    leaves the workflow on its own default of trusting the commit.
+    """
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    runner = make_runner(fake, tmp_path, is_fork=is_fork)
+
+    await runner.process_message(make_batch("batch-1"))
+
+    assert fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]["is_fork"] == expected
 
 
 @pytest.mark.asyncio

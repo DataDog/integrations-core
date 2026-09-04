@@ -55,6 +55,10 @@ inputs:
     description: "Test context, reported to CI Visibility and used to pick the E2E flags"
     required: false
     default: "standard"
+  is_fork:
+    description: "Whether the code under test comes from a fork. Turns off anything needing a credential"
+    required: false
+    default: "false"
   dd_api_key:
     description: "Datadog API key, for CI Visibility. Telemetry only"
     required: false
@@ -118,9 +122,9 @@ runs:
         INPUT_TEST_PY2: "false"
         INPUT_TEST_PY3: "true"
         INPUT_REPO: core
-        # A fork's code only ever reaches a runner through a merge ref the caller resolved, so there
-        # is no fork-owned execution to downgrade here.
-        INPUT_IS_FORK: "false"
+        # Read by both run scripts to decide whether to trace. A fork holds no API key, so claiming
+        # otherwise would have them trace with nothing to send to.
+        INPUT_IS_FORK: ${{ inputs.is_fork }}
         DD_API_KEY_SECRET: ${{ inputs.dd_api_key }}
         SETUP_ENV_VARS: ""
         DOCKER_USERNAME: ${{ inputs.docker_username }}

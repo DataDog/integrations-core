@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.utils.git import ChangedFile
     from ddev.utils.github_async import AsyncGitHubClient
+    from ddev.utils.github_async.models import PullRequestRef
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 
@@ -156,6 +157,7 @@ def dispatch_tests(
         checkout_sha=run.checkout_sha,
         base_sha=run.base_sha,
         branch=run.branch,
+        is_fork=run.is_fork,
         workflow=workflow or config.workflow,
         workflow_ref=workflow_ref or config.workflow_ref,
         target_branch=run.target_branch,
@@ -248,6 +250,7 @@ class ResolvedRun:
     changed_files: list[ChangedFile] | None
     pr_number: int | None = None
     target_branch: str | None = None
+    is_fork: bool = False
 
 
 def resolve_run(
@@ -294,6 +297,17 @@ def resolve_run(
         branch=app.repo.git.current_branch(),
         changed_files=changed_files,
     )
+
+
+def head_is_fork(head: PullRequestRef, *, owner: str, repo: str) -> bool:
+    """Whether a pull request's head branch lives outside the repository being tested.
+
+    A deleted head repository reads as a fork: the value decides whether credentials are withheld, so
+    the unknown case is the restrictive one.
+    """
+    if head.repo is None:
+        return True
+    return head.repo.full_name.casefold() != f"{owner}/{repo}".casefold()
 
 
 def resolve_pull_request_run(
@@ -373,6 +387,7 @@ def resolve_pull_request_run(
                 changed_files=changed_files,
                 pr_number=pull.number,
                 target_branch=pull.base.ref,
+                is_fork=head_is_fork(pull.head, owner=owner, repo=repo),
             )
 
     try:
