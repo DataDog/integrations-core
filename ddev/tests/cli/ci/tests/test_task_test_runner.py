@@ -6,7 +6,10 @@
 from __future__ import annotations
 
 import asyncio
+import base64
+import gzip
 import json
+import secrets
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +17,13 @@ import pytest
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.status import Status, conclusion_to_check_run_conclusion, conclusion_to_status
-from ddev.cli.ci.tests.task_test_runner import CANCEL_REQUEST_TIMEOUT, TaskTestRunner, TestRunnerOptions
+from ddev.cli.ci.tests.task_test_runner import (
+    CANCEL_REQUEST_TIMEOUT,
+    WORKFLOW_INPUTS_LIMIT,
+    JobListTooLargeError,
+    TaskTestRunner,
+    TestRunnerOptions,
+)
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
@@ -34,6 +43,10 @@ from tests.helpers.github_async import FakeAsyncGitHubClient
 
 def wrap(data: Any) -> GitHubResponse[Any]:
     return GitHubResponse(data=data, headers={})
+
+
+def decode_job_list(encoded: str) -> list[dict[str, Any]]:
+    return json.loads(gzip.decompress(base64.b64decode(encoded)).decode())
 
 
 DEFAULT_URL = object()
@@ -190,51 +203,68 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
 
     dispatch_calls = fake.calls_to("create_workflow_dispatch")
     assert len(dispatch_calls) == 1
-    assert dispatch_calls[0].kwargs == {
+    kwargs = dispatch_calls[0].kwargs
+    assert {key: value for key, value in kwargs.items() if key != "inputs"} == {
         "owner": "DataDog",
         "repo": "integrations-core",
         "workflow_id": "test-batch.yaml",
         "ref": "master",
         "timeout": None,
         "return_run_details": True,
-        "inputs": {
-            "batch_id": "batch-1",
-            "checkout_sha": "merge-sha-bbb",
-            "integrations": json.dumps(["ntp", "kafka"]),
-            "job_list": json.dumps(
-                [
-                    {
-                        "name": "j1",
-                        "target": "ntp",
-                        "runner_labels": ["ubuntu-22.04"],
-                        "environment": "py3.13",
-                        "platform": "linux",
-                        "python_version": "3.13",
-                        "unit_tests": True,
-                        "e2e_tests": False,
-                        "agent_image": None,
-                        "minimum_base_package": False,
-                        "coverage": True,
-                        "artifact_name": "ntp_py3.13_linux",
-                    },
-                    {
-                        "name": "j2",
-                        "target": "ntp",
-                        "runner_labels": ["ubuntu-22.04"],
-                        "environment": "py3.13",
-                        "platform": "linux",
-                        "python_version": "3.13",
-                        "unit_tests": True,
-                        "e2e_tests": False,
-                        "agent_image": None,
-                        "minimum_base_package": False,
-                        "coverage": True,
-                        "artifact_name": "ntp_py3.13_linux",
-                    },
-                ]
-            ),
-        },
     }
+    assert kwargs["inputs"]["batch_id"] == "batch-1"
+    assert kwargs["inputs"]["checkout_sha"] == "merge-sha-bbb"
+    assert kwargs["inputs"]["integrations"] == json.dumps(["ntp", "kafka"])
+    assert decode_job_list(kwargs["inputs"]["job_list"]) == [
+        {
+            "name": "j1",
+            "target": "ntp",
+            "runner_labels": ["ubuntu-22.04"],
+            "environment": "py3.13",
+            "platform": "linux",
+            "python_version": "3.13",
+            "unit_tests": True,
+            "e2e_tests": False,
+            "agent_image": None,
+            "minimum_base_package": False,
+            "coverage": True,
+            "artifact_name": "ntp_py3.13_linux",
+        },
+        {
+            "name": "j2",
+            "target": "ntp",
+            "runner_labels": ["ubuntu-22.04"],
+            "environment": "py3.13",
+            "platform": "linux",
+            "python_version": "3.13",
+            "unit_tests": True,
+            "e2e_tests": False,
+            "agent_image": None,
+            "minimum_base_package": False,
+            "coverage": True,
+            "artifact_name": "ntp_py3.13_linux",
+        },
+    ]
+
+
+@pytest.mark.asyncio
+async def test_a_batch_too_large_to_dispatch_is_refused_before_dispatching(tmp_path: Path):
+    """GitHub rejects an oversized dispatch, and a rejected one still opens a check run that
+    nothing will ever close, so the batch has to be refused before the request is made.
+
+    Names are random rather than repetitive, so they survive compression and the batch really does
+    exceed the limit.
+    """
+    jobs = [make_job(secrets.token_hex(150)) for _ in range(300)]
+    batch = TestBatch(id="big", batch_id="batch-big", job_list=jobs, jobs_count=len(jobs), integrations=["ntp"])
+    fake = FakeAsyncGitHubClient()
+    runner = make_runner(fake, tmp_path)
+
+    with pytest.raises(JobListTooLargeError, match=str(WORKFLOW_INPUTS_LIMIT)):
+        await runner.process_message(batch)
+
+    fake.assert_not_called("create_workflow_dispatch")
+    fake.assert_not_called("create_check_run")
 
 
 @pytest.mark.asyncio

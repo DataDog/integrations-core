@@ -25,6 +25,42 @@ class PullRequestState(StrEnum):
     CLOSED = auto()
 
 
+class PullRequestFileStatus(StrEnum):
+    """How a file was changed by a pull request.
+
+    The `diff-entry` schema declares `status` as
+    `enum: [added, removed, modified, renamed, copied, changed, unchanged]`.
+    Reference:
+    https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files
+    """
+
+    ADDED = auto()
+    REMOVED = auto()
+    MODIFIED = auto()
+    RENAMED = auto()
+    COPIED = auto()
+    CHANGED = auto()
+    UNCHANGED = auto()
+
+
+class PullRequestFile(BaseModel):
+    """One entry of a pull request's file list.
+
+    Only the fields needed to reconstruct a change are modelled; the schema's diff statistics and
+    blob URLs are ignored. `previous_filename` is populated for renames and copies, and is the
+    source path.
+
+    Field reference (the `diff-entry` schema):
+    https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    filename: str
+    status: PullRequestFileStatus
+    previous_filename: str | None = None
+
+
 class PullRequestRef(BaseModel):
     """A head or base branch reference on a pull request.
 
@@ -39,11 +75,17 @@ class PullRequestRef(BaseModel):
     label: str | None = None  # e.g. 'octocat:new-topic'
 
 
-class PullRequest(BaseModel):
-    """A GitHub pull request.
+class PullRequestSimple(BaseModel):
+    """A GitHub pull request as the list endpoints return it.
 
-    Field reference:
-    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+    GitHub has two pull request schemas. `pull-request-simple` is what the list endpoints return,
+    and it is a strict subset of `pull-request`: it omits the diff totals and the merge state,
+    without marking them null. Whether those fields are available is therefore a property of the
+    endpoint that was called, not of the pull request, which is why the two are modelled
+    separately rather than as one class with everything optional. `PullRequest` adds them.
+
+    Field reference (the `pull-request-simple` schema):
+    https://docs.github.com/en/rest/pulls/pulls#list-pull-requests
     """
 
     model_config = ConfigDict(extra="ignore")
@@ -66,7 +108,6 @@ class PullRequest(BaseModel):
     # State
     state: PullRequestState | None = None
     draft: bool = False
-    merged: bool | None = None
     locked: bool = False
     merge_commit_sha: str | None = None
 
@@ -91,3 +132,23 @@ class PullRequest(BaseModel):
     # Branch references
     head: PullRequestRef | None = None
     base: PullRequestRef | None = None
+
+
+class PullRequest(PullRequestSimple):
+    """A GitHub pull request as the single-object endpoints return it.
+
+    Adds the fields `pull-request` declares and `pull-request-simple` omits. `changed_files` is
+    required: the schema declares it as a required integer, and a caller listing a pull request's
+    files needs it to tell a complete list from a silently truncated one. Validation failing is
+    the point, since the alternative is reading a missing count as an empty diff and testing
+    nothing.
+
+    Field reference (the `pull-request` schema):
+    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+    """
+
+    changed_files: int
+
+    # Also full-only, but left optional: `port-commit` reads it as a boolean and the schema's other
+    # additions (`additions`, `deletions`, `commits`, `mergeable`, ...) are not modelled at all.
+    merged: bool | None = None

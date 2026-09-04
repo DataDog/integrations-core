@@ -44,7 +44,9 @@ from .models import (
     IssueComment,
     Label,
     PullRequest,
+    PullRequestFile,
     PullRequestReviewComment,
+    PullRequestSimple,
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
@@ -66,6 +68,10 @@ DEFAULT_BASE_URL = "https://api.github.com"
 # number; neither the OpenAPI description nor the REST docs state it. Measured in UTF-8 bytes, which is
 # never below the character count GitHub means, so it errs only towards refusing a body it might take.
 COMMENT_BODY_LIMIT = 65_536
+# Every paginated endpoint this client calls takes the shared `per-page` parameter, described as
+# "The number of results per page (max 100)". The cap is not in the parameter's schema and GitHub does
+# not reject a larger value, it silently serves 100, so nothing but this check surfaces the mistake.
+MAX_PER_PAGE = 100
 # GitHub answers a cancel with 409 once the run has reached a terminal state, which is what was asked for.
 RUN_ALREADY_TERMINAL_STATUS = 409
 # The caller is a run being cancelled, so the whole ladder has to fit in the seconds it has left.
@@ -80,6 +86,16 @@ SIGNED_URL_EXPIRED_STATUS = 403
 QUERY_MASK = "***"  # noqa: S105
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+def _ensure_per_page_valid(per_page: int):
+    """Refuse a page size GitHub would not honour, before spending a request on it.
+
+    Raises:
+        ValueError: If *per_page* is outside 1..`MAX_PER_PAGE`.
+    """
+    if not 1 <= per_page <= MAX_PER_PAGE:
+        raise ValueError(f"per_page must be between 1 and {MAX_PER_PAGE}, got {per_page}")
 
 
 def _ensure_body_fits(body: str):
@@ -659,7 +675,11 @@ class AsyncGitHubClient:
 
         Returns:
             AsyncIterator[GitHubResponse[ArtifactsList]]: One page of artifacts per iteration.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request(
             "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
@@ -692,7 +712,11 @@ class AsyncGitHubClient:
 
         Returns:
             AsyncIterator[GitHubResponse[WorkflowJobsList]]: One page of jobs per iteration.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
         async for response in self._paginated_request(
             "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
@@ -822,7 +846,11 @@ class AsyncGitHubClient:
         Returns:
             AsyncIterator[GitHubResponse[list[IssueComment]]]: One page of comments per iteration,
             following Link headers until exhausted.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         # The response body is a bare JSON array, so there is no wrapper model to validate against
         # (unlike ``WorkflowJobsList``); each item is validated individually.
         endpoint = f"/repos/{owner}/{repo}/issues/{issue_number}/comments"
@@ -864,6 +892,91 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, PullRequest)
 
+    async def list_commit_pulls(
+        self,
+        owner: str,
+        repo: str,
+        commit_sha: str,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequestSimple]]]:
+        """
+        Calls the GitHub API to list the pull requests associated with a commit (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/commits/commits#list-pull-requests-associated-with-a-commit
+
+        The commit only has to be reachable from the repository, not merged into it, so a pull
+        request opened from a fork resolves through the ``refs/pull/<n>/head`` the base repository
+        keeps. A commit whose pull request is closed resolves to nothing.
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            commit_sha: SHA of the commit to look up.
+            per_page: Number of pull requests per page (default 100, GitHub's maximum).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Applies per page. Defaults to the client's policy for replayable requests.
+
+        Returns:
+            AsyncIterator[GitHubResponse[list[PullRequestSimple]]]: One page of pull requests per
+            iteration, in the abbreviated form the list endpoints return.
+        """
+        # The response body is a bare JSON array, so there is no wrapper model to validate against.
+        endpoint = f"/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
+        async for response in self._paginated_request(
+            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+        ):
+            pulls = [PullRequestSimple.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[PullRequestSimple]].model_validate(
+                {"data": pulls, "headers": dict(response.headers)}
+            )
+
+    async def list_pull_request_files(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequestFile]]]:
+        """
+        Calls the GitHub API to list the files a pull request changes (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#list-pull-requests-files
+
+        The endpoint stops at 3000 files and does not report that it did, so a caller that needs a
+        complete list must compare the number of files it received against ``changed_files`` on the
+        pull request itself.
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            pull_number: Pull request number.
+            per_page: Number of files per page (default 100, GitHub's maximum).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Applies per page. Defaults to the client's policy for replayable requests.
+
+        Returns:
+            AsyncIterator[GitHubResponse[list[PullRequestFile]]]: One page of files per iteration,
+            following Link headers until exhausted.
+        """
+        # The response body is a bare JSON array, so there is no wrapper model to validate against
+        # (unlike ``WorkflowJobsList``); each item is validated individually.
+        endpoint = f"/repos/{owner}/{repo}/pulls/{pull_number}/files"
+        async for response in self._paginated_request(
+            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+        ):
+            files = [PullRequestFile.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[PullRequestFile]].model_validate(
+                {"data": files, "headers": dict(response.headers)}
+            )
+
     async def list_pull_requests(
         self,
         owner: str,
@@ -875,7 +988,7 @@ class AsyncGitHubClient:
         timeout: float | None = None,
         *,
         retry: RetryPolicy | None = None,
-    ) -> GitHubResponse[list[PullRequest]]:
+    ) -> GitHubResponse[list[PullRequestSimple]]:
         """
         Calls the GitHub API to list pull requests in a repository.
 
@@ -895,8 +1008,13 @@ class AsyncGitHubClient:
             retry: Defaults to the client's policy for replayable requests.
 
         Returns:
-            GitHubResponse[list[PullRequest]]: The validated pull requests on the first result page.
+            GitHubResponse[list[PullRequestSimple]]: The validated pull requests on the first result
+            page, in the abbreviated form the list endpoints return.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
+        _ensure_per_page_valid(per_page)
         params: dict[str, Any] = {"state": state, "per_page": per_page}
         if head is not None:
             params["head"] = head
@@ -905,8 +1023,10 @@ class AsyncGitHubClient:
         response = await self._request(
             "GET", f"/repos/{owner}/{repo}/pulls", timeout=timeout, retry=retry, params=params
         )
-        pulls = [PullRequest.model_validate(item) for item in response.json()]
-        return GitHubResponse[list[PullRequest]].model_validate({"data": pulls, "headers": dict(response.headers)})
+        pulls = [PullRequestSimple.model_validate(item) for item in response.json()]
+        return GitHubResponse[list[PullRequestSimple]].model_validate(
+            {"data": pulls, "headers": dict(response.headers)}
+        )
 
     async def create_pull_request(
         self,
