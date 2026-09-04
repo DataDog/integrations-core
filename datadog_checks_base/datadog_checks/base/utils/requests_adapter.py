@@ -18,6 +18,9 @@ from urllib3.exceptions import ReadTimeoutError as Urllib3ReadTimeoutError
 if TYPE_CHECKING:
     from requests.adapters import _HostParams, _PoolKwargs
 
+    # A runtime import would be circular because http.py uses this module.
+    from .http import RequestsWrapper
+
 from datadog_checks.base.utils import _http_utils
 
 from .http_exceptions import (
@@ -31,7 +34,7 @@ from .http_exceptions import (
     HTTPClientStatusError,
     HTTPClientTimeoutError,
 )
-from .http_protocol import HTTPRequestSnapshot, HTTPResponse
+from .http_protocol import HTTPClient, HTTPRequestSnapshot, HTTPResponse
 from .tls import create_ssl_context
 
 
@@ -334,4 +337,5 @@ def create_https_adapter(
 
 
 if TYPE_CHECKING:
+    client: HTTPClient = RequestsWrapper({}, {})
     response: HTTPResponse = RequestsResponseAdapter(requests.Response())
