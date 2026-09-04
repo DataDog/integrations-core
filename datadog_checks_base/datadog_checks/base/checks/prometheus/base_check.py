@@ -21,7 +21,7 @@ class PrometheusScraper(PrometheusScraperMixin):
         self._http_handlers = {}
 
     def create_http_client(self, instance: dict | None = None) -> HTTPClient:
-        return self.check.create_http_client(instance)
+        return self.check.create_http_client(instance, remapper=self.HTTP_CONFIG_REMAPPER)
 
     def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """

@@ -499,15 +499,15 @@ class AgentCheck(object):
 
         return self._http
 
-    def create_http_client(self, instance: dict | None = None) -> HTTPClient:
-        """Construct the HTTP client backing self.http, optionally from a given instance config."""
+    def create_http_client(self, instance: dict | None = None, *, remapper: dict | None = None) -> HTTPClient:
+        """Construct the HTTP client backing self.http, optionally overriding its instance and config remapper."""
         # See Performance Optimizations in this package's README.md.
         from datadog_checks.base.utils.http import create_http_client
 
         return create_http_client(
             self.instance if instance is None else instance,
             self.init_config,
-            self.HTTP_CONFIG_REMAPPER,
+            self.HTTP_CONFIG_REMAPPER if remapper is None else remapper,
             self.log,
         )
 
