@@ -135,17 +135,8 @@ jobs:
             echo "- targets: $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["INTEGRATIONS"])) or "-")')"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # A commit status rather than a check run. A check run has to live in a check suite, and a suite
-      # is keyed on (app, head_sha): this workflow is dispatched at the default branch, so reporting
-      # on the tested commit means GitHub files the check into whichever `github-actions` suite
-      # already exists at that SHA. The batch then appears under an unrelated workflow, and its
-      # `Details` leads there rather than here.
-      #
-      # Statuses are not in suites, so nothing adopts them, and `target_url` is honoured.
-      #
-      # An octo-sts token would also give the check its own suite, but a policy naming this workflow
-      # is reachable from `test`, which runs the tested commit's code and holds `id-token: write` for
-      # `dd-sts`. That code would then be one exchange away from a token this repository trusts.
+      # A status, not a check run: a check run at a SHA this workflow was not dispatched at gets filed
+      # under whichever workflow already has a check suite there.
       - name: Mark the batch pending
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -418,9 +409,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          # A status has only error/failure/pending/success. Anything that did not pass reports
-          # `failure`, described by what actually happened, because leaving it `pending` would hold
-          # the pull request on a batch that is already over.
+          # A status has no `cancelled` or `skipped`, and `pending` would hold the pull request.
           case "$TEST_RESULT" in
             success)   state=success; description="All jobs passed" ;;
             cancelled) state=failure; description="The batch was cancelled" ;;
