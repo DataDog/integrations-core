@@ -69,26 +69,26 @@ def openmetrics_payload(example_metrics_registry):
 
 
 @pytest.fixture
-def prometheus_poll_mock(fake_openmetrics_http, prometheus_payload) -> Iterator[FakeHTTPClient]:
-    fake_openmetrics_http.register_response(
+def prometheus_poll_mock(fake_http, prometheus_payload) -> Iterator[FakeHTTPClient]:
+    fake_http.register_response(
         'GET',
         TEST_METRICS_ENDPOINT,
         _text_response(prometheus_payload, content_type=PROMETHEUS_CONTENT_TYPE),
         match_options={'stream': True},
     )
-    yield fake_openmetrics_http
-    fake_openmetrics_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
-    fake_openmetrics_http.assert_all_responses_consumed()
+    yield fake_http
+    fake_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture
-def openmetrics_poll_mock(fake_openmetrics_http, openmetrics_payload) -> Iterator[FakeHTTPClient]:
-    fake_openmetrics_http.register_response(
+def openmetrics_poll_mock(fake_http, openmetrics_payload) -> Iterator[FakeHTTPClient]:
+    fake_http.register_response(
         'GET',
         TEST_METRICS_ENDPOINT,
         _text_response(openmetrics_payload, content_type=OPENMETRICS_CONTENT_TYPE),
         match_options={'stream': True},
     )
-    yield fake_openmetrics_http
-    fake_openmetrics_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
-    fake_openmetrics_http.assert_all_responses_consumed()
+    yield fake_http
+    fake_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
+    fake_http.assert_all_responses_consumed()

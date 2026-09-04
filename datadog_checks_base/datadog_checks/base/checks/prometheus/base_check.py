@@ -4,6 +4,7 @@
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.http_protocol import HTTPClient
 
 from .mixins import PrometheusScraperMixin
 
@@ -18,6 +19,9 @@ class PrometheusScraper(PrometheusScraperMixin):
         super(PrometheusScraper, self).__init__()
         self.check = check
         self._http_handlers = {}
+
+    def create_http_client(self, instance: dict | None = None) -> HTTPClient:
+        return self.check.create_http_client(instance)
 
     def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """
@@ -87,8 +91,11 @@ class GenericPrometheusCheck(AgentCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 2000
+    HTTP_CONFIG_REMAPPER = PrometheusScraperMixin.HTTP_CONFIG_REMAPPER
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):
+        if init_config is None:
+            init_config = {}
         super(GenericPrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
         self.scrapers_map = {}
         self.default_instances = default_instances if default_instances is not None else {}

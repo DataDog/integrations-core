@@ -410,30 +410,6 @@ def fake_http(mocker):
 
 
 @pytest.fixture
-def fake_openmetrics_http(fake_http, mocker):
-    """Patch the OpenMetrics v1 handler to use the base-owned HTTP fake."""
-    mixins = importlib.import_module('datadog_checks.base.checks.openmetrics.mixins')
-    mocker.patch.object(
-        mixins,
-        'create_http_client',
-        side_effect=_create_fake_http_client_factory(fake_http),
-    )
-    return fake_http
-
-
-@pytest.fixture
-def fake_prometheus_http(fake_http, mocker):
-    """Patch the legacy Prometheus handler to use the base-owned HTTP fake."""
-    mixins = importlib.import_module('datadog_checks.base.checks.prometheus.mixins')
-    mocker.patch.object(
-        mixins,
-        'create_http_client',
-        side_effect=_create_fake_http_client_factory(fake_http),
-    )
-    return fake_http
-
-
-@pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(

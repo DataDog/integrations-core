@@ -13,9 +13,8 @@ from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientRequestError,
+    HTTPClientError,
     HTTPClientSSLError,
     HTTPClientStatusError,
 )
@@ -468,9 +467,7 @@ class PrometheusScraperMixin(object):
             http_config['ssl_ignore_warning'] = True
             http_config['ssl_verify'] = False
 
-        http_handler = self._http_handlers[endpoint] = create_http_client(
-            http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
+        http_handler = self._http_handlers[endpoint] = self.create_http_client(http_config)
 
         headers = http_handler.options['headers']
 
@@ -580,8 +577,7 @@ class PrometheusScraperMixin(object):
         except HTTPClientSSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        # Auth-token fetching can raise HTTPClientStatusError, a sibling of HTTPClientRequestError.
-        except (IOError, HTTPClientRequestError, HTTPClientStatusError):
+        except (IOError, HTTPClientError):
             if self.health_service_check:
                 self._submit_service_check(
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"),
