@@ -138,6 +138,7 @@ def test_diff_no_differences(ddev):
             ],
         ),
         patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send,
     ):
         result = ddev(
             "size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"
@@ -150,6 +151,21 @@ def test_diff_no_differences(ddev):
         assert ddev("size", "diff", "commit1", "commit2", "--compressed").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--format", "csv,markdown,json,png").exit_code == 0
         assert ddev("size", "diff", "commit1", "commit2", "--show-gui").exit_code == 0
+
+        result = ddev(
+            "size",
+            "diff",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-aarch64",
+            "--python",
+            "3.12",
+            "--to-dd-key",
+            "fake_key",
+        )
+        assert result.exit_code == 0, result.output
+        mock_send.assert_not_called()
 
 
 def test_diff_invalid_platform(ddev):
@@ -224,3 +240,57 @@ def test_diff_invalid_platform_and_version(ddev):
     ):
         result = ddev("size", "diff", "commit1", "commit2", "--platform", "linux", "--python", "2.10", "--compressed")
         assert result.exit_code != 0
+
+
+@pytest.mark.parametrize(
+    "flag, value, expected_org, expected_key, compressed",
+    [
+        pytest.param("--to-dd-key", "fake_key", None, "fake_key", False, id="key"),
+        pytest.param("--to-dd-key", "fake_key", None, "fake_key", True, id="key_compressed"),
+        pytest.param("--to-dd-org", "default", "default", None, False, id="org"),
+    ],
+)
+def test_diff_sends_metrics_to_dd(
+    ddev, mock_size_diff_dependencies, flag, value, expected_org, expected_key, compressed
+):
+    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
+        cli_args = [
+            "size",
+            "diff",
+            "commit1",
+            "commit2",
+            "--platform",
+            "linux-aarch64",
+            "--python",
+            "3.12",
+            flag,
+            value,
+        ]
+        if compressed:
+            cli_args.append("--compressed")
+        result = ddev(*cli_args)
+
+    assert result.exit_code == 0, result.output
+    mock_send.assert_called_once()
+    app, commit, modules, org, key, sent_compressed = mock_send.call_args.args
+    assert commit == "commit2"
+    assert org == expected_org
+    assert key == expected_key
+    assert sent_compressed is compressed
+    assert modules
+
+
+def test_diff_no_dd_credentials_does_not_send(ddev, mock_size_diff_dependencies):
+    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
+        result = ddev("size", "diff", "commit1", "commit2", "--platform", "linux-aarch64", "--python", "3.12")
+
+    assert result.exit_code == 0, result.output
+    mock_send.assert_not_called()
+
+
+def test_diff_org_and_key_are_mutually_exclusive(ddev, mock_size_diff_dependencies):
+    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
+        result = ddev("size", "diff", "commit1", "commit2", "--to-dd-org", "default", "--to-dd-key", "fake_key")
+
+    assert result.exit_code != 0
+    mock_send.assert_not_called()

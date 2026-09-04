@@ -521,16 +521,30 @@ def format(s: str) -> str:
     return f'"{s}"' if "," in s else s
 
 
+def build_section_label(header: str, total: str | None) -> str:
+    return f"{header} ({total})" if total is not None else header
+
+
 def save_markdown(
     app: Application,
     title: str,
     modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     file_path: str,
+    section_total: Literal["none", "absolute", "delta"] = "none",
 ) -> None:
+    """
+    Writes the modules as one collapsible markdown section per platform and Python version.
+
+    Args:
+        section_total: Whether to summarize each section with the sum of its Size_Bytes, and how.
+            `absolute` for plain sizes, `delta` to also sign a positive sum. Defaults to `none`
+            because summing is only meaningful when the rows partition a single total; timeline
+            rows, for instance, are the size at successive commits, so their sum means nothing.
+    """
     if modules == []:
         return
 
-    headers = [k for k in modules[0].keys() if "Bytes" not in k]
+    headers = [k for k in modules[0].keys() if "Bytes" not in k and k not in ("Platform", "Python_Version")]
 
     # Group modules by platform and version
     grouped_modules = {(modules[0].get("Platform", ""), modules[0].get("Python_Version", "")): [modules[0]]}
@@ -547,21 +561,37 @@ def save_markdown(
     lines.append(f"# {title}")
     lines.append("")
 
-    for (platform, version), group in grouped_modules.items():
-        if platform and version:
-            lines.append(f"## Platform: {platform}, Python Version: {version}")
-        elif platform:
-            lines.append(f"## Platform: {platform}")
-        elif version:
-            lines.append(f"## Python Version: {version}")
-        else:
-            lines.append("## Other")
+    def section_key(item: tuple[tuple[object, object], list]) -> tuple[str, str]:
+        (platform, version), _ = item
+        return str(platform), str(version)
 
+    for (platform, version), group in sorted(grouped_modules.items(), key=section_key):
+        if platform and version:
+            label = f"{platform}, Python {version}"
+        elif platform:
+            label = str(platform)
+        elif version:
+            label = f"Python {version}"
+        else:
+            label = "Other"
+
+        readable_total = None
+        if section_total != "none":
+            total = sum(int(row.get("Size_Bytes", 0) or 0) for row in group)
+            readable_total = convert_to_human_readable_size(total)
+            if section_total == "delta" and total > 0:
+                readable_total = f"+{readable_total}"
+        label = build_section_label(label, readable_total)
+
+        lines.append("<details>")
+        lines.append(f"<summary>{label}</summary>")
         lines.append("")
         lines.append("| " + " | ".join(headers) + " |")
         lines.append("| " + " | ".join("---" for _ in headers) + " |")
         for row in group:
             lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+        lines.append("")
+        lines.append("</details>")
         lines.append("")
 
     markdown = "\n".join(lines)
@@ -614,7 +644,13 @@ def export_format(
 
         elif output_format == "markdown":
             markdown_filename = f"{name}.md"
-            save_markdown(app, "Status", modules, markdown_filename)
+            save_markdown(
+                app,
+                mode.capitalize(),
+                modules,
+                markdown_filename,
+                section_total="delta" if mode == "diff" else "absolute",
+            )
 
 
 def plot_treemap(
@@ -835,6 +871,112 @@ def draw_treemap_rects_with_labels(
             )
 
 
+def initialize_dd_client(app: Application, org: str | None, key: str | None) -> None:
+    """
+    Resolves Datadog credentials from a configured org or a raw API key and initializes the API client.
+    """
+    if org:
+        if org not in app.config.orgs:
+            raise RuntimeError(f"No organization named `{org}` found in config file")
+        config_file_info = app.config.orgs[org]
+    else:
+        config_file_info = {'api_key': key, 'site': 'datadoghq.com'}
+
+    if "api_key" not in config_file_info:
+        raise RuntimeError("No API key found in config file")
+    if "site" not in config_file_info:
+        raise RuntimeError("No site found in config file")
+
+    initialize(
+        api_key=config_file_info["api_key"],
+        api_host=f"https://api.{config_file_info['site']}",
+        mute=False,
+    )
+
+
+def build_module_tags(
+    item: FileDataEntryPlatformVersion,
+    size_type: str,
+    message: str,
+    tickets: list[str],
+    prs: list[str],
+    change_type: str | None = None,
+) -> list[str]:
+    """
+    Builds the tag list shared by the per-module size and size_diff metrics.
+    """
+    name = re.sub(r" \((?:NEW|DELETED)\)$", "", item["Name"])
+    tags = [
+        f"name:{name}",
+        f"type:{item['Type']}",
+        f"name_type:{item['Type']}({name})",
+        f"python_version:{item['Python_Version']}",
+        f"module_version:{item['Version']}",
+        f"platform:{item['Platform']}",
+        "team:agent-integrations",
+        f"compression:{size_type}",
+        f"metrics_version:{METRIC_VERSION}",
+        f"jira_ticket:{tickets[0]}",
+        f"pr_number:{prs[-1]}",
+        f"commit_message:{message}",
+    ]
+    if change_type:
+        tags.append(f"change_type:{change_type}")
+    return tags
+
+
+def diff_change_type(name: str) -> str:
+    """
+    Classifies a diff entry's Name (as produced by get_diff) into "new", "deleted", or "changed".
+    """
+    if name.endswith(" (NEW)"):
+        return "new"
+    if name.endswith(" (DELETED)"):
+        return "deleted"
+    return "changed"
+
+
+def send_diff_metrics_to_dd(
+    app: Application,
+    commit: str,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str | None,
+    key: str | None,
+    compressed: bool,
+) -> None:
+    """
+    Sends per-module size deltas to Datadog as datadog.agent_integrations.size_diff.
+
+    Args:
+        commit: The later of the two compared commits. The deltas are attributed to it, so the size change
+            lands on the commit that introduced it.
+        modules: Formatted diff entries, whose Size_Bytes are deltas and may be negative.
+    """
+    size_type = "compressed" if compressed else "uncompressed"
+
+    initialize_dd_client(app, org, key)
+
+    timestamp, message, tickets, prs = get_commit_data(commit)
+
+    metrics = [
+        {
+            "metric": "datadog.agent_integrations.size_diff",
+            "type": "gauge",
+            "points": [(timestamp, item["Size_Bytes"])],
+            "tags": build_module_tags(
+                item, size_type, message, tickets, prs, change_type=diff_change_type(item["Name"])
+            ),
+        }
+        for item in modules
+    ]
+
+    app.display(f"Sending {len(metrics)} size diff metrics to Datadog...")
+    app.display_debug(f"Sending size diff metrics: {metrics}")
+    response = api.Metric.send(metrics=metrics)
+    if response.get("errors"):
+        raise RuntimeError(f"Failed to send size diff metrics to Datadog: {response['errors']}")
+
+
 def send_metrics_to_dd(
     app: Application,
     commit: str,
@@ -846,12 +988,7 @@ def send_metrics_to_dd(
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
-    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
-
-    if "api_key" not in config_file_info:
-        raise RuntimeError("No API key found in config file")
-    if "site" not in config_file_info:
-        raise RuntimeError("No site found in config file")
+    initialize_dd_client(app, org, key)
 
     timestamp, message, tickets, prs = get_commit_data(commit)
 
@@ -870,20 +1007,7 @@ def send_metrics_to_dd(
                 "metric": f"{metric_name}.size",
                 "type": "gauge",
                 "points": [(timestamp, item["Size_Bytes"])],
-                "tags": [
-                    f"name:{item['Name']}",
-                    f"type:{item['Type']}",
-                    f"name_type:{item['Type']}({item['Name']})",
-                    f"python_version:{item['Python_Version']}",
-                    f"module_version:{item['Version']}",
-                    f"platform:{item['Platform']}",
-                    "team:agent-integrations",
-                    f"compression:{size_type}",
-                    f"metrics_version:{METRIC_VERSION}",
-                    f"jira_ticket:{tickets[0]}",
-                    f"pr_number:{prs[-1]}",
-                    f"commit_message:{message}",
-                ],
+                "tags": build_module_tags(item, size_type, message, tickets, prs),
             }
         )
 
@@ -933,11 +1057,6 @@ def send_metrics_to_dd(
                 ],
             }
         )
-
-    initialize(
-        api_key=config_file_info["api_key"],
-        api_host=f"https://api.{config_file_info['site']}",
-    )
 
     # Format the sizes dictionary into a human-readable summary
     summary_lines = []

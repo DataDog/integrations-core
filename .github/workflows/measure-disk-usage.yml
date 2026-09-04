@@ -73,6 +73,89 @@ jobs:
           fi
           ddev "${args[@]}"
 
+      - name: Resolve the commit to diff against
+        id: base
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT: ${{ github.event.workflow_run.event }}
+        run: |
+          if [ "$EVENT" = "push" ]; then
+            base_sha=$(git rev-parse "${SHA}^1")
+          else
+            base_sha=$(git merge-base origin/master "$SHA")
+          fi
+          echo "sha=$base_sha" >> "$GITHUB_OUTPUT"
+          echo "Diffing $SHA against $base_sha"
+
+      - name: Measure disk usage difference (Uncompressed)
+        id: diff-uncompressed
+        continue-on-error: true
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          SEND: ${{ github.event.workflow_run.event == 'push' }}
+        run: |
+          args=(-v size diff "$BASE_SHA" "$SHA" --format markdown)
+          if [ "$SEND" = "true" ]; then
+            args+=(--to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
+
+      - name: Measure disk usage difference (Compressed)
+        id: diff-compressed
+        continue-on-error: true
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          SEND: ${{ github.event.workflow_run.event == 'push' }}
+        run: |
+          args=(-v size diff "$BASE_SHA" "$SHA" --format markdown --compressed)
+          if [ "$SEND" = "true" ]; then
+            args+=(--to-dd-key "$DD_API_KEY")
+          fi
+          ddev "${args[@]}"
+
+      - name: Build the size difference comment
+        if: github.event.workflow_run.event == 'pull_request'
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UNCOMPRESSED_OUTCOME: ${{ steps.diff-uncompressed.outcome }}
+          COMPRESSED_OUTCOME: ${{ steps.diff-compressed.outcome }}
+        run: |
+          section() {
+            local title=$1 file=$2 outcome=$3
+            printf '<details>\n<summary><strong>%s</strong></summary>\n\n' "$title"
+            if [ -f "$file" ]; then
+              tail -n +3 "$file"
+            elif [ "$outcome" = "success" ]; then
+              printf 'No integration or dependency changed size.\n'
+            else
+              printf ':warning: The %s measurement failed, so no size difference is available. ' "${title,,}"
+              printf 'See [the workflow run](%s).\n' "$RUN_URL"
+            fi
+            printf '\n</details>\n\n'
+          }
+
+          mkdir -p pr-comment
+          {
+            printf '## Disk usage change\n\n'
+            printf 'Commit `%s` compared against `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
+            section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
+            section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
+          } > pr-comment/body.md
+
+      - name: Upload PR comment artifact
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: pr-comment
+          path: pr-comment/body.md
+          if-no-files-found: error
+
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
