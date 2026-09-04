@@ -60,6 +60,47 @@ No additional installation is needed on your server.
 
 3. Restart Flink and the Agent.
 
+Flink jobs can register their own [custom metrics][16] (for example, an
+operator-scoped counter your operator code emits). By default, this
+integration collects only the metrics documented in [metadata.csv][11], so
+job-specific custom metrics are not collected. Collect them
+with the `extra_metrics` option, mapping the exact raw Prometheus metric name
+Flink exposes to the Datadog metric name you want:
+
+```yaml
+instances:
+  - openmetrics_endpoint: http://<FLINK_HOST>:9249/metrics
+    extra_metrics:
+      - flink_taskmanager_job_task_operator_messageLatency: operator.messageLatency
+```
+
+<div class="alert alert-info">These custom Flink metrics are considered standard metrics in Datadog.</div>
+
+You can also match multiple metrics at once with a regular expression, for
+example to collect everything under a given Flink scope:
+
+```yaml
+    extra_metrics:
+      - ^flink_taskmanager_job_task_operator_.+
+```
+
+Metrics collected this way are submitted under Flink's raw Prometheus metric
+name (for example `flink.flink_taskmanager_job_task_operator_messageLatency`)
+rather than a curated Datadog name. A regular expression can match more than
+one metric, so it cannot be mapped to a single custom name.
+
+If a custom metric's exposed type is wrong (for example, Flink reports one of
+your operator's counters as a `gauge`), force the correct type the same way:
+
+```yaml
+    extra_metrics:
+      - flink_taskmanager_job_task_operator_customEventsTotal:
+          name: operator.customEventsTotal
+          type: counter
+```
+
+See the [sample flink.d/conf.yaml][8] for the full `extra_metrics` syntax.
+
 #### Metric collection - Datadog HTTP Reporter (legacy)
 
 <!-- partial
@@ -198,3 +239,4 @@ Need help? Contact [Datadog support][12].
 [12]: https://docs.datadoghq.com/help/
 [13]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
 [15]: https://nightlies.apache.org/flink/flink-docs-stable/docs/deployment/metric_reporters/#prometheus
+[16]: https://nightlies.apache.org/flink/flink-docs-stable/docs/ops/metrics/#registering-metrics
