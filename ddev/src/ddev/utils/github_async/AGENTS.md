@@ -103,6 +103,54 @@ Follow the block with an `Args:` section that describes each argument, and a
 `Returns:` section describing the wrapped response. This keeps every method
 traceable to its source contract and makes the public surface self-explanatory.
 
+## Two retry layers, and which one owns a failure
+
+Failures are retried in two places, and adding a retry to the wrong one is the mistake this section
+exists to prevent.
+
+- **Rate limiting** (`_rate_limited_request`, with `ddev.utils.rate_limiting`) owns 403 and 429
+  responses that the headers confirm are rate limiting. Re-acquiring the limiter *is* the backoff, so
+  there is no sleeping or arithmetic there. Never add a sleep or a wait to this layer.
+- **The retry strategy** (`_request`, with `retry.py`) owns everything else: transport failures and
+  5xx. stamina executes it, so there is no backoff arithmetic here either.
+
+The strategy wraps the rate-limit layer, never the reverse, so every attempt re-acquires the limiter
+and waits out any pause the governor holds.
+
+When adding an endpoint method, decide its default by whether the request can be **replayed**, not by
+its verb:
+
+- A GET takes the default, `retry` forwarded straight through.
+- A mutation that is idempotent (sets given fields to given values, or is a no-op when repeated)
+  passes `retry=retry if retry is not None else self._retry_policies.safe` and says why in the
+  docstring. `update_check_run`, `update_issue_comment` and `add_labels_to_issue` are the examples.
+- Any other mutation takes the default, which only retries failures that prove the request never
+  reached GitHub. Widening one of these is how you get a duplicate workflow run or a second comment.
+
+What may be retried is not configurable; `[dispatcher.github_retries]` tunes attempts and backoff
+only. A config file that could widen the conditions would make a duplicate side effect a setting.
+
+The client reports its own retries through the logger passed to it, and stays quiet when there is
+none. Separately, stamina installs a process-wide `on_retry` hook that logs every scheduled retry to
+the `stamina` logger, so retries are visible even with no logger injected. That hook is global, and
+disabling it would also silence the unrelated `stamina.retry` in `ddev/e2e/agent/docker.py`, so it is
+left alone here rather than reached into from this package.
+
+## Reject a page size GitHub would not honour
+
+Every endpoint method taking `per_page` must call `_ensure_per_page_valid` before its request.
+GitHub's shared `per-page` parameter is documented as "max 100" but carries no maximum in its schema,
+and a larger value is not refused: the API silently serves 100. Without the check, a method that only
+reads the first page returns fewer results than the caller asked for and nothing says why.
+
+## Never follow a redirect
+
+The client does not follow redirects, because the `Authorization` header would travel to whatever
+host `Location` names. An unexpected 3xx raises `GitHubUnexpectedRedirectError` naming the endpoint,
+and no policy may retry one. `download_artifact` is the single endpoint whose contract is a redirect;
+it opts in with `expect_redirect=True` and reads `Location` itself. Do not enable `follow_redirects`
+to make a failing request work.
+
 ## One method per API endpoint
 
 Always keep exactly one method per API endpoint. Do not create convenience

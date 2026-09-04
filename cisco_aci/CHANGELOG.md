@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2026-09-02
+
+***Changed***:
+
+* [Cisco ACI] Stop passing hostname when emitting metrics ([#24707](https://github.com/DataDog/integrations-core/pull/24707))
+
+***Added***:
+
+* [Cisco ACI] Add new endpoint to process APIC interfaces to enable topology ([#24193](https://github.com/DataDog/integrations-core/pull/24193))
+
+## 5.1.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
 ## 5.0.1 / 2026-06-18 / Agent 7.81.0
 
 ***Fixed***:

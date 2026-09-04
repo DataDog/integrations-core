@@ -54,6 +54,37 @@ Kueue is a cluster-level service. Configure this integration as a Cluster Agent 
 
 See the [sample kueue.d/conf.yaml][4] for all available configuration options.
 
+### Cluster agent configuration and GPU monitoring integration
+
+Enabling [GPU monitoring][13] will enrich the Kueue integration with GPU-related data, and will also show GPU-related tags in the Kueue metrics. In order to enable this part of the integration, two settings need to be configured in the Datadog Agent configuration:
+
+```yaml
+gpu:
+  enabled: true
+
+cluster_agent:
+  kueue:
+    enabled: true
+```
+
+### Log collection
+
+The Kueue controller manager writes logs to its container output, which Kubernetes captures as container logs. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12]. Logs are collected by the node Agent running on the node that hosts the Kueue controller manager, not by the Cluster Agent that runs this cluster check.
+
+After log collection has been enabled, set the Kueue log configuration as an Autodiscovery annotation on the controller manager's pod template. This allows it to persist despite pod restarts. Add it under `spec.template.metadata.annotations` of the `kueue-controller-manager` deployment, or set `controllerManager.manager.podAnnotations` if you install Kueue with the Helm chart:
+
+```yaml
+ad.datadoghq.com/manager.logs: |
+  [
+    {
+      "source": "kueue",
+      "service": "<SERVICE>"
+    }
+  ]
+```
+
+This annotation targets the container named `manager`, which is the container name used by both the Kueue release manifests and the Helm chart. Replace `manager` with the name (`.spec.containers[i].name`) of your Kueue container if you use a different name.
+
 ### Validation
 
 [Run the Cluster Agent's `clusterchecks` subcommand][11] and look for `kueue` under the Checks section.
@@ -96,3 +127,5 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
+[12]: https://docs.datadoghq.com/containers/kubernetes/log/
+[13]: https://docs.datadoghq.com/gpu_monitoring/

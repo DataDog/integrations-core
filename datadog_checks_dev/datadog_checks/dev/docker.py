@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
 from types import SimpleNamespace
@@ -13,7 +14,7 @@ from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fs import create_file, file_exists
+from .fs import create_file, ensure_dir_exists, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
@@ -114,13 +115,25 @@ def assert_all_discovery_candidates_stable(
 def _get_compose_container_id(
     compose_file: str | os.PathLike[str] | None, compose_service: str, *, project_name: str | None = None
 ) -> str:
-    compose_file = compose_file or _get_default_compose_file()
     project_name = project_name or _get_default_compose_project_name()
+    if not project_name:
+        raise AssertionError(
+            'Could not determine the Compose project name. '
+            'Pass project_name explicitly or use docker_run with a Compose file.'
+        )
 
-    command = ['docker', 'compose']
-    if project_name:
-        command.extend(['-p', project_name])
-    command.extend(['-f', os.fspath(compose_file), 'ps', '-q', compose_service])
+    command = [
+        'docker',
+        'ps',
+        '--quiet',
+        '--filter',
+        f'label=com.docker.compose.project={project_name}',
+        '--filter',
+        f'label=com.docker.compose.service={compose_service}',
+        '--filter',
+        # Exclude temporary containers created by `docker compose run` for the same project and service.
+        'label=com.docker.compose.oneoff=False',
+    ]
 
     container_id = run_command(command, capture='out', check=True).stdout.strip()
     if not container_id:
@@ -135,20 +148,6 @@ def _get_default_compose_service() -> str:
         return docker_metadata['service_name']
 
     return os.path.basename(find_check_root(depth=2))
-
-
-def _get_default_compose_file() -> str:
-    docker_metadata = get_state('docker_compose_metadata', {})
-    if docker_metadata.get('compose_file'):
-        return docker_metadata['compose_file']
-
-    compose_file = os.path.join(find_check_root(depth=3), 'tests', 'docker', 'docker-compose.yml')
-    if os.path.exists(compose_file):
-        return compose_file
-
-    raise AssertionError(
-        'Could not determine the compose file. Pass compose_file explicitly or use docker_run with a compose file.'
-    )
 
 
 def _get_default_compose_project_name() -> str | None:
@@ -303,6 +302,16 @@ def using_windows_containers():
     return os_type == 'windows'
 
 
+def shared_logs_base_dir():
+    # macOS runs the daemon in a VM; Colima shares only $HOME, so keep bind sources there.
+    if sys.platform != 'darwin':
+        return None
+
+    base = os.path.join(os.path.expanduser('~'), '.cache', 'datadog-checks-dev', 'shared-logs')
+    ensure_dir_exists(base)
+    return base
+
+
 @contextmanager
 def shared_logs(example_log_configs, mount_whitelist=None):
     log_source = example_log_configs[0].get('source', 'check')
@@ -313,6 +322,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 
     env_vars = {}
     docker_volumes = get_state('docker_volumes', [])
+    base_directory = shared_logs_base_dir()
 
     with ExitStack() as stack:
         for i, example_log_config in enumerate(example_log_configs, 1):
@@ -320,7 +330,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
                 continue
 
             log_name = 'dd_log_{}'.format(i)
-            d = stack.enter_context(TempDir(log_name))
+            d = stack.enter_context(TempDir(log_name, base_directory=base_directory))
 
             # Create the file that will ultimately be shared by containers
             shared_log_file = os.path.join(d, '{}_{}.log'.format(log_source, log_name))

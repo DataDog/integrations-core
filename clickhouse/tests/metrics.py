@@ -91,6 +91,9 @@ OPTIONAL_METRICS = [
     'clickhouse.cache_dictionary.update_queue.keys',
     'clickhouse.compilation.llvm.attempt.count',
     'clickhouse.compilation.llvm.attempt.total',
+    # JIT execution counter; only appears once a compiled function is actually run, so it is optional.
+    'clickhouse.compilation.function.execute.count',
+    'clickhouse.compilation.function.execute.total',
     'clickhouse.compilation.size.count',
     'clickhouse.compilation.size.total',
     'clickhouse.compilation.time',
@@ -247,6 +250,10 @@ OPTIONAL_METRICS = [
     'clickhouse.syscall.write.wait',
     'clickhouse.table.distributed.file.insert.broken',
     'clickhouse.table.distributed.file.insert.pending',
+    # Incremented by the check's own clusterAllReplicas node enumeration, so it only appears once
+    # that fan-out has run, and only on versions carrying the ProfileEvent.
+    'clickhouse.table.function.count',
+    'clickhouse.table.function.total',
     'clickhouse.table.insert.row.count',
     'clickhouse.table.insert.row.total',
     'clickhouse.table.insert.size.count',

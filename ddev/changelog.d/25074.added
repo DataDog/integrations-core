@@ -1,0 +1,1 @@
+Add a `--minimum-base-package` option to `ddev ci dispatch-tests` that plans a minimum-base-package job alongside each test job.

@@ -8,6 +8,21 @@ on:
   merge_group:
     types: [checks_requested]
 
+# Finding and then creating the notice comment is not atomic, so two runs racing
+# on quick successive pushes would each create their own copy. github.ref points
+# at the base branch on pull_request_target, so the group is keyed on the PR to
+# avoid serializing every open PR behind one queue.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCS_URL: https://datadoghq.atlassian.net/wiki/spaces/AI/pages/6182240746/Dependency+Updates
+  PR_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+  # Shared with dependency-wheel-promotion.yaml so the promotion run edits the
+  # notice this workflow posts instead of adding another comment.
+  PROMOTION_COMMENT_MARKER: <!-- dependency-wheel-promotion pr=${{ github.event.pull_request.number }} -->
+
 jobs:
   check:
     name: Set dependency-wheel-promotion status
@@ -16,10 +31,11 @@ jobs:
     permissions:
       statuses: write
       contents: read
+      pull-requests: write
     steps:
     - name: Check if dependency files changed
       id: deps-changed
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           const files = await github.paginate(github.rest.pulls.listFiles, {
@@ -36,7 +52,8 @@ jobs:
           core.setOutput('changed', changed ? 'true' : 'false');
 
     - name: Set fallback dependency-wheel-promotion status
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      id: promotion-status
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           const sha = context.payload.pull_request.head.sha;
@@ -46,22 +63,82 @@ jobs:
             ref: sha,
             per_page: 100,
           });
-          if (statuses.some(status => status.context === 'dependency-wheel-promotion')) {
+          // The API returns statuses newest first, so the first match for the
+          // context is the state currently shown on the PR.
+          const existing = statuses.find(status => status.context === 'dependency-wheel-promotion');
+          if (existing) {
             core.info(`dependency-wheel-promotion status already exists for ${sha}; leaving it unchanged.`);
+            core.setOutput('state', existing.state);
             return;
           }
 
           const changed = '${{ steps.deps-changed.outputs.changed }}' === 'true';
+          const state = changed ? 'pending' : 'success';
           await github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
             sha,
-            state: changed ? 'pending' : 'success',
+            state,
             context: 'dependency-wheel-promotion',
             description: changed
-              ? 'Wheels must be promoted to stable before merge. Run: ddev dep promote <PR_URL>'
+              ? 'Wheels must be promoted to stable before merge. Run: ddev dep promote ${{ env.PR_URL }}'
               : 'No dependency changes; promotion not required.',
           });
+          core.setOutput('state', state);
+
+    - name: Find existing promotion notice
+      id: find_notice
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: ${{ env.PROMOTION_COMMENT_MARKER }}
+
+    # A promotion status of success on a PR that still changes dependencies means
+    # the wheels are already promoted for this head SHA, and the promotion run
+    # owns the comment.
+    - name: Post or update the promotion notice
+      if: steps.deps-changed.outputs.changed == 'true' && steps.promotion-status.outputs.state != 'success'
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-id: ${{ steps.find_notice.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          > [!WARNING]
+          > **This PR changes Agent dependencies. Do not merge it until the wheels are promoted.**
+          >
+          > Dependency inputs changed, so the dependency resolution and wheel build workflow runs on this branch. It takes 1.5 to 3 hours and finishes by committing updated lockfiles. The wheels it builds then have to be promoted before the Agent can use them.
+          >
+          > **Steps to take, in order:**
+          >
+          > 1. Wait for the resolution workflow to finish and commit the lockfiles to this branch.
+          > 2. Review the Agent build triggered by that commit (`default-pipeline` in GitLab), especially `static_quality_gate`.
+          > 3. Get the PR approved.
+          > 4. Promote the wheels:
+          >    ```
+          >    ddev dep promote ${{ env.PR_URL }}
+          >    ```
+          > 5. Wait for `dependency-wheel-promotion` to turn green. Only then merge.
+          >
+          > Merging before promotion leaves the Agent unable to install the wheels these lockfiles pin. `dependency-wheel-promotion` is a required check: if it is pending or red, that is intentional. Do not bypass it and do not ask for an admin merge.
+          >
+          > Pushing again to this branch invalidates the promotion, so if you push after step 4 you have to promote again.
+          >
+          > <sub>Head commit `${{ github.event.pull_request.head.sha }}`. Full process: [Dependency Updates](${{ env.DOCS_URL }}). This comment is updated automatically as promotion progresses.</sub>
+
+    - name: Clear the promotion notice
+      if: steps.deps-changed.outputs.changed != 'true' && steps.find_notice.outputs.comment-id != ''
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        comment-id: ${{ steps.find_notice.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          ${{ env.PROMOTION_COMMENT_MARKER }}
+          This PR no longer changes Agent dependencies, so wheel promotion is not required and `dependency-wheel-promotion` passes on its own.
+
+          <sub>Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
   merge-queue:
     name: Set dependency-wheel-promotion status for merge queue
@@ -72,7 +149,7 @@ jobs:
       contents: read
     steps:
     - name: Set dependency-wheel-promotion status to success
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           await github.rest.repos.createCommitStatus({

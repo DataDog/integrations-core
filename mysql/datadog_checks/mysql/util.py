@@ -10,6 +10,9 @@ import pymysql
 
 from datadog_checks.mysql.cursor import CommenterCursor
 
+# First version exposing the `explain_json_format_version` system variable
+EXPLAIN_JSON_FORMAT_VERSION_MIN_VERSION = (8, 3, 0)
+
 
 class DatabaseConfigurationError(Enum):
     """
@@ -49,7 +52,18 @@ def get_truncation_state(statement):
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
 
 
-def connect_with_session_variables(**connect_args):
+def supports_explain_json_format_version(version):
+    """
+    Whether the server exposes the ``explain_json_format_version`` system variable, which was added in
+    MySQL 8.3.0 (and inherited by Percona). MariaDB does not have it. Returns False when the version is
+    not known yet, since the variable cannot be set safely without it.
+    """
+    if not version or version.flavor == 'MariaDB':
+        return False
+    return version.version_compatible(EXPLAIN_JSON_FORMAT_VERSION_MIN_VERSION)
+
+
+def connect_with_session_variables(mysql_version=None, **connect_args):
     db = pymysql.connect(**connect_args)
     with closing(db.cursor(CommenterCursor)) as cursor:
         # PyMYSQL only sets autocommit if it receives a different value from the server
@@ -60,6 +74,13 @@ def connect_with_session_variables(**connect_args):
         # Lower the lock wait timeout to avoid deadlocks on metadata locks. By default this is a year.
         # https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_lock_wait_timeout
         cursor.execute("SET LOCK_WAIT_TIMEOUT=5")
+        # MySQL 9.5 made version 2 the default JSON format for EXPLAIN, which restructures the plan
+        # around access paths (`query_plan`/`inputs`) instead of `query_block`. Pin the format so
+        # collected execution plans keep the same shape across server versions. Servers without the
+        # variable only ever produce the version 1 format, so there is nothing to pin there.
+        # https://dev.mysql.com/doc/refman/9.7/en/explain.html
+        if supports_explain_json_format_version(mysql_version):
+            cursor.execute("SET SESSION explain_json_format_version=1")
     return db
 
 
@@ -74,10 +95,12 @@ class ManagedAuthConnectionMixin:
     Mixin for async jobs that need to reconnect periodically for managed auth (e.g., AWS RDS IAM).
 
     Subclasses must initialize:
+        self._check (the check instance, used to read the detected server version)
         self._connection_args_provider (callable)
         self._uses_managed_auth (bool)
         self._db_created_at (float, timestamp)
         self._db (connection or None)
+        self._cancel_event (event.Event, used to abort queries if the Agent has unscheduled this check)
 
     Subclasses must implement:
         _close_db_conn() - closes self._db
@@ -91,6 +114,11 @@ class ManagedAuthConnectionMixin:
             return False
         return (time.time() - self._db_created_at) >= self.MANAGED_AUTH_RECONNECT_INTERVAL
 
+    def _raise_if_cancelled(self):
+        """Abort before a query if the Agent has unscheduled this check."""
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
     def _get_db_connection(self):
         """Get or create database connection, reconnecting periodically for managed auth."""
         if self._should_reconnect_for_managed_auth():
@@ -98,7 +126,7 @@ class ManagedAuthConnectionMixin:
 
         if not self._db:
             conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
             if self._uses_managed_auth:
                 self._db_created_at = time.time()
 

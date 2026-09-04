@@ -1,0 +1,53 @@
+# Policy for: .github/workflows/zz-dispatch-poc.yml in DataDog/integrations-core
+#
+# Temporary, and deliberately narrower than the Dispatcher will eventually need. It exists so the
+# POC round trip runs on a real octo-sts token rather than the ambient GITHUB_TOKEN, which is the
+# one part of the production path the POC cannot otherwise exercise. Deleted together with
+# zz-dispatch-poc.yml; the production policy is AI-7129.
+#
+# Naming convention:
+#   self:          Only this repository (DataDog/integrations-core) can use this policy
+#   dispatch-poc:  The Dispatcher POC workflow
+#   pull-request:  Triggered by pull_request events
+#
+# Security model:
+#   - job_workflow_ref pins the policy to zz-dispatch-poc.yml, so no other workflow can mint it.
+#   - The ref is left open, because a pull_request run resolves it to refs/pull/<n>/merge and the
+#     POC is iterated on across pull requests. Reaching this policy therefore requires push access
+#     to this repository: a fork pull request is never granted id-token: write, so it cannot obtain
+#     the OIDC token the exchange starts from.
+#   - Nothing here is granted that the workflow's own `permissions:` block does not already hold,
+#     so the token is a swap of credential, not an escalation.
+#
+# Permissions granted:
+#   - actions: write       - Dispatch the batch workflow, then read its runs, jobs, and artifacts.
+#   - statuses: write      - The run's aggregate result, one per run whatever the batch count.
+#   - pull_requests: write - The run's summary comment.
+#   - contents: read       - Check out the repository and read the pull request's diff.
+#
+# `checks: write` is deliberately absent. Each batch opens and closes its own check run from within
+# `test-batch.yml`, on that workflow's own token, so the Dispatcher writes no check run at all. The
+# aggregate is a commit status rather than a check run because a check run's `details_url` is
+# overwritten when it is created from inside a workflow, which leaves `Details` pointing at a page
+# that only says the check started.
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.dispatch-poc.pull-request
+
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:pull_request
+
+claim_pattern:
+  event_name: pull_request
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/zz-dispatch-poc\.yml@.*
+  repository: DataDog/integrations-core
+
+permissions:
+  actions: write
+  statuses: write
+  pull_requests: write
+  contents: read

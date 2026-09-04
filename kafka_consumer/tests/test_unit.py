@@ -277,6 +277,22 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     )
 
 
+def test_when_no_committed_offset_then_consumer_metrics_are_skipped(check, kafka_instance, dd_run_check, aggregator):
+    # Given: a partition with no committed offset, which librdkafka can surface as a negative
+    # logical offset (e.g. -1001 OFFSET_INVALID, or -2 OFFSET_BEGINNING) rather than a real offset.
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", -2)])]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
+    dd_run_check(kafka_consumer_check)
+
+    # Then: the partition is skipped rather than reporting a negative offset and inflated lag
+    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
+
+
 def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()
     kafka_instance["collect_consumer_group_state"] = True
@@ -1201,3 +1217,24 @@ def test_get_partition_offsets_returns_all_healthy_partitions():
     # READ_UNCOMMITTED is load-bearing: READ_COMMITTED would return the LSO, not the true high watermark.
     assert client._kafka_client.list_offsets.call_args.kwargs["isolation_level"] == IsolationLevel.READ_UNCOMMITTED
     assert client._kafka_client.list_offsets.call_args.kwargs["request_timeout"] == 5
+
+
+def test_get_partition_offsets_drops_negative_offsets():
+    """A Kafka offset is never negative, so such a value is dropped instead of becoming a metric."""
+    from confluent_kafka import TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="wrapped_topic", partition=0): _offset_future(-1533701557),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("wrapped_topic", 0)])
+
+    assert results == [("healthy_topic", 0, 100)]
