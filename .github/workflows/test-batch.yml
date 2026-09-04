@@ -1,0 +1,249 @@
+# Runs one Dispatcher batch: a set of test jobs planned by `ddev ci dispatch-tests` and sent here as
+# a single workflow input.
+#
+# The Dispatcher decides *what* runs and this workflow decides *how*, so the split against
+# `test-target.yml` is deliberate: that one is a reusable workflow a caller invokes per target and is
+# also consumed by integrations-extras and marketplace, while this one is dispatched once per batch
+# and expands the batch itself. Both drive the same scripts from
+# `.github/actions/setup-test-target-scripts`, which is where the test recipe actually lives, so
+# neither is a copy of the other.
+#
+# Two parts of the contract fail silently when broken, both consumed by the Dispatcher:
+#   - the matrix job name must be `BatchJob.name` verbatim, because the gatherer joins workflow jobs
+#     to planned jobs by exact name and raises when a planned job has none.
+#   - each job uploads exactly one artifact named `BatchJob.artifact_name()`, holding its JUnit and
+#     coverage XML. Any other name reads as a lost artifact and the batch reports empty results.
+#
+# `workflow_dispatch` requires the file to exist on the default branch, so changes here only take
+# effect once merged.
+name: Test Batch
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_id:
+        description: "Logical batch identity, e.g. batch-01"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Ref the batch tests, refs/pull/<n>/merge for a pull request"
+        required: true
+        type: string
+      job_list:
+        description: "The batch's jobs, as gzip+base64 of the plan's JSON"
+        required: true
+        type: string
+      integrations:
+        description: "JSON array of the target names in this batch"
+        required: false
+        default: "[]"
+        type: string
+      pytest_args:
+        description: 'Arguments every job appends to pytest, e.g. -m "not flaky"'
+        required: false
+        default: ""
+        type: string
+      context:
+        description: "Test context, reported to CI Visibility and used to pick the E2E flags"
+        required: false
+        default: "standard"
+        type: string
+
+# The test job runs a pull request's code, so it gets nothing. Job-level grants are added where they
+# are needed rather than here.
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  expand:
+    name: expand
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.decode.outputs.matrix }}
+    steps:
+      - name: Decode the job list
+        id: decode
+        env:
+          JOB_LIST: ${{ inputs.job_list }}
+          BATCH_ID: ${{ inputs.batch_id }}
+          INTEGRATIONS: ${{ inputs.integrations }}
+        run: |
+          set -euo pipefail
+
+          # A repository-wide batch is several times GitHub's 65,535-character input limit as plain
+          # JSON, so the Dispatcher always compresses. A decode failure means a malformed input and
+          # must stop the batch rather than produce an empty matrix.
+          printf '%s' "$JOB_LIST" | base64 -d | gzip -dc > jobs.json
+
+          count=$(python3 -c 'import json; print(len(json.load(open("jobs.json"))))')
+          if [[ "$count" -eq 0 ]]; then
+            echo "::error::The batch carries no jobs."
+            exit 1
+          fi
+
+          echo "matrix=$(cat jobs.json)" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### ${BATCH_ID}"
+            echo
+            echo "- jobs: ${count}"
+            echo "- targets: $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["INTEGRATIONS"])) or "-")')"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  test:
+    needs: expand
+    # Correlated by exact name, so this must stay `matrix.name` alone: a prefix or a suffix here
+    # leaves every job in the batch unmatched.
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner_labels }}
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      id-token: write # dd-sts, for the CI Visibility API key
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.expand.outputs.matrix) }}
+    steps:
+      - name: Set up Windows
+        if: runner.os == 'Windows'
+        run: diskperf -y
+
+      # uv's default hardlink mode on Windows breaks the `hatch env remove` that `ddev test --compat`
+      # runs at the end of a minimum-base-package job. See test-target.yml for the full explanation.
+      - name: Configure uv link mode (Windows minimum-base-package)
+        if: runner.os == 'Windows' && matrix.minimum_base_package
+        run: echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.checkout_sha }}
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-test-target-api-key
+
+      - name: Install workflow scripts
+        uses: ./.github/actions/setup-test-target-scripts
+
+      # Sets FORCE_COLOR, PYTHON_VERSION, DDEV_E2E_AGENT, the DD_* CI Visibility variables,
+      # TEST_RESULTS_DIR, and the INPUT_* variables the two run scripts read. Every variable it
+      # dereferences must be set here: it runs under `set -u`.
+      - name: Set environment variables
+        run: bash .github/workflows/scripts/setup-test-env.sh
+        env:
+          INPUT_TARGET: ${{ matrix.target }}
+          INPUT_TARGET_ENV: ${{ matrix.environment }}
+          INPUT_PLATFORM: ${{ matrix.platform }}
+          INPUT_PYTHON_VERSION: ${{ matrix.python_version }}
+          INPUT_MINIMUM_BASE_PACKAGE: ${{ matrix.minimum_base_package }}
+          INPUT_JOB_NAME: ${{ matrix.name }}
+          INPUT_PYTEST_ARGS: ${{ inputs.pytest_args }}
+          INPUT_CONTEXT: ${{ inputs.context }}
+          # The planner resolves the agent image per job and leaves it unset for a job that runs no
+          # E2E tests, where the value is never read.
+          INPUT_AGENT_IMAGE: ${{ matrix.agent_image || 'registry.datadoghq.com/agent-dev:master-py3' }}
+          INPUT_AGENT_IMAGE_WINDOWS: ${{ matrix.agent_image || 'registry.datadoghq.com/agent:7-rc-servercore' }}
+          # Python 2 is not dispatched, but the script reads both variables unconditionally.
+          INPUT_AGENT_IMAGE_PY2: ""
+          INPUT_AGENT_IMAGE_WINDOWS_PY2: ""
+          INPUT_TEST_PY2: "false"
+          INPUT_TEST_PY3: "true"
+          # Only integrations-core is dispatched, and a dispatch never carries fork code: the ref is
+          # this repository's merge ref, resolved by the Dispatcher.
+          INPUT_REPO: core
+          INPUT_IS_FORK: "false"
+          DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key }}
+          SETUP_ENV_VARS: ""
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          ORACLE_DOCKER_USERNAME: ${{ secrets.ORACLE_DOCKER_USERNAME }}
+          ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
+          DD_GITHUB_USER: ${{ github.actor }}
+          DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag job for CI Visibility
+        uses: ./.github/actions/tag-job
+        with:
+          tags: ${{ env.DD_TAGS }}
+          dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
+          dd_site: ${{ env.DD_SITE }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure ddev
+        run: |
+          ddev config set upgrade_check false
+          ddev config set repos.core .
+          ddev config set repo core
+
+      - name: Lint
+        timeout-minutes: 60
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          ddev test --lint "$TARGET" || {
+            echo "::error::Lint failed!"
+            echo "::error::Run 'ddev test --fmt $TARGET' to fix formatting issues."
+            exit 1
+          }
+
+      - name: Prepare for testing
+        timeout-minutes: 60
+        run: ddev ci setup "$INPUT_TARGET_STR"
+
+      - name: Ensure Docker is running
+        run: bash .github/workflows/scripts/ensure-docker.sh
+
+      - name: Run Unit & Integration tests
+        if: matrix.unit_tests
+        timeout-minutes: 60
+        run: bash .github/workflows/scripts/run-unit-integration-tests.sh
+
+      - name: Run E2E tests
+        if: matrix.e2e_tests
+        timeout-minutes: 60
+        run: bash .github/workflows/scripts/run-e2e-tests.sh
+        env:
+          INPUT_SESSION_NAME: e2e-tests
+
+      # One flat directory per job, uploaded under the job's `artifact_name`. The gatherer rglobs
+      # `test-*.xml` and `coverage*.xml` inside it, which is what `ddev test --junit` and `--cov`
+      # already produce; nothing here renames them.
+      - name: Collect the job's reports
+        if: always()
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          if [[ -d "$TARGET/junit" ]]; then
+            find "$TARGET/junit" -name 'test-*.xml' -exec cp {} reports/ \;
+          fi
+          # Absent for a minimum-base-package job, which runs without `--cov`.
+          if [[ -f "$TARGET/coverage.xml" ]]; then
+            cp "$TARGET/coverage.xml" reports/
+          fi
+          ls -la reports
+
+      - name: Upload the job's reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: reports
+          if-no-files-found: warn
