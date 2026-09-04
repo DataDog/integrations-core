@@ -21,7 +21,6 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientTimeoutError,
 )
 from datadog_checks.base.utils.requests_adapter import (
-    _COMPAT_EXCEPTIONS,
     RequestsResponseAdapter,
     _backend_compat_type,
     _translate_requests_exception,
@@ -51,7 +50,7 @@ def test_transport_exception_mapping(raised, expected):
     with pytest.raises(expected) as exc_info:
         http.get('http://example.test/')
 
-    assert type(exc_info.value) is _COMPAT_EXCEPTIONS[expected]
+    assert isinstance(exc_info.value, type(raised))
     assert exc_info.value.request.method == 'GET'
     assert exc_info.value.request.url == 'http://example.test/'
 
@@ -104,9 +103,9 @@ def test_raise_for_status_maps_to_status_error():
 )
 def test_translate_maps_requests_to_agnostic(raised, expected):
     result = _translate_requests_exception(raised)
-    assert type(result) is _COMPAT_EXCEPTIONS[expected], (
-        f"{type(raised).__name__} -> {type(result).__name__}, expected {expected.__name__}"
-    )
+    assert isinstance(result, expected)
+    if isinstance(raised, requests.exceptions.RequestException):
+        assert isinstance(result, type(raised))
 
 
 def test_invalid_header_keeps_the_value_error_family():
@@ -117,6 +116,33 @@ def test_invalid_header_keeps_the_value_error_family():
     assert isinstance(translated, HTTPClientRequestError)
     assert isinstance(translated, requests.exceptions.InvalidHeader)
     assert isinstance(translated, ValueError)
+
+
+@pytest.mark.parametrize(
+    'error_type',
+    [
+        requests.exceptions.InvalidURL,
+        requests.exceptions.MissingSchema,
+        requests.exceptions.InvalidSchema,
+        requests.exceptions.URLRequired,
+    ],
+)
+def test_invalid_url_translation_does_not_match_sibling_requests_errors(error_type):
+    translated = _translate_requests_exception(error_type('bad URL'))
+    sibling_types = tuple(
+        candidate
+        for candidate in (
+            requests.exceptions.InvalidURL,
+            requests.exceptions.MissingSchema,
+            requests.exceptions.InvalidSchema,
+            requests.exceptions.URLRequired,
+        )
+        if candidate is not error_type
+    )
+
+    assert isinstance(translated, HTTPClientInvalidURLError)
+    assert isinstance(translated, error_type)
+    assert not isinstance(translated, sibling_types)
 
 
 @pytest.mark.parametrize(
@@ -145,12 +171,12 @@ def test_invalid_header_keeps_the_value_error_family():
         pytest.param(requests.exceptions.HTTPError('500'), [requests.exceptions.HTTPError], id='status'),
         pytest.param(
             requests.exceptions.MissingSchema('no-scheme'),
-            [requests.exceptions.MissingSchema, requests.exceptions.InvalidURL, ValueError],
+            [requests.exceptions.MissingSchema, ValueError],
             id='missing-schema',
         ),
         pytest.param(
             requests.exceptions.TooManyRedirects('loop'),
-            [requests.exceptions.RequestException],
+            [requests.exceptions.TooManyRedirects, requests.exceptions.RequestException],
             id='fallthrough',
         ),
     ],
@@ -180,10 +206,6 @@ def test_compat_bases_do_not_leak_into_the_agnostic_tree():
     assert not isinstance(
         _translate_requests_exception(requests.exceptions.ConnectTimeout('boom')), HTTPClientConnectionError
     )
-    for agnostic, compat in _COMPAT_EXCEPTIONS.items():
-        assert compat.__bases__[0] is agnostic
-        assert compat.__name__ == agnostic.__name__
-        assert compat.__module__ == agnostic.__module__
 
 
 def test_backend_compat_type_supports_backend_subclassing_agnostic():
@@ -207,7 +229,10 @@ def requests_exception_types():
         found[exc_type.__name__] = exc_type
         pending.extend(exc_type.__subclasses__())
 
-    return sorted(found.values(), key=lambda exc_type: exc_type.__name__)
+    return sorted(
+        (exc_type for exc_type in found.values() if not issubclass(exc_type, requests.exceptions.JSONDecodeError)),
+        key=lambda exc_type: exc_type.__name__,
+    )
 
 
 @pytest.mark.parametrize('exc_type', requests_exception_types(), ids=lambda exc_type: exc_type.__name__)
@@ -215,6 +240,7 @@ def test_every_requests_exception_lands_under_a_handled_agnostic_type(exc_type):
     translated = _translate_requests_exception(exc_type.__new__(exc_type))
 
     assert isinstance(translated, (HTTPClientRequestError, HTTPClientStatusError))
+    assert isinstance(translated, exc_type)
 
 
 def test_a_non_requests_failure_reaches_the_caller_untranslated():
@@ -237,6 +263,21 @@ def test_translate_adapts_attached_backend_response():
     assert isinstance(translated.response, RequestsResponseAdapter)
     assert translated.response.status_code == 401
     assert translated.response.content == b'unauthorized'
+
+
+def test_too_many_redirects_keeps_its_response():
+    response = requests.Response()
+    response.status_code = 302
+    response._content = b'redirect loop'
+    error = requests.exceptions.TooManyRedirects('too many redirects', response=response)
+
+    translated = _translate_requests_exception(error)
+
+    assert isinstance(translated, HTTPClientRequestError)
+    assert isinstance(translated, requests.exceptions.TooManyRedirects)
+    assert isinstance(translated.response, RequestsResponseAdapter)
+    assert translated.response.status_code == 302
+    assert translated.response.content == b'redirect loop'
 
 
 def test_re_entering_the_seam_leaves_a_translated_error_intact():
@@ -357,6 +398,24 @@ def test_auth_token_fetch_error_maps_to_agnostic():
     http.auth_token_handler.poll.side_effect = requests.exceptions.ConnectionError('token endpoint refused')
     with pytest.raises(HTTPClientConnectionError):
         http.get('http://example.test/')
+
+
+def test_auth_token_json_error_keeps_decode_semantics():
+    http = RequestsWrapper({}, {})
+    http.auth_token_handler = mock.MagicMock()
+    http.auth_token_handler.poll.side_effect = requests.exceptions.JSONDecodeError(
+        'invalid token response', 'not JSON', 0
+    )
+
+    with pytest.raises(json.JSONDecodeError) as exc_info:
+        http.get('http://example.test/')
+
+    assert isinstance(exc_info.value, requests.exceptions.JSONDecodeError)
+    assert isinstance(exc_info.value, ValueError)
+    assert not isinstance(exc_info.value, HTTPClientError)
+    assert exc_info.value.msg == 'invalid token response'
+    assert exc_info.value.doc == 'not JSON'
+    assert exc_info.value.pos == 0
 
 
 def test_direct_iteration_maps_mid_stream_exceptions():
