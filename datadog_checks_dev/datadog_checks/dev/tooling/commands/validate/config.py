@@ -24,6 +24,7 @@ from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERIT
 from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.manifest_utils import get_metric_prefix
 from datadog_checks.dev.tooling.testing import process_checks_option
 from datadog_checks.dev.tooling.utils import (
     complete_valid_checks,
@@ -123,6 +124,7 @@ def config(ctx, check, sync, verbose):
             for error in spec.errors:
                 check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
         else:
+            apply_discovery_metrics_prefix(spec.data, check)
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
             for example_file, (contents, errors) in example_consumer.render().items():
@@ -180,6 +182,33 @@ def config(ctx, check, sync, verbose):
 
     if files_failed:
         abort()
+
+
+def apply_discovery_metrics_prefix(spec_data, check):
+    """
+    Populate the `metrics_prefix` field of a generated `auto_conf.yaml`'s `discovery` block
+    whenever the check's metric prefix diverges from its own name.
+
+    Autodiscovery skips config discovery for an integration if a conflicting generic
+    (`openmetrics`/`prometheus`) integration is already configured for the same service. Detecting
+    that conflict requires knowing the integration's metric prefix; `metrics_prefix` lets the Agent
+    do that without a hardcoded name-to-prefix map. Most integrations' prefix already matches their
+    name, so this only needs to add anything for the minority where it doesn't, and it is computed
+    here rather than authored by hand since the prefix is already available in machine-readable form
+    (manifest.json / `.ddev/config.toml` overrides). A spec author can still hand-write a different
+    `example` via the normal `overrides:` mechanism; this only fills in the still-default `{}`.
+    """
+    for file in spec_data.get('files', []):
+        if file.get('example_name') != 'auto_conf.yaml':
+            continue
+
+        for option in file.get('options', []):
+            if option.get('name') != 'discovery' or option.get('example') != {}:
+                continue
+
+            prefix = get_metric_prefix(check).rstrip('.')
+            if prefix and prefix != check:
+                option['example'] = {'metrics_prefix': prefix}
 
 
 def validate_default_template(spec_file):
