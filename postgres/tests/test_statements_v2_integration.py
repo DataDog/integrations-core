@@ -667,30 +667,66 @@ def test_counter_reset_between_cycles_v2(aggregator, integration_check, dbm_inst
 def test_cache_hit_rate_stable_across_cycles_v2(aggregator, integration_check, dbm_instance_v2):
     """Once a statement's text is cached, later cycles must serve it from the cache rather than
     re-fetching it from Postgres. If live entries are dropped prematurely the emitted metrics stay
-    correct, so only the hit rate reveals that every cycle is re-fetching and re-obfuscating."""
+    correct, so only the hit rate reveals that every cycle is re-fetching and re-obfuscating.
+
+    A new (queryid, dbid, userid) can still appear after warmup — autovacuum, or a check query
+    whose first snapshot landed on the last warmup cycle — and that costs one miss. The bug this
+    catches is re-fetching a key that is already known and still live.
+    """
     conn = _test_query_conn()
     check = integration_check(dbm_instance_v2)
     check._connect()
 
-    # The first cycle only seeds the baseline, and the check's own recurring statements trickle into
-    # pg_stat_statements over the next few, so warm up generously before measuring steady state.
-    for _ in range(6):
-        _run_cycle(check, conn)
+    # First cycle selects and instantiates the V2 collector; capture it before installing the spy.
+    _run_cycle(check, conn)
+    job = check.statement_metrics
+    assert isinstance(job, PostgresStatementMetricsV2)
 
-    aggregator.reset()
+    original_fetch = job._fetch_query_texts
+    fetched_keys: set = set()
+    refetched_while_live: set = set()
+    vanished_before_fetch: set = set()
+    measuring = False
+
+    def _fetch_spy(keys):
+        if measuring:
+            # A key we already fetched that is fetched again — and did not leave pg_stat_statements
+            # in between — means the cache dropped a live entry.
+            refetched_while_live.update((set(keys) & fetched_keys) - vanished_before_fetch)
+        texts = original_fetch(keys)
+        fetched_keys.update(texts.keys())
+        return texts
+
+    original_resolve = job._resolve_obfuscations
+    previous_live_keys: set = set()
+
+    def _resolve_spy(live_pgss_keys, changed_pgss_keys):
+        vanished_before_fetch.update(previous_live_keys - live_pgss_keys)
+        previous_live_keys.clear()
+        previous_live_keys.update(live_pgss_keys)
+        return original_resolve(live_pgss_keys, changed_pgss_keys)
 
     steady_state_cycles = 3
-    for _ in range(steady_state_cycles):
-        _run_cycle(check, conn)
+    with (
+        mock.patch.object(job, '_fetch_query_texts', side_effect=_fetch_spy),
+        mock.patch.object(job, '_resolve_obfuscations', side_effect=_resolve_spy),
+    ):
+        # Recurring check statements trickle into pg_stat_statements over the next few cycles.
+        for _ in range(5):
+            _run_cycle(check, conn)
+
+        aggregator.reset()
+        measuring = True
+        for _ in range(steady_state_cycles):
+            _run_cycle(check, conn)
 
     conn.close()
 
     hits = [m.value for m in aggregator.metrics("dd.postgres.statement_metrics.lookup.hits")]
-    misses = [m.value for m in aggregator.metrics("dd.postgres.statement_metrics.lookup.misses")]
 
     assert len(hits) == steady_state_cycles, f"expected one hits gauge per cycle, got {hits}"
     assert all(hit > 0 for hit in hits), f"steady-state cycles served nothing from cache: hits={hits}"
-    assert sum(misses) == 0, f"steady-state cycles re-fetched statement text: misses={misses}"
+    assert not refetched_while_live, f"cached keys were re-fetched while still live: {sorted(refetched_while_live)}"
 
 
 # ---------------------------------------------------------------------------
