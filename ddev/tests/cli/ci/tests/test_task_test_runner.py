@@ -9,6 +9,7 @@ import asyncio
 import base64
 import gzip
 import json
+import re
 import secrets
 from pathlib import Path
 from typing import Any
@@ -704,3 +705,17 @@ async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tm
     await runner.cancel_dispatched_runs()
 
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
+
+
+def test_a_dispatched_job_carries_exactly_the_keys_the_workflow_accepts():
+    """`test-batch.yml` fails a batch whose jobs do not carry exactly these keys, so a new `BatchJob`
+    field that is not added there stops every batch in `setup` rather than reaching a runner.
+
+    The key list is read out of the workflow so the two cannot drift apart silently.
+    """
+    workflow = Path(__file__).parents[5] / ".github" / "workflows" / "test-batch.yml"
+    block = re.search(r"# matrix-keys-begin\n(.*?)# matrix-keys-end", workflow.read_text(encoding="utf-8"), re.DOTALL)
+    assert block is not None, "the key list markers are gone from test-batch.yml"
+    expected = set(re.findall(r'"([a-z0-9_]+)"', block.group(1)))
+
+    assert set(TaskTestRunner._job_input(make_job())) == expected
