@@ -12,6 +12,13 @@ from datadog_checks.falco import FalcoCheck
 
 from .common import METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:12 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert FalcoCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_empty_instance(dd_run_check):
     with pytest.raises(
