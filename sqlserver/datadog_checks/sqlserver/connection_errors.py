@@ -24,6 +24,20 @@ class SQLConnectionError(Exception):
     pass
 
 
+def _expected_db_exceptions() -> tuple[type[Exception], ...]:
+    exceptions: list[type[Exception]] = [SQLConnectionError]
+    if pyodbc is not None:
+        exceptions.append(pyodbc.Error)
+    if adodbapi is not None:
+        exceptions.append(adodbapi.DatabaseError)
+    return tuple(exceptions)
+
+
+# Database errors a DBM async job should report as a warning rather than a crash. Which entries are
+# present depends on which drivers are installed, so this is built once at import time.
+EXPECTED_DB_EXCEPTIONS = _expected_db_exceptions()
+
+
 class ConnectionErrorCode(Enum):
     """
     Denotes the various reasons a connection might fail.

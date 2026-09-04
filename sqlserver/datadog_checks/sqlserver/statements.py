@@ -23,6 +23,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.connection_errors import EXPECTED_DB_EXCEPTIONS
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
 
@@ -263,7 +264,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             check,
             run_sync=is_affirmative(self._config.statement_metrics_config.get('run_sync', False)),
             enabled=is_affirmative(self._config.statement_metrics_config.get('enabled', True)),
-            expected_db_exceptions=(),
+            expected_db_exceptions=EXPECTED_DB_EXCEPTIONS,
             min_collection_interval=self._config.min_collection_interval,
             dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
@@ -637,9 +638,32 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # we use the plan handle
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
-            if self._seen_plans_ratelimiter.acquire(plan_key):
-                raise_if_cancelled(self._cancel_event)
+            # Check admission without consuming the plan's budget: a failed lookup below must not
+            # suppress this plan until the rate limiter entry expires.
+            if not self._seen_plans_ratelimiter.would_acquire(plan_key):
+                continue
+            raise_if_cancelled(self._cancel_event)
+            try:
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
+            except Exception as e:
+                # A connection closed during cancellation may surface as a database error.
+                raise_if_cancelled(self._cancel_event)
+                self.log.debug(
+                    "Failed to load plan | query_signature=[%s] query_hash=[%s] query_plan_hash=[%s] "
+                    "plan_handle=[%s] err=[%s]",
+                    row['query_signature'],
+                    row['query_hash'],
+                    row['query_plan_hash'],
+                    row['plan_handle'],
+                    e,
+                )
+                self._check.count(
+                    "dd.sqlserver.statements.error",
+                    1,
+                    **self._check.debug_stats_kwargs(tags=["error:load-plan-{}".format(type(e))]),
+                )
+                continue
+            if self._seen_plans_ratelimiter.acquire(plan_key):
                 obfuscated_plan = None
                 collection_errors = []
 
