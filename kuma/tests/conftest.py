@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import platform
+import tempfile
 
 import pytest
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kind import ClusterConfig, kind_run
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
@@ -16,10 +18,35 @@ KUMA_NAMESPACE = 'kuma-system'
 KUMA_SERVICE = 'kuma-control-plane'
 KUMA_STARTUP_TIMEOUT = 600
 KUMA_METRICS_ENDPOINT = f'http://{KUMA_SERVICE}.{KUMA_NAMESPACE}.svc.cluster.local:5680/metrics'
+KUMA_VERSION = os.environ.get('KUMA_VERSION', '2.10.6')
+KUMA_IMAGES = [f'kumahq/kuma-cp:{KUMA_VERSION}', f'kumahq/kumactl:{KUMA_VERSION}']
+
+
+class PreloadImages:
+    """Side-load locally cached chart images so the kind nodes don't pull them from Docker Hub.
+
+    Images that are not already in the local Docker cache are skipped and pulled by the
+    nodes as usual, so this never adds a download. Run `docker pull` on them once to
+    speed up subsequent runs.
+    """
+
+    def add_cluster_info(self, cluster_config: ClusterConfig):
+        self.cluster_name = cluster_config.cluster_name
+
+    def __call__(self):
+        # The archive must be single-platform: `kind load docker-image` fails on
+        # multi-arch images when Docker uses the containerd image store.
+        spec = f'{platform.system().lower()}/{platform.machine()}'
+        for image in KUMA_IMAGES:
+            if run_command(['docker', 'image', 'inspect', image], capture=True).code != 0:
+                continue
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                archive = os.path.join(tmp_dir, 'image.tar')
+                run_command(['docker', 'save', '--platform', spec, image, '-o', archive], check=True)
+                run_command(['kind', 'load', 'image-archive', archive, '--name', self.cluster_name], check=True)
 
 
 def setup_kuma():
-    kuma_version = os.environ.get('KUMA_VERSION', '2.10.6')
     run_command(['kubectl', 'create', 'namespace', KUMA_NAMESPACE], check=True)
     run_command(['helm', 'repo', 'add', 'kuma', 'https://kumahq.github.io/charts'], check=True)
     run_command(['helm', 'repo', 'update'], check=True)
@@ -31,7 +58,7 @@ def setup_kuma():
             'kuma',
             'kuma/kuma',
             '--version',
-            kuma_version,
+            KUMA_VERSION,
             '--create-namespace',
             '-n',
             KUMA_NAMESPACE,
@@ -55,7 +82,7 @@ def setup_kuma():
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
-    with kind_run(conditions=[setup_kuma]) as kubeconfig:
+    with kind_run(conditions=[PreloadImages(), setup_kuma]) as kubeconfig:
         instance = {'openmetrics_endpoint': KUMA_METRICS_ENDPOINT}
         metadata = {
             'agent_type': 'kubernetes',
