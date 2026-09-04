@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import asyncio
+import signal
 import subprocess
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -106,6 +107,23 @@ class CapturingOrchestrator(ValidationOrchestrator):
     def submit_message(self, message: BaseMessage) -> None:
         assert isinstance(message, ValidationMessage)
         self.submitted.append(message)
+
+
+def test_signals_are_left_to_the_default_handling(mock_app: MagicMock):
+    """A validation is a subprocess run from a pool thread, so a requested stop cannot interrupt it and
+    the command would stay alive until the subprocess timeout instead of terminating.
+    """
+    orch = ValidationOrchestrator(app=mock_app, target=None, validations=["models"])
+    installed: list[signal.Signals] = []
+
+    async def install_with_a_live_loop() -> None:
+        loop = asyncio.get_running_loop()
+        with patch.object(loop, "add_signal_handler", side_effect=lambda sig, *_: installed.append(sig)):
+            orch.install_signal_handlers()
+
+    asyncio.run(install_with_a_live_loop())
+
+    assert installed == []
 
 
 @pytest.mark.parametrize(

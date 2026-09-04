@@ -17,13 +17,14 @@ import pytest
 
 from ddev.cli.ci.tests import pr_comment
 from ddev.cli.ci.tests.messages import UpdatePRComment
-from ddev.cli.ci.tests.pr_comment import COMMENT_MARKER
+from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING, CANCELLED_WITHOUT_RESULTS_NOTE, COMMENT_MARKER
 from ddev.cli.ci.tests.progress import JobAttemptProgress, JobProgress, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
+from ddev.utils.rate_limiting import RateLimitWaitAbandoned
 from tests.cli.ci.tests.helpers import (
     TOTAL_JOBS,
     comment_page,
@@ -712,3 +713,97 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
     # Full refused, compact refused, minimal accepted: the whole ladder, ending on a write.
     assert attempted == tiers
     assert not reporter.pr_comment_failed
+
+
+async def test_a_cancelled_run_is_reported_even_with_nothing_gathered():
+    """The comment is the only place a reader learns the run happened.
+
+    Posting nothing when a run is cancelled before any batch reports is indistinguishable from a job
+    that hung, which is the state a reader would otherwise keep waiting on.
+    """
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+
+    await reporter.publish_cancelled()
+
+    created = client.last_call("create_issue_comment")
+    assert CANCELLED_HEADING in created.kwargs["body"]
+
+
+async def test_a_cancelled_report_that_never_landed_says_so_on_the_run_page():
+    """The run page is the only place left to say the pull request was not updated.
+
+    `_report_cancellation` gathers this with `return_exceptions`, so a write that raises is absorbed
+    and never reaches the caller. `RateLimitWaitAbandoned` is the one to expect, because cancelling
+    shortens the limiter's wait so a GitHub pause fails fast instead of outliving the process. With
+    the failure recorded only after the write, the summary would claim the comment was current.
+    """
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+    await reporter.process_message(_update(1))
+    for method in ("update_issue_comment", "create_issue_comment", "list_issue_comments"):
+        client.mock_response(method, RateLimitWaitAbandoned(2.0, 58.0))
+
+    with pytest.raises(RateLimitWaitAbandoned):
+        await reporter.publish_cancelled()
+
+    assert reporter.pr_comment_failed
+
+
+async def test_nothing_supersedes_a_cancelled_report():
+    """A batch finishing as the run is cancelled must not put the report back to "still running".
+
+    Batches report concurrently, so a revision can be rendered after the cancellation notice went
+    out. Leaving that to call order would have the last word on the pull request claim the run is
+    still going, on a run that has already been cancelled.
+    """
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+    await reporter.process_message(_update(1))
+    await reporter.publish_cancelled()
+
+    await reporter.process_message(_update(2))
+
+    assert reporter.latest_body is not None
+    assert CANCELLED_HEADING in reporter.latest_body
+    assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
+
+
+async def test_a_cancelled_run_reports_what_it_had_gathered():
+    """A partial report is worth keeping, so cancelling renders the snapshot rather than discarding it.
+
+    The heading alone cannot tell the two cancelled bodies apart, since the no-results notice carries
+    it too. The job count is what identifies the snapshot behind a body, so that is what says the
+    partial results survived instead of being replaced by the notice.
+    """
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+    await reporter.process_message(_update(1))
+
+    await reporter.publish_cancelled()
+
+    assert reporter.latest_body is not None
+    assert CANCELLED_HEADING in reporter.latest_body
+    assert jobs_reported(reporter.latest_body) == 1
+    assert CANCELLED_WITHOUT_RESULTS_NOTE not in reporter.latest_body
+
+
+async def test_a_write_that_raises_still_leaves_the_report_behind():
+    """The report is what the run found; whether it reached GitHub is a separate fact.
+
+    `_write` only catches HTTP failures, and `RateLimitWaitAbandoned` is a `TimeoutError`, so it goes
+    straight through. The cancellation path sets a small `max_wait_seconds` to make that happen, which
+    is exactly when the run summary is the only place left to publish from.
+    """
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", RateLimitWaitAbandoned(waited_seconds=0.0, remaining_seconds=61.0))
+    reporter = _reporter(client)
+
+    with pytest.raises(RateLimitWaitAbandoned):
+        await reporter.process_message(_update(3))
+
+    assert reporter.latest_body is not None
+    # The revision advanced with the retained body, so the earlier snapshot that follows is refused
+    # and the only write attempted is the one that failed.
+    await reporter.process_message(_update(2))
+    assert len(client.calls_to("create_issue_comment")) == 1

@@ -1,1 +1,0 @@
-Collapse per-database service checks and database file queries into batched requests.

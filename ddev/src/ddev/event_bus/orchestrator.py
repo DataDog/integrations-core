@@ -7,12 +7,14 @@ import asyncio
 import contextlib
 import logging
 import math
+import signal
 import threading
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from concurrent.futures import wait as wait_for_futures
 from dataclasses import dataclass
+from types import FrameType
 from typing import assert_never, cast
 
 from .exceptions import (
@@ -26,8 +28,16 @@ from .exceptions import (
 )
 
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
+# What `signal.getsignal` hands back: a Python callable, one of the `SIG_*` constants, or None for a
+# handler installed outside Python.
+type SignalHandler = Callable[[int, FrameType | None], object] | int | signal.Handlers | None
 
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
+# How long the loop may block before re-reading the timeout and the stop flag.
+STOP_CHECK_INTERVAL = 1.0
+# What a process is asked to stop with: SIGINT from an interactive interrupt, SIGTERM from a scheduler
+# or CI runner cancelling the job.
+SHUTDOWN_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 
 class OrchestratorTimeout(Exception):
@@ -75,8 +85,19 @@ class BaseProcessor[T: BaseMessage]:
 
         The default implementation re-raises so unmodified processors fall through to
         the orchestrator-level ``fail_fast`` policy.
+
+        Can be cancelled part-way when the bus it belongs to is asked to stop.
         """
         raise error
+
+    def on_stop_requested(self) -> None:
+        """React to the bus being asked to wind down, by shortening work already in flight.
+
+        Called once per processor. :attr:`stopping` is already set and the bus may already be acting on
+        it, so this cannot assume anything is still running; shorten what is in flight rather than
+        expecting to run first. May be called from a signal handler, so it must not block or await.
+        Raising is contained: the stop still happens and the other processors are still told.
+        """
 
     def submit_message(self, message: BaseMessage) -> None:
         """Put *message* on the bus this processor was registered in, from any thread."""
@@ -156,13 +177,17 @@ class EventBusOrchestrator(ABC):
         # because the pool's own threads discard from it as they finish.
         self._sync_work: set[Future] = set()
         self._sync_work_lock = threading.Lock()
+        self._stop_claim = threading.Lock()
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
+        self._processors: list[Processor] = []
         # These will be initialized in the running loop
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
         self._loop: asyncio.AbstractEventLoop | None = None
         self._stopping = threading.Event()
+        self._displaced_signal_handlers: dict[signal.Signals, SignalHandler] = {}
+        self._interrupted = False
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -185,6 +210,92 @@ class EventBusOrchestrator(ABC):
         processor.bus = self
         for msg_type in message_types:
             self._subscribers.setdefault(msg_type, []).append(processor)
+        # By identity: a subclass defining `__eq__` would otherwise drop a distinct processor.
+        if not any(registered is processor for registered in self._processors):
+            self._processors.append(processor)
+
+    def install_signal_handlers(self) -> None:
+        """Route :data:`SHUTDOWN_SIGNALS` to :meth:`on_shutdown_signal` for the life of the run.
+
+        Called by :meth:`initialize`. Override to handle a different set, or to do nothing where the
+        process has another owner for them.
+
+        One handler per signal, despite the name: this replaces whatever was installed rather than
+        chaining onto it, so two buses in a process would leave only the second one hearing anything.
+        For SIGINT what it replaces is the handler that raises ``KeyboardInterrupt``, which is what
+        makes shutdown take the same path whichever signal comes first. Whatever is displaced is put
+        back by :meth:`remove_signal_handlers`.
+        """
+        loop = asyncio.get_running_loop()
+        for received in SHUTDOWN_SIGNALS:
+            displaced = signal.getsignal(received)
+            try:
+                loop.add_signal_handler(received, self.on_shutdown_signal, received)
+            except (NotImplementedError, RuntimeError) as e:
+                # Windows loops cannot do this at all, and no loop can off the main thread. Neither is
+                # worth failing a run over: the bus still stops, just not on a signal.
+                self._logger.debug("Not handling %s: %s", received.name, e)
+            else:
+                # Recorded only once installed, so a partial install cannot have teardown write back a
+                # handler this never displaced.
+                self._displaced_signal_handlers[received] = displaced
+
+    def remove_signal_handlers(self) -> None:
+        """Undo :meth:`install_signal_handlers`. Called by :meth:`finalize`.
+
+        ``remove_signal_handler`` restores the interpreter default rather than what was displaced, so a
+        run would otherwise leave a caller that had its own handler without one.
+        """
+        loop = asyncio.get_running_loop()
+        while self._displaced_signal_handlers:
+            received, displaced = self._displaced_signal_handlers.popitem()
+            with contextlib.suppress(NotImplementedError, RuntimeError):
+                loop.remove_signal_handler(received)
+            # None means the handler was not installed from Python, which `signal` refuses to take back.
+            if displaced is not None:
+                signal.signal(received, displaced)
+
+    def on_shutdown_signal(self, received: signal.Signals) -> None:
+        """React to a shutdown signal by winding the bus down.
+
+        Runs as a loop callback rather than in signal context, so it may not block or await. Anything it
+        raises reaches the loop's exception handler, and a second signal will not retry it, so put what
+        must happen first. Override to add to this, calling ``super()``.
+        """
+        self._interrupted = self._interrupted or received == signal.SIGINT
+        self._logger.warning("Received %s: the bus will wind down", received.name)
+        self.request_stop()
+
+    def request_stop(self) -> None:
+        """Ask the bus to wind down, from any thread.
+
+        The loop acts on it within ``STOP_CHECK_INTERVAL``, so a caller under a deadline it does not
+        control, such as a cancelled CI job, reaches ``finalize`` without waiting out the grace period.
+        ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
+        loop awaits them directly and would otherwise be held for as long as they take.
+
+        Sets :attr:`stopping`, then runs every registered processor's
+        :meth:`BaseProcessor.on_stop_requested`. A second caller returns at once rather than waiting for
+        those to finish.
+        """
+        # A one-shot latch, never released, so the first caller is the one that notifies. Non-blocking
+        # because a signal handler runs on the thread it interrupted: waiting here for a lock that
+        # thread already holds would deadlock it, and the handler is often the one for SIGTERM.
+        if not self._stop_claim.acquire(blocking=False):
+            return
+
+        self._stopping.set()
+        self._logger.info("Stop requested; the bus will wind down")
+        self._notify_processors_of_stop()
+
+    def _notify_processors_of_stop(self) -> None:
+        for processor in self._processors:
+            try:
+                processor.on_stop_requested()
+            except Exception as e:
+                # Swallowed rather than routed: the caller may be a signal handler, where raising loses
+                # the processors behind this one.
+                self._logger.error("on_stop_requested failed for '%s': %s", processor.name, e, exc_info=e)
 
     def submit_message(self, message: BaseMessage):
         """Adds a message to the queue, from any thread.
@@ -192,12 +303,18 @@ class EventBusOrchestrator(ABC):
         ``asyncio.Queue`` is not thread-safe, and a put it loses leaves the bus spinning on a message
         it never reads, so while the bus runs the loop thread makes every put.
         """
+        if self.stopping:
+            # Dropped rather than raised: processors submit from `finally` blocks, where raising would
+            # route an expected shutdown through the error policy.
+            self._logger.warning("Dropped %s(%s): the bus is shutting down", type(message).__name__, message.id)
+            return
+
         if self._loop is not None and self._loop.is_running():
             self._loop.call_soon_threadsafe(self._queue.put_nowait, message)
         else:
             self._queue.put_nowait(message)
 
-    def run(self):
+    def run(self, *, propagate_keyboard_interrupt: bool = False):
         """
         Launch the orchestrator and start consuming messages from the message queue.
 
@@ -210,8 +327,17 @@ class EventBusOrchestrator(ABC):
           - [hook] on_message_received(message)
         - finalize()
           - [hook] on_finalize(exc_info)
+
+        Args:
+            propagate_keyboard_interrupt: Re-raise ``KeyboardInterrupt`` after a run interrupted by
+                SIGINT has wound down. Handling the signal is what stops the interpreter raising it, and
+                with it whatever the caller does about one, such as Click's abort. Off by default: a bus
+                that wound down cleanly has not failed. Callers that read state off the bus afterwards,
+                or report the outcome themselves, want it off.
         """
         asyncio.run(self._entry_point())
+        if self._interrupted and propagate_keyboard_interrupt:
+            raise KeyboardInterrupt
 
     async def _entry_point(self):
         exception = None
@@ -229,8 +355,10 @@ class EventBusOrchestrator(ABC):
         Initializes the orchestrator.
         """
         self._running = True
+        # Before the hook, so a signal arriving during it winds the bus down rather than killing it.
+        self.install_signal_handlers()
         try:
-            await self.on_initialize()
+            await self._bounded_by_stop(self.on_initialize(), HookName.ON_INITIALIZE)
         except (FatalProcessingError, asyncio.CancelledError):
             raise
         except Exception as e:
@@ -247,6 +375,10 @@ class EventBusOrchestrator(ABC):
     async def on_initialize(self):  # pragma: no cover
         """
         Hook for subclasses to perform initial setup (e.g. submit initial messages).
+
+        Abandoned if :meth:`request_stop` is called, from any thread, while this is still waiting, so
+        it may be cancelled part-way and ``on_finalize`` then runs against whatever it had reached.
+        A hook that must finish what it starts should check :attr:`stopping` itself and return.
         """
         pass
 
@@ -270,6 +402,10 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_FINALIZE, e),
                 self.on_error,
             )
+        finally:
+            # A handler outlives the loop it was installed on, so leaving it behind would have a later
+            # bus in the same process deliver signals to this dead one.
+            self.remove_signal_handlers()
 
     async def _run_in_worker[T: BaseMessage](self, work: Callable[[T], None], message: T) -> None:
         """Run blocking work on the processor pool, tracked until it finishes.
@@ -336,6 +472,10 @@ class EventBusOrchestrator(ABC):
         hook. To stop the bus entirely, raise :class:`FatalProcessingError`. Any
         other exception is wrapped as :class:`OrchestratorHookError` and routed
         through :meth:`on_error`.
+
+        Abandoned if :meth:`request_stop` is called, from any thread, while this is still waiting, in
+        which case the message is not dispatched. A hook that must finish what it starts should check
+        :attr:`stopping` itself and return.
         """
         pass
 
@@ -355,6 +495,9 @@ class EventBusOrchestrator(ABC):
 
         The default implementation re-raises so unmodified orchestrators fall through
         to the ``fail_fast`` policy.
+
+        Best-effort once a stop has been requested: whoever asked may be working to a deadline, and
+        the process can be killed before this returns. Keep it short.
         """
         raise error
 
@@ -410,7 +553,7 @@ class EventBusOrchestrator(ABC):
                 wait_set = running_tasks | {get_task}
                 # We use a small timeout to check for max_timeout periodically. If we leave this here blocking
                 # we can keep the loop alive much longer than the max_timeout.
-                done, _ = await asyncio.wait(wait_set, return_when=asyncio.FIRST_COMPLETED, timeout=1.0)
+                done, _ = await asyncio.wait(wait_set, return_when=asyncio.FIRST_COMPLETED, timeout=STOP_CHECK_INTERVAL)
 
                 current_get_task = get_task
                 if current_get_task in done:
@@ -442,10 +585,20 @@ class EventBusOrchestrator(ABC):
 
     async def __should_stop(self, start_time: float, running_tasks: set[asyncio.Task], get_task: asyncio.Task) -> bool:
         """
-        Checks whether the orchestrator should stop. This can happen in two ways:
+        Checks whether the orchestrator should stop. This can happen in three ways:
+        - A stop was requested
         - The max timeout is reached
         - The queue is empty and all processors have been completed and the grace period is reached
         """
+        # First, because a caller asking to stop outranks reporting a timeout it did not wait for.
+        if self.stopping:
+            self._logger.info(
+                "Stopping on request. A total of %s tasks were running.",
+                len(running_tasks),
+            )
+            get_task.cancel()
+            return True
+
         # Check first whether we are over the max timeout
         if self._remaining_time(start_time) <= 0:
             self._logger.error(
@@ -468,13 +621,55 @@ class EventBusOrchestrator(ABC):
                 # This ensures we wait for new message for a time period defined by grace_period
                 # but capped by max_timeout
                 wait_time = min(self._grace_period, remaining)
-                await asyncio.wait_for(asyncio.shield(get_task), timeout=wait_time)
-            except asyncio.TimeoutError:
-                get_task.cancel()
-                return True
+                if not await self.__wait_for_message(get_task, wait_time):
+                    if self.stopping:
+                        # Said here too, or a stop seen inside the wait leaves through this branch and
+                        # reads like the grace period simply expiring.
+                        self._logger.info("Stopping on request while idle.")
+                    get_task.cancel()
+                    return True
             except Exception:
                 # If the get_task failed, we return False to let the loop handle the exception
                 return False
+
+        return False
+
+    async def _bounded_by_stop(self, hook: Awaitable[None], name: HookName) -> None:
+        """Run a lifecycle hook the loop awaits directly, abandoning it if a stop is requested.
+
+        Without this a hook waiting on I/O holds the loop for as long as that takes, however long ago
+        the stop was asked for, and a caller with a deadline never reaches `finalize`.
+        """
+        work = asyncio.ensure_future(hook)
+        # Bounded by `asyncio.wait` rather than a sleeping waiter task: its timeout does not go through
+        # `asyncio.sleep`, so this cannot become a spin loop if something replaces that.
+        while not self.stopping:
+            done, _ = await asyncio.wait({work}, timeout=STOP_CHECK_INTERVAL)
+            if done:
+                # Awaited so a hook that failed still reaches the error policy rather than being lost
+                # with the future it failed in.
+                await work
+                return
+
+        work.cancel()
+        self._logger.warning("Abandoned %s: a stop was requested while it was still waiting", name)
+        with contextlib.suppress(asyncio.CancelledError):
+            await work
+
+    async def __wait_for_message(self, get_task: asyncio.Task, wait_time: float) -> bool:
+        """Whether a message arrived within ``wait_time``.
+
+        Waited out in slices rather than in one go, so a stop requested while the bus sits idle is
+        acted on promptly instead of after a grace period that can be far longer than the caller has.
+        """
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + wait_time
+        while (remaining := deadline - loop.time()) > 0:
+            if self.stopping:
+                return False
+            with contextlib.suppress(asyncio.TimeoutError):
+                await asyncio.wait_for(asyncio.shield(get_task), timeout=min(STOP_CHECK_INTERVAL, remaining))
+                return True
 
         return False
 
@@ -505,7 +700,7 @@ class EventBusOrchestrator(ABC):
         # directly from on_message_received skips dispatch for this message and
         # continues with the next one.
         try:
-            await self.on_message_received(msg)
+            await self._bounded_by_stop(self.on_message_received(msg), HookName.ON_MESSAGE_RECEIVED)
         except (asyncio.CancelledError, FatalProcessingError):
             raise
         except SkipMessageError as e:
@@ -571,6 +766,17 @@ class EventBusOrchestrator(ABC):
         and any on_success failure (wrapped as :class:`ProcessorHookError`)
         through the processor's ``on_error`` and applies the orchestrator's policy.
         """
+        if self.stopping:
+            # A task can be created before the stop and scheduled after it, so refusing here covers
+            # every processor without each having to check.
+            self._logger.warning(
+                "Not dispatching %s(%s) to %s: the bus is shutting down",
+                type(message).__name__,
+                message.id,
+                processor.name,
+            )
+            return
+
         try:
             match processor:
                 case AsyncProcessor():

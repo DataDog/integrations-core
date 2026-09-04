@@ -84,10 +84,22 @@ def build_test_units(
                 platforms=tuple(platforms),
                 runners=ci_override.get("runners", {}),
                 environments=environments,
+                supports_minimum_base_package=supports_minimum_base_package(integration),
             )
         )
 
     return expand_test_units(definitions)
+
+
+def supports_minimum_base_package(integration: Integration) -> bool:
+    """Whether testing *integration* against the minimum base package differs from a normal run.
+
+    Mirrors the condition `ddev test --compat` applies before pinning the base package version, so a
+    target it would not pin is never replicated.
+    """
+    return (
+        integration.is_package and integration.is_integration and integration.minimum_base_package_version is not None
+    )
 
 
 def build_test_batches(
@@ -98,6 +110,7 @@ def build_test_batches(
     config: BatchingConfig,
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
+    minimum_base_package: bool = False,
 ) -> list[TestBatch]:
     """Turn changed files into the complete, ordered list of `TestBatch` messages.
 
@@ -110,7 +123,7 @@ def build_test_batches(
         environment_provider=environment_provider,
         rules=rules,
     )
-    jobs = expand_batch_jobs(units)
+    jobs = expand_batch_jobs(units, minimum_base_package=minimum_base_package)
     job_groups = strategy(jobs, config=config)
     validate_batches(job_groups, jobs, config=config)
     return create_test_batches(job_groups)

@@ -136,6 +136,13 @@ the `stamina` logger, so retries are visible even with no logger injected. That 
 disabling it would also silence the unrelated `stamina.retry` in `ddev/e2e/agent/docker.py`, so it is
 left alone here rather than reached into from this package.
 
+## Reject a page size GitHub would not honour
+
+Every endpoint method taking `per_page` must call `_ensure_per_page_valid` before its request.
+GitHub's shared `per-page` parameter is documented as "max 100" but carries no maximum in its schema,
+and a larger value is not refused: the API silently serves 100. Without the check, a method that only
+reads the first page returns fewer results than the caller asked for and nothing says why.
+
 ## Never follow a redirect
 
 The client does not follow redirects, because the `Authorization` header would travel to whatever

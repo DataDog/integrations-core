@@ -35,6 +35,12 @@ PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.MACOS: PlatformSpec("macOS", "macos-14-large"),
 }
 
+# The runners a plan may schedule on. Plan content follows the tested tree's `.ddev/config.toml` and
+# `hatch.toml`, so this is the set of places that influence can put a job, and the reason a
+# self-hosted label never goes in it. A `runners` override needs its label adding here. One label
+# per job: `runs-on` with an array is conjunctive, so a hosted image is only schedulable alone.
+ALLOWED_RUNNER_LABELS = frozenset({"ubuntu-22.04", "windows-2022", "macos-14-large"})
+
 # Targets rendered before everything else, in this order.
 DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
     name: index
@@ -102,6 +108,8 @@ class TargetDefinition:
     platforms: tuple[PlatformName, ...] = (PlatformName.LINUX,)
     runners: Mapping[str, Sequence[str]] = field(default_factory=dict)
     environments: tuple[ResolvedEnvironment, ...] = ()
+    # Whether `ddev test --compat` would pin this target's base package.
+    supports_minimum_base_package: bool = False
 
 
 @dataclass(frozen=True)
@@ -119,6 +127,7 @@ class TestUnit:
     platform: PlatformName
     runner_labels: tuple[str, ...]
     environment: ResolvedEnvironment
+    supports_minimum_base_package: bool = False
 
 
 def normalize_job_name(job_name: str) -> str:
@@ -218,6 +227,7 @@ def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
                         platform=platform_id,
                         runner_labels=runner_labels,
                         environment=environment,
+                        supports_minimum_base_package=target.supports_minimum_base_package,
                     )
                 )
 
