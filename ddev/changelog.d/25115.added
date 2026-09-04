@@ -1,1 +1,0 @@
-Add the ``test-batch`` workflow and the ``run-test-job`` action, and move the per-batch check run out of the dispatcher into the workflow that owns it.
