@@ -237,6 +237,7 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     env = {item['name']: item.get('value') for item in resources['Pod']['spec']['containers'][0]['env']}
     assert env['DD_API_KEY'] == 'a' * 32
     assert env['DD_SITE'] == 'datadoghq.com'
+    assert env['DD_AGENT_TELEMETRY_ENABLED'] == 'false'
     assert env['DD_AUTOCONFIG_FROM_ENVIRONMENT'] == 'true'
     assert 'DD_KUBERNETES_KUBELET_HOST' in env
     assert 'DD_KUBERNETES_KUBELET_NODENAME' in env

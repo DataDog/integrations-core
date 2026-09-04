@@ -161,6 +161,7 @@ class TestStart:
         assert 'export DD_API_KEY="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"' in exported_env_vars_str
         assert 'export DD_APM_ENABLED="false"' in exported_env_vars_str
         assert 'export DD_TELEMETRY_ENABLED="true"' in exported_env_vars_str
+        assert 'export DD_AGENT_TELEMETRY_ENABLED="false"' in exported_env_vars_str
 
     def test_without_config_file_does_not_add_synced_folder(
         self,
