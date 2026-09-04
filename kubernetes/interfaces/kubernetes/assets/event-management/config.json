@@ -1,0 +1,5 @@
+{
+  "interface_id": "kubernetes",
+  "intake_channel": "api",
+  "audience": ["external"]
+}
