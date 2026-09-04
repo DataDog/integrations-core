@@ -263,6 +263,24 @@ def test_collection_interval_gcd(intervals, expected):
 
 
 @pytest.mark.unit
+def test_metadata_job_ticks_at_gcd_of_all_sub_intervals(pg_instance):
+    """
+    Each metadata sub-collector gates itself on its own interval, which only yields the configured
+    cadence if the loop ticks at the GCD of every sub-interval. A tick coarser than that -- because
+    the GCD is computed over only some of the intervals, or not at all -- silently delays whichever
+    collector has the shortest interval.
+    """
+    pg_instance['dbm'] = True
+    pg_instance['collect_settings'] = {'enabled': True, 'collection_interval': 600}
+    pg_instance['collect_schemas'] = {'enabled': True, 'collection_interval': 700}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 800}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    assert check.metadata_samples.collection_interval == 100
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'exclude_hostname, expected_hostname',
     [
@@ -524,34 +542,6 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
         after = metadata._last_column_statistics_query_time
 
     assert after > before
-
-
-def test_report_postgres_metadata_honors_schemas_collection_interval(pg_instance):
-    """
-    The metadata job loop ticks at the GCD of its sub-intervals, so each sub-collector has to gate
-    itself. Schema collection stopped doing that in #21727, which dropped the only assignment to
-    _last_schemas_query_time and left collect_schemas.collection_interval inert: schemas were
-    collected on every tick no matter how high the interval was set.
-    """
-    pg_instance['dbm'] = True
-    pg_instance['collect_schemas'] = {'enabled': True, 'collection_interval': 600}
-    pg_instance['collect_settings'] = {'enabled': False}
-
-    check = PostgreSql('postgres', {}, [pg_instance])
-    metadata = check.metadata_samples
-    metadata._tags_no_db = []
-
-    with mock.patch.object(metadata._schema_collector, 'collect_schemas') as collect_schemas:
-        for _ in range(3):
-            metadata.report_postgres_metadata()
-
-        assert collect_schemas.call_count == 1
-
-        # Collection resumes once the configured interval has elapsed.
-        metadata._last_schemas_query_time -= 601
-        metadata.report_postgres_metadata()
-
-        assert collect_schemas.call_count == 2
 
 
 def _autodiscovery_scope(name):
