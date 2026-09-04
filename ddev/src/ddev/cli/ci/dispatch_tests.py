@@ -208,8 +208,7 @@ def validate_options(
     its diff are read from the API.
 
     A malformed invocation raises `UsageError` (exit code 2), so a caller can tell it from a run
-    that started and failed. A missing token is not one: the options were right, the environment
-    is not.
+    that started and failed. A missing token is not one: the options were right.
     """
     from ddev.utils.github import parse_pull_request_reference
 
@@ -265,8 +264,7 @@ def resolve_run(
 ) -> ResolvedRun | None:
     """Resolve what to test, or None when there is nothing left to test or report to.
 
-    Every such outcome says which one it was before returning, since from the outside a run that
-    resolved to nothing and a run that was never asked for anything look the same.
+    Every None outcome says which one it was before returning.
     """
     if requested_pr is not None or pr_head_sha is not None:
         return resolve_pull_request_run(

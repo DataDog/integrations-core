@@ -257,12 +257,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
     ],
 )
 async def test_pytest_args_reach_the_batch_workflow(tmp_path: Path, pytest_args: str, expected: str | None):
-    """A run selects tests with these, so losing them runs tests the caller excluded: `master.yml`
-    passes `-m "not flaky"` and would silently run the flaky suite.
-
-    Unset means absent rather than empty, because GitHub rejects a dispatch carrying an input the
-    workflow does not declare (`HTTP 422: Unexpected inputs provided`).
-    """
+    """Losing these runs tests the caller excluded: `master.yml` passes `-m "not flaky"`."""
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(fake, [])

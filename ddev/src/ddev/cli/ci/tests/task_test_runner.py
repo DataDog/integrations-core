@@ -219,8 +219,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             "integrations": json.dumps(message.integrations),
             "job_list": encode_job_list([self._job_input(job) for job in message.job_list]),
         }
-        # Omitted rather than sent empty, so the workflow's own default is what decides how a run
-        # with no pytest arguments behaves.
+        # GitHub rejects inputs the workflow does not declare, so unset means absent, not empty.
         if self._options.pytest_args:
             inputs["pytest_args"] = self._options.pytest_args
         size = sum(len(value) for value in inputs.values())

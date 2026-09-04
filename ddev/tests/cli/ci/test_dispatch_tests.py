@@ -313,9 +313,7 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, local_changes,
 
 
 def test_pytest_args_are_shown_in_the_plan(ddev, github, planned):
-    """An option click accepts but nothing forwards would silently run the tests it was meant to
-    exclude, and the plan is where a run says what it is about to do.
-    """
+    """Catches an option click accepts but nothing forwards."""
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pytest-args', '-m "not flaky"', '--dry-run')
 
     assert result.exit_code == 0, result.output

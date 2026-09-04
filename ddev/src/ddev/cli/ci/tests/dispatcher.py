@@ -57,12 +57,6 @@ class DispatcherContext:
     pr_number: int | None = None
     tags: tuple[str, ...] = ()
     pytest_args: str = ''
-    """Extra arguments every job passes to pytest, as one unparsed string.
-
-    A property of the run rather than of a job: a run selects tests one way and never mixes kinds.
-    Unparsed because the batch workflow hands it to the shell, which is what makes `-m "not flaky"`
-    survive as a single argument.
-    """
 
 
 @dataclass(frozen=True)
