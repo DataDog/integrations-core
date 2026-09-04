@@ -10,6 +10,13 @@ from datadog_checks.keda import KedaCheck
 
 from .common import TEST_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert KedaCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check_mock_keda_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('keda_metrics.txt'))
