@@ -100,10 +100,19 @@ def test_validate_allows_oversized_split_when_enabled():
     validate_batches(groups, all_jobs, config=config(allow_integration_splitting=True))  # no raise
 
 
-def test_validate_rejects_a_runner_the_batch_workflow_will_not_schedule_on():
+@pytest.mark.parametrize(
+    "runner_labels",
+    [
+        pytest.param(("self-hosted",), id="outside the allowlist"),
+        pytest.param((), id="no runner at all"),
+        pytest.param(("ubuntu-22.04", "windows-2022"), id="two allowed labels"),
+    ],
+)
+def test_validate_rejects_a_runner_the_batch_workflow_will_not_schedule_on(runner_labels):
     """A `runners` override travels with the tested tree, so a pull request can name any label it
-    likes. Scheduling on one would put unreviewed code on a runner nobody chose for it.
+    likes. `runs-on` with an array is conjunctive, so two labels and none are equally unschedulable
+    and the batch would hang rather than fail.
     """
-    job = make_job("weird", runner_labels=("self-hosted", "gpu"))
-    with pytest.raises(BatchValidationError, match="unknown runners: gpu, self-hosted"):
+    job = make_job("weird", runner_labels=runner_labels)
+    with pytest.raises(BatchValidationError, match="not one known runner"):
         validate_batches([[job]], [job], config=config())

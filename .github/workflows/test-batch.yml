@@ -42,7 +42,7 @@ on:
         required: true
         type: string
       head_sha:
-        description: "Commit the results belong to, full 40 characters. The pull request's head"
+        description: "Commit the results belong to. The pull request's head"
         required: true
         type: string
       branch:
@@ -76,10 +76,14 @@ on:
 
 permissions: {}
 
-# The Dispatcher has no way to cancel a run, so without this a second push leaves every batch of the
-# previous one running with nothing to reap it.
+# A new revision of a pull request dispatches the same batch ids against the same
+# refs/pull/<n>/merge, so its batches land in the previous revision's groups and cancel them.
+# `head_sha` would give every revision a group of its own and cancel nothing; a commit run keys on
+# its own SHA, so master never cancels itself. What the group cannot see, the Dispatcher's
+# `cancel_dispatched_runs` reaps: a cancellation or a closed pull request with no follow-up push,
+# and a plan that shrank, whose old higher-numbered batches have no successor here.
 concurrency:
-  group: test-batch-${{ inputs.head_sha }}-${{ inputs.batch_id }}
+  group: test-batch-${{ inputs.checkout_sha }}-${{ inputs.batch_id }}
   cancel-in-progress: true
 
 defaults:

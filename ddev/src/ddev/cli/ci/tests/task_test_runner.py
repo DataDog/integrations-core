@@ -142,8 +142,11 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     async def cancel_dispatched_runs(self) -> None:
         """Cancel the runs this runner dispatched that have not finished.
 
-        Left running they would keep burning runner minutes long after the run that asked for them is
-        gone. Concurrent, because whatever budget the caller has is shared by all of them.
+        The batch workflow's concurrency group already cancels a superseded revision's batches. This
+        covers what the group cannot see: a cancellation or a closed pull request with no follow-up
+        push, a plan that shrank, and the minutes between this process being killed and the next
+        batches being dispatched. Concurrent, because whatever budget the caller has is shared by
+        all of them.
         """
         if not self._runs_in_flight:
             return
