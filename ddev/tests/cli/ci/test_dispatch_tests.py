@@ -312,6 +312,14 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, local_changes,
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
+def test_pytest_args_are_shown_in_the_plan(ddev, github, planned):
+    """Catches an option click accepts but nothing forwards."""
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pytest-args', '-m "not flaky"', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert '-m "not flaky"' in result.output
+
+
 def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--all', '--dry-run')
 

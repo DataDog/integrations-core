@@ -55,6 +55,12 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     metavar='"KEY:VALUE ..."',
     help='Tags the run reports itself under, separated by spaces. Their meaning is the caller\'s to decide.',
 )
+@click.option(
+    '--pytest-args',
+    default=None,
+    metavar='ARGS',
+    help='Arguments every job appends to pytest, as one string. For example: -m "not flaky".',
+)
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
 @click.option(
@@ -77,6 +83,7 @@ def dispatch_tests(
     pr_base_ref: str | None,
     commit: str | None,
     tags: str | None,
+    pytest_args: str | None,
     repository: str | None,
     all_targets: bool,
     minimum_base_package: bool,
@@ -145,6 +152,7 @@ def dispatch_tests(
         owner=owner,
         repo=repo,
         tags=tuple(tags.split()) if tags else (),
+        pytest_args=pytest_args or '',
         checkout_sha=run.checkout_sha,
         base_sha=run.base_sha,
         branch=run.branch,
@@ -200,8 +208,7 @@ def validate_options(
     its diff are read from the API.
 
     A malformed invocation raises `UsageError` (exit code 2), so a caller can tell it from a run
-    that started and failed. A missing token is not one: the options were right, the environment
-    is not.
+    that started and failed. A missing token is not one: the options were right.
     """
     from ddev.utils.github import parse_pull_request_reference
 
@@ -257,8 +264,7 @@ def resolve_run(
 ) -> ResolvedRun | None:
     """Resolve what to test, or None when there is nothing left to test or report to.
 
-    Every such outcome says which one it was before returning, since from the outside a run that
-    resolved to nothing and a run that was never asked for anything look the same.
+    Every None outcome says which one it was before returning.
     """
     if requested_pr is not None or pr_head_sha is not None:
         return resolve_pull_request_run(
@@ -451,6 +457,8 @@ def display_plan(app: Application, context: DispatcherContext, batches: list[Tes
         app.display_pair('Target branch', context.target_branch)
     if context.tags:
         app.display_pair('Tags', ' '.join(context.tags))
+    if context.pytest_args:
+        app.display_pair('Pytest args', context.pytest_args)
     app.display_pair('Workflow', f'{context.workflow} @ {context.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)

@@ -56,6 +56,7 @@ class DispatcherContext:
     target_branch: str | None = None
     pr_number: int | None = None
     tags: tuple[str, ...] = ()
+    pytest_args: str = ''
 
 
 @dataclass(frozen=True)
@@ -228,6 +229,7 @@ def build_dispatcher(
             checkout_sha=context.checkout_sha,
             artifacts_base_path=artifacts_path,
             poll_interval_seconds=config.poll_interval_seconds,
+            pytest_args=context.pytest_args,
         ),
     )
     gatherer = TaskTestGatherer("test-gatherer", output_path, batches)

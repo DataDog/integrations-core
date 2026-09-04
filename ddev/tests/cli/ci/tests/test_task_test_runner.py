@@ -96,7 +96,7 @@ def mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]):
     fake.mock_response("list_workflow_jobs", wrap(WorkflowJobsList(total_count=len(jobs), jobs=list(jobs))))
 
 
-def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner:
+def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path, pytest_args: str = "") -> TaskTestRunner:
     options = TestRunnerOptions(
         owner="DataDog",
         repo="integrations-core",
@@ -106,6 +106,7 @@ def make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner
         checkout_sha="merge-sha-bbb",
         artifacts_base_path=tmp_path,
         poll_interval_seconds=0.0,
+        pytest_args=pytest_args,
     )
     runner = TaskTestRunner(
         name="task-test-runner",
@@ -245,6 +246,27 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             "artifact_name": "ntp_py3.13_linux",
         },
     ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("pytest_args", "expected"),
+    [
+        pytest.param('-m "not flaky"', '-m "not flaky"', id="forwarded-with-quoting-intact"),
+        pytest.param("", None, id="omitted-when-unset"),
+    ],
+)
+async def test_pytest_args_reach_the_batch_workflow(tmp_path: Path, pytest_args: str, expected: str | None):
+    """Losing these runs tests the caller excluded: `master.yml` passes `-m "not flaky"`."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    runner = make_runner(fake, tmp_path, pytest_args=pytest_args)
+
+    await runner.process_message(make_batch("batch-1"))
+
+    inputs = fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]
+    assert inputs.get("pytest_args") == expected
 
 
 @pytest.mark.asyncio
