@@ -64,6 +64,119 @@ AUTODISCOVERY_FILTERED_INSTANCE_METRICS = [
     'sqlserver.database.backup_count',
 ]
 
+PER_DATABASE_STAGGERED_METRICS = [
+    pytest.param(
+        SqlserverIndexUsageMetrics,
+        'index_usage_metrics',
+        {'enabled': True, 'enabled_tempdb': False, 'collection_interval': 10},
+        id='index-usage',
+    ),
+    pytest.param(
+        SqlserverTableSizeMetrics,
+        'table_size_metrics',
+        {'enabled': True, 'collection_interval': 10},
+        id='table-size',
+    ),
+    pytest.param(
+        SqlserverDBFragmentationMetrics,
+        'db_fragmentation_metrics',
+        {'enabled': True, 'enabled_tempdb': False, 'collection_interval': 10},
+        id='fragmentation',
+    ),
+]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
+def test_per_database_metrics_spread_across_the_collection_interval(
+    init_config, instance_docker_metrics, metrics_class, config_key, metric_config
+):
+    """
+    Every database is collected on the first pass, and from then on each one is collected once per
+    interval in its own slot rather than all of them together.
+
+    The bug this guards against is the burst: before phase offsets, all N databases were due on the
+    same pass forever, so a large estate did one enormous sweep per interval. Delaying the *first*
+    pass would be an equally bad failure, leaving databases uncollected for a whole interval after
+    startup, so that is asserted here too.
+    """
+    databases = ['master', 'msdb', 'database_1', 'database_2', 'database_3', 'database_4', 'delta']
+    interval = 10
+    instance_docker_metrics['database_metrics'] = {config_key: metric_config}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = interval
+    executed_databases = []
+
+    def execute_query_handler(_query, db=None, params=None):
+        executed_databases.append(db)
+        return []
+
+    now = 100
+    with mock.patch('datadog_checks.base.utils.db.query.get_timestamp', side_effect=lambda: now):
+        metrics = metrics_class(
+            config=sqlserver_check._config,
+            new_query_executor=sqlserver_check._new_query_executor,
+            server_static_info=STATIC_SERVER_INFO,
+            execute_query_handler=execute_query_handler,
+            databases=databases,
+        )
+        _ = metrics.query_executors
+
+        metrics.execute()
+        assert sorted(executed_databases) == sorted(databases), "the first pass must collect every database"
+
+        # Walk one full interval a second at a time, recording which databases came due on each tick.
+        per_tick = []
+        for _ in range(interval):
+            now += 1
+            executed_databases.clear()
+            metrics.execute()
+            per_tick.append(list(executed_databases))
+
+    collected = [db for tick in per_tick for db in tick]
+    assert sorted(collected) == sorted(databases), "each database is collected exactly once per interval"
+    assert max(len(tick) for tick in per_tick) < len(databases), "the databases must not all be due on one tick"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
+def test_per_database_metric_slots_are_stable(
+    init_config, instance_docker_metrics, metrics_class, config_key, metric_config
+):
+    instance_docker_metrics['database_metrics'] = {config_key: metric_config}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = 10
+
+    def collect_offsets(databases: list[str]) -> dict[str, int | None]:
+        offsets = {}
+
+        def new_query_executor(queries: list[dict], **kwargs) -> mock.Mock:
+            database = kwargs['executor'].keywords['db']
+            offsets[database] = queries[0].get('collection_phase_offset')
+            return mock.Mock()
+
+        metrics = metrics_class(
+            config=sqlserver_check._config,
+            new_query_executor=new_query_executor,
+            server_static_info=STATIC_SERVER_INFO,
+            execute_query_handler=mock.Mock(),
+            databases=databases,
+        )
+        metrics._build_query_executors()
+        return offsets
+
+    original_offsets = collect_offsets(['alpha', 'beta', 'gamma'])
+    reconstructed_offsets = collect_offsets(['alpha', 'beta', 'gamma'])
+    expanded_offsets = collect_offsets(['alpha', 'beta', 'gamma', 'delta'])
+
+    assert original_offsets == {'alpha': 4, 'beta': 5, 'gamma': 2}
+    assert reconstructed_offsets == original_offsets
+    assert {database: expanded_offsets[database] for database in original_offsets} == original_offsets
+    assert collect_offsets(['alpha']) == {'alpha': None}
+
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = None
+    assert collect_offsets(['alpha', 'beta']) == {'alpha': None, 'beta': None}
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
