@@ -21,9 +21,15 @@
 #
 # Permissions granted:
 #   - actions: write       - Dispatch the batch workflow, then read its runs, jobs, and artifacts.
-#   - checks: write        - One check run per batch, opened before the dispatch and closed after.
+#   - statuses: write      - The run's aggregate result, one per run whatever the batch count.
 #   - pull_requests: write - The run's summary comment.
 #   - contents: read       - Check out the repository and read the pull request's diff.
+#
+# `checks: write` is deliberately absent. Each batch opens and closes its own check run from within
+# `test-batch.yml`, on that workflow's own token, so the Dispatcher writes no check run at all. The
+# aggregate is a commit status rather than a check run because a check run's `details_url` is
+# overwritten when it is created from inside a workflow, which leaves `Details` pointing at a page
+# that only says the check started.
 #
 # Usage in workflows:
 #   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
@@ -42,6 +48,6 @@ claim_pattern:
 
 permissions:
   actions: write
-  checks: write
+  statuses: write
   pull_requests: write
   contents: read
