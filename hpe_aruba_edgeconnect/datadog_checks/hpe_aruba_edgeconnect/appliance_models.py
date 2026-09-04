@@ -42,7 +42,7 @@ class Appliance:
 
     @property
     def is_reachable(self) -> bool:
-        # Appliance state to Orchestrator value mapping:
+        # Appliance states to Orchestrator value mapping:
         # 0 - Unknown ( When an appliance is added to Orchestrator, it
         #   is in this state )
         # 1 - Normal ( Appliance is reachable from Orchestrator)
