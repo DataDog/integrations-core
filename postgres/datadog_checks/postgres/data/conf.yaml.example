@@ -172,7 +172,7 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
-    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'azure_sys', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
     ## A list of databases to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
     ## set collect_default_database to false in addition to adding it to this array.
@@ -185,6 +185,7 @@ instances:
     #   - template1
     #   - rdsadmin
     #   - azure_maintenance
+    #   - azure_sys
     #   - cloudsqladmin
     #   - alloydbadmin
     #   - alloydbmetadata
