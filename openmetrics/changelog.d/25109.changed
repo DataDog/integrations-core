@@ -1,1 +1,1 @@
-Raise the minimum required ``datadog-checks-base`` version to ``38.3.0``, which introduces the Agent Health issue reporting this check relies on.
+Raise the minimum required datadog-checks-base version to 38.3.0.
