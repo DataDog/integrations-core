@@ -206,6 +206,17 @@ def test_fake_client_matches_registrations_made_before_a_match_option_changed():
     client.assert_all_responses_consumed()
 
 
+def test_fake_client_accepts_protocol_mapping_request_options():
+    client = FakeHTTPClient()
+    url = 'https://example.test/items'
+    response = FakeHTTPResponse()
+    headers = FakeHTTPResponse(headers={'X-Test': 'value'}).headers
+    client.register_response('GET', url, response)
+
+    assert client.get(url, headers=headers) is response
+    client.assert_requests([RecordedRequest('GET', url, {'headers': {'X-Test': 'value'}})])
+
+
 def test_fake_client_records_a_body_that_cannot_be_copied():
     client = FakeHTTPClient()
     url = 'https://example.test/upload'

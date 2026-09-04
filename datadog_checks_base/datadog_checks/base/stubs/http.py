@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator, Mapping
-from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import timedelta
 from types import MappingProxyType
@@ -20,15 +19,20 @@ JSON_RESULT_UNSET = object()
 SUPPRESSED_AUTH = object()
 
 
+def _snapshot_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {name: _snapshot_value(item) for name, item in value.items()}
+    if isinstance(value, list):
+        return [_snapshot_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_snapshot_value(item) for item in value)
+    # Request bodies and authentication objects may not be copyable.
+    return value
+
+
 def _snapshot_options(options: Mapping[str, Any]) -> Mapping[str, Any]:
     """Copy the plain data in each option so the fake and its callers share no mutable state."""
-    return MappingProxyType(
-        {
-            # Bodies and authentication objects are not always copyable.
-            name: deepcopy(value) if isinstance(value, (Mapping, list, tuple)) else value
-            for name, value in options.items()
-        }
-    )
+    return MappingProxyType({name: _snapshot_value(value) for name, value in options.items()})
 
 
 @dataclass(frozen=True, slots=True)
