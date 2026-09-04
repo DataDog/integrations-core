@@ -18,53 +18,33 @@ from datadog_checks.dev.http import MockResponse
 
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
+# Deployment tasks are collected with one server-wide `api/tasks` request per task state. The
+# request is only narrowed to the monitored spaces when the instance filters them, so each response
+# is registered both with and without the `spaces` parameter.
+TASK_PARAMS_TO_FILENAME = {
+    'states=Queued,Executing/skip=0/take=2': 'in_progress_low_limit_pg1',
+    'states=Queued,Executing/skip=0/take=30': 'in_progress_high_limit_pg1',
+    'fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'none_completed_low_limit_pg1',
+    'fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'none_completed_high_limit_pg1',
+    'fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'completed_low_limit_pg1',
+    'fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=2/take=2': 'completed_low_limit_pg2',
+    'fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'completed_high_limit_pg1',
+}
+
+SPACES_PARAMS = ['', 'spaces=Spaces-1/', 'spaces=Spaces-1,Spaces-2/']
+
 PARAMS_TO_FILENAME_MAPPING = {
-    # project 2 tasks
-    'name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=2': 'project_1_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=30': 'project_1_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_1_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_1_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_1_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_1_completed_high_limit_pg1',
-    # project 2 tasks
-    'name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=2': 'project_2_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=30': 'project_2_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_2_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_2_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_2_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_2_completed_high_limit_pg1',
-    # project 3 tasks
-    'name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=2': 'project_3_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=30': 'project_3_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_3_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_3_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_3_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=2/take=2': 'project_3_completed_low_limit_pg2',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_3_completed_high_limit_pg1',
-    # project 4 tasks
-    'name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=2': 'project_4_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=30': 'project_4_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_4_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_4_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_4_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_4_completed_high_limit_pg1',
+    # tasks
+    **{
+        f'name=Deploy/{spaces}{params}': filename
+        for spaces in SPACES_PARAMS
+        for params, filename in TASK_PARAMS_TO_FILENAME.items()
+    },
     # events
     'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:15.123000+00:00/'
     'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
