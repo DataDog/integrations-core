@@ -1,1 +1,0 @@
-Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded.
