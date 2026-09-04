@@ -5,10 +5,13 @@ from copy import deepcopy
 
 import mock
 import pytest
+import requests
 
 from datadog_checks.squid import SquidCheck
 
 from . import common
+
+pytestmark = pytest.mark.unit
 
 
 def test_parse_counter(aggregator, check):
@@ -117,3 +120,64 @@ def test_legacy_username_password(instance, auth_config):
                 verify=mock.ANY,
                 allow_redirects=mock.ANY,
             )
+
+
+def test_check_submits_rate_with_name_and_custom_tags_combined(aggregator, check, instance):
+    # Kills squid.py:95 (Mod->Add on "name:%s" % name) and :100-101 (ZeroIterationForLoop and
+    # Add->other operator mutants on tags=tags + custom_tags in the rate() loop).
+    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
+        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+            g.return_value = mock.MagicMock(text="client_http.requests = 42\n")
+            check.check(instance)
+
+    aggregator.assert_metric(
+        "squid.cachemgr.client_http.requests", value=42, tags=["name:ok_instance", "custom_tag"], count=1
+    )
+
+
+def test_get_counters_builds_metric_name_from_prefix_and_counter(check):
+    # Kills squid.py:125 (Mod->other operator mutants on "%s.%s" % (METRIC_PREFIX, counter)).
+    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
+        g.return_value = mock.MagicMock(text="client_http.requests = 42\n", headers={})
+        counters = check.get_counters(common.HOST, common.PORT, [])
+
+    assert counters == {"squid.cachemgr.client_http.requests": 42.0}
+
+
+def test_get_counters_reraises_and_flags_service_check_on_connection_error(aggregator, check):
+    # Kills squid.py:114 (ExceptionReplacer on `except requests.exceptions.RequestException`).
+    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
+        g.side_effect = requests.exceptions.ConnectionError("boom")
+        with pytest.raises(requests.exceptions.RequestException):
+            check.get_counters(common.HOST, common.PORT, [])
+
+    aggregator.assert_service_check(common.SERVICE_CHECK, status=check.CRITICAL)
+
+
+def test_submit_version_skips_when_metadata_collection_disabled(datadog_agent, check):
+    # Kills squid.py:154 (RemoveDecorator on @AgentCheck.metadata_entrypoint).
+    check.check_id = 'test:123'
+    datadog_agent._config['enable_metadata_collection'] = False
+
+    check.submit_version({"Server": "squid/3.1.4"})
+
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_submit_version_parses_version_after_slash(datadog_agent, check):
+    # Kills squid.py:157 (AddNot on `if "/" not in version_header`) and :161 (NumberReplacer on
+    # version_header.split('/')[1], which would pick the wrong side of the slash or raise IndexError).
+    check.check_id = 'test:123'
+
+    check.submit_version({"Server": "squid/3.1.4"})
+
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.scheme': 'semver',
+            'version.major': '3',
+            'version.minor': '1',
+            'version.patch': '4',
+            'version.raw': '3.1.4',
+        },
+    )
