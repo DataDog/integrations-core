@@ -63,7 +63,7 @@ semver==3.0.4
 service-identity[idna]==26.1.0
 simplejson==4.1.1
 supervisor==4.3.0
-tuf==4.0.0
+tuf==7.0.0
 urllib3==2.7.0
 vertica-python==1.4.0
 voltdbclient==15.3.0
