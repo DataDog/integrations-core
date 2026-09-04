@@ -1,0 +1,1 @@
+Migrate legacy cAdvisor requests to the backend-neutral HTTP client.
