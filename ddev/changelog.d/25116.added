@@ -1,0 +1,1 @@
+Open a datadog-agent PR pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit when tagging an Agent release branch, and make `ddev release branch tag` idempotent so it can be re-run to open that PR later.
