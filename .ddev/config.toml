@@ -48,6 +48,7 @@ hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
+intersystems_iris = "InterSystems IRIS"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -59,6 +60,7 @@ control_m = "control_m."
 nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
+intersystems_iris = "intersystems_iris."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]

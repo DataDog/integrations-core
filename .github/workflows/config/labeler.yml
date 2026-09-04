@@ -413,10 +413,6 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
-integration/idira_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - idira_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
@@ -725,6 +721,10 @@ integration/ide_shepherd:
 - changed-files:
   - any-glob-to-any-file:
     - ide_shepherd/**/*
+integration/idira_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - idira_endpoint_privilege_manager/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -749,6 +749,10 @@ integration/intercom:
 - changed-files:
   - any-glob-to-any-file:
     - intercom/**/*
+integration/intersystems_iris:
+- changed-files:
+  - any-glob-to-any-file:
+    - intersystems_iris/**/*
 integration/istio:
 - changed-files:
   - any-glob-to-any-file:

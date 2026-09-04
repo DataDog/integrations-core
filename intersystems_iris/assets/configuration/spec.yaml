@@ -1,0 +1,31 @@
+name: intersystems_iris
+files:
+- name: intersystems_iris.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://%%host%%:52773/api/monitor/metrics
+        openmetrics_endpoint.description: |
+          The URL of the IRIS built-in `/api/monitor/metrics` endpoint, which exposes
+          OpenMetrics telemetry data. This endpoint is unauthenticated by default. If the endpoint
+          has been secured, use the `auth_token`, `username` and `password`, or `headers` options
+          below.
+
+          Note: Interoperability metrics (`interop.*`) are only emitted once the "Record Statistics
+          for SAM" (System Alerting and Monitoring) setting is enabled
+          (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a running production.
+  - template: logs
+    example:
+    - type: file
+      path: /usr/irissys/mgr/messages.log
+      source: intersystems_iris
+      service: <SERVICE>
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
