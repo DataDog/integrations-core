@@ -128,6 +128,41 @@ class TestDisableAuth:
 
         assert 'Authorization' not in transport.requests[0].headers
 
+    @pytest.mark.parametrize(
+        'location',
+        [
+            pytest.param('/final', id='same-host'),
+            pytest.param('http://redirect.example/final', id='cross-host'),
+        ],
+    )
+    def test_disable_auth_suppresses_netrc_header_after_redirect(self, location):
+        transport = common.RequestsTransport()
+        transport.respond(status_code=302, headers={'Location': location})
+        transport.respond()
+        http = RequestsWrapper({}, {})
+        http.persist_connections = True
+        http.session.mount('http://', transport)
+
+        with mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')):
+            http.disable_auth()
+            http.get('http://example.com/start')
+
+        assert len(transport.requests) == 2
+        assert all('Authorization' not in request.headers for request in transport.requests)
+
+    def test_disable_auth_suppresses_netrc_header_after_redirect_with_injected_session(self):
+        transport = common.RequestsTransport()
+        transport.respond(status_code=302, headers={'Location': '/final'})
+        transport.respond()
+        http = common.create_requests_client(transport)
+
+        with mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')):
+            http.disable_auth()
+            http.get('http://example.com/start')
+
+        assert len(transport.requests) == 2
+        assert all('Authorization' not in request.headers for request in transport.requests)
+
 
 class TestCookies:
     def test_get_cookie_missing_returns_default(self):

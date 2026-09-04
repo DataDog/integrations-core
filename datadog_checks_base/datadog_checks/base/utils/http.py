@@ -11,6 +11,7 @@ import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from types import MethodType
 from typing import TYPE_CHECKING
 from urllib.parse import quote, urlparse, urlunparse
 
@@ -212,6 +213,22 @@ def get_tls_config_from_options(new_options):
 def suppress_default_auth(request):
     """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
     return request
+
+
+def _rebuild_auth_without_netrc(
+    session: requests.Session, prepared_request: requests.PreparedRequest, response: requests.Response
+) -> None:
+    original_request = response.request
+    assert original_request is not None
+    # Preserve Requests' cross-host credential stripping while deliberately omitting its .netrc lookup.
+    if 'Authorization' in prepared_request.headers and session.should_strip_auth(
+        original_request.url, prepared_request.url
+    ):
+        del prepared_request.headers['Authorization']
+
+
+def _suppress_netrc_auth(session: requests.Session) -> None:
+    session.rebuild_auth = MethodType(_rebuild_auth_without_netrc, session)
 
 
 class RequestsWrapper(object):
@@ -478,6 +495,8 @@ class RequestsWrapper(object):
     def disable_auth(self) -> None:
         """Suppress configured and .netrc auth without disabling other environment settings."""
         self.options['auth'] = suppress_default_auth
+        if self._session is not None:
+            _suppress_netrc_auth(self._session)
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -734,6 +753,8 @@ class RequestsWrapper(object):
         We leave it to callers to mount any HTTPS adapters if necessary.
         """
         session = requests.Session()
+        if self.options['auth'] is suppress_default_auth:
+            _suppress_netrc_auth(session)
         # Enable Unix Domain Socket (UDS) support.
         # See: https://github.com/msabramo/requests-unixsocket
         session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
