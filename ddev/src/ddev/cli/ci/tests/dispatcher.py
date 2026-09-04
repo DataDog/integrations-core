@@ -9,7 +9,6 @@ import asyncio
 import logging
 import signal
 from dataclasses import dataclass
-from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.messages import BatchFinished, TestBatch, UpdatePRComment
@@ -37,15 +36,6 @@ logger = logging.getLogger(__name__)
 CANCELLED_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
 
 
-class RunContext(StrEnum):
-    """What kind of run the Dispatcher is testing, reported as a monitoring tag."""
-
-    PR = "pr"
-    MASTER = "master"
-    AGENT_TEST = "agent-test"
-    RELEASE = "release"
-
-
 @dataclass(frozen=True)
 class DispatcherContext:
     """The run being tested. `build_dispatcher` consumes part of it; the rest describes the run
@@ -58,7 +48,6 @@ class DispatcherContext:
 
     owner: str
     repo: str
-    run_context: RunContext
     checkout_sha: str
     base_sha: str
     branch: str
@@ -66,6 +55,8 @@ class DispatcherContext:
     workflow_ref: str
     target_branch: str | None = None
     pr_number: int | None = None
+    tags: tuple[str, ...] = ()
+    pytest_args: str = ''
 
 
 @dataclass(frozen=True)
@@ -238,6 +229,7 @@ def build_dispatcher(
             checkout_sha=context.checkout_sha,
             artifacts_base_path=artifacts_path,
             poll_interval_seconds=config.poll_interval_seconds,
+            pytest_args=context.pytest_args,
         ),
     )
     gatherer = TaskTestGatherer("test-gatherer", output_path, batches)

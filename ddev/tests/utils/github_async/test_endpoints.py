@@ -25,7 +25,10 @@ from ddev.utils.github_async.models import (
     JobStepStatus,
     Label,
     PullRequest,
+    PullRequestFile,
+    PullRequestFileStatus,
     PullRequestReviewComment,
+    PullRequestSimple,
     PullRequestState,
     WorkflowDispatchResult,
     WorkflowJob,
@@ -35,7 +38,7 @@ from ddev.utils.github_async.models import (
     WorkflowRun,
 )
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
-from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
+from tests.utils.github_async.helpers import ENDPOINT_CALLS, first_page, json_response, make_client
 from tests.utils.github_async.payloads import (
     artifact,
     check_run_payload,
@@ -45,6 +48,7 @@ from tests.utils.github_async.payloads import (
     git_ref_payload,
     issue_comment_payload,
     pr_review_comment_payload,
+    pull_request_file_payload,
     pull_request_payload,
     workflow_job,
     workflow_run_payload,
@@ -335,6 +339,60 @@ async def test_a_non_validation_status_is_never_read_as_too_long():
     assert exc_info.value.response.status_code == 500
 
 
+# Deliberately a literal rather than `MAX_PER_PAGE`, for the same reason as the comment-body limit.
+GITHUB_PAGE_SIZE_LIMIT = 100
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        pytest.param(
+            lambda client, size: first_page(client.list_workflow_run_artifacts("o", "r", 1, per_page=size)),
+            id="list_workflow_run_artifacts",
+        ),
+        pytest.param(
+            lambda client, size: first_page(client.list_workflow_jobs("o", "r", 42, per_page=size)),
+            id="list_workflow_jobs",
+        ),
+        pytest.param(
+            lambda client, size: first_page(client.list_issue_comments("o", "r", 7, per_page=size)),
+            id="list_issue_comments",
+        ),
+        pytest.param(lambda client, size: client.list_pull_requests("o", "r", per_page=size), id="list_pull_requests"),
+    ],
+)
+async def test_an_out_of_range_page_size_is_refused_before_the_request(call):
+    """GitHub serves 100 for a larger value instead of failing, so only this guard surfaces the mistake."""
+    requested = False
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requested
+        requested = True
+        return json_response([])
+
+    client = make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValueError, match="per_page"):
+        await call(client, GITHUB_PAGE_SIZE_LIMIT + 1)
+
+    assert requested is False
+
+
+@pytest.mark.parametrize(
+    ("per_page", "expectation"),
+    [
+        pytest.param(0, pytest.raises(ValueError), id="below-range"),
+        pytest.param(1, does_not_raise(), id="smallest-page"),
+        pytest.param(GITHUB_PAGE_SIZE_LIMIT, does_not_raise(), id="largest-page"),
+        pytest.param(GITHUB_PAGE_SIZE_LIMIT + 1, pytest.raises(ValueError), id="above-range"),
+    ],
+)
+async def test_the_accepted_page_sizes_are_one_to_githubs_maximum(per_page, expectation):
+    """A page size GitHub ignores, 0 included, is a caller mistake worth naming rather than silently sending."""
+    client = make_client(httpx.MockTransport(lambda request: json_response([])))
+    with expectation:
+        await client.list_pull_requests("o", "r", per_page=per_page)
+
+
 async def test_an_unreadable_validation_response_is_not_assumed_to_be_about_length():
     """The pre-flight guard already measured this body, so an unreadable 422 is not about length.
 
@@ -442,7 +500,7 @@ async def test_create_pull_request_success() -> None:
             "body": "Fix description",
             "draft": False,
         }
-        return json_response(pull_request_payload(number=42), status_code=201)
+        return json_response(full_pull_request_payload(number=42), status_code=201)
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master", "Fix description")
@@ -455,7 +513,7 @@ async def test_create_pull_request_draft_true_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["draft"] is True
-        return json_response(pull_request_payload(number=7), status_code=201)
+        return json_response(full_pull_request_payload(number=7), status_code=201)
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("o", "r", "T", "h", "b", draft=True)
@@ -492,15 +550,15 @@ async def test_list_pull_requests_success():
         assert request.url.params.get("head") == "owner:alice/backport-123-to-7.62.x"
         return json_response(
             [
-                full_pull_request_payload(number=5, state="closed", merged=True),
-                full_pull_request_payload(number=6, state="closed", merged=True),
+                pull_request_payload(number=5, state="closed"),
+                pull_request_payload(number=6, state="closed"),
             ]
         )
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.list_pull_requests("owner", "repo", state="all", head="owner:alice/backport-123-to-7.62.x")
     assert [pr.number for pr in result.data] == [5, 6]
-    assert all(isinstance(pr, PullRequest) for pr in result.data)
+    assert all(isinstance(pr, PullRequestSimple) for pr in result.data)
 
 
 async def test_list_pull_requests_empty_result():
@@ -528,6 +586,69 @@ async def test_list_pull_requests_forwards_base_filter():
     client = make_client(httpx.MockTransport(handler))
     result = await client.list_pull_requests("o", "r", base="7.62.x")
     assert result.data[0].number == 1
+
+
+async def test_list_pull_request_files_success():
+    """Spans two pages because stopping at the first would plan a subset of the targets and still
+    report success, so the run would go green having never tested the rest of the change.
+    """
+    second_page_url = "https://api.github.com/repos/owner/repo/pulls/25074/files?page=2"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/pulls/25074/files"
+        if request.url.params.get("page") == "2":
+            return json_response(
+                [
+                    pull_request_file_payload(
+                        filename="disk/renamed.py",
+                        status="renamed",
+                        previous_filename="disk/original.py",
+                    )
+                ]
+            )
+        assert request.url.params["per_page"] == "100"
+        # The response body is a bare array, not an object with a wrapper key.
+        return json_response(
+            [
+                pull_request_file_payload(filename="disk/tests/test_unit.py"),
+                pull_request_file_payload(filename="disk/removed.py", status="removed"),
+            ],
+            headers={"link": f'<{second_page_url}>; rel="next"'},
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_pull_request_files("owner", "repo", 25074)]
+
+    assert len(pages) == 2
+    files = [changed for page in pages for changed in page.data]
+    assert all(isinstance(changed, PullRequestFile) for changed in files)
+    assert [changed.filename for changed in files] == [
+        "disk/tests/test_unit.py",
+        "disk/removed.py",
+        "disk/renamed.py",
+    ]
+    assert [changed.status for changed in files] == [
+        PullRequestFileStatus.MODIFIED,
+        PullRequestFileStatus.REMOVED,
+        PullRequestFileStatus.RENAMED,
+    ]
+    # A rename's source path is a changed path too, so a caller that loses it misses the work.
+    assert [changed.previous_filename for changed in files] == [None, None, "disk/original.py"]
+
+
+async def test_list_commit_pulls_success():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/commits/31014335d4/pulls"
+        assert request.url.params["per_page"] == "100"
+        # The abbreviated `pull-request-simple` form, which is what this endpoint returns.
+        return json_response([pull_request_payload(number=25082)])
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_commit_pulls("owner", "repo", "31014335d4")]
+
+    assert [pull.number for page in pages for pull in page.data] == [25082]
 
 
 async def test_add_labels_to_issue_success() -> None:

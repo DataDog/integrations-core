@@ -37,6 +37,8 @@ redis.aof.rewrite.current_time_sec,gauge,,second,,Duration of the on-going AOF r
 redis.aof.rewrite.scheduled,gauge,,,,Flag indicating an AOF rewrite operation,0,redis,,,
 redis.aof.rewrites,gauge,,,,Number of AOF rewrites performed since startup,0,redis,,,
 redis.aof.size,gauge,,byte,,AOF current file size (redis.aof.size).,0,redis,aof size,,
+redis.bytes_received_per_sec,gauge,,byte,second,The network's read rate per second in bytes/sec. Only available on Azure Redis.,-1,redis,bytes received per sec,,
+redis.bytes_sent_per_sec,gauge,,byte,second,The network's write rate per second in bytes/sec. Only available on Azure Redis.,-1,redis,bytes sent per sec,,
 redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections [v3 & v4].,0,redis,biggest input buf,,
 redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked,memory,
 redis.clients.evicted,gauge,,,,Number of evicted clients due to `maxmemory-clients` limit,-1,redis,,,
