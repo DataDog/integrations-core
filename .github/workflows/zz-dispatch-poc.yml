@@ -66,11 +66,26 @@ jobs:
       # On the ambient token, not the octo-sts one: the POC policy grants `checks: write` and this
       # needs `statuses: write`. The production policy takes `statuses: write` in its place, since the
       # Dispatcher no longer writes check runs at all.
+      # `.../actions/runs/<id>/job/<job_id>` opens this job with its log, where the run summary needs
+      # another click to get to. The numeric job id is not in any context, so it is looked up by name;
+      # falling back to the run itself keeps a lookup failure from costing the status its link.
+      - name: Resolve this job's URL
+        id: job_url
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_NAME: ${{ github.job }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          url=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs" \
+            --jq "[.jobs[] | select(.name == \"${JOB_NAME}\") | .html_url] | first // empty")
+          echo "url=${url:-$RUN_URL}" >> "$GITHUB_OUTPUT"
+
       - name: Mark the run pending
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_URL: ${{ steps.job_url.outputs.url }}
         run: |
           set -euo pipefail
           # The production context is `tests`, which is what branch protection would require. Prefixed
@@ -80,7 +95,7 @@ jobs:
             -f "state=pending" \
             -f "description=Planning and dispatching batches" \
             -f "target_url=${JOB_URL}" \
-            --jq '"posted \(.context) as \(.state)"'
+            --jq '"posted \(.context) as \(.state), pointing at \(.target_url)"'
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -123,7 +138,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
-          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_URL: ${{ steps.job_url.outputs.url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
         run: |
           set -euo pipefail
           # A status has no `cancelled`, so a cancelled run reports `failure`: it did not finish, and
@@ -139,7 +154,7 @@ jobs:
             -f "state=${state}" \
             -f "description=${description}" \
             -f "target_url=${JOB_URL}" \
-            --jq '"settled \(.context) as \(.state)"'
+            --jq '"settled \(.context) as \(.state), pointing at \(.target_url)"'
 
       - name: Show what the run produced
         if: always()
