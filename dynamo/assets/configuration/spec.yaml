@@ -1,0 +1,44 @@
+name: Dynamo
+files:
+- name: dynamo.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.value.example: http://localhost:8000/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing Dynamo's Prometheus metrics.
+
+          This integration is part of GPU monitoring and only runs when GPU monitoring is enabled
+          in the Agent configuration (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`). When GPU
+          monitoring is off, every instance configured here is skipped.
+
+          This is typically the frontend's `/metrics` endpoint (default port 8000).
+          Backend workers (`python -m dynamo.vllm`, `python -m dynamo.sglang`, etc.) expose a
+          separate system status server on `DYN_SYSTEM_PORT` (commonly 8081, set to 9090 by the
+          Kubernetes operator) that must be configured as its own instance if you want worker-side
+          `dynamo.component.*` metrics in addition to frontend metrics.
+
+          For more information refer to:
+          https://docs.nvidia.com/dynamo/latest/observability/metrics.html
+        histogram_buckets_as_distributions.value.example: true
+        histogram_buckets_as_distributions.description: |
+          Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+          enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+
+          This integration enables this option by default.
+
+          Learn more about distribution metrics:
+          https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+        collect_counters_with_distributions.value.example: true
+        collect_counters_with_distributions.description: |
+          Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+          when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+          `histogram_buckets_as_distributions` option.
+
+          This integration enables this option by default.
