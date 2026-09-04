@@ -32,7 +32,7 @@ jobs:
     timeout-minutes: 60
     permissions:
       actions: write # dispatch the batch workflow, then read its runs, jobs and artifacts
-      checks: write # the run's aggregate check, opened and closed by this workflow
+      statuses: write # the run's aggregate status, posted and settled by this workflow
       pull-requests: write # the run's comment
       contents: read
       id-token: write # the octo-sts exchange
@@ -50,32 +50,37 @@ jobs:
           scope: DataDog/integrations-core
           policy: self.dispatch-poc.pull-request
 
-      # The run's aggregate check: one per run, whatever the batch count, so it is the one that can
+      # The run's aggregate result: one per run, whatever the batch count, so it is the one that can
       # eventually be required. A batch's own check cannot be, because `batch-03` only exists on a
-      # diff large enough to plan three, and a required check that never reports blocks the pull
-      # request forever.
+      # diff large enough to plan three, and a required check that never reports leaves a small pull
+      # request blocked forever.
       #
-      # Opened here and closed by an `if: always()` step rather than by the Dispatcher: GitHub
+      # A commit status rather than a check run, because `target_url` is honoured while a check run's
+      # `details_url` is overwritten when the run is created from inside a workflow: GitHub points it
+      # at the check's own page, which says only that the check started. `Details` here lands on this
+      # job, which is where the plan, the batch list and the failure actually are.
+      #
+      # Posted here and settled by an `if: always()` step rather than by the Dispatcher: GitHub
       # re-evaluates `if` on cancellation and exempts `always()` steps, giving them the server-side
       # cancellation window, while the Dispatcher process is signalled and then killed.
-      - name: Open the run's aggregate check
-        id: aggregate
+      # On the ambient token, not the octo-sts one: the POC policy grants `checks: write` and this
+      # needs `statuses: write`. The production policy takes `statuses: write` in its place, since the
+      # Dispatcher no longer writes check runs at all.
+      - name: Mark the run pending
         env:
-          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          # Prefixed like the workflow that owns it, as `test-batch/<batch>` is. The production one is
-          # named `tests`, which is what branch protection would require; this must not be mistaken
-          # for it while the POC runs alongside the existing checks.
-          id=$(gh api "repos/${GITHUB_REPOSITORY}/check-runs" \
-            -f "name=zz-dispatch-poc/tests" \
-            -f "head_sha=${HEAD_SHA}" \
-            -f "status=in_progress" \
-            -f "details_url=${RUN_URL}" \
-            --jq '.id')
-          echo "id=${id}" >> "$GITHUB_OUTPUT"
+          # The production context is `tests`, which is what branch protection would require. Prefixed
+          # here so it cannot be mistaken for it while the POC runs alongside the existing checks.
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=zz-dispatch-poc/tests" \
+            -f "state=pending" \
+            -f "description=Planning and dispatching batches" \
+            -f "target_url=${JOB_URL}" \
+            --jq '"posted \(.context) as \(.state)"'
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -112,27 +117,29 @@ jobs:
       # From the dispatch step's own outcome, which is its exit code and already accounts for every
       # batch. Nothing is read from a file: a second source of truth could disagree with the exit
       # code, and a run that wrote `success` and then died would report green.
-      - name: Close the run's aggregate check
-        if: always() && steps.aggregate.outputs.id != ''
+      - name: Settle the run's aggregate result
+        if: always()
         env:
-          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
-          CHECK_RUN_ID: ${{ steps.aggregate.outputs.id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          # A status has no `cancelled`, so a cancelled run reports `failure`: it did not finish, and
+          # `pending` would leave the pull request waiting on a run that is already gone.
           case "$DISPATCH_OUTCOME" in
-            success)   conclusion=success ;;
-            cancelled) conclusion=cancelled ;;
-            # Includes the step never running, which means the run died before dispatching.
-            *)         conclusion=failure ;;
+            success) state=success;  description="All batches passed" ;;
+            failure) state=failure;  description="A batch failed" ;;
+            *)       state=failure;  description="The run did not finish" ;;
           esac
 
-          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/check-runs/${CHECK_RUN_ID}" \
-            -f "status=completed" \
-            -f "conclusion=${conclusion}" \
-            -f "details_url=${RUN_URL}" \
-            --jq '"aggregate check closed as \(.conclusion)"'
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=zz-dispatch-poc/tests" \
+            -f "state=${state}" \
+            -f "description=${description}" \
+            -f "target_url=${JOB_URL}" \
+            --jq '"settled \(.context) as \(.state)"'
 
       - name: Show what the run produced
         if: always()
