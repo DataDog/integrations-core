@@ -1,10 +1,10 @@
 # Runs one Dispatcher batch: the set of test jobs `ddev ci dispatch-tests` planned and sent here as a
 # single workflow input.
 #
-# The batch owns its own check run, opened in `setup` and closed in `teardown`. That is deliberately
+# The batch reports its own result, posted in `setup` and settled in `teardown`. That is deliberately
 # not the Dispatcher's job: a step guarded by `if: always()` gets GitHub's server-side cancellation
 # window, whereas the Dispatcher process is signalled and then killed, so a cancelled run would leave
-# a check open forever if the Dispatcher were the one closing it.
+# the result pending forever if the Dispatcher were the one settling it.
 #
 # Test execution lives in `.github/actions/run-test-job`, which this workflow calls once per job. The
 # workflow decides where a job runs and what it may touch; the action decides what gets tested.
@@ -96,10 +96,9 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions:
-      checks: write
+      statuses: write
     outputs:
       matrix: ${{ steps.decode.outputs.matrix }}
-      check_run_id: ${{ steps.check.outputs.id }}
     steps:
       - name: Decode the job list
         id: decode
@@ -122,6 +121,7 @@ jobs:
           fi
 
           {
+            echo "count=${count}"
             echo "matrix<<__MATRIX__"
             cat jobs.json
             echo
@@ -135,22 +135,23 @@ jobs:
             echo "- targets: $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["INTEGRATIONS"])) or "-")')"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Open the batch's check run
-        id: check
+      # A status, not a check run: a check run at a SHA this workflow was not dispatched at gets filed
+      # under whichever workflow already has a check suite there.
+      - name: Mark the batch pending
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BATCH_ID: ${{ inputs.batch_id }}
           HEAD_SHA: ${{ inputs.head_sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_COUNT: ${{ steps.decode.outputs.count }}
         run: |
           set -euo pipefail
-          id=$(gh api "repos/${GITHUB_REPOSITORY}/check-runs" \
-            -f "name=test-batch/${BATCH_ID}" \
-            -f "head_sha=${HEAD_SHA}" \
-            -f "status=in_progress" \
-            -f "details_url=${RUN_URL}" \
-            --jq '.id')
-          echo "id=${id}" >> "$GITHUB_OUTPUT"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=test-batch/${BATCH_ID}" \
+            -f "state=pending" \
+            -f "description=Running ${JOB_COUNT} job(s)" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"posted \(.context) as \(.state)"'
 
   # Twin of `test_fork`, which runs the same steps with no OIDC and no credentials. `permissions`
   # takes no expression, so the gate has to be two jobs, and a reusable workflow would rename them to
@@ -394,28 +395,31 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions:
-      checks: write
+      statuses: write
     steps:
       # From the test job's result rather than this job's status, so a cancelled or skipped batch
-      # closes as what it was instead of as a success. The twin that did not run reports `skipped`,
+      # settles as what it was instead of as a success. The twin that did not run reports `skipped`,
       # so which one to read is selected on the value that chose it.
-      - name: Close the batch's check run
+      - name: Settle the batch's result
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHECK_RUN_ID: ${{ needs.setup.outputs.check_run_id }}
+          BATCH_ID: ${{ inputs.batch_id }}
+          HEAD_SHA: ${{ inputs.head_sha }}
           TEST_RESULT: ${{ inputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          # A status has no `cancelled` or `skipped`, and `pending` would hold the pull request.
           case "$TEST_RESULT" in
-            success)   conclusion=success ;;
-            cancelled) conclusion=cancelled ;;
-            skipped)   conclusion=skipped ;;
-            *)         conclusion=failure ;;
+            success)   state=success; description="All jobs passed" ;;
+            cancelled) state=failure; description="The batch was cancelled" ;;
+            skipped)   state=failure; description="The batch did not run" ;;
+            *)         state=failure; description="A job failed" ;;
           esac
 
-          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/check-runs/${CHECK_RUN_ID}" \
-            -f "status=completed" \
-            -f "conclusion=${conclusion}" \
-            -f "details_url=${RUN_URL}" \
-            --jq '.conclusion'
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=test-batch/${BATCH_ID}" \
+            -f "state=${state}" \
+            -f "description=${description}" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"settled \(.context) as \(.state)"'
