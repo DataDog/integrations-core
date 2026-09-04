@@ -168,11 +168,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # The author identity is attacker-controlled, and a value carrying a newline would define
-          # further variables in GITHUB_ENV rather than just itself. git's ident parser cannot
-          # produce one today (it strips them on the way in and yields an empty string for an object
-          # malformed enough to contain one), so this is a guard against that changing, not a fix for
-          # a live hole. Dropped rather than escaped: an unattributed result beats a decorated one.
+          # Attacker-controlled, and a newline in it would define further variables in GITHUB_ENV.
           author_email=$(git log -1 --format=%ae)
           case $author_email in
             *[!a-zA-Z0-9.@_+-]*) author_email='' ;;
@@ -206,7 +202,9 @@ jobs:
           cache-profile: local-ddev-base
 
       - name: Configure ddev
-        run: ddev config override
+        run: |
+          ddev config set upgrade_check false
+          ddev config override
 
       - name: Run the tests
         uses: ./.github/actions/run-test-job
