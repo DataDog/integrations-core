@@ -218,6 +218,8 @@ def test_schema_collection_can_disable_views(schema_config: dict, views_collecte
     metadata._schema_config = schema_config
     metadata._schema_collection_interval = 0
     metadata._last_schemas_collection_time = 0
+    metadata._cancel_event = mock.Mock()
+    metadata._cancel_event.is_set.return_value = False
     metadata._schema_collector = mock.Mock()
     metadata._view_collector = mock.Mock()
 
