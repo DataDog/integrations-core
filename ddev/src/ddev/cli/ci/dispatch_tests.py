@@ -55,6 +55,12 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     metavar='"KEY:VALUE ..."',
     help='Tags the run reports itself under, separated by spaces. Their meaning is the caller\'s to decide.',
 )
+@click.option(
+    '--pytest-args',
+    default=None,
+    metavar='ARGS',
+    help='Arguments every job appends to pytest, as one string. For example: -m "not flaky".',
+)
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
 @click.option(
@@ -77,6 +83,7 @@ def dispatch_tests(
     pr_base_ref: str | None,
     commit: str | None,
     tags: str | None,
+    pytest_args: str | None,
     repository: str | None,
     all_targets: bool,
     minimum_base_package: bool,
@@ -145,6 +152,7 @@ def dispatch_tests(
         owner=owner,
         repo=repo,
         tags=tuple(tags.split()) if tags else (),
+        pytest_args=pytest_args or '',
         checkout_sha=run.checkout_sha,
         base_sha=run.base_sha,
         branch=run.branch,
@@ -451,6 +459,8 @@ def display_plan(app: Application, context: DispatcherContext, batches: list[Tes
         app.display_pair('Target branch', context.target_branch)
     if context.tags:
         app.display_pair('Tags', ' '.join(context.tags))
+    if context.pytest_args:
+        app.display_pair('Pytest args', context.pytest_args)
     app.display_pair('Workflow', f'{context.workflow} @ {context.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)

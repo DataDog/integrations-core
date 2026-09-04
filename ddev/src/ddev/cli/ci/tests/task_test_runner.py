@@ -67,6 +67,7 @@ class TestRunnerOptions:
     checkout_sha: str
     artifacts_base_path: Path
     poll_interval_seconds: float = 30.0
+    pytest_args: str = ''
 
 
 class TaskTestRunner(AsyncProcessor[TestBatch]):
@@ -218,6 +219,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             "integrations": json.dumps(message.integrations),
             "job_list": encode_job_list([self._job_input(job) for job in message.job_list]),
         }
+        # Omitted rather than sent empty, so the workflow's own default is what decides how a run
+        # with no pytest arguments behaves.
+        if self._options.pytest_args:
+            inputs["pytest_args"] = self._options.pytest_args
         size = sum(len(value) for value in inputs.values())
         if size > WORKFLOW_INPUTS_LIMIT:
             raise JobListTooLargeError(message.batch_id, size)
