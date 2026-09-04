@@ -35,6 +35,11 @@ PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.MACOS: PlatformSpec("macOS", "macos-14-large"),
 }
 
+# The runners a plan may schedule on. Plan content follows the tested tree's `.ddev/config.toml` and
+# `hatch.toml`, so this is the set of places that influence can put a job, and the reason a
+# self-hosted label never goes in it. A `runners` override needs its label adding here.
+ALLOWED_RUNNER_LABELS = frozenset({"ubuntu-22.04", "windows-2022", "macos-14-large"})
+
 # Targets rendered before everything else, in this order.
 DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
     name: index

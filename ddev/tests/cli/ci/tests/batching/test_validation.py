@@ -98,3 +98,12 @@ def test_validate_allows_oversized_split_when_enabled():
     all_jobs = jobs("huge", 400)
     groups = default_strategy(all_jobs, config=config(allow_integration_splitting=True))
     validate_batches(groups, all_jobs, config=config(allow_integration_splitting=True))  # no raise
+
+
+def test_validate_rejects_a_runner_the_batch_workflow_will_not_schedule_on():
+    """A `runners` override travels with the tested tree, so a pull request can name any label it
+    likes. Scheduling on one would put unreviewed code on a runner nobody chose for it.
+    """
+    job = make_job("weird", runner_labels=("self-hosted", "gpu"))
+    with pytest.raises(BatchValidationError, match="unknown runners: gpu, self-hosted"):
+        validate_batches([[job]], [job], config=config())
