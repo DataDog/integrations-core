@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
@@ -178,26 +178,31 @@ def test_bad_response_exception(dd_run_check, instance, aggregator, caplog):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get'),
+    ('mock_http_get', 'log_line'),
     [
         pytest.param(
             {'response_overrides': {'/v1/apps/example-app-1/volumes': _status_response(404)}},
-            id='http error',
+            "Encountered an HTTP error in '_collect_volumes_for_app'"
+            " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]: "
+            "404 Client Error",
+            id='status error',
+        ),
+        pytest.param(
+            {'response_overrides': {'/v1/apps/example-app-1/volumes': HTTPClientError('transport failed')}},
+            "Encountered an HTTP error in '_collect_volumes_for_app'"
+            " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientError'>]: transport failed",
+            id='root error',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
+def test_http_error_logged_at_debug(dd_run_check, instance, aggregator, caplog, log_line):
     caplog.set_level(logging.DEBUG)
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
 
-    assert (
-        "Encountered an HTTP error in '_collect_volumes_for_app'"
-        " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]: "
-        "404 Client Error" in caplog.text
-    )
+    assert log_line in caplog.text
 
     for metric in MOCKED_PROMETHEUS_METRICS:
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")

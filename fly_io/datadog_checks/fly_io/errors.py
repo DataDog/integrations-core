@@ -4,9 +4,9 @@
 import json
 from functools import wraps
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError, HTTPClientStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
-UPSTREAM_EXCEPTIONS = (HTTPClientRequestError, HTTPClientStatusError, json.JSONDecodeError)
+UPSTREAM_EXCEPTIONS = (HTTPClientError, json.JSONDecodeError)
 
 
 def handle_error(f):
