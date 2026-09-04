@@ -228,6 +228,7 @@ def build_dispatcher(
             base_sha=context.base_sha,
             checkout_sha=context.checkout_sha,
             artifacts_base_path=artifacts_path,
+            branch=context.branch,
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
         ),

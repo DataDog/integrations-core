@@ -1,0 +1,170 @@
+name: "Run test job"
+description: "Runs one target's tests on a runner that already has Python and ddev installed"
+
+# Holds the logic to run tests, not the logic to decide where they run. The caller owns `runs-on`,
+# `permissions`, `concurrency`, `timeout-minutes`, and which secrets exist at all; this action owns
+# what gets tested and how.
+#
+# `runner_labels` therefore never appears here. `platform` does, but only as test configuration: it
+# tags the run and turns off tracing for sqlserver-on-Windows. It does not pick the Agent image,
+# which the caller resolves per job and passes in, and it does not pick the runner.
+#
+# Composite actions cannot read the `secrets` context, so every credential is an explicit input, as
+# `tag-job` already does with `dd_api_key`. All of them are optional and no-op when absent, so a
+# caller that does not have one simply does not pass it.
+
+inputs:
+  target:
+    description: "Integration to test"
+    required: true
+  job_name:
+    description: "Name of the calling job, used to name the results directory"
+    required: true
+  platform:
+    description: "linux, windows or macos. Test configuration only, not runner selection"
+    required: true
+  environment:
+    description: "Target environment, empty for a target that defines none"
+    required: false
+    default: ""
+  python_version:
+    description: "Python version already set up on the runner"
+    required: false
+    default: "3.13"
+  unit_tests:
+    description: "Run unit and integration tests"
+    required: false
+    default: "false"
+  e2e_tests:
+    description: "Run E2E tests"
+    required: false
+    default: "false"
+  agent_image:
+    description: "Agent image for E2E, resolved by the caller. Empty when e2e_tests is false"
+    required: false
+    default: ""
+  minimum_base_package:
+    description: "Test against the oldest supported datadog-checks-base"
+    required: false
+    default: "false"
+  pytest_args:
+    description: 'Arguments appended to pytest, as one string, e.g. -m "not flaky"'
+    required: false
+    default: ""
+  context:
+    description: "Test context, reported to CI Visibility and used to pick the E2E flags"
+    required: false
+    default: "standard"
+  dd_api_key:
+    description: "Datadog API key, for CI Visibility. Telemetry only"
+    required: false
+    default: ""
+  github_token:
+    description: "Token used to lift the api.github.com rate limit during ddev validate licenses"
+    required: false
+    default: ""
+  docker_username:
+    description: "Docker Hub user, needed only by the sap_hana and weblogic setup scripts"
+    required: false
+    default: ""
+  docker_token:
+    description: "Docker Hub token, needed only by the sap_hana and weblogic setup scripts"
+    required: false
+    default: ""
+  oracle_docker_username:
+    description: "Oracle registry user, needed only by the weblogic setup script"
+    required: false
+    default: ""
+  oracle_docker_password:
+    description: "Oracle registry password, needed only by the weblogic setup script"
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    # uv's default hardlink mode on Windows breaks the `hatch env remove` that `ddev test --compat`
+    # runs at the end of a minimum-base-package job. See test-target.yml for the full explanation.
+    - name: Configure uv link mode (Windows minimum-base-package)
+      if: runner.os == 'Windows' && inputs.minimum_base_package == 'true'
+      shell: bash
+      run: echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"
+
+    - name: Install workflow scripts
+      uses: ./.github/actions/setup-test-target-scripts
+
+    # Sets FORCE_COLOR, DDEV_E2E_AGENT, the DD_* CI Visibility variables, TEST_RESULTS_DIR, DD_TAGS,
+    # and the INPUT_* variables the two run scripts read. It runs under `set -u`, so every variable
+    # it dereferences is passed, including the Python 2 images it reads unconditionally.
+    - name: Set environment variables
+      shell: bash
+      run: bash .github/workflows/scripts/setup-test-env.sh
+      env:
+        INPUT_TARGET: ${{ inputs.target }}
+        INPUT_TARGET_ENV: ${{ inputs.environment }}
+        INPUT_PLATFORM: ${{ inputs.platform }}
+        INPUT_PYTHON_VERSION: ${{ inputs.python_version }}
+        INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum_base_package }}
+        INPUT_JOB_NAME: ${{ inputs.job_name }}
+        INPUT_PYTEST_ARGS: ${{ inputs.pytest_args }}
+        INPUT_CONTEXT: ${{ inputs.context }}
+        # The caller resolved the image, so the script's platform branch is given the same value on
+        # both sides and cannot pick a different one.
+        INPUT_AGENT_IMAGE: ${{ inputs.agent_image }}
+        INPUT_AGENT_IMAGE_WINDOWS: ${{ inputs.agent_image }}
+        # Python 2 is not supported here, but the script reads both variables unconditionally.
+        INPUT_AGENT_IMAGE_PY2: ""
+        INPUT_AGENT_IMAGE_WINDOWS_PY2: ""
+        INPUT_TEST_PY2: "false"
+        INPUT_TEST_PY3: "true"
+        INPUT_REPO: core
+        # A fork's code only ever reaches a runner through a merge ref the caller resolved, so there
+        # is no fork-owned execution to downgrade here.
+        INPUT_IS_FORK: "false"
+        DD_API_KEY_SECRET: ${{ inputs.dd_api_key }}
+        SETUP_ENV_VARS: ""
+        DOCKER_USERNAME: ${{ inputs.docker_username }}
+        DOCKER_ACCESS_TOKEN: ${{ inputs.docker_token }}
+        ORACLE_DOCKER_USERNAME: ${{ inputs.oracle_docker_username }}
+        ORACLE_DOCKER_PASSWORD: ${{ inputs.oracle_docker_password }}
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Tag job for CI Visibility
+      if: inputs.dd_api_key != ''
+      uses: ./.github/actions/tag-job
+      with:
+        tags: ${{ env.DD_TAGS }}
+        dd_api_key: ${{ inputs.dd_api_key }}
+        dd_site: ${{ env.DD_SITE }}
+
+    - name: Lint
+      shell: bash
+      env:
+        TARGET: ${{ inputs.target }}
+      run: |
+        ddev test --lint "$TARGET" || {
+          echo "::error::Lint failed!"
+          echo "::error::Run 'ddev test --fmt $TARGET' to fix formatting issues."
+          exit 1
+        }
+
+    - name: Prepare for testing
+      shell: bash
+      run: ddev ci setup "$INPUT_TARGET_STR"
+
+    - name: Ensure Docker is running
+      shell: bash
+      run: bash .github/workflows/scripts/ensure-docker.sh
+
+    - name: Run Unit & Integration tests
+      if: inputs.unit_tests == 'true'
+      shell: bash
+      run: bash .github/workflows/scripts/run-unit-integration-tests.sh
+
+    - name: Run E2E tests
+      if: inputs.e2e_tests == 'true'
+      shell: bash
+      run: bash .github/workflows/scripts/run-e2e-tests.sh
+      env:
+        INPUT_SESSION_NAME: e2e-tests
