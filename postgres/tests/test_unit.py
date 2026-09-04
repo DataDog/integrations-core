@@ -263,6 +263,24 @@ def test_collection_interval_gcd(intervals, expected):
 
 
 @pytest.mark.unit
+def test_metadata_job_ticks_at_gcd_of_all_sub_intervals(pg_instance):
+    """
+    Each metadata sub-collector gates itself on its own interval, which only yields the configured
+    cadence if the loop ticks at the GCD of every sub-interval. A tick coarser than that -- because
+    the GCD is computed over only some of the intervals, or not at all -- silently delays whichever
+    collector has the shortest interval.
+    """
+    pg_instance['dbm'] = True
+    pg_instance['collect_settings'] = {'enabled': True, 'collection_interval': 600}
+    pg_instance['collect_schemas'] = {'enabled': True, 'collection_interval': 700}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 800}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    assert check.metadata_samples.collection_interval == 100
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'exclude_hostname, expected_hostname',
     [
