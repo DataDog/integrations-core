@@ -13,12 +13,123 @@ import pytest
 from pytest import fail
 from semver import VersionInfo
 
+from datadog_checks.base.utils.db.schemas import SchemaCollector
 from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
+from datadog_checks.postgres.views import PostgresViewCollector
 
 pytestmark = pytest.mark.unit
+
+
+def test_schema_collectors_use_independent_queries_and_limits(pg_instance, integration_check):
+    pg_instance['collect_schemas'] = {'max_tables': 25, 'max_views': 1000}
+    check = integration_check(pg_instance)
+    check.version = VersionInfo(18, 0, 0)
+
+    table_query, _ = PostgresSchemaCollector(check).get_rows_query()
+    view_query, _ = PostgresViewCollector(check).get_rows_query()
+
+    assert "LIMIT 25" in table_query
+    assert "c.relkind IN ( 'r', 'p', 'f' )" in table_query
+    assert "pg_get_viewdef" not in table_query
+    assert "LIMIT 1000" in view_query
+    assert "c.relkind IN ('v', 'm')" in view_query
+    assert "pg_get_viewdef" in view_query
+    assert view_query.index("LIMIT 1000") < view_query.index("pg_get_viewdef")
+    assert view_query.index("LIMIT 1000") < view_query.index("INNER JOIN pg_attribute")
+    assert "a.attrelid = selected_views.view_id" in view_query
+
+
+def test_view_collector_maps_view_metadata(pg_instance, integration_check):
+    check = integration_check(pg_instance)
+    collector = PostgresViewCollector(check)
+    database = {
+        'description': 'application database',
+        'encoding': 'UTF8',
+        'id': '1',
+        'name': 'app',
+        'owner': 'postgres',
+    }
+    row = {
+        'schema_id': 2200,
+        'schema_name': 'public',
+        'schema_owner': 'postgres',
+        'view_id': 16420,
+        'view_name': 'active_users',
+        'view_owner': 'app',
+        'definition': 'SELECT id, email FROM users;',
+        'relkind': 'v',
+        'columns': [
+            {'data_type': 'integer', 'default': None, 'name': 'id', 'nullable': True},
+            {'data_type': 'text', 'default': None, 'name': 'email', 'nullable': True},
+        ],
+    }
+
+    mapped = collector._map_row(database, row)
+
+    assert mapped == {
+        **database,
+        'schemas': [
+            {
+                'id': '2200',
+                'name': 'public',
+                'owner': 'postgres',
+                'tables': [],
+                'views': [
+                    {
+                        'columns': row['columns'],
+                        'definition': 'SELECT id, email FROM users;',
+                        'id': '16420',
+                        'name': 'active_users',
+                        'owner': 'app',
+                        'relkind': 'v',
+                    }
+                ],
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize(
+    ('collector_class', 'expected_metric', 'unexpected_metric'),
+    [
+        (PostgresSchemaCollector, 'dd.postgres.schema.tables_count', 'dd.postgres.schema.views_count'),
+        (PostgresViewCollector, 'dd.postgres.schema.views_count', 'dd.postgres.schema.tables_count'),
+    ],
+)
+def test_schema_collectors_report_separate_object_counts(
+    pg_instance, integration_check, collector_class, expected_metric, unexpected_metric
+):
+    if collector_class is PostgresViewCollector and not hasattr(SchemaCollector, 'object_count_metric_name'):
+        pytest.skip("The minimum base package does not schedule PostgreSQL view collection")
+    check = integration_check(pg_instance)
+    check.gauge = mock.Mock()
+    collector = collector_class(check)
+    collector._get_databases = mock.Mock(return_value=[])
+
+    collector.collect_schemas()
+
+    submitted_metrics = {call.args[0] for call in check.gauge.call_args_list}
+    assert expected_metric in submitted_metrics
+    assert unexpected_metric not in submitted_metrics
+
+
+@pytest.mark.parametrize(('collect_views', 'views_collected'), [(True, True), (False, False)])
+def test_schema_collection_can_disable_views(collect_views, views_collected):
+    metadata = object.__new__(PostgresMetadata)
+    metadata._collect_views_enabled = collect_views
+    metadata._schema_collector = mock.Mock()
+    metadata._schema_collector.collect_schemas.return_value = True
+    metadata._view_collector = mock.Mock()
+    metadata._log = mock.Mock()
+
+    metadata._collect_postgres_schemas()
+
+    metadata._schema_collector.collect_schemas.assert_called_once_with()
+    assert metadata._view_collector.collect_schemas.called is views_collected
 
 
 def test_get_instance_metrics_lt_92(integration_check, pg_instance):

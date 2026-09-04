@@ -988,6 +988,14 @@ files:
           value:
             type: boolean
             example: true
+        - name: collect_views
+          fleet_configurable: true
+          description: |
+            Enable collection of PostgreSQL views and materialized views. Set to false to continue collecting table
+            schemas without collecting views. Defaults to true.
+          value:
+            type: boolean
+            example: true
         - name: max_tables
           fleet_configurable: true
           description: |
@@ -996,6 +1004,14 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_views
+          fleet_configurable: true
+          description: |
+            Maximum amount of views and materialized views the Agent collects from each database.
+          value:
+            type: number
+            example: 1000
+            display_default: 1000
         - name: max_query_duration
           fleet_configurable: true
           description: |

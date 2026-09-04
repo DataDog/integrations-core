@@ -40,6 +40,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM persons;
     CREATE SCHEMA public2;
     CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
+    CREATE VIEW public2.active_persons AS SELECT personid, lastname, city FROM persons;
+    CREATE MATERIALIZED VIEW public2.materialized_persons AS SELECT personid, firstname, city FROM persons;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
