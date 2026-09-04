@@ -184,17 +184,18 @@ requires_signals = pytest.mark.skipif(sys.platform == "win32", reason="The Dispa
 def run_cancelled_by_sigint(dispatcher: Dispatcher, client: FakeAsyncGitHubClient) -> None:
     """Run *dispatcher* to completion, signalling it once it has a dispatched run to clean up.
 
-    The signal goes out from inside `create_check_run`, so the run's handlers are already installed
-    and there is something in flight for the cleanup to find.
+    The signal goes out from inside `get_workflow_run`, the first call after a run is recorded in
+    flight, so the run's handlers are already installed and there is something for the cleanup to
+    find.
     """
-    created_check_run = client.create_check_run
+    got_workflow_run = client.get_workflow_run
 
-    async def cancel_once_the_check_run_exists(*args, **kwargs):
-        response = await created_check_run(*args, **kwargs)
+    async def cancel_once_a_run_is_in_flight(*args, **kwargs):
+        response = await got_workflow_run(*args, **kwargs)
         os.kill(os.getpid(), signal.SIGINT)
         return response
 
-    client.create_check_run = cancel_once_the_check_run_exists  # type: ignore[method-assign]
+    client.get_workflow_run = cancel_once_a_run_is_in_flight  # type: ignore[method-assign]
 
     try:
         dispatcher.run()
@@ -237,8 +238,6 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
     # The initial plan already created the comment, so the cancelled report edits that one.
     assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
-    # Each batch closes its own check run on the way out, so the cleanup does not repeat it.
-    assert client.last_call("update_check_run").kwargs["conclusion"] == "cancelled"
     # The run page is rendered from the same report, so it cannot claim the run is still going.
     assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
 

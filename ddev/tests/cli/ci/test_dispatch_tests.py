@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pytest
 
+from ddev.cli.ci.dispatch_tests import head_is_fork
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest, PullRequestFile, PullRequestSimple
 from tests.cli.ci.tests.helpers import make_batch, make_job
@@ -21,12 +22,17 @@ def pull_request(
     number: int = PR_NUMBER,
     head_sha: str = HEAD_SHA,
     base_ref: str = 'a-target-branch',
+    head_repo: str | None = 'DataDog/integrations-core',
 ) -> PullRequest:
     return PullRequest(
         number=number,
         html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
         state=state,
-        head={'ref': 'hs/a-branch', 'sha': head_sha},
+        head={
+            'ref': 'hs/a-branch',
+            'sha': head_sha,
+            'repo': {'full_name': head_repo} if head_repo is not None else None,
+        },
         base={'ref': base_ref, 'sha': 'base-sha-bbb'},
         changed_files=changed_files,
     )
@@ -310,6 +316,33 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, local_changes,
     assert result.exit_code == 0, result.output
     assert 'No affected target to test.' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
+
+
+@pytest.mark.parametrize(
+    ('head_repo', 'expected'),
+    [
+        pytest.param('DataDog/integrations-core', False, id='same-repository'),
+        pytest.param('datadog/Integrations-Core', False, id='same-repository-other-casing'),
+        pytest.param('attacker/integrations-core', True, id='fork'),
+        pytest.param('DataDog/integrations-core-evil', True, id='name-that-only-starts-the-same'),
+        pytest.param(None, True, id='deleted-head-repository'),
+    ],
+)
+def test_head_is_fork(head_repo: str | None, expected: bool):
+    """This decides whether the batch is given credentials, so reading a fork as the repository itself
+    hands a fork's code the Datadog key and the Docker credentials.
+    """
+    head = pull_request(head_repo=head_repo).head
+    assert head is not None
+    assert head_is_fork(head, owner='DataDog', repo='integrations-core') is expected
+
+
+def test_pytest_args_are_shown_in_the_plan(ddev, github, planned):
+    """Catches an option click accepts but nothing forwards."""
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pytest-args', '-m "not flaky"', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert '-m "not flaky"' in result.output
 
 
 def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
