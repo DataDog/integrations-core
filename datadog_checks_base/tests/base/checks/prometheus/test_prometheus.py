@@ -11,6 +11,7 @@ from contextlib import contextmanager
 import mock
 import pytest
 
+from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientError, HTTPClientStatusError
 from datadog_checks.checks.prometheus import PrometheusCheck, PrometheusScraper, UnknownFormatError
@@ -2049,6 +2050,26 @@ def test_composed_prometheus_scraper_uses_owner_client_factory():
 
     assert http_handler is fake_http
     owner.create_http_client.assert_called_once()
+
+
+def test_composed_prometheus_scraper_applies_own_http_remapper():
+    owner = AgentCheck('test', {}, [{}])
+    scraper = PrometheusScraper(owner)
+    scraper.extra_headers = {}
+    scraper.ssl_cert = None
+    scraper.ssl_private_key = None
+    scraper.ssl_ca_cert = None
+
+    http_handler = scraper.get_http_handler(
+        FAKE_ENDPOINT,
+        {
+            'prometheus_timeout': 37,
+            'ssl_verify': False,
+        },
+    )
+
+    assert http_handler.options['timeout'] == (37.0, 37.0)
+    assert http_handler.options['verify'] is False
 
 
 def test_get_http_handler_negotiates_over_seeded_default_headers(p_check):
