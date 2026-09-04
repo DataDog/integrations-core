@@ -1,0 +1,39 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "DNSFilter",
+      "fixed": {
+        "fixed_base_url": "https://api.dnsfilter.com"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "dnsfilter-logs"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v1/traffic_reports/query_logs",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
+}
