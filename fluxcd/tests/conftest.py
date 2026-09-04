@@ -14,6 +14,7 @@ from datadog_checks.dev.subprocess import run_command
 from datadog_checks.fluxcd import FluxcdCheck
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 opj = os.path.join
 
 # The Services in flux-system (source-controller, notification-controller) only expose the
@@ -25,6 +26,7 @@ opj = os.path.join
 CONTROLLERS = ('source-controller', 'helm-controller', 'kustomize-controller', 'notification-controller')
 METRICS_PORT = 8080
 POD_IP_STATE_PREFIX = 'fluxcd_pod_ip_'
+KUBECONFIG_STATE = 'fluxcd_kubeconfig'
 
 
 def setup_fluxcd():
@@ -73,6 +75,7 @@ def get_controller_pod_ip(controller: str) -> str:
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_fluxcd]) as kubeconfig:
+        save_state(KUBECONFIG_STATE, kubeconfig)
         instances = [
             {
                 'openmetrics_endpoint': f'http://{get_state(POD_IP_STATE_PREFIX + controller)}:{METRICS_PORT}/metrics',
@@ -80,9 +83,20 @@ def dd_environment():
             for controller in CONTROLLERS
         ]
 
-        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+        metadata = {
+            'agent_type': 'kubernetes',
+            'kubernetes': {
+                'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'fluxcd', 'data', 'auto_conf.yaml'),
+            },
+        }
 
         yield {'instances': instances}, metadata
+
+
+@pytest.fixture(scope='session')
+def fluxcd_kubeconfig():
+    return get_state(KUBECONFIG_STATE)
 
 
 @pytest.fixture
