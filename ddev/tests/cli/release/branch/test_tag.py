@@ -1,12 +1,18 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import base64
+import json
+from contextlib import asynccontextmanager
 from unittest.mock import call as c
 
+import httpx
 import pytest
 from httpx import HTTPStatusError, Request, Response
 
+from ddev.cli.release.branch.tag import _open_datadog_agent_bump_pr as REAL_OPEN_DATADOG_AGENT_BUMP_PR
 from ddev.utils.git import GitRepository
+from ddev.utils.github_async import AsyncGitHubClient
 from ddev.utils.github_errors import GitHubAuthenticationError
 
 ORIGIN_REF = 'origin/7.56.x'
@@ -88,6 +94,7 @@ NO_CONFIRMATION_SO_ABORT = 'Did not get confirmation, aborting. Did not create o
 RC_NUMBER_PROMPT = 'What RC number are we tagging? (hit ENTER to accept suggestion) [{}]'
 TAG_THIS_RELEASE_PROMPT = 'You are on release branch `7.56.x`. Tag this release?'
 LS_REMOTE_OK = 'abc123\trefs/heads/7.56.x\n'
+RESOLVED_COMMIT_SHA = '1111111111111111111111111111111111111111'
 
 EXAMPLE_TAGS = [
     '7.56.0-rc.1',
@@ -117,6 +124,8 @@ def _capture_dispatch(*args):
     sub = args[0]
     if sub == 'ls-remote':
         return LS_REMOTE_OK
+    if sub == 'rev-parse':
+        return f'{RESOLVED_COMMIT_SHA}\n'
     return ''
 
 
@@ -127,6 +136,9 @@ def basic_git(mocker):
     # That's why we need a function that returns the mock.
     mocker.patch('ddev.repo.core.GitRepository', lambda _: mock_git)
     mock_git.capture.side_effect = _capture_dispatch
+    # Default tagging tests off the datadog-agent PR flow, which has its own dedicated tests. The
+    # `agent_pr_git` fixture restores the real implementation for those.
+    mocker.patch('ddev.cli.release.branch.tag._open_datadog_agent_bump_pr')
     return mock_git
 
 
@@ -263,15 +275,23 @@ def test_confirm_non_sequential_rc(ddev, git, rc_num):
 
 
 @pytest.mark.parametrize('rc_num', ['1', '5', '11'])
-def test_abort_if_rc_tag_exists(ddev, git, rc_num):
-    """
-    Refuse to overwrite an existing RC tag.
-    """
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', input=f'{rc_num}\ny\n')
+def test_existing_rc_tag_re_runs_follow_up_without_re_tagging(ddev, git, mocker, rc_num):
+    """Re-running for an existing RC tag is idempotent: no re-tag, but the follow-up steps run again.
 
-    assert result.exit_code == 1, result.output
+    This is the recovery path for when the datadog-agent release branch did not exist at tag time,
+    so the bump PR could not be opened until later.
+    """
+    open_pr = mocker.patch('ddev.cli.release.branch.tag._open_datadog_agent_bump_pr')
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', input=f'{rc_num}\n')
+
+    assert result.exit_code == 0, result.output
     assert RC_NUMBER_PROMPT.format('12') in result.output
-    assert f'Tag 7.56.0-rc.{rc_num} already exists. Switch to git to overwrite it.' in result.output
+    assert f'Tag 7.56.0-rc.{rc_num} already exists; skipping tag creation' in result.output
+    git.tag.assert_not_called()
+    git.push.assert_not_called()
+    # The bump PR is (re)opened, pinning the commit the existing tag points at (its last argument).
+    open_pr.assert_called_once()
+    assert open_pr.call_args.args[-1] == f'7.56.0-rc.{rc_num}'
 
 
 def test_abort_if_tag_less_than_one(ddev, git):
@@ -551,3 +571,221 @@ def test_build_agent_yaml_workflow_authentication_failure_uses_central_handler(d
     assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
     basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     basic_git.push.assert_called_once_with('7.56.0')
+
+
+AGENT_RELEASE_JSON = (
+    '{\n'
+    '    "base_branch": "7.56.x",\n'
+    '    "current_milestone": "7.56.0",\n'
+    '    "dependencies": {\n'
+    '        "INTEGRATIONS_CORE_VERSION": "7.56.x",\n'
+    '        "JMXFETCH_VERSION": "0.49.5"\n'
+    '    },\n'
+    '    "last_stable": {\n'
+    '        "7": "7.55.0"\n'
+    '    }\n'
+    '}\n'
+)
+
+
+@pytest.fixture
+def agent_pr_git(basic_git, mocker):
+    """Like the `git` fixture, but restores `_open_datadog_agent_bump_pr` so it actually runs."""
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=False)
+    mocker.patch('ddev.cli.release.branch.tag._open_datadog_agent_bump_pr', REAL_OPEN_DATADOG_AGENT_BUMP_PR)
+    basic_git.current_branch.return_value = '7.56.x'
+    basic_git.tags.return_value = EXAMPLE_TAGS[:]
+    return basic_git
+
+
+def _agent_transport(release_json=AGENT_RELEASE_JSON):
+    """MockTransport standing in for datadog-agent's Git/contents/PR endpoints; records requests.
+
+    Serves `release.json` (from `release_json`) on GET contents and accepts the branch, commit and
+    PR mutations. Returns the recorded requests so a test can inspect what was sent.
+    """
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        path = request.url.path
+        if path.startswith('/repos/DataDog/datadog-agent/git/ref/'):
+            return httpx.Response(
+                200,
+                json={
+                    'ref': 'refs/heads/7.56.x',
+                    'node_id': 'x',
+                    'url': 'u',
+                    'object': {'type': 'commit', 'sha': 'basesha', 'url': 'u'},
+                },
+            )
+        if path == '/repos/DataDog/datadog-agent/contents/release.json' and request.method == 'GET':
+            return httpx.Response(
+                200,
+                json={
+                    'type': 'file',
+                    'encoding': 'base64',
+                    'size': len(release_json),
+                    'name': 'release.json',
+                    'path': 'release.json',
+                    'content': base64.b64encode(release_json.encode()).decode(),
+                    'sha': 'blobsha',
+                },
+            )
+        if path == '/repos/DataDog/datadog-agent/git/refs' and request.method == 'POST':
+            return httpx.Response(
+                201,
+                json={
+                    'ref': 'refs/heads/x',
+                    'node_id': 'x',
+                    'url': 'u',
+                    'object': {'type': 'commit', 'sha': 'basesha', 'url': 'u'},
+                },
+            )
+        if path == '/repos/DataDog/datadog-agent/contents/release.json' and request.method == 'PUT':
+            return httpx.Response(201, json={'content': None, 'commit': {'sha': 'newcommit'}})
+        if path == '/repos/DataDog/datadog-agent/pulls' and request.method == 'POST':
+            return httpx.Response(
+                201, json={'number': 1, 'html_url': 'https://github.com/DataDog/datadog-agent/pull/1'}
+            )
+        raise AssertionError(f'unexpected request: {request.method} {path}')
+
+    return httpx.MockTransport(handler), requests
+
+
+def _patch_async_client(mocker, transport):
+    @asynccontextmanager
+    async def fake_client(**kwargs):
+        client = AsyncGitHubClient(token='test-token', transport=transport)
+        try:
+            yield client
+        finally:
+            await client.aclose()
+
+    mocker.patch('ddev.utils.github_async.async_github_client', fake_client)
+
+
+def _request_body(requests, method, path_suffix):
+    for request in requests:
+        if request.method == method and request.url.path.endswith(path_suffix):
+            return json.loads(request.content)
+    return None
+
+
+def test_agent_pr_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    transport, requests = _agent_transport()
+    _patch_async_client(mocker, transport)
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    # The PR must target the matching Agent release branch, never `main`.
+    pr_body = _request_body(requests, 'POST', '/pulls')
+    assert pr_body['base'] == '7.56.x'
+    # The committed release.json pins the integrations-core commit SHA the tag was placed on,
+    # not the tag name.
+    put_body = _request_body(requests, 'PUT', '/contents/release.json')
+    committed = base64.b64decode(put_body['content']).decode()
+    assert f'"INTEGRATIONS_CORE_VERSION": "{RESOLVED_COMMIT_SHA}"' in committed
+    assert 'Datadog-agent bump PR created' in result.output
+
+
+def test_skip_agent_pr_does_not_open_pr(ddev, agent_pr_git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    transport, requests = _agent_transport()
+    _patch_async_client(mocker, transport)
+
+    result = ddev(
+        'release',
+        'branch',
+        'tag',
+        '--release',
+        '7.56.x',
+        '--final',
+        '--skip-open-pr-check',
+        '--skip-agent-pr',
+        input='y\n',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert requests == []
+
+
+def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr_git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    already_pinned = AGENT_RELEASE_JSON.replace(
+        '"INTEGRATIONS_CORE_VERSION": "7.56.x"', f'"INTEGRATIONS_CORE_VERSION": "{RESOLVED_COMMIT_SHA}"'
+    )
+    transport, requests = _agent_transport(release_json=already_pinned)
+    _patch_async_client(mocker, transport)
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    # Already pinned: no branch is cut, no commit is made, no PR is opened.
+    assert _request_body(requests, 'PUT', '/contents/release.json') is None
+    assert _request_body(requests, 'POST', '/pulls') is None
+    assert f'already pins `{RESOLVED_COMMIT_SHA}`' in result.output
+
+
+def test_agent_pr_api_failure_does_not_fail_the_pushed_tag(ddev, agent_pr_git, mocker, config_file):
+    """The tag is already pushed when the PR is attempted, so a PR API error must only warn."""
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.startswith('/repos/DataDog/datadog-agent/git/ref/'):
+            return httpx.Response(
+                200,
+                json={
+                    'ref': 'refs/heads/7.56.x',
+                    'node_id': 'x',
+                    'url': 'u',
+                    'object': {'type': 'commit', 'sha': 'basesha', 'url': 'u'},
+                },
+            )
+        return httpx.Response(500, json={'message': 'boom'})
+
+    _patch_async_client(mocker, httpx.MockTransport(handler))
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    agent_pr_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
+    agent_pr_git.push.assert_called_once_with('7.56.0')
+    assert 'could not be created' in result.output
+
+
+def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr_git, mocker, config_file):
+    """A 404 resolving the base branch means the Agent release branch isn't cut yet, not a bug."""
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.startswith('/repos/DataDog/datadog-agent/git/ref/'):
+            return httpx.Response(404, json={'message': 'Not Found'})
+        raise AssertionError(f'unexpected request after a missing base branch: {request.url.path}')
+
+    _patch_async_client(mocker, httpx.MockTransport(handler))
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    agent_pr_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
+    assert 'release branch does not exist on datadog-agent yet' in result.output
+
+
+def test_bump_integrations_core_version_preserves_other_keys():
+    from ddev.cli.release.branch.tag import _bump_integrations_core_version
+
+    result = _bump_integrations_core_version(AGENT_RELEASE_JSON, RESOLVED_COMMIT_SHA)
+
+    data = json.loads(result)
+    assert data['dependencies']['INTEGRATIONS_CORE_VERSION'] == RESOLVED_COMMIT_SHA
+    assert data['dependencies']['JMXFETCH_VERSION'] == '0.49.5'
+    assert data['current_milestone'] == '7.56.0'
+    assert result.endswith('\n')

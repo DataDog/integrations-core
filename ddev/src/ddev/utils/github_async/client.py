@@ -41,6 +41,9 @@ from .models import (
     CheckRun,
     CheckRunConclusion,
     CheckRunStatus,
+    FileCommit,
+    FileContent,
+    GitReference,
     IssueComment,
     Label,
     PullRequest,
@@ -1147,6 +1150,158 @@ class AsyncGitHubClient:
             json=payload,
         )
         return self._parse_response(response, CheckRun)
+
+    async def get_ref(
+        self,
+        owner: str,
+        repo: str,
+        ref: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitReference]:
+        """
+        Calls the GitHub API to get a single git reference.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/git/refs#get-a-reference
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            ref: Reference without the leading `refs/`, for example `heads/main` or `tags/v1.0`.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, which does not retry a 404.
+
+        Returns:
+            GitHubResponse[GitReference]: The validated reference (its `object.sha` is the commit it
+            points at) and headers.
+        """
+        response = await self._request("GET", f"/repos/{owner}/{repo}/git/ref/{ref}", timeout=timeout, retry=retry)
+        return self._parse_response(response, GitReference)
+
+    async def create_ref(
+        self,
+        owner: str,
+        repo: str,
+        ref: str,
+        sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitReference]:
+        """
+        Calls the GitHub API to create a git reference (for example, a new branch).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/git/refs#create-a-reference
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            ref: Fully qualified reference to create, for example `refs/heads/my-branch`.
+            sha: SHA1 the new reference points at.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the mutating policy; a replayed create that succeeded once returns 422
+                (the ref already exists), so this is not treated as replayable.
+
+        Returns:
+            GitHubResponse[GitReference]: The validated created reference and headers.
+        """
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/git/refs",
+            timeout=timeout,
+            retry=retry,
+            json={"ref": ref, "sha": sha},
+        )
+        return self._parse_response(response, GitReference)
+
+    async def get_content(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        ref: str | None = None,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[FileContent]:
+        """
+        Calls the GitHub API to get the contents of a single file.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/repos/contents#get-repository-content
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            path: Path to the file within the repository.
+            ref: Optional branch, tag, or commit to read from. Defaults to the repository's default
+                branch when omitted.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, which does not retry a 404.
+
+        Returns:
+            GitHubResponse[FileContent]: The validated file content (`content` is base64-encoded per
+            `encoding`) and headers. Requesting a directory instead of a file fails validation, since
+            the response would be a list rather than a `content-file`.
+        """
+        params = {} if ref is None else {"ref": ref}
+        response = await self._request(
+            "GET", f"/repos/{owner}/{repo}/contents/{path}", timeout=timeout, retry=retry, params=params
+        )
+        return self._parse_response(response, FileContent)
+
+    async def create_or_update_file_contents(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        message: str,
+        content: str,
+        sha: str | None = None,
+        branch: str | None = None,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[FileCommit]:
+        """
+        Calls the GitHub API to create or update a file, committing the change.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            path: Path to the file within the repository.
+            message: Commit message.
+            content: New file content, base64-encoded.
+            sha: Blob SHA of the file being replaced. Required when updating an existing file; omit it
+                only when creating a new file.
+            branch: Branch to commit to. Defaults to the repository's default branch when omitted.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the mutating policy. With `sha` supplied the update is conditional, so a
+                replay after success returns 409 rather than committing twice; only pre-send transport
+                failures are retried.
+
+        Returns:
+            GitHubResponse[FileCommit]: The validated commit result and headers.
+        """
+        payload: dict[str, Any] = {"message": message, "content": content}
+        if sha is not None:
+            payload["sha"] = sha
+        if branch is not None:
+            payload["branch"] = branch
+        response = await self._request(
+            "PUT",
+            f"/repos/{owner}/{repo}/contents/{path}",
+            timeout=timeout,
+            retry=retry,
+            json=payload,
+        )
+        return self._parse_response(response, FileCommit)
 
     async def _resolve_artifact_redirect(
         self,

@@ -30,6 +30,12 @@ if TYPE_CHECKING:
     from .check_run import CheckRunStatus as CheckRunStatus
     from .comment import IssueComment as IssueComment
     from .comment import PullRequestReviewComment as PullRequestReviewComment
+    from .git import CommitInfo as CommitInfo
+    from .git import ContentType as ContentType
+    from .git import FileCommit as FileCommit
+    from .git import FileContent as FileContent
+    from .git import GitObject as GitObject
+    from .git import GitReference as GitReference
     from .label import Label as Label
     from .pull_request import PullRequest as PullRequest
     from .pull_request import PullRequestRef as PullRequestRef
@@ -54,7 +60,13 @@ MODULE_BY_NAME: dict[str, str] = {
     'CheckRun': 'check_run',
     'CheckRunConclusion': 'check_run',
     'CheckRunStatus': 'check_run',
+    'CommitInfo': 'git',
+    'ContentType': 'git',
+    'FileCommit': 'git',
+    'FileContent': 'git',
     'GitHubUser': 'user',
+    'GitObject': 'git',
+    'GitReference': 'git',
     'IssueComment': 'comment',
     'JobStep': 'workflow',
     'JobStepStatus': 'workflow',
