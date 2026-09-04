@@ -166,11 +166,23 @@ jobs:
           HEAD_SHA: ${{ inputs.head_sha }}
           BRANCH: ${{ inputs.branch }}
         run: |
+          set -euo pipefail
+
+          # The author identity is attacker-controlled, and a value carrying a newline would define
+          # further variables in GITHUB_ENV rather than just itself. git's ident parser cannot
+          # produce one today (it strips them on the way in and yields an empty string for an object
+          # malformed enough to contain one), so this is a guard against that changing, not a fix for
+          # a live hole. Dropped rather than escaped: an unattributed result beats a decorated one.
+          author_email=$(git log -1 --format=%ae)
+          case $author_email in
+            *[!a-zA-Z0-9.@_+-]*) author_email='' ;;
+          esac
+
           {
             echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
             echo "DD_GIT_BRANCH=${BRANCH}"
             echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
-            echo "DD_GIT_COMMIT_AUTHOR_EMAIL=$(git log -1 --format=%ae)"
+            echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
           } >> "$GITHUB_ENV"
 
       - name: Get Datadog credentials
