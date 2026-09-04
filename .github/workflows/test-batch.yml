@@ -9,9 +9,12 @@
 # Test execution lives in `.github/actions/run-test-job`, which this workflow calls once per job. The
 # workflow decides where a job runs and what it may touch; the action decides what gets tested.
 #
-# Every input is chosen by whoever dispatched the batch, so `setup` validates all of them and
-# resolves fork status from the API rather than trusting `inputs.is_fork`. `setup` and `teardown`
-# never check out, so they only ever run code that comes from the default branch.
+# Trust model. The Dispatcher runs from `test-dispatch.yml` in master context, and the OIDC policy
+# issues the dispatch credential only to a master-context run, so every input here was produced by
+# master's ddev. What a pull request does influence is plan content, because the planner reads
+# `.ddev/config.toml` and each target's `hatch.toml` from the tree it is given; `validate_batches`
+# bounds that Dispatcher-side. A repository maintainer can hand-dispatch anything, and this workflow
+# does not defend against its own maintainers.
 #
 # Three parts of the contract fail silently when broken, all read straight off the matrix so nothing
 # here reconstructs them:
@@ -66,7 +69,7 @@ on:
         default: "standard"
         type: string
       is_fork:
-        description: "What the dispatcher believes about the tested commit. Cross-checked in setup"
+        description: "Whether the tested commit comes from a fork. Withholds every credential when true"
         required: false
         default: "false"
         type: string
@@ -74,8 +77,7 @@ on:
 permissions: {}
 
 # The Dispatcher has no way to cancel a run, so without this a second push leaves every batch of the
-# previous one running with nothing to reap it. Evaluated before any job starts, so it sits outside
-# the input validation `setup` does.
+# previous one running with nothing to reap it.
 concurrency:
   group: test-batch-${{ inputs.head_sha }}-${{ inputs.batch_id }}
   cancel-in-progress: true
@@ -91,16 +93,11 @@ jobs:
     timeout-minutes: 5
     permissions:
       checks: write
-      # Read-only, for the pull request lookup and the ancestor check below. This job never
-      # checks out.
-      contents: read
-      pull-requests: read
     outputs:
       matrix: ${{ steps.decode.outputs.matrix }}
-      is_fork: ${{ steps.resolve.outputs.is_fork }}
       check_run_id: ${{ steps.check.outputs.id }}
     steps:
-      - name: Decode and validate the job list
+      - name: Decode the job list
         id: decode
         env:
           JOB_LIST: ${{ inputs.job_list }}
@@ -109,210 +106,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Becomes the check run name and the concurrency group.
-          if [[ ! "$BATCH_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
-            echo "::error::batch_id is not a plain identifier."
-            exit 1
-          fi
-
           # A repository-wide batch is several times GitHub's 65,535-character input limit as plain
           # JSON, so the Dispatcher always compresses. A decode failure is a malformed input and must
           # stop the batch rather than produce an empty matrix.
           printf '%s' "$JOB_LIST" | base64 -d | gzip -dc > jobs.json
 
-          python3 <<'PY' > matrix.json
-          import json
-          import re
+          count=$(python3 -c 'import json; print(len(json.load(open("jobs.json"))))')
+          if [[ "$count" -eq 0 ]]; then
+            echo "::error::The batch carries no jobs."
+            exit 1
+          fi
 
-          # Where a batch's code gets scheduled, fork-authored code included, so a self-hosted label
-          # must never appear here. A label added to `.ddev/config.toml` needs adding here too.
-          ALLOWED_RUNNER_LABELS = {"ubuntu-22.04", "windows-2022", "macos-14-large"}
-
-          # matrix-keys-begin
-          EXPECTED_KEYS = {
-              "name",
-              "target",
-              "runner_labels",
-              "environment",
-              "platform",
-              "python_version",
-              "unit_tests",
-              "e2e_tests",
-              "agent_image",
-              "minimum_base_package",
-              "coverage",
-              "artifact_name",
-          }
-          # matrix-keys-end
-
-          PLATFORMS = {"linux", "windows", "macos"}
-          TARGET = re.compile(r"^[A-Za-z0-9._-]+$")
-          ENVIRONMENT = re.compile(r"^[A-Za-z0-9._-]*$")
-          PYTHON_VERSION = re.compile(r"^[0-9]+\.[0-9]+$")
-          AGENT_IMAGE = re.compile(r"^[A-Za-z0-9./:_@-]+$")
-          # `ARTIFACT_NAME_DISALLOWED` in ddev's `messages.py`. Reaching upload-artifact with one of
-          # these loses the job's reports instead of failing the batch.
-          ARTIFACT_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
-
-          errors = []
-
-          def displayable(value):
-              # Built from an integration's display name, which `normalize_job_name` only strips
-              # `<>:"/\|?*` from, so the character set is open. Bound what breaks the matrix.
-              return (
-                  isinstance(value, str)
-                  and 0 < len(value) <= 120
-                  and value == value.strip()
-                  and not any(ord(char) < 0x20 or ord(char) == 0x7F for char in value)
-              )
-
-          def matches(pattern, value):
-              return isinstance(value, str) and pattern.fullmatch(value) is not None
-
-          with open("jobs.json") as stream:
-              jobs = json.load(stream)
-          if not isinstance(jobs, list) or not jobs:
-              raise SystemExit("::error::The batch carries no jobs.")
-
-          for index, job in enumerate(jobs):
-              def bad(field, why, index=index):
-                  errors.append(f"::error::job {index}, {field}: {why}")
-
-              if not isinstance(job, dict):
-                  bad("<job>", "not an object")
-                  continue
-
-              keys = set(job)
-              if keys != EXPECTED_KEYS:
-                  missing = ", ".join(sorted(EXPECTED_KEYS - keys)) or "none"
-                  unknown = ", ".join(sorted(keys - EXPECTED_KEYS)) or "none"
-                  bad("<keys>", f"missing {missing}, unknown {unknown}")
-                  continue
-
-              labels = job["runner_labels"]
-              if not isinstance(labels, list) or not labels:
-                  bad("runner_labels", "not a non-empty list")
-              else:
-                  for label in labels:
-                      if label not in ALLOWED_RUNNER_LABELS:
-                          bad("runner_labels", f"{label!r} is not an allowed runner")
-
-              if not displayable(job["name"]):
-                  bad("name", "empty, padded, over-long or carrying a control character")
-              if not displayable(job["artifact_name"]) or ARTIFACT_DISALLOWED.search(str(job["artifact_name"])):
-                  bad("artifact_name", "not a name upload-artifact accepts")
-              if not matches(TARGET, job["target"]):
-                  bad("target", "not a plain identifier")
-              if not matches(ENVIRONMENT, job["environment"]):
-                  bad("environment", "not a plain identifier")
-              if job["platform"] not in PLATFORMS:
-                  bad("platform", f"{job['platform']!r} is not a known platform")
-              if not matches(PYTHON_VERSION, job["python_version"]):
-                  bad("python_version", "not major.minor")
-              if job["agent_image"] is not None and not matches(AGENT_IMAGE, job["agent_image"]):
-                  bad("agent_image", "not an image reference")
-              for field in ("unit_tests", "e2e_tests", "minimum_base_package", "coverage"):
-                  if not isinstance(job[field], bool):
-                      bad(field, "not a boolean")
-
-          # A repeated artifact name makes the second upload fail, which reads as a lost result
-          # rather than as a broken batch. A repeated job name leaves the gatherer's join ambiguous.
-          for field in ("name", "artifact_name"):
-              seen = set()
-              for index, job in enumerate(jobs):
-                  value = job.get(field) if isinstance(job, dict) else None
-                  if isinstance(value, str):
-                      if value in seen:
-                          errors.append(f"::error::job {index}, {field}: {value!r} is not unique")
-                      seen.add(value)
-
-          if errors:
-              raise SystemExit("\n".join(errors))
-
-          print(json.dumps(jobs, separators=(",", ":")), end="")
-          PY
-
-          compact=$(cat matrix.json)
           {
             echo "matrix<<__MATRIX__"
-            echo "$compact"
+            cat jobs.json
+            echo
             echo "__MATRIX__"
           } >> "$GITHUB_OUTPUT"
 
           {
             echo "### ${BATCH_ID}"
             echo
-            echo "- jobs: $(python3 -c 'import json; print(len(json.load(open("matrix.json"))))')"
+            echo "- jobs: ${count}"
             echo "- targets: $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["INTEGRATIONS"])) or "-")')"
           } >> "$GITHUB_STEP_SUMMARY"
-
-      # `inputs.is_fork` is the Dispatcher's claim, and the Dispatcher may itself be running code
-      # from the commit under test. Resolving it here keeps the gate right when that claim is not.
-      - name: Resolve what this batch is testing
-        id: resolve
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHECKOUT_SHA: ${{ inputs.checkout_sha }}
-          HEAD_SHA: ${{ inputs.head_sha }}
-          BRANCH: ${{ inputs.branch }}
-          CLAIMED_FORK: ${{ inputs.is_fork }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          set -euo pipefail
-
-          if [[ ! "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "::error::head_sha is not a commit SHA."
-            exit 1
-          fi
-
-          # An unreadable answer withholds credentials rather than stopping the batch, so one retry
-          # keeps a transient error from silently costing a trusted batch its CI Visibility.
-          retry() { "$@" || { sleep 5; "$@"; }; }
-
-          is_fork=true
-          if [[ "$CHECKOUT_SHA" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
-            number="${BASH_REMATCH[1]}"
-            if pull=$(retry gh api "repos/${GITHUB_REPOSITORY}/pulls/${number}"); then
-              head_repo=$(jq -r '.head.repo.full_name // ""' <<<"$pull")
-              head_sha=$(jq -r '.head.sha' <<<"$pull")
-              head_ref=$(jq -r '.head.ref' <<<"$pull")
-              # Without this the batch could attach its check run to any commit it named, including
-              # another pull request's head.
-              if [[ "$head_sha" != "$HEAD_SHA" || "$head_ref" != "$BRANCH" ]]; then
-                echo "::error::Batch reports ${HEAD_SHA} on ${BRANCH}, #${number} heads ${head_sha} on ${head_ref}."
-                exit 1
-              fi
-              if [[ "${head_repo,,}" == "${GITHUB_REPOSITORY,,}" ]]; then
-                is_fork=false
-              fi
-            else
-              echo "::warning::Could not read #${number}, so the batch runs without credentials."
-            fi
-          elif [[ "$CHECKOUT_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            # A fork's commits are reachable here under refs/pull/<n>/head, so a bare SHA is trusted
-            # only once it is known to be on the default branch.
-            if [[ "$CHECKOUT_SHA" != "$HEAD_SHA" ]]; then
-              echo "::error::A commit batch must report the commit it checks out."
-              exit 1
-            fi
-            if status=$(retry gh api "repos/${GITHUB_REPOSITORY}/compare/${DEFAULT_BRANCH}...${CHECKOUT_SHA}" --jq '.status'); then
-              case "$status" in
-                identical|behind) is_fork=false ;;
-                *) echo "::warning::${CHECKOUT_SHA} is not on ${DEFAULT_BRANCH}, so the batch runs without credentials." ;;
-              esac
-            else
-              echo "::warning::Could not place ${CHECKOUT_SHA} on ${DEFAULT_BRANCH}, so the batch runs without credentials."
-            fi
-          else
-            echo "::error::checkout_sha must be refs/pull/<n>/merge or a commit SHA."
-            exit 1
-          fi
-
-          echo "is_fork=${is_fork}" >> "$GITHUB_OUTPUT"
-          if [[ "$is_fork" != "$CLAIMED_FORK" ]]; then
-            echo "::warning::The dispatcher reported is_fork=${CLAIMED_FORK}, this batch resolved ${is_fork}."
-          fi
-          echo "- fork: ${is_fork}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open the batch's check run
         id: check
@@ -337,7 +154,7 @@ jobs:
   # credentials.
   test:
     needs: setup
-    if: needs.setup.outputs.is_fork != 'true'
+    if: inputs.is_fork != 'true'
     # Correlated by exact name, so this must stay `matrix.name` alone: a prefix or a suffix here
     # leaves every job in the batch unmatched.
     name: ${{ matrix.name }}
@@ -374,14 +191,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          # A newline in either would define further variables in GITHUB_ENV. The branch guard
-          # asserts a git ref invariant rather than fixing a live hole.
+          # Attacker-controlled, and a newline in it would define further variables in GITHUB_ENV.
           author_email=$(git log -1 --format=%ae)
           case $author_email in
             *[!a-zA-Z0-9.@_+-]*) author_email='' ;;
-          esac
-          case $BRANCH in
-            *[!a-zA-Z0-9._/+-]*) BRANCH='' ;;
           esac
 
           {
@@ -474,7 +287,7 @@ jobs:
   # Each of those is optional in the action and no-ops when absent, so the tests still run.
   test_fork:
     needs: setup
-    if: needs.setup.outputs.is_fork == 'true'
+    if: inputs.is_fork == 'true'
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runner_labels }}
     timeout-minutes: 120
@@ -504,9 +317,6 @@ jobs:
           author_email=$(git log -1 --format=%ae)
           case $author_email in
             *[!a-zA-Z0-9.@_+-]*) author_email='' ;;
-          esac
-          case $BRANCH in
-            *[!a-zA-Z0-9._/+-]*) BRANCH='' ;;
           esac
 
           {
@@ -589,7 +399,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHECK_RUN_ID: ${{ needs.setup.outputs.check_run_id }}
-          TEST_RESULT: ${{ needs.setup.outputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
+          TEST_RESULT: ${{ inputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
