@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import base64
 import json
-from contextlib import asynccontextmanager
 from unittest.mock import call as c
 
 import httpx
@@ -12,7 +11,7 @@ from httpx import HTTPStatusError, Request, Response
 
 from ddev.cli.release.branch.tag import _open_datadog_agent_bump_pr as REAL_OPEN_DATADOG_AGENT_BUMP_PR
 from ddev.utils.git import GitRepository
-from ddev.utils.github_async import AsyncGitHubClient
+from ddev.utils.github_async.models import FileContent
 from ddev.utils.github_errors import GitHubAuthenticationError
 
 ORIGIN_REF = 'origin/7.56.x'
@@ -598,105 +597,44 @@ def agent_pr_git(basic_git, mocker):
     return basic_git
 
 
-def _agent_transport(release_json=AGENT_RELEASE_JSON):
-    """MockTransport standing in for datadog-agent's Git/contents/PR endpoints; records requests.
-
-    Serves `release.json` (from `release_json`) on GET contents and accepts the branch, commit and
-    PR mutations. Returns the recorded requests so a test can inspect what was sent.
-    """
-    requests: list[httpx.Request] = []
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        requests.append(request)
-        path = request.url.path
-        if path.startswith('/repos/DataDog/datadog-agent/git/ref/'):
-            return httpx.Response(
-                200,
-                json={
-                    'ref': 'refs/heads/7.56.x',
-                    'node_id': 'x',
-                    'url': 'u',
-                    'object': {'type': 'commit', 'sha': 'basesha', 'url': 'u'},
-                },
-            )
-        if path == '/repos/DataDog/datadog-agent/contents/release.json' and request.method == 'GET':
-            return httpx.Response(
-                200,
-                json={
-                    'type': 'file',
-                    'encoding': 'base64',
-                    'size': len(release_json),
-                    'name': 'release.json',
-                    'path': 'release.json',
-                    'content': base64.b64encode(release_json.encode()).decode(),
-                    'sha': 'blobsha',
-                },
-            )
-        if path == '/repos/DataDog/datadog-agent/git/refs' and request.method == 'POST':
-            return httpx.Response(
-                201,
-                json={
-                    'ref': 'refs/heads/x',
-                    'node_id': 'x',
-                    'url': 'u',
-                    'object': {'type': 'commit', 'sha': 'basesha', 'url': 'u'},
-                },
-            )
-        if path == '/repos/DataDog/datadog-agent/contents/release.json' and request.method == 'PUT':
-            return httpx.Response(201, json={'content': None, 'commit': {'sha': 'newcommit'}})
-        if path == '/repos/DataDog/datadog-agent/pulls' and request.method == 'POST':
-            return httpx.Response(
-                201, json={'number': 1, 'html_url': 'https://github.com/DataDog/datadog-agent/pull/1'}
-            )
-        raise AssertionError(f'unexpected request: {request.method} {path}')
-
-    return httpx.MockTransport(handler), requests
+def _mock_release_json(fake_async_github, release_json=AGENT_RELEASE_JSON):
+    """Register the datadog-agent `release.json` the fake serves on `get_content`."""
+    fake_async_github.mock_response(
+        'get_content',
+        FileContent(
+            type='file',
+            encoding='base64',
+            size=len(release_json),
+            name='release.json',
+            path='release.json',
+            content=base64.b64encode(release_json.encode()).decode(),
+            sha='blobsha',
+        ),
+    )
 
 
-def _patch_async_client(mocker, transport):
-    @asynccontextmanager
-    async def fake_client(**kwargs):
-        client = AsyncGitHubClient(token='test-token', transport=transport)
-        try:
-            yield client
-        finally:
-            await client.aclose()
-
-    mocker.patch('ddev.utils.github_async.async_github_client', fake_client)
-
-
-def _request_body(requests, method, path_suffix):
-    for request in requests:
-        if request.method == method and request.url.path.endswith(path_suffix):
-            return json.loads(request.content)
-    return None
-
-
-def test_agent_pr_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, mocker, config_file):
+def test_agent_pr_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-    transport, requests = _agent_transport()
-    _patch_async_client(mocker, transport)
+    _mock_release_json(fake_async_github)
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 
     assert result.exit_code == 0, result.output
     # The PR must target the matching Agent release branch, never `main`.
-    pr_body = _request_body(requests, 'POST', '/pulls')
-    assert pr_body['base'] == '7.56.x'
+    assert fake_async_github.last_call('create_pull_request').kwargs['base'] == '7.56.x'
     # The committed release.json pins the integrations-core commit SHA the tag was placed on,
     # not the tag name.
-    put_body = _request_body(requests, 'PUT', '/contents/release.json')
-    committed = base64.b64decode(put_body['content']).decode()
+    committed = base64.b64decode(
+        fake_async_github.last_call('create_or_update_file_contents').kwargs['content']
+    ).decode()
     assert f'"INTEGRATIONS_CORE_VERSION": "{RESOLVED_COMMIT_SHA}"' in committed
     assert 'Datadog-agent bump PR created' in result.output
 
 
-def test_skip_agent_pr_does_not_open_pr(ddev, agent_pr_git, mocker, config_file):
+def test_skip_agent_pr_does_not_open_pr(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-    transport, requests = _agent_transport()
-    _patch_async_client(mocker, transport)
 
     result = ddev(
         'release',
@@ -711,46 +649,35 @@ def test_skip_agent_pr_does_not_open_pr(ddev, agent_pr_git, mocker, config_file)
     )
 
     assert result.exit_code == 0, result.output
-    assert requests == []
+    fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr_git, mocker, config_file):
+def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
     already_pinned = AGENT_RELEASE_JSON.replace(
         '"INTEGRATIONS_CORE_VERSION": "7.56.x"', f'"INTEGRATIONS_CORE_VERSION": "{RESOLVED_COMMIT_SHA}"'
     )
-    transport, requests = _agent_transport(release_json=already_pinned)
-    _patch_async_client(mocker, transport)
+    _mock_release_json(fake_async_github, release_json=already_pinned)
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 
     assert result.exit_code == 0, result.output
     # Already pinned: no branch is cut, no commit is made, no PR is opened.
-    assert _request_body(requests, 'PUT', '/contents/release.json') is None
-    assert _request_body(requests, 'POST', '/pulls') is None
+    fake_async_github.assert_not_called('create_or_update_file_contents')
+    fake_async_github.assert_not_called('create_pull_request')
     assert f'already pins `{RESOLVED_COMMIT_SHA}`' in result.output
 
 
-def test_agent_pr_api_failure_does_not_fail_the_pushed_tag(ddev, agent_pr_git, mocker, config_file):
+def test_agent_pr_api_failure_does_not_fail_the_pushed_tag(ddev, agent_pr_git, fake_async_github, config_file):
     """The tag is already pushed when the PR is attempted, so a PR API error must only warn."""
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path.startswith('/repos/DataDog/datadog-agent/git/ref/'):
-            return httpx.Response(
-                200,
-                json={
-                    'ref': 'refs/heads/7.56.x',
-                    'node_id': 'x',
-                    'url': 'u',
-                    'object': {'type': 'commit', 'sha': 'basesha', 'url': 'u'},
-                },
-            )
-        return httpx.Response(500, json={'message': 'boom'})
-
-    _patch_async_client(mocker, httpx.MockTransport(handler))
+    _mock_release_json(fake_async_github)
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=Request('POST', 'https://api.github.com'), response=Response(500)),
+    )
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 
@@ -760,17 +687,14 @@ def test_agent_pr_api_failure_does_not_fail_the_pushed_tag(ddev, agent_pr_git, m
     assert 'could not be created' in result.output
 
 
-def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr_git, mocker, config_file):
+def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr_git, fake_async_github, config_file):
     """A 404 resolving the base branch means the Agent release branch isn't cut yet, not a bug."""
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path.startswith('/repos/DataDog/datadog-agent/git/ref/'):
-            return httpx.Response(404, json={'message': 'Not Found'})
-        raise AssertionError(f'unexpected request after a missing base branch: {request.url.path}')
-
-    _patch_async_client(mocker, httpx.MockTransport(handler))
+    fake_async_github.mock_response(
+        'get_ref',
+        httpx.HTTPStatusError('Not Found', request=Request('GET', 'https://api.github.com'), response=Response(404)),
+    )
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 

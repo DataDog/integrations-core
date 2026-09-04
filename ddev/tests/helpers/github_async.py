@@ -48,6 +48,11 @@ from ddev.utils.github_async.models import (
     CheckRun,
     CheckRunConclusion,
     CheckRunStatus,
+    CommitInfo,
+    FileCommit,
+    FileContent,
+    GitObject,
+    GitReference,
     IssueComment,
     Label,
     PullRequest,
@@ -208,6 +213,41 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         ),
         # Download is a side-effecting no-op by default; per-URL failures are registered explicitly.
         'download_artifact': lambda: None,
+        # Git data / contents defaults. Tests that care about specific values register their own.
+        'get_ref': lambda: GitHubResponse(
+            data=GitReference(
+                ref='refs/heads/main',
+                node_id='REF_kwDO',
+                url='https://api.github.com/repos/test/repo/git/refs/heads/main',
+                object=GitObject(type='commit', sha='a' * 40, url='https://api.github.com/x'),
+            ),
+            headers={},
+        ),
+        'create_ref': lambda: GitHubResponse(
+            data=GitReference(
+                ref='refs/heads/feature',
+                node_id='REF_kwDO',
+                url='https://api.github.com/repos/test/repo/git/refs/heads/feature',
+                object=GitObject(type='commit', sha='a' * 40, url='https://api.github.com/x'),
+            ),
+            headers={},
+        ),
+        'get_content': lambda: GitHubResponse(
+            data=FileContent(
+                type='file',
+                encoding='base64',
+                size=3,
+                name='release.json',
+                path='release.json',
+                content='e30K',
+                sha='b' * 40,
+            ),
+            headers={},
+        ),
+        'create_or_update_file_contents': lambda: GitHubResponse(
+            data=FileCommit(commit=CommitInfo(sha='c' * 40, html_url='https://github.com/x/commit/c')),
+            headers={},
+        ),
     }
 
 
@@ -720,6 +760,66 @@ class FakeAsyncGitHubClient:
             raise response
         Path(dest_path).mkdir(parents=True, exist_ok=True)
         return None
+
+    async def get_ref(
+        self,
+        owner: str,
+        repo: str,
+        ref: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitReference]:
+        return self._call('get_ref', owner=owner, repo=repo, ref=ref, timeout=timeout)
+
+    async def create_ref(
+        self,
+        owner: str,
+        repo: str,
+        ref: str,
+        sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitReference]:
+        return self._call('create_ref', owner=owner, repo=repo, ref=ref, sha=sha, timeout=timeout)
+
+    async def get_content(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        ref: str | None = None,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[FileContent]:
+        return self._call('get_content', owner=owner, repo=repo, path=path, ref=ref, timeout=timeout)
+
+    async def create_or_update_file_contents(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        message: str,
+        content: str,
+        sha: str | None = None,
+        branch: str | None = None,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[FileCommit]:
+        return self._call(
+            'create_or_update_file_contents',
+            owner=owner,
+            repo=repo,
+            path=path,
+            message=message,
+            content=content,
+            sha=sha,
+            branch=branch,
+            timeout=timeout,
+        )
 
     async def aclose(self) -> None:
         return None
