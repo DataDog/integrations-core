@@ -57,6 +57,7 @@ class DispatcherContext:
     pr_number: int | None = None
     tags: tuple[str, ...] = ()
     pytest_args: str = ''
+    is_fork: bool = False
 
 
 @dataclass(frozen=True)
@@ -228,6 +229,8 @@ def build_dispatcher(
             base_sha=context.base_sha,
             checkout_sha=context.checkout_sha,
             artifacts_base_path=artifacts_path,
+            branch=context.branch,
+            is_fork=context.is_fork,
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
         ),
