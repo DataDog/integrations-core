@@ -756,6 +756,8 @@ snmp.fgFwPolByteCount,count,,packet,,[Fortinet FortiGate] The number of bytes in
 snmp.fgFwPolByteCount.rate,gauge,,packet,second,[Fortinet FortiGate] The number of bytes in packets per second matching the policy.,0,snmp,,
 snmp.fgFwPolPktCount,count,,packet,,[Fortinet FortiGate] The number of packets matched to policy (passed or blocked depending on policy action). Count is from the time the policy became active.,0,snmp,,
 snmp.fgFwPolPktCount.rate,gauge,,packet,second,[Fortinet FortiGate] The number of packets per second matched to policy (passed or blocked depending on policy action). Count is from the time the policy became active.,0,snmp,,
+snmp.fgHwSensorAlarmStatus,gauge,,,,[Fortinet FortiGate] Whether the hardware sensor's value is outside of the normal range: false(0) true(1).,0,snmp,,
+snmp.fgHwSensorValue,gauge,,,,[Fortinet FortiGate] The hardware sensor's current value.,0,snmp,,
 snmp.fgIntfEntVdom,gauge,,,,[Fortinet FortiGate] The virtual domain the interface belongs to. This index corresponds to the index used by fgVdTable.,0,snmp,,
 snmp.fgProcessorPktDroppedCount,count,,packet,,[Fortinet FortiGate] The total number of packets dropped by this processor.,0,snmp,,
 snmp.fgProcessorPktDroppedCount.rate,gauge,,packet,second,[Fortinet FortiGate] The total number of packets dropped per second by this processor.,0,snmp,,
