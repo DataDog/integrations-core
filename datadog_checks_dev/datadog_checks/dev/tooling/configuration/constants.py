@@ -47,4 +47,5 @@ ALLOWED_FORMATS = {
     'path',
     'port',
     'url',
+    'secret',
 }
