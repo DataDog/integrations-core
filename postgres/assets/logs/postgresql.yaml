@@ -14,6 +14,11 @@ facets:
     source: log
   - groups:
       - Database
+    name: Statement
+    path: db.statement
+    source: log
+  - groups:
+      - Database
     name: User
     path: db.user
     source: log
@@ -34,13 +39,17 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: Postgresql
+  name: PostgreSQL
   enabled: true
   filter:
     query: source:postgresql
   processors:
+    # ════════════════════════════════════════════════════════════════════
+    # Stage 1 parses text prefixes into PostgreSQL jsonlog's top-level field names.
+    # Using bare names such as `pid`, `user`, and `dbname` lets stderr and jsonlog
+    # records share the remaining processors without normalization remappers.
     - type: grok-parser
-      name: Parsing Postgresql logs
+      name: Parse PostgreSQL logs
       enabled: true
       source: message
       samples:
@@ -48,47 +57,189 @@ pipeline:
         - '2017-11-07 17:37:22 UTC FATAL:  role "myrole" does not exist'
         - '2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;'
         - '2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter'
-        - '2025-09-15 19:05:58.892 UTC:10.0.216.218(36378):shopper_1@dbmorders_1:[20337]:395:00000:2025-09-15 19:02:57 UTC:384/39221:0:68c862e1.4f71:[unknown]:LOCATION:  exec_simple_query, postgres.c:1075'
-        - '2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:00000:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);'
+        - '2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:44 UTC-6a8372f8.38-LOG:  checkpoint starting: shutdown immediate'
+        - '<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;'
+        - '<2026-08-17 20:47:01 UTC     56 6a837345.38 >LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:45:57.031 UTC [106] pgllp_db pgllp_app pgllp_user 172.17.0.1 6a837305.6a LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:55.896 UTC [55]     6a837303.37 LOG:  checkpoint starting: shutdown immediate'
+        - ' sql_error_code = 00000 time_ms = "2026-08-17 20:47:13.749 UTC" pid="108" proc_start_time="2026-08-17 20:47:13 UTC" session_id="6a837351.6c" vtid="4/5" tid="0" log_line="10" database="pgllp_db" connection_source="172.17.0.1(42336)" user="pgllp_user" application_name="pgllp_app" LOG:  statement: SELECT 2 AS c02;'
+        - ' sql_error_code = 00000 time_ms = "2026-08-17 20:47:12.517 UTC" pid="56" proc_start_time="2026-08-17 20:47:12 UTC" session_id="6a837350.38" vtid="" tid="0" log_line="2" LOG:  checkpoint starting: shutdown immediate'
+        - 'pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=172.17.0.1 LOG:  statement: SELECT 2 AS c02;'
+        - 'pid=56,user=,db=,app=,client= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:11 UTC::@:[56]:LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-18 19:43:22 FOO:BAR:fd42::3(49152):alice@db:[72]:LOG:  ipv6 boundary regression'
+        - '2026-08-18 19:43:22.905 UTC:2001:db8::3:alice@db:[72]:LOG:  autovacuum: VACUUM public.t (1)'
+        - '2026-08-18 19:43:22.905 UTC:db.example:pgbench(1)@db:[72]:LOG:  m'
+        - '2026-08-28 12:19:21.018 :::1(46904):postgres@postgres:[88]:LOG:  hello'
+        - '2026-08-17 20:45:23.980 UTC:172.17.0.1(54222):pgllp_user@pgllp_db:[107]:10:00000:2026-08-17 20:45:23 UTC:4/5:0:6a8372e3.6b:pgllp_app:LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:22.912 UTC::@:[56]:2:00000:2026-08-17 20:45:22 UTC::0:6a8372e2.38:LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:28.967 UTC [63][checkpointer]: [2-1] db=,user= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=172.17.0.1 LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:17.855 UTC [64]: [2-1] db=,user=,host= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:06.977 UTC [64]: [2-1] db=,user= LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:46:39.837 UTC [63] LOG:  checkpoint starting: shutdown immediate'
+        - '2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;'
+        - '2026-08-17 20:45:33.812 UTC [54] LOG:  checkpoint starting: shutdown immediate'
       grok:
         supportRules: |
-          _timestamp %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
-          _timestamp_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
-          _betimestamp %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
-          _database %{notSpace:db.instance}
-          _raw_query %{data:db.statement}
-          _duration %{numberExt:duration}
-          _severity %{?>notSpace:db.severity}
-          _user %{notSpace:db.user}
-          _client_ip %{notSpace:network.client.ip}
-          _proc_id %{notSpace:postgres.proc_id}
-          _session_id %{notSpace:postgres.session_id}
-          _app %{notSpace:postgres.appname}
-          _prefix %{_timestamp_ms} \[%{_proc_id}\] %{_database} %{_app} %{_user} %{_client_ip} %{_session_id}
+          # Keep these matchRules in one parser: supportRules are processor-scoped.
+          #
+          # Open-ended prefix values use lazy data matches so the consuming rule's
+          # next literal determines the delimiter.
+          _pg_pid %{integer:pid}
+          _pg_line_num %{integer:line_num}
+          _pg_txid %{integer:txid}
+          _pg_session_id %{regex("[0-9a-f]+\\.[0-9a-f]+"):session_id}
+          _pg_vxid (?:%{regex("[0-9]+/[0-9]+"):vxid})?
+          _pg_state_code %{regex("[A-Z0-9]{5}"):state_code:nullIf("00000")}
+          _pg_timestamp %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)? (?:[0-9A-Za-z+-]+)?"):timestamp}
+          _pg_session_start %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)? (?:[0-9A-Za-z+-]+)?"):session_start}
+          _pg_remote (?:(?:%{ipOrHost:remote_host}\(%{integer:remote_port}\))|%{regex("\\[local\\]"):remote_host}|%{ipOrHost:remote_host})?
+          _pg_user %{regex("\\S*"):user:nullIf("[unknown]")}
+          _pg_dbname %{regex("\\S*"):dbname:nullIf("[unknown]")}
+          _pg_app_name %{data:application_name:nullIf("[unknown]")}
+          _pg_remote_host %{regex("\\S*"):remote_host}
+          _pg_backend_type %{data:backend_type}
+          _pg_ps %{data:ps}
+          _pg_body %{word:error_severity}:  %{data:message}(?: at character %{integer:cursor_position})?
+          # This duplicates pgprefix_datadog and stays first for compatibility.
+          _prefix %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id}
         matchRules: |
-          #Check documentation for the setup of the suggested format
-          suggested_format_with_duration %{_prefix} %{_severity}:\s+duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # log_line_prefix = '%m [%p] %d %a %u %h %c '
+          suggested_format %{_prefix} %{_pg_body}
 
-          suggested_format %{_prefix} %{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # The pid is absent from some startup and fatal lines.
+          # log_line_prefix = '%m [%p] ' (PostgreSQL's built-in default)
+          default_format %{_pg_timestamp}\s+(?:\[%{_pg_pid}\]\s+)?%{_pg_body}
 
-          #See RDS documentation for more data-rich format
-          enhanced_rds_with_duration %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s*(%{integer}:\s*)?duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # log_line_prefix = '%t-%c-' (Azure Database for PostgreSQL default)
+          pgprefix_azure %{_pg_timestamp}-%{_pg_session_id}-%{_pg_body}
 
-          enhanced_rds %{_timestamp_ms}:(%{_client_ip}\(%{port:network.client.port:integer}\))?:(%{_user})?@(%{_database})?:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname}:)?%{_severity}:\s*(%{integer}:\s*)?(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # log_line_prefix = '<%m %r %a %d %u %p %c %x>' (synthetic bracketed test fixture, not a known vendor default)
+          pgprefix_bracket <%{_pg_timestamp} %{_pg_remote} %{_pg_app_name} %{_pg_dbname} %{_pg_user} %{_pg_pid} %{_pg_session_id} %{_pg_ps}>%{_pg_body}
 
-          default_format (%{_timestamp}|%{_timestamp_ms} \[%{_proc_id}])\s+%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+          # log_line_prefix = '%m [%p] %d %a %u %h %c ' (same as suggested_format; kept for compatibility, see comment below)
+          pgprefix_datadog %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id} %{_pg_body}
 
-          #Sample
-          #2017-11-07 17:30:39 UTC LOG:  incomplete startup packet
-          #2017-11-07 17:37:22 UTC FATAL:  role "myrole" does not exist
+          # log_line_prefix = ' sql_error_code = %e time_ms = "%m" pid="%p" proc_start_time="%s" session_id="%c" vtid="%v" tid="%x" log_line="%l" database="%d" connection_source="%r" user="%u" application_name="%a" ' (Heroku Postgres)
+          pgprefix_heroku \s*sql_error_code = %{_pg_state_code} time_ms = "%{_pg_timestamp}" pid="%{_pg_pid}" proc_start_time="%{_pg_session_start}" session_id="%{_pg_session_id}" vtid="%{_pg_vxid}" tid="%{_pg_txid}" log_line="%{_pg_line_num}" (?:database="%{_pg_dbname}" connection_source="%{_pg_remote}" user="%{_pg_user}" application_name="%{_pg_app_name}" )?%{_pg_body}
 
-          #Sample suggested format
-          #2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;
+          # log_line_prefix = 'pid=%p,user=%u,db=%d,app=%a,client=%h ' (synthetic key-value test fixture, not a known vendor default)
+          pgprefix_kv_client pid=%{_pg_pid},user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name},client=%{_pg_remote_host} %{_pg_body}
 
-          #Sample suggested format with duration included
-          #2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter
+          # log_line_prefix = '%t:%r:%u@%d:[%p]:' (Amazon RDS default)
+          pgprefix_rds %{_pg_timestamp}:%{_pg_remote}:%{_pg_user}@%{_pg_dbname}:\[%{_pg_pid}\]:%{_pg_body}
+
+          # log_line_prefix = '%t:%r:%u@%d:[%p]:%l:%e:%s:%v:%x:%c:%a:' (RDS with the enhanced-logging fields enabled)
+          pgprefix_rds_enhanced %{_pg_timestamp}:%{_pg_remote}:%{_pg_user}@%{_pg_dbname}:\[%{_pg_pid}\]:%{_pg_line_num}:%{_pg_state_code}:%{_pg_session_start}:%{_pg_vxid}:%{_pg_txid}:%{_pg_session_id}:(?:%{_pg_app_name}:)?%{_pg_body}
+
+          # log_line_prefix = '%m [%p][%b]: [%l-1] db=%d,user=%u '
+          pgprefix_verbose_user_backend %{_pg_timestamp} \[%{_pg_pid}\]\[%{_pg_backend_type}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
+
+          # With %q, atdb, default, and pganalyze background-process prefixes are
+          # byte-identical and yield the same fields. Keep their rules adjacent;
+          # their full-line forms remain distinguishable.
+          # log_line_prefix = '%m [%p]: [%l-1] db=%d,user=%u,host=%h '
+          pgprefix_verbose_user_host %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user},host=%{_pg_remote_host} %{_pg_body}
+
+          # log_line_prefix = '%m [%p]: [%l-1] db=%d,user=%u '
+          pgprefix_verbose_user %{_pg_timestamp} \[%{_pg_pid}\]: \[%{_pg_line_num}-1\] db=%{_pg_dbname},user=%{_pg_user} %{_pg_body}
+
+          # log_line_prefix = '%m [%p] %q%u@%d '
+          pgprefix_atdb %{_pg_timestamp} \[%{_pg_pid}\] (?:%{_pg_user}@%{_pg_dbname} )?%{_pg_body}
+
+          # log_line_prefix = '%m [%p] ' (identical form to default_format; kept as a distinct named rule for the pid-present case)
+          pgprefix_default %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_body}
+
+          # log_line_prefix = '%m [%p] %q[user=%u,db=%d,app=%a] ' (pganalyze recommended prefix)
+          pgprefix_pganalyze %{_pg_timestamp} \[%{_pg_pid}\] (?:\[user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name}\] )?%{_pg_body}
+
+          # Keep the fallback last because matchRules are first-match-wins. It
+          # preserves the raw line for best-effort extraction from unknown prefixes.
+          # Matches any log_line_prefix not covered above.
+          pgprefix_unparsed %{data:message}
+    # ════════════════════════════════════════════════════════════════════
+    # Stage 2 promotes jsonlog-compatible fields to standard attributes. Duration
+    # is copied to an attribute and left in `message`, so the body stays byte-for-byte
+    # what Postgres emitted and downstream log parsers see the shape they expect.
+    # Scaling happens only in the arithmetic processor at the end of this stage.
     - type: grok-parser
-      name: Extract db.operation from statement
+      name: Extract `duration` from `message`
+      enabled: true
+      source: message
+      grok:
+        supportRules: |
+        matchRules: |
+          # `%{data}` is lazy; a greedy `.*` anchors on the LAST `duration: N ms`,
+          # which query text can supply. Captures nothing into `message`.
+          pg_duration %{data}duration:\s+%{number:duration}\s+ms%{data}
+      samples:
+        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
+        - '2025-09-16 18:26:45.429 UTC:1.2.3.4(31674):p@p:[87]:1:00000:2025-09-16 18:25:58 UTC:5/2050:0:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
+        - 'duration: 12.345 ms'
+        - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
+    # Promote Stage 1's parsed body over the raw prefix line. The remapper consumes
+    # its source, matching intake preprocessing for jsonlog records.
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: grok-parser
+      name: Parse `timestamp` into `db.date`
+      enabled: true
+      source: timestamp
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_date_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
+
+          pg_date %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
+
+          pg_date_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):db.date}\s*
+
+          pg_date_notz %{date("yyyy-MM-dd HH:mm:ss"):db.date}\s*
+      samples:
+        - 2026-08-17 20:45:57.031 UTC
+        - 2026-08-17 20:45:45 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
+    # date() creates an attribute; the date remapper below sets the official date.
+    - type: grok-parser
+      name: Extract `db.statement` from `message`
+      enabled: true
+      source: message
+      grok:
+        supportRules: |
+        matchRules: |
+          # Lazy: a greedy `.*` would take a `statement:` inside the query text.
+          pg_statement %{data}statement:\s+%{data:db.statement}
+      samples:
+        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
+        - 'statement: SELECT 2 AS c02;'
+        - 'duration: 12.345 ms'
+        - 'checkpoint starting: shutdown immediate'
+    # Preserve socket and hostname values in remote_host; promote only valid IPs.
+    - type: grok-parser
+      name: Parse `remote_host` as `network.client.ip`
+      enabled: true
+      source: remote_host
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_client_ip %{ip:network.client.ip}
+      samples:
+        - 172.17.0.1
+        - fd42::3
+        - '[local]'
+        - db-client.internal
+    - type: grok-parser
+      name: Extract `db.operation` from `db.statement`
       enabled: true
       source: db.statement
       grok:
@@ -98,23 +249,83 @@ pipeline:
       samples:
         - SELECT * FROM playground;
         - select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter
+    # A direct status remap uses first-letter heuristics that misclassify several
+    # PostgreSQL values. Map explicit severities first and keep the catch-all last.
+    - type: category-processor
+      name: Normalize PostgreSQL severity
+      enabled: true
+      target: postgres.severity_category
+      categories:
+        - filter:
+            query: '@error_severity:PANIC'
+          name: emergency
+        - filter:
+            query: '@error_severity:FATAL'
+          name: critical
+        - filter:
+            query: '@error_severity:ERROR'
+          name: error
+        - filter:
+            query: '@error_severity:WARNING'
+          name: warning
+        - filter:
+            query: '@error_severity:NOTICE'
+          name: notice
+        - filter:
+            query: '@error_severity:DEBUG1 OR @error_severity:DEBUG2 OR @error_severity:DEBUG3 OR @error_severity:DEBUG4 OR @error_severity:DEBUG5'
+          name: debug
+        - filter:
+            query: '@error_severity:INFO OR @error_severity:LOG OR @error_severity:DETAIL OR @error_severity:HINT OR @error_severity:QUERY OR @error_severity:STATEMENT OR @error_severity:CONTEXT OR @error_severity:LOCATION'
+          name: info
+        - filter:
+            query: '*'
+          name: info_default
+    # Status remappers are first-write-wins; this must precede the legacy remapper.
+    - type: status-remapper
+      name: Define `postgres.severity_category` as the official status of the log
+      enabled: true
+      sources:
+        - postgres.severity_category
     - type: date-remapper
       name: Define `db.date` as the official date of the log
       enabled: true
       sources:
         - db.date
-    - type: message-remapper
-      name: Define `msg` as the official message of the log
+    # Error Tracking requires a service. A string builder supplies the constant
+    # through an intermediate attribute because only a remapper can set the
+    # reserved service field. Service remappers are first-write-wins.
+    - type: string-builder-processor
+      name: Set PostgreSQL service name
+      enabled: true
+      template: postgresql
+      target: postgres.service_name
+      replaceMissing: false
+    - type: service-remapper
+      name: Define `postgres.service_name` as the official service of the log
       enabled: true
       sources:
-        - msg
-    - type: status-remapper
-      name: Define `db.severity` as the official status of the log
+        - postgres.service_name
+    - type: arithmetic-processor
+      name: Convert duration from ms to ns
       enabled: true
-      sources:
-        - db.severity
+      expression: duration * 1000000
+      target: duration
+      replaceMissing: false
+    # ════════════════════════════════════════════════════════════════════
+    # Stage 3 preserves attributes emitted by the previous pipeline. Stage 2 does
+    # not depend on these compatibility aliases.
     - type: attribute-remapper
-      name: Map attribute `db.instance` to tag `db`
+      name: Map `dbname` to `db.instance`
+      enabled: true
+      sources:
+        - dbname
+      target: db.instance
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: Map `db.instance` to tag `db`
       enabled: true
       sources:
         - db.instance
@@ -123,9 +334,145 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
-    - type: arithmetic-processor
-      name: Convert duration from ms to ns
+    - type: attribute-remapper
+      name: Map `user` to `db.user`
       enabled: true
-      expression: duration * 1000000
-      target: duration
+      sources:
+        - user
+      target: db.user
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: Map `error_severity` to `db.severity`
+      enabled: true
+      sources:
+        - error_severity
+      target: db.severity
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    # Parse the jsonlog string so db.backend_start retains its date type.
+    - type: grok-parser
+      name: Parse `session_start` into `db.backend_start`
+      enabled: true
+      source: session_start
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_backend_start_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.backend_start}
+
+          pg_backend_start %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
+
+          pg_backend_start_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):db.backend_start}\s*
+
+          pg_backend_start_notz %{date("yyyy-MM-dd HH:mm:ss"):db.backend_start}\s*
+      samples:
+        - 2025-09-15 19:02:57 UTC
+        - 2026-08-17 20:45:57.031 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
+    # Retained for compatibility; the Stage 2 status remapper normally wins first.
+    - type: status-remapper
+      name: Define `db.severity` as the official status of the log
+      enabled: true
+      sources:
+        - db.severity
+    # Use a string builder because legacy postgres.proc_id was a string while
+    # jsonlog's pid is an integer.
+    - type: string-builder-processor
+      name: Map `pid` to `postgres.proc_id`
+      enabled: true
+      template: '%{pid}'
+      target: postgres.proc_id
       replaceMissing: false
+    # Mirror the remaining enhanced RDS fields to their legacy paths. SQL state
+    # 00000 is omitted as successful completion, and a string builder preserves
+    # postgres.xid's legacy string type while jsonlog's txid remains an integer.
+    - type: string-builder-processor
+      name: Map `txid` to `postgres.xid`
+      enabled: true
+      template: '%{txid}'
+      target: postgres.xid
+      replaceMissing: false
+    - type: attribute-remapper
+      name: Map `vxid` to `postgres.vxid`
+      enabled: true
+      sources:
+        - vxid
+      target: postgres.vxid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: Map `line_num` to `session_lineno`
+      enabled: true
+      sources:
+        - line_num
+      target: session_lineno
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: Map `remote_port` to `network.client.port`
+      enabled: true
+      sources:
+        - remote_port
+      target: network.client.port
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: grok-parser
+      name: 'Stage 3 (quarantined): promote `remote_host` to `network.client.hostname` when it is not an IP'
+      enabled: true
+      source: remote_host
+      grok:
+        supportRules: |
+        matchRules: |
+          pg_client_local %{regex("\\[local\\]"):network.client.hostname}
+
+          pg_client_fqdn %{regex("[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.[A-Za-z][A-Za-z0-9-]*"):network.client.hostname}
+
+          pg_client_hostname %{regex("[A-Za-z][A-Za-z0-9_-]*"):network.client.hostname}
+      samples:
+        - '[local]'
+        - db-client.internal
+        - localhost
+        - 172.17.0.1
+        - fd42::3
+        - 2001:db8::3
+    - type: attribute-remapper
+      name: Map `state_code` to `sql_state`
+      enabled: true
+      sources:
+        - state_code
+      target: sql_state
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: Map `session_id` to `postgres.session_id`
+      enabled: true
+      sources:
+        - session_id
+      target: postgres.session_id
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+    - type: attribute-remapper
+      name: Map `application_name` to `postgres.appname`
+      enabled: true
+      sources:
+        - application_name
+      target: postgres.appname
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
