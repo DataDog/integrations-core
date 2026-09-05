@@ -342,7 +342,7 @@
                                     "query": {
                                         "data_source": "infrastructure",
                                         "resource_type": "pod",
-                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $daemonset $job $cronjob ((field#metadata.creationTimestamp:>=1hr AND NOT kube_condition_ready:true) OR pod_phase:failed)"
+                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $daemonset $job $cronjob ((field#metadata.creationTimestamp:>=1hr AND NOT kube_condition_ready:true AND NOT pod_phase:succeeded) OR pod_phase:failed)"
                                     },
                                     "columns": [
                                         {
@@ -443,6 +443,171 @@
                 "y": 7,
                 "width": 12,
                 "height": 6
+            }
+        },
+        {
+            "id": 4847629150386417,
+            "definition": {
+                "title": "Container Health",
+                "title_align": "center",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6735192087463150,
+                        "definition": {
+                            "title": "Waiting Containers by Reason",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob} by {reason}.fill(zero)",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "orange"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8251047632195804,
+                        "definition": {
+                            "title": "Containers by Last Termination Reason",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.containers.last_state.terminated{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob} by {reason}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "red"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7482601935472816,
+                        "definition": {
+                            "title": "Restarts Across Active Containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.containers.restarts{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2841769054387216,
+                        "definition": {
+                            "title": "Containers Running but Not Ready",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "running",
+                                            "query": "sum:kubernetes_state.container.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "ready",
+                                            "query": "sum:kubernetes_state.container.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "clamp_min(running - ready, 0)",
+                                            "alias": "Not Ready"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "orange"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 7
             }
         },
         {
@@ -601,14 +766,14 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 6,
+                            "width": 4,
                             "height": 2
                         }
                     },
                     {
                         "id": 3927185046291503,
                         "definition": {
-                            "title": "Memory Usage",
+                            "title": "Memory Working Set",
                             "show_legend": false,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -625,14 +790,14 @@
                                     "queries": [
                                         {
                                             "data_source": "metrics",
-                                            "name": "usage",
-                                            "query": "sum:kubernetes.memory.usage{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}"
+                                            "name": "working_set",
+                                            "query": "sum:kubernetes.memory.working_set{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "usage",
-                                            "alias": "Usage",
+                                            "formula": "working_set",
+                                            "alias": "Working Set",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -749,9 +914,65 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 4,
                             "y": 0,
-                            "width": 6,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1598043277612940,
+                        "definition": {
+                            "title": "CPU Throttled Periods",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "throttled",
+                                            "query": "sum:kubernetes.cpu.cfs.throttled.periods{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "periods",
+                                            "query": "sum:kubernetes.cpu.cfs.periods{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * throttled / periods",
+                                            "alias": "Throttled Periods",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
                             "height": 2
                         }
                     },
@@ -1070,7 +1291,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 20,
                 "width": 12,
                 "height": 9
             }
