@@ -183,6 +183,19 @@ def test_hatch_environments_keep_conditional_stages_for_the_worker(
         pytest.param('[env.collectors.custom]\npath = "hatch_plugin.py"', "env.collectors", id="custom-collector"),
         pytest.param('[envs.extra]\ntest-env = true', "envs.extra", id="named-test-environment"),
         pytest.param(
+            '''
+            [env.collectors.default]
+            [envs.default]
+            python = "3.13"
+            test-env = true
+            e2e-env = false
+            [envs.extra]
+            template = "default"
+            ''',
+            "envs.extra.template",
+            id="named-inheritance",
+        ),
+        pytest.param(
             '[envs.default.overrides]\nenv.PYTHON.python = { value = "3.11" }',
             "envs.default.overrides.env.PYTHON.python",
             id="dynamic-python",

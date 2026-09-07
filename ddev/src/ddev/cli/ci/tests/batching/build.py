@@ -47,7 +47,10 @@ logger = logging.getLogger(__name__)
 ENVIRONMENT_NAME_PATTERN = re.compile(r"[A-Za-z0-9._-]+")
 SUPPORTED_ENVIRONMENT_COLLECTORS = frozenset({"default", "datadog-checks"})
 SUPPORTED_OVERRIDE_SCOPES = frozenset({"platform", "env", "matrix", "name"})
-UNSUPPORTED_ENVIRONMENT_FIELDS = ("template", "matrix-name-format", "matrix-exclude", "matrix-include")
+UNSUPPORTED_ENVIRONMENT_FIELDS = {
+    "default": ("template", "matrix-name-format", "matrix-exclude", "matrix-include"),
+    "named": ("template",),
+}
 UNSUPPORTED_OVERRIDE_FIELDS = frozenset({"python", "platforms", "matrix", "template", "matrix-name-format"})
 OS_PLATFORM_OVERRIDE = ("matrix", "os", "platforms")
 PLATFORM_MAPPING_FIELDS = frozenset({"value", "if"})
@@ -236,6 +239,9 @@ def _default_environment(config: dict[str, Any]) -> dict[str, Any]:
         if name == "default":
             continue
         named = _table(value, f"envs.{name}")
+        for field in UNSUPPORTED_ENVIRONMENT_FIELDS["named"]:
+            if field in named:
+                raise ValueError(f"envs.{name}.{field}: unsupported for static discovery")
         if any(named.get(field, False) for field in TEST_STAGE_DEFAULTS):
             raise ValueError(f"envs.{name}: test environments outside envs.default are unsupported")
         for _, _, settings in _overrides(named.get("overrides", {}), f"envs.{name}.overrides"):
@@ -243,7 +249,7 @@ def _default_environment(config: dict[str, Any]) -> dict[str, Any]:
                 raise ValueError(f"envs.{name}.overrides: conditional named test environments are unsupported")
 
     default = _table(envs.get("default", {}), "envs.default")
-    for field in UNSUPPORTED_ENVIRONMENT_FIELDS:
+    for field in UNSUPPORTED_ENVIRONMENT_FIELDS["default"]:
         if field in default:
             raise ValueError(f"envs.default.{field}: unsupported for static discovery")
     if default.get("type", "virtual") != "virtual":
