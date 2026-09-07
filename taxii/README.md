@@ -44,4 +44,4 @@ Most TAXII problems are server-side. Include these from the Configure tab so sup
 
 **Connection timeout or TLS handshake failed.** Usually a network path or certificate problem on the server side, not something Datadog can retry around.
 
-For questions about the TAXII standard itself rather than this integration, see the [OASIS CTI documentation](https://docs.oasis-open.org/cti/).
+For questions about the TAXII standard itself rather than this integration, see the [OASIS CTI documentation](https://oasis-open.github.io/cti-documentation/).
