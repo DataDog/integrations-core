@@ -1,4 +1,4 @@
-# STIX/TAXII
+# TAXII
 
 ## Overview
 

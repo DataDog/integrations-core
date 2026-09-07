@@ -10,7 +10,7 @@
         "support": "README.md#Troubleshooting",
         "changelog": "CHANGELOG.md",
         "description": "Pull threat intelligence from any TAXII 2.1 server into Cloud SIEM.",
-        "title": "STIX/TAXII",
+        "title": "TAXII",
         "media": [],
         "classifier_tags": [
             "Category::Cloud",
