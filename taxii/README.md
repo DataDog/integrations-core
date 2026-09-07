@@ -22,7 +22,7 @@ Add each collection you want to ingest by its ID. Objects are mapped to STIX 2.1
 
 ## Troubleshooting
 
-Need help? Contact Datadog support.
+Need help? Contact [Datadog support](https://www.datadoghq.com/support/).
 
 ### Before you open a ticket
 
