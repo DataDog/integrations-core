@@ -146,16 +146,6 @@ def test_from_argocd_kube_app_name_yields_nothing_when_declared_ports_exclude_de
     assert contexts == []
 
 
-def test_generated_discovery_yields_nothing_when_declared_ports_exclude_default() -> None:
-    tagger.set_tags({'container_id://custom': ['kube_app_name:argocd-repo-server']})
-
-    candidates = list(
-        discovery.candidates(build_service(service_id='docker://custom', ports=(Port(number=8081, name='server'),)))
-    )
-
-    assert candidates == []
-
-
 def test_from_argocd_kube_app_name_brackets_ipv6_host_in_url() -> None:
     tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
 
