@@ -8,6 +8,22 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
+BUNDLED_NFSIOSTAT_PATHS = (
+    '/opt/datadog-agent/embedded/sbin/nfsiostat',
+    '/opt/datadog-packages/datadog-agent/stable/embedded/sbin/nfsiostat',
+)
+SOURCE_NFSIOSTAT_PATH = '/usr/local/sbin/nfsiostat'
+
+
+def _build_bundled_nfsiostat_command(nfsiostat_path: str) -> list[str]:
+    """Build the command for an Agent-bundled nfsiostat script."""
+    embedded_path = os.path.dirname(os.path.dirname(nfsiostat_path))
+    python_path = os.path.join(embedded_path, 'bin', 'python')
+    if os.path.exists(python_path):
+        return [python_path, nfsiostat_path, '1', '2']
+
+    return [nfsiostat_path, '1', '2']
+
 
 class NfsStatCheck(AgentCheck):
     metric_prefix = 'system.nfs.'
@@ -18,17 +34,18 @@ class NfsStatCheck(AgentCheck):
         if init_config.get('nfsiostat_path'):
             self.nfs_cmd = init_config['nfsiostat_path'].split() + ['1', '2']
         else:
-            # if not, check if it's installed in the opt dir, if so use that
-            if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
-                self.nfs_cmd = ['/opt/datadog-agent/embedded/sbin/nfsiostat', '1', '2']
-            # if not, then check if it is in the default place
-            elif os.path.exists('/usr/local/sbin/nfsiostat'):
-                self.nfs_cmd = ['/usr/local/sbin/nfsiostat', '1', '2']
+            for nfsiostat_path in BUNDLED_NFSIOSTAT_PATHS:
+                if os.path.exists(nfsiostat_path):
+                    self.nfs_cmd = _build_bundled_nfsiostat_command(nfsiostat_path)
+                    break
             else:
-                raise Exception(
-                    'nfsstat check requires nfsiostat be installed, please install it '
-                    '(through nfs-utils) or set the path to the installed version'
-                )
+                if os.path.exists(SOURCE_NFSIOSTAT_PATH):
+                    self.nfs_cmd = [SOURCE_NFSIOSTAT_PATH, '1', '2']
+                else:
+                    raise Exception(
+                        'nfsstat check requires nfsiostat be installed, please install it '
+                        '(through nfs-utils) or set the path to the installed version'
+                    )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
         self.disable_missing_mountpoints_warning = is_affirmative(
             self.instance.get('disable_missing_mountpoints_warning', False)
