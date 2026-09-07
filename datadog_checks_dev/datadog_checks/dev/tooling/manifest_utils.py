@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev.fs import file_exists, path_join
+import toml
+
+from datadog_checks.dev.fs import file_exists, path_join, read_file
 
 from .commands.console import abort
 from .constants import get_root
@@ -18,6 +20,28 @@ NON_INTEGRATION_PATHS = [
     "datadog_checks_downloader",
     "ddev",
 ]
+
+
+def get_metric_prefix(check):
+    """
+    Return the metric prefix declared for `check`.
+
+    Prefers `manifest.json`'s `/assets/integration/metrics/prefix` and falls back to the
+    `metrics-prefix` overrides table in the repo's `.ddev/config.toml`, the same source
+    `ddev validate metadata` consults. Returns '' if neither declares one (e.g. `manifest.json`
+    is absent, as is increasingly the case since manifest.json is being phased out).
+    """
+    manifest_json = JSONDict(load_manifest(check))
+    prefix = manifest_json.get_path("/assets/integration/metrics/prefix") or ''
+    if prefix:
+        return prefix
+
+    config_toml_path = path_join(get_root(), '.ddev', 'config.toml')
+    if file_exists(config_toml_path):
+        repo_config = toml.loads(read_file(config_toml_path))
+        prefix = repo_config.get('overrides', {}).get('metrics-prefix', {}).get(check, '')
+
+    return prefix
 
 
 class Manifest:
