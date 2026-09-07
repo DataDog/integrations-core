@@ -1,7 +1,10 @@
 #!/bin/sh
 
+set -e
+
 # Install NFS client
-apt update && apt install -y nfs-common=1:1.3.4-6+deb11u1
+apt-get update
+apt-get install -y nfs-common
 
 # Make the directory to mount
 mkdir /test1
