@@ -9,8 +9,8 @@
         "configuration": "README.md#Setup",
         "support": "README.md#Troubleshooting",
         "changelog": "CHANGELOG.md",
-        "description": "Poll TAXII 2.1 servers for STIX threat intelligence and enrich Cloud SIEM logs.",
-        "title": "TAXII",
+        "description": "Pull threat intelligence from any TAXII 2.1 server into Cloud SIEM.",
+        "title": "STIX/TAXII",
         "media": [],
         "classifier_tags": [
             "Category::Cloud",
