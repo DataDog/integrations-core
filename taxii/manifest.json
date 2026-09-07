@@ -21,7 +21,7 @@
     "assets": {
         "integration": {
             "auto_install": false,
-            "source_type_id": 0,
+            "source_type_id": 84000000,
             "source_type_name": "TAXII",
             "events": {
                 "creates_events": false
