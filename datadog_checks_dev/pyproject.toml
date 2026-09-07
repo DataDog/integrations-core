@@ -89,7 +89,7 @@ cli = [
     # We have to pin to 23.11.0 until the following issue is done:
     # https://github.com/twisted/towncrier/issues/641
     "towncrier==23.11.0",
-    "twine>=1.11.0",
+    "twine>=7.0.0",
     "virtualenv>=20.26.1",
     # TODO: Remove once every check has a pyproject.toml
 ]

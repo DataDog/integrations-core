@@ -236,6 +236,9 @@ def _validate_strategy_input(stanza: dict, name: str, input_def: Any, loader: An
     if input_def.type == 'array[int]':
         if not isinstance(value, list) or not all(isinstance(v, int) and not isinstance(v, bool) for v in value):
             loader.errors.append(f'{location}: Attribute `{name}` must be an array of integers')
+    elif input_def.type == 'array[string]':
+        if not isinstance(value, list) or not value or not all(isinstance(v, str) and v for v in value):
+            loader.errors.append(f'{location}: Attribute `{name}` must be a non-empty array of non-empty strings')
     elif input_def.type == 'integer':
         if not isinstance(value, int) or isinstance(value, bool):
             loader.errors.append(f'{location}: Attribute `{name}` must be an integer')
@@ -382,14 +385,17 @@ def _validate_discovery_template(
     template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
 ) -> None:
     try:
-        parsed_template = Formatter().parse(template)
+        parsed_template = list(Formatter().parse(template))
     except ValueError as e:
         loader.errors.append(f'{location}, {field_name}: Invalid candidate template: {e}')
         return
 
-    for _, placeholder, _, _ in parsed_template:
+    for _, placeholder, _, conversion in parsed_template:
         if placeholder is None:
             continue
+
+        if conversion is not None and conversion not in ('s', 'r', 'a'):
+            loader.errors.append(f'{location}, {field_name}: Unknown conversion `!{conversion}`')
 
         root, separator, attr = placeholder.partition('.')
         if not separator or root not in placeholders:

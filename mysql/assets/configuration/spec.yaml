@@ -79,6 +79,125 @@ files:
               type: boolean
               example: false
               display_default: false
+          - name: data_observability
+            display_priority: 0
+            fleet_configurable: true
+            description: |
+              Configure the Data Observability async job, which executes monitoring
+              queries delivered via Remote Configuration.
+              Enabling Data Observability with Database Monitoring uses one additional
+              connection. Increase MAX_USER_CONNECTIONS from 5 to 6 for the monitoring user.
+            options:
+              - name: enabled
+                fleet_configurable: true
+                description: Enable the Data Observability job.
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+              - name: collection_interval
+                fleet_configurable: true
+                description: |
+                  How often (in seconds) the job wakes up to check which queries are
+                  due. Individual queries define when they are due using either
+                  interval_seconds or a cron schedule. Set this value no greater than
+                  the shortest query interval or the shortest gap between scheduled
+                  executions. Longer collection intervals delay queries and can skip
+                  earlier cron ticks when several become due between collection cycles.
+                value:
+                  type: number
+                  example: 10
+                  display_default: 10
+              - name: run_sync
+                hidden: true
+                description: Run the job synchronously (for testing).
+                value:
+                  type: boolean
+                  example: false
+                  display_default: false
+                fleet_configurable: false
+              - name: config_id
+                hidden: true
+                description: |
+                  Unique identifier of the Remote Configuration payload that populated
+                  this data_observability block. Set automatically by the Datadog Agent
+                  Go RC handler when it delivers query configuration; do not set this
+                  field manually. It is forwarded as-is on every emitted event so that
+                  the intake can correlate results back to the originating RC config.
+                value:
+                  type: string
+                fleet_configurable: false
+              - name: queries
+                hidden: true
+                description: |
+                  List of monitor queries to execute. Populated automatically by the
+                  Datadog Agent Go RC handler when Remote Configuration delivers a
+                  DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+                  describes one SQL monitoring query along with its scheduling
+                  parameters and entity metadata.
+                value:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - monitor_id
+                      - dbname
+                      - query
+                      - query_timeout
+                      - entity
+                    properties:
+                      - name: monitor_id
+                        type: integer
+                      - name: dbname
+                        type: string
+                      - name: type
+                        type: string
+                      - name: query
+                        type: string
+                      - name: interval_seconds
+                        description: |
+                          How often (in seconds) to run this query. Ignored when schedule is set
+                          (see schedule for the precedence rule).
+                        type: integer
+                      - name: schedule
+                        description: |
+                          A standard 5-field cron expression (minute hour dom month dow) specifying
+                          when to run this query. When both schedule and interval_seconds are set,
+                          schedule wins and interval_seconds is ignored. If neither is set, the
+                          query is skipped at runtime with a warning.
+                        type: string
+                      - name: query_timeout
+                        description: |
+                          Statement timeout for this query in milliseconds. Overrides the instance-level
+                          query_timeout for this query only.
+                        type: integer
+                      - name: entity
+                        type: object
+                        required:
+                          - platform
+                          - account
+                          - database
+                          - schema
+                          - table
+                        properties:
+                          - name: platform
+                            type: string
+                          - name: account
+                            type: string
+                          - name: database
+                            type: string
+                          - name: schema
+                            type: string
+                          - name: table
+                            type: string
+                      - name: custom_sql_select_fields
+                        type: object
+                        properties:
+                          - name: metric_config_id
+                            type: integer
+                          - name: entity_id
+                            type: string
+                fleet_configurable: false
           - name: propagate_agent_tags
             display_priority: 0
             description: |
@@ -378,7 +497,8 @@ files:
                   Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing schemas. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
-                  Only tables and schemas for which the user has been granted SELECT privileges are collected.
+                  Only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`)
+                  privilege are collected.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
@@ -389,7 +509,8 @@ files:
               - name: table_size_metrics
                 description: |
                   Set to `true` to collect data table size metrics.
-                  Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+                  Note that only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`)
+                  privilege are collected.
                   This runs a heavy query against your database to compute the relevant metrics
                   for all your existing tables. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
@@ -402,7 +523,8 @@ files:
               - name: system_table_size_metrics
                 description: |
                   Set to `true` to collect system table size metrics from performance_schema, information_schema and mysql.
-                  Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+                  Note that only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`)
+                  privilege are collected.
                   This runs a heavy query against your database to compute the relevant metrics
                   for all your existing tables. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
@@ -472,11 +594,13 @@ files:
             display_priority: 0
             description: |
               Configure collection of schemas (databases).
-              Only tables and schemas for which the user has been granted SELECT privileges are collected.
+              Only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`) privilege
+              are collected.
             options:
               - name: enabled
                 description: |
-                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                  Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+                  Defaults to false.
                 value:
                   type: boolean
                   example: false
@@ -504,11 +628,13 @@ files:
             description: |
               DEPRECATED: Use `collect_schemas` instead.
               Configure collection of schemas (databases).
-              Only tables and schemas for which the user has been granted SELECT privileges are collected.
+              Only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`) privilege
+              are collected.
             options:
               - name: enabled
                 description: |
-                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                  Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+                  Defaults to false.
                 value:
                   type: boolean
                   example: false

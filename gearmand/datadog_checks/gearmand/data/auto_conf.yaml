@@ -8,7 +8,8 @@ ad_identifiers:
 
 ## Enables configuration discovery
 #
-discovery: {}
+discovery:
+  metrics_prefix: gearman
 
 ## Unused init configuration
 #

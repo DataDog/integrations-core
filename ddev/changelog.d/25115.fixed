@@ -1,0 +1,1 @@
+``ddev ci dispatch-tests`` sends each batch the commit and branch its results belong to and whether the tested head lives in a fork, no longer opens the batch's check run itself, and rejects a plan naming an unknown runner.

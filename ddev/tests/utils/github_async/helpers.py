@@ -10,7 +10,7 @@ import dataclasses
 import io
 import zipfile
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 from aiolimiter import AsyncLimiter
@@ -24,6 +24,7 @@ from tests.utils.github_async.payloads import (
     full_pull_request_payload,
     issue_comment_payload,
     pr_review_comment_payload,
+    pull_request_file_payload,
     pull_request_payload,
     workflow_job,
     workflow_run_payload,
@@ -109,6 +110,10 @@ class EndpointCase:
     id: str
     call: Callable[[AsyncGitHubClient], Awaitable[GitHubResponse[Any]]]
     ok_response: Callable[[], httpx.Response]
+    # Which retry default the endpoint is expected to use. Stated per endpoint rather than derived
+    # from the verb, because whether a request can be safely replayed is the whole question, and
+    # three of the mutating endpoints can be.
+    default_retry: Literal["safe", "mutating"]
 
 
 ENDPOINT_CALLS = [
@@ -118,53 +123,96 @@ ENDPOINT_CALLS = [
         lambda: json_response(
             {"workflow_run_id": 1, "run_url": "https://api.github.com/x", "html_url": "https://github.com/x"}
         ),
+        default_retry="mutating",
     ),
     EndpointCase(
-        "get_workflow_run", lambda c: c.get_workflow_run("o", "r", 42), lambda: json_response(workflow_run_payload())
+        "get_workflow_run",
+        lambda c: c.get_workflow_run("o", "r", 42),
+        lambda: json_response(workflow_run_payload()),
+        default_retry="safe",
     ),
     EndpointCase(
         "list_workflow_run_artifacts",
         lambda c: first_page(c.list_workflow_run_artifacts("o", "r", 1)),
         lambda: json_response({"total_count": 1, "artifacts": [artifact(1)]}),
+        default_retry="safe",
     ),
     EndpointCase(
         "list_workflow_jobs",
         lambda c: first_page(c.list_workflow_jobs("o", "r", 42)),
         lambda: json_response({"total_count": 1, "jobs": [workflow_job(1)]}),
+        default_retry="safe",
     ),
     EndpointCase(
         "create_issue_comment",
         lambda c: c.create_issue_comment("o", "r", 1, "body"),
         lambda: json_response(issue_comment_payload()),
+        default_retry="mutating",
+    ),
+    EndpointCase(
+        "update_issue_comment",
+        lambda c: c.update_issue_comment("o", "r", 1, "body"),
+        lambda: json_response(issue_comment_payload()),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_issue_comments",
+        lambda c: first_page(c.list_issue_comments("o", "r", 1)),
+        lambda: json_response([issue_comment_payload()]),
+        default_retry="safe",
     ),
     EndpointCase(
         "get_pull_request",
         lambda c: c.get_pull_request("o", "r", 5),
         lambda: json_response(full_pull_request_payload(number=5)),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_pull_requests",
+        lambda c: c.list_pull_requests("o", "r"),
+        lambda: json_response([pull_request_payload(number=1)]),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_pull_request_files",
+        lambda c: first_page(c.list_pull_request_files("o", "r", 5)),
+        lambda: json_response([pull_request_file_payload()]),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_commit_pulls",
+        lambda c: first_page(c.list_commit_pulls("o", "r", "abc123")),
+        lambda: json_response([pull_request_payload(number=1)]),
+        default_retry="safe",
     ),
     EndpointCase(
         "create_pull_request",
         lambda c: c.create_pull_request("o", "r", "t", "h", "b"),
-        lambda: json_response(pull_request_payload(number=1), status_code=201),
+        lambda: json_response(full_pull_request_payload(number=1), status_code=201),
+        default_retry="mutating",
     ),
     EndpointCase(
         "add_labels_to_issue",
         lambda c: c.add_labels_to_issue("o", "r", 1, ["bug"]),
         lambda: json_response([{"id": 1, "name": "bug"}]),
+        default_retry="safe",
     ),
     EndpointCase(
         "create_pr_review_comment",
         lambda c: c.create_pr_review_comment("o", "r", 1, "body", "sha", "path", position=1),
         lambda: json_response(pr_review_comment_payload()),
+        default_retry="mutating",
     ),
     EndpointCase(
         "create_check_run",
         lambda c: c.create_check_run("o", "r", "ck", "abc", "in_progress"),
         lambda: json_response(check_run_payload()),
+        default_retry="mutating",
     ),
     EndpointCase(
         "update_check_run",
         lambda c: c.update_check_run("o", "r", 77, status="in_progress"),
         lambda: json_response(check_run_payload(id=77)),
+        default_retry="safe",
     ),
 ]

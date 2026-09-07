@@ -1,0 +1,425 @@
+# Runs one Dispatcher batch: the set of test jobs `ddev ci dispatch-tests` planned and sent here as a
+# single workflow input.
+#
+# The batch reports its own result, posted in `setup` and settled in `teardown`. That is deliberately
+# not the Dispatcher's job: a step guarded by `if: always()` gets GitHub's server-side cancellation
+# window, whereas the Dispatcher process is signalled and then killed, so a cancelled run would leave
+# the result pending forever if the Dispatcher were the one settling it.
+#
+# Test execution lives in `.github/actions/run-test-job`, which this workflow calls once per job. The
+# workflow decides where a job runs and what it may touch; the action decides what gets tested.
+#
+# Trust model. The Dispatcher runs from `test-dispatch.yml` in master context, and the OIDC policy
+# issues the dispatch credential only to a master-context run, so every input here was produced by
+# master's ddev. What a pull request does influence is plan content, because the planner reads
+# `.ddev/config.toml` and each target's `hatch.toml` from the tree it is given; `validate_batches`
+# bounds that Dispatcher-side. A repository maintainer can hand-dispatch anything, and this workflow
+# does not defend against its own maintainers.
+#
+# Three parts of the contract fail silently when broken, all read straight off the matrix so nothing
+# here reconstructs them:
+#   - the job name must be `BatchJob.name` verbatim, because the gatherer joins workflow jobs to
+#     planned jobs by exact name and raises when a planned job has none.
+#   - each job uploads exactly one artifact named `BatchJob.artifact_name()`. Any other name reads as
+#     a lost artifact and the batch reports empty results.
+#   - `DD_GIT_*` must point at the tested commit. This workflow is dispatched at `ref: master`, so
+#     its ambient `GITHUB_SHA` is master's tip and every result would otherwise be attributed to
+#     master, including on pull requests.
+#
+# `workflow_dispatch` requires the file to exist on the default branch, so changes here only take
+# effect once merged.
+name: Test Batch
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_id:
+        description: "Logical batch identity, e.g. batch-01"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Ref the batch tests, refs/pull/<n>/merge for a pull request"
+        required: true
+        type: string
+      head_sha:
+        description: "Commit the results belong to. The pull request's head"
+        required: true
+        type: string
+      branch:
+        description: "Branch the results belong to"
+        required: true
+        type: string
+      job_list:
+        description: "The batch's jobs, as gzip+base64 of the plan's JSON"
+        required: true
+        type: string
+      integrations:
+        description: "JSON array of the target names in this batch"
+        required: false
+        default: "[]"
+        type: string
+      pytest_args:
+        description: 'Arguments every job appends to pytest, e.g. -m "not flaky"'
+        required: false
+        default: ""
+        type: string
+      context:
+        description: "Test context, reported to CI Visibility and used to pick the E2E flags"
+        required: false
+        default: "standard"
+        type: string
+      is_fork:
+        description: "Whether the tested commit comes from a fork. Withholds every credential when true"
+        required: false
+        default: "false"
+        type: string
+
+permissions: {}
+
+# A new revision of a pull request dispatches the same batch ids against the same
+# refs/pull/<n>/merge, so its batches land in the previous revision's groups and cancel them.
+# `head_sha` would give every revision a group of its own and cancel nothing; a commit run keys on
+# its own SHA, so master never cancels itself. What the group cannot see, the Dispatcher's
+# `cancel_dispatched_runs` reaps: a cancellation or a closed pull request with no follow-up push,
+# and a plan that shrank, whose old higher-numbered batches have no successor here.
+concurrency:
+  group: test-batch-${{ inputs.checkout_sha }}-${{ inputs.batch_id }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup:
+    name: setup
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    permissions:
+      statuses: write
+    outputs:
+      matrix: ${{ steps.decode.outputs.matrix }}
+    steps:
+      - name: Decode the job list
+        id: decode
+        env:
+          JOB_LIST: ${{ inputs.job_list }}
+          BATCH_ID: ${{ inputs.batch_id }}
+          INTEGRATIONS: ${{ inputs.integrations }}
+        run: |
+          set -euo pipefail
+
+          # A repository-wide batch is several times GitHub's 65,535-character input limit as plain
+          # JSON, so the Dispatcher always compresses. A decode failure is a malformed input and must
+          # stop the batch rather than produce an empty matrix.
+          printf '%s' "$JOB_LIST" | base64 -d | gzip -dc > jobs.json
+
+          count=$(python3 -c 'import json; print(len(json.load(open("jobs.json"))))')
+          if [[ "$count" -eq 0 ]]; then
+            echo "::error::The batch carries no jobs."
+            exit 1
+          fi
+
+          {
+            echo "count=${count}"
+            echo "matrix<<__MATRIX__"
+            cat jobs.json
+            echo
+            echo "__MATRIX__"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### ${BATCH_ID}"
+            echo
+            echo "- jobs: ${count}"
+            echo "- targets: $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["INTEGRATIONS"])) or "-")')"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # A status, not a check run: a check run at a SHA this workflow was not dispatched at gets filed
+      # under whichever workflow already has a check suite there.
+      - name: Mark the batch pending
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BATCH_ID: ${{ inputs.batch_id }}
+          HEAD_SHA: ${{ inputs.head_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_COUNT: ${{ steps.decode.outputs.count }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=test-batch/${BATCH_ID}" \
+            -f "state=pending" \
+            -f "description=Running ${JOB_COUNT} job(s)" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"posted \(.context) as \(.state)"'
+
+  # Twin of `test_fork`, which runs the same steps with no OIDC and no credentials. `permissions`
+  # takes no expression, so the gate has to be two jobs, and a reusable workflow would rename them to
+  # `<caller> / <called>` and break the exact-name join. Keep the step lists identical apart from the
+  # credentials.
+  test:
+    needs: setup
+    if: inputs.is_fork != 'true'
+    # Correlated by exact name, so this must stay `matrix.name` alone: a prefix or a suffix here
+    # leaves every job in the batch unmatched.
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner_labels }}
+    # Hardcoded rather than an input: a hung job would otherwise hold a runner for the 6h default,
+    # long after the Dispatcher's own ceiling has passed.
+    timeout-minutes: 120
+    # Permissions come from the default branch and a pull request cannot widen them, but every step
+    # after the checkout runs the tested commit's code, so what this job holds is what it can take.
+    permissions:
+      contents: read
+      id-token: write # dd-sts, for the CI Visibility API key
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - name: Set up Windows
+        if: runner.os == 'Windows'
+        run: diskperf -y
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.checkout_sha }}
+          persist-credentials: false
+
+      # Datadog's git variables take precedence over the CI provider's, which is the only way to stop
+      # this run being attributed to master. `head_sha` and not `checkout_sha`: the latter is
+      # refs/pull/<n>/merge, which is not a SHA.
+      - name: Attribute results to the tested commit
+        env:
+          HEAD_SHA: ${{ inputs.head_sha }}
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -euo pipefail
+
+          # Attacker-controlled, and a newline in it would define further variables in GITHUB_ENV.
+          author_email=$(git log -1 --format=%ae)
+          case $author_email in
+            *[!a-zA-Z0-9.@_+-]*) author_email='' ;;
+          esac
+
+          {
+            echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
+            echo "DD_GIT_BRANCH=${BRANCH}"
+            echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+            echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
+          } >> "$GITHUB_ENV"
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-test-target-api-key
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      # The planner fans a change in ddev's test-planning code out to every eligible target precisely
+      # to find out whether it breaks running the integrations' tests, so the jobs have to run the
+      # checkout's ddev. From PyPI they would all exercise the released one and the fan-out would be
+      # guaranteed to tell us nothing.
+      - uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure ddev
+        run: |
+          ddev config set upgrade_check false
+          ddev config override
+
+      - name: Run the tests
+        uses: ./.github/actions/run-test-job
+        with:
+          target: ${{ matrix.target }}
+          job_name: ${{ matrix.name }}
+          platform: ${{ matrix.platform }}
+          environment: ${{ matrix.environment }}
+          python_version: ${{ matrix.python_version }}
+          unit_tests: ${{ matrix.unit_tests }}
+          e2e_tests: ${{ matrix.e2e_tests }}
+          agent_image: ${{ matrix.agent_image }}
+          minimum_base_package: ${{ matrix.minimum_base_package }}
+          pytest_args: ${{ inputs.pytest_args }}
+          context: ${{ inputs.context }}
+          is_fork: "false"
+          dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
+          # A rate-limit lift for the ~70 api.github.com calls `ddev validate licenses` makes, not an
+          # authorization requirement, so the ambient token is enough.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Read only by the sap_hana and weblogic setup scripts, so every other job runs without
+          # them rather than seeing credentials it has no use for.
+          docker_username: ${{ (matrix.target == 'sap_hana' || matrix.target == 'weblogic') && secrets.DOCKER_USERNAME || '' }}
+          docker_token: ${{ (matrix.target == 'sap_hana' || matrix.target == 'weblogic') && secrets.DOCKER_ACCESS_TOKEN || '' }}
+          oracle_docker_username: ${{ matrix.target == 'weblogic' && secrets.ORACLE_DOCKER_USERNAME || '' }}
+          oracle_docker_password: ${{ matrix.target == 'weblogic' && secrets.ORACLE_DOCKER_PASSWORD || '' }}
+
+      # One flat directory per job, uploaded under the job's `artifact_name`. The gatherer rglobs
+      # `test-*.xml` and `coverage*.xml` inside it, which is what `ddev test --junit` and `--cov`
+      # already write, so nothing is renamed here.
+      - name: Collect the job's reports
+        if: always()
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          if [[ -d "$TARGET/junit" ]]; then
+            find "$TARGET/junit" -name 'test-*.xml' -exec cp {} reports/ \;
+          fi
+          # Absent for a minimum-base-package job, which runs without `--cov`.
+          if [[ -f "$TARGET/coverage.xml" ]]; then
+            cp "$TARGET/coverage.xml" reports/
+          fi
+          ls -la reports
+
+      - name: Upload the job's reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: reports
+          if-no-files-found: warn
+
+  # Twin of `test`, for a commit this repository does not control. No `id-token`, so the tested code
+  # cannot mint an OIDC token whose claims name the default branch, and no credential inputs at all.
+  # Each of those is optional in the action and no-ops when absent, so the tests still run.
+  test_fork:
+    needs: setup
+    if: inputs.is_fork == 'true'
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner_labels }}
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - name: Set up Windows
+        if: runner.os == 'Windows'
+        run: diskperf -y
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.checkout_sha }}
+          persist-credentials: false
+
+      - name: Attribute results to the tested commit
+        env:
+          HEAD_SHA: ${{ inputs.head_sha }}
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -euo pipefail
+
+          author_email=$(git log -1 --format=%ae)
+          case $author_email in
+            *[!a-zA-Z0-9.@_+-]*) author_email='' ;;
+          esac
+
+          {
+            echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
+            echo "DD_GIT_BRANCH=${BRANCH}"
+            echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+            echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
+          } >> "$GITHUB_ENV"
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure ddev
+        run: |
+          ddev config set upgrade_check false
+          ddev config override
+
+      - name: Run the tests
+        uses: ./.github/actions/run-test-job
+        with:
+          target: ${{ matrix.target }}
+          job_name: ${{ matrix.name }}
+          platform: ${{ matrix.platform }}
+          environment: ${{ matrix.environment }}
+          python_version: ${{ matrix.python_version }}
+          unit_tests: ${{ matrix.unit_tests }}
+          e2e_tests: ${{ matrix.e2e_tests }}
+          agent_image: ${{ matrix.agent_image }}
+          minimum_base_package: ${{ matrix.minimum_base_package }}
+          pytest_args: ${{ inputs.pytest_args }}
+          context: ${{ inputs.context }}
+          is_fork: "true"
+
+      - name: Collect the job's reports
+        if: always()
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          if [[ -d "$TARGET/junit" ]]; then
+            find "$TARGET/junit" -name 'test-*.xml' -exec cp {} reports/ \;
+          fi
+          if [[ -f "$TARGET/coverage.xml" ]]; then
+            cp "$TARGET/coverage.xml" reports/
+          fi
+          ls -la reports
+
+      - name: Upload the job's reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: reports
+          if-no-files-found: warn
+
+  teardown:
+    needs:
+      - setup
+      - test
+      - test_fork
+    if: always() && needs.setup.result == 'success'
+    name: teardown
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    permissions:
+      statuses: write
+    steps:
+      # From the test job's result rather than this job's status, so a cancelled or skipped batch
+      # settles as what it was instead of as a success. The twin that did not run reports `skipped`,
+      # so which one to read is selected on the value that chose it.
+      - name: Settle the batch's result
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BATCH_ID: ${{ inputs.batch_id }}
+          HEAD_SHA: ${{ inputs.head_sha }}
+          TEST_RESULT: ${{ inputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          # A status has no `cancelled` or `skipped`, and `pending` would hold the pull request.
+          case "$TEST_RESULT" in
+            success)   state=success; description="All jobs passed" ;;
+            cancelled) state=failure; description="The batch was cancelled" ;;
+            skipped)   state=failure; description="The batch did not run" ;;
+            *)         state=failure; description="A job failed" ;;
+          esac
+
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=test-batch/${BATCH_ID}" \
+            -f "state=${state}" \
+            -f "description=${description}" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"settled \(.context) as \(.state)"'

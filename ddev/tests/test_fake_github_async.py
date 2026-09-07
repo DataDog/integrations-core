@@ -5,12 +5,26 @@
 
 from __future__ import annotations
 
+import contextlib
+import inspect
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
+
 import httpx
 import pytest
 
-from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import Artifact, ArtifactsList, PullRequest
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
+from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
+from ddev.utils.rate_limiting import RelaxedRateLimits
+from tests.cli.ci.tests.helpers import comment_page
 from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.utils.github_async.helpers import first_page
+
+
+def a_pull_request(number: int) -> PullRequest:
+    """A payload for the fake to hand back. These tests are about the fake's dispatch, not the model."""
+    return PullRequest(number=number, html_url=f'https://x/{number}', changed_files=1)
 
 
 @pytest.fixture
@@ -30,7 +44,7 @@ def test_unknown_method_without_default_raises(fake: FakeAsyncGitHubClient) -> N
 
 
 async def test_sticky_mock_with_inner_data_is_auto_wrapped(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=42, html_url='https://x/42'))
+    fake.mock_response('create_pull_request', a_pull_request(42))
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -39,9 +53,7 @@ async def test_sticky_mock_with_inner_data_is_auto_wrapped(fake: FakeAsyncGitHub
 
 
 async def test_sticky_mock_with_full_response_passes_through(fake: FakeAsyncGitHubClient) -> None:
-    full = GitHubResponse.model_validate(
-        {'data': PullRequest(number=99, html_url='https://x/99'), 'headers': {'x-rate-limit': '5'}}
-    )
+    full = GitHubResponse.model_validate({'data': a_pull_request(99), 'headers': {'x-rate-limit': '5'}})
     fake.mock_response('create_pull_request', full)
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -51,7 +63,7 @@ async def test_sticky_mock_with_full_response_passes_through(fake: FakeAsyncGitH
 
 
 async def test_sticky_mock_partial_match_only_fires_for_matching_call(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=7, html_url='https://x/7'), draft=True)
+    fake.mock_response('create_pull_request', a_pull_request(7), draft=True)
 
     # Default fires for non-matching calls.
     default = await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=False)
@@ -63,8 +75,8 @@ async def test_sticky_mock_partial_match_only_fires_for_matching_call(fake: Fake
 
 
 async def test_most_recent_sticky_mock_wins(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=1, html_url='https://x/1'))
-    fake.mock_response('create_pull_request', PullRequest(number=2, html_url='https://x/2'))
+    fake.mock_response('create_pull_request', a_pull_request(1))
+    fake.mock_response('create_pull_request', a_pull_request(2))
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -80,8 +92,8 @@ async def test_exception_response_raises(fake: FakeAsyncGitHubClient) -> None:
 
 
 async def test_one_shot_consumed_then_falls_through_to_sticky(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=10, html_url='https://x/10'), once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=99, html_url='https://x/99'))  # sticky
+    fake.mock_response('create_pull_request', a_pull_request(10), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(99))  # sticky
 
     first = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
     second = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -96,7 +108,7 @@ async def test_multiple_one_shots_fire_in_registration_order(fake: FakeAsyncGitH
     """The retry pattern: first call errors, second succeeds."""
     err = httpx.HTTPStatusError('try again', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500))
     fake.mock_response('create_pull_request', err, once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=5, html_url='https://x/5'), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(5), once=True)
 
     with pytest.raises(httpx.HTTPStatusError):
         await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -108,7 +120,7 @@ async def test_multiple_one_shots_fire_in_registration_order(fake: FakeAsyncGitH
 async def test_one_shot_with_match_kwargs_only_consumed_when_match(fake: FakeAsyncGitHubClient) -> None:
     fake.mock_response(
         'create_pull_request',
-        PullRequest(number=7, html_url='https://x/7'),
+        a_pull_request(7),
         once=True,
         draft=True,
     )
@@ -127,15 +139,15 @@ async def test_one_shot_with_match_kwargs_only_consumed_when_match(fake: FakeAsy
 
 
 async def test_assert_all_responses_consumed_passes_when_empty(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=5, html_url='https://x/5'), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(5), once=True)
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
     fake.assert_all_responses_consumed()  # must not raise
 
 
 async def test_assert_all_responses_consumed_fails_with_pending(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=1, html_url='https://x/1'), once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=2, html_url='https://x/2'), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(1), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(2), once=True)
 
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -243,6 +255,33 @@ async def test_assert_called_with_fails_when_no_match(fake: FakeAsyncGitHubClien
         )
 
 
+async def test_list_issue_comments_defaults_to_no_comments(fake: FakeAsyncGitHubClient):
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+    assert [comment for page in pages for comment in page.data] == []
+
+
+async def test_list_issue_comments_yields_the_pages_it_was_given(fake: FakeAsyncGitHubClient):
+    """A page is itself a list of comments, so pages are registered explicitly rather than inferred."""
+    fake.mock_response(
+        'list_issue_comments',
+        [comment_page(IssueComment(id=1, body='a')), comment_page(IssueComment(id=2, body='b'))],
+    )
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 2
+    assert [comment.id for page in pages for comment in page.data] == [1, 2]
+
+
+async def test_list_issue_comments_yields_one_page_for_one_response(fake: FakeAsyncGitHubClient):
+    fake.mock_response('list_issue_comments', comment_page(IssueComment(id=1, body='a'), IssueComment(id=2, body='b')))
+
+    pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
+
+    assert len(pages) == 1
+    assert [comment.id for comment in pages[0].data] == [1, 2]
+
+
 async def test_assert_not_called_passes_when_method_unused(fake: FakeAsyncGitHubClient) -> None:
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -259,13 +298,184 @@ async def test_assert_not_called_fails_when_method_was_called(fake: FakeAsyncGit
 async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubClient) -> None:
     err = httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500))
     fake.mock_response('create_pull_request', err, once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=5, html_url='https://x/5'))
+    fake.mock_response('create_pull_request', a_pull_request(5))
 
     with pytest.raises(httpx.HTTPStatusError):
         await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=True)
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=False)
 
     assert len(fake.calls_to('create_pull_request')) == 2
+
+
+# One call per mirror, paired with an argument the recording must carry back. Every mirror belongs
+# here: `test_every_mirror_is_in_the_call_table` fails when one is added without being registered,
+# which is the case a hand-written test per method cannot catch.
+SHUTDOWN_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
+
+MIRROR_CALLS = [
+    ('get_pull_request', lambda f, _: f.get_pull_request('o', 'r', 5), {'pull_number': 5}),
+    ('list_pull_requests', lambda f, _: f.list_pull_requests('o', 'r', head='o:branch'), {'head': 'o:branch'}),
+    ('create_pull_request', lambda f, _: f.create_pull_request('o', 'r', 'T', 'h', 'b', draft=True), {'draft': True}),
+    ('create_issue_comment', lambda f, _: f.create_issue_comment('o', 'r', 7, 'hello'), {'body': 'hello'}),
+    ('update_issue_comment', lambda f, _: f.update_issue_comment('o', 'r', 3, 'edited'), {'comment_id': 3}),
+    ('list_issue_comments', lambda f, _: first_page(f.list_issue_comments('o', 'r', 7)), {'issue_number': 7}),
+    (
+        'list_pull_request_files',
+        lambda f, _: first_page(f.list_pull_request_files('o', 'r', 5)),
+        {'pull_number': 5},
+    ),
+    (
+        'list_commit_pulls',
+        lambda f, _: first_page(f.list_commit_pulls('o', 'r', 'abc123')),
+        {'commit_sha': 'abc123'},
+    ),
+    (
+        'add_labels_to_issue',
+        lambda f, _: f.add_labels_to_issue('o', 'r', 7, ['qa/skip-qa']),
+        {'labels': ['qa/skip-qa']},
+    ),
+    (
+        'create_workflow_dispatch',
+        lambda f, _: f.create_workflow_dispatch('o', 'r', 'wf.yml', 'main'),
+        {'workflow_id': 'wf.yml'},
+    ),
+    ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
+    (
+        'create_pr_review_comment',
+        lambda f, _: f.create_pr_review_comment('o', 'r', 1, 'body', 'abc123', 'file.py', line=10, side='RIGHT'),
+        {'commit_id': 'abc123', 'line': 10},
+    ),
+    (
+        'enter_shutdown_mode',
+        lambda f, _: f.enter_shutdown_mode(rate_limits=SHUTDOWN_RATE_LIMITS),
+        {'rate_limits': SHUTDOWN_RATE_LIMITS},
+    ),
+    (
+        'create_check_run',
+        lambda f, _: f.create_check_run('o', 'r', 'unit', 'abc123', 'in_progress'),
+        {'head_sha': 'abc123'},
+    ),
+    ('update_check_run', lambda f, _: f.update_check_run('o', 'r', 9, status='in_progress'), {'check_run_id': 9}),
+    (
+        'list_workflow_run_artifacts',
+        lambda f, _: first_page(f.list_workflow_run_artifacts('o', 'r', 42)),
+        {'run_id': 42},
+    ),
+    ('list_workflow_jobs', lambda f, _: first_page(f.list_workflow_jobs('o', 'r', 42)), {'run_id': 42}),
+    (
+        'download_artifact',
+        lambda f, tmp: f.download_artifact('https://x/zip', tmp / 'out'),
+        {'archive_download_url': 'https://x/zip'},
+    ),
+]
+
+
+# Helpers the fake adds for tests to assert with. Everything else public on the fake mirrors a real
+# client method and therefore belongs in the call table.
+NON_MIRRORS = frozenset(
+    {
+        'aclose',
+        'assert_all_responses_consumed',
+        'assert_called_once_with',
+        'assert_called_with',
+        'assert_not_called',
+        'calls_to',
+        'last_call',
+        'mock_response',
+    }
+)
+
+
+def test_every_mirror_is_in_the_call_table():
+    """A mirror missing from the table is an untested mirror, so the omission has to fail loudly.
+
+    Discriminated by name rather than by whether the mirror is a coroutine: the client has sync
+    methods too, and filtering on `iscoroutinefunction` made those invisible to this check.
+    """
+    mirrors = {
+        name
+        for name, member in vars(FakeAsyncGitHubClient).items()
+        if not name.startswith('_') and name not in NON_MIRRORS and inspect.isfunction(member)
+    }
+
+    assert {name for name, _, _ in MIRROR_CALLS} == mirrors
+
+
+MIRRORED_METHODS = frozenset(
+    {
+        name
+        for name, member in vars(AsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member) and hasattr(FakeAsyncGitHubClient, name)
+    }
+)
+
+
+def test_every_client_method_has_a_mirror():
+    """A client method with no mirror is the one gap the other two checks cannot see.
+
+    They compare the fake against the call table and the exemption list against the client, so a
+    method that exists only on the real client is absent from both sides of both. That is how a
+    caller reached a mirror that was never written: the code raised `AttributeError` mid-run and the
+    test around it still passed.
+    """
+    real = {
+        name
+        for name, member in vars(AsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member)
+    }
+    fake = {
+        name
+        for name, member in vars(FakeAsyncGitHubClient).items()
+        if not name.startswith('_') and inspect.isfunction(member)
+    }
+
+    assert real - NON_MIRRORS <= fake
+
+
+@pytest.mark.parametrize('name', sorted(MIRRORED_METHODS), ids=sorted(MIRRORED_METHODS))
+def test_a_mirror_accepts_what_the_real_method_accepts(name: str):
+    """A mirror missing a parameter fails only in the test that passes it, and never in type checking.
+
+    `mypy-files` is `src/ddev`, so nothing checks a call into the fake. Every mirror went a whole
+    release with no `retry` parameter and nothing noticed, because no test had passed one yet.
+    """
+    real = inspect.signature(getattr(AsyncGitHubClient, name)).parameters
+    fake = inspect.signature(getattr(FakeAsyncGitHubClient, name)).parameters
+
+    assert [p for p in real if p not in fake] == []
+    # The reverse too, or the fake grows arguments no caller can ever pass.
+    assert [p for p in fake if p not in real] == []
+
+
+def test_no_real_client_method_is_excused_from_the_table():
+    """`NON_MIRRORS` excuses a name from the check above, so it must only ever name test helpers.
+
+    Without this, adding a client method to `NON_MIRRORS` would silently exempt it from needing a
+    mirror at all. `aclose` is the one legitimate overlap: both classes have it, and the fake's is
+    a no-op with no arguments worth recording.
+    """
+    real = {name for name, member in vars(AsyncGitHubClient).items() if inspect.isfunction(member)}
+
+    assert NON_MIRRORS & real == {'aclose'}
+
+
+@pytest.mark.parametrize(('method', 'call', 'expected'), MIRROR_CALLS, ids=[name for name, _, _ in MIRROR_CALLS])
+async def test_a_mirror_records_the_arguments_it_was_called_with(
+    fake: FakeAsyncGitHubClient,
+    tmp_path: Path,
+    method: str,
+    call: Callable[[FakeAsyncGitHubClient, Path], Any],
+    expected: dict[str, Any],
+):
+    """Recording happens before the response resolves, so a mirror whose default raises still records."""
+    with contextlib.suppress(httpx.HTTPStatusError):
+        # Sync mirrors return nothing to await, so the table can hold both shapes.
+        if inspect.isawaitable(result := call(fake, tmp_path)):
+            await result
+
+    recorded = fake.last_call(method).kwargs
+    assert expected.items() <= recorded.items()
 
 
 # ---------------------------------------------------------------------------

@@ -28,6 +28,15 @@ if TYPE_CHECKING:
 @click.option('--draft', is_flag=True, default=False, help='Open the PR as a draft.')
 @click.option('--verify', is_flag=True, default=False, help='Run commit hooks (skipped by default).')
 @click.option('--dry-run', is_flag=True, default=False, help='Print every step instead of executing it.')
+@click.option(
+    '--from-pr',
+    'from_pr',
+    type=int,
+    default=None,
+    metavar='PR_NUMBER',
+    help='Backport a merged PR to every `backport/<base>` label on it, deriving the commit and target '
+    'branches from the PR. Mutually exclusive with COMMIT_OR_PR.',
+)
 def port_commit(
     app: Application,
     commit_hash: str | None,
@@ -39,12 +48,13 @@ def port_commit(
     draft: bool,
     verify: bool,
     dry_run: bool,
+    from_pr: int | None,
 ) -> None:
     """
     Backport a commit onto a target branch.
 
     Cherry-picks COMMIT_OR_PR onto `--target-branch` (default `master`) on a new branch named
-    `<github-user>/<prefix>-<sha[:10]>-<suffix>`, preserving `.in-toto` files from the target
+    `<github-user>/<prefix>-<sha[:10]>-<suffix>`, preserving `.in-toto` and `.deps/` files from the target
     branch so package signatures stay intact. Pushes the branch and, unless `--no-pr` is set,
     opens a pull request titled `[Backport] <subject>` and labeled with `--pr-labels`.
 
@@ -53,26 +63,30 @@ def port_commit(
     first when a GitHub token is configured, and fall back to commit resolution on 404. If
     omitted, the current HEAD commit is used after confirmation.
 
+    Pass `--from-pr <number>` instead of COMMIT_OR_PR to backport a merged PR to every
+    `backport/<base>` label on it, deriving the commit and target branches from the PR. A base
+    whose backport PR already exists (open, merged, or closed) is skipped, so re-runs are
+    idempotent. Give `--target-branch` alongside `--from-pr` to restrict the backport to that one
+    branch.
+
     The GitHub user for the branch prefix is taken from `ddev config` (`github.user`) or the
     `DD_GITHUB_USER` / `GITHUB_USER` / `GITHUB_ACTOR` environment variables.
     """
     import logging
 
     from ddev.cli.release.port_commit_workflow import (
-        PortStepError,
-        build_port_steps,
+        PortOptions,
         display_completion_summary,
+        execute_port_plan,
         resolve_port_plan,
+        run_backport_from_pr,
     )
 
     # httpx logs every request at INFO and clutters the workflow output. The PR-resolution and
     # PR-creation steps already print their own status lines; the underlying HTTP traffic is noise.
     logging.getLogger('httpx').setLevel(logging.WARNING)
 
-    plan = resolve_port_plan(
-        app,
-        commit_hash=commit_hash,
-        target_branch=target_branch,
+    options = PortOptions(
         branch_prefix=branch_prefix,
         branch_suffix=branch_suffix,
         pr_labels=pr_labels,
@@ -81,36 +95,38 @@ def port_commit(
         verify=verify,
         dry_run=dry_run,
     )
-    bundle = build_port_steps(app, plan)
 
-    success = False
-    error_msg: str | None = None
-    try:
-        for step in bundle.steps:
-            step.run()
-        success = True
-    except PortStepError as e:
-        error_msg = str(e)
-    finally:
-        # If the PR was created before the failure (e.g. labeling failed afterwards), the worktree
-        # holds no recoverable state — the work is pushed and the PR exists on GitHub. Suppress the
-        # warning in that case to avoid a misleading "inspect the worktree" message.
-        pr_already_created = bundle.pr_step is not None and bundle.pr_step.pr_url is not None
-        if not success and not plan.dry_run and not pr_already_created:
-            app.display_warning(f'Worktree left at `{plan.worktree_path}` for inspection.')
+    if from_pr is not None:
+        if commit_hash is not None:
+            app.abort('Pass either COMMIT_OR_PR or --from-pr, not both.')
+        from click.core import ParameterSource
 
-    if error_msg is not None:
-        app.abort(error_msg)
+        ctx = click.get_current_context()
+        target_branch_explicit = ctx.get_parameter_source('target_branch') is not ParameterSource.DEFAULT
+        override_base = target_branch if target_branch_explicit else None
+        succeeded = run_backport_from_pr(
+            app,
+            pr_number=from_pr,
+            override_base=override_base,
+            options=options,
+        )
+        if not succeeded:
+            app.abort('One or more backports failed.')
+        return
 
-    try:
-        bundle.teardown.run()
-    except PortStepError as e:
-        app.display_warning(f'Could not remove worktree at `{plan.worktree_path}`: {e}')
-        app.display_warning(f'Run `git worktree remove --force {plan.worktree_path}` to clean it up manually.')
+    plan = resolve_port_plan(
+        app,
+        commit_hash=commit_hash,
+        target_branch=target_branch,
+        options=options,
+    )
+
+    outcome = execute_port_plan(app, plan)
+    if outcome.error is not None:
+        app.abort(outcome.error)
 
     if plan.dry_run:
         app.display_success('Dry run complete.')
         return
 
-    pr_url = bundle.pr_step.pr_url if bundle.pr_step is not None else None
-    display_completion_summary(app, plan, pr_url=pr_url)
+    display_completion_summary(app, plan, pr_url=outcome.pr_url)

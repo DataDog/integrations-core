@@ -8,7 +8,7 @@ files:
       port_hints:
       - 4730
       candidates:
-      - server: "{service.host}"
+      - server: "{service.host!s}"
         port: "{port.number}"
   options:
   - template: init_config
@@ -55,3 +55,6 @@ files:
       value.example:
       - gearmand
   - template: auto_conf/discovery
+    overrides:
+      discovery.example:
+        metrics_prefix: gearman

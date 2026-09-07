@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.7.0 / 2026-08-05
+
+***Added***:
+
+* Add container-based config discovery support. ([#24488](https://github.com/DataDog/integrations-core/pull/24488))
+
 ## 3.6.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

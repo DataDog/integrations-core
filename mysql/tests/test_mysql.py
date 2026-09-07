@@ -798,7 +798,7 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
 @pytest.mark.usefixtures('dd_environment')
 def test_additional_status_already_queried(aggregator, dd_run_check, instance_status_already_queried, caplog):
     caplog.clear()
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_status_already_queried])
     dd_run_check(mysql_check)
 

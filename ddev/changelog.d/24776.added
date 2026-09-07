@@ -1,0 +1,1 @@
+Report the type of each changed file from `GitRepository.changed_files`, and allow comparing two refs.

@@ -1,10 +1,12 @@
 import io
 import json
 import os
+import re
 import zipfile
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
+import requests
 
 from ddev.cli.size.utils.common_funcs import (
     _matches_gitignore,
@@ -13,7 +15,6 @@ from ddev.cli.size.utils.common_funcs import (
     convert_to_human_readable_size,
     extract_version_from_about_py,
     format_modules,
-    get_dependencies_from_json,
     get_dependencies_list,
     get_dependencies_sizes,
     get_files,
@@ -22,10 +23,11 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
-    parse_sizes_json,
+    request_wheel,
     save_csv,
     save_json,
     save_markdown,
+    wheel_url_candidates,
 )
 from ddev.utils.fs import Path
 
@@ -145,14 +147,18 @@ def test_matches_gitignore(path, patterns, expected):
 
 
 def test_get_dependencies_list():
-    file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
+    file_content = (
+        "dependency1 @ https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl\n"
+        "dependency2 @ https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency2/dependency2-1.1.1-.whl"
+    )
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
-        deps, urls, versions = get_dependencies_list("fake_path", "stable")
+        deps, urls, versions = get_dependencies_list("fake_path")
     assert deps == ["dependency1", "dependency2"]
+    # The storage tier placeholder is left unresolved here; it's resolved later when the wheel is requested.
     assert urls == [
-        "https://example.com/dependency1/dependency1-1.1.1-.whl",
-        "https://example.com/dependency2/dependency2-1.1.1-.whl",
+        "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl",
+        "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency2/dependency2-1.1.1-.whl",
     ]
     assert versions == ["1.1.1", "1.1.1"]
 
@@ -170,10 +176,18 @@ def test_get_dependencies_sizes():
     mock_response.content = zip_content
     mock_response.__enter__.return_value = mock_response
     mock_response.__exit__.return_value = None
-    with patch("requests.get", return_value=mock_response):
+    with patch("requests.get", return_value=mock_response) as mock_get:
         file_data = get_dependencies_sizes(
-            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
+            MagicMock(),
+            ["dependency1"],
+            ["https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/dependency1/dependency1-1.1.1-.whl"],
+            ["1.1.1"],
+            True,
+            "dev",
         )
+
+    # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
+    mock_get.assert_called_once_with("https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True)
 
     assert file_data == [
         {
@@ -393,62 +407,89 @@ def test_extract_version_from_about_py(file_content, expected_version):
     assert version == expected_version
 
 
-def test_parse_sizes_json(tmp_path):
-    compressed_data = json.dumps(
-        [
-            {
-                "Name": "dep1",
-                "Size_Bytes": 123,
-                "Size": "2 B",
-                "Type": "Dependency",
-                "Platform": "linux-x86_64",
-                "Python_Version": "3.12",
-            },
-            {
-                "Name": "dep2",
-                "Size_Bytes": 123,
-                "Size": "2 B",
-                "Type": "Dependency",
-                "Platform": "macos-x86_64",
-                "Python_Version": "3.12",
-            },
-            {
-                "Name": "module1",
-                "Size_Bytes": 123,
-                "Size": "2 B",
-                "Type": "Integration",
-                "Platform": "linux-x86_64",
-                "Python_Version": "3.12",
-            },
-        ]
-    )
-
-    expected_output = {
-        "dep1": {
-            "compressed": 123,
-            "compression": True,
-            "version": None,
-        }
-    }
-    compressed_json_path = tmp_path / "compressed.json"
-    compressed_json_path.write_text(compressed_data)
-
-    result = parse_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
-
-    assert result == expected_output
+PLACEHOLDER_URL = "https://example.com/${INTEGRATIONS_WHEELS_STORAGE}/built/dep1/dep1-1.1.1-.whl"
 
 
-def test_get_dependencies_from_json():
-    dep_size_dict = (
-        '{"dep1": {"compressed": 1, "uncompressed": 2, "version": "1.1.1"},\n'
-        '"dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"}}'
-    )
-    expected = [
-        {"Name": "dep1", "Version": "1.1.1", "Size_Bytes": 1, "Size": "1 B", "Type": "Dependency"},
-        {"Name": "dep2", "Version": "1.1.1", "Size_Bytes": 10, "Size": "10 B", "Type": "Dependency"},
+def make_wheel_response(status_code):
+    response = MagicMock()
+    response.status_code = status_code
+    if status_code >= 400:
+        error = requests.HTTPError(response=response)
+        response.raise_for_status.side_effect = error
+    else:
+        response.raise_for_status.return_value = None
+    return response
+
+
+@pytest.mark.parametrize(
+    "wheels_storage, expected",
+    [
+        pytest.param(
+            "dev",
+            [
+                "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+            ],
+            id="dev",
+        ),
+        pytest.param(
+            "stable",
+            [
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
+                "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+            ],
+            id="stable",
+        ),
+    ],
+)
+def test_wheel_url_candidates_prefers_configured_tier(wheels_storage, expected):
+    assert wheel_url_candidates(PLACEHOLDER_URL, wheels_storage) == expected
+
+
+def test_wheel_url_candidates_without_placeholder_is_not_duplicated():
+    url = "https://example.com/built/dep1/dep1-1.1.1-.whl"
+    assert wheel_url_candidates(url, "dev") == [url]
+
+
+@pytest.mark.parametrize("missing_status_code", [404, 403], ids=["not_found", "forbidden"])
+def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
+    missing = make_wheel_response(missing_status_code)
+    found = make_wheel_response(200)
+
+    with patch("requests.get", side_effect=[missing, found]) as mock_get:
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
+
+    assert [call.args[0] for call in mock_get.call_args_list] == [
+        "https://example.com/dev/built/dep1/dep1-1.1.1-.whl",
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl",
     ]
+    missing.close.assert_called_once()
 
-    with patch('ddev.utils.fs.Path') as mock_path:
-        mock_path.read_text.return_value = dep_size_dict
-        result = get_dependencies_from_json(mock_path, "linux-x86_64", "3.12", True)
-    assert result == expected
+
+def test_request_wheel_raises_when_no_tier_has_the_wheel():
+    with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
+        with pytest.raises(
+            requests.HTTPError,
+            match=re.escape(
+                "Tried: https://example.com/dev/built/dep1/dep1-1.1.1-.whl (404), "
+                "https://example.com/stable/built/dep1/dep1-1.1.1-.whl (404)"
+            ),
+        ):
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+
+def test_request_wheel_does_not_retry_on_a_non_missing_error():
+    with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
+        with pytest.raises(requests.HTTPError):
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == 1
+
+
+def test_request_wheel_uses_head_when_requested():
+    found = make_wheel_response(200)
+
+    with patch("requests.head", return_value=found) as mock_head:
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
+
+    mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")
