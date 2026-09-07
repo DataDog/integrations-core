@@ -6,15 +6,27 @@ import os
 from copy import deepcopy
 
 import mock
+import pytest
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.nfsstat import NfsStatCheck
+from datadog_checks.nfsstat.nfsstat import SOURCE_NFSIOSTAT_PATH
 
 from .common import METRICS
 
 FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 
 log = logging.getLogger(__name__)
+
+OMNIBUS_NFSIOSTAT_PATH = '/opt/datadog-agent/embedded/sbin/nfsiostat'
+OMNIBUS_PYTHON_PATH = '/opt/datadog-agent/embedded/bin/python'
+FLEET_NFSIOSTAT_PATH = '/opt/datadog-packages/datadog-agent/stable/embedded/sbin/nfsiostat'
+FLEET_PYTHON_PATH = '/opt/datadog-packages/datadog-agent/stable/embedded/bin/python'
+
+
+def make_check(init_config: dict[str, str], present_paths: set[str]) -> NfsStatCheck:
+    with mock.patch('datadog_checks.nfsstat.nfsstat.os.path.exists', side_effect=lambda path: path in present_paths):
+        return NfsStatCheck('nfsstat', init_config, [{}])
 
 
 class TestNfsstat:
@@ -75,3 +87,38 @@ class TestNfsstat:
             aggregator.assert_metric(metric, tags=tags_unicode)
 
         assert aggregator.metrics_asserted_pct == 100.0
+
+
+@pytest.mark.unit
+class TestNfsiostatPathResolution:
+    def test_explicit_path_is_used_verbatim(self) -> None:
+        check = make_check({'nfsiostat_path': '/custom/nfsiostat --debug'}, set())
+
+        assert check.nfs_cmd == ['/custom/nfsiostat', '--debug', '1', '2']
+
+    def test_fleet_automation_path_uses_its_embedded_python(self) -> None:
+        check = make_check({}, {FLEET_NFSIOSTAT_PATH, FLEET_PYTHON_PATH})
+
+        assert check.nfs_cmd == [FLEET_PYTHON_PATH, FLEET_NFSIOSTAT_PATH, '1', '2']
+
+    def test_bundled_path_without_embedded_python_runs_directly(self) -> None:
+        check = make_check({}, {FLEET_NFSIOSTAT_PATH})
+
+        assert check.nfs_cmd == [FLEET_NFSIOSTAT_PATH, '1', '2']
+
+    def test_omnibus_path_takes_precedence(self) -> None:
+        check = make_check(
+            {},
+            {OMNIBUS_NFSIOSTAT_PATH, OMNIBUS_PYTHON_PATH, FLEET_NFSIOSTAT_PATH, FLEET_PYTHON_PATH},
+        )
+
+        assert check.nfs_cmd == [OMNIBUS_PYTHON_PATH, OMNIBUS_NFSIOSTAT_PATH, '1', '2']
+
+    def test_source_path_runs_directly(self) -> None:
+        check = make_check({}, {SOURCE_NFSIOSTAT_PATH})
+
+        assert check.nfs_cmd == [SOURCE_NFSIOSTAT_PATH, '1', '2']
+
+    def test_missing_nfsiostat_raises(self) -> None:
+        with pytest.raises(Exception, match='nfsstat check requires nfsiostat be installed'):
+            make_check({}, set())
