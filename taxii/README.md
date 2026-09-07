@@ -14,7 +14,7 @@ STIX 2.1 is the standard format for describing threat intelligence: indicators, 
 
 Datadog acts as a TAXII client. It authenticates to a server you supply and polls the collections you add by ID, fetching new objects on the interval you choose. Because both are open standards, this one tile covers any vendor or community feed that speaks TAXII 2.1, with no per-vendor integration required.
 
-## Installation
+## Setup
 
 Click "New" and enter the TAXII server's API root URL and its credentials.
 
