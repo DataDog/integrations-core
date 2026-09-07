@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import hashlib
+import io
 import json
 import uuid as uuid_module
 from contextlib import contextmanager
@@ -168,35 +169,55 @@ class FakeUploadClient:
     def __init__(
         self,
         run_finalize_response=None,
-        raise_on_put=None,
-        raise_on_page_finalize=None,
+        put_page_response=None,
+        raise_on_put_page=None,
         raise_on_run_finalize=None,
         put_log=None,
     ):
-        # (batch_index, part_number, payload, sha256_hex, rows)
-        self.put_part_calls = []
-        self.page_finalize_calls = []
+        # SimpleNamespace(batch_index, record_offset, page_bytes, rows, sha256_hex, payload)
+        self.put_page_calls = []
         self.run_finalize_calls = 0
         self.abort_calls = 0
-        self.raise_on_put = raise_on_put
-        self.raise_on_page_finalize = raise_on_page_finalize
+        self.raise_on_put_page = raise_on_put_page
         self.raise_on_run_finalize = raise_on_run_finalize
         self.run_finalize_response = (
             run_finalize_response if run_finalize_response is not None else {'upload_id': UPLOAD_ID}
         )
+        # When unset, the authoritative receipt echoes the producer's own page metadata;
+        # tests pass a mapping (or a callable taking the page metadata) to mutate it.
+        self.put_page_response = put_page_response
         self.put_log = put_log
 
-    def put_part(self, creds, batch_index, part_number, payload, sha256_hex, rows):
-        self.put_part_calls.append((batch_index, part_number, payload, sha256_hex, rows))
+    def put_page(self, creds, page, body):
+        payload = body.read()
+        self.put_page_calls.append(
+            SimpleNamespace(
+                batch_index=page.batch_index,
+                record_offset=page.record_offset,
+                page_bytes=page.page_bytes,
+                rows=page.rows,
+                sha256_hex=page.sha256_hex,
+                payload=payload,
+            )
+        )
         if self.put_log is not None:
-            self.put_log.append(('put', batch_index, part_number, len(payload), rows))
-        if self.raise_on_put is not None:
-            raise self.raise_on_put
-
-    def finalize_page(self, creds, batch_index):
-        self.page_finalize_calls.append(batch_index)
-        if self.raise_on_page_finalize is not None:
-            raise self.raise_on_page_finalize
+            self.put_log.append(('put', page.batch_index, page.page_bytes, page.rows))
+        if self.raise_on_put_page is not None:
+            raise self.raise_on_put_page
+        if self.put_page_response is not None:
+            response = self.put_page_response
+            if callable(response):
+                response = response(page)
+        else:
+            response = {
+                'batch_index': page.batch_index,
+                'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
+                'record_offset': page.record_offset,
+                'bytes': page.page_bytes,
+                'rows': page.rows,
+                'sha256': page.sha256_hex,
+            }
+        return response
 
     def finalize_run(self, creds):
         self.run_finalize_calls += 1
@@ -246,7 +267,6 @@ def valid_result_delivery(**extra):
         'uploadId': UPLOAD_ID,
         'baseUrl': BASE_URL,
         'token': TOKEN,
-        'partBytes': 64 * 1024 * 1024,
         'limits': valid_limits(),
     }
     result_delivery.update(extra)
@@ -267,14 +287,13 @@ def valid_limits(**extra):
     return limits
 
 
-def bounded_request(query='SELECT 1 AS value', part_bytes=64, **limit_overrides):
-    """A request with small limits so page/part boundaries are cheap to exercise."""
+def bounded_request(query='SELECT 1 AS value', **limit_overrides):
+    """A request with small limits so page boundaries are cheap to exercise."""
     limits = valid_limits(
         maxFileBytes=1024, maxResultBytes=8192, maxRowBytes=64, maxColumns=8, maxSchemaBytes=256, maxPages=4
     )
     limits.update(limit_overrides)
     request = valid_request(query=query)
-    request['resultDelivery']['partBytes'] = part_bytes
     request['resultDelivery']['limits'] = limits
     return request
 
@@ -332,18 +351,26 @@ def prefix_bytes(batch_index=0, record_offset=0, schema_json=None):
 
 
 def assembled_pages(fake_client):
-    """Reassemble each completed page from its sequentially uploaded parts."""
-    parts = {}
-    for batch_index, _part_number, payload, _sha256_hex, _rows in fake_client.put_part_calls:
-        parts.setdefault(batch_index, []).append(payload)
-    return {batch_index: b''.join(payloads) for batch_index, payloads in parts.items()}
+    """Each completed page's exact uploaded bytes, keyed by batch index."""
+    return {call.batch_index: call.payload for call in fake_client.put_page_calls}
 
 
-def part_row_sums(fake_client):
-    sums = {}
-    for batch_index, _part_number, _payload, _sha256_hex, rows in fake_client.put_part_calls:
-        sums[batch_index] = sums.get(batch_index, 0) + rows
-    return sums
+def track_page_spools(monkeypatch):
+    """Route the page spool to tracked in-memory files.
+
+    Returns the created spools. The factory asserts the at-most-one-spool invariant: a
+    previous spool is always closed before a new page spools opens.
+    """
+    spools = []
+
+    def open_page_spool():
+        assert all(spool.closed for spool in spools), 'a previous page spool was still open'
+        spool = io.BytesIO()
+        spools.append(spool)
+        return spool
+
+    monkeypatch.setattr(remote_query, '_open_page_spool', open_page_spool)
+    return spools
 
 
 # ---------------------------------------------------------------------------
@@ -464,9 +491,7 @@ def test_stream_rejects_string_limit_values_before_resolution(field):
     assert_failed_event(events, 'invalid_request', field)
 
 
-@pytest.mark.parametrize(
-    'field', ['runId', 'taskId', 'artifactVersion', 'uploadId', 'baseUrl', 'token', 'partBytes', 'limits']
-)
+@pytest.mark.parametrize('field', ['runId', 'taskId', 'artifactVersion', 'uploadId', 'baseUrl', 'token', 'limits'])
 def test_stream_rejects_missing_delivery_fields_before_resolution(field):
     request = valid_request()
     del request['resultDelivery'][field]
@@ -490,8 +515,6 @@ def test_stream_rejects_missing_delivery_fields_before_resolution(field):
         ({'baseUrl': ''}, 'baseUrl'),
         ({'token': ''}, 'token'),
         ({'uploadId': ''}, 'uploadId'),
-        ({'partBytes': 0}, 'partBytes'),
-        ({'partBytes': '8'}, 'partBytes'),
     ],
 )
 def test_stream_rejects_invalid_delivery_fields_before_resolution(mutation, expected):
@@ -534,15 +557,16 @@ def test_stream_rejects_invalid_limits_before_resolution(limits, expected):
     assert_failed_event(events, 'invalid_request', expected)
 
 
-def test_stream_rejects_part_bytes_larger_than_a_page():
+def test_stream_rejects_part_bytes_field_before_resolution():
+    # The direct-page upload protocol has no part-size instruction: any ``partBytes``
+    # value, even one the part protocol would have accepted, fails validation as an
+    # unknown delivery field so a stale sender is rejected rather than silently ignored.
     request = valid_request()
-    request['resultDelivery']['partBytes'] = 2097152
-    request['resultDelivery']['limits']['maxFileBytes'] = 1048576
-    request['resultDelivery']['limits']['maxRowBytes'] = 65536
+    request['resultDelivery']['partBytes'] = 64 * 1024 * 1024
 
     events = collect_events(request, None, registry=ExplodingRegistry())
 
-    assert_failed_event(events, 'invalid_request', 'partBytes must not exceed limits.maxFileBytes')
+    assert_failed_event(events, 'invalid_request', 'partBytes')
 
 
 def test_stream_requires_result_delivery():
@@ -912,7 +936,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['resultDelivery']['runId'] == RUN_ID
     assert started['resultDelivery']['taskId'] == TASK_ID
     assert started['resultDelivery']['artifactVersion'] == 1
-    assert started['resultDelivery']['partBytes'] == 64 * 1024 * 1024
+    assert 'partBytes' not in started['resultDelivery']
     assert started['resultDelivery']['limits'] == {
         'maxFileBytes': 104857600,
         'maxResultBytes': 10 * 1024**3,
@@ -1052,8 +1076,7 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     final = assert_success(events)
-    assert fake.put_part_calls == []
-    assert fake.page_finalize_calls == []
+    assert fake.put_page_calls == []
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
     assert final['upload_receipt'] == {
@@ -1083,7 +1106,7 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(m
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
     assert final['upload_receipt']['totalBytes'] == len(pages[0])
-    assert fake.page_finalize_calls == [0]
+    assert [call.batch_index for call in fake.put_page_calls] == [0]
     assert fake.run_finalize_calls == 1
 
 
@@ -1140,7 +1163,7 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
             {'column_name': 'country', 'vendor_data_type': 'character varying(255)'},
         ]
     )
-    assert fake.page_finalize_calls == [0, 1]
+    assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
     assert event_metadata(events[0])['includeSchema'] is True
 
 
@@ -1210,7 +1233,7 @@ def test_producer_rejects_duplicate_result_column_names_before_row_data(monkeypa
     # No row data was fetched or written: the run fails before any page bytes.
     server = pool.cursors[1]
     assert server.fetch_sizes == []
-    assert fake.put_part_calls == []
+    assert fake.put_page_calls == []
 
 
 def test_producer_rejects_duplicate_columns_even_with_schema_disabled(monkeypatch):
@@ -1248,7 +1271,7 @@ def test_producer_fails_closed_on_incomplete_requested_schema(monkeypatch):
     assert_failed_event(events, 'schema_unavailable')
     server = pool.cursors[1]
     assert server.fetch_sizes == []
-    assert fake.put_part_calls == []
+    assert fake.put_page_calls == []
 
 
 def test_producer_fails_closed_when_description_lacks_type_modifiers(monkeypatch):
@@ -1300,7 +1323,7 @@ def two_row_boundary_request(monkeypatch, extra_file_bytes=0):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    request = bounded_request(part_bytes=32)
+    request = bounded_request()
     request['resultDelivery']['limits']['maxFileBytes'] = (
         prefix_len + len(ROW_BYTES) + 1 + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX) + extra_file_bytes
     )
@@ -1348,7 +1371,7 @@ def test_page_split_boundary_plus_one_row_starts_next_page(monkeypatch):
     assert final['upload_receipt']['pageCount'] == 2
     assert final['upload_receipt']['totalRows'] == 2
     assert final['upload_receipt']['totalBytes'] == sum(len(page) for page in pages.values())
-    assert fake.page_finalize_calls == [0, 1]
+    assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
 
 
 def test_page_split_row_too_large_when_row_plus_envelope_exceeds_max_file_bytes(monkeypatch):
@@ -1363,7 +1386,7 @@ def test_page_split_row_too_large_when_row_plus_envelope_exceeds_max_file_bytes(
 
     assert_failed_event(events, 'row_too_large', 'maxFileBytes')
     # Nothing was uploaded: the failure is detected before writing the row.
-    assert fake.put_part_calls == []
+    assert fake.put_page_calls == []
 
 
 def test_page_split_row_too_large_when_row_exceeds_max_row_bytes(monkeypatch):
@@ -1376,7 +1399,7 @@ def test_page_split_row_too_large_when_row_exceeds_max_row_bytes(monkeypatch):
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'row_too_large', 'maxRowBytes')
-    assert fake.put_part_calls == []
+    assert fake.put_page_calls == []
 
 
 def test_page_split_enforces_max_pages(monkeypatch):
@@ -1390,9 +1413,9 @@ def test_page_split_enforces_max_pages(monkeypatch):
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'max_pages_exceeded')
-    # Page 0 was fully produced and finalized before the cap tripped, but the run fails:
+    # Page 0 was fully produced and uploaded before the cap tripped, but the run fails:
     # no receipt is emitted and the session is aborted.
-    assert fake.page_finalize_calls == [0]
+    assert [call.batch_index for call in fake.put_page_calls] == [0]
     assert fake.abort_calls == 1
     assert 'upload_receipt' not in event_metadata(events[-1])
 
@@ -1414,70 +1437,54 @@ def test_page_split_enforces_max_result_bytes(monkeypatch):
     assert 'upload_receipt' not in event_metadata(events[-1])
 
 
-def test_part_bookkeeping_rows_span_parts_and_never_count_newlines(monkeypatch):
+def test_page_upload_declares_rows_explicitly_and_never_counts_newlines(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    # partBytes equals the prefix length: part 1 is exactly the prefix (no row completes
-    # inside it), the rest of the page -- the row, including embedded newlines, plus the
-    # suffix -- forms the final short part. The row completes in the part containing its
-    # final byte, and rows are never inferred by counting newlines in part bytes.
-    request = bounded_request(part_bytes=prefix_len)
+    # One row whose encoded value contains escaped newlines: the page PUT declares exactly
+    # one row, proving rows are counted per appended row rather than inferred from the
+    # page byte stream.
+    request = bounded_request()
     pool = FakePool(rows=[('a\nb\nc',)], description=[FakeColumn('payload', 25)])
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    assert [call[1] for call in fake.put_part_calls] == [1, 2]
-    assert [call[4] for call in fake.put_part_calls] == [0, 1]
-    assert sum(call[4] for call in fake.put_part_calls) == 1
-    page = b''.join(call[2] for call in fake.put_part_calls)
-    assert json.loads(page)['data']['items'] == [{'payload': 'a\nb\nc'}]
-    # Row bytes are tracked exactly once: one row total despite the embedded newlines.
+    (call,) = fake.put_page_calls
+    assert json.loads(call.payload)['data']['items'] == [{'payload': 'a\nb\nc'}]
+    assert call.rows == 1
     assert event_metadata(events[-1])['stats']['rowsEmitted'] == 1
 
 
-def test_part_bookkeeping_contiguous_part_numbers_restart_per_page(monkeypatch):
+def test_page_uploads_carry_exact_whole_page_metadata(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    # Two pages of one row each; small parts so each page spans several parts.
-    request = bounded_request(
-        part_bytes=8,
-        maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX),
-    )
+    # Two pages of one row each: each page PUT declares the SHA-256, byte count, and row
+    # count of its own complete page, with the cumulative record offset advancing.
+    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX))
     pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    calls = [(batch, part) for batch, part, _payload, _sha, _rows in fake.put_part_calls]
-    page0_parts = [part for batch, part in calls if batch == 0]
-    page1_parts = [part for batch, part in calls if batch == 1]
-    # 1-based contiguous part numbers, restarting on each page.
-    assert page0_parts == list(range(1, len(page0_parts) + 1))
-    assert page1_parts == list(range(1, len(page1_parts) + 1))
-    # Non-final parts are exactly partBytes; the final part of each page may be shorter.
-    for batch in (0, 1):
-        payloads = [payload for b, _p, payload, _sha, _rows in fake.put_part_calls if b == batch]
-        assert all(len(payload) == 8 for payload in payloads[:-1])
-        assert len(payloads[-1]) <= 8
-    # Each part carries the SHA-256 of its own body.
-    for _batch, _part, payload, sha256_hex, _rows in fake.put_part_calls:
-        assert sha256_hex == hashlib.sha256(payload).hexdigest()
-    # Row completions per page sum to the page's rows and to the run total.
-    assert part_row_sums(fake) == {0: 1, 1: 1}
+    assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
+    assert [call.record_offset for call in fake.put_page_calls] == [0, 1]
+    for call in fake.put_page_calls:
+        # The declared identity is exact for the whole page: its own checksum, byte count,
+        # and row count.
+        assert call.sha256_hex == hashlib.sha256(call.payload).hexdigest()
+        assert call.page_bytes == len(call.payload)
+        assert call.rows == 1
     assert event_metadata(events[-1])['upload_receipt']['totalRows'] == 2
 
 
-def test_part_upload_streams_before_cursor_is_exhausted(monkeypatch):
+def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     order_log = []
-    prefix_len = len(prefix_bytes())
-    request = bounded_request(part_bytes=prefix_len, maxPages=128, maxResultBytes=64 * 1024)
+    request = bounded_request(maxPages=128, maxResultBytes=64 * 1024)
 
     def row_provider():
         for _index in range(500):
@@ -1495,8 +1502,8 @@ def test_part_upload_streams_before_cursor_is_exhausted(monkeypatch):
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    # Parts are uploaded while rows are still being fetched: the producer never buffers
-    # the complete result (or a complete page) before uploading.
+    # Pages are uploaded while rows are still being fetched: the producer never buffers
+    # the complete result before uploading, only one bounded page at a time.
     first_put = next(index for index, entry in enumerate(order_log) if entry[0] == 'put')
     later_fetch = next(
         index for index, entry in enumerate(order_log[first_put:], start=first_put) if entry[0] == 'fetch'
@@ -1504,18 +1511,115 @@ def test_part_upload_streams_before_cursor_is_exhausted(monkeypatch):
     assert later_fetch > first_put
     exhausted = next(index for index, entry in enumerate(order_log) if entry[0] == 'exhausted')
     assert exhausted > first_put
-    # Pages are contiguous zero-based, every non-final part of every page is exactly
-    # partBytes, and all rows are accounted for exactly once.
-    page_indexes = sorted({entry[0] for entry in fake.put_part_calls})
+    # Pages are contiguous zero-based, no page exceeds maxFileBytes, and every row is
+    # declared exactly once across the page PUTs.
+    page_indexes = sorted({call.batch_index for call in fake.put_page_calls})
     assert page_indexes == list(range(len(page_indexes)))
-    assert sum(entry[4] for entry in fake.put_part_calls) == 500
+    assert sum(call.rows for call in fake.put_page_calls) == 500
     assert event_metadata(events[-1])['upload_receipt']['totalRows'] == 500
     assert event_metadata(events[-1])['upload_receipt']['pageCount'] == len(page_indexes)
-    for batch in page_indexes:
-        parts = [call for call in fake.put_part_calls if call[0] == batch]
-        # Non-final parts of a page are exactly partBytes; the final part may be shorter.
-        assert all(len(call[2]) == prefix_len for call in parts[:-1])
-        assert len(parts[-1][2]) <= prefix_len
+    max_file_bytes = request['resultDelivery']['limits']['maxFileBytes']
+    assert all(call.page_bytes <= max_file_bytes for call in fake.put_page_calls)
+
+
+# ---------------------------------------------------------------------------
+# Page spool lifecycle
+# ---------------------------------------------------------------------------
+
+
+def test_page_spool_closed_after_each_matching_page_receipt(monkeypatch):
+    spools = track_page_spools(monkeypatch)
+    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
+    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
+
+    events = collect_events(request, make_check(pool=pool), client=FakeUploadClient())
+
+    assert_success(events)
+    # One spool per page, each closed right after its authoritative page receipt matched;
+    # the at-most-one-spool invariant is asserted inside the tracked factory.
+    assert len(spools) == 2
+    assert all(spool.closed for spool in spools)
+
+
+def test_page_spool_closed_on_page_upload_failure(monkeypatch):
+    spools = track_page_spools(monkeypatch)
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    fake = FakeUploadClient(
+        raise_on_put_page=remote_query.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
+    )
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'upload_failed')
+    assert len(spools) == 1
+    assert all(spool.closed for spool in spools)
+
+
+def test_page_spool_closed_on_page_receipt_mismatch(monkeypatch):
+    spools = track_page_spools(monkeypatch)
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    bad_receipt = {
+        'batch_index': 0,
+        'key': 'agent-intake-test/pages/0.json',
+        'record_offset': 0,
+        'bytes': 7,
+        'rows': 1,
+        'sha256': '0' * 64,
+    }
+    fake = FakeUploadClient(put_page_response=bad_receipt)
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'invalid_receipt')
+    assert len(spools) == 1
+    assert all(spool.closed for spool in spools)
+    assert fake.abort_calls == 1
+
+
+def test_page_spool_closed_on_row_failure_mid_page(monkeypatch):
+    spools = track_page_spools(monkeypatch)
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # The first fetchmany returns one row and opens page 0; the next fetch raises while
+    # the page spool is still open.
+    pool = FakePool(rows=[(1,)], fetch_error=ValueError('fetch broke'), fetch_error_at=2)
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
+
+    assert_failed_event(events, 'query_failed')
+    assert len(spools) == 1
+    assert all(spool.closed for spool in spools)
+
+
+def test_page_spool_closed_on_cancellation_mid_page(monkeypatch):
+    spools = track_page_spools(monkeypatch)
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,), (2,)])
+    check = make_check(pool=pool)
+    fake = FakeUploadClient()
+    # The guard runs before each row and once more at page close: cancel on that last
+    # check, with both rows spooled and the page upload not yet attempted.
+    remaining_checks = 3
+
+    def is_cancelled():
+        nonlocal remaining_checks
+        remaining_checks -= 1
+        return remaining_checks < 0
+
+    check.is_cancelled = is_cancelled
+
+    events = collect_events(valid_request(), check, client=fake)
+
+    assert_failed_event(events, 'cancelled')
+    assert fake.put_page_calls == []
+    assert fake.abort_calls == 1
+    assert len(spools) == 1
+    assert all(spool.closed for spool in spools)
 
 
 # ---------------------------------------------------------------------------
@@ -1778,7 +1882,30 @@ def _upload_creds(**overrides):
     return remote_query.UploadCredentials(**defaults)
 
 
-def test_requests_upload_client_uses_exact_page_aware_http_contract(monkeypatch):
+def _page_metadata(payload, batch_index=0, record_offset=0, rows=1):
+    return remote_query.PageUploadMetadata(
+        batch_index=batch_index,
+        record_offset=record_offset,
+        page_bytes=len(payload),
+        rows=rows,
+        sha256_hex=hashlib.sha256(payload).hexdigest(),
+    )
+
+
+def _receipt_json(page):
+    return json.dumps(
+        {
+            'batch_index': page.batch_index,
+            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
+            'record_offset': page.record_offset,
+            'bytes': page.page_bytes,
+            'rows': page.rows,
+            'sha256': page.sha256_hex,
+        }
+    ).encode('utf-8')
+
+
+def test_requests_upload_client_uses_exact_direct_page_http_contract(monkeypatch):
     import requests
 
     captured = []
@@ -1795,38 +1922,39 @@ def test_requests_upload_client_uses_exact_page_aware_http_contract(monkeypatch)
     creds = _upload_creds()
     client = remote_query.RequestsUploadClient()
     payload = b'abcdefgh'
-    client.put_part(creds, 2, 3, payload, hashlib.sha256(payload).hexdigest(), 4)
+    page = _page_metadata(payload, batch_index=2, record_offset=7, rows=4)
+    spool = io.BytesIO(payload)
+    receipt = client.put_page(creds, page, spool)
 
     test_drive_header = 'test-drive-its-agent-intake-poc'
 
     put = captured[0]
     assert put.method == 'PUT'
-    assert put.url == '{}/uploads/{}/pages/2/parts/3'.format(BASE_URL, UPLOAD_ID)
+    assert put.url == '{}/uploads/{}/pages/2'.format(BASE_URL, UPLOAD_ID)
     assert put.headers['Content-Type'] == 'application/octet-stream'
-    assert put.headers['X-DD-Part-SHA256'] == hashlib.sha256(payload).hexdigest()
-    assert put.headers['X-DD-Part-Bytes'] == '8'
-    assert put.headers['X-DD-Part-Rows'] == '4'
+    assert put.headers['X-DD-Page-Bytes'] == '8'
+    assert put.headers['X-DD-Page-Rows'] == '4'
+    assert put.headers['X-DD-Record-Offset'] == '7'
+    assert put.headers['X-DD-Page-SHA256'] == hashlib.sha256(payload).hexdigest()
+    assert put.headers['Content-Length'] == '8'
     assert put.headers['dd-api-key'] == 'TEST_API_KEY'
     assert put.headers['dd-application-key'] == 'TEST_APP_KEY'
     assert put.headers['Authorization'] == 'Bearer ' + TOKEN
     # The Test Drive routing header is derived from the validated Agent-config name as
-    # ``test-drive-<name>: 1`` and rides on every upload request: part PUT, page finalize,
-    # run finalize, and abort.
+    # ``test-drive-<name>: 1`` and rides on every upload request: page PUT, run finalize,
+    # and abort.
     assert put.headers[test_drive_header] == '1'
-    assert put.data == payload
+    # The rewound spool is the streamed request body: the whole page in one PUT.
+    assert put.data is spool
+    assert put.data.tell() == 0
+    assert put.data.read() == payload
     assert put.timeout == remote_query.REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT
     assert remote_query.REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS == 300
-
-    client.finalize_page(creds, 2)
-    page_finalize = captured[1]
-    assert page_finalize.method == 'POST'
-    assert page_finalize.url == '{}/uploads/{}/pages/2/finalize'.format(BASE_URL, UPLOAD_ID)
-    assert page_finalize.headers['Content-Type'] == 'application/json'
-    assert page_finalize.headers[test_drive_header] == '1'
-    assert page_finalize.data == b'{}'
+    # The page receipt body is parsed and returned for verification.
+    assert receipt == {'upload_id': 'upload-01k'}
 
     response = client.finalize_run(creds)
-    run_finalize = captured[2]
+    run_finalize = captured[1]
     assert run_finalize.method == 'POST'
     assert run_finalize.url == '{}/uploads/{}/finalize'.format(BASE_URL, UPLOAD_ID)
     assert run_finalize.headers[test_drive_header] == '1'
@@ -1834,7 +1962,7 @@ def test_requests_upload_client_uses_exact_page_aware_http_contract(monkeypatch)
     assert response == {'upload_id': 'upload-01k'}
 
     client.abort(creds)
-    abort = captured[3]
+    abort = captured[2]
     assert abort.method == 'POST'
     assert abort.url == '{}/uploads/{}/abort'.format(BASE_URL, UPLOAD_ID)
     assert abort.headers[test_drive_header] == '1'
@@ -1842,13 +1970,14 @@ def test_requests_upload_client_uses_exact_page_aware_http_contract(monkeypatch)
 
 
 @pytest.mark.parametrize('trigger', ['transient_status', 'connection_error'])
-def test_requests_upload_client_retries_part_idempotently(monkeypatch, trigger):
+def test_requests_upload_client_retries_page_idempotently(monkeypatch, trigger):
     import requests
 
     calls = []
 
     def fake_request(method, url, headers=None, data=None, timeout=None):
-        calls.append(SimpleNamespace(url=url, headers=dict(headers or {}), data=data))
+        body = data.read() if data is not None else b''
+        calls.append(SimpleNamespace(url=url, headers=dict(headers or {}), body=body))
         if len(calls) == 1 and trigger == 'transient_status':
             return SimpleNamespace(status_code=503, content=b'')
         if len(calls) == 1 and trigger == 'connection_error':
@@ -1861,16 +1990,73 @@ def test_requests_upload_client_retries_part_idempotently(monkeypatch, trigger):
     creds = _upload_creds(test_drive=None)
     client = remote_query.RequestsUploadClient()
     payload = b'ijklmnop'
-    client.put_part(creds, 1, 1, payload, hashlib.sha256(payload).hexdigest(), 1)
+    page = _page_metadata(payload, batch_index=1, record_offset=3, rows=2)
+    client.put_page(creds, page, io.BytesIO(payload))
 
-    # The same part request (same page/part URL, same checksum header, same body) is
-    # retried verbatim, so an idempotent server-side replay by (part, checksum) cannot
-    # double-count bytes.
+    # The same whole-page request (same page URL, same declared headers, byte-identical
+    # body) is retried verbatim, so an idempotent server-side replay by (page, checksum)
+    # cannot double-count or corrupt the page.
     assert len(calls) == 2
     assert calls[0].url == calls[1].url
-    assert calls[0].url == '{}/uploads/{}/pages/1/parts/1'.format(BASE_URL, UPLOAD_ID)
-    assert calls[0].headers['X-DD-Part-SHA256'] == calls[1].headers['X-DD-Part-SHA256']
-    assert calls[0].data == calls[1].data == payload
+    assert calls[0].url == '{}/uploads/{}/pages/1'.format(BASE_URL, UPLOAD_ID)
+    for header in ('X-DD-Page-Bytes', 'X-DD-Page-Rows', 'X-DD-Record-Offset', 'X-DD-Page-SHA256', 'Content-Length'):
+        assert calls[0].headers[header] == calls[1].headers[header]
+    assert calls[0].body == calls[1].body == payload
+
+
+def test_requests_upload_client_retries_page_upload_in_progress(monkeypatch):
+    import requests
+
+    calls = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        calls.append(data.read())
+        if len(calls) == 1:
+            # A duplicate in-flight page attempt: retryable by error code, not by status.
+            body = json.dumps(
+                {'error': {'code': 'page_upload_in_progress', 'message': 'page is being uploaded'}}
+            ).encode('utf-8')
+            return SimpleNamespace(status_code=409, content=body)
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+
+    creds = _upload_creds(test_drive=None)
+    client = remote_query.RequestsUploadClient()
+    payload = b'qrstuvwx'
+    page = _page_metadata(payload)
+
+    client.put_page(creds, page, io.BytesIO(payload))
+
+    # The in-progress code is retried with the same byte-identical page.
+    assert len(calls) == 2
+    assert calls[0] == calls[1] == payload
+
+
+def test_requests_upload_client_fails_closed_on_conflicting_page_error(monkeypatch):
+    import requests
+
+    calls = []
+
+    def fake_request(method, url, headers=None, data=None, timeout=None):
+        calls.append(url)
+        body = json.dumps({'error': {'code': 'already_exists', 'message': 'conflicting page'}}).encode('utf-8')
+        return SimpleNamespace(status_code=409, content=body)
+
+    monkeypatch.setattr(requests, 'request', fake_request)
+    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
+
+    creds = _upload_creds(test_drive=None)
+    client = remote_query.RequestsUploadClient()
+    page = _page_metadata(b'x')
+
+    # A checksum/metadata conflict is terminal, never retried or overwritten.
+    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
+        client.put_page(creds, page, io.BytesIO(b'x'))
+    assert excinfo.value.code == 'upload_failed'
+    assert excinfo.value.retryable is False
+    assert len(calls) == 1
 
 
 def test_requests_upload_client_fails_closed_on_non_transient_status(monkeypatch):
@@ -1889,7 +2075,7 @@ def test_requests_upload_client_fails_closed_on_non_transient_status(monkeypatch
     client = remote_query.RequestsUploadClient()
 
     with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-        client.put_part(creds, 0, 1, b'x', 'deadbeef', 0)
+        client.put_page(creds, _page_metadata(b'x'), io.BytesIO(b'x'))
     assert excinfo.value.code == 'upload_failed'
     assert excinfo.value.retryable is False
     assert len(calls) == 1
@@ -1944,7 +2130,7 @@ def test_requests_upload_client_omits_test_drive_header_when_not_configured(monk
 
     creds = _upload_creds(test_drive=None)
     client = remote_query.RequestsUploadClient()
-    client.put_part(creds, 0, 1, b'x', 'deadbeef', 0)
+    client.put_page(creds, _page_metadata(b'x'), io.BytesIO(b'x'))
 
     # With no Test Drive configured the permanent-service path is preserved: no header whose
     # name starts with the test-drive prefix is sent on the upload request.
@@ -2014,6 +2200,55 @@ def test_verify_run_finalize_response_fails_closed_on_identity_mismatch():
     assert excinfo.value.code == 'invalid_receipt'
 
 
+def test_parse_page_receipt_body_accepts_json_objects():
+    payload = b'{"value":1}'
+    page = _page_metadata(payload)
+    receipt = _receipt_json(page)
+
+    assert remote_query.parse_page_receipt_body(receipt) == json.loads(receipt)
+
+
+@pytest.mark.parametrize('body', [b'', b'not json', b'[]', b'"x"', b'null'])
+def test_parse_page_receipt_body_fails_closed_on_unusable_bodies(body):
+    # Every accepted page PUT returns the authoritative receipt: an empty body is a
+    # broken response, not a silent success.
+    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
+        remote_query.parse_page_receipt_body(body)
+    assert excinfo.value.code == 'invalid_receipt'
+
+
+def test_verify_page_response_accepts_only_the_authoritative_page_identity():
+    payload = b'{"value":1}'
+    page = _page_metadata(payload, batch_index=2, record_offset=7, rows=4)
+    receipt = {
+        'batch_index': 2,
+        'key': 'agent-intake-test/pages/2.json',
+        'record_offset': 7,
+        'bytes': len(payload),
+        'rows': 4,
+        'sha256': page.sha256_hex,
+    }
+
+    remote_query.verify_page_response(receipt, page)
+
+    mismatches = [
+        {'batch_index': 3},  # wrong page index
+        {'record_offset': 6},  # wrong row offset
+        {'bytes': len(payload) + 1},  # wrong byte count
+        {'rows': 5},  # wrong row count
+        {'sha256': '0' * 64},  # wrong checksum: terminal, never overwritten
+        {'key': ''},  # no usable object key
+        {'key': 7},
+        {'batch_index': '2'},  # strings are not exact integers
+        {'rows': True},
+    ]
+    for mismatch in mismatches:
+        with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
+            remote_query.verify_page_response({**receipt, **mismatch}, page)
+        assert excinfo.value.code == 'invalid_receipt'
+        assert excinfo.value.retryable is False
+
+
 # ---------------------------------------------------------------------------
 # Failure, timeout, and cancellation flows
 # ---------------------------------------------------------------------------
@@ -2023,54 +2258,57 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    request = bounded_request(
-        part_bytes=8,
-        maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX),
-    )
+    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX))
     pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    # All parts of page 0 precede its page finalize; page 1 parts follow; run finalize is
-    # the last call and happens exactly once.
-    batches = [call[0] for call in fake.put_part_calls]
-    assert batches == sorted(batches)
-    assert fake.page_finalize_calls == [0, 1]
+    # Pages are uploaded in order, each exactly once, and run finalize is the last call.
+    assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
 
 
-def test_stream_aborts_on_part_upload_failure(monkeypatch):
+def test_stream_aborts_on_page_upload_failure(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient(
-        raise_on_put=remote_query.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
+        raise_on_put_page=remote_query.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
     )
 
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'upload_failed')
-    assert len(fake.put_part_calls) == 1
+    assert len(fake.put_page_calls) == 1
     assert fake.abort_calls == 1
     assert fake.run_finalize_calls == 0
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
 
 
-def test_stream_fails_closed_on_partial_page_finalization(monkeypatch):
+def test_stream_fails_closed_on_page_receipt_mismatch(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    fake = FakeUploadClient(
-        raise_on_page_finalize=remote_query.RemoteQueryFailure('upload_failed', 'page finalize rejected')
-    )
+    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
+    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
+    bad_receipt = {
+        'batch_index': 0,
+        'key': 'agent-intake-test/pages/0.json',
+        'record_offset': 0,
+        'bytes': 123,
+        'rows': 1,
+        'sha256': 'f' * 64,
+    }
+    fake = FakeUploadClient(put_page_response=bad_receipt)
 
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+    events = collect_events(request, make_check(pool=pool), client=fake)
 
-    assert_failed_event(events, 'upload_failed')
-    assert fake.page_finalize_calls == [0]
+    # A receipt that disagrees with the produced page fails the run: page 1 is never
+    # produced, the session is aborted, and no partial receipt is emitted.
+    assert_failed_event(events, 'invalid_receipt')
+    assert [call.batch_index for call in fake.put_page_calls] == [0]
     assert fake.run_finalize_calls == 0
     assert fake.abort_calls == 1
     assert 'upload_receipt' not in event_metadata(events[-1])

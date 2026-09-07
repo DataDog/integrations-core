@@ -6,8 +6,10 @@
 
 Executes one validated query through a named (server-side) cursor, normalizes PostgreSQL
 values into the pinned cross-language JSON contract, splits the rows into byte-bounded JSON
-page files, and streams each page's bytes as multipart parts directly to its-agent-intake
-over HTTP. Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP
+page files, and uploads each complete page to its-agent-intake as one direct HTTP request.
+Each page is spooled into an anonymous temporary file while its exact bytes, rows, record
+offset, and SHA-256 are computed, so every retry resends a byte-identical page with stable
+metadata. Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP
 action output; the emit callback carries only ``metadata``/``final``/``error`` events, and
 the final event carries only the compact run receipt.
 """
@@ -20,15 +22,15 @@ import json
 import logging
 import math
 import re
+import tempfile
 import time
 import uuid
-from collections import deque
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from datetime import time as dt_time
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Literal, Protocol
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Protocol
 
 import psycopg.errors as psycopg_errors
 import psycopg.types.json as psycopg_json
@@ -75,7 +77,6 @@ REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
 # Server-owned maximums. The backend selects/clamps every injected limit; the integration only
 # fails closed when an injected instruction exceeds a known platform ceiling, which would
 # indicate a backend/integration contract version mismatch.
-REMOTE_QUERY_UPLOAD_MAX_PART_BYTES = 128 * 1024 * 1024
 REMOTE_QUERY_UPLOAD_MAX_FILE_BYTES = 128 * 1024 * 1024
 REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 10 * 1024 * 1024 * 1024
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
@@ -187,8 +188,8 @@ class RemoteQueryUploadLimits(BaseModel):
 class RemoteQueryResultDelivery(BaseModel):
     """Backend-injected upload instructions and artifact contract metadata.
 
-    The Agent forwards the run-scoped intake session instructions (``uploadId``, ``baseUrl``,
-    ``token``, ``partBytes``), the effective server-owned limits, the artifact contract
+    The Agent forwards the run-scoped intake session instructions (``uploadId``,
+    ``baseUrl``, ``token``), the effective server-owned limits, the artifact contract
     version, and the authoritative run/task identity used in every page envelope. Every field
     is server-owned: the integration validates what it receives and never invents values.
     """
@@ -201,15 +202,7 @@ class RemoteQueryResultDelivery(BaseModel):
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     token: StrictStr = Field(alias='token', min_length=1)
-    part_bytes: StrictInt = Field(alias='partBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_PART_BYTES)
     limits: RemoteQueryUploadLimits
-
-    @model_validator(mode='after')
-    def validate_part_within_page(self) -> 'RemoteQueryResultDelivery':
-        # Parts are fragments of a page, so the injected part size must not exceed the page cap.
-        if self.part_bytes > self.limits.max_file_bytes:
-            raise ValueError('partBytes must not exceed limits.maxFileBytes')
-        return self
 
 
 class RemoteQueryRequest(BaseModel):
@@ -239,8 +232,23 @@ class RemoteQueryRunStats:
 
     rows_emitted: int = 0
     pages_emitted: int = 0
-    parts_emitted: int = 0
     bytes_emitted: int = 0
+
+
+@dataclass(frozen=True)
+class PageUploadMetadata:
+    """The complete identity of one produced page, declared in the page PUT headers.
+
+    Every field is computed while the page is spooled, so the page request and any whole-page
+    retry carry stable metadata, and intake's authoritative page receipt is compared against
+    these exact values before the run may advance to the next page.
+    """
+
+    batch_index: int
+    record_offset: int
+    page_bytes: int
+    rows: int
+    sha256_hex: str
 
 
 @dataclass(frozen=True)
@@ -668,23 +676,37 @@ def page_prefix(*, run_id: str, task_id: str, batch_index: int, record_offset: i
 
 
 # ---------------------------------------------------------------------------
-# Page writer: byte-bounded pages streamed into bounded multipart parts
+# Page writer: byte-bounded pages spooled once and uploaded as one request each
 # ---------------------------------------------------------------------------
 
 
+def _open_page_spool() -> BinaryIO:
+    """Open the one-page retryable spool: an anonymous, owner-only temporary file.
+
+    ``tempfile.TemporaryFile`` is created with unpredictable 0600 permissions and is
+    unlinked immediately (O_TMPFILE where available), so the spooled page bytes never
+    have a predictable path, are never visible to other users, vanish on close or process
+    death, and are never collected by flare or support bundles. Its path and contents are
+    never logged.
+    """
+    return tempfile.TemporaryFile()
+
+
 class PageWriter:
-    """Split encoded rows into byte-bounded JSON pages and stream page bytes to intake.
+    """Split encoded rows into byte-bounded JSON pages and upload each as one request.
 
-    At most one page and one part are active at a time. Page bytes stream into
-    ``partBytes``-sized parts, so a part boundary may fall anywhere in the byte stream
-    (including inside an encoded row or UTF-8 sequence); the object-store completion
-    concatenates part bytes exactly, so only the completed page is JSON.
+    At most one page is active at a time: it is produced into a single anonymous spool file
+    (bounded by ``maxFileBytes``, never the whole result in memory) while its exact bytes,
+    row count, record offset, and SHA-256 are computed. The completed page is uploaded with
+    one direct page PUT; retries resends the whole spool byte-identically. The spool is
+    closed as soon as intake's authoritative page receipt matches, and on every failure,
+    cancellation, or abort path.
 
-    Row completions are tracked explicitly with row-end offsets: a row belongs to the part
-    that contains its final byte, and page row counts are never inferred by counting
-    newlines. Before writing a row the writer accounts for the comma, the encoded row, and
-    the required closing suffix; a row that cannot fit a fresh page's minimal envelope fails
-    with ``row_too_large``.
+    Rows are counted explicitly as they are appended, never inferred from the byte stream.
+    Before writing a row the writer accounts for the comma, the encoded row, and the
+    required closing suffix; a row that cannot fit a fresh page's minimal envelope fails
+    with ``row_too_large``. Page-envelope bytes and page splitting stay byte-exact with the
+    v1 artifact contract.
     """
 
     def __init__(
@@ -702,15 +724,14 @@ class PageWriter:
         self._schema_json = schema_json
         self._guard = guard
         self._stats = stats
-        # Active page state. ``_page_bytes`` counts prefix + rows written so far; the
+        # Active page state. ``_page_bytes`` counts prefix + rows appended so far; the
         # closing suffix is appended at close time.
         self._page_open = False
-        self._pending = bytearray()
+        self._spool: BinaryIO | None = None
         self._page_bytes = 0
         self._page_rows = 0
-        self._page_flushed_bytes = 0
-        self._part_number = 1
-        self._row_end_offsets: deque[int] = deque()
+        self._page_record_offset = 0
+        self._page_sha: 'hashlib._Hash' | None = None
 
     def add_row(self, row_bytes: bytes) -> None:
         self._ensure_page()
@@ -745,14 +766,10 @@ class PageWriter:
                 )
 
         if self._page_rows:
-            self._pending += b','
-            self._page_bytes += 1
-        self._pending += row_bytes
-        self._page_bytes += len(row_bytes)
-        self._row_end_offsets.append(self._page_bytes)
+            self._append(b',')
+        self._append(row_bytes)
         self._page_rows += 1
         self._stats.rows_emitted += 1
-        self._flush_full_parts()
 
     def finish(self) -> dict[str, Any]:
         """Close the active page, apply zero-row behavior, and finalize the run.
@@ -776,6 +793,15 @@ class PageWriter:
             'totalBytes': self._stats.bytes_emitted,
         }
 
+    def discard(self) -> None:
+        """Close any page spool left open by a failed, cancelled, or aborted run.
+
+        A no-op once every page receipt has matched; the success path closes each spool at
+        its own page receipt.
+        """
+        self._page_open = False
+        self._close_spool()
+
     def _ensure_page(self) -> None:
         if not self._page_open:
             self._begin_page()
@@ -794,54 +820,50 @@ class PageWriter:
             schema_json=self._schema_json,
         )
         self._page_open = True
-        self._pending += prefix
-        self._page_bytes = len(prefix)
+        self._spool = _open_page_spool()
+        self._page_record_offset = self._stats.rows_emitted
+        self._page_sha = hashlib.sha256()
+        self._page_bytes = 0
         self._page_rows = 0
-        self._page_flushed_bytes = 0
-        self._part_number = 1
-        self._row_end_offsets.clear()
+        self._append(prefix)
 
     def _close_page(self) -> None:
         self._guard()
-        self._pending += PAGE_SUFFIX
-        self._page_bytes += len(PAGE_SUFFIX)
-        self._flush_full_parts()
-        if self._pending:
-            # The final part of a page may be shorter than partBytes; empty pages cannot
-            # happen because the prefix plus suffix are always non-empty bytes.
-            self._put_part(bytes(self._pending))
-            self._pending.clear()
-        self._client.finalize_page(self._creds, self._stats.pages_emitted)
+        self._append(PAGE_SUFFIX)
+        metadata = PageUploadMetadata(
+            batch_index=self._stats.pages_emitted,
+            record_offset=self._page_record_offset,
+            page_bytes=self._page_bytes,
+            rows=self._page_rows,
+            sha256_hex=self._page_sha.hexdigest(),
+        )
+        try:
+            # Flush so the on-disk file is exactly the declared page, rewind so the request
+            # streams the whole page from the start, then upload and verify the receipt.
+            self._spool.flush()
+            self._spool.seek(0)
+            receipt = self._client.put_page(self._creds, metadata, self._spool)
+            verify_page_response(receipt, metadata)
+        finally:
+            # The spool is deleted on every path: receipt match, upload failure,
+            # cancellation, or a thrown guard. Nothing outlives the page it served.
+            self._close_spool()
         self._stats.pages_emitted += 1
         self._stats.bytes_emitted += self._page_bytes
         self._page_open = False
 
-    def _flush_full_parts(self) -> None:
-        part_bytes = self._delivery.part_bytes
-        while len(self._pending) >= part_bytes:
-            self._put_part(bytes(self._pending[:part_bytes]))
-            del self._pending[:part_bytes]
+    def _append(self, data: bytes) -> None:
+        self._spool.write(data)
+        self._page_sha.update(data)
+        self._page_bytes += len(data)
 
-    def _put_part(self, payload: bytes) -> None:
-        self._guard()
-        self._page_flushed_bytes += len(payload)
-        # Row completions are tracked explicitly: a row belongs to the part containing its
-        # final byte. Row-end offsets are absolute within the page and strictly increasing,
-        # so each row is counted exactly once, in the part where it completes.
-        rows_in_part = 0
-        while self._row_end_offsets and self._row_end_offsets[0] <= self._page_flushed_bytes:
-            rows_in_part += 1
-            self._row_end_offsets.popleft()
-        self._client.put_part(
-            self._creds,
-            batch_index=self._stats.pages_emitted,
-            part_number=self._part_number,
-            payload=payload,
-            sha256_hex=hashlib.sha256(payload).hexdigest(),
-            rows=rows_in_part,
-        )
-        self._part_number += 1
-        self._stats.parts_emitted += 1
+    def _close_spool(self) -> None:
+        if self._spool is not None:
+            spool, self._spool = self._spool, None
+            try:
+                spool.close()
+            except Exception:
+                LOGGER.debug('Unable to close the remote query page spool', exc_info=True)
 
 
 # ---------------------------------------------------------------------------
@@ -898,23 +920,29 @@ def produce_remote_query(
 
                     writer = PageWriter(delivery, creds, client, schema_json, guard, stats)
                     guard()
-                    while True:
-                        rows = server_cursor.fetchmany(REMOTE_QUERY_FETCH_BATCH_ROWS)
-                        if not rows:
-                            break
-                        for row in rows:
-                            guard()
-                            row_buffer = bytearray()
-                            encode_row(row, columns, row_buffer)
-                            if len(row_buffer) > limits.max_row_bytes:
-                                raise RemoteQueryFailure(
-                                    'row_too_large',
-                                    'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
-                                        len(row_buffer), limits.max_row_bytes
-                                    ),
-                                )
-                            writer.add_row(bytes(row_buffer))
-                    return writer.finish()
+                    try:
+                        while True:
+                            rows = server_cursor.fetchmany(REMOTE_QUERY_FETCH_BATCH_ROWS)
+                            if not rows:
+                                break
+                            for row in rows:
+                                guard()
+                                row_buffer = bytearray()
+                                encode_row(row, columns, row_buffer)
+                                if len(row_buffer) > limits.max_row_bytes:
+                                    raise RemoteQueryFailure(
+                                        'row_too_large',
+                                        'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
+                                            len(row_buffer), limits.max_row_bytes
+                                        ),
+                                    )
+                                writer.add_row(bytes(row_buffer))
+                        return writer.finish()
+                    finally:
+                        # Any spool still open (row failure, cancellation, timeout, upload
+                        # failure) is closed here; the success path already closed each
+                        # spool at its matching page receipt.
+                        writer.discard()
             finally:
                 if in_transaction:
                     try:
@@ -1018,14 +1046,14 @@ def _is_query_allowlist_enabled() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Direct multipart upload to its-agent-intake (page-aware)
+# Direct page upload to its-agent-intake
 #
-# The integration uploads page parts directly to its-agent-intake over HTTP. The Agent
-# forwards the intake base URL and scoped upload token in resultDelivery, and the
-# integration reads the org API key and POC application key from Agent config via
-# datadog_agent.get_config. Bulk part bytes never traverse the native emit bridge,
-# AgentSecure, PAR, or AP action output; only the compact final receipt is emitted back.
-
+# The integration uploads each complete page directly to its-agent-intake with one HTTP
+# PUT request. The Agent forwards the intake base URL and scoped upload token in
+# resultDelivery, and the integration reads the org API key and POC application key from
+# Agent config via datadog_agent.get_config. Bulk page bytes never traverse the native
+# emit bridge, AgentSecure, PAR, or AP action output; only the compact final receipt is
+# emitted back.
 #
 # Test Drive routing is a narrow development knob, not a production request field: the
 # Agent config value names a Test Drive, and the uploader emits the header
@@ -1044,8 +1072,12 @@ REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN = re.compile(r'[a-z0-9](?:[a-z0-9-]*
 REMOTE_QUERY_UPLOAD_MAX_RETRIES = 4
 REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
 REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
+# Intake reports an in-progress duplicate page attempt with this public error code; the
+# same byte-identical page is retried with bounded backoff. Any other rejection (a checksum
+# or metadata conflict, auth, limit enforcement) is terminal.
+REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE = 'page_upload_in_progress'
 # Per-upload HTTP timeout as an explicit (connect, read) tuple: a short connect timeout and a
-# 5-minute read timeout so a slow part upload (e.g. a large part over a constrained link) is
+# 5-minute read timeout so a slow page upload (e.g. a large page over a constrained link) is
 # not cut short, while a stuck connect fails fast. Retry count and backoff stay bounded above.
 REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
 REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 300
@@ -1066,11 +1098,7 @@ class UploadCredentials:
 
 
 class UploadClient(Protocol):
-    def put_part(
-        self, creds: UploadCredentials, batch_index: int, part_number: int, payload: bytes, sha256_hex: str, rows: int
-    ) -> None: ...
-
-    def finalize_page(self, creds: UploadCredentials, batch_index: int) -> None: ...
+    def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, body: BinaryIO) -> Mapping[str, Any]: ...
 
     def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]: ...
 
@@ -1078,7 +1106,7 @@ class UploadClient(Protocol):
 
 
 class RequestsUploadClient:
-    """Page-aware HTTP upload client for its-agent-intake. Imports requests lazily."""
+    """Direct-page HTTP upload client for its-agent-intake. Imports requests lazily."""
 
     def __init__(self, timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT) -> None:
         self._timeout = timeout
@@ -1096,22 +1124,31 @@ class RequestsUploadClient:
             headers[test_drive_header] = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE
         return headers
 
-    def put_part(
-        self, creds: UploadCredentials, batch_index: int, part_number: int, payload: bytes, sha256_hex: str, rows: int
-    ) -> None:
-        headers = self._headers(creds, 'application/octet-stream')
-        headers['X-DD-Part-SHA256'] = sha256_hex
-        headers['X-DD-Part-Bytes'] = str(len(payload))
-        headers['X-DD-Part-Rows'] = str(rows)
-        url = '{}/uploads/{}/pages/{}/parts/{}'.format(
-            creds.base_url.rstrip('/'), creds.upload_id, batch_index, part_number
-        )
-        _upload_with_retry('PUT', url, headers, payload, self._timeout)
+    def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, spool: BinaryIO) -> Mapping[str, Any]:
+        """Upload one complete page as a single PUT and return the parsed page receipt.
 
-    def finalize_page(self, creds: UploadCredentials, batch_index: int) -> None:
-        headers = self._headers(creds, 'application/json')
-        url = '{}/uploads/{}/pages/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id, batch_index)
-        _upload_with_retry('POST', url, headers, b'{}', self._timeout)
+        The spooled page is streamed as the request body with stable declared metadata;
+        every bounded retry rewinds the spool and resends byte-identical content for the
+        same page index.
+        """
+        headers = self._headers(creds, 'application/octet-stream')
+        headers['X-DD-Page-Bytes'] = str(page.page_bytes)
+        headers['X-DD-Page-Rows'] = str(page.rows)
+        headers['X-DD-Record-Offset'] = str(page.record_offset)
+        headers['X-DD-Page-SHA256'] = page.sha256_hex
+        # The spool is complete and rewound before the request, so the exact page size is
+        # declared as a stable Content-Length for one non-chunked request body.
+        headers['Content-Length'] = str(page.page_bytes)
+        url = '{}/uploads/{}/pages/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, page.batch_index)
+        _status, response_body = _upload_with_retry(
+            'PUT',
+            url,
+            headers,
+            spool,
+            self._timeout,
+            retryable_error_codes=frozenset((REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE,)),
+        )
+        return parse_page_receipt_body(response_body)
 
     def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]:
         headers = self._headers(creds, 'application/json')
@@ -1128,6 +1165,17 @@ class RequestsUploadClient:
             LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
 
 
+def parse_page_receipt_body(body: bytes) -> Mapping[str, Any]:
+    """Parse the page-upload response, failing closed on a non-JSON or non-object body."""
+    try:
+        parsed = json.loads(body.decode('utf-8'))
+    except (UnicodeDecodeError, ValueError):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not valid JSON.')
+    if not isinstance(parsed, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
+    return parsed
+
+
 def parse_finalize_run_body(body: bytes) -> Mapping[str, Any]:
     """Parse the run-finalize response, failing closed on a non-JSON or non-object body."""
     if not body or not body.strip():
@@ -1139,6 +1187,44 @@ def parse_finalize_run_body(body: bytes) -> Mapping[str, Any]:
     if not isinstance(parsed, Mapping):
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
     return parsed
+
+
+def verify_page_response(response: Mapping[str, Any], page: PageUploadMetadata) -> None:
+    """Fail closed unless intake's authoritative page receipt matches the produced page.
+
+    Every receipt field the producer declared is compared exactly before the spool is
+    deleted and the next page may be produced. The object ``key`` is server-derived and
+    opaque to the producer, so it is validated structurally; its exact value is verified
+    downstream by its-agent.
+    """
+    if not isinstance(response, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
+    key = response.get('key')
+    if not isinstance(key, str) or not key:
+        raise RemoteQueryFailure(
+            'invalid_receipt', 'its-agent-intake page upload response did not carry a usable object key.'
+        )
+    _verify_page_receipt_field(response, 'batch_index', page.batch_index)
+    _verify_page_receipt_field(response, 'record_offset', page.record_offset)
+    _verify_page_receipt_field(response, 'bytes', page.page_bytes)
+    _verify_page_receipt_field(response, 'rows', page.rows)
+    reported_sha256 = response.get('sha256')
+    if reported_sha256 != page.sha256_hex:
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake page upload response reported sha256 {!r} instead of {!r}.'.format(
+                str(reported_sha256), page.sha256_hex
+            ),
+        )
+
+
+def _verify_page_receipt_field(response: Mapping[str, Any], field: str, expected: int) -> None:
+    reported = response.get(field)
+    if type(reported) is not int or reported != expected:
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake page upload response reported {} {!r} instead of {}.'.format(field, reported, expected),
+        )
 
 
 def verify_run_finalize_response(response: Mapping[str, Any], upload_id: str) -> None:
@@ -1163,18 +1249,40 @@ def _is_transient_upload_status(status: int) -> bool:
     return status == 408 or status == 429 or status >= 500
 
 
+def _parse_error_code(body: bytes) -> str | None:
+    """Read intake's public error code from a rejection body, if it carries one."""
+    if not body or not body.strip():
+        return None
+    try:
+        parsed = json.loads(body.decode('utf-8'))
+    except (UnicodeDecodeError, ValueError):
+        return None
+    if not isinstance(parsed, Mapping):
+        return None
+    error = parsed.get('error')
+    if not isinstance(error, Mapping):
+        return None
+    code = error.get('code')
+    return code if isinstance(code, str) else None
+
+
 def _upload_with_retry(
     method: str,
     url: str,
     headers: Mapping[str, str],
-    body: bytes,
+    body: bytes | BinaryIO,
     timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
+    retryable_error_codes: frozenset[str] = frozenset(),
 ) -> tuple[int, bytes]:
     import requests  # lazy: only the POC upload path needs it
 
     backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
     last_err: Any = None
     for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
+        if not isinstance(body, bytes):
+            # Whole-page retry: rewind the spool so every attempt sends byte-identical
+            # content for the same page index with unchanged declared metadata.
+            body.seek(0)
         try:
             resp = requests.request(method, url, headers=dict(headers), data=body, timeout=timeout)
         except requests.exceptions.RequestException as e:
@@ -1182,11 +1290,14 @@ def _upload_with_retry(
         else:
             if 200 <= resp.status_code < 300:
                 return resp.status_code, resp.content
-            if not _is_transient_upload_status(resp.status_code):
+            if _is_transient_upload_status(resp.status_code) or (
+                retryable_error_codes and _parse_error_code(resp.content) in retryable_error_codes
+            ):
+                last_err = 'status {}'.format(resp.status_code)
+            else:
                 raise RemoteQueryFailure(
                     'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
                 )
-            last_err = 'status {}'.format(resp.status_code)
         if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
             break
         time.sleep(backoff)
@@ -1434,7 +1545,6 @@ def _started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
             'taskId': delivery.task_id,
             'uploadId': delivery.upload_id,
             'artifactVersion': delivery.artifact_version,
-            'partBytes': delivery.part_bytes,
             'limits': {
                 'maxFileBytes': limits.max_file_bytes,
                 'maxResultBytes': limits.max_result_bytes,
@@ -1460,7 +1570,6 @@ def _stats_metadata(stats: RemoteQueryRunStats, started_at: float) -> dict[str, 
     return {
         'rowsEmitted': stats.rows_emitted,
         'pagesEmitted': stats.pages_emitted,
-        'partsEmitted': stats.parts_emitted,
         'bytesEmitted': stats.bytes_emitted,
         'elapsedMs': _elapsed_ms(started_at),
     }
