@@ -10,6 +10,7 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
 - [Service Checks](#service-checks)
+- [Manifest Files](#manifest-files)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -98,6 +99,18 @@ ddev validate models -s <INTEGRATION_NAME>
 New integrations should not add their own service checks. Use metrics and metric-based monitors instead. Existing integrations that already submit service checks may continue to do so for backward compatibility.
 
 The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
+## Manifest Files
+
+New integrations must not include a `manifest.json`. Instead, add the following to `.ddev/config.toml`, keyed by the integration's directory name:
+
+- Display name under `[overrides.display-name]`.
+- Metrics prefix (matching the prefix used in `metadata.csv`) under `[overrides.metrics-prefix]`.
+- Supported platforms under `[overrides.manifest.platforms]`.
+
+`assets/configuration/spec.yaml`, `metadata.csv`, and `assets/service_checks.json` are unaffected and still live at their normal paths regardless of whether the integration has a manifest.
+
+Existing integrations that already have a `manifest.json` should keep it — there's no need to migrate them away from it.
 
 ## Development Workflow
 
