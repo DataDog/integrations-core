@@ -41,11 +41,12 @@ Some values are duplicated between them on purpose: `ci_matrix.py` must run stan
 dependencies, so it cannot import from this package. `PLATFORMS` and the path patterns are the
 copies that matter. Change one and change the other.
 
-Environment discovery is the one place they deliberately differ. This package asks Hatch through an
-injected `EnvironmentProvider`, where `ci_matrix.py` reads the `hatch.toml` matrix directly. Asking
-Hatch is accurate but costs one subprocess per target, and the repository-wide rule selects every testable
-target, so a `datadog_checks_base` change means hundreds of serial subprocesses. That needs
-concurrency or a `hatch.toml`-reading provider before this runs on real pull requests.
+Environment discovery uses an injected `EnvironmentProvider`. `HatchEnvironmentProvider` reads
+`hatch.toml` without invoking Hatch or loading project plugins. It expands default matrices, Python
+versions, literal platform restrictions, and the `os` matrix convention, including literal
+`matrix.os.platforms` mappings. It does not evaluate general overrides or inheritance. Unsupported
+constructs that affect discovery raise `PlanningError`; conditional test availability stays enabled
+for the worker to resolve at runtime.
 
 ## Rules
 

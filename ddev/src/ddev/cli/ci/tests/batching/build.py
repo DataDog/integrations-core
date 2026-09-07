@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -29,7 +30,8 @@ from ddev.cli.ci.tests.messages import TestBatch
 from ddev.e2e.agent_images import PYTHON_VERSION_PATTERN
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterator, Sequence
+    from typing import Any
 
     from ddev.cli.ci.tests.batching.targets import TargetRule
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
@@ -38,10 +40,10 @@ if TYPE_CHECKING:
     from ddev.integration.core import Integration
     from ddev.repo.core import Repository
     from ddev.utils.git import ChangedFile
-    from ddev.utils.hatch import Environment
-    from ddev.utils.platform import Platform, PlatformName
+    from ddev.utils.platform import PlatformName
 
 logger = logging.getLogger(__name__)
+ENVIRONMENT_NAME_PATTERN = re.compile(r"[A-Za-z0-9._-]+")
 
 
 def build_test_units(
@@ -164,66 +166,163 @@ def _supported_os(integration: Integration) -> list[str]:
 
 @dataclass(frozen=True, eq=False)
 class HatchEnvironmentProvider:
-    """An `EnvironmentProvider` backed by ddev's Hatch integration."""
+    """Read candidate environments from Hatch configuration without evaluating project code."""
 
-    platform: Platform
     default_python_version: str
 
     def __call__(self, integration: Integration, platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]:
-        from ddev.utils.hatch import list_environments
+        import tomllib
 
-        return resolve_hatch_environments(
-            list_environments(self.platform, integration),
-            platforms,
-            default_python_version=self.default_python_version,
-        )
+        try:
+            with open(integration.path / "hatch.toml", "rb") as stream:
+                config = tomllib.load(stream)
+            return self._resolve(config, platforms)
+        except (OSError, ValueError) as error:
+            raise PlanningError(f"{integration.name}/hatch.toml: {error}") from error
+
+    def _resolve(self, config: dict[str, Any], platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]:
+        from itertools import product
+
+        env = _table(config.get("env", {}), "env")
+        collectors = _table(env.get("collectors", {}), "env.collectors")
+        if unknown := collectors.keys() - {"default", "datadog-checks"}:
+            raise ValueError(f"env.collectors: unsupported collectors {sorted(unknown)}")
+
+        envs = _table(config.get("envs", {}), "envs")
+        for name, value in envs.items():
+            if name == "default":
+                continue
+            named = _table(value, f"envs.{name}")
+            if named.get("test-env", False) or named.get("e2e-env", False):
+                raise ValueError(f"envs.{name}: test environments outside envs.default are unsupported")
+            for _, _, settings in _overrides(named.get("overrides", {}), f"envs.{name}.overrides"):
+                if settings.keys() & {"test-env", "e2e-env"}:
+                    raise ValueError(f"envs.{name}.overrides: conditional named test environments are unsupported")
+
+        default = _table(envs.get("default", {}), "envs.default")
+        for field in ("template", "matrix-name-format", "matrix-exclude", "matrix-include"):
+            if field in default:
+                raise ValueError(f"envs.default.{field}: unsupported for static discovery")
+        if default.get("type", "virtual") != "virtual":
+            raise ValueError("envs.default.type: only virtual environments support static discovery")
+
+        python = _python_version(default.get("python", self.default_python_version), "envs.default.python")
+        restrictions = _strings(default.get("platforms", []), "envs.default.platforms")
+        availability = {}
+        for field in ("test-env", "e2e-env"):
+            value = default.get(field, True)
+            if not isinstance(value, bool):
+                raise ValueError(f"envs.default.{field}: expected a boolean")
+            availability[field] = value
+
+        os_platforms = None
+        for scope, selector, settings in _overrides(default.get("overrides", {}), "envs.default.overrides"):
+            for field, value in settings.items():
+                location = f"envs.default.overrides.{scope}.{selector}.{field}"
+                if (scope, selector, field) == ("matrix", "os", "platforms"):
+                    os_platforms = _os_platform_mapping(value, location)
+                elif field in {"python", "platforms", "matrix", "template", "matrix-name-format"}:
+                    raise ValueError(f"{location}: unsupported for static discovery")
+                elif field in availability:
+                    # The worker evaluates these conditions; false here would prevent it from doing so.
+                    availability[field] = True
+
+        if os_platforms is not None and restrictions:
+            raise ValueError(
+                "envs.default.platforms: combining literal and matrix platform restrictions is unsupported"
+            )
+
+        matrices = default.get("matrix", [])
+        if not isinstance(matrices, list):
+            raise ValueError("envs.default.matrix: expected an array of tables")
+
+        result = []
+        names: set[str] = set()
+        for index, value in enumerate(matrices or [{}]):
+            field = f"envs.default.matrix[{index}]"
+            matrix = _table(value, field)
+            if matrices and not matrix:
+                raise ValueError(f"{field}: expected at least one matrix variable")
+            # Hatch places Python first in environment names, regardless of TOML key order.
+            axes = sorted(matrix, key=lambda key: key != "python")
+            values = [_strings(matrix[axis], f"{field}.{axis}", nonempty=True) for axis in axes]
+            for combination in product(*values):
+                variables = dict(zip(axes, combination, strict=True))
+                version = _python_version(variables.get("python", python), f"{field}.python")
+                name = "-".join(f"py{v}" if k == "python" else v for k, v in variables.items()) or "default"
+                if not ENVIRONMENT_NAME_PATTERN.fullmatch(name):
+                    raise ValueError(f"{field}: invalid environment name {name!r}")
+                if name in names:
+                    raise ValueError(f"{field}: duplicate environment name {name!r}")
+                names.add(name)
+
+                allowed = restrictions
+                if "os" in variables:
+                    os_name = variables["os"]
+                    if os_platforms is None:
+                        allowed = [os_name] if not restrictions or os_name in restrictions else []
+                        if not allowed:
+                            continue
+                    elif os_name not in os_platforms:
+                        raise ValueError(f"{field}.os: no platform mapping for {os_name!r}")
+                    else:
+                        allowed = os_platforms[os_name]
+                elif os_platforms is not None:
+                    raise ValueError(f"{field}: matrix.os.platforms requires an os variable")
+
+                if not any(availability.values()):
+                    continue
+                for platform in platforms:
+                    if allowed and str(platform) not in allowed:
+                        continue
+                    result.append(
+                        ResolvedEnvironment(
+                            name=name,
+                            platform=platform,
+                            python_version=version,
+                            test_available=availability["test-env"],
+                            e2e_available=availability["e2e-env"],
+                        )
+                    )
+        return result
 
 
-def resolve_hatch_environments(
-    environments: Sequence[Environment],
-    platforms: Sequence[PlatformName],
-    *,
-    default_python_version: str,
-) -> list[ResolvedEnvironment]:
-    """Map ddev `Environment` values onto target platforms, keeping environments that test anything.
+def _table(value: object, field: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{field}: expected a table")
+    return value
 
-    An environment constrained to specific platforms is routed only to those the target also runs
-    on; an unconstrained one runs on every platform the target runs on.
 
-    The Python version comes from Hatch's own `python` value, never from the environment name,
-    which only encodes it by convention.
-    """
-    if not platforms:
-        return []
+def _strings(value: object, field: str, *, nonempty: bool = False) -> list[str]:
+    if not isinstance(value, list) or any(not isinstance(item, str) or not item for item in value):
+        raise ValueError(f"{field}: expected an array of nonempty strings")
+    if nonempty and not value:
+        raise ValueError(f"{field}: expected at least one value")
+    return value
 
-    by_name = {str(platform): platform for platform in platforms}
-    resolved: list[ResolvedEnvironment] = []
-    for environment in environments:
-        if not (environment.test_env or environment.e2e_env):
+
+def _python_version(value: object, field: str) -> str:
+    if not isinstance(value, str) or not PYTHON_VERSION_PATTERN.fullmatch(value):
+        raise ValueError(f"{field}: expected a `major.minor` Python version, got {value!r}")
+    return value
+
+
+def _overrides(value: object, field: str) -> Iterator[tuple[str, str, dict[str, Any]]]:
+    for scope, selectors in _table(value, field).items():
+        if scope not in {"platform", "env", "matrix", "name"}:
             continue
+        for selector, settings in _table(selectors, f"{field}.{scope}").items():
+            yield scope, selector, _table(settings, f"{field}.{scope}.{selector}")
 
-        if environment.platforms:
-            # Raw configuration, so a platform ddev does not target drops out of the intersection
-            # instead of failing the plan.
-            candidate_platforms = [by_name[name] for name in environment.platforms if name in by_name]
-        else:
-            candidate_platforms = list(platforms)
 
-        python_version = environment.python or default_python_version
-        if not PYTHON_VERSION_PATTERN.match(python_version):
-            raise PlanningError(
-                f'Environment {environment.name!r} reports Python {python_version!r}; '
-                f'expected a `major.minor` version such as `3.13`'
-            )
-
-        for platform in candidate_platforms:
-            resolved.append(
-                ResolvedEnvironment(
-                    name=environment.name,
-                    platform=platform,
-                    python_version=python_version,
-                    test_available=environment.test_env,
-                    e2e_available=environment.e2e_env,
-                )
-            )
-    return resolved
+def _os_platform_mapping(value: object, field: str) -> dict[str, list[str]]:
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{field}: expected literal value/if mappings")
+    platforms: dict[str, list[str]] = {}
+    for item in value:
+        mapping = _table(item, field)
+        if mapping.keys() != {"value", "if"} or not isinstance(mapping["value"], str) or not mapping["value"]:
+            raise ValueError(f"{field}: only literal value/if mappings are supported")
+        for os_name in _strings(mapping["if"], f"{field}.if", nonempty=True):
+            platforms.setdefault(os_name, []).append(mapping["value"])
+    return platforms

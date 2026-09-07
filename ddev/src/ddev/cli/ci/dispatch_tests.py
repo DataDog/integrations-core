@@ -143,7 +143,7 @@ def dispatch_tests(
         changed_files=run.changed_files,
         all_targets=all_targets,
         minimum_base_package=minimum_base_package,
-        environment_provider=HatchEnvironmentProvider(app.platform, config.default_python_version),
+        environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
     )
     if not batches:
         app.display_info('No affected target to test.')
