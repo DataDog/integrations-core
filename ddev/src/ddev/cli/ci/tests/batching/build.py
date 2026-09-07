@@ -43,7 +43,17 @@ if TYPE_CHECKING:
     from ddev.utils.platform import PlatformName
 
 logger = logging.getLogger(__name__)
+
 ENVIRONMENT_NAME_PATTERN = re.compile(r"[A-Za-z0-9._-]+")
+SUPPORTED_ENVIRONMENT_COLLECTORS = frozenset({"default", "datadog-checks"})
+SUPPORTED_OVERRIDE_SCOPES = frozenset({"platform", "env", "matrix", "name"})
+UNSUPPORTED_ENVIRONMENT_FIELDS = ("template", "matrix-name-format", "matrix-exclude", "matrix-include")
+UNSUPPORTED_OVERRIDE_FIELDS = frozenset({"python", "platforms", "matrix", "template", "matrix-name-format"})
+OS_PLATFORM_OVERRIDE = ("matrix", "os", "platforms")
+PLATFORM_MAPPING_FIELDS = frozenset({"value", "if"})
+
+# The datadog-checks collector enables both stages on the default environment.
+TEST_STAGE_DEFAULTS = {"test-env": True, "e2e-env": True}
 
 
 def build_test_units(
@@ -181,110 +191,132 @@ class HatchEnvironmentProvider:
             raise PlanningError(f"{integration.name}/hatch.toml: {error}") from error
 
     def _resolve(self, config: dict[str, Any], platforms: Sequence[PlatformName]) -> list[ResolvedEnvironment]:
-        from itertools import product
-
-        env = _table(config.get("env", {}), "env")
-        collectors = _table(env.get("collectors", {}), "env.collectors")
-        if unknown := collectors.keys() - {"default", "datadog-checks"}:
-            raise ValueError(f"env.collectors: unsupported collectors {sorted(unknown)}")
-
-        envs = _table(config.get("envs", {}), "envs")
-        for name, value in envs.items():
-            if name == "default":
-                continue
-            named = _table(value, f"envs.{name}")
-            if named.get("test-env", False) or named.get("e2e-env", False):
-                raise ValueError(f"envs.{name}: test environments outside envs.default are unsupported")
-            for _, _, settings in _overrides(named.get("overrides", {}), f"envs.{name}.overrides"):
-                if settings.keys() & {"test-env", "e2e-env"}:
-                    raise ValueError(f"envs.{name}.overrides: conditional named test environments are unsupported")
-
-        default = _table(envs.get("default", {}), "envs.default")
-        for field in ("template", "matrix-name-format", "matrix-exclude", "matrix-include"):
-            if field in default:
-                raise ValueError(f"envs.default.{field}: unsupported for static discovery")
-        if default.get("type", "virtual") != "virtual":
-            raise ValueError("envs.default.type: only virtual environments support static discovery")
-
+        default = _default_environment(config)
         python = _python_version(default.get("python", self.default_python_version), "envs.default.python")
         restrictions = _strings(default.get("platforms", []), "envs.default.platforms")
-        availability = {}
-        for field in ("test-env", "e2e-env"):
-            value = default.get(field, True)
-            if not isinstance(value, bool):
-                raise ValueError(f"envs.default.{field}: expected a boolean")
-            availability[field] = value
-
-        os_platforms = None
-        for scope, selector, settings in _overrides(default.get("overrides", {}), "envs.default.overrides"):
-            for field, value in settings.items():
-                location = f"envs.default.overrides.{scope}.{selector}.{field}"
-                if (scope, selector, field) == ("matrix", "os", "platforms"):
-                    os_platforms = _os_platform_mapping(value, location)
-                elif field in {"python", "platforms", "matrix", "template", "matrix-name-format"}:
-                    raise ValueError(f"{location}: unsupported for static discovery")
-                elif field in availability:
-                    # The worker evaluates these conditions; false here would prevent it from doing so.
-                    availability[field] = True
-
+        availability, os_platforms = _execution_settings(default)
         if os_platforms is not None and restrictions:
             raise ValueError(
                 "envs.default.platforms: combining literal and matrix platform restrictions is unsupported"
             )
 
-        matrices = default.get("matrix", [])
-        if not isinstance(matrices, list):
-            raise ValueError("envs.default.matrix: expected an array of tables")
-
-        result = []
+        result: list[ResolvedEnvironment] = []
         names: set[str] = set()
-        for index, value in enumerate(matrices or [{}]):
-            field = f"envs.default.matrix[{index}]"
-            matrix = _table(value, field)
-            if matrices and not matrix:
-                raise ValueError(f"{field}: expected at least one matrix variable")
-            # Hatch places Python first in environment names, regardless of TOML key order.
-            axes = sorted(matrix, key=lambda key: key != "python")
-            values = [_strings(matrix[axis], f"{field}.{axis}", nonempty=True) for axis in axes]
-            for combination in product(*values):
-                variables = dict(zip(axes, combination, strict=True))
-                version = _python_version(variables.get("python", python), f"{field}.python")
-                name = "-".join(f"py{v}" if k == "python" else v for k, v in variables.items()) or "default"
-                if not ENVIRONMENT_NAME_PATTERN.fullmatch(name):
-                    raise ValueError(f"{field}: invalid environment name {name!r}")
-                if name in names:
-                    raise ValueError(f"{field}: duplicate environment name {name!r}")
-                names.add(name)
+        for field, variables in _matrix_combinations(default.get("matrix", [])):
+            version = _python_version(variables.get("python", python), f"{field}.python")
+            name = _environment_name(variables, field)
+            if name in names:
+                raise ValueError(f"{field}: duplicate environment name {name!r}")
+            names.add(name)
 
-                allowed = restrictions
-                if "os" in variables:
-                    os_name = variables["os"]
-                    if os_platforms is None:
-                        allowed = [os_name] if not restrictions or os_name in restrictions else []
-                        if not allowed:
-                            continue
-                    elif os_name not in os_platforms:
-                        raise ValueError(f"{field}.os: no platform mapping for {os_name!r}")
-                    else:
-                        allowed = os_platforms[os_name]
-                elif os_platforms is not None:
-                    raise ValueError(f"{field}: matrix.os.platforms requires an os variable")
-
-                if not any(availability.values()):
-                    continue
-                for platform in platforms:
-                    if allowed and str(platform) not in allowed:
-                        continue
-                    result.append(
-                        ResolvedEnvironment(
-                            name=name,
-                            platform=platform,
-                            python_version=version,
-                            test_available=availability["test-env"],
-                            e2e_available=availability["e2e-env"],
-                        )
-                    )
+            candidates = _environment_platforms(platforms, variables.get("os"), restrictions, os_platforms, field)
+            if not any(availability.values()):
+                continue
+            result.extend(
+                ResolvedEnvironment(
+                    name=name,
+                    platform=platform,
+                    python_version=version,
+                    test_available=availability["test-env"],
+                    e2e_available=availability["e2e-env"],
+                )
+                for platform in candidates
+            )
         return result
+
+
+def _default_environment(config: dict[str, Any]) -> dict[str, Any]:
+    env = _table(config.get("env", {}), "env")
+    collectors = _table(env.get("collectors", {}), "env.collectors")
+    if unknown := collectors.keys() - SUPPORTED_ENVIRONMENT_COLLECTORS:
+        raise ValueError(f"env.collectors: unsupported collectors {sorted(unknown)}")
+
+    envs = _table(config.get("envs", {}), "envs")
+    for name, value in envs.items():
+        if name == "default":
+            continue
+        named = _table(value, f"envs.{name}")
+        if any(named.get(field, False) for field in TEST_STAGE_DEFAULTS):
+            raise ValueError(f"envs.{name}: test environments outside envs.default are unsupported")
+        for _, _, settings in _overrides(named.get("overrides", {}), f"envs.{name}.overrides"):
+            if settings.keys() & TEST_STAGE_DEFAULTS.keys():
+                raise ValueError(f"envs.{name}.overrides: conditional named test environments are unsupported")
+
+    default = _table(envs.get("default", {}), "envs.default")
+    for field in UNSUPPORTED_ENVIRONMENT_FIELDS:
+        if field in default:
+            raise ValueError(f"envs.default.{field}: unsupported for static discovery")
+    if default.get("type", "virtual") != "virtual":
+        raise ValueError("envs.default.type: only virtual environments support static discovery")
+    return default
+
+
+def _execution_settings(default: dict[str, Any]) -> tuple[dict[str, bool], dict[str, list[str]] | None]:
+    availability = {}
+    for field, fallback in TEST_STAGE_DEFAULTS.items():
+        value = default.get(field, fallback)
+        if not isinstance(value, bool):
+            raise ValueError(f"envs.default.{field}: expected a boolean")
+        availability[field] = value
+
+    os_platforms = None
+    for scope, selector, settings in _overrides(default.get("overrides", {}), "envs.default.overrides"):
+        for field, value in settings.items():
+            location = f"envs.default.overrides.{scope}.{selector}.{field}"
+            if (scope, selector, field) == OS_PLATFORM_OVERRIDE:
+                os_platforms = _os_platform_mapping(value, location)
+            elif field in UNSUPPORTED_OVERRIDE_FIELDS:
+                raise ValueError(f"{location}: unsupported for static discovery")
+            elif field in availability:
+                # The worker evaluates these conditions; false here would prevent it from doing so.
+                availability[field] = True
+    return availability, os_platforms
+
+
+def _matrix_combinations(value: object) -> Iterator[tuple[str, dict[str, str]]]:
+    from itertools import product
+
+    if not isinstance(value, list):
+        raise ValueError("envs.default.matrix: expected an array of tables")
+    for index, entry in enumerate(value or [{}]):
+        field = f"envs.default.matrix[{index}]"
+        matrix = _table(entry, field)
+        if value and not matrix:
+            raise ValueError(f"{field}: expected at least one matrix variable")
+        # Hatch places Python first in environment names, regardless of TOML key order.
+        axes = sorted(matrix, key=lambda key: key != "python")
+        values = [_strings(matrix[axis], f"{field}.{axis}", nonempty=True) for axis in axes]
+        for combination in product(*values):
+            yield field, dict(zip(axes, combination, strict=True))
+
+
+def _environment_name(variables: dict[str, str], field: str) -> str:
+    name = "-".join(f"py{value}" if key == "python" else value for key, value in variables.items()) or "default"
+    if not ENVIRONMENT_NAME_PATTERN.fullmatch(name):
+        raise ValueError(f"{field}: invalid environment name {name!r}")
+    return name
+
+
+def _environment_platforms(
+    platforms: Sequence[PlatformName],
+    os_name: str | None,
+    restrictions: list[str],
+    os_platforms: dict[str, list[str]] | None,
+    field: str,
+) -> list[PlatformName]:
+    allowed = restrictions
+    if os_name is not None:
+        if os_platforms is None:
+            if restrictions and os_name not in restrictions:
+                return []
+            allowed = [os_name]
+        elif os_name not in os_platforms:
+            raise ValueError(f"{field}.os: no platform mapping for {os_name!r}")
+        else:
+            allowed = os_platforms[os_name]
+    elif os_platforms is not None:
+        raise ValueError(f"{field}: matrix.os.platforms requires an os variable")
+    return [platform for platform in platforms if not allowed or str(platform) in allowed]
 
 
 def _table(value: object, field: str) -> dict[str, Any]:
@@ -309,7 +341,7 @@ def _python_version(value: object, field: str) -> str:
 
 def _overrides(value: object, field: str) -> Iterator[tuple[str, str, dict[str, Any]]]:
     for scope, selectors in _table(value, field).items():
-        if scope not in {"platform", "env", "matrix", "name"}:
+        if scope not in SUPPORTED_OVERRIDE_SCOPES:
             continue
         for selector, settings in _table(selectors, f"{field}.{scope}").items():
             yield scope, selector, _table(settings, f"{field}.{scope}.{selector}")
@@ -321,7 +353,7 @@ def _os_platform_mapping(value: object, field: str) -> dict[str, list[str]]:
     platforms: dict[str, list[str]] = {}
     for item in value:
         mapping = _table(item, field)
-        if mapping.keys() != {"value", "if"} or not isinstance(mapping["value"], str) or not mapping["value"]:
+        if mapping.keys() != PLATFORM_MAPPING_FIELDS or not isinstance(mapping["value"], str) or not mapping["value"]:
             raise ValueError(f"{field}: only literal value/if mappings are supported")
         for os_name in _strings(mapping["if"], f"{field}.if", nonempty=True):
             platforms.setdefault(os_name, []).append(mapping["value"])
