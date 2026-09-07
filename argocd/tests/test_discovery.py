@@ -13,7 +13,7 @@ import yaml
 from datadog_checks.argocd.config_models import discovery
 from datadog_checks.argocd.config_models.discovery_strategies import from_argocd_kube_app_name
 from datadog_checks.base.stubs import tagger
-from datadog_checks.base.utils.discovery import Service
+from datadog_checks.base.utils.discovery import Port, Service
 
 KIND_MANIFEST = Path(__file__).parent / 'kind' / 'argocd_install.yaml'
 DISCOVERY_ROLE_ENDPOINTS: dict[str, tuple[str, int]] = {
@@ -37,12 +37,17 @@ def reset_tagger() -> Iterator[None]:
     tagger.reset()
 
 
-def build_service(service_id: str = 'docker://abc', host: str = '10.0.0.1') -> Service:
-    return Service(id=service_id, host=host, ports=())
+def build_service(
+    service_id: str = 'docker://abc',
+    host: str = '10.0.0.1',
+    ports: tuple[Port, ...] = (),
+) -> Service:
+    return Service(id=service_id, host=host, ports=ports)
 
 
-def kind_workload_app_names() -> set[str]:
-    app_names: set[str] = set()
+def kind_workloads() -> dict[str, tuple[Port, ...]]:
+    """Map each kind-fixture workload's app name to its declared container ports."""
+    workloads: dict[str, tuple[Port, ...]] = {}
     with KIND_MANIFEST.open(encoding='utf-8') as f:
         for manifest in yaml.safe_load_all(f):
             if not isinstance(manifest, dict) or manifest.get('kind') not in {'Deployment', 'StatefulSet'}:
@@ -61,14 +66,22 @@ def kind_workload_app_names() -> set[str]:
                 continue
 
             labels = metadata.get('labels', {})
-            if not isinstance(labels, dict):
+            app_name = labels.get('app.kubernetes.io/name') if isinstance(labels, dict) else None
+            if not isinstance(app_name, str):
                 continue
 
-            app_name = labels.get('app.kubernetes.io/name')
-            if isinstance(app_name, str):
-                app_names.add(app_name)
+            containers = template.get('spec', {}).get('containers', [])
+            if not isinstance(containers, list):
+                continue
 
-    return app_names
+            workloads[app_name] = tuple(
+                Port(number=port['containerPort'], name=port.get('name') or '')
+                for container in containers
+                for port in (container.get('ports') or [])
+                if isinstance(port, dict) and isinstance(port.get('containerPort'), int)
+            )
+
+    return workloads
 
 
 def assert_candidate_endpoint(candidate: dict[str, Any], endpoint_field: str, host: str, port: int) -> None:
@@ -86,6 +99,41 @@ def test_from_argocd_kube_app_name_yields_role_endpoint_on_matching_role() -> No
 
     assert len(contexts) == 1
     assert contexts[0]['endpoints'].api_server_endpoint == 'http://10.0.0.8:8083/metrics'
+
+
+def test_from_argocd_kube_app_name_prefers_declared_metrics_port_over_role_default() -> None:
+    tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
+
+    contexts = list(
+        from_argocd_kube_app_name(
+            build_service(ports=(Port(number=8080, name='http'), Port(number=9999, name='metrics')))
+        )
+    )
+
+    assert len(contexts) == 1
+    assert contexts[0]['endpoints'].api_server_endpoint == 'http://10.0.0.1:9999/metrics'
+
+
+def test_from_argocd_kube_app_name_falls_back_to_role_default_for_unnamed_ports() -> None:
+    tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
+
+    # The official install manifest declares the server's ports without names: 8080 is the
+    # main HTTP port and 8083 is the metrics port.
+    contexts = list(
+        from_argocd_kube_app_name(build_service(ports=(Port(number=8080, name=''), Port(number=8083, name=''))))
+    )
+
+    assert len(contexts) == 1
+    assert contexts[0]['endpoints'].api_server_endpoint == 'http://10.0.0.1:8083/metrics'
+
+
+def test_from_argocd_kube_app_name_brackets_ipv6_host_in_url() -> None:
+    tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
+
+    contexts = list(from_argocd_kube_app_name(build_service(host='fd00::1')))
+
+    assert len(contexts) == 1
+    assert contexts[0]['endpoints'].api_server_endpoint == 'http://[fd00::1]:8083/metrics'
 
 
 @pytest.mark.parametrize(
@@ -119,14 +167,16 @@ def test_from_argocd_kube_app_name_queries_tagger_container_entity(service_id: s
 
 
 def test_generated_discovery_matches_kind_fixture_roles() -> None:
-    app_names = kind_workload_app_names()
-    assert set(KIND_DISCOVERY_ROLE_ENDPOINTS) <= app_names
+    workloads = kind_workloads()
+    assert set(KIND_DISCOVERY_ROLE_ENDPOINTS) <= set(workloads)
 
     tagger.set_tags({f'container_id://{role}': [f'kube_app_name:{role}'] for role in KIND_DISCOVERY_ROLE_ENDPOINTS})
 
     for index, (role, (endpoint_field, port)) in enumerate(KIND_DISCOVERY_ROLE_ENDPOINTS.items(), 1):
         host = f'10.0.0.{index}'
-        candidates = list(discovery.candidates(build_service(service_id=f'docker://{role}', host=host)))
+        candidates = list(
+            discovery.candidates(build_service(service_id=f'docker://{role}', host=host, ports=workloads[role]))
+        )
 
         assert len(candidates) == 1
         assert_candidate_endpoint(candidates[0], endpoint_field, host, port)
@@ -151,7 +201,7 @@ def test_generated_discovery_supports_commit_server_synthetically() -> None:
 
 
 def test_generated_discovery_ignores_kind_redis_workload() -> None:
-    assert 'argocd-redis' in kind_workload_app_names()
+    assert 'argocd-redis' in kind_workloads()
     tagger.set_tags({'container_id://redis': ['kube_app_name:argocd-redis']})
 
     assert list(discovery.candidates(build_service(service_id='docker://redis', host='10.0.0.70'))) == []
