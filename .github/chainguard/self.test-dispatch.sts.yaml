@@ -1,3 +1,4 @@
+# Allows test-dispatch on master to run test batches and report their results.
 issuer: https://token.actions.githubusercontent.com
 
 subject: repo:DataDog/integrations-core:ref:refs/heads/master
@@ -10,6 +11,6 @@ claim_pattern:
   repository: ^DataDog/integrations-core$
 
 permissions:
-  actions: write
-  pull_requests: write
-  statuses: write
+  actions: write # Dispatch/cancel batches and read runs, jobs, and artifacts.
+  pull_requests: write # Resolve the PR and post its test report.
+  statuses: write # Publish the aggregate result on the tested commit.
