@@ -14,12 +14,12 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtendedKeyUsageOID, NameOID
-from datadog_checks.dev.utils import ON_WINDOWS
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils import http as http_module
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
 from datadog_checks.base.utils.tls import TlsConfig
+from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = [pytest.mark.unit]
 

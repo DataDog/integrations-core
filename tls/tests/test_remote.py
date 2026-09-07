@@ -6,8 +6,8 @@ import re
 import mock
 import pytest
 from cryptography.x509.oid import AuthorityInformationAccessOID
-from datadog_checks.base import ConfigurationError
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,
     SERVICE_CHECK_EXPIRATION,
