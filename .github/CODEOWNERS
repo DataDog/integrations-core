@@ -105,6 +105,10 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /podman/                                        @DataDog/container-integrations @DataDog/agent-integrations
 /podman/*.md                                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /podman/manifest.json                           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/taxii/                                                    @DataDog/cloud-siem
+/taxii/*.md                                                @DataDog/cloud-siem @DataDog/documentation
+/taxii/manifest.json                                       @DataDog/cloud-siem @DataDog/documentation
+
 /tcp_queue_length/                              @DataDog/container-integrations @DataDog/agent-integrations
 /tcp_queue_length/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation

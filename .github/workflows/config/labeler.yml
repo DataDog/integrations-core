@@ -1469,6 +1469,10 @@ integration/tanium:
 - changed-files:
   - any-glob-to-any-file:
     - tanium/**/*
+integration/taxii:
+- changed-files:
+  - any-glob-to-any-file:
+    - taxii/**/*
 integration/tcp_check:
 - changed-files:
   - any-glob-to-any-file:
