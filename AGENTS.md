@@ -9,6 +9,7 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Maintaining This File](#maintaining-this-file)
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
+- [Service Checks](#service-checks)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -91,6 +92,12 @@ Don't modify files in `**/config_models/*.py` directly. To change those files, e
 ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
+
+## Service Checks
+
+New integrations should not add their own service checks. Use metrics and metric-based monitors instead. Existing integrations that already submit service checks may continue to do so for backward compatibility.
+
+The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
 
 ## Development Workflow
 
