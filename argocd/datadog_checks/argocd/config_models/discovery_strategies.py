@@ -54,6 +54,13 @@ def from_argocd_kube_app_name(service: Service) -> Iterator[dict[str, ArgoCDDisc
     install manifest names the ``metrics`` port only on the applicationset-controller, so a
     declared ``metrics`` port is preferred when present and the role's default metrics port
     is used as the fallback for the unnamed or undeclared ports of the other roles.
+
+    The fallback port must be among the service's declared ports before it is used: when the
+    declared ports exclude the role's default port and none is named ``metrics``, the
+    endpoint would target a port the service does not expose, so no candidate is yielded.
+    An empty port list means the container declared no ports at all (for example the
+    notifications-controller of the official install manifest), in which case the default
+    port can be neither confirmed nor refuted and is still used.
     """
     tags = tagger.tag(container_tagger_entity_id(service.id), tagger.LOW) or []
     for kube_app_name, (endpoint_field, default_port) in ARGOCD_ROLE_ENDPOINTS.items():
@@ -61,7 +68,13 @@ def from_argocd_kube_app_name(service: Service) -> Iterator[dict[str, ArgoCDDisc
             continue
 
         port = next(candidate_ports_by_name(service, ['metrics']), None)
-        port_number = port.number if port is not None else default_port
+        if port is not None:
+            port_number = port.number
+        elif service.ports and default_port not in {declared.number for declared in service.ports}:
+            return
+        else:
+            port_number = default_port
+
         endpoint = f'http://{service.host}:{port_number}/metrics'
         yield {'endpoints': ArgoCDDiscoveryEndpoints(**{endpoint_field: endpoint})}
         return

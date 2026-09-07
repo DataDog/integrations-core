@@ -127,6 +127,35 @@ def test_from_argocd_kube_app_name_falls_back_to_role_default_for_unnamed_ports(
     assert contexts[0]['endpoints'].api_server_endpoint == 'http://10.0.0.1:8083/metrics'
 
 
+def test_from_argocd_kube_app_name_confirms_default_port_declared_under_other_name() -> None:
+    tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
+
+    contexts = list(from_argocd_kube_app_name(build_service(ports=(Port(number=8083, name='http'),))))
+
+    assert len(contexts) == 1
+    assert contexts[0]['endpoints'].api_server_endpoint == 'http://10.0.0.1:8083/metrics'
+
+
+def test_from_argocd_kube_app_name_yields_nothing_when_declared_ports_exclude_default() -> None:
+    tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
+
+    # Custom install where the server exposes only its main HTTP port and neither names a
+    # ``metrics`` port nor declares the default metrics port number.
+    contexts = list(from_argocd_kube_app_name(build_service(ports=(Port(number=8080, name='http'),))))
+
+    assert contexts == []
+
+
+def test_generated_discovery_yields_nothing_when_declared_ports_exclude_default() -> None:
+    tagger.set_tags({'container_id://custom': ['kube_app_name:argocd-repo-server']})
+
+    candidates = list(
+        discovery.candidates(build_service(service_id='docker://custom', ports=(Port(number=8081, name='server'),)))
+    )
+
+    assert candidates == []
+
+
 def test_from_argocd_kube_app_name_brackets_ipv6_host_in_url() -> None:
     tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
 
