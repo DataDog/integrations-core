@@ -147,7 +147,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=test-batch/${BATCH_ID}" \
+            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
             -f "state=pending" \
             -f "description=Running ${JOB_COUNT} job(s)" \
             -f "target_url=${RUN_URL}" \
@@ -418,7 +418,7 @@ jobs:
           esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=test-batch/${BATCH_ID}" \
+            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
             -f "state=${state}" \
             -f "description=${description}" \
             -f "target_url=${RUN_URL}" \
