@@ -1,0 +1,15 @@
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  event_name: ^(push|workflow_dispatch|workflow_run)$
+  ref: ^refs/heads/master$
+  ref_protected: "^true$"
+  job_workflow_ref: ^DataDog/integrations-core/\.github/workflows/test-dispatch\.yml@refs/heads/master$
+  repository: ^DataDog/integrations-core$
+
+permissions:
+  actions: write
+  pull_requests: write
+  statuses: write
