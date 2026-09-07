@@ -179,7 +179,22 @@ def _supported_os(integration: Integration) -> list[str]:
 
 @dataclass(frozen=True, eq=False)
 class HatchEnvironmentProvider:
-    """Read candidate environments from Hatch configuration without evaluating project code."""
+    """Read candidate environments from Hatch configuration without evaluating project code.
+
+    Parse hatch.toml with tomllib and expand each default matrix into the
+    Cartesian product of its axes, with Python first in environment names.
+    For example, python = ["3.12", "3.13"] and version = ["1", "2"] produce
+    py3.12-1, py3.12-2, py3.13-1, and py3.13-2.
+
+    Each combination produces a candidate per compatible requested platform.
+    Without a matrix, use the default environment.
+
+    Only literal matrix.os.platforms mappings are resolved during planning.
+    An override mentioning test-env or e2e-env keeps that specific stage
+    enabled for the worker to decide. Otherwise each flag uses its literal
+    value, defaulting to true. Unsupported discovery overrides raise a
+    planning error; runtime-only settings are ignored.
+    """
 
     default_python_version: str
 
