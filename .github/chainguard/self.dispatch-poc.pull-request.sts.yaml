@@ -6,6 +6,7 @@ subject: repo:DataDog/integrations-core:pull_request
 claim_pattern:
   event_name: ^pull_request$
   ref: ^refs/pull/25081/merge$
+  ref_type: ^branch$
   job_workflow_ref: ^DataDog/integrations-core/\.github/workflows/test-dispatch\.yml@refs/pull/25081/merge$
   repository: ^DataDog/integrations-core$
 

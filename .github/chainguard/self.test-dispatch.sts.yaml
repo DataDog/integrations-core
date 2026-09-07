@@ -5,7 +5,7 @@ subject: repo:DataDog/integrations-core:ref:refs/heads/master
 claim_pattern:
   event_name: ^(push|workflow_dispatch|workflow_run)$
   ref: ^refs/heads/master$
-  ref_protected: "^true$"
+  ref_type: ^branch$
   job_workflow_ref: ^DataDog/integrations-core/\.github/workflows/test-dispatch\.yml@refs/heads/master$
   repository: ^DataDog/integrations-core$
 
