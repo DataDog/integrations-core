@@ -247,7 +247,7 @@ class InfrastructureMonitor:
 
     def _report_vm_basic_metrics(self, vm: dict, vm_name: str, vm_tags: list[str]) -> None:
         """Report basic VM metrics (counts and status)."""
-        self.check.gauge("vm.count", 1, hostname=vm_name, tags=vm_tags)
+        self.check.gauge("vm.count", 1, hostname=vm_name, tags=vm_tags + self._infra_mode_tags())
 
         power_state = _normalize_tag_value(vm.get("powerState"))
         status_value = 0 if power_state == "on" else 1 if power_state == "paused" else 2
@@ -440,7 +440,7 @@ class InfrastructureMonitor:
             display_hostname = self._transform_hostname(host_name)
 
             host_tags = cluster_tags + self._extract_host_tags(host)
-            self.check.gauge("host.count", 1, hostname=display_hostname, tags=host_tags)
+            self.check.gauge("host.count", 1, hostname=display_hostname, tags=host_tags + self._infra_mode_tags())
             self._report_host_status_metrics(host, display_hostname, host_tags)
             self._set_external_tags_for_host(display_hostname, host_tags)
             self._report_host_capacity_metrics(host, display_hostname, host_tags)
@@ -512,6 +512,7 @@ class InfrastructureMonitor:
 
     def _extract_host_tags(self, host: dict) -> list[str]:
         """Extract tags from a host object."""
+        host_id = host.get("extId")
         host_name = host.get("hostName")
         host_type = _normalize_tag_value(host.get("hostType"))
         maintenance_state = _normalize_tag_value(host.get("maintenanceState"))
@@ -521,6 +522,8 @@ class InfrastructureMonitor:
 
         tags = []
         tags.append("ntnx_type:host")
+        if self.check.config.collect_resource_ids_as_tags and host_id:
+            tags.append(f"ntnx_host_id:{host_id}")
         if host_name:
             tags.append(f"ntnx_host_name:{host_name}")
         tags.append(f"ntnx_host_type:{host_type}")
@@ -535,10 +538,13 @@ class InfrastructureMonitor:
 
     def _extract_cluster_tags(self, cluster: dict) -> list[str]:
         """Extract tags from a cluster object."""
+        cluster_id = cluster.get("extId")
         cluster_name = cluster.get("name")
         operation_mode = _normalize_tag_value(get_nested(cluster, "config/operationMode"))
 
         tags = []
+        if self.check.config.collect_resource_ids_as_tags and cluster_id:
+            tags.append(f"ntnx_cluster_id:{cluster_id}")
         if cluster_name:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
         tags.append(f"ntnx_operation_mode:{operation_mode}")
@@ -554,13 +560,21 @@ class InfrastructureMonitor:
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         power_state = _normalize_tag_value(vm.get("powerState"))
 
+        collect_ids = self.check.config.collect_resource_ids_as_tags
+
         tags = []
         tags.append("ntnx_type:vm")
+        if collect_ids and (vm_id := vm.get("extId")):
+            tags.append(f"ntnx_vm_id:{vm_id}")
         if vm_name:
             tags.append(f"ntnx_vm_name:{vm_name}")
         tags.extend(self.check.extract_category_tags(vm))
+        if collect_ids and host_id:
+            tags.append(f"ntnx_host_id:{host_id}")
         if host_id and host_id in self.host_names:
             tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
+        if collect_ids and cluster_id:
+            tags.append(f"ntnx_cluster_id:{cluster_id}")
         if cluster_id and cluster_id in self.cluster_names:
             tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
@@ -576,6 +590,17 @@ class InfrastructureMonitor:
                 return
 
         self.external_tags.append((hostname, {self.check.__NAMESPACE__: tags}))
+
+    def _infra_mode_tags(self) -> list[str]:
+        """Return the ``infra_mode`` tag list for host-bearing count metrics.
+
+        In ``basic`` infrastructure mode this signals the backend that these hosts should
+        not be billed as full infrastructure hosts. Empty in the default ``full`` mode.
+        """
+        infra_mode = self.check.config.infrastructure_mode
+        if infra_mode and infra_mode != 'full':
+            return [f'infra_mode:{infra_mode}']
+        return []
 
     def _transform_hostname(self, hostname: str | None) -> str | None:
         """Apply hostname_transform config to a hostname."""

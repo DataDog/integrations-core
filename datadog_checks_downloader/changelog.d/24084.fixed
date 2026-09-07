@@ -1,1 +1,0 @@
-Use ``https://agent-integration-wheels.datadoghq.com`` (CloudFront) as the default v2 repository URL, replacing the direct S3 URL. The ``--repository`` flag still accepts any HTTPS base URL.

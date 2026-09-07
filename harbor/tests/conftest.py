@@ -59,7 +59,7 @@ def dd_environment(e2e_instance):
 
 
 def create_simple_user():
-    requests.post(
+    response = requests.post(
         URL + USERS_PATH,
         auth=("admin", "Harbor12345"),
         json={
@@ -70,6 +70,9 @@ def create_simple_user():
         },
         verify=False,
     )
+    # A conflict means an earlier attempt or a reused environment already created the user.
+    if response.status_code != 409:
+        response.raise_for_status()
 
 
 @pytest.fixture(scope='session')

@@ -20,17 +20,14 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
 from .util import (
+    DDIGNORE_COMMENT,
+    INSUFFICIENT_PRIVILEGE,
     DatabaseConfigurationError,
     parse_shared_preload_libraries,
     payload_pg_version,
     warning_with_tags,
 )
 from .version_utils import V9_4, V14
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 STATEMENTS_QUERY = """
 SELECT {cols}
@@ -39,8 +36,8 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query != '<insufficient privilege>'
-  AND query NOT LIKE '/* DDIGNORE */%%'
+  WHERE query != '{insufficient_privilege}'
+  AND query NOT LIKE '{ddignore_comment}%%'
   {queryid_filter}
   {filters}
   {extra_clauses}
@@ -59,6 +56,8 @@ def statements_query(**kwargs):
         filters=filters,
         extra_clauses=extra_clauses,
         queryid_filter="",
+        insufficient_privilege=INSUFFICIENT_PRIVILEGE,
+        ddignore_comment=DDIGNORE_COMMENT,
     )
 
 
@@ -153,7 +152,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             enabled=config.query_metrics.enabled,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            dbms="postgres",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
         )
@@ -187,7 +186,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._full_statement_text_cache = None
         self._state = None
@@ -256,7 +255,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
-                'ddagentversion': datadog_agent.get_version(),
+                'ddagentversion': self._check.agent_version,
                 'service': self._config.service,
             }
 
@@ -559,7 +558,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

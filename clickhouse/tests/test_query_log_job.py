@@ -212,7 +212,7 @@ class TestBuildPerNodeCheckpointFilter:
         job._node_checkpoints = None
         job._last_checkpoint_microseconds = 5000
 
-        with mock.patch.object(job, '_load_node_checkpoints', return_value={}) as mock_load:
+        with mock.patch.object(job._checkpoint, '_load_node_checkpoints', return_value={}) as mock_load:
             filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
         mock_load.assert_called_once()
@@ -227,8 +227,8 @@ class TestAdvanceCheckpoint:
         job._pending_node_checkpoints = {'node-A': 5000}
 
         with (
-            mock.patch.object(job, '_save_checkpoint') as mock_save,
-            mock.patch.object(job, '_save_node_checkpoints') as mock_save_nodes,
+            mock.patch.object(job._checkpoint, '_save_checkpoint') as mock_save,
+            mock.patch.object(job._checkpoint, '_save_node_checkpoints') as mock_save_nodes,
         ):
             job._advance_checkpoint()
 
@@ -242,8 +242,8 @@ class TestAdvanceCheckpoint:
         job._pending_node_checkpoints = {'node-A': 3000, 'node-B': 4000}
 
         with (
-            mock.patch.object(job, '_save_checkpoint') as mock_save,
-            mock.patch.object(job, '_save_node_checkpoints') as mock_save_nodes,
+            mock.patch.object(job._checkpoint, '_save_checkpoint') as mock_save,
+            mock.patch.object(job._checkpoint, '_save_node_checkpoints') as mock_save_nodes,
         ):
             job._advance_checkpoint()
 
@@ -257,8 +257,8 @@ class TestAdvanceCheckpoint:
         job._pending_node_checkpoints = {'node-A': 100}
 
         with (
-            mock.patch.object(job, '_save_checkpoint') as mock_save,
-            mock.patch.object(job, '_save_node_checkpoints') as mock_save_nodes,
+            mock.patch.object(job._checkpoint, '_save_checkpoint') as mock_save,
+            mock.patch.object(job._checkpoint, '_save_node_checkpoints') as mock_save_nodes,
         ):
             job._advance_checkpoint()
 

@@ -2,6 +2,103 @@
 
 <!-- towncrier release notes start -->
 
+## 38.3.1 / 2026-09-03
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
+## 38.3.0 / 2026-09-02
+
+***Added***:
+
+* Improve docstrings in metrics_mapping module for cleaner API reference rendering. ([#22773](https://github.com/DataDog/integrations-core/pull/22773))
+* Add an Agent Health issue when OpenMetrics checks drop metrics at the configured limit. ([#24819](https://github.com/DataDog/integrations-core/pull/24819))
+
+***Fixed***:
+
+* Fix OpenMetrics V2 checks flushing a monotonic counter's full raw value on the scrape following its first observation, when ``share_labels``/``target_info`` is configured and the shared-label source metric is ordered after the metrics it tags in the scrape payload. ([#24884](https://github.com/DataDog/integrations-core/pull/24884))
+* Stop an OpenMetrics V2 instance that configures ``rename_labels`` from silently discarding the renames its check declares in ``get_default_config``. The instance's renames are now merged with the check's declared renames entry by entry, with the instance's own entries taking precedence, instead of replacing them wholesale. ([#24921](https://github.com/DataDog/integrations-core/pull/24921))
+
+## 38.2.0 / 2026-08-27
+
+***Added***:
+
+* Implement the ``agent_version`` property on the ``DatabaseCheck`` base class. ([#24905](https://github.com/DataDog/integrations-core/pull/24905))
+
+## 38.1.0 / 2026-08-20
+
+***Added***:
+
+* Add QueryStats, ObfuscationLookup and resolve_obfuscations for incremental query metrics collection. ([#24791](https://github.com/DataDog/integrations-core/pull/24791))
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+* Add a cancellation lifecycle to ``DatabaseCheck`` so DBM integrations get thread-safe ``cancel()`` handling with a ``shutdown()`` teardown hook. ([#24844](https://github.com/DataDog/integrations-core/pull/24844))
+
+***Fixed***:
+
+* Fix AIA chasing crashing when the CA Issuers response is DER-encoded. ([#24683](https://github.com/DataDog/integrations-core/pull/24683))
+* Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
+
+## 38.0.2 / 2026-08-26
+
+***Fixed***:
+
+* Bump ddtrace to 4.12.2 to remediate CVE-2026-50271 (W3C baggage header DoS). ([#24864](https://github.com/DataDog/integrations-core/pull/24864))
+
+## 38.0.1 / 2026-08-24
+
+***Fixed***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c, and bump pyopenssl to 26.4.0 for compatibility. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+*Note: This release is bundled with the `7.83.x` Agent and does not include changes from the `38.1.0` release.*
+
+## 38.0.0 / 2026-08-05
+
+***Changed***:
+
+* Patch prometheus_client to restore v0.21.1 parsing behavior to fix a performance regression introduced in v0.22.0, with up to ~40% improvement in check execution time for parsing-heavy workloads. This drops support for UTF-8 metric names, quoted dotted label names (OpenMetrics 2.0), and structural characters ({, }, =, ,) inside quoted label values. Set ``patch_prometheus_client`` to ``false`` in ``datadog.yaml`` to disable. ([#24651](https://github.com/DataDog/integrations-core/pull/24651))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Add an async job registry to `DatabaseCheck` so DBM integrations can register `DBMAsyncJob`s additively and run, cancel, or shut them all down through a single entry point (`register_async_job`, `run_async_jobs`, `cancel_async_jobs`, `shutdown_async_jobs`), along with a `DBMAsyncJob.shutdown()` hook for releasing lifetime-scoped resources on unschedule. ([#24442](https://github.com/DataDog/integrations-core/pull/24442))
+* Add a discovery helper for selecting service ports by name. ([#24555](https://github.com/DataDog/integrations-core/pull/24555))
+* Allow disabling fallback ports for configuration discovery candidates. ([#24706](https://github.com/DataDog/integrations-core/pull/24706))
+
+***Fixed***:
+
+* Bracket IPv6-literal hosts in discovery URL templates. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
+## 37.42.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add a `DBMS` class attribute to `DatabaseCheck` so integrations can declare their DBM platform identifier explicitly. The `dbms` property now returns `DBMS` when set and only falls back to the deprecated class-name derivation (with a warning) when it is not. ([#24297](https://github.com/DataDog/integrations-core/pull/24297))
+
+## 37.41.0 / 2026-06-30
+
+***Added***:
+
+* Lazy load the validation package (core, security, utils) on import of datadog_checks.checks. ([#23936](https://github.com/DataDog/integrations-core/pull/23936))
+* Add configuration discovery runtime (Service/Port types, candidate_ports, probing harness, and discovery entry points). ([#23963](https://github.com/DataDog/integrations-core/pull/23963))
+* Add ``include_internal`` and ``include_db`` options to ``TagManager.get_tags`` so DBM checks can exclude internal resource tags (``dd.internal.*``) and the per-database ``db`` tag from tag views that should not carry them. ([#23976](https://github.com/DataDog/integrations-core/pull/23976))
+* Add report_issue and resolve_issue for Agent Health reporting from integrations. ([#24016](https://github.com/DataDog/integrations-core/pull/24016))
+* Implement the ``agent_hostname`` property on the ``DatabaseCheck`` base class. ([#24243](https://github.com/DataDog/integrations-core/pull/24243))
+* Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling. ([#24244](https://github.com/DataDog/integrations-core/pull/24244))
+* Provide a default `database_identifier` implementation on the `DatabaseCheck` base class that is built (and cached) from the `database_identifier_template` and `database_identifier_params` hooks, so integrations no longer need to reimplement the database identifier templating logic. ([#24250](https://github.com/DataDog/integrations-core/pull/24250))
+
+## 37.40.1 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+* Bump PyJWT to 2.13.0. ([#24074](https://github.com/DataDog/integrations-core/pull/24074))
+
 ## 37.40.0 / 2026-06-09
 
 ***Added***:

@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.flink import FlinkCheck
 
@@ -26,9 +26,12 @@ def dd_environment():
         ),
         sleep=15,
     ):
-        yield {
-            "openmetrics_endpoint": f"http://{get_docker_hostname()}:{JOBMANAGER_PORT}/metrics",
-        }
+        yield (
+            {
+                "openmetrics_endpoint": f"http://{get_docker_hostname()}:{JOBMANAGER_PORT}/metrics",
+            },
+            get_e2e_discovery_metadata(),
+        )
 
 
 @pytest.fixture

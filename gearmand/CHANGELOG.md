@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.0 / 2026-09-02
+
+***Added***:
+
+* Add ``metrics_prefix`` to the ``discovery`` block of ``auto_conf.yaml``. ([#24861](https://github.com/DataDog/integrations-core/pull/24861))
+
+## 5.4.0 / 2026-08-05
+
+***Added***:
+
+* Add container-based config discovery support. ([#24487](https://github.com/DataDog/integrations-core/pull/24487))
+
+***Fixed***:
+
+* Preserve raw service hosts in generated discovery configurations. ([#24710](https://github.com/DataDog/integrations-core/pull/24710))
+
 ## 5.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

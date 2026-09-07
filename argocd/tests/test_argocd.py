@@ -2,9 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from unittest.mock import patch
+
 import pytest
 
 from datadog_checks.argocd import ArgocdCheck
+from datadog_checks.argocd.resources import ArgocdResourceCollector
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -99,3 +102,24 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
         ServiceCheck.UNKNOWN,
         tags=['endpoint:http://app_controller:8082', 'name:faz'],
     )
+
+
+def test_both_collectors_disabled_raises(dd_run_check):
+    check = ArgocdCheck('argocd', {}, [{"collect_openmetrics": False, "collect_genresources": False}])
+    with pytest.raises(Exception, match="Enable at least one of"):
+        dd_run_check(check)
+
+
+def test_genresources_only_mode_skips_the_metrics_scrape(aggregator, dd_run_check):
+    instance = {
+        "collect_openmetrics": False,
+        "collect_genresources": True,
+        "genresources_endpoint": "https://argocd.example.com",
+        "genresources_stream_applications_enabled": False,
+    }
+    check = ArgocdCheck('argocd', {}, [instance])
+    with patch.object(ArgocdResourceCollector, "collect") as collect:
+        dd_run_check(check)
+
+    collect.assert_called_once()  # the generic resources collector still runs
+    assert aggregator.metric_names == []  # ...but nothing is scraped from the OpenMetrics endpoints

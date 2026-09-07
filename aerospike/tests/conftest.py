@@ -7,6 +7,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev import get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckCommandOutput, WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
@@ -99,7 +100,7 @@ def dd_environment():
         conditions=_get_conditions(),
         attempts=2,
     ):
-        yield OPENMETRICS_V2_INSTANCE
+        yield OPENMETRICS_V2_INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

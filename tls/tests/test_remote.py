@@ -6,8 +6,8 @@ import re
 import mock
 import pytest
 from cryptography.x509.oid import AuthorityInformationAccessOID
-
 from datadog_checks.base import ConfigurationError
+
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,
     SERVICE_CHECK_EXPIRATION,
@@ -442,7 +442,9 @@ def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(
         status=c.CRITICAL,
         tags=c._tags,
         count=1,
-        message=re.escape("Unable to parse the certificate: argument 'data': "),
+        # Only assert on our own prefix: the rest comes from cryptography and its wording changes
+        # between versions.
+        message=re.escape("Unable to parse the certificate: "),
     )
     aggregator.assert_service_check(SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, count=0)

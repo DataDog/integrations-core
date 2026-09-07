@@ -242,7 +242,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the operation samples collection interval in seconds. Each collection involves capturing
@@ -275,7 +274,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the slow operations collection interval in seconds. Each collection involves capturing
@@ -283,7 +281,6 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
         - name: max_operations
           description: |
             Set the maximum number of slow operations to collect per interval.
@@ -304,7 +301,6 @@ files:
           value:
             type: string
             example: queryPlanner
-          fleet_configurable: false
     - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       fleet_configurable: true
@@ -315,7 +311,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents
@@ -323,7 +318,6 @@ files:
           value:
             type: number
             example: 3600
-          fleet_configurable: false
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -343,7 +337,6 @@ files:
             type: number
             display_default: null
             example: 300
-          fleet_configurable: false
         - name: max_depth
           description: |
             Set the maximum depth of nested documents to sample.
@@ -374,7 +367,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents
@@ -382,7 +374,6 @@ files:
           value:
             type: number
             example: 3600
-          fleet_configurable: false
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -391,7 +382,6 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
         - name: max_collections
           description: |
             Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
@@ -402,14 +392,12 @@ files:
             type: number
             display_default: null
             example: 300
-          fleet_configurable: false
         - name: max_depth
           description: |
             Set the maximum depth of nested documents to sample.
           value:
             type: number
             example: 5
-          fleet_configurable: false
         - name: collect_search_indexes
           description: |
             Set to `true` to collect search indexes for each collection.
@@ -417,7 +405,6 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: false
     - name: query_metrics
       description: |
         Query metrics provide aggregated performance statistics for normalized queries.
@@ -436,7 +423,6 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query metrics collection interval in seconds.
@@ -444,7 +430,6 @@ files:
             type: number
             example: 10
             display_default: 10
-          fleet_configurable: false
         - name: full_statement_text_cache_max_size
           description: |
             Maximum size of the cache for full query text events.
@@ -452,7 +437,6 @@ files:
             type: number
             example: 10000
             display_default: 10000
-          fleet_configurable: false
         - name: full_statement_text_samples_per_hour_per_query
           description: |
             Maximum number of full query text events per query per hour.
@@ -460,7 +444,6 @@ files:
             type: number
             example: 1
             display_default: 1
-          fleet_configurable: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -554,7 +537,6 @@ files:
           value:
             type: integer
             example: 300
-          fleet_configurable: false
         - name: collections_indexes_stats
           description: |
             The interval in seconds at which to collect collection indexes stats metrics.

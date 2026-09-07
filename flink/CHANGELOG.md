@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.0 / 2026-08-05
+
+***Added***:
+
+* Add container-based config discovery support. ([#24485](https://github.com/DataDog/integrations-core/pull/24485))
+
+***Fixed***:
+
+* Require `datadog-checks-base>=37.41.0` since config discovery relies on it. ([#24545](https://github.com/DataDog/integrations-core/pull/24545))
+
+## 3.3.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add OpenMetrics-based collection mode that scrapes Flink's flink-metrics-prometheus reporter, as an alternative to the existing Datadog HTTP Reporter push-based mode. Keeps the Datadog API key with the Agent rather than in Flink configuration, making the integration usable in GitOps/Kubernetes deployments where flink-conf.yaml is mounted read-only from a ConfigMap. ([#23857](https://github.com/DataDog/integrations-core/pull/23857))
+
 ## 3.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

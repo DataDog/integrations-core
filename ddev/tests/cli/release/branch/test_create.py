@@ -6,11 +6,13 @@ from __future__ import annotations
 import json
 from unittest.mock import call
 
+import httpx
 import pytest
 
 from ddev.cli.release.branch.build_agent import ensure_build_agent_yaml_updated
 from ddev.cli.release.branch.create import compute_next_milestone, update_release_json
 from ddev.utils.fs import Path
+from ddev.utils.github_errors import GitHubAuthenticationError
 
 
 @pytest.mark.parametrize(
@@ -368,3 +370,26 @@ def test_create_branch_pr_creation_failure(ddev, mocker):
     assert result.exit_code == 0, result.output
     assert 'Failed to create the pull request' in result.output
     assert 'All done' in result.output
+
+
+def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mocker):
+    request = httpx.Request('POST', 'https://api.github.com/repos/DataDog/integrations-core/pulls')
+    response = httpx.Response(403, request=request)
+    error = httpx.HTTPStatusError('forbidden', request=request, response=response)
+
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request',
+        side_effect=GitHubAuthenticationError.from_http_status_error(error),
+    )
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 1, result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'Please create one manually from `release/bump-milestone-7.80.0` to `master`' in result.output

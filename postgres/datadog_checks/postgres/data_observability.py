@@ -7,7 +7,7 @@ import json
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import psycopg
 
@@ -31,49 +31,66 @@ CRON_STARTUP_LOOKBACK_SECONDS = 300
 # Fallback per-query statement timeout.
 DEFAULT_DO_QUERY_TIMEOUT_S = 60
 
-Mode = Literal["cron", "interval"]
+
+@dataclass
+class CronScheduledQuery:
+    mode: ClassVar[Literal["cron"]] = "cron"
+    query: Query
+    scheduler: CronScheduler
+
+
+@dataclass
+class IntervalScheduledQuery:
+    mode: ClassVar[Literal["interval"]] = "interval"
+    query: Query
+    interval_seconds: int
+    last_execution: float | None = None
+
+
+ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
 
 
 @dataclass(frozen=True)
 class DueQuery:
-    query: Query
+    scheduled_query: ScheduledQuery
     scheduled_time: float
-    mode: Mode
+
+    @property
+    def query(self) -> Query:
+        return self.scheduled_query.query
 
 
 class PostgresDataObservability(DBMAsyncJob):
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config
-        self._last_execution: dict[int, float] = {}
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
             rate_limit=1 / float(collection_interval),
             run_sync=config.data_observability.run_sync,
             enabled=config.data_observability.enabled,
-            dbms="postgres",
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="data-observability",
         )
         # Filter bad queries on check construction.
-        self._queries, self._schedulers = self._filter_valid_queries(self._do_config.queries or ())
+        self._scheduled_queries = self._filter_valid_queries(self._do_config.queries or ())
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
 
     @property
     def _do_config(self):
         return self._config.data_observability
 
-    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
-        valid: list[Query] = []
-        schedulers: dict[int, CronScheduler] = {}
+    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[ScheduledQuery, ...]:
+        valid: list[ScheduledQuery] = []
         for q in queries:
             if q.schedule:
                 try:
-                    schedulers[q.monitor_id] = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
+                    scheduler = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
                 except (ValueError, TypeError) as e:
                     self._log.warning(
                         "Skipping DO query monitor_id=%d: invalid cron schedule %r (%s). "
@@ -84,34 +101,38 @@ class PostgresDataObservability(DBMAsyncJob):
                         q.monitor_id,
                     )
                     continue
-            elif not (q.interval_seconds and q.interval_seconds > 0):
+                valid.append(CronScheduledQuery(query=q, scheduler=scheduler))
+                continue
+
+            interval_seconds = q.interval_seconds
+            if not interval_seconds or interval_seconds <= 0:
                 self._log.warning(
                     "Skipping DO query monitor_id=%d: neither schedule nor positive interval_seconds set",
                     q.monitor_id,
                 )
                 continue
-            valid.append(q)
-        return tuple(valid), schedulers
+            valid.append(IntervalScheduledQuery(query=q, interval_seconds=interval_seconds))
+        return tuple(valid)
 
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
         due: list[DueQuery] = []
-        for q in self._queries:
-            if q.schedule:
+        for scheduled_query in self._scheduled_queries:
+            if isinstance(scheduled_query, CronScheduledQuery):
                 # +0.001 so a poll landing exactly on a tick boundary is treated
                 # as due (CronScheduler.previous_tick uses strict less-than).
-                ticks = self._schedulers[q.monitor_id].due_ticks(now + 0.001)
+                ticks = scheduled_query.scheduler.due_ticks(now + 0.001)
                 if ticks:
                     # Take the latest elapsed tick; earlier ones are already in the past
                     # and do not need separate execution.
-                    due.append(DueQuery(q, ticks[-1], "cron"))
+                    due.append(DueQuery(scheduled_query, ticks[-1]))
             else:
-                last = self._last_execution.get(q.monitor_id)
-                if last is None or now - last >= q.interval_seconds:
+                last = scheduled_query.last_execution
+                if last is None or now - last >= scheduled_query.interval_seconds:
                     # Seed: treat first sight as if the previous interval just completed,
                     # so the scheduled_time for DueQuery is now and lateness is 0.
-                    scheduled = (last + q.interval_seconds) if last is not None else now
-                    due.append(DueQuery(q, scheduled, "interval"))
+                    scheduled = (last + scheduled_query.interval_seconds) if last is not None else now
+                    due.append(DueQuery(scheduled_query, scheduled))
         return due
 
     def _build_base_tags(self) -> list[str]:
@@ -234,8 +255,8 @@ class PostgresDataObservability(DBMAsyncJob):
             # leave the query stuck re-firing the same tick.
             # For cron mode, due_ticks() already advanced the scheduler's internal state.
             now_at_fire_end = time.time()
-            if due.mode == "interval":
-                self._last_execution[q.monitor_id] = now_at_fire_end
+            if isinstance(due.scheduled_query, IntervalScheduledQuery):
+                due.scheduled_query.last_execution = now_at_fire_end
 
             try:
                 self._check.gauge(
@@ -259,7 +280,7 @@ class PostgresDataObservability(DBMAsyncJob):
                 self._check.gauge(
                     'dd.postgres.data_observability.query_fire_lateness_seconds',
                     lateness,
-                    tags=tags + [f'mode:{due.mode}'],
+                    tags=tags + [f'mode:{due.scheduled_query.mode}'],
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )

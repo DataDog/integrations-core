@@ -47,7 +47,7 @@ def mock_lustre_commands():
     Usage:
         def test_something(mock_lustre_commands):
             mapping = {
-                'lctl get_param -ny version': 'all_version.txt',
+                'lctl get_param -n version': 'all_version.txt',
                 'lctl dl': 'client_dl_yaml.txt',
             }
             with mock_lustre_commands(mapping):

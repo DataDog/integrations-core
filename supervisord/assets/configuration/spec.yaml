@@ -38,6 +38,7 @@ files:
           fleet_configurable: true
           value:
             type: string
+            require_trusted_provider: true
             example: <SOCKETFILE_PATH>
         - name: username
           description: Required only if a username is configured.

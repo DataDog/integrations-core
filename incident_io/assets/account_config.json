@@ -1,0 +1,16 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_token",
+          "label": "API key",
+          "help": "incident.io API Key",
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ]
+}

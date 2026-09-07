@@ -57,6 +57,8 @@ def disable_integration_before_install(config_file: Path):
 
 
 class VagrantAgent(AgentInterface):
+    build_config_key = 'vagrant'
+    supports_ci = False
     VM_HOST_IP = "172.30.1.5"
 
     def __init__(
@@ -116,7 +118,10 @@ class VagrantAgent(AgentInterface):
         self._run_commands(guest_cmds, "restart_agent_service")
         self.app.display_info("Datadog Agent service restart sequence completed.")
 
-    def invoke(self, args: list[str]) -> None:
+    def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
+        if env_vars:
+            raise NotImplementedError("Per-invocation env_vars are not supported for the Vagrant agent")
+
         agent_bin = LINUX_AGENT_BIN_PATH if not self._is_windows_vm else WINDOWS_AGENT_BIN_PATH
         guest_cmd_parts = ["sudo", agent_bin] + args if not self._is_windows_vm else [agent_bin] + args
         host_cmd = self._format_command(guest_cmd_parts)

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.0 / 2026-08-05
+
+***Added***:
+
+* Add support for `connect_duration_seconds` and `header_duration_seconds` histogram metrics behind the `collect_nginx_histograms` flag. ([#24538](https://github.com/DataDog/integrations-core/pull/24538))
+
 ## 5.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

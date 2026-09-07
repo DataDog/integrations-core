@@ -111,6 +111,36 @@ def test_appliances_filter(dd_run_check, aggregator, mocker, instance, ips, filt
 
 
 @pytest.mark.parametrize(
+    'bad_ip',
+    [
+        pytest.param('appliance.example.com', id='hostname'),
+        pytest.param('appliance.example.com:8443', id='host_port'),
+        pytest.param('localhost:9999', id='localhost_port'),
+        pytest.param('', id='empty'),
+    ],
+)
+def test_appliances_with_non_ip_address_are_skipped(dd_run_check, aggregator, mocker, instance, bad_ip):
+    inst = instance('localhost:8443', max_backfill_minutes=10)
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+
+    payload = [
+        {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.1'},
+        {**APPLIANCE_PAYLOAD[0], 'ip': bad_ip, 'hostName': 'invalid-appliance'},
+    ]
+    _setup_mocks(mocker, check, payload, appliance_client=_mock_appliance_client(TGZ_DATA))
+
+    dd_run_check(check)
+
+    monitored_ips = [
+        tag.split(':', 1)[1]
+        for metric in aggregator.metrics(f'{NS}.device.reachability')
+        for tag in metric.tags
+        if tag.startswith('device_ip:')
+    ]
+    assert monitored_ips == ['10.0.0.1']
+
+
+@pytest.mark.parametrize(
     'value, expected',
     [
         pytest.param('1000Mb/s (auto)', 1_000_000_000, id='1000mbps_auto'),

@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 8.10.0 / 2026-09-02
+
+***Added***:
+
+* Update redis to 8.0.1. ([#24867](https://github.com/DataDog/integrations-core/pull/24867))
+* Update redis to 8.1.0. ([#24883](https://github.com/DataDog/integrations-core/pull/24883))
+
+***Fixed***:
+
+* Select the RESP2 protocol explicitly when connecting to Redis so the wire protocol stays the same when the ``redis`` client default flips to RESP3 in newer versions. ([#24833](https://github.com/DataDog/integrations-core/pull/24833))
+
+## 8.9.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Allow setting ``client_name`` on Redis connections for easier identification in CLIENT LIST output. ([#23734](https://github.com/DataDog/integrations-core/pull/23734))
+
 ## 8.8.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:

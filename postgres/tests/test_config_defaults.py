@@ -235,6 +235,11 @@ EXPECTED_DEFAULTS = {
     # === Agent standard fields ===
     'min_collection_interval': 15.0,  # Standard Agent field
     'empty_default_hostname': False,  # Deprecated field
+    # === Health ===
+    'automatic_diagnostics': {
+        'enabled': False,
+        'interval': 600,
+    },
 }
 
 

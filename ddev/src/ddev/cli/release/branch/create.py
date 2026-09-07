@@ -12,6 +12,8 @@ import click
 from httpx import HTTPError, HTTPStatusError
 from packaging.version import Version
 
+from ddev.utils.github_errors import GitHubAuthenticationError
+
 from .build_agent import BUILD_AGENT_YAML_PATH, ensure_build_agent_yaml_updated
 
 if TYPE_CHECKING:
@@ -137,6 +139,11 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             f'after cutting the `{branch_name}` release branch.',
         )
         app.display_success(f'Pull request created: {pr_url}')
+    except GitHubAuthenticationError:
+        app.display_warning(
+            f'Failed to create the pull request. Please create one manually from `{bump_branch}` to `master`.'
+        )
+        raise
     except HTTPError as e:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'

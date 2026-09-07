@@ -11,4 +11,5 @@ fluentd.flush_time_count,gauge,,millisecond,,The total time of buffer flush in m
 fluentd.retry_count,gauge,,time,,The number of retries for this plugin.,-1,fluentd,retry count,
 fluentd.rollback_count,gauge,,unit,,The total number of rollback. rollback happens when write/try_write failed,-1,fluentd,rollback count,
 fluentd.slow_flush_count,gauge,,unit,,The total number of slow flush. This count will be incremented when buffer flush is longer than slow_flush_log_threshold,-1,fluentd,slow flush,cpu|memory
+fluentd.tracked_file_count,gauge,,file,,Number of files currently being tracked by the in_tail plugin,0,fluentd,tracked files,
 fluentd.write_count,gauge,,unit,,The total number of write/try_write call in output plugin,0,fluentd,write count,

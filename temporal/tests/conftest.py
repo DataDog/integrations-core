@@ -9,7 +9,15 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here, run_command
+from datadog_checks.dev import (
+    EnvVars,
+    TempDir,
+    docker_run,
+    get_docker_hostname,
+    get_e2e_discovery_metadata,
+    get_here,
+    run_command,
+)
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.temporal import TemporalCheck
@@ -42,7 +50,7 @@ def dd_environment():
 
         time.sleep(2)
 
-        yield copy.deepcopy(INSTANCE)
+        yield copy.deepcopy(INSTANCE), get_e2e_discovery_metadata()
 
 
 @contextmanager

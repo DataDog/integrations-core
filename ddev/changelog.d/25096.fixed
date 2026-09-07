@@ -1,0 +1,1 @@
+Send a batch's job list to the test workflow as gzip and base64.

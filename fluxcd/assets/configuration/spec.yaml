@@ -9,3 +9,9 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+    - name: kube_state_metrics_endpoint
+      description: |
+        URL exposing a kube-state-metrics endpoint. Enables collection of kube-state-metrics
+        for Flux custom resources (Flux 2.1+).
+      value:
+        type: string

@@ -345,11 +345,25 @@ class DBMAsyncJob(object):
         if self._features is None:
             self._features = [None]
 
+    @property
+    def job_name(self) -> Optional[str]:
+        """The job's name"""
+        return self._job_name
+
     def cancel(self):
         """
         Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
+
+    def wait_for_completion(self) -> None:
+        """
+        Block until the job loop has finished running, then clear its future. No-op if the loop is
+        not running. Typically called after :meth:`cancel` to wait for the loop to stop.
+        """
+        if self._job_loop_future:
+            self._job_loop_future.result()
+            self._job_loop_future = None
 
     def run_job_loop(self, tags):
         """
@@ -467,6 +481,8 @@ class DBMAsyncJob(object):
                         )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
+            # Runs on every loop exit, including the inactivity stop above, after which the loop may
+            # restart on the next check run. For one-time teardown on unschedule, override shutdown().
             if self._shutdown_callback:
                 self._shutdown_callback()
 
@@ -497,6 +513,19 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
+
+    def shutdown(self) -> None:
+        """
+        Release resources the job holds for its whole lifetime, such as dedicated DB connections or
+        clients.
+
+        Called once when the owning check is unscheduled, after the loop has stopped. The default
+        is a no-op; override to close long-lived resources, and keep the implementation idempotent.
+
+        Unlike ``shutdown_callback``, which runs on every loop exit and may be followed by a
+        restart, this runs only during final teardown.
+        """
+        pass
 
 
 @contextlib.contextmanager

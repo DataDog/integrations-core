@@ -56,18 +56,21 @@ files:
         Path to the client SSL certificate.
       value:
         type: string
+        require_trusted_provider: true
       fleet_configurable: false
     - name: ssl_root_cert
       description: |
         Path to the SSL root certificate authority.
       value:
         type: string
+        require_trusted_provider: true
       fleet_configurable: false
     - name: ssl_key
       description: |
         Path to the client SSL private key.
       value:
         type: string
+        require_trusted_provider: true
       fleet_configurable: false
     - name: ssl_password
       secret: true

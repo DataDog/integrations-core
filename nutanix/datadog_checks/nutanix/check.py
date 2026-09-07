@@ -17,6 +17,7 @@ from datadog_checks.nutanix.utils import retry_on_rate_limit
 
 class NutanixCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'nutanix'
+    HA_SUPPORTED = True
     HTTP_CONFIG_REMAPPER = {'pc_username': {'name': 'username'}, 'pc_password': {'name': 'password'}}
 
     def __init__(self, name, init_config, instances):

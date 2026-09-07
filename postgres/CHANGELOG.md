@@ -2,7 +2,66 @@
 
 <!-- towncrier release notes start -->
 
-## 23.9.1 / 2026-06-16
+## 23.12.0 / 2026-09-02
+
+***Security***:
+
+* Send the explain PREPARE for a parameterized query over the extended query protocol, so the server rejects sampled text holding more than one statement. ([#24839](https://github.com/DataDog/integrations-core/pull/24839))
+
+***Added***:
+
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+* Add an `aurora_role` tag with writer and reader values to PostgreSQL metrics emitted from Aurora instances. ([#24901](https://github.com/DataDog/integrations-core/pull/24901))
+* Clarify Postgres spec usage of ignore_databases ([#24922](https://github.com/DataDog/integrations-core/pull/24922))
+
+***Fixed***:
+
+* Manage async job lifecycles through the ``DatabaseCheck`` job registry. ([#24824](https://github.com/DataDog/integrations-core/pull/24824))
+* Only tear the check down once when it is cancelled, and keep logging usable through the end of teardown. ([#24852](https://github.com/DataDog/integrations-core/pull/24852))
+* Remove the logging adapter cleanup from check teardown, which the base class no longer needs. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
+* Respect dbstrict in schema collection ([#24923](https://github.com/DataDog/integrations-core/pull/24923))
+* Inherit the check cancellation lifecycle from ``DatabaseCheck``. ([#24933](https://github.com/DataDog/integrations-core/pull/24933))
+* Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#25000](https://github.com/DataDog/integrations-core/pull/25000))
+* Move incremental query metrics collection onto the shared query metrics primitives, so cache entries for statements that have left ``pg_stat_statements`` are dropped on every collection instead of only those that reported metrics. ([#25005](https://github.com/DataDog/integrations-core/pull/25005))
+* Use a shared ``DDIGNORE_COMMENT`` constant for queries excluded from query metrics. ([#25018](https://github.com/DataDog/integrations-core/pull/25018))
+* Use a shared ``INSUFFICIENT_PRIVILEGE`` constant for the query text Postgres returns when a statement is not visible. ([#25019](https://github.com/DataDog/integrations-core/pull/25019))
+* Cache the Agent version instead of resolving it for every payload. ([#25021](https://github.com/DataDog/integrations-core/pull/25021))
+* Build and cache relation queries once instead of rebuilding them for each database on every check run. ([#25052](https://github.com/DataDog/integrations-core/pull/25052))
+* Collect per-database autodiscovery metrics in a single pass over the discovered databases to reduce connection pool churn. ([#25061](https://github.com/DataDog/integrations-core/pull/25061))
+
+## 23.11.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Include logical_database with pg_extension payload_row ([#24709](https://github.com/DataDog/integrations-core/pull/24709))
+
+***Fixed***:
+
+* Cache parameterized-query explain failures caused by ambiguous function calls so they aren't re-attempted on every collection. ([#24505](https://github.com/DataDog/integrations-core/pull/24505))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
+## 23.10.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Run `diagnose` on check initialization, then emit any warnings and failures as Agent Health events. ([#23645](https://github.com/DataDog/integrations-core/pull/23645))
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Update the relations config comment to reflect the current number of metrics generated per relation. ([#24096](https://github.com/DataDog/integrations-core/pull/24096))
+* Cache parameterized-query explain failures caused by unresolvable parameter types so they aren't re-attempted on every collection. ([#24102](https://github.com/DataDog/integrations-core/pull/24102))
+* Migrate the Postgres check's tag handling to the shared `TagManager`. ([#24265](https://github.com/DataDog/integrations-core/pull/24265))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24270](https://github.com/DataDog/integrations-core/pull/24270))
+* Remove duplicated `database_identifier` logic now provided by the DatabaseCheck base class. ([#24278](https://github.com/DataDog/integrations-core/pull/24278))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 23.9.1 / 2026-06-16 / Agent 7.81.0
 
 ***Fixed***:
 

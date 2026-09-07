@@ -2,6 +2,42 @@
 
 <!-- towncrier release notes start -->
 
+## 2.10.0 / 2026-09-02
+
+***Added***:
+
+* Emit updated topic config to the event platform after a successful update_topic_config or delete_topic_config action, so the UI reflects changes immediately without waiting for the kafka_consumer check cache to expire. ([#24967](https://github.com/DataDog/integrations-core/pull/24967))
+
+***Fixed***:
+
+* Fix unintended config resets by switching from deprecated alter_configs (PUT semantics) to incremental_alter_configs (PATCH semantics) in update_topic_config and delete_topic_config. ([#24967](https://github.com/DataDog/integrations-core/pull/24967))
+
+## 2.9.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 2.8.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add earliest, latest, and timestamp-based offset support to the ``update_consumer_group_offsets`` action, along with an inactive-group precondition check and per-partition error reporting. ([#24165](https://github.com/DataDog/integrations-core/pull/24165))
+
+***Fixed***:
+
+* Reformat auto-generated `config_models` files following the migration of the model formatter from black to ruff. No behavior or type-contract change. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
+## 2.7.2 / 2026-06-24 / Agent 7.81.0
+
+***Fixed***:
+
+* Fix `read_messages` hanging until the global timeout when a filter matched fewer messages than `n_messages_retrieved`. Consumption is now bounded to a snapshot of the log taken when the check starts (per-partition high watermark + `enable.partition.eof`), the default timeout is reduced from 20s to 5s, and a `hit_timeout` stat distinguishes a truncated read from a complete one. ([#24162](https://github.com/DataDog/integrations-core/pull/24162))
+
 ## 2.7.1 / 2026-06-09
 
 ***Fixed***:

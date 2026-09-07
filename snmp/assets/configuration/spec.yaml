@@ -76,7 +76,6 @@ files:
               name: tcpPassiveOpens
               metric_tags:
                 - TCP
-        fleet_configurable: false
       - name: profiles
         description: |
           Specify profiles to be able to reference a set of metrics by name.
@@ -96,6 +95,15 @@ files:
               definition_file: cisco-asr.yaml
         hidden: true
         fleet_configurable: false
+      - name: use_remote_config_profiles
+        description: |
+          Whether to apply device profiles from the SNMP Profile Manager, managed through Remote Configuration.
+          When enabled, any locally defined profiles are ignored in favor of the remotely-managed profiles.
+        value:
+          type: boolean
+          example: true
+          display_default: false
+        fleet_configurable: true
       - name: refresh_oids_cache_interval
         legacy: true
         description: |

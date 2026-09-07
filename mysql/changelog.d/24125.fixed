@@ -1,1 +1,0 @@
-Fixes `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` metrics by submitting them as monotonic counts instead of gauges, so they correctly reflect per-interval operations rather than cumulative `performance_schema` lifetime totals.

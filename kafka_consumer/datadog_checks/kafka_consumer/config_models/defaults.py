@@ -48,6 +48,10 @@ def instance_kafka_configs_refresh_interval():
     return 180
 
 
+def instance_kafka_connect_tls_verify():
+    return True
+
+
 def instance_min_collection_interval():
     return 15
 

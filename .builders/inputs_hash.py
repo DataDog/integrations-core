@@ -91,6 +91,9 @@ IGNORED_FILES = frozenset({
     'pyproject.toml',
     # Runs in CI to install pytest/etc; not baked into any image or artifact.
     'test_dependencies.txt',
+    # Contributor documentation; not baked into any image or artifact.
+    'AGENTS.md',
+    'CLAUDE.md',
 })
 
 

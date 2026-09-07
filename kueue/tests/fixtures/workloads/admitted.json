@@ -1,0 +1,45 @@
+[
+  {
+    "metadata": {
+      "name": "training-job",
+      "namespace": "team-a",
+      "uid": "workload-uid",
+      "creationTimestamp": "2026-06-16T10:00:00Z"
+    },
+    "spec": {
+      "queueName": "gpu",
+      "priority": 100,
+      "priorityClassRef": {
+        "name": "high"
+      }
+    },
+    "status": {
+      "admission": {
+        "clusterQueue": "default"
+      },
+      "conditions": [
+        {
+          "type": "QuotaReserved",
+          "status": "True",
+          "reason": "QuotaReserved",
+          "lastTransitionTime": "2026-06-16T10:00:05Z",
+          "message": "Quota reserved in ClusterQueue default"
+        },
+        {
+          "type": "Admitted",
+          "status": "True",
+          "reason": "Admitted",
+          "lastTransitionTime": "2026-06-16T10:00:08Z",
+          "message": "The workload is admitted"
+        },
+        {
+          "type": "PodsReady",
+          "status": "True",
+          "reason": "Started",
+          "lastTransitionTime": "2026-06-16T10:00:20Z",
+          "message": "All pods are ready"
+        }
+      ]
+    }
+  }
+]

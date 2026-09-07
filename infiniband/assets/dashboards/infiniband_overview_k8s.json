@@ -1,0 +1,3165 @@
+{
+    "title": "InfiniBand Overview - Kubernetes Version",
+    "description": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.\n\nThis Kubernetes view scopes every widget by cluster (`kube_cluster_name`) and `env` so you can triage InfiniBand fabric health across clusters, then narrow to a single node's NIC ports with the template variables.\n\n**Further reading:**\n\n-   [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n-   [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
+    "widgets": [
+        {
+            "id": 5000000000000004,
+            "definition": {
+                "title": "",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5000000000000001,
+                        "definition": {
+                            "type": "image",
+                            "url": "/static/images/logos/infiniband_large.svg",
+                            "url_dark_theme": "/static/images/logos/infiniband_reversed_large.svg",
+                            "sizing": "cover",
+                            "margin": "md",
+                            "has_background": false,
+                            "has_border": false,
+                            "vertical_align": "center",
+                            "horizontal_align": "center"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000002,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000003,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Further reading:**\n\n- [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n- [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 9
+            }
+        },
+        {
+            "id": 5000000000000009,
+            "definition": {
+                "title": "InfiniBand Monitoring Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5000000000000005,
+                        "definition": {
+                            "type": "note",
+                            "content": "InfiniBand Overview shows a quick summary of all reporting InfiniBand instances and related monitors and their status.",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5000000000000006,
+                        "definition": {
+                            "title": "Port States Overview",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer} by {port_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000007,
+                        "definition": {
+                            "title": "Physical States Overview",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_phys_state{$env,$cluster,$host,$device,$port,$link_layer} by {port_phys_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000008,
+                        "definition": {
+                            "title": "InfiniBand Monitor Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(integration:infiniband) $host $env $cluster",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false,
+                            "show_investigation": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 9
+            }
+        },
+        {
+            "id": 5000000000000024,
+            "definition": {
+                "title": "Fleet Triage - Cluster & Host",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5000000000000010,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Start here.** Use the template variables at the top (env, cluster, host, device, port, link_layer) to move from a fleet-wide view down to a single node's NIC ports. The KPIs and top-offender lists below show which cluster, host, and port to investigate \u2014 click a row to investigate that host's detail. In Kubernetes, `host` is the node: these are node-level fabric counters and are not attributable to a pod.",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000011,
+                        "definition": {
+                            "title": "Reporting Ports",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000012,
+                        "definition": {
+                            "title": "Active Ports",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer,port_state:active}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000013,
+                        "definition": {
+                            "title": "Ports Not Active",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer,!port_state:active}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000014,
+                        "definition": {
+                            "title": "Phys Ports Not LinkUp",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_phys_state{$env,$cluster,$host,$device,$port,$link_layer,!port_phys_state:linkup}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000015,
+                        "definition": {
+                            "title": "Port State by Cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,port_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Filter to this cluster",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000016,
+                        "definition": {
+                            "title": "Physical State by Cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_phys_state{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,port_phys_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Filter to this cluster",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000017,
+                        "definition": {
+                            "title": "Problem Ports (state != active)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer,!port_state:active} by {kube_cluster_name,host,device,port,port_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000018,
+                        "definition": {
+                            "title": "Top Symbol Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.symbol_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000020,
+                        "definition": {
+                            "title": "Top Port Receive Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 12,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000021,
+                        "definition": {
+                            "title": "Top Transmit Discards",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_xmit_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000023,
+                        "definition": {
+                            "title": "Top Congestion (ECN Marked)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.np_ecn_marked_roce_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 16,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000019,
+                        "definition": {
+                            "title": "Top Port Downed Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.link_downed{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5000000000000022,
+                        "definition": {
+                            "title": "Top RDMA Out-of-Buffer Drops",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.out_of_buffer{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Drill into host detail",
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 20,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 25
+            }
+        },
+        {
+            "id": 5000000000000041,
+            "definition": {
+                "title": "InfiniBand Interface Counters",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5000000000000025,
+                        "definition": {
+                            "type": "note",
+                            "content": "These metrics monitor the physical health and performance of your InfiniBand fabric, tracking link stability, error patterns, congestion points, and traffic volumes. By observing these foundational metrics, you can identify hardware failures, signal integrity issues, and network bottlenecks before they cascade into application-level problems. Grouped by cluster, host, device, and port; narrow with the template variables above.",
+                            "background_color": "blue",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000026,
+                        "definition": {
+                            "title": "Minor Link Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Symbol Error"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.symbol_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000027,
+                        "definition": {
+                            "title": "Times Port was Downed",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Link Downed"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.link_downed{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000028,
+                        "definition": {
+                            "title": "Error Recovery Completed",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Link Error Recovery"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.link_error_recovery{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000029,
+                        "definition": {
+                            "title": "Error Packets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Received Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000030,
+                        "definition": {
+                            "title": "EBP (End Bad Packet) Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Received Remote Physical Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_remote_physical_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000031,
+                        "definition": {
+                            "title": "Local Errors Threshold Exceeds",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Local Link Integrity Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.local_link_integrity_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000032,
+                        "definition": {
+                            "title": "Discarded Received Packets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Received Discards"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000033,
+                        "definition": {
+                            "title": "Outbound Packets Discarded",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Transmit Discards"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_xmit_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000034,
+                        "definition": {
+                            "title": "Transmit Wait Time Ticks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Transmit Wait"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_xmit_wait{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000035,
+                        "definition": {
+                            "title": "Data Octets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Data (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Data",
+                                            "formula": "monotonic_diff(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_rcv_data{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000036,
+                        "definition": {
+                            "title": "Data Octets Transmitted",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Transmit Data (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Transmit Data",
+                                            "formula": "monotonic_diff(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_xmit_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_xmit_data{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000037,
+                        "definition": {
+                            "title": "Packets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Packets (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Packets",
+                                            "formula": "monotonic_diff(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_packets_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_rcv_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000038,
+                        "definition": {
+                            "title": "Excessive Buffer Overrun",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Excessive Buffer Overrun Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.excessive_buffer_overrun_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000039,
+                        "definition": {
+                            "title": "Packet Discarded Due to Switch Relay Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Received Switch Relay Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_switch_relay_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000040,
+                        "definition": {
+                            "title": "Packets Received Discarded at the Switch Port",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Port Received Constraint Errors"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.port_rcv_constraint_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 12,
+                "height": 18
+            }
+        },
+        {
+            "id": 5000000000000061,
+            "definition": {
+                "title": "Remote Direct Memory Access Counters",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5000000000000042,
+                        "definition": {
+                            "type": "note",
+                            "content": "These metrics reveal the operational health of RDMA communications running over your InfiniBand fabric, exposing protocol errors, congestion events, resource limitations, and message-handling issues. Grouped by cluster, host, device, and port; narrow with the template variables above.",
+                            "background_color": "purple",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000043,
+                        "definition": {
+                            "title": "Ack Timer Expirations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Local Ack Timeout Error"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.local_ack_timeout_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000044,
+                        "definition": {
+                            "title": "Negative Ack Sequence Packets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "Packet Sequence Error"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.packet_seq_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000045,
+                        "definition": {
+                            "title": "Receiver Not Ready Negative Acks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)",
+                                            "alias": "RNR NAK Retry Error"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rnr_nak_retry_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000046,
+                        "definition": {
+                            "title": "CNP Packets Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.np_cnp_sent{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000047,
+                        "definition": {
+                            "title": "Congestion Marked Packets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.np_ecn_marked_roce_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000048,
+                        "definition": {
+                            "title": "Adaptive Retransmissions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.roce_adp_retrans{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000049,
+                        "definition": {
+                            "title": "Drops Due to Out of Buffer",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.out_of_buffer{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000050,
+                        "definition": {
+                            "title": "Out of Sequence Packets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.out_of_sequence{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000051,
+                        "definition": {
+                            "title": "Duplicate Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.duplicate_request{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000052,
+                        "definition": {
+                            "title": "CQE Completed with Errors (Requester)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.req_cqe_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000053,
+                        "definition": {
+                            "title": "CQE Completed with Errors (Responder)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.resp_cqe_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000054,
+                        "definition": {
+                            "title": "Remote Access Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.resp_remote_access_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000055,
+                        "definition": {
+                            "title": "Local Length Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.resp_local_length_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000056,
+                        "definition": {
+                            "title": "Invalid Local Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.req_remote_invalid_request{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000057,
+                        "definition": {
+                            "title": "Work Queue Entry Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rx_wqe_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000058,
+                        "definition": {
+                            "title": "RoCE Slow Restart Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.roce_slow_restart{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000059,
+                        "definition": {
+                            "title": "CNP Packets Ignored",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rp_cnp_ignored{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 17,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000060,
+                        "definition": {
+                            "title": "CNP Packets Handled",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rp_cnp_handled{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 17,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 52,
+                "width": 12,
+                "height": 21
+            }
+        },
+        {
+            "id": 5000000000000073,
+            "definition": {
+                "title": "AWS Elastic Fabric Adapter Counters",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5000000000000062,
+                        "definition": {
+                            "type": "note",
+                            "content": "These metrics monitor AWS Elastic Fabric Adapter (EFA) performance, tracking packet transmission, RDMA operations, and buffer utilization specific to this cloud-optimized interconnect. They populate only on EFA-backed hosts. Grouped by cluster, host, device, and port; narrow with the template variables above.",
+                            "background_color": "orange",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5000000000000063,
+                        "definition": {
+                            "title": "Completed RDMA Write Ops",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rdma_write_wrs{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000064,
+                        "definition": {
+                            "title": "Bytes Transmitted",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.tx_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000065,
+                        "definition": {
+                            "title": "Bytes Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rx_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000066,
+                        "definition": {
+                            "title": "Packets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rx_pkts{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000067,
+                        "definition": {
+                            "title": "Packets Dropped",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.rx_drops{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000068,
+                        "definition": {
+                            "title": "Packets Transmitted",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.tx_pkts{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000069,
+                        "definition": {
+                            "title": "Send Packets Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.send_wrs{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000070,
+                        "definition": {
+                            "title": "Send Bytes Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.recv_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000071,
+                        "definition": {
+                            "title": "Send Bytes Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.send_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5000000000000072,
+                        "definition": {
+                            "title": "Send Packets Received",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:infiniband.rdma.recv_wrs{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 73,
+                "width": 12,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "env",
+            "prefix": "env",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster",
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "device",
+            "prefix": "device",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "port",
+            "prefix": "port",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "link_layer",
+            "prefix": "link_layer",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "author_name": "Datadog"
+}

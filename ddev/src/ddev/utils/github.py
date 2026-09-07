@@ -4,17 +4,54 @@
 from __future__ import annotations
 
 import json
+import re
 from functools import cached_property
 from time import time
 from typing import TYPE_CHECKING, overload
+
+from ddev.utils.github_errors import (
+    GITHUB_AUTHENTICATION_STATUS_CODES,
+    GitHubAuthenticationError,
+    github_secondary_rate_limit_wait,
+)
+
+MAX_SECONDARY_RATE_LIMIT_RETRIES = 2
+MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS = 3600
+
+PULL_REQUEST_NUMBER_PATTERN = re.compile(r'^\d+$')
+PULL_REQUEST_URL_PATTERN = re.compile(r'^https?://github\.com/[^/]+/[^/]+/pull/(\d+)(?:[/?#].*)?$', re.IGNORECASE)
 
 if TYPE_CHECKING:
     from typing import Any, Literal
 
     from httpx import Client
 
+    from ddev.cli.application import Application
     from ddev.cli.terminal import BorrowedStatus
     from ddev.repo.core import Repository
+
+
+def resolve_owner_repo(app: Application, repository: str | None = None) -> tuple[str, str]:
+    """Split `owner/name`, defaulting to the active repository and the `DataDog` organization."""
+    full_name = repository or app.repo.full_name
+    owner, separator, name = full_name.partition('/')
+    if not separator:
+        return 'DataDog', full_name
+    return owner, name
+
+
+def parse_pull_request_reference(value: str) -> int | None:
+    """Return the pull-request number in *value*, or None when it is neither shape.
+
+    Accepts a bare number or a GitHub pull-request URL, so a command can take whichever one the
+    user has at hand.
+    """
+    reference = value.strip()
+    if PULL_REQUEST_NUMBER_PATTERN.match(reference):
+        return int(reference)
+
+    match = PULL_REQUEST_URL_PATTERN.match(reference)
+    return int(match.group(1)) if match else None
 
 
 class PullRequest:
@@ -199,6 +236,8 @@ class GitHubManager:
 
         try:
             response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        except GitHubAuthenticationError:
+            raise
         except HTTPStatusError:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
@@ -215,6 +254,8 @@ class GitHubManager:
 
         try:
             response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except GitHubAuthenticationError:
+            raise
         except HTTPStatusError:
             return None
         return [label['name'] for label in response.json().get('labels', [])]
@@ -305,16 +346,29 @@ class GitHubManager:
         return self.__api_call('get', *args, **kwargs)
 
     def __api_call(self, method, *args, **kwargs):
-        from httpx import HTTPError
+        from httpx import HTTPError, HTTPStatusError
 
         retry_wait = 2
+        secondary_rate_limit_retries = 0
         while True:
             try:
                 response = getattr(self.client, method)(*args, auth=self.__auth, **kwargs)
 
+                secondary_rate_limit_wait = github_secondary_rate_limit_wait(response)
+                if secondary_rate_limit_wait is not None:
+                    if (
+                        secondary_rate_limit_retries < MAX_SECONDARY_RATE_LIMIT_RETRIES
+                        and secondary_rate_limit_wait <= MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS
+                    ):
+                        secondary_rate_limit_retries += 1
+                        self.__status.wait_for(
+                            secondary_rate_limit_wait + 1,
+                            context='GitHub API secondary rate limit reached',
+                        )
+                        continue
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
-                if response.status_code == 403 and response.headers['X-RateLimit-Remaining'] == '0':  # noqa: PLR2004
+                elif response.status_code == 403 and response.headers.get('X-RateLimit-Remaining') == '0':  # noqa: PLR2004
                     self.__status.wait_for(
                         float(response.headers['X-RateLimit-Reset']) - time() + 1,
                         context='GitHub API rate limit reached',
@@ -325,5 +379,12 @@ class GitHubManager:
                 retry_wait *= 2
                 continue
 
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except HTTPStatusError as e:
+                if github_secondary_rate_limit_wait(e.response) is not None:
+                    raise
+                if e.response.status_code in GITHUB_AUTHENTICATION_STATUS_CODES:
+                    raise GitHubAuthenticationError.from_http_status_error(e) from e
+                raise
             return response

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 
 from .common import COMPOSE_FILE, INSTANCE, INSTANCE_BAD_URL, INSTANCE_NO_URL, TRAFFIC_SERVER_URL
 
@@ -11,7 +11,7 @@ from .common import COMPOSE_FILE, INSTANCE, INSTANCE_BAD_URL, INSTANCE_NO_URL, T
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(COMPOSE_FILE, endpoints=[TRAFFIC_SERVER_URL]):
-        yield INSTANCE
+        yield INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 2.5.1 / 2026-08-05
+
+***Fixed***:
+
+* Fix parsing logic and query params for squeue ([#24513](https://github.com/DataDog/integrations-core/pull/24513))
+
+## 2.5.0 / 2026-07-08 / Agent 7.82.0
+
+***Security***:
+
+* Require a trusted provider for the ``seff_path`` config option. ([#24235](https://github.com/DataDog/integrations-core/pull/24235))
+
+***Fixed***:
+
+* Fix process tag enrichment when SLURM scontrol reports namespace PIDs. ([#24384](https://github.com/DataDog/integrations-core/pull/24384))
+
 ## 2.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 
 from . import common
 
@@ -21,7 +21,7 @@ def dd_environment():
         wait_for_health=False,
         endpoints=common.STATUS_URL,
     ):
-        yield common.openmetrics_instance
+        yield common.openmetrics_instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
