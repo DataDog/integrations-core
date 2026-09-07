@@ -66,8 +66,8 @@ logger = logging.getLogger(__name__)
 class ResolvedEnvironment:
     """A candidate environment routed onto a platform.
 
-    Availability flags request test stages, not guaranteed work. Conditional availability stays
-    enabled here so the worker can resolve it against its own platform and environment.
+    Availability flags request test stages, not guaranteed work. Conditional E2E availability
+    stays enabled here so the worker can resolve it against its own platform and environment.
     """
 
     name: str

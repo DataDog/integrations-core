@@ -45,8 +45,9 @@ Environment discovery uses an injected `EnvironmentProvider`. `HatchEnvironmentP
 `hatch.toml` without invoking Hatch or loading project plugins. It expands default matrices, Python
 versions, literal platform restrictions, and the `os` matrix convention, including literal
 `matrix.os.platforms` mappings. It does not evaluate general overrides or inheritance. Unsupported
-constructs that affect discovery raise `PlanningError`; conditional test availability stays enabled
-for the worker to resolve at runtime.
+constructs that affect discovery raise `PlanningError`. Default `test-env` must remain true and
+cannot be overridden: `ddev test` does not filter explicitly selected unit-test environments.
+Conditional E2E availability stays enabled for the worker to resolve at runtime.
 
 ## Rules
 

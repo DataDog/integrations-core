@@ -51,7 +51,7 @@ UNSUPPORTED_ENVIRONMENT_FIELDS = {
     "default": ("template", "matrix-name-format", "matrix-exclude", "matrix-include"),
     "named": ("template",),
 }
-UNSUPPORTED_OVERRIDE_FIELDS = frozenset({"python", "platforms", "matrix", "template", "matrix-name-format"})
+UNSUPPORTED_OVERRIDE_FIELDS = frozenset({"python", "platforms", "matrix", "template", "matrix-name-format", "test-env"})
 OS_PLATFORM_OVERRIDE = ("matrix", "os", "platforms")
 PLATFORM_MAPPING_FIELDS = frozenset({"value", "if"})
 
@@ -189,11 +189,12 @@ class HatchEnvironmentProvider:
     Each combination produces a candidate per compatible requested platform.
     Without a matrix, use the default environment.
 
+    The test-env flag defaults to true and cannot be disabled or overridden.
+    E2E availability uses its literal value (true by default); an e2e-env
+    override keeps E2E enabled for the worker to decide.
     Only literal matrix.os.platforms mappings are resolved during planning.
-    An override mentioning test-env or e2e-env keeps that specific stage
-    enabled for the worker to decide. Otherwise each flag uses its literal
-    value, defaulting to true. Unsupported discovery overrides raise a
-    planning error; runtime-only settings are ignored.
+    Unsupported discovery overrides raise a planning error; runtime-only
+    settings are ignored.
     """
 
     default_python_version: str
@@ -228,8 +229,6 @@ class HatchEnvironmentProvider:
             names.add(name)
 
             candidates = _environment_platforms(platforms, variables.get("os"), restrictions, os_platforms, field)
-            if not any(availability.values()):
-                continue
             result.extend(
                 ResolvedEnvironment(
                     name=name,
@@ -279,6 +278,8 @@ def _execution_settings(default: dict[str, Any]) -> tuple[dict[str, bool], dict[
         if not isinstance(value, bool):
             raise ValueError(f"envs.default.{field}: expected a boolean")
         availability[field] = value
+    if not availability["test-env"]:
+        raise ValueError("envs.default.test-env: disabling unit tests is unsupported for static discovery")
 
     os_platforms = None
     for scope, selector, settings in _overrides(default.get("overrides", {}), "envs.default.overrides"):
@@ -288,8 +289,8 @@ def _execution_settings(default: dict[str, Any]) -> tuple[dict[str, bool], dict[
                 os_platforms = _os_platform_mapping(value, location)
             elif field in UNSUPPORTED_OVERRIDE_FIELDS:
                 raise ValueError(f"{location}: unsupported for static discovery")
-            elif field in availability:
-                # The worker evaluates these conditions; false here would prevent it from doing so.
+            elif field == "e2e-env":
+                # ddev env test evaluates E2E availability on the worker.
                 availability[field] = True
     return availability, os_platforms
 

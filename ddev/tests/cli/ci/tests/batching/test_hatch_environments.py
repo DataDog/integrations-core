@@ -126,9 +126,8 @@ def test_hatch_environments_route_platforms(tmp_path: Path, config: str, expecte
     ("config", "expected"),
     [
         pytest.param('[envs.default]', [(True, True)], id="standard-stages"),
+        pytest.param('[envs.default]\ntest-env = true', [(True, True)], id="explicit-unit-tests"),
         pytest.param('[envs.default]\ne2e-env = false', [(True, False)], id="unit-only"),
-        pytest.param('[envs.default]\ntest-env = false', [(False, True)], id="e2e-only"),
-        pytest.param('[envs.default]\ntest-env = false\ne2e-env = false', [], id="disabled"),
         pytest.param(
             '''
             [envs.default]
@@ -149,7 +148,7 @@ def test_hatch_environments_route_platforms(tmp_path: Path, config: str, expecte
         ),
     ],
 )
-def test_hatch_environments_keep_conditional_stages_for_the_worker(
+def test_hatch_environments_resolve_stages_and_defer_conditional_e2e(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, config: str, expected: list[tuple[bool, bool]]
 ):
     integration = integration_with_config(tmp_path, config)
@@ -164,6 +163,17 @@ def test_hatch_environments_keep_conditional_stages_for_the_worker(
 @pytest.mark.parametrize(
     ("config", "field"),
     [
+        pytest.param('[envs.default]\ntest-env = false', "envs.default.test-env", id="disabled-unit-tests"),
+        pytest.param(
+            '[envs.default.overrides]\nenv.RUN_UNIT.test-env = { value = true }',
+            "envs.default.overrides.env.RUN_UNIT.test-env",
+            id="unit-test-enablement-override",
+        ),
+        pytest.param(
+            '[envs.default.overrides]\nplatform.windows.test-env = { value = false }',
+            "envs.default.overrides.platform.windows.test-env",
+            id="unit-test-disablement-override",
+        ),
         pytest.param('[envs.default]\npython = "3.13t"', "envs.default.python", id="unsupported-python"),
         pytest.param('[envs.default]\nplatforms = "linux"', "envs.default.platforms", id="invalid-platform-list"),
         pytest.param('[[envs.default.matrix]]\npython = []', "envs.default.matrix[0].python", id="empty-axis"),
