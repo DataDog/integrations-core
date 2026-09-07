@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.nfsstat import NfsStatCheck
-from datadog_checks.nfsstat.nfsstat import SOURCE_NFSIOSTAT_PATH
+from datadog_checks.nfsstat.nfsstat import SOURCE_NFSIOSTAT_PATH, Device
 
 from .common import METRICS
 
@@ -87,6 +87,38 @@ class TestNfsstat:
             aggregator.assert_metric(metric, tags=tags_unicode)
 
         assert aggregator.metrics_asserted_pct == 100.0
+
+    @pytest.mark.unit
+    def test_device_without_export_path(self) -> None:
+        device = Device(
+            [
+                ['nfs-server', 'mounted', 'on', '/test1:'],
+                [],
+                ['0.0', '0.0'],
+                [],
+                ['0.0', '0.0', '0.0', '0.0', '(0.0%)', '0.0', '0.0'],
+                [],
+                ['0.0', '0.0', '0.0', '0.0', '(0.0%)', '0.0', '0.0'],
+            ],
+            mock.MagicMock(),
+        )
+
+        assert device.nfs_server == 'nfs-server'
+        assert device.nfs_export == ''
+
+    @pytest.mark.unit
+    def test_check_skips_incomplete_initial_sample(self, aggregator) -> None:
+        instance = self.INSTANCES['main']
+        check = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
+
+        with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
+            mock_output = ensure_unicode(f.read())
+
+        mock_output = 'nfs-server mounted on /test1:\n\n' + mock_output
+        with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output', return_value=(mock_output, '', 0)):
+            check.check(instance)
+
+        aggregator.assert_metric('system.nfs.ops')
 
 
 @pytest.mark.unit

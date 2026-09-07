@@ -58,6 +58,10 @@ class NfsStatCheck(AgentCheck):
         custom_tags = instance.get("tags", [])
         stats = stat_out.splitlines()
 
+        def add_device(device_data: list[list[str]]) -> None:
+            if len(device_data) >= 7:
+                all_devices.append(Device(device_data, self.log))
+
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
                 if not self.disable_missing_mountpoints_warning:
@@ -71,14 +75,12 @@ class NfsStatCheck(AgentCheck):
                 continue
             elif l.find('mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
-                device = Device(this_device, self.log)
-                all_devices.append(device)
+                add_device(this_device)
                 this_device = []
             this_device.append(l.strip().split())
 
         # Add the last device into the array
-        device = Device(this_device, self.log)
-        all_devices.append(device)
+        add_device(this_device)
 
         # Disregard the first half of device stats (report 1 of 2)
         # as that is the moving average
@@ -105,8 +107,7 @@ class Device(object):
         self.log.info(self._device_header)
         self.device_name = self._device_header[0]
         self.mount = self._device_header[-1][:-1]
-        self.nfs_server = self.device_name.split(':')[0]
-        self.nfs_export = self.device_name.split(':')[1]
+        self.nfs_server, _, self.nfs_export = self.device_name.partition(':')
 
     def _parse_ops(self):
         ops = self._device_data[2]
