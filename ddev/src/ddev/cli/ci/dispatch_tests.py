@@ -103,7 +103,7 @@ def dispatch_tests(
     import logging
     from pathlib import Path
 
-    from ddev.cli.ci.tests.batching.build import HatchEnvironmentProvider
+    from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
     from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.utils.github import resolve_owner_repo

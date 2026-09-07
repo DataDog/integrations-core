@@ -22,6 +22,7 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 | Module | Role |
 | --- | --- |
 | `build.py` | Composes the stages and adapts concrete `Repository`/`Integration` objects to them. The package's public entry point. |
+| `hatch_environments.py` | Reads and validates static Hatch environment settings and expands candidate environments. |
 | `targets.py` | Maps changed files to affected target names through ordered, independent rules. `AllTargetsRule` is the exception: it ignores the change set, for a run that tests everything. |
 | `units.py` | Expands targets into `TestUnit` values: one target, one platform, one environment. |
 | `jobs.py` | Turns each unit into the concrete `BatchJob` the workflow runs. |
@@ -41,13 +42,14 @@ Some values are duplicated between them on purpose: `ci_matrix.py` must run stan
 dependencies, so it cannot import from this package. `PLATFORMS` and the path patterns are the
 copies that matter. Change one and change the other.
 
-Environment discovery uses an injected `EnvironmentProvider`. `HatchEnvironmentProvider` reads
-`hatch.toml` without invoking Hatch or loading project plugins. It expands default matrices, Python
-versions, literal platform restrictions, and the `os` matrix convention, including literal
-`matrix.os.platforms` mappings. It does not evaluate general overrides or inheritance. Unsupported
-constructs that affect discovery raise `PlanningError`. Default `test-env` must remain true and
-cannot be overridden: `ddev test` does not filter explicitly selected unit-test environments.
-Conditional E2E availability stays enabled for the worker to resolve at runtime.
+Environment discovery uses an injected `EnvironmentProvider` defined in `units.py`.
+The `HatchEnvironmentProvider` in `hatch_environments.py` reads `hatch.toml` without invoking Hatch
+or loading project plugins. It expands default matrices, Python versions, literal platform
+restrictions, and the `os` matrix convention, including literal `matrix.os.platforms` mappings.
+It does not evaluate general overrides or inheritance. Unsupported constructs that affect discovery
+raise `PlanningError`. Default `test-env` must remain true and cannot be overridden: `ddev test`
+does not filter explicitly selected unit-test environments. Conditional E2E availability stays
+enabled for the worker to resolve at runtime.
 
 ## Rules
 

@@ -9,8 +9,8 @@ from textwrap import dedent
 
 import pytest
 
-from ddev.cli.ci.tests.batching.build import HatchEnvironmentProvider
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
+from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path as DdevPath
