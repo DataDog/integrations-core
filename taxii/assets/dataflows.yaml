@@ -1,0 +1,6 @@
+provides:
+  - id: taxii-collection-ingestion
+    always_on: true
+    granular: true
+    data_type: threat_intel_feed
+    direction: inbound

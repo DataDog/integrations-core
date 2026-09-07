@@ -1,0 +1,61 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "key": "api_root_url",
+      "label": "TAXII API Root URL",
+      "help": "Full HTTPS URL of the TAXII API root endpoint.",
+      "editable": false,
+      "required": true,
+      "url": {
+        "pattern": "^https://[^\\s]+$"
+      }
+    },
+    {
+      "key": "auth_mode",
+      "label": "Authentication Mode",
+      "help": "Authentication method used to access the TAXII server.",
+      "editable": false,
+      "required": true,
+      "dropdown": {
+        "options": [
+          {
+            "value": "none",
+            "label": "No Authentication"
+          },
+          {
+            "value": "basic",
+            "label": "HTTP Basic"
+          }
+        ],
+        "default": "none"
+      }
+    },
+    {
+      "key": "basic_username",
+      "label": "Basic Username",
+      "help": "Username or API token for HTTP Basic authentication.",
+      "editable": true,
+      "required": false,
+      "password": {}
+    },
+    {
+      "key": "basic_password",
+      "label": "Basic Password",
+      "help": "Password or API token for HTTP Basic authentication.",
+      "editable": true,
+      "required": false,
+      "password": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "taxii-collection-ingestion",
+      "additional_config_fields": []
+    }
+  ],
+  "v2_endpoints": {
+    "enabled": false,
+    "interface_id_slug": "taxii"
+  }
+}

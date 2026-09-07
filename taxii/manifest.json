@@ -1,0 +1,37 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "b7e8f4a2-3c5d-4a6b-9e1f-8d2c7a5b4e3f",
+    "app_id": "taxii",
+    "owner": "cloud-siem",
+    "display_on_public_website": false,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Troubleshooting",
+        "changelog": "CHANGELOG.md",
+        "description": "Poll TAXII 2.1 servers for STIX threat intelligence and enrich Cloud SIEM logs.",
+        "title": "TAXII",
+        "media": [],
+        "classifier_tags": [
+            "Category::Cloud",
+            "Category::Security",
+            "Offering::Integration"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 0,
+            "source_type_name": "TAXII",
+            "events": {
+                "creates_events": false
+            }
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    }
+}
