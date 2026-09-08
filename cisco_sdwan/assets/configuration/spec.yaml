@@ -12,6 +12,7 @@ files:
       description: The IP address/endpoint of the Cisco Manager instance.
       required: true
       fleet_configurable: true
+      formats: ["url"]
       value:
         type: string
         example: <VMANAGE_ENDPOINT>
