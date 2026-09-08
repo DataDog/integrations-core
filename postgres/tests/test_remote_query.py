@@ -11,6 +11,7 @@ from datetime import time as dt_time
 from decimal import Decimal
 from types import SimpleNamespace
 
+import psycopg.errors as psycopg_errors
 import pytest
 
 from datadog_checks.base.utils import remote_queries as rq
@@ -145,6 +146,7 @@ class FakePool:
         fetch_error_at=None,
         row_provider=None,
         fetch_log=None,
+        connection_errors=None,
     ):
         self.rows = rows or []
         self.description = description or [FakeColumn('value', 23)]
@@ -154,6 +156,9 @@ class FakePool:
         self.fetch_error_at = fetch_error_at
         self.row_provider = row_provider
         self.fetch_log = fetch_log
+        # Per-dbname connection failures raised from get_connection, e.g. psycopg
+        # InvalidCatalogName for a database that does not exist on the endpoint.
+        self.connection_errors = connection_errors or {}
         self.requested_dbnames = []
         self.cursors = []
 
@@ -163,6 +168,9 @@ class FakePool:
     @contextmanager
     def get_connection(self, dbname):
         self.requested_dbnames.append(dbname)
+        error = self.connection_errors.get(dbname)
+        if error is not None:
+            raise error
         yield FakeConnection(self)
 
 
@@ -601,16 +609,6 @@ def test_stream_uses_only_supplied_live_check_for_target_matching(monkeypatch):
     assert matching_pool.requested_dbnames == ['datadog_test']
 
 
-def test_stream_requires_dbname_match_even_when_host_and_port_match():
-    pool = FakePool(rows=[(1,)])
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
-    events = collect_events(valid_request(dbname='postgres'), check)
-
-    assert_failed_event(events, 'target_not_found')
-    assert pool.requested_dbnames == []
-
-
 def test_stream_host_port_dbname_target_ignores_database_instance_matches():
     pool = FakePool(rows=[(1,)])
     check = make_check(
@@ -672,6 +670,148 @@ def test_stream_missing_pool_returns_credentials_unavailable(monkeypatch):
     events = collect_events(valid_request(), check, client=FakeUploadClient())
 
     assert_failed_event(events, 'credentials_unavailable')
+
+
+# ---------------------------------------------------------------------------
+# Dynamic database targeting (a requested dbname on the matched check)
+# ---------------------------------------------------------------------------
+
+
+def test_dynamic_tuple_requested_dbname_executes_on_requested_database(monkeypatch):
+    """Tuple selection matches the endpoint only; a different dbname executes there."""
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
+
+    events = collect_events(valid_request(dbname='analytics'), check, client=FakeUploadClient())
+
+    assert_success(events)
+    # The gate warms the pool entry for the requested database, then the producer reuses it.
+    assert pool.requested_dbnames == ['analytics', 'analytics']
+
+
+def test_dynamic_tuple_requested_dbname_matches_when_configured_dbname_is_absent(monkeypatch):
+    """A check configured without a dbname still matches its endpoint; the request names the database."""
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(host='localhost', port=5432, dbname=None, pool=pool)
+
+    events = collect_events(valid_request(dbname='datadog_test'), check, client=FakeUploadClient())
+
+    assert_success(events)
+    assert pool.requested_dbnames == ['datadog_test', 'datadog_test']
+
+
+def test_dynamic_tuple_unknown_requested_dbname_fails_target_not_found(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(
+        rows=[(1,)],
+        connection_errors={'postgres': psycopg_errors.InvalidCatalogName('database "postgres" does not exist')},
+    )
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
+
+    events = collect_events(valid_request(dbname='postgres'), check)
+
+    assert_failed_event(events, 'target_not_found', 'does not exist')
+    # One gate probe and no producer execution: no cursor was created and no run started.
+    assert pool.requested_dbnames == ['postgres']
+    assert pool.cursors == []
+    assert [event.event_type for event in events] == ['error']
+
+
+def test_dynamic_tuple_connection_error_fails_retryable_target_unavailable(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(
+        rows=[(1,)],
+        connection_errors={'analytics': psycopg_errors.OperationalError('connection refused')},
+    )
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
+
+    events = collect_events(valid_request(dbname='analytics'), check)
+
+    assert_failed_event(events, 'target_unavailable', 'connection refused')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert pool.requested_dbnames == ['analytics']
+    assert pool.cursors == []
+
+
+def test_dynamic_database_instance_with_requested_dbname_executes_on_requested_database(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(
+        host='localhost',
+        port=5432,
+        dbname='datadog_test',
+        pool=pool,
+        check_database_identifier='Postgres/Primary-A',
+    )
+    request = valid_request()
+    request['target'] = {'database_instance': 'Postgres/Primary-A', 'dbname': 'analytics'}
+
+    events = collect_events(request, check, client=FakeUploadClient())
+
+    assert_success(events)
+    assert pool.requested_dbnames == ['analytics', 'analytics']
+
+
+def test_dynamic_database_instance_with_unknown_requested_dbname_fails_target_not_found(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(
+        rows=[(1,)],
+        connection_errors={'analytics': psycopg_errors.InvalidCatalogName('database "analytics" does not exist')},
+    )
+    check = make_check(
+        host='localhost',
+        port=5432,
+        dbname='datadog_test',
+        pool=pool,
+        check_database_identifier='Postgres/Primary-A',
+    )
+    request = valid_request()
+    request['target'] = {'database_instance': 'Postgres/Primary-A', 'dbname': 'analytics'}
+
+    events = collect_events(request, check)
+
+    assert_failed_event(events, 'target_not_found', 'does not exist')
+    assert pool.requested_dbnames == ['analytics']
+    assert pool.cursors == []
+
+
+def test_dynamic_gate_dbstrict_rejects_requested_database_without_pool_access(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool, dbstrict=True)
+
+    events = collect_events(valid_request(dbname='analytics'), check)
+
+    assert_failed_event(events, 'target_not_found', 'dbstrict')
+    assert pool.requested_dbnames == []
+
+
+def test_dynamic_gate_ignore_databases_rejects_requested_database_without_pool_access(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool, ignore_databases=('template%',))
+
+    events = collect_events(valid_request(dbname='template0'), check)
+
+    assert_failed_event(events, 'target_not_found', 'ignore_databases')
+    assert pool.requested_dbnames == []
+
+
+@pytest.mark.parametrize(
+    'pattern,dbname,expected',
+    [
+        ('template0', 'template0', True),
+        ('template%', 'template0', True),
+        ('Template0', 'TEMPLATE0', True),
+        ('template_', 'template0', True),
+        ('template_', 'template01', False),
+        ('rdsadmin', 'rdsadmin_extra', False),
+    ],
+)
+def test_ignore_database_pattern_matches_use_ilike_semantics(pattern, dbname, expected):
+    assert remote_query._matches_ignore_database(pattern, dbname) is expected
 
 
 # ---------------------------------------------------------------------------

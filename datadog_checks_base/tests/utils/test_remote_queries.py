@@ -311,13 +311,23 @@ def test_finalize_identity_must_match():
         {},
         {'host': 'db', 'dbname': 'db'},
         {'database_instance': ' db '},
+        {'database_instance': 'db', 'host': 'db'},
         {'database_instance': 'db', 'port': 5432},
+        {'database_instance': 'db', 'dbname': None},
+        {'database_instance': 'db', 'dbname': ''},
+        {'database_instance': 'db', 'dbname': ' '},
         {'host': 'db', 'port': True, 'dbname': 'db'},
     ],
 )
 def test_target_requires_one_complete_selector(target):
     with pytest.raises(ValueError):
         rq.normalize_target(target)
+
+
+def test_database_instance_target_accepts_requested_dbname():
+    target = rq.normalize_target({'database_instance': 'Primary/DB', 'dbname': 'other'})
+    assert (target.database_instance, target.dbname) == ('Primary/DB', 'other')
+    assert target.host is None and target.port is None
 
 
 @pytest.mark.parametrize(

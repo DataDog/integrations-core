@@ -116,9 +116,11 @@ class RemoteQueryTarget(BaseModel):
         if null_fields:
             raise ValueError('{} must not be null'.format(', '.join(null_fields)))
 
-        host_fields = self.model_fields_set & {'host', 'port', 'dbname'}
         if self.database_instance is not None:
-            if host_fields:
+            # database_instance selects a loaded check instance; an accompanying dbname
+            # requests a logical execution database on that instance's endpoint. Only the
+            # endpoint fields are a different selector mode.
+            if self.model_fields_set & {'host', 'port'}:
                 raise ValueError('target must use exactly one selector mode: database_instance or host/port/dbname')
             return self
 

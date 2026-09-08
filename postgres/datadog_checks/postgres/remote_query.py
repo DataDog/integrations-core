@@ -18,6 +18,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import re
 import time
 import uuid
 from collections.abc import Iterable, Iterator, Mapping, Sequence
@@ -544,7 +545,23 @@ def _resolve_statement_timeout_ms(check: 'PostgreSql', limits: rq.RemoteQueryUpl
 def _resolve_matches(target: rq.RemoteQueryTarget, checks: Iterable['PostgreSql']) -> list['PostgreSql']:
     if target.database_instance is not None:
         return [check for check in checks if getattr(check, 'database_identifier', None) == target.database_instance]
-    return [check for check in checks if _target_from_check(check) == target]
+    return [check for check in checks if _endpoint_matches(check, target)]
+
+
+def _endpoint_matches(check: 'PostgreSql', target: rq.RemoteQueryTarget) -> bool:
+    """Tuple-mode selection matches the normalized configured endpoint only.
+
+    The requested dbname is an execution parameter resolved after selection, never part of
+    selection identity, so a check whose config does not name a database still matches its
+    endpoint.
+    """
+    configured = _target_from_check(check)
+    return configured is not None and configured.host == target.host and configured.port == target.port
+
+
+# The selector model requires a complete host/port/dbname tuple; endpoint matching compares
+# only host and port, so the dbname of a rendered configured target is a constant placeholder.
+_ENDPOINT_PROBE_DBNAME = 'endpoint'
 
 
 def _target_from_check(check: 'PostgreSql') -> rq.RemoteQueryTarget | None:
@@ -553,7 +570,7 @@ def _target_from_check(check: 'PostgreSql') -> rq.RemoteQueryTarget | None:
         return None
 
     try:
-        return rq.RemoteQueryTarget(host=config.host, port=config.port, dbname=config.dbname)
+        return rq.RemoteQueryTarget(host=config.host, port=config.port, dbname=_ENDPOINT_PROBE_DBNAME)
     except (AttributeError, ValidationError):
         return None
 
@@ -561,6 +578,65 @@ def _target_from_check(check: 'PostgreSql') -> rq.RemoteQueryTarget | None:
 def _dbname_from_check(check: 'PostgreSql') -> str | None:
     config = getattr(check, '_config', None)
     return getattr(config, 'dbname', None)
+
+
+# ---------------------------------------------------------------------------
+# Dynamic database resolution (a requested dbname on the matched check)
+# ---------------------------------------------------------------------------
+
+
+def _matches_ignore_database(pattern: str, dbname: str) -> bool:
+    """SQL ILIKE semantics: ``%`` matches any sequence, ``_`` one character, case-insensitively.
+
+    ``ignore_databases`` entries narrow instance metrics through ``datname not ilike``, so the
+    dynamic database gate applies the same matching to a requested database name.
+    """
+    regex = ''.join('.*' if char == '%' else '.' if char == '_' else re.escape(char) for char in pattern)
+    return re.fullmatch(regex, dbname, re.IGNORECASE) is not None
+
+
+def _dynamic_database_requested(requested_dbname: str | None, configured_dbname: str | None) -> bool:
+    """The dynamic gate applies only when the request names a database other than the configured one.
+
+    A request naming the configured database — or naming none, which executes the configured
+    database — follows the exact existing path with no extra connection attempt.
+    """
+    return requested_dbname is not None and requested_dbname != configured_dbname
+
+
+def _gate_dynamic_database(check: 'PostgreSql', db_pool: Any, requested_dbname: str) -> None:
+    """Fail closed unless the requested database is in scope and exists on the matched endpoint.
+
+    The scope is the effective one that already narrows instance metrics: ``dbstrict`` pins the
+    instance to its configured database and ``ignore_databases`` holds ILIKE exclusion patterns.
+    The existence probe opens and releases one pooled connection — warming the same pool entry
+    the producer reuses — and never runs the customer's SQL.
+    """
+    config = getattr(check, '_config', None)
+    if getattr(config, 'dbstrict', False):
+        raise rq.RemoteQueryFailure(
+            'target_not_found',
+            'Requested database is not allowed: dbstrict narrows the matched instance to its configured database.',
+        )
+    ignore_patterns = getattr(config, 'ignore_databases', None) or ()
+    if any(_matches_ignore_database(pattern, requested_dbname) for pattern in ignore_patterns):
+        raise rq.RemoteQueryFailure(
+            'target_not_found',
+            'Requested database is excluded by the matched instance ignore_databases filter.',
+        )
+    try:
+        with db_pool.get_connection(requested_dbname):
+            pass
+    except psycopg_errors.InvalidCatalogName as e:
+        raise rq.RemoteQueryFailure(
+            'target_not_found', 'Requested database does not exist on the matched connection.'
+        ) from e
+    except Exception as e:
+        # Any other connection failure (unreachable endpoint, authentication, pool unavailable)
+        # is retryable and stays visible: never a silent no-match and never a success.
+        raise rq.RemoteQueryFailure(
+            'target_unavailable', 'Unable to connect to the requested database: {}'.format(e), retryable=True
+        ) from e
 
 
 # ---------------------------------------------------------------------------
@@ -661,7 +737,10 @@ def iter_agent_rpc_stream_events(
         return
 
     check = matches[0]
-    execution_dbname = _dbname_from_check(check)
+    configured_dbname = _dbname_from_check(check)
+    # The requested dbname is the execution database whenever the request names one; only a
+    # database_instance-only request falls back to the matched check's configured database.
+    execution_dbname = target.dbname if target.dbname is not None else configured_dbname
     if execution_dbname is None:
         yield rq.failed_event(
             'target_unavailable',
@@ -695,6 +774,13 @@ def iter_agent_rpc_stream_events(
             elapsed_ms=rq.elapsed_ms(started_at),
         )
         return
+
+    if _dynamic_database_requested(target.dbname, configured_dbname):
+        try:
+            _gate_dynamic_database(check, db_pool, target.dbname)
+        except rq.RemoteQueryFailure as e:
+            yield rq.failed_event(e.code, e.message, retryable=e.retryable, elapsed_ms=rq.elapsed_ms(started_at))
+            return
 
     client = http_client if http_client is not None else rq.RequestsUploadClient()
     stats = rq.RemoteQueryRunStats()
