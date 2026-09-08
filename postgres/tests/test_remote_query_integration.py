@@ -15,7 +15,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from datadog_checks.postgres import remote_query
+from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.postgres.remote_query import StaticPostgresCheckRegistry, iter_agent_rpc_stream_events
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -69,7 +69,7 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_KEY'
         return None
 
-    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
 
 
 def remote_query_request(pg_instance, query, include_schema=False, **limits):
@@ -204,7 +204,7 @@ def test_remote_query_select_one_and_zero_row_schema_page(integration_check, pg_
     assert parsed['data']['items'] == [{'value': 1}]
 
     # The zero-row query is not allowlisted; the E2E producer path is under test here.
-    monkeypatch.setattr(remote_query, '_is_query_allowlist_enabled', lambda: False)
+    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
     zero_row_request = remote_query_request(pg_instance, 'SELECT 1 AS value WHERE 1 = 0', include_schema=True)
     zero_events, zero_client = run_producer(zero_row_request, check)
 

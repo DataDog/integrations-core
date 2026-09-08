@@ -7,9 +7,8 @@
 Executes one validated read-only query through a dedicated ``clickhouse-connect`` client,
 streams the server-rendered rows with bounded memory, normalizes ClickHouse values into
 the pinned cross-language JSON contract, splits the rows into byte-bounded JSON page files,
-and uploads each complete page to its-agent-intake as one direct HTTP request. Each page is
-spooled into an anonymous temporary file while its exact bytes, rows, record offset, and
-SHA-256 are computed, so every retry resends a byte-identical page with stable metadata.
+and uploads each complete page to its-agent-intake as one direct HTTP request. The shared
+page writer retains one bounded page in memory through byte-identical retries.
 Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action
 output; the emit callback carries only ``metadata``/``final``/``error`` events, and the
 final event carries only the compact run receipt.
@@ -73,42 +72,27 @@ abandoned; closing (never draining) the socket lets the server cancel the query 
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import math
 import re
-import tempfile
 import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import clickhouse_connect.driver.exceptions as clickhouse_errors
 import urllib3.exceptions
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictInt,
-    StrictStr,
-    ValidationError,
-    field_validator,
-    model_validator,
-)
+from pydantic import ValidationError
 
-from datadog_checks.base.agent import datadog_agent
-from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils import remote_queries as rq
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
 
 LOGGER = logging.getLogger(__name__)
 
-REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.enable_query_allowlist'
-REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES = frozenset(('false', 'no', '0', 'n', 'off'))
 # ClickHouse hard cap on repeat() counts: the server rejects anything above 1,000,000 with
 # Code 131 (TOO_LARGE_STRING_SIZE), and no setting lifts it, verified on 22.7, 24.8, and
 # 26.3. Proof payloads larger than the cap concatenate bounded repeat() parts instead.
@@ -154,25 +138,6 @@ REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
     + tuple(_proof_payload_query(size_bytes) for size_bytes in REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES)
 )
 
-# Server-owned maximums. The backend selects/clamps every injected limit; the integration only
-# fails closed when an injected instruction exceeds a known platform ceiling, which would
-# indicate a backend/integration contract version mismatch.
-REMOTE_QUERY_UPLOAD_MAX_FILE_BYTES = 128 * 1024 * 1024
-REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 10 * 1024 * 1024 * 1024
-REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
-
-# Page artifact contract (version 1). One complete UTF-8 JSON document per page:
-#
-#   {"version":1,"run_id":"...","task_id":"...","batch_index":0,"record_offset":0,
-#    "schema":[{"column_name":"...","vendor_data_type":"..."}],
-#    "data":{"items":[{...row...},...]}}
-#
-# ``schema`` repeats identically in every page when includeSchema is enabled and is omitted
-# entirely (never ``null``/``[]``) when disabled. There is no ``total_records`` field.
-REMOTE_QUERY_ARTIFACT_VERSION = 1
-PAGE_SUFFIX = b']}}'
-
-RemoteQueryEmit = Callable[[str, str, bytes], None]
 
 # One-stream row format: the first line is the column names, the second the ClickHouse type
 # strings, then one JSON array of server-rendered values per line. Line breaks only occur at
@@ -181,125 +146,6 @@ RemoteQueryEmit = Callable[[str, str, bytes], None]
 REMOTE_QUERY_STREAM_FORMAT = 'JSONCompactEachRowWithNamesAndTypes'
 # Stream reads are bounded to this chunk size; nothing larger is buffered per read.
 REMOTE_QUERY_STREAM_CHUNK_BYTES = 256 * 1024
-
-
-class RemoteQueryTarget(BaseModel):
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    host: StrictStr | None = Field(default=None, min_length=1)
-    port: StrictInt | None = Field(default=None, ge=1, le=65535)
-    dbname: StrictStr | None = Field(default=None, min_length=1)
-    database_instance: StrictStr | None = Field(default=None, min_length=1)
-
-    @field_validator('host')
-    @classmethod
-    def normalize_host(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        host = value.strip().lower()
-        if host.endswith('.'):
-            host = host[:-1]
-        if not host:
-            raise ValueError('host must be a non-empty string')
-        return host
-
-    @field_validator('dbname')
-    @classmethod
-    def validate_dbname(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        if not value:
-            raise ValueError('dbname must be a non-empty string')
-        if value != value.strip():
-            raise ValueError('dbname must not contain surrounding whitespace')
-        return value
-
-    @field_validator('database_instance')
-    @classmethod
-    def validate_database_instance(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        if not value.strip():
-            raise ValueError('database_instance must be a non-empty string')
-        if value != value.strip():
-            raise ValueError('database_instance must not contain surrounding whitespace')
-        return value
-
-    @model_validator(mode='after')
-    def validate_selector_mode(self) -> 'RemoteQueryTarget':
-        null_fields = [
-            field_name
-            for field_name in ('host', 'port', 'dbname', 'database_instance')
-            if field_name in self.model_fields_set and getattr(self, field_name) is None
-        ]
-        if null_fields:
-            raise ValueError('{} must not be null'.format(', '.join(null_fields)))
-
-        host_fields = self.model_fields_set & {'host', 'port', 'dbname'}
-        if self.database_instance is not None:
-            if host_fields:
-                raise ValueError('target must use exactly one selector mode: database_instance or host/port/dbname')
-            return self
-
-        if self.host is None or self.port is None or self.dbname is None:
-            raise ValueError('host/port/dbname target requires host, port, and dbname')
-        return self
-
-
-class RemoteQueryUploadLimits(BaseModel):
-    """Backend-injected effective limits. Server-owned; never invented by the integration."""
-
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    max_file_bytes: StrictInt = Field(alias='maxFileBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_FILE_BYTES)
-    max_result_bytes: StrictInt = Field(alias='maxResultBytes', ge=1, le=REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES)
-    max_row_bytes: StrictInt = Field(alias='maxRowBytes', ge=1)
-    max_columns: StrictInt = Field(alias='maxColumns', ge=1)
-    max_schema_bytes: StrictInt = Field(alias='maxSchemaBytes', ge=1)
-    max_pages: StrictInt = Field(alias='maxPages', ge=1)
-    timeout_ms: StrictInt = Field(default=REMOTE_QUERY_DEFAULT_TIMEOUT_MS, alias='timeoutMs', ge=1)
-
-    @model_validator(mode='after')
-    def validate_limit_relations(self) -> 'RemoteQueryUploadLimits':
-        if self.max_row_bytes > self.max_file_bytes:
-            raise ValueError('maxRowBytes must not exceed maxFileBytes: a row must fit inside one page')
-        if self.max_schema_bytes > self.max_file_bytes:
-            raise ValueError('maxSchemaBytes must not exceed maxFileBytes: the schema must fit inside one page')
-        if self.max_file_bytes > self.max_result_bytes:
-            raise ValueError('maxFileBytes must not exceed maxResultBytes')
-        return self
-
-
-class RemoteQueryResultDelivery(BaseModel):
-    """Backend-injected upload instructions and artifact contract metadata.
-
-    The Agent forwards the run-scoped intake session instructions (``uploadId``,
-    ``baseUrl``, ``token``), the effective server-owned limits, the artifact contract
-    version, and the authoritative run/task identity used in every page envelope. Every field
-    is server-owned: the integration validates what it receives and never invents values.
-    """
-
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    run_id: StrictStr = Field(alias='runId', min_length=1)
-    task_id: StrictStr = Field(alias='taskId', min_length=1)
-    artifact_version: Literal[REMOTE_QUERY_ARTIFACT_VERSION] = Field(alias='artifactVersion')
-    upload_id: StrictStr = Field(alias='uploadId', min_length=1)
-    base_url: StrictStr = Field(alias='baseUrl', min_length=1)
-    token: StrictStr = Field(alias='token', min_length=1)
-    limits: RemoteQueryUploadLimits
-
-
-class RemoteQueryRequest(BaseModel):
-    """A single remote query execution producing bounded JSON result pages."""
-
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    operation: Literal['produce_json_pages'] = Field(alias='operation')
-    target: RemoteQueryTarget
-    query: StrictStr = Field(min_length=1)
-    include_schema: StrictBool = Field(default=False, alias='includeSchema')
-    result_delivery: RemoteQueryResultDelivery = Field(alias='resultDelivery')
 
 
 @dataclass(frozen=True)
@@ -311,52 +157,12 @@ class ResultColumn:
     family: str
 
 
-@dataclass
-class RemoteQueryRunStats:
-    """Mutable run accounting shared with the page writer so failures can report partials."""
-
-    rows_emitted: int = 0
-    pages_emitted: int = 0
-    bytes_emitted: int = 0
-
-
-@dataclass(frozen=True)
-class PageUploadMetadata:
-    """The complete identity of one produced page, declared in the page PUT headers.
-
-    Every field is computed while the page is spooled, so the page request and any whole-page
-    retry carry stable metadata, and intake's authoritative page receipt is compared against
-    these exact values before the run may advance to the next page.
-    """
-
-    batch_index: int
-    record_offset: int
-    page_bytes: int
-    rows: int
-    sha256_hex: str
-
-
 @dataclass(frozen=True)
 class StaticClickhouseCheckRegistry:
     checks: Sequence['ClickhouseCheck']
 
     def iter_clickhouse_checks(self) -> Iterable['ClickhouseCheck']:
         return iter(self.checks)
-
-
-@dataclass(frozen=True)
-class RemoteQueryEvent:
-    event_type: str
-    metadata: Mapping[str, Any]
-    payload: bytes = b''
-
-
-class RemoteQueryFailure(Exception):
-    def __init__(self, code: str, message: str, retryable: bool = False):
-        self.code = code
-        self.message = message
-        self.retryable = retryable
-        super().__init__(message)
 
 
 class ClickhouseCheckRegistry(Protocol):
@@ -591,7 +397,7 @@ def validate_read_only_statement(query: str) -> None:
     """
     scanner = StatementScanner(query)
     if not scanner.scan_statements() or not scanner.terminated:
-        raise RemoteQueryFailure(
+        raise rq.RemoteQueryFailure(
             'invalid_request', 'Invalid remote query request: query must be a single read-only statement.'
         )
     scanner.rewind()
@@ -601,7 +407,9 @@ def validate_read_only_statement(query: str) -> None:
         # CTE definitions must resolve to an operative SELECT.
         keyword = 'select' if _validate_with_select(scanner) else ''
     if keyword not in REMOTE_QUERY_READ_ONLY_STATEMENTS:
-        raise RemoteQueryFailure('invalid_request', 'Invalid remote query request: query is not a read-only statement.')
+        raise rq.RemoteQueryFailure(
+            'invalid_request', 'Invalid remote query request: query is not a read-only statement.'
+        )
 
 
 def _validate_with_select(scanner: StatementScanner) -> bool:
@@ -643,8 +451,6 @@ def _validate_with_select(scanner: StatementScanner) -> bool:
 
 # A JSON number per RFC 8259: no leading zeros, optional fraction and exponent. Server
 # numeric text must already satisfy this; anything else fails closed.
-_JSON_NUMBER_PATTERN = re.compile(r'\A-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?\Z')
-_NON_FINITE_NUMERIC_TEXT = frozenset(('NaN', 'Infinity', '-Infinity'))
 
 _INTEGER_TYPE_NAMES = frozenset(
     (
@@ -712,7 +518,7 @@ def normalize_typed_value(family: str, value: Any) -> Any:
             return int(value)
         return value
     if family in ('decimal', 'float') and isinstance(value, str):
-        if _JSON_NUMBER_PATTERN.match(value):
+        if rq.JSON_NUMBER_PATTERN.match(value):
             return Decimal(value)
         return value
     if family == 'bool':
@@ -726,42 +532,6 @@ def normalize_typed_value(family: str, value: Any) -> Any:
     return value
 
 
-def _encode_raw_number_text(out: bytearray, text: str) -> None:
-    if not _JSON_NUMBER_PATTERN.match(text):
-        raise RemoteQueryFailure(
-            'unsupported_value', 'ClickHouse sent numeric text {!r} that is not a JSON number.'.format(text)
-        )
-    out += text.encode('utf-8')
-
-
-def _encode_non_finite_text(out: bytearray, text: str) -> None:
-    out += json.dumps(text).encode('utf-8')
-
-
-def _encode_decimal(out: bytearray, value: Decimal) -> None:
-    if value.is_finite():
-        _encode_raw_number_text(out, str(value))
-        return
-    if value.is_nan():
-        _encode_non_finite_text(out, 'NaN')
-    elif value > 0:
-        _encode_non_finite_text(out, 'Infinity')
-    else:
-        _encode_non_finite_text(out, '-Infinity')
-
-
-def _encode_float(out: bytearray, value: float) -> None:
-    if math.isfinite(value):
-        # Python repr is the shortest string that round-trips the float.
-        _encode_raw_number_text(out, repr(value))
-    elif math.isnan(value):
-        _encode_non_finite_text(out, 'NaN')
-    elif value > 0:
-        _encode_non_finite_text(out, 'Infinity')
-    else:
-        _encode_non_finite_text(out, '-Infinity')
-
-
 def _encode_json_value(out: bytearray, value: Any) -> None:
     """Encode one normalized ClickHouse value into ``out`` as JSON bytes.
 
@@ -773,11 +543,11 @@ def _encode_json_value(out: bytearray, value: Any) -> None:
     elif isinstance(value, bool):
         out += b'true' if value else b'false'
     elif isinstance(value, int):
-        _encode_raw_number_text(out, str(value))
+        rq.encode_raw_number_text(out, str(value))
     elif isinstance(value, Decimal):
-        _encode_decimal(out, value)
+        rq.encode_decimal(out, value)
     elif isinstance(value, float):
-        _encode_float(out, value)
+        rq.encode_float(out, value)
     elif isinstance(value, str):
         out += json.dumps(value).encode('utf-8')
     elif isinstance(value, (list, tuple)):
@@ -792,7 +562,7 @@ def _encode_json_value(out: bytearray, value: Any) -> None:
         first = True
         for key, item in value.items():
             if not isinstance(key, str):
-                raise RemoteQueryFailure('unsupported_value', 'JSON object keys must be strings.')
+                raise rq.RemoteQueryFailure('unsupported_value', 'JSON object keys must be strings.')
             if not first:
                 out += b','
             first = False
@@ -801,7 +571,7 @@ def _encode_json_value(out: bytearray, value: Any) -> None:
             _encode_json_value(out, item)
         out += b'}'
     else:
-        raise RemoteQueryFailure(
+        raise rq.RemoteQueryFailure(
             'unsupported_value',
             'ClickHouse value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
         )
@@ -810,7 +580,7 @@ def _encode_json_value(out: bytearray, value: Any) -> None:
 def encode_row(values: Sequence[Any], columns: Sequence[ResultColumn], out: bytearray) -> None:
     """Encode one result row as a JSON object keyed by result-column name."""
     if len(values) != len(columns):
-        raise RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
+        raise rq.RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
     out += b'{'
     for index, (column, value) in enumerate(zip(columns, values)):
         if index:
@@ -832,13 +602,13 @@ def _parse_json_line(line: bytes) -> Any:
         return json.loads(line, parse_float=Decimal)
     except (UnicodeDecodeError, ValueError):
         # Result data must be valid UTF-8 JSON; never echo the offending line.
-        raise RemoteQueryFailure('query_failed', 'The result stream carried a row that is not valid JSON.') from None
+        raise rq.RemoteQueryFailure('query_failed', 'The result stream carried a row that is not valid JSON.') from None
 
 
 def _parse_header_row(line: bytes, expected: str) -> list[str]:
     parsed = _parse_json_line(line)
     if not isinstance(parsed, list) or not parsed or not all(isinstance(entry, str) and entry for entry in parsed):
-        raise RemoteQueryFailure(
+        raise rq.RemoteQueryFailure(
             'query_failed', 'The result stream did not carry usable {} in its header row.'.format(expected)
         )
     return parsed
@@ -846,7 +616,7 @@ def _parse_header_row(line: bytes, expected: str) -> list[str]:
 
 def build_columns(names: Sequence[str], types: Sequence[str]) -> list[ResultColumn]:
     if len(names) != len(types):
-        raise RemoteQueryFailure('query_failed', 'The result stream header rows do not agree on column count.')
+        raise rq.RemoteQueryFailure('query_failed', 'The result stream header rows do not agree on column count.')
     return [
         ResultColumn(name=name, vendor_data_type=vendor_data_type, family=type_family(vendor_data_type))
         for name, vendor_data_type in zip(names, types)
@@ -855,21 +625,21 @@ def build_columns(names: Sequence[str], types: Sequence[str]) -> list[ResultColu
 
 def validate_columns(columns: Sequence[ResultColumn], max_columns: int) -> None:
     if len(columns) > max_columns:
-        raise RemoteQueryFailure(
+        raise rq.RemoteQueryFailure(
             'max_columns_exceeded',
             'Query described {} result columns; the limit is {}.'.format(len(columns), max_columns),
         )
     seen = set()
     for column in columns:
         if column.name in seen:
-            raise RemoteQueryFailure(
+            raise rq.RemoteQueryFailure(
                 'duplicate_columns',
                 'Duplicate result-column name {!r} cannot key a JSON row object.'.format(column.name),
             )
         seen.add(column.name)
 
 
-def build_schema_json(columns: Sequence[ResultColumn], delivery: RemoteQueryResultDelivery) -> bytes:
+def build_schema_json(columns: Sequence[ResultColumn], delivery: rq.RemoteQueryResultDelivery) -> bytes:
     """Build the ordered schema entries, rejecting oversize schemas.
 
     The encoded schema repeats in every page, so it must fit both ``maxSchemaBytes`` and the
@@ -879,12 +649,12 @@ def build_schema_json(columns: Sequence[ResultColumn], delivery: RemoteQueryResu
     schema_json = json.dumps(entries, separators=(',', ':')).encode('utf-8')
     limits = delivery.limits
     if len(schema_json) > limits.max_schema_bytes:
-        raise RemoteQueryFailure(
+        raise rq.RemoteQueryFailure(
             'max_schema_bytes_exceeded',
             'Encoded schema is {} bytes; the limit is {}.'.format(len(schema_json), limits.max_schema_bytes),
         )
     prefix_len = len(
-        page_prefix(
+        rq.page_prefix(
             run_id=delivery.run_id,
             task_id=delivery.task_id,
             batch_index=0,
@@ -892,27 +662,12 @@ def build_schema_json(columns: Sequence[ResultColumn], delivery: RemoteQueryResu
             schema_json=schema_json,
         )
     )
-    if prefix_len + len(PAGE_SUFFIX) > limits.max_file_bytes:
-        raise RemoteQueryFailure(
+    if prefix_len + len(rq.PAGE_SUFFIX) > limits.max_file_bytes:
+        raise rq.RemoteQueryFailure(
             'max_file_bytes_exceeded',
             'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
         )
     return schema_json
-
-
-def page_prefix(*, run_id: str, task_id: str, batch_index: int, record_offset: int, schema_json: bytes | None) -> bytes:
-    """The envelope bytes through the opening of ``data.items``, with no trailing space."""
-    head = (
-        '{"version":1,"run_id":%s,"task_id":%s,"batch_index":%d,"record_offset":%d,'
-        % (json.dumps(run_id), json.dumps(task_id), batch_index, record_offset)
-    ).encode('utf-8')
-    parts = [head]
-    if schema_json is not None:
-        parts.append(b'"schema":')
-        parts.append(schema_json)
-        parts.append(b',')
-    parts.append(b'"data":{"items":[')
-    return b''.join(parts)
 
 
 # Slack for header-row buffering: the header lines carry names and type strings whose
@@ -951,7 +706,7 @@ class LineBoundTracker:
     within the platform page ceiling plus the fixed header slack.
     """
 
-    def __init__(self, limits: RemoteQueryUploadLimits):
+    def __init__(self, limits: rq.RemoteQueryUploadLimits):
         self._header_bound = max(limits.max_schema_bytes, limits.max_row_bytes) + REMOTE_QUERY_HEADER_LINE_SLACK
         self._row_bound = self._header_bound
         self._max_row_bytes = limits.max_row_bytes
@@ -963,206 +718,15 @@ class LineBoundTracker:
         """Tighten the data-row bound once the column names are known."""
         self._row_bound = row_line_ceiling(columns, self._max_row_bytes)
 
-    def too_large_failure(self, index: int, buffered: int) -> RemoteQueryFailure:
+    def too_large_failure(self, index: int, buffered: int) -> rq.RemoteQueryFailure:
         if index < 2:
-            return RemoteQueryFailure('query_failed', 'The result stream header row exceeded the allowed size.')
-        return RemoteQueryFailure(
+            return rq.RemoteQueryFailure('query_failed', 'The result stream header row exceeded the allowed size.')
+        return rq.RemoteQueryFailure(
             'row_too_large',
             'A single row exceeds maxRowBytes ({} buffered bytes; the limit is {} bytes).'.format(
                 buffered, self._max_row_bytes
             ),
         )
-
-
-# ---------------------------------------------------------------------------
-# Page writer: byte-bounded pages spooled once and uploaded as one request each
-# ---------------------------------------------------------------------------
-
-
-def _open_page_spool() -> BinaryIO:
-    """Open the one-page retryable spool: an anonymous, owner-only temporary file.
-
-    ``tempfile.TemporaryFile`` is created with unpredictable 0600 permissions and is
-    unlinked immediately (O_TMPFILE where available), so the spooled page bytes never
-    have a predictable path, are never visible to other users, vanish on close or process
-    death, and are never collected by flare or support bundles. Its path and contents are
-    never logged.
-    """
-    return tempfile.TemporaryFile()
-
-
-class PageWriter:
-    """Split encoded rows into byte-bounded JSON pages and upload each as one request.
-
-    At most one page is active at a time: it is produced into a single anonymous spool file
-    (bounded by ``maxFileBytes``, never the whole result in memory) while its exact bytes,
-    row count, record offset, and SHA-256 are computed. The completed page is uploaded with
-    one direct page PUT; retries resends the whole spool byte-identically. The spool is
-    closed as soon as intake's authoritative page receipt matches, and on every failure,
-    cancellation, or abort path.
-
-    Rows are counted explicitly as they are appended, never inferred from the byte stream.
-    Before writing a row the writer accounts for the comma, the encoded row, and the
-    required closing suffix; a row that cannot fit a fresh page's minimal envelope fails
-    with ``row_too_large``. Page-envelope bytes and page splitting stay byte-exact with the
-    v1 artifact contract.
-    """
-
-    def __init__(
-        self,
-        delivery: RemoteQueryResultDelivery,
-        creds: UploadCredentials,
-        client: UploadClient,
-        schema_json: bytes | None,
-        guard: Callable[[], None],
-        stats: RemoteQueryRunStats,
-    ):
-        self._delivery = delivery
-        self._creds = creds
-        self._client = client
-        self._schema_json = schema_json
-        self._guard = guard
-        self._stats = stats
-        # Active page state. ``_page_bytes`` counts prefix + rows appended so far; the
-        # closing suffix is appended at close time.
-        self._page_open = False
-        self._spool: BinaryIO | None = None
-        self._page_bytes = 0
-        self._page_rows = 0
-        self._page_record_offset = 0
-        self._page_sha: 'hashlib._Hash' | None = None
-
-    def add_row(self, row_bytes: bytes) -> None:
-        self._ensure_page()
-        suffix_len = len(PAGE_SUFFIX)
-        comma_len = 1 if self._page_rows else 0
-        page_needed = self._page_bytes + comma_len + len(row_bytes) + suffix_len
-        if (
-            page_needed > self._delivery.limits.max_file_bytes
-            or self._stats.bytes_emitted + page_needed > self._delivery.limits.max_result_bytes
-        ):
-            # The row does not fit the current page (or would push the run over the total
-            # byte cap): close the current NON-EMPTY page and retry the row on a fresh
-            # page. An empty page holds nothing but the envelope, so a row that still does
-            # not fit cannot be split further and fails the run.
-            if self._page_rows:
-                self._close_page()
-                self._begin_page()
-                page_needed = self._page_bytes + len(row_bytes) + suffix_len
-            if page_needed > self._delivery.limits.max_file_bytes:
-                raise RemoteQueryFailure(
-                    'row_too_large',
-                    'A single row plus the minimal page envelope exceeds maxFileBytes ({} > {} bytes).'.format(
-                        page_needed, self._delivery.limits.max_file_bytes
-                    ),
-                )
-            if self._stats.bytes_emitted + page_needed > self._delivery.limits.max_result_bytes:
-                raise RemoteQueryFailure(
-                    'max_result_bytes_exceeded',
-                    'A single row plus the minimal page envelope exceeds maxResultBytes ({} > {} bytes).'.format(
-                        self._stats.bytes_emitted + page_needed, self._delivery.limits.max_result_bytes
-                    ),
-                )
-
-        if self._page_rows:
-            self._append(b',')
-        self._append(row_bytes)
-        self._page_rows += 1
-        self._stats.rows_emitted += 1
-
-    def finish(self) -> dict[str, Any]:
-        """Close the active page, apply zero-row behavior, and finalize the run.
-
-        Returns the compact run receipt: only ``uploadId``, ``pageCount``, ``totalRows``,
-        ``totalBytes``. No schema and no bulk bytes ever appear in the receipt.
-        """
-        if self._page_open:
-            self._close_page()
-        elif self._schema_json is not None and self._stats.pages_emitted == 0:
-            # Zero-row query with schema requested: one schema-bearing empty page so the
-            # consumer can still discover the query's columns.
-            self._begin_page()
-            self._close_page()
-        response = self._client.finalize_run(self._creds)
-        verify_run_finalize_response(response, self._creds.upload_id)
-        return {
-            'uploadId': self._creds.upload_id,
-            'pageCount': self._stats.pages_emitted,
-            'totalRows': self._stats.rows_emitted,
-            'totalBytes': self._stats.bytes_emitted,
-        }
-
-    def discard(self) -> None:
-        """Close any page spool left open by a failed, cancelled, or aborted run.
-
-        A no-op once every page receipt has matched; the success path closes each spool at
-        its own page receipt.
-        """
-        self._page_open = False
-        self._close_spool()
-
-    def _ensure_page(self) -> None:
-        if not self._page_open:
-            self._begin_page()
-
-    def _begin_page(self) -> None:
-        if self._stats.pages_emitted >= self._delivery.limits.max_pages:
-            raise RemoteQueryFailure(
-                'max_pages_exceeded',
-                'Page count reached the limit of {} pages.'.format(self._delivery.limits.max_pages),
-            )
-        prefix = page_prefix(
-            run_id=self._delivery.run_id,
-            task_id=self._delivery.task_id,
-            batch_index=self._stats.pages_emitted,
-            record_offset=self._stats.rows_emitted,
-            schema_json=self._schema_json,
-        )
-        self._page_open = True
-        self._spool = _open_page_spool()
-        self._page_record_offset = self._stats.rows_emitted
-        self._page_sha = hashlib.sha256()
-        self._page_bytes = 0
-        self._page_rows = 0
-        self._append(prefix)
-
-    def _close_page(self) -> None:
-        self._guard()
-        self._append(PAGE_SUFFIX)
-        metadata = PageUploadMetadata(
-            batch_index=self._stats.pages_emitted,
-            record_offset=self._page_record_offset,
-            page_bytes=self._page_bytes,
-            rows=self._page_rows,
-            sha256_hex=self._page_sha.hexdigest(),
-        )
-        try:
-            # Flush so the on-disk file is exactly the declared page, rewind so the request
-            # streams the whole page from the start, then upload and verify the receipt.
-            self._spool.flush()
-            self._spool.seek(0)
-            receipt = self._client.put_page(self._creds, metadata, self._spool)
-            verify_page_response(receipt, metadata)
-        finally:
-            # The spool is deleted on every path: receipt match, upload failure,
-            # cancellation, or a thrown guard. Nothing outlives the page it served.
-            self._close_spool()
-        self._stats.pages_emitted += 1
-        self._stats.bytes_emitted += self._page_bytes
-        self._page_open = False
-
-    def _append(self, data: bytes) -> None:
-        self._spool.write(data)
-        self._page_sha.update(data)
-        self._page_bytes += len(data)
-
-    def _close_spool(self) -> None:
-        if self._spool is not None:
-            spool, self._spool = self._spool, None
-            try:
-                spool.close()
-            except Exception:
-                LOGGER.debug('Unable to close the remote query page spool', exc_info=True)
 
 
 # ---------------------------------------------------------------------------
@@ -1237,12 +801,12 @@ def iter_stream_lines(stream: StreamSource, guard: Callable[[], None], bounds: L
 
 
 def _run_streamed_query(
-    request: RemoteQueryRequest,
+    request: rq.RemoteQueryRequest,
     clickhouse_client: ClickhouseClient,
-    creds: UploadCredentials,
-    client: UploadClient,
+    creds: rq.UploadCredentials,
+    client: rq.UploadClient,
     guard: Callable[[], None],
-    stats: RemoteQueryRunStats,
+    stats: rq.RemoteQueryRunStats,
 ) -> dict[str, Any]:
     """Stream the query result into bounded JSON pages and return the run receipt."""
     delivery = request.result_delivery
@@ -1257,7 +821,7 @@ def _run_streamed_query(
             names_line = next(lines)
             types_line = next(lines)
         except StopIteration:
-            raise RemoteQueryFailure(
+            raise rq.RemoteQueryFailure(
                 'query_failed', 'The result stream did not carry the column name and type header rows.'
             ) from None
         columns = build_columns(
@@ -1270,18 +834,18 @@ def _run_streamed_query(
         if request.include_schema:
             schema_json = build_schema_json(columns, delivery)
 
-        writer = PageWriter(delivery, creds, client, schema_json, guard, stats)
+        writer = rq.PageWriter(delivery, creds, client, schema_json, guard, stats)
         try:
             guard()
             for line in lines:
                 guard()
                 values = _parse_json_line(line)
                 if not isinstance(values, list):
-                    raise RemoteQueryFailure('query_failed', 'A result row was not a JSON array.')
+                    raise rq.RemoteQueryFailure('query_failed', 'A result row was not a JSON array.')
                 row_buffer = bytearray()
                 encode_row(values, columns, row_buffer)
                 if len(row_buffer) > limits.max_row_bytes:
-                    raise RemoteQueryFailure(
+                    raise rq.RemoteQueryFailure(
                         'row_too_large',
                         'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
                             len(row_buffer), limits.max_row_bytes
@@ -1290,9 +854,7 @@ def _run_streamed_query(
                 writer.add_row(bytes(row_buffer))
             return writer.finish()
         finally:
-            # Any spool still open (row failure, cancellation, timeout, upload failure) is
-            # closed here; the success path already closed each spool at its matching
-            # page receipt.
+            # Release the page even if the response stream or row conversion fails.
             writer.discard()
     finally:
         # Always close (never drain) the response: closing the socket is what lets the server
@@ -1304,13 +866,14 @@ def _run_streamed_query(
 
 
 def produce_remote_query(
-    request: RemoteQueryRequest,
+    request: rq.RemoteQueryRequest,
     check: 'ClickhouseCheck',
-    creds: UploadCredentials,
-    client: UploadClient,
+    creds: rq.UploadCredentials,
+    client: rq.UploadClient,
     started_at: float,
-    stats: RemoteQueryRunStats,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', RemoteQueryUploadLimits], ClickhouseClient] | None = None,
+    stats: rq.RemoteQueryRunStats,
+    clickhouse_client_factory: Callable[['ClickhouseCheck', rq.RemoteQueryUploadLimits], ClickhouseClient]
+    | None = None,
 ) -> dict[str, Any]:
     """Execute the validated query once and return the compact run receipt.
 
@@ -1323,32 +886,32 @@ def produce_remote_query(
     deadline = started_at + limits.timeout_ms / 1000
 
     def guard() -> None:
-        _raise_if_timed_out(deadline)
-        _raise_if_cancelled(check)
+        rq.raise_if_timed_out(deadline)
+        rq.raise_if_cancelled(check)
 
     clickhouse_client = None
     try:
         factory = clickhouse_client_factory if clickhouse_client_factory is not None else _default_client_factory
         try:
             clickhouse_client = factory(check, limits)
-        except RemoteQueryFailure:
+        except rq.RemoteQueryFailure:
             raise
         except Exception:
             # A connection-level failure: the matched instance could not be reached or refused
             # the request. Never echo the underlying text (it can quote identifiers or
             # credentials embedded in connection error strings).
             LOGGER.debug('Remote query client creation failed', exc_info=True)
-            raise RemoteQueryFailure(
+            raise rq.RemoteQueryFailure(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
         try:
             receipt = _run_streamed_query(request, clickhouse_client, creds, client, guard, stats)
-        except RemoteQueryFailure:
+        except rq.RemoteQueryFailure:
             raise
         except clickhouse_errors.OperationalError:
             # A transport-level failure: the request never got a usable server response.
             LOGGER.debug('Remote query transport failed', exc_info=True)
-            raise RemoteQueryFailure(
+            raise rq.RemoteQueryFailure(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
         except (
@@ -1360,7 +923,7 @@ def produce_remote_query(
             # The stream died mid-read: server-side cancellation (max_execution_time or
             # cancel-on-close) or a dropped connection. Both are retryable for the run.
             LOGGER.debug('Remote query stream failed mid-stream', exc_info=True)
-            raise RemoteQueryFailure(
+            raise rq.RemoteQueryFailure(
                 'timeout',
                 'The remote query stream was interrupted (server cancellation or connection failure).',
                 True,
@@ -1370,10 +933,10 @@ def produce_remote_query(
             # the client refused a request-level setting. The instance is reachable, the
             # run is not. Never echo the underlying message: it can quote query text.
             LOGGER.debug('Remote query rejected by the server', exc_info=True)
-            raise RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
+            raise rq.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
         except Exception:
             LOGGER.exception('Remote query execution failed')
-            raise RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
+            raise rq.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
         return receipt
     finally:
         # The streamed response is owned and closed by _run_streamed_query; the client owns
@@ -1385,7 +948,7 @@ def produce_remote_query(
                 LOGGER.debug('Unable to close the remote query client', exc_info=True)
 
 
-def _default_client_factory(check: 'ClickhouseCheck', limits: RemoteQueryUploadLimits) -> ClickhouseClient:
+def _default_client_factory(check: 'ClickhouseCheck', limits: rq.RemoteQueryUploadLimits) -> ClickhouseClient:
     """Create the per-run client from the matched check.
 
     The read timeout bounds a single silent read, so it is derived from the run deadline
@@ -1394,27 +957,10 @@ def _default_client_factory(check: 'ClickhouseCheck', limits: RemoteQueryUploadL
     """
     factory = getattr(check, 'create_remote_query_client', None)
     if factory is None:
-        raise RemoteQueryFailure(
+        raise rq.RemoteQueryFailure(
             'target_unavailable', 'The matched ClickHouse check cannot create a remote query client.'
         )
     return factory(send_receive_timeout=max(1, math.ceil(limits.timeout_ms / 1000)))
-
-
-def _raise_if_timed_out(deadline: float) -> None:
-    if time.monotonic() > deadline:
-        raise RemoteQueryFailure('timeout', 'Remote query exceeded timeoutMs.', retryable=True)
-
-
-def _raise_if_cancelled(check: 'ClickhouseCheck') -> None:
-    # The Agent runtime exposes ``is_cancelled`` as a plain bool attribute on the check
-    # object, while other runtimes (and test doubles) may expose a callable hook; honor
-    # both shapes. An absent attribute carries no cancellation signal.
-    is_cancelled = getattr(check, 'is_cancelled', None)
-    if is_cancelled is None:
-        return
-    cancelled = is_cancelled() if callable(is_cancelled) else is_cancelled
-    if cancelled:
-        raise RemoteQueryFailure('cancelled', 'Remote query run was cancelled.', retryable=True)
 
 
 # ---------------------------------------------------------------------------
@@ -1422,20 +968,13 @@ def _raise_if_cancelled(check: 'ClickhouseCheck') -> None:
 # ---------------------------------------------------------------------------
 
 
-def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
-    try:
-        return RemoteQueryTarget.model_validate(target)
-    except ValidationError as e:
-        raise ValueError(_validation_message(e)) from e
-
-
-def _resolve_matches(target: RemoteQueryTarget, checks: Iterable['ClickhouseCheck']) -> list['ClickhouseCheck']:
+def _resolve_matches(target: rq.RemoteQueryTarget, checks: Iterable['ClickhouseCheck']) -> list['ClickhouseCheck']:
     if target.database_instance is not None:
         return [check for check in checks if getattr(check, 'database_identifier', None) == target.database_instance]
     return [check for check in checks if _target_from_check(check) == target]
 
 
-def _target_from_check(check: 'ClickhouseCheck') -> RemoteQueryTarget | None:
+def _target_from_check(check: 'ClickhouseCheck') -> rq.RemoteQueryTarget | None:
     config = getattr(check, '_config', None)
     if config is None:
         return None
@@ -1443,7 +982,7 @@ def _target_from_check(check: 'ClickhouseCheck') -> RemoteQueryTarget | None:
     try:
         # The wire contract is {host, port, dbname}; the ClickHouse instance config spells
         # them {server, port, db}.
-        return RemoteQueryTarget(host=config.server, port=config.port, dbname=config.db)
+        return rq.RemoteQueryTarget(host=config.server, port=config.port, dbname=config.db)
     except (AttributeError, ValidationError):
         return None
 
@@ -1454,351 +993,7 @@ def _target_from_check(check: 'ClickhouseCheck') -> RemoteQueryTarget | None:
 
 
 def _is_query_allowed(query: str) -> bool:
-    return not _is_query_allowlist_enabled() or query in REMOTE_QUERY_QUERY_ALLOWLIST
-
-
-def _is_query_allowlist_enabled() -> bool:
-    try:
-        config_value = datadog_agent.get_config(REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY)
-    except Exception:
-        LOGGER.debug('Unable to read remote query allowlist configuration', exc_info=True)
-        return True
-
-    if config_value is None:
-        return True
-    if isinstance(config_value, str):
-        normalized_value = config_value.strip().lower()
-        return normalized_value not in REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES
-
-    return is_affirmative(config_value)
-
-
-# ---------------------------------------------------------------------------
-# Direct page upload to its-agent-intake
-#
-# The integration uploads each complete page directly to its-agent-intake with one HTTP
-# PUT request. The Agent forwards the intake base URL and scoped upload token in
-# resultDelivery, and the integration reads the org API key and POC application key from
-# Agent config via datadog_agent.get_config. Bulk page bytes never traverse the native
-# emit bridge, AgentSecure, PAR, or AP action output; only the compact final receipt is
-# emitted back.
-#
-# Test Drive routing is a narrow development knob, not a production request field: the
-# Agent config value names a Test Drive, and the uploader emits the header
-# ``test-drive-<validated-name>: 1``. The name never travels through resultDelivery or AP
-# action input. When the config is absent or invalid, no Test Drive header is emitted, so
-# the upload follows the permanent-service path.
-
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive'
-# The header name is built from the validated Test Drive name as ``test-drive-<name>`` with
-# the fixed value ``1``. The name is validated against REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN
-# so it cannot inject arbitrary headers (no colons, spaces, CR/LF, or other control characters).
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX = 'test-drive-'
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE = '1'
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH = 63
-REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN = re.compile(r'[a-z0-9](?:[a-z0-9-]*[a-z0-9])?')
-REMOTE_QUERY_UPLOAD_MAX_RETRIES = 4
-REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
-REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
-# Intake reports an in-progress duplicate page attempt with this public error code; the
-# same byte-identical page is retried with bounded backoff. Any other rejection (a checksum
-# or metadata conflict, auth, limit enforcement) is terminal.
-REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE = 'page_upload_in_progress'
-# Per-upload HTTP timeout as an explicit (connect, read) tuple: a short connect timeout and a
-# 5-minute read timeout so a slow page upload (e.g. a large page over a constrained link) is
-# not cut short, while a stuck connect fails fast. Retry count and backoff stay bounded above.
-REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
-REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 300
-REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT = (
-    REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS,
-    REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
-)
-
-
-@dataclass(frozen=True)
-class UploadCredentials:
-    base_url: str
-    upload_id: str
-    api_key: str
-    app_key: str
-    token: str
-    test_drive: str | None
-
-
-class UploadClient(Protocol):
-    def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, body: BinaryIO) -> Mapping[str, Any]: ...
-
-    def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]: ...
-
-    def abort(self, creds: UploadCredentials) -> None: ...
-
-
-class RequestsUploadClient:
-    """Direct-page HTTP upload client for its-agent-intake. Imports requests lazily."""
-
-    def __init__(self, timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT) -> None:
-        self._timeout = timeout
-
-    def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
-        headers = {
-            'dd-api-key': creds.api_key,
-            'dd-application-key': creds.app_key,
-            'Authorization': 'Bearer ' + creds.token,
-        }
-        if content_type is not None:
-            headers['Content-Type'] = content_type
-        if creds.test_drive:
-            test_drive_header = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX + creds.test_drive
-            headers[test_drive_header] = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE
-        return headers
-
-    def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, spool: BinaryIO) -> Mapping[str, Any]:
-        """Upload one complete page as a single PUT and return the parsed page receipt.
-
-        The spooled page is streamed as the request body with stable declared metadata;
-        every bounded retry rewinds the spool and resends byte-identical content for the
-        same page index.
-        """
-        headers = self._headers(creds, 'application/octet-stream')
-        headers['X-DD-Page-Bytes'] = str(page.page_bytes)
-        headers['X-DD-Page-Rows'] = str(page.rows)
-        headers['X-DD-Record-Offset'] = str(page.record_offset)
-        headers['X-DD-Page-SHA256'] = page.sha256_hex
-        # The spool is complete and rewound before the request, so the exact page size is
-        # declared as a stable Content-Length for one non-chunked request body.
-        headers['Content-Length'] = str(page.page_bytes)
-        url = '{}/uploads/{}/pages/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, page.batch_index)
-        _status, response_body = _upload_with_retry(
-            'PUT',
-            url,
-            headers,
-            spool,
-            self._timeout,
-            retryable_error_codes=frozenset((REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE,)),
-        )
-        return parse_page_receipt_body(response_body)
-
-    def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]:
-        headers = self._headers(creds, 'application/json')
-        url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        _status, body = _upload_with_retry('POST', url, headers, b'{}', self._timeout)
-        return parse_finalize_run_body(body)
-
-    def abort(self, creds: UploadCredentials) -> None:
-        headers = self._headers(creds, 'application/json')
-        url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        try:
-            _upload_with_retry('POST', url, headers, b'{}', self._timeout)
-        except RemoteQueryFailure:
-            LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
-
-
-def parse_page_receipt_body(body: bytes) -> Mapping[str, Any]:
-    """Parse the page-upload response, failing closed on a non-JSON or non-object body."""
-    try:
-        parsed = json.loads(body.decode('utf-8'))
-    except (UnicodeDecodeError, ValueError):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not valid JSON.')
-    if not isinstance(parsed, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
-    return parsed
-
-
-def parse_finalize_run_body(body: bytes) -> Mapping[str, Any]:
-    """Parse the run-finalize response, failing closed on a non-JSON or non-object body."""
-    if not body or not body.strip():
-        return {}
-    try:
-        parsed = json.loads(body.decode('utf-8'))
-    except (UnicodeDecodeError, ValueError):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not valid JSON.')
-    if not isinstance(parsed, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
-    return parsed
-
-
-def verify_page_response(response: Mapping[str, Any], page: PageUploadMetadata) -> None:
-    """Fail closed unless intake's authoritative page receipt matches the produced page.
-
-    Every receipt field the producer declared is compared exactly before the spool is
-    deleted and the next page may be produced. The object ``key`` is server-derived and
-    opaque to the producer, so it is validated structurally; its exact value is verified
-    downstream by its-agent.
-    """
-    if not isinstance(response, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
-    key = response.get('key')
-    if not isinstance(key, str) or not key:
-        raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake page upload response did not carry a usable object key.'
-        )
-    _verify_page_receipt_field(response, 'batch_index', page.batch_index)
-    _verify_page_receipt_field(response, 'record_offset', page.record_offset)
-    _verify_page_receipt_field(response, 'bytes', page.page_bytes)
-    _verify_page_receipt_field(response, 'rows', page.rows)
-    reported_sha256 = response.get('sha256')
-    if reported_sha256 != page.sha256_hex:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake page upload response reported sha256 {!r} instead of {!r}.'.format(
-                str(reported_sha256), page.sha256_hex
-            ),
-        )
-
-
-def _verify_page_receipt_field(response: Mapping[str, Any], field: str, expected: int) -> None:
-    reported = response.get(field)
-    if type(reported) is not int or reported != expected:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake page upload response reported {} {!r} instead of {}.'.format(field, reported, expected),
-        )
-
-
-def verify_run_finalize_response(response: Mapping[str, Any], upload_id: str) -> None:
-    """Fail closed when intake's authoritative response reports a different upload session."""
-    if not isinstance(response, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
-    reported_upload_id = response.get('upload_id')
-    if reported_upload_id is None or reported_upload_id == '':
-        # The compact receipt is the integration's own accounting; intake's authoritative
-        # result is verified by its-agent, so an absent identity echo is accepted.
-        return
-    if str(reported_upload_id) != upload_id:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake run finalize response reported upload id {!r} instead of {!r}.'.format(
-                str(reported_upload_id), upload_id
-            ),
-        )
-
-
-def _is_transient_upload_status(status: int) -> bool:
-    return status == 408 or status == 429 or status >= 500
-
-
-def _parse_error_code(body: bytes) -> str | None:
-    """Read intake's public error code from a rejection body, if it carries one."""
-    if not body or not body.strip():
-        return None
-    try:
-        parsed = json.loads(body.decode('utf-8'))
-    except (UnicodeDecodeError, ValueError):
-        return None
-    if not isinstance(parsed, Mapping):
-        return None
-    error = parsed.get('error')
-    if not isinstance(error, Mapping):
-        return None
-    code = error.get('code')
-    return code if isinstance(code, str) else None
-
-
-def _upload_with_retry(
-    method: str,
-    url: str,
-    headers: Mapping[str, str],
-    body: bytes | BinaryIO,
-    timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
-    retryable_error_codes: frozenset[str] = frozenset(),
-) -> tuple[int, bytes]:
-    import requests  # lazy: only the upload path needs it
-
-    backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
-    last_err: Any = None
-    for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
-        if not isinstance(body, bytes):
-            # Whole-page retry: rewind the spool so every attempt sends byte-identical
-            # content for the same page index with unchanged declared metadata.
-            body.seek(0)
-        try:
-            resp = requests.request(method, url, headers=dict(headers), data=body, timeout=timeout)
-        except requests.exceptions.RequestException as e:
-            last_err = e
-        else:
-            if 200 <= resp.status_code < 300:
-                return resp.status_code, resp.content
-            if _is_transient_upload_status(resp.status_code) or (
-                retryable_error_codes and _parse_error_code(resp.content) in retryable_error_codes
-            ):
-                last_err = 'status {}'.format(resp.status_code)
-            else:
-                raise RemoteQueryFailure(
-                    'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
-                )
-        if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
-            break
-        time.sleep(backoff)
-        backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
-    raise RemoteQueryFailure(
-        'upload_failed',
-        'upload to its-agent-intake failed after {} attempts: {}'.format(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, last_err),
-        retryable=True,
-    )
-
-
-def _get_agent_config(key: str) -> str:
-    try:
-        value = datadog_agent.get_config(key)
-    except Exception:
-        LOGGER.debug('Unable to read agent config %s', key, exc_info=True)
-        return ''
-    if value is None:
-        return ''
-    return str(value)
-
-
-def _validate_test_drive_name(value: str | None) -> str | None:
-    """Normalize and validate the configured intake Test Drive name.
-
-    The Agent config value names a Test Drive to route intake uploads to. When valid, the
-    uploader emits the header ``test-drive-<name>: 1``; when absent or invalid, no Test Drive
-    header is emitted so the upload follows the permanent-service path. The name is restricted
-    to lowercase ASCII alphanumerics and hyphens so it cannot inject arbitrary headers.
-    """
-    if value is None:
-        return None
-    name = value.strip().lower()
-    if not name:
-        return None
-    valid = (
-        len(name) <= REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH
-        and REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN.fullmatch(name) is not None
-    )
-    if not valid:
-        LOGGER.warning(
-            'Ignoring invalid remote query intake Test Drive name %r: it must be 1-%d '
-            'lowercase ASCII alphanumerics or hyphens, starting and ending with an alphanumeric.',
-            value,
-            REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH,
-        )
-        return None
-    return name
-
-
-def _resolve_upload_credentials(delivery: RemoteQueryResultDelivery) -> UploadCredentials:
-    test_drive = _validate_test_drive_name(_get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY))
-    return UploadCredentials(
-        base_url=delivery.base_url,
-        upload_id=delivery.upload_id,
-        api_key=_get_agent_config('api_key'),
-        app_key=_get_agent_config('app_key'),
-        token=delivery.token,
-        test_drive=test_drive,
-    )
-
-
-def _default_upload_client() -> UploadClient:
-    return RequestsUploadClient()
-
-
-def _safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
-    if not creds.base_url or not creds.upload_id or not creds.token:
-        return
-    try:
-        client.abort(creds)
-    except Exception:
-        LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
+    return not rq.is_query_allowlist_enabled() or query in REMOTE_QUERY_QUERY_ALLOWLIST
 
 
 # ---------------------------------------------------------------------------
@@ -1807,7 +1002,7 @@ def _safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
 
 
 def execute_agent_rpc_stream_copy(
-    request_json: str | bytes | bytearray, check: 'ClickhouseCheck', emit: RemoteQueryEmit
+    request_json: str | bytes | bytearray, check: 'ClickhouseCheck', emit: rq.RemoteQueryEmit
 ) -> None:
     """Execute a remote query request and emit page producer events.
 
@@ -1818,16 +1013,18 @@ def execute_agent_rpc_stream_copy(
     try:
         request = json.loads(request_json)
     except (TypeError, ValueError):
-        _emit_event(
+        rq.emit_event(
             emit,
-            _failed_event('invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'),
+            rq.failed_event(
+                'invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'
+            ),
         )
         return
 
     if not isinstance(request, Mapping):
-        _emit_event(
+        rq.emit_event(
             emit,
-            _failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.'),
+            rq.failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.'),
         )
         return
 
@@ -1837,9 +1034,10 @@ def execute_agent_rpc_stream_copy(
 def _execute_upload_stream(
     request: Mapping[str, Any],
     check: 'ClickhouseCheck',
-    emit: RemoteQueryEmit,
-    http_client: UploadClient | None = None,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', RemoteQueryUploadLimits], ClickhouseClient] | None = None,
+    emit: rq.RemoteQueryEmit,
+    http_client: rq.UploadClient | None = None,
+    clickhouse_client_factory: Callable[['ClickhouseCheck', rq.RemoteQueryUploadLimits], ClickhouseClient]
+    | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
     events = iter_agent_rpc_stream_events(
@@ -1847,7 +1045,7 @@ def _execute_upload_stream(
     )
     try:
         for event in events:
-            _emit_event(emit, event)
+            rq.emit_event(emit, event)
     except BaseException:
         events.close()
         raise
@@ -1856,28 +1054,29 @@ def _execute_upload_stream(
 def iter_agent_rpc_stream_events(
     request: Any,
     registry: ClickhouseCheckRegistry,
-    http_client: UploadClient | None = None,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', RemoteQueryUploadLimits], ClickhouseClient] | None = None,
-) -> Iterator[RemoteQueryEvent]:
+    http_client: rq.UploadClient | None = None,
+    clickhouse_client_factory: Callable[['ClickhouseCheck', rq.RemoteQueryUploadLimits], ClickhouseClient]
+    | None = None,
+) -> Iterator[rq.RemoteQueryEvent]:
     """Yield producer events for unit tests and callback adaptation."""
     started_at = time.monotonic()
     try:
-        parsed_request = RemoteQueryRequest.model_validate(request)
+        parsed_request = rq.RemoteQueryRequest.model_validate(request)
     except ValidationError as e:
-        yield _failed_event('invalid_request', _validation_message(e), elapsed_ms=_elapsed_ms(started_at))
+        yield rq.failed_event('invalid_request', rq.validation_message(e), elapsed_ms=rq.elapsed_ms(started_at))
         return
 
     try:
         validate_read_only_statement(parsed_request.query)
-    except RemoteQueryFailure as e:
-        yield _failed_event(e.code, e.message, elapsed_ms=_elapsed_ms(started_at))
+    except rq.RemoteQueryFailure as e:
+        yield rq.failed_event(e.code, e.message, elapsed_ms=rq.elapsed_ms(started_at))
         return
 
     if not _is_query_allowed(parsed_request.query):
-        yield _failed_event(
+        yield rq.failed_event(
             'invalid_request',
             'Invalid remote query request: query is not allowlisted.',
-            elapsed_ms=_elapsed_ms(started_at),
+            elapsed_ms=rq.elapsed_ms(started_at),
         )
         return
 
@@ -1885,41 +1084,41 @@ def iter_agent_rpc_stream_events(
     matches = _resolve_matches(target, registry.iter_clickhouse_checks())
     LOGGER.debug('Remote query target match count: %d', len(matches))
     if not matches:
-        yield _failed_event(
+        yield rq.failed_event(
             'target_not_found',
             'No loaded ClickHouse integration instance matched target selector.',
-            elapsed_ms=_elapsed_ms(started_at),
+            elapsed_ms=rq.elapsed_ms(started_at),
         )
         return
     if len(matches) > 1:
-        yield _failed_event(
+        yield rq.failed_event(
             'target_ambiguous',
             'More than one loaded ClickHouse integration instance matched target selector.',
-            elapsed_ms=_elapsed_ms(started_at),
+            elapsed_ms=rq.elapsed_ms(started_at),
         )
         return
 
     check = matches[0]
-    creds = _resolve_upload_credentials(parsed_request.result_delivery)
+    creds = rq.resolve_upload_credentials(parsed_request.result_delivery)
     if not creds.api_key or not creds.app_key:
-        yield _failed_event(
+        yield rq.failed_event(
             'credentials_unavailable',
             'Remote query upload requires api_key and app_key to be configured on the Agent.',
-            elapsed_ms=_elapsed_ms(started_at),
+            elapsed_ms=rq.elapsed_ms(started_at),
         )
         return
 
     if getattr(check, '_pool_manager', None) is None:
-        yield _failed_event(
+        yield rq.failed_event(
             'target_unavailable',
             'Matched ClickHouse check HTTP connection pool is unavailable.',
-            elapsed_ms=_elapsed_ms(started_at),
+            elapsed_ms=rq.elapsed_ms(started_at),
         )
         return
 
-    client = http_client if http_client is not None else _default_upload_client()
-    stats = RemoteQueryRunStats()
-    yield RemoteQueryEvent('metadata', _started_metadata(parsed_request))
+    client = http_client if http_client is not None else rq.RequestsUploadClient()
+    stats = rq.RemoteQueryRunStats()
+    yield rq.RemoteQueryEvent('metadata', rq.started_metadata(parsed_request))
 
     try:
         receipt = produce_remote_query(
@@ -1931,100 +1130,18 @@ def iter_agent_rpc_stream_events(
             stats,
             clickhouse_client_factory=clickhouse_client_factory,
         )
-    except RemoteQueryFailure as e:
-        _safe_abort(client, creds)
-        yield _failed_event(e.code, e.message, retryable=e.retryable, stats=_stats_metadata(stats, started_at))
+    except rq.RemoteQueryFailure as e:
+        rq.safe_abort(client, creds)
+        yield rq.failed_event(e.code, e.message, retryable=e.retryable, stats=rq.stats_metadata(stats, started_at))
         return
     except BaseException as e:
-        _safe_abort(client, creds)
+        rq.safe_abort(client, creds)
         if not isinstance(e, Exception):
             raise
         LOGGER.exception('Remote query execution failed')
-        yield _failed_event('query_failed', 'Remote query execution failed.', stats=_stats_metadata(stats, started_at))
+        yield rq.failed_event(
+            'query_failed', 'Remote query execution failed.', stats=rq.stats_metadata(stats, started_at)
+        )
         return
 
-    yield RemoteQueryEvent('final', _succeeded_metadata(receipt, stats, started_at))
-
-
-def _started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
-    delivery = request.result_delivery
-    limits = delivery.limits
-    return {
-        'status': 'STARTED',
-        'operation': request.operation,
-        'includeSchema': request.include_schema,
-        'resultDelivery': {
-            'runId': delivery.run_id,
-            'taskId': delivery.task_id,
-            'uploadId': delivery.upload_id,
-            'artifactVersion': delivery.artifact_version,
-            'limits': {
-                'maxFileBytes': limits.max_file_bytes,
-                'maxResultBytes': limits.max_result_bytes,
-                'maxRowBytes': limits.max_row_bytes,
-                'maxColumns': limits.max_columns,
-                'maxSchemaBytes': limits.max_schema_bytes,
-                'maxPages': limits.max_pages,
-                'timeoutMs': limits.timeout_ms,
-            },
-        },
-    }
-
-
-def _succeeded_metadata(receipt: Mapping[str, Any], stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
-    return {
-        'status': 'SUCCEEDED',
-        'upload_receipt': dict(receipt),
-        'stats': _stats_metadata(stats, started_at),
-    }
-
-
-def _stats_metadata(stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
-    return {
-        'rowsEmitted': stats.rows_emitted,
-        'pagesEmitted': stats.pages_emitted,
-        'bytesEmitted': stats.bytes_emitted,
-        'elapsedMs': _elapsed_ms(started_at),
-    }
-
-
-def _failed_event(
-    code: str,
-    message: str,
-    retryable: bool = False,
-    stats: Mapping[str, Any] | None = None,
-    elapsed_ms: int | None = None,
-) -> RemoteQueryEvent:
-    metadata: dict[str, Any] = {
-        'status': 'FAILED',
-        'error': {'code': code, 'message': message, 'retryable': retryable},
-    }
-    if stats is not None:
-        metadata['stats'] = dict(stats)
-    elif elapsed_ms is not None:
-        metadata['stats'] = {'elapsedMs': elapsed_ms}
-    return RemoteQueryEvent('error', metadata)
-
-
-def _emit_event(emit: RemoteQueryEmit, event: RemoteQueryEvent) -> None:
-    emit(event.event_type, json.dumps(event.metadata, default=str), event.payload)
-
-
-def _elapsed_ms(started_at: float) -> int:
-    return max(0, int((time.monotonic() - started_at) * 1000))
-
-
-def _validation_message(error: ValidationError) -> str:
-    details = []
-    for item in error.errors(include_input=False):
-        location = _validation_location(item.get('loc', ()))
-        message = item.get('msg', 'Invalid value')
-        if location:
-            details.append(f'{location}: {message}')
-        else:
-            details.append(message)
-    return 'Invalid remote query request: {}'.format('; '.join(details))
-
-
-def _validation_location(location: tuple[Any, ...]) -> str:
-    return '.'.join(str(part) for part in location)
+    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at))

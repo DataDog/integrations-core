@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import hashlib
-import io
 import json
 import uuid as uuid_module
 from contextlib import contextmanager
@@ -14,6 +12,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 from datadog_checks.postgres.remote_query import (
@@ -23,7 +22,6 @@ from datadog_checks.postgres.remote_query import (
     StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
     iter_agent_rpc_stream_events,
-    normalize_target,
 )
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -293,6 +291,7 @@ def bounded_request(query='SELECT 1 AS value', **limit_overrides):
         maxFileBytes=1024, maxResultBytes=8192, maxRowBytes=64, maxColumns=8, maxSchemaBytes=256, maxPages=4
     )
     limits.update(limit_overrides)
+    limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     request = valid_request(query=query)
     request['resultDelivery']['limits'] = limits
     return request
@@ -306,11 +305,11 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_APP_KEY'
         return None
 
-    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
 
 
 def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(remote_query, '_is_query_allowlist_enabled', lambda: False)
+    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
 
 
 class ExplodingRegistry:
@@ -345,7 +344,7 @@ def assert_success(events):
 
 
 def prefix_bytes(batch_index=0, record_offset=0, schema_json=None):
-    return remote_query.page_prefix(
+    return rq.page_prefix(
         run_id=RUN_ID, task_id=TASK_ID, batch_index=batch_index, record_offset=record_offset, schema_json=schema_json
     )
 
@@ -355,92 +354,9 @@ def assembled_pages(fake_client):
     return {call.batch_index: call.payload for call in fake_client.put_page_calls}
 
 
-def track_page_spools(monkeypatch):
-    """Route the page spool to tracked in-memory files.
-
-    Returns the created spools. The factory asserts the at-most-one-spool invariant: a
-    previous spool is always closed before a new page spools opens.
-    """
-    spools = []
-
-    def open_page_spool():
-        assert all(spool.closed for spool in spools), 'a previous page spool was still open'
-        spool = io.BytesIO()
-        spools.append(spool)
-        return spool
-
-    monkeypatch.setattr(remote_query, '_open_page_spool', open_page_spool)
-    return spools
-
-
 # ---------------------------------------------------------------------------
 # Target normalization and validation
 # ---------------------------------------------------------------------------
-
-
-def test_normalize_target_trims_lowercases_host_and_removes_one_trailing_dot():
-    target = normalize_target({'host': ' Example.INTERNAL. ', 'port': 5432, 'dbname': 'postgres'})
-
-    assert target.host == 'example.internal'
-    assert target.port == 5432
-    assert target.dbname == 'postgres'
-
-
-def test_normalize_target_rejects_missing_port():
-    with pytest.raises(ValueError):
-        normalize_target({'host': 'localhost', 'dbname': 'postgres'})
-
-
-def test_normalize_target_accepts_database_instance_without_normalization():
-    target = normalize_target({'database_instance': 'Postgres/Primary-A'})
-
-    assert target.database_instance == 'Postgres/Primary-A'
-    assert target.host is None
-    assert target.dbname is None
-
-
-@pytest.mark.parametrize('port', [True, '5432', 'abc', '0', 0, -1, 65536, None])
-def test_normalize_target_rejects_invalid_port_values(port):
-    with pytest.raises(ValueError):
-        normalize_target({'host': 'localhost', 'port': port, 'dbname': 'postgres'})
-
-
-@pytest.mark.parametrize(
-    'target',
-    [
-        {'host': '', 'port': 5432, 'dbname': 'postgres'},
-        {'host': '  ', 'port': 5432, 'dbname': 'postgres'},
-        {'host': 'localhost', 'port': 5432, 'dbname': ''},
-        {'host': 'localhost', 'port': 5432, 'dbname': ' postgres '},
-    ],
-)
-def test_normalize_target_rejects_empty_host_or_dbname(target):
-    with pytest.raises(ValueError):
-        normalize_target(target)
-
-
-@pytest.mark.parametrize(
-    'target',
-    [
-        {},
-        {'host': 'localhost'},
-        {'port': 5432},
-        {'dbname': 'postgres'},
-        {'host': 'localhost', 'port': 5432},
-        {'host': 'localhost', 'dbname': 'postgres'},
-        {'port': 5432, 'dbname': 'postgres'},
-        {'host': 'localhost', 'dbname': 'postgres', 'database_instance': 'postgres-dbi'},
-        {'database_instance': 'postgres-dbi', 'host': 'localhost'},
-        {'database_instance': 'postgres-dbi', 'port': 5432},
-        {'database_instance': 'postgres-dbi', 'dbname': 'postgres'},
-        {'database_instance': 'postgres-dbi', 'host': ''},
-        {'database_instance': ''},
-        {'database_instance': ' postgres-dbi '},
-    ],
-)
-def test_normalize_target_rejects_missing_partial_mixed_or_invalid_database_instance_target(target):
-    with pytest.raises(ValueError):
-        normalize_target(target)
 
 
 # ---------------------------------------------------------------------------
@@ -457,152 +373,6 @@ def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
     assert_failed_event(events, 'invalid_request', field)
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
-
-
-def test_stream_rejects_unknown_target_fields_before_resolution():
-    request = valid_request()
-    request['target']['password'] = 'SECRET_DO_NOT_LOG'
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', 'password')
-    assert 'SECRET_DO_NOT_LOG' not in str(events)
-
-
-def test_stream_rejects_unknown_limits_fields_before_resolution():
-    request = valid_request()
-    request['resultDelivery']['limits']['password'] = 'SECRET_DO_NOT_LOG'
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', 'password')
-    assert 'SECRET_DO_NOT_LOG' not in str(events)
-
-
-@pytest.mark.parametrize(
-    'field', ['maxFileBytes', 'maxResultBytes', 'maxRowBytes', 'maxColumns', 'maxSchemaBytes', 'maxPages', 'timeoutMs']
-)
-def test_stream_rejects_string_limit_values_before_resolution(field):
-    request = valid_request()
-    request['resultDelivery']['limits'][field] = '10'
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', field)
-
-
-@pytest.mark.parametrize('field', ['runId', 'taskId', 'artifactVersion', 'uploadId', 'baseUrl', 'token', 'limits'])
-def test_stream_rejects_missing_delivery_fields_before_resolution(field):
-    request = valid_request()
-    del request['resultDelivery'][field]
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', field)
-
-
-@pytest.mark.parametrize(
-    'mutation, expected',
-    [
-        ({'apiKey': 'SECRET_API_KEY'}, 'apiKey'),
-        ({'mode': 'POC_PUBLIC_MULTIPART_UPLOAD'}, 'mode'),
-        ({'format': 'csv'}, 'format'),
-        ({'compression': 'none'}, 'compression'),
-        ({'artifactVersion': 2}, 'artifactVersion'),
-        ({'artifactVersion': '1'}, 'artifactVersion'),
-        ({'runId': ''}, 'runId'),
-        ({'taskId': ''}, 'taskId'),
-        ({'baseUrl': ''}, 'baseUrl'),
-        ({'token': ''}, 'token'),
-        ({'uploadId': ''}, 'uploadId'),
-    ],
-)
-def test_stream_rejects_invalid_delivery_fields_before_resolution(mutation, expected):
-    request = valid_request()
-    request['resultDelivery'].update(mutation)
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', expected)
-    assert 'SECRET_API_KEY' not in str(events)
-    assert 'scoped-upload-token' not in str(events)
-
-
-@pytest.mark.parametrize(
-    'limits, expected',
-    [
-        ({'maxFileBytes': 128 * 1024 * 1024 + 1}, 'maxFileBytes'),
-        ({'maxResultBytes': 10 * 1024**3 + 1}, 'maxResultBytes'),
-        ({'maxRowBytes': 0}, 'maxRowBytes'),
-        ({'maxColumns': 0}, 'maxColumns'),
-        ({'maxSchemaBytes': 0}, 'maxSchemaBytes'),
-        ({'maxPages': 0}, 'maxPages'),
-        ({'timeoutMs': 0}, 'timeoutMs'),
-        (
-            {'maxRowBytes': 2097152, 'maxFileBytes': 1048576},
-            'maxRowBytes must not exceed maxFileBytes',
-        ),
-        (
-            {'maxFileBytes': 104857600, 'maxResultBytes': 1048576},
-            'maxFileBytes must not exceed maxResultBytes',
-        ),
-    ],
-)
-def test_stream_rejects_invalid_limits_before_resolution(limits, expected):
-    request = valid_request()
-    request['resultDelivery']['limits'].update(limits)
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', expected)
-
-
-def test_stream_rejects_part_bytes_field_before_resolution():
-    # The direct-page upload protocol has no part-size instruction: any ``partBytes``
-    # value, even one the part protocol would have accepted, fails validation as an
-    # unknown delivery field so a stale sender is rejected rather than silently ignored.
-    request = valid_request()
-    request['resultDelivery']['partBytes'] = 64 * 1024 * 1024
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', 'partBytes')
-
-
-def test_stream_requires_result_delivery():
-    request = valid_request()
-    del request['resultDelivery']
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', 'resultDelivery')
-
-
-@pytest.mark.parametrize('operation', [None, 'copy_stream', 'query', 1])
-def test_stream_rejects_non_page_operation_before_pool_access(operation):
-    pool = FakePool(rows=[(1,)])
-    request = valid_request()
-    if operation is None:
-        del request['operation']
-    else:
-        request['operation'] = operation
-
-    events = collect_events(request, make_check(pool=pool))
-
-    assert_failed_event(events, 'invalid_request', 'operation')
-    assert pool.requested_dbnames == []
-
-
-@pytest.mark.parametrize('include_schema', ['true', 1, None])
-def test_stream_rejects_non_boolean_include_schema_before_pool_access(include_schema):
-    pool = FakePool(rows=[(1,)])
-    request = valid_request()
-    request['includeSchema'] = include_schema
-
-    events = collect_events(request, make_check(pool=pool))
-
-    assert_failed_event(events, 'invalid_request', 'includeSchema')
-    assert pool.requested_dbnames == []
 
 
 @pytest.mark.parametrize('request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff'])
@@ -661,31 +431,6 @@ def test_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeyp
 
     assert_success(events)
     assert pool.requested_dbnames == ['datadog_test']
-
-
-@pytest.mark.parametrize('config_value', ['', None, True, 1, 'true', 'yes', 'on', '1', 'TRUE', ' Yes '])
-def test_query_allowlist_enabled_by_default_and_affirmative_values(monkeypatch, config_value):
-    requested_keys: list[str] = []
-
-    def get_config(key: str) -> object:
-        requested_keys.append(key)
-        return config_value
-
-    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
-
-    assert remote_query._is_query_allowlist_enabled() is True
-    assert requested_keys == [remote_query.REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY]
-
-
-@pytest.mark.parametrize('config_value', [False, 0, 'false', 'no', 'off', '0', 'FALSE', ' No '])
-def test_query_allowlist_disabled_by_explicit_negative_values(monkeypatch, config_value):
-    def get_config(key: str) -> object:
-        assert key == remote_query.REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY
-        return config_value
-
-    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
-
-    assert remote_query._is_query_allowlist_enabled() is False
 
 
 def test_stream_accepts_large_payload_proof_queries(monkeypatch):
@@ -884,7 +629,7 @@ def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
     def get_config(key):
         return None
 
-    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
     pool = FakePool(rows=[(1,)])
 
     events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
@@ -976,7 +721,7 @@ def test_producer_writes_exact_v1_envelope_json(monkeypatch):
     assert_success(events)
     (page,) = assembled_pages(fake).values()
     # Schema disabled: the schema key is omitted entirely, never null/[].
-    assert page == (prefix_bytes() + b'{"value":1}' + remote_query.PAGE_SUFFIX)
+    assert page == (prefix_bytes() + b'{"value":1}' + rq.PAGE_SUFFIX)
     parsed = json.loads(page)
     assert parsed == {
         'version': 1,
@@ -1037,7 +782,7 @@ def test_producer_applies_instance_remote_queries_timeout_over_delivery_limit(mo
 
 
 def test_statement_timeout_resolution_prefers_instance_timeout():
-    limits = remote_query.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
+    limits = rq.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
     check = make_check(remote_queries=SimpleNamespace(timeout_ms=300_000))
 
     assert remote_query._resolve_statement_timeout_ms(check, limits) == 300_000
@@ -1049,7 +794,7 @@ def test_statement_timeout_resolution_prefers_instance_timeout():
     ids=['section-unset', 'timeout-unset', 'timeout-non-positive'],
 )
 def test_statement_timeout_resolution_falls_back_to_delivery_limit(remote_queries):
-    limits = remote_query.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
+    limits = rq.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
     check = make_check(remote_queries=remote_queries)
 
     assert remote_query._resolve_statement_timeout_ms(check, limits) == 7_777
@@ -1138,7 +883,7 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
     # maxFileBytes fits the schema-bearing prefix plus exactly the longer row, so both
     # rows never fit one page and the second row forces a second page.
     request['resultDelivery']['limits']['maxFileBytes'] = (
-        len(prefix_bytes(schema_json=schema_json)) + len(longest_row_bytes) + len(remote_query.PAGE_SUFFIX)
+        len(prefix_bytes(schema_json=schema_json)) + len(longest_row_bytes) + len(rq.PAGE_SUFFIX)
     )
     fake = FakeUploadClient()
 
@@ -1325,68 +1070,10 @@ def two_row_boundary_request(monkeypatch, extra_file_bytes=0):
     prefix_len = len(prefix_bytes())
     request = bounded_request()
     request['resultDelivery']['limits']['maxFileBytes'] = (
-        prefix_len + len(ROW_BYTES) + 1 + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX) + extra_file_bytes
+        prefix_len + len(ROW_BYTES) + 1 + len(ROW_BYTES) + len(rq.PAGE_SUFFIX) + extra_file_bytes
     )
+    request['resultDelivery']['limits']['maxSchemaBytes'] = 1
     return request
-
-
-def test_page_split_exact_boundary_fit_keeps_one_page(monkeypatch):
-    request = two_row_boundary_request(monkeypatch)
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    final = assert_success(events)
-    pages = assembled_pages(fake)
-    assert list(pages) == [0]
-    assert json.loads(pages[0])['data']['items'] == [{'payload': 'aaaa'}, {'payload': 'aaaa'}]
-    assert final['upload_receipt']['pageCount'] == 1
-    assert final['upload_receipt']['totalRows'] == 2
-    assert final['upload_receipt']['totalBytes'] == len(pages[0])
-
-
-def test_page_split_boundary_plus_one_row_starts_next_page(monkeypatch):
-    # One byte short of fitting both rows: the second row starts a new page at the
-    # cumulative row offset.
-    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    final = assert_success(events)
-    pages = assembled_pages(fake)
-    assert list(pages) == [0, 1]
-    parsed_pages = [json.loads(page) for page in pages.values()]
-    assert parsed_pages[0]['batch_index'] == 0
-    assert parsed_pages[0]['record_offset'] == 0
-    assert parsed_pages[0]['data']['items'] == [{'payload': 'aaaa'}]
-    assert parsed_pages[1]['batch_index'] == 1
-    assert parsed_pages[1]['record_offset'] == 1
-    assert parsed_pages[1]['data']['items'] == [{'payload': 'aaaa'}]
-    # No page exceeds maxFileBytes.
-    max_file_bytes = request['resultDelivery']['limits']['maxFileBytes']
-    assert all(len(page) <= max_file_bytes for page in pages.values())
-    assert final['upload_receipt']['pageCount'] == 2
-    assert final['upload_receipt']['totalRows'] == 2
-    assert final['upload_receipt']['totalBytes'] == sum(len(page) for page in pages.values())
-    assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
-
-
-def test_page_split_row_too_large_when_row_plus_envelope_exceeds_max_file_bytes(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX) - 1)
-    pool = FakePool(rows=[('aaaa',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'row_too_large', 'maxFileBytes')
-    # Nothing was uploaded: the failure is detected before writing the row.
-    assert fake.put_page_calls == []
 
 
 def test_page_split_row_too_large_when_row_exceeds_max_row_bytes(monkeypatch):
@@ -1400,84 +1087,6 @@ def test_page_split_row_too_large_when_row_exceeds_max_row_bytes(monkeypatch):
 
     assert_failed_event(events, 'row_too_large', 'maxRowBytes')
     assert fake.put_page_calls == []
-
-
-def test_page_split_enforces_max_pages(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    request = bounded_request(maxPages=1, maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX))
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'max_pages_exceeded')
-    # Page 0 was fully produced and uploaded before the cap tripped, but the run fails:
-    # no receipt is emitted and the session is aborted.
-    assert [call.batch_index for call in fake.put_page_calls] == [0]
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
-def test_page_split_enforces_max_result_bytes(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    request = bounded_request(
-        maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX),
-        maxResultBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX),
-    )
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'max_result_bytes_exceeded', 'maxResultBytes')
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
-def test_page_upload_declares_rows_explicitly_and_never_counts_newlines(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # One row whose encoded value contains escaped newlines: the page PUT declares exactly
-    # one row, proving rows are counted per appended row rather than inferred from the
-    # page byte stream.
-    request = bounded_request()
-    pool = FakePool(rows=[('a\nb\nc',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_success(events)
-    (call,) = fake.put_page_calls
-    assert json.loads(call.payload)['data']['items'] == [{'payload': 'a\nb\nc'}]
-    assert call.rows == 1
-    assert event_metadata(events[-1])['stats']['rowsEmitted'] == 1
-
-
-def test_page_uploads_carry_exact_whole_page_metadata(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    # Two pages of one row each: each page PUT declares the SHA-256, byte count, and row
-    # count of its own complete page, with the cumulative record offset advancing.
-    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX))
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_success(events)
-    assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
-    assert [call.record_offset for call in fake.put_page_calls] == [0, 1]
-    for call in fake.put_page_calls:
-        # The declared identity is exact for the whole page: its own checksum, byte count,
-        # and row count.
-        assert call.sha256_hex == hashlib.sha256(call.payload).hexdigest()
-        assert call.page_bytes == len(call.payload)
-        assert call.rows == 1
-    assert event_metadata(events[-1])['upload_receipt']['totalRows'] == 2
 
 
 def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
@@ -1520,106 +1129,6 @@ def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
     assert event_metadata(events[-1])['upload_receipt']['pageCount'] == len(page_indexes)
     max_file_bytes = request['resultDelivery']['limits']['maxFileBytes']
     assert all(call.page_bytes <= max_file_bytes for call in fake.put_page_calls)
-
-
-# ---------------------------------------------------------------------------
-# Page spool lifecycle
-# ---------------------------------------------------------------------------
-
-
-def test_page_spool_closed_after_each_matching_page_receipt(monkeypatch):
-    spools = track_page_spools(monkeypatch)
-    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-
-    events = collect_events(request, make_check(pool=pool), client=FakeUploadClient())
-
-    assert_success(events)
-    # One spool per page, each closed right after its authoritative page receipt matched;
-    # the at-most-one-spool invariant is asserted inside the tracked factory.
-    assert len(spools) == 2
-    assert all(spool.closed for spool in spools)
-
-
-def test_page_spool_closed_on_page_upload_failure(monkeypatch):
-    spools = track_page_spools(monkeypatch)
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    fake = FakeUploadClient(
-        raise_on_put_page=remote_query.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
-    )
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'upload_failed')
-    assert len(spools) == 1
-    assert all(spool.closed for spool in spools)
-
-
-def test_page_spool_closed_on_page_receipt_mismatch(monkeypatch):
-    spools = track_page_spools(monkeypatch)
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    bad_receipt = {
-        'batch_index': 0,
-        'key': 'agent-intake-test/pages/0.json',
-        'record_offset': 0,
-        'bytes': 7,
-        'rows': 1,
-        'sha256': '0' * 64,
-    }
-    fake = FakeUploadClient(put_page_response=bad_receipt)
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'invalid_receipt')
-    assert len(spools) == 1
-    assert all(spool.closed for spool in spools)
-    assert fake.abort_calls == 1
-
-
-def test_page_spool_closed_on_row_failure_mid_page(monkeypatch):
-    spools = track_page_spools(monkeypatch)
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # The first fetchmany returns one row and opens page 0; the next fetch raises while
-    # the page spool is still open.
-    pool = FakePool(rows=[(1,)], fetch_error=ValueError('fetch broke'), fetch_error_at=2)
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
-
-    assert_failed_event(events, 'query_failed')
-    assert len(spools) == 1
-    assert all(spool.closed for spool in spools)
-
-
-def test_page_spool_closed_on_cancellation_mid_page(monkeypatch):
-    spools = track_page_spools(monkeypatch)
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,), (2,)])
-    check = make_check(pool=pool)
-    fake = FakeUploadClient()
-    # The guard runs before each row and once more at page close: cancel on that last
-    # check, with both rows spooled and the page upload not yet attempted.
-    remaining_checks = 3
-
-    def is_cancelled():
-        nonlocal remaining_checks
-        remaining_checks -= 1
-        return remaining_checks < 0
-
-    check.is_cancelled = is_cancelled
-
-    events = collect_events(valid_request(), check, client=fake)
-
-    assert_failed_event(events, 'cancelled')
-    assert fake.put_page_calls == []
-    assert fake.abort_calls == 1
-    assert len(spools) == 1
-    assert all(spool.closed for spool in spools)
 
 
 # ---------------------------------------------------------------------------
@@ -1705,21 +1214,21 @@ def test_value_contract_encodes_each_family(value, expected):
 def test_value_contract_bytea_is_base64_only_for_the_bytea_oid():
     assert encode_value(b'\x00\xff\x80', top_type_oid=BYTEA_OID) == b'"AP+A"'
     # A binary buffer from any other column fails closed instead of silently stringifying.
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
+    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
         encode_value(b'\x00\xff\x80', top_type_oid=25)
     assert excinfo.value.code == 'unsupported_value'
 
 
 @pytest.mark.parametrize('value', [timedelta(days=1), object(), {1}])
 def test_value_contract_fails_closed_on_unconvertible_values(value):
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
+    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
         encode_value(value)
     assert excinfo.value.code == 'unsupported_value'
 
 
 @pytest.mark.parametrize('value', [RawJsonNumber('1.5.2'), RawJsonNumber(''), RawJsonNumber('abc')])
 def test_value_contract_fails_closed_on_non_json_numeric_text(value):
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
+    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
         encode_value(value)
     assert excinfo.value.code == 'unsupported_value'
 
@@ -1869,386 +1378,6 @@ def test_psycopg_array_loading_uses_the_cursor_scoped_loaders():
 # ---------------------------------------------------------------------------
 
 
-def _upload_creds(**overrides):
-    defaults = {
-        'base_url': BASE_URL,
-        'upload_id': UPLOAD_ID,
-        'api_key': 'TEST_API_KEY',
-        'app_key': 'TEST_APP_KEY',
-        'token': TOKEN,
-        'test_drive': 'its-agent-intake-poc',
-    }
-    defaults.update(overrides)
-    return remote_query.UploadCredentials(**defaults)
-
-
-def _page_metadata(payload, batch_index=0, record_offset=0, rows=1):
-    return remote_query.PageUploadMetadata(
-        batch_index=batch_index,
-        record_offset=record_offset,
-        page_bytes=len(payload),
-        rows=rows,
-        sha256_hex=hashlib.sha256(payload).hexdigest(),
-    )
-
-
-def _receipt_json(page):
-    return json.dumps(
-        {
-            'batch_index': page.batch_index,
-            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
-            'record_offset': page.record_offset,
-            'bytes': page.page_bytes,
-            'rows': page.rows,
-            'sha256': page.sha256_hex,
-        }
-    ).encode('utf-8')
-
-
-def test_requests_upload_client_uses_exact_direct_page_http_contract(monkeypatch):
-    import requests
-
-    captured = []
-
-    def fake_request(method, url, headers=None, data=None, timeout=None):
-        captured.append(
-            SimpleNamespace(method=method, url=url, headers=dict(headers or {}), data=data, timeout=timeout)
-        )
-        return SimpleNamespace(status_code=200, content=b'{"upload_id": "upload-01k"}')
-
-    monkeypatch.setattr(requests, 'request', fake_request)
-    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
-
-    creds = _upload_creds()
-    client = remote_query.RequestsUploadClient()
-    payload = b'abcdefgh'
-    page = _page_metadata(payload, batch_index=2, record_offset=7, rows=4)
-    spool = io.BytesIO(payload)
-    receipt = client.put_page(creds, page, spool)
-
-    test_drive_header = 'test-drive-its-agent-intake-poc'
-
-    put = captured[0]
-    assert put.method == 'PUT'
-    assert put.url == '{}/uploads/{}/pages/2'.format(BASE_URL, UPLOAD_ID)
-    assert put.headers['Content-Type'] == 'application/octet-stream'
-    assert put.headers['X-DD-Page-Bytes'] == '8'
-    assert put.headers['X-DD-Page-Rows'] == '4'
-    assert put.headers['X-DD-Record-Offset'] == '7'
-    assert put.headers['X-DD-Page-SHA256'] == hashlib.sha256(payload).hexdigest()
-    assert put.headers['Content-Length'] == '8'
-    assert put.headers['dd-api-key'] == 'TEST_API_KEY'
-    assert put.headers['dd-application-key'] == 'TEST_APP_KEY'
-    assert put.headers['Authorization'] == 'Bearer ' + TOKEN
-    # The Test Drive routing header is derived from the validated Agent-config name as
-    # ``test-drive-<name>: 1`` and rides on every upload request: page PUT, run finalize,
-    # and abort.
-    assert put.headers[test_drive_header] == '1'
-    # The rewound spool is the streamed request body: the whole page in one PUT.
-    assert put.data is spool
-    assert put.data.tell() == 0
-    assert put.data.read() == payload
-    assert put.timeout == remote_query.REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT
-    assert remote_query.REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS == 300
-    # The page receipt body is parsed and returned for verification.
-    assert receipt == {'upload_id': 'upload-01k'}
-
-    response = client.finalize_run(creds)
-    run_finalize = captured[1]
-    assert run_finalize.method == 'POST'
-    assert run_finalize.url == '{}/uploads/{}/finalize'.format(BASE_URL, UPLOAD_ID)
-    assert run_finalize.headers[test_drive_header] == '1'
-    assert run_finalize.data == b'{}'
-    assert response == {'upload_id': 'upload-01k'}
-
-    client.abort(creds)
-    abort = captured[2]
-    assert abort.method == 'POST'
-    assert abort.url == '{}/uploads/{}/abort'.format(BASE_URL, UPLOAD_ID)
-    assert abort.headers[test_drive_header] == '1'
-    assert abort.data == b'{}'
-
-
-@pytest.mark.parametrize('trigger', ['transient_status', 'connection_error'])
-def test_requests_upload_client_retries_page_idempotently(monkeypatch, trigger):
-    import requests
-
-    calls = []
-
-    def fake_request(method, url, headers=None, data=None, timeout=None):
-        body = data.read() if data is not None else b''
-        calls.append(SimpleNamespace(url=url, headers=dict(headers or {}), body=body))
-        if len(calls) == 1 and trigger == 'transient_status':
-            return SimpleNamespace(status_code=503, content=b'')
-        if len(calls) == 1 and trigger == 'connection_error':
-            raise requests.exceptions.RequestException('boom')
-        return SimpleNamespace(status_code=200, content=b'{}')
-
-    monkeypatch.setattr(requests, 'request', fake_request)
-    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
-
-    creds = _upload_creds(test_drive=None)
-    client = remote_query.RequestsUploadClient()
-    payload = b'ijklmnop'
-    page = _page_metadata(payload, batch_index=1, record_offset=3, rows=2)
-    client.put_page(creds, page, io.BytesIO(payload))
-
-    # The same whole-page request (same page URL, same declared headers, byte-identical
-    # body) is retried verbatim, so an idempotent server-side replay by (page, checksum)
-    # cannot double-count or corrupt the page.
-    assert len(calls) == 2
-    assert calls[0].url == calls[1].url
-    assert calls[0].url == '{}/uploads/{}/pages/1'.format(BASE_URL, UPLOAD_ID)
-    for header in ('X-DD-Page-Bytes', 'X-DD-Page-Rows', 'X-DD-Record-Offset', 'X-DD-Page-SHA256', 'Content-Length'):
-        assert calls[0].headers[header] == calls[1].headers[header]
-    assert calls[0].body == calls[1].body == payload
-
-
-def test_requests_upload_client_retries_page_upload_in_progress(monkeypatch):
-    import requests
-
-    calls = []
-
-    def fake_request(method, url, headers=None, data=None, timeout=None):
-        calls.append(data.read())
-        if len(calls) == 1:
-            # A duplicate in-flight page attempt: retryable by error code, not by status.
-            body = json.dumps(
-                {'error': {'code': 'page_upload_in_progress', 'message': 'page is being uploaded'}}
-            ).encode('utf-8')
-            return SimpleNamespace(status_code=409, content=body)
-        return SimpleNamespace(status_code=200, content=b'{}')
-
-    monkeypatch.setattr(requests, 'request', fake_request)
-    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
-
-    creds = _upload_creds(test_drive=None)
-    client = remote_query.RequestsUploadClient()
-    payload = b'qrstuvwx'
-    page = _page_metadata(payload)
-
-    client.put_page(creds, page, io.BytesIO(payload))
-
-    # The in-progress code is retried with the same byte-identical page.
-    assert len(calls) == 2
-    assert calls[0] == calls[1] == payload
-
-
-def test_requests_upload_client_fails_closed_on_conflicting_page_error(monkeypatch):
-    import requests
-
-    calls = []
-
-    def fake_request(method, url, headers=None, data=None, timeout=None):
-        calls.append(url)
-        body = json.dumps({'error': {'code': 'already_exists', 'message': 'conflicting page'}}).encode('utf-8')
-        return SimpleNamespace(status_code=409, content=body)
-
-    monkeypatch.setattr(requests, 'request', fake_request)
-    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
-
-    creds = _upload_creds(test_drive=None)
-    client = remote_query.RequestsUploadClient()
-    page = _page_metadata(b'x')
-
-    # A checksum/metadata conflict is terminal, never retried or overwritten.
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-        client.put_page(creds, page, io.BytesIO(b'x'))
-    assert excinfo.value.code == 'upload_failed'
-    assert excinfo.value.retryable is False
-    assert len(calls) == 1
-
-
-def test_requests_upload_client_fails_closed_on_non_transient_status(monkeypatch):
-    import requests
-
-    calls = []
-
-    def fake_request(method, url, headers=None, data=None, timeout=None):
-        calls.append(url)
-        return SimpleNamespace(status_code=400, content=b'')
-
-    monkeypatch.setattr(requests, 'request', fake_request)
-    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
-
-    creds = _upload_creds(test_drive=None)
-    client = remote_query.RequestsUploadClient()
-
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-        client.put_page(creds, _page_metadata(b'x'), io.BytesIO(b'x'))
-    assert excinfo.value.code == 'upload_failed'
-    assert excinfo.value.retryable is False
-    assert len(calls) == 1
-
-
-@pytest.mark.parametrize(
-    'raw, expected',
-    [
-        ('its-agent-intake-poc', 'its-agent-intake-poc'),
-        ('  its-agent-intake-poc  ', 'its-agent-intake-poc'),
-        ('ITS-AGENT-INTAKE-POC', 'its-agent-intake-poc'),
-        ('its-agent-intake-2', 'its-agent-intake-2'),
-    ],
-)
-def test_validate_test_drive_name_normalizes_valid_test_drive_names(raw, expected):
-    # Valid names are trimmed and lowercased so the emitted ``test-drive-<name>: 1`` header is
-    # deterministic regardless of how the Agent config value is cased or padded.
-    assert remote_query._validate_test_drive_name(raw) == expected
-
-
-@pytest.mark.parametrize(
-    'raw',
-    [
-        None,
-        '',
-        '   ',
-        'its-agent-intake-poc:1',
-        'its-agent-intake-poc\r\nX-Other: 1',
-        'its agent intake poc',
-        '-its-agent-intake-poc',
-        'its-agent-intake-poc-',
-        'a' * 64,
-    ],
-)
-def test_validate_test_drive_name_rejects_invalid_names_fail_closed(raw):
-    # Invalid names must fail closed to None so no Test Drive header is emitted: the permanent
-    # service is targeted and the Agent config value cannot inject arbitrary headers.
-    assert remote_query._validate_test_drive_name(raw) is None
-
-
-def test_requests_upload_client_omits_test_drive_header_when_not_configured(monkeypatch):
-    import requests
-
-    captured = []
-
-    def fake_request(method, url, headers=None, data=None, timeout=None):
-        captured.append(SimpleNamespace(headers=dict(headers or {})))
-        return SimpleNamespace(status_code=200, content=b'{}')
-
-    monkeypatch.setattr(requests, 'request', fake_request)
-    monkeypatch.setattr(remote_query.time, 'sleep', lambda _seconds: None)
-
-    creds = _upload_creds(test_drive=None)
-    client = remote_query.RequestsUploadClient()
-    client.put_page(creds, _page_metadata(b'x'), io.BytesIO(b'x'))
-
-    # With no Test Drive configured the permanent-service path is preserved: no header whose
-    # name starts with the test-drive prefix is sent on the upload request.
-    put = captured[0]
-    assert not any(name.startswith(remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX) for name in put.headers)
-
-
-@pytest.mark.parametrize(
-    'config_value, expected',
-    [
-        ('  ITS-AGENT-INTAKE-POC  ', 'its-agent-intake-poc'),
-        ('', None),
-    ],
-)
-def test_resolve_upload_credentials_reads_validated_test_drive_from_agent_config(monkeypatch, config_value, expected):
-    def get_config(key):
-        if key == 'api_key':
-            return 'TEST_API_KEY'
-        if key == 'app_key':
-            return 'TEST_APP_KEY'
-        if key == remote_query.REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY:
-            return config_value
-        return None
-
-    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
-
-    creds = remote_query._resolve_upload_credentials(
-        remote_query.RemoteQueryResultDelivery.model_validate(valid_result_delivery())
-    )
-
-    # The Agent-config Test Drive name is read through the dedicated config key and normalized
-    # before reaching the uploader; an absent value yields None so the upload keeps the
-    # permanent-service path instead of routing to a Test Drive.
-    assert creds.test_drive == expected
-    assert creds.api_key == 'TEST_API_KEY'
-    assert creds.app_key == 'TEST_APP_KEY'
-    assert creds.base_url == BASE_URL
-    assert creds.upload_id == UPLOAD_ID
-    assert creds.token == TOKEN
-
-
-@pytest.mark.parametrize(
-    'body, expected',
-    [
-        (b'', {}),
-        (b'{}', {}),
-        (b'{"upload_id": "upload-01k", "pages": []}', {'upload_id': 'upload-01k', 'pages': []}),
-    ],
-)
-def test_parse_finalize_run_body_accepts_json_objects(body, expected):
-    assert remote_query.parse_finalize_run_body(body) == expected
-
-
-@pytest.mark.parametrize('body', [b'not json', b'[]', b'"x"'])
-def test_parse_finalize_run_body_fails_closed_on_unusable_bodies(body):
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-        remote_query.parse_finalize_run_body(body)
-    assert excinfo.value.code == 'invalid_receipt'
-
-
-def test_verify_run_finalize_response_fails_closed_on_identity_mismatch():
-    remote_query.verify_run_finalize_response({}, UPLOAD_ID)
-    remote_query.verify_run_finalize_response({'upload_id': ''}, UPLOAD_ID)
-    remote_query.verify_run_finalize_response({'upload_id': UPLOAD_ID}, UPLOAD_ID)
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-        remote_query.verify_run_finalize_response({'upload_id': 'other-upload'}, UPLOAD_ID)
-    assert excinfo.value.code == 'invalid_receipt'
-
-
-def test_parse_page_receipt_body_accepts_json_objects():
-    payload = b'{"value":1}'
-    page = _page_metadata(payload)
-    receipt = _receipt_json(page)
-
-    assert remote_query.parse_page_receipt_body(receipt) == json.loads(receipt)
-
-
-@pytest.mark.parametrize('body', [b'', b'not json', b'[]', b'"x"', b'null'])
-def test_parse_page_receipt_body_fails_closed_on_unusable_bodies(body):
-    # Every accepted page PUT returns the authoritative receipt: an empty body is a
-    # broken response, not a silent success.
-    with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-        remote_query.parse_page_receipt_body(body)
-    assert excinfo.value.code == 'invalid_receipt'
-
-
-def test_verify_page_response_accepts_only_the_authoritative_page_identity():
-    payload = b'{"value":1}'
-    page = _page_metadata(payload, batch_index=2, record_offset=7, rows=4)
-    receipt = {
-        'batch_index': 2,
-        'key': 'agent-intake-test/pages/2.json',
-        'record_offset': 7,
-        'bytes': len(payload),
-        'rows': 4,
-        'sha256': page.sha256_hex,
-    }
-
-    remote_query.verify_page_response(receipt, page)
-
-    mismatches = [
-        {'batch_index': 3},  # wrong page index
-        {'record_offset': 6},  # wrong row offset
-        {'bytes': len(payload) + 1},  # wrong byte count
-        {'rows': 5},  # wrong row count
-        {'sha256': '0' * 64},  # wrong checksum: terminal, never overwritten
-        {'key': ''},  # no usable object key
-        {'key': 7},
-        {'batch_index': '2'},  # strings are not exact integers
-        {'rows': True},
-    ]
-    for mismatch in mismatches:
-        with pytest.raises(remote_query.RemoteQueryFailure) as excinfo:
-            remote_query.verify_page_response({**receipt, **mismatch}, page)
-        assert excinfo.value.code == 'invalid_receipt'
-        assert excinfo.value.retryable is False
-
-
 # ---------------------------------------------------------------------------
 # Failure, timeout, and cancellation flows
 # ---------------------------------------------------------------------------
@@ -2258,7 +1387,7 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(remote_query.PAGE_SUFFIX))
+    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(rq.PAGE_SUFFIX))
     pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
     fake = FakeUploadClient()
 
@@ -2276,7 +1405,7 @@ def test_stream_aborts_on_page_upload_failure(monkeypatch):
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient(
-        raise_on_put_page=remote_query.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
+        raise_on_put_page=rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
     )
 
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
@@ -2318,9 +1447,7 @@ def test_stream_fails_closed_on_run_finalize_failure(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
-    fake = FakeUploadClient(
-        raise_on_run_finalize=remote_query.RemoteQueryFailure('upload_failed', 'run finalize rejected')
-    )
+    fake = FakeUploadClient(raise_on_run_finalize=rq.RemoteQueryFailure('upload_failed', 'run finalize rejected'))
 
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 

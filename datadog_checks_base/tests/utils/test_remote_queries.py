@@ -1,0 +1,365 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+import hashlib
+import io
+import json
+from types import SimpleNamespace
+
+import pytest
+from pydantic import ValidationError
+
+from datadog_checks.base.utils import remote_queries as rq
+
+
+@pytest.fixture
+def delivery():
+    return rq.RemoteQueryResultDelivery.model_validate(
+        {
+            'runId': 'run-1',
+            'taskId': 'task-1',
+            'artifactVersion': 1,
+            'uploadId': 'upload-1',
+            'baseUrl': 'https://intake.example',
+            'token': 'test-token',
+            'limits': {
+                'maxFileBytes': 1024,
+                'maxResultBytes': 8192,
+                'maxRowBytes': 64,
+                'maxColumns': 8,
+                'maxSchemaBytes': 256,
+                'maxPages': 8,
+                'timeoutMs': 5000,
+            },
+        }
+    )
+
+
+@pytest.fixture
+def creds(delivery):
+    return rq.UploadCredentials(
+        delivery.base_url, delivery.upload_id, 'test-api-key', 'test-app-key', delivery.token, None
+    )
+
+
+def receipt(page):
+    return {
+        'batch_index': page.batch_index,
+        'record_offset': page.record_offset,
+        'bytes': page.page_bytes,
+        'rows': page.rows,
+        'sha256': page.sha256_hex,
+        'key': f'pages/{page.batch_index}.json',
+    }
+
+
+class Uploads:
+    def __init__(self):
+        self.pages = []
+        self.bodies = []
+
+    def put_page(self, creds, page, body):
+        self.pages.append((page, body.read()))
+        self.bodies.append(body)
+        return receipt(page)
+
+    def finalize_run(self, creds):
+        return {'upload_id': creds.upload_id}
+
+
+def bounded_delivery(delivery, **limits):
+    value = delivery.model_dump(by_alias=True)
+    value['limits'].update(limits)
+    return rq.RemoteQueryResultDelivery.model_validate(value)
+
+
+@pytest.mark.parametrize('include_schema', [False, True])
+def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, include_schema):
+    schema = [{'column_name': 'value', 'vendor_data_type': 'text'}]
+    schema_json = json.dumps(schema).encode() if include_schema else None
+    row = {'value': 'a\n\u2603'}
+    encoded = json.dumps(row).encode()
+    prefix = rq.page_prefix(
+        run_id=delivery.run_id, task_id=delivery.task_id, batch_index=0, record_offset=0, schema_json=schema_json
+    )
+    limit = len(prefix) + len(encoded) + 3
+    delivery = bounded_delivery(delivery, maxFileBytes=limit, maxSchemaBytes=len(schema_json or b'') or 1)
+    uploads = Uploads()
+    writer = rq.PageWriter(delivery, creds, uploads, schema_json, lambda: None, rq.RemoteQueryRunStats())
+    for _ in range(3):
+        writer.add_row(encoded)
+    result = writer.finish()
+
+    assert len(uploads.pages) == 3
+    for index, (page, payload) in enumerate(uploads.pages):
+        envelope = json.loads(payload)
+        assert envelope['data']['items'] == [row]
+        assert envelope['run_id'] == delivery.run_id
+        assert envelope['task_id'] == delivery.task_id
+        assert envelope['batch_index'] == page.batch_index == index
+        assert envelope['record_offset'] == page.record_offset == index
+        assert page.rows == 1
+        assert page.page_bytes == len(payload) <= limit
+        assert page.sha256_hex == hashlib.sha256(payload).hexdigest()
+        if include_schema:
+            assert envelope['schema'] == schema
+        else:
+            assert 'schema' not in envelope
+    assert result == {
+        'uploadId': creds.upload_id,
+        'pageCount': 3,
+        'totalRows': 3,
+        'totalBytes': sum(len(payload) for _, payload in uploads.pages),
+    }
+    assert all(body.closed for body in uploads.bodies)
+
+
+@pytest.mark.parametrize('schema,pages', [(None, 0), (b'[{"column_name":"value","vendor_data_type":"int"}]', 1)])
+def test_empty_result_keeps_requested_schema(delivery, creds, schema, pages):
+    uploads = Uploads()
+    writer = rq.PageWriter(delivery, creds, uploads, schema, lambda: None, rq.RemoteQueryRunStats())
+    assert writer.finish()['pageCount'] == pages
+    if pages:
+        assert json.loads(uploads.pages[0][1])['data']['items'] == []
+
+
+@pytest.mark.parametrize(
+    'bound,error', [('page', 'row_too_large'), ('count', 'max_pages_exceeded'), ('total', 'max_result_bytes_exceeded')]
+)
+def test_page_limits_fail_without_final_success(delivery, creds, bound, error):
+    row = b'{"value":1}'
+    size = (
+        len(
+            rq.page_prefix(
+                run_id=delivery.run_id, task_id=delivery.task_id, batch_index=0, record_offset=0, schema_json=None
+            )
+        )
+        + len(row)
+        + 3
+    )
+    delivery = bounded_delivery(
+        delivery,
+        maxFileBytes=size,
+        maxSchemaBytes=1,
+        maxPages=1 if bound == 'count' else 8,
+        maxResultBytes=size if bound == 'total' else 8192,
+    )
+    uploads = Uploads()
+    writer = rq.PageWriter(delivery, creds, uploads, None, lambda: None, rq.RemoteQueryRunStats())
+    try:
+        with pytest.raises(rq.RemoteQueryFailure) as failure:
+            writer.add_row(row + b' ' if bound == 'page' else row)
+            writer.add_row(row)
+            writer.finish()
+        assert failure.value.code == error
+    finally:
+        writer.discard()
+    assert all(body.closed for body in uploads.bodies)
+
+
+@pytest.mark.parametrize('failure', ['upload', 'receipt'])
+def test_failed_upload_releases_page(delivery, creds, failure):
+    bodies = []
+
+    def put_page(_creds, page, body):
+        bodies.append(body)
+        if failure == 'upload':
+            raise rq.RemoteQueryFailure('upload_failed', 'unavailable')
+        return {**receipt(page), 'rows': page.rows + 1}
+
+    writer = rq.PageWriter(
+        delivery, creds, SimpleNamespace(put_page=put_page), None, lambda: None, rq.RemoteQueryRunStats()
+    )
+    writer.add_row(b'{"value":1}')
+    with pytest.raises(rq.RemoteQueryFailure):
+        writer.finish()
+    assert bodies[0].closed
+
+
+@pytest.mark.parametrize('trigger', ['lost_response', 'unavailable', 'in_progress'])
+def test_http_page_retry_replays_exact_body_and_headers(monkeypatch, creds, trigger):
+    import requests
+
+    calls = []
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(2, 7, len(payload), 1, hashlib.sha256(payload).hexdigest())
+
+    def request(method, url, headers, data, timeout):
+        calls.append((method, url, headers, data.read()))
+        if len(calls) == 1:
+            if trigger == 'lost_response':
+                raise requests.exceptions.ConnectionError('response lost')
+            status = 503 if trigger == 'unavailable' else 409
+            return SimpleNamespace(status_code=status, content=b'{"error":{"code":"page_upload_in_progress"}}')
+        return SimpleNamespace(status_code=200, content=json.dumps(receipt(page)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    client = rq.RequestsUploadClient()
+    with io.BytesIO(payload) as body:
+        assert client.put_page(creds, page, body) == receipt(page)
+    assert calls[0] == calls[1]
+    method, url, headers, sent = calls[0]
+    assert (method, url, sent) == ('PUT', 'https://intake.example/uploads/upload-1/pages/2', payload)
+    assert headers == {
+        'dd-api-key': 'test-api-key',
+        'dd-application-key': 'test-app-key',
+        'Authorization': 'Bearer test-token',
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': str(len(payload)),
+        'X-DD-Page-Bytes': str(len(payload)),
+        'X-DD-Page-Rows': '1',
+        'X-DD-Record-Offset': '7',
+        'X-DD-Page-SHA256': page.sha256_hex,
+    }
+
+
+@pytest.mark.parametrize('status', [400, 403, 409])
+def test_http_terminal_rejections_are_not_retried(monkeypatch, creds, status):
+    import requests
+
+    calls = []
+
+    def request(*args, **kwargs):
+        calls.append(args)
+        return SimpleNamespace(status_code=status, content=b'{"error":{"code":"already_exists"}}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    page = rq.PageUploadMetadata(0, 0, 1, 1, '0' * 64)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.RequestsUploadClient().put_page(creds, page, io.BytesIO(b'x'))
+    assert failure.value.code == 'upload_failed'
+    assert not failure.value.retryable
+    assert len(calls) == 1
+
+
+def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
+    import requests
+
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append((method, url, headers, data))
+        return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, 'test-intake'
+    )
+    client = rq.RequestsUploadClient()
+    assert client.finalize_run(creds)['upload_id'] == creds.upload_id
+    client.abort(creds)
+    assert [call[1] for call in calls] == [
+        'https://intake.example/uploads/upload-1/finalize',
+        'https://intake.example/uploads/upload-1/abort',
+    ]
+    assert all(
+        method == 'POST' and headers['test-drive-test-intake'] == '1' and body == b'{}'
+        for method, _, headers, body in calls
+    )
+
+
+@pytest.mark.parametrize(
+    'field,bad',
+    [('batch_index', 1), ('record_offset', -1), ('bytes', 2), ('rows', True), ('sha256', 'mismatch'), ('key', '')],
+)
+def test_receipt_must_match_produced_page(field, bad):
+    page = rq.PageUploadMetadata(0, 0, 1, 1, '0' * 64)
+    with pytest.raises(rq.RemoteQueryFailure, match='response'):
+        rq.verify_page_response({**receipt(page), field: bad}, page)
+
+
+@pytest.mark.parametrize('body', [b'', b'not-json', b'[]', b'null'])
+def test_page_receipt_requires_json_object(body):
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.parse_page_receipt_body(body)
+    assert failure.value.code == 'invalid_receipt'
+
+
+def test_finalize_identity_must_match():
+    with pytest.raises(rq.RemoteQueryFailure):
+        rq.verify_run_finalize_response({'upload_id': 'other'}, 'upload-1')
+
+
+@pytest.mark.parametrize(
+    'target',
+    [
+        {},
+        {'host': 'db', 'dbname': 'db'},
+        {'database_instance': ' db '},
+        {'database_instance': 'db', 'port': 5432},
+        {'host': 'db', 'port': True, 'dbname': 'db'},
+    ],
+)
+def test_target_requires_one_complete_selector(target):
+    with pytest.raises(ValueError):
+        rq.normalize_target(target)
+
+
+@pytest.mark.parametrize(
+    'path,value',
+    [
+        (('operation',), None),
+        (('includeSchema',), 'true'),
+        (('target', 'port'), '5432'),
+        (('resultDelivery',), None),
+        (('resultDelivery', 'artifactVersion'), 2),
+        (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
+        (('resultDelivery', 'limits', 'maxResultBytes'), 10 * 1024**3 + 1),
+        (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
+    ],
+)
+def test_request_validation_rejects_malformed_instructions_without_echoing_values(delivery, path, value):
+    request = {
+        'operation': 'produce_json_pages',
+        'query': 'SELECT 1',
+        'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
+        'resultDelivery': delivery.model_dump(by_alias=True),
+    }
+    parent = request
+    for key in path[:-1]:
+        parent = parent[key]
+    parent[path[-1]] = value
+    with pytest.raises(ValidationError) as failure:
+        rq.RemoteQueryRequest.model_validate(request)
+    message = rq.validation_message(failure.value)
+    assert path[-1] in message
+    assert 'SECRET_DO_NOT_LOG' not in message
+    assert delivery.token not in message
+
+
+def test_target_normalization():
+    target = rq.normalize_target({'host': ' DB.EXAMPLE. ', 'port': 5432, 'dbname': 'db'})
+    assert (target.host, target.port, target.dbname) == ('db.example', 5432, 'db')
+    assert rq.normalize_target({'database_instance': 'Primary/DB'}).database_instance == 'Primary/DB'
+
+
+@pytest.mark.parametrize(
+    'mutation',
+    [{'maxFileBytes': 0}, {'maxRowBytes': 2048}, {'maxSchemaBytes': 2048}, {'maxResultBytes': 512}, {'maxPages': '8'}],
+)
+def test_limits_reject_invalid_bounds(delivery, mutation):
+    with pytest.raises(ValidationError):
+        bounded_delivery(delivery, **mutation)
+
+
+@pytest.mark.parametrize('value,expected', [(None, True), (' yes ', True), ('false', False), (False, False)])
+def test_allowlist_default_and_config(monkeypatch, value, expected):
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', lambda _: value)
+    assert rq.is_query_allowlist_enabled() is expected
+
+
+@pytest.mark.parametrize(
+    'value,expected',
+    [
+        (' TEST-INTAKE ', 'test-intake'),
+        (None, None),
+        ('', None),
+        ('-intake', None),
+        ('a' * 64, None),
+        ('x\r\nAuthorization: y', None),
+    ],
+)
+def test_test_drive_name_cannot_inject_headers(value, expected):
+    assert rq.validate_test_drive_name(value) == expected
