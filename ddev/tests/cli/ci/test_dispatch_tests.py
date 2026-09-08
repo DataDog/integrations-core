@@ -5,12 +5,22 @@
 
 from __future__ import annotations
 
+import subprocess
+from typing import TYPE_CHECKING
+
 import pytest
 
 from ddev.cli.ci.dispatch_tests import head_is_fork
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest, PullRequestFile, PullRequestSimple
 from tests.cli.ci.tests.helpers import make_batch, make_job
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from ddev.config.file import ConfigFileWithOverrides
+    from tests.helpers.github_async import FakeAsyncGitHubClient
+    from tests.helpers.runner import CliRunner
 
 PR_NUMBER = 4242
 HEAD_SHA = 'head-sha-aaa'
@@ -64,7 +74,7 @@ def pulls_page(*pulls: PullRequestSimple) -> GitHubResponse[list[PullRequestSimp
 
 @pytest.fixture
 def planned(mocker):
-    """Stand in for the planning layer, which has its own tests and costs a Hatch call per target."""
+    """Keep PR-resolution tests independent of the planning layer."""
     batches = [make_batch(make_job(target='ntp'))]
     return mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=batches)
 
@@ -110,6 +120,27 @@ def test_a_pull_request_supplies_the_whole_run_context(ddev, github, planned, re
     assert 'a-target-branch' in result.output
     # A pull request is tested at its merge commit, not at its head.
     assert f'refs/pull/{PR_NUMBER}/merge' in result.output
+
+
+def test_dispatch_tests_plans_from_hatch_toml(
+    ddev: CliRunner, github: FakeAsyncGitHubClient, config_file: ConfigFileWithOverrides, tmp_path: Path
+):
+    root = tmp_path / 'repo'
+    (root / '.ddev').mkdir(parents=True)
+    (root / '.ddev' / 'config.toml').write_text('')
+    subprocess.run(['git', 'init', '--quiet', str(root)], check=True)
+    (root / 'ntp').mkdir()
+    (root / 'ntp' / 'hatch.toml').write_text(
+        '[envs.default]\ne2e-env = false\n[[envs.default.matrix]]\npython = ["3.13"]\nversion = ["1", "2"]\n'
+    )
+    config_file.global_model.repos['core'] = str(root)
+    config_file.save()
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--repo', 'DataDog/integrations-core', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Batches -> 1 (2 jobs)' in result.output
+    assert '\n    ntp\n' in result.output
 
 
 def test_a_head_sha_resolves_to_its_pull_request(ddev, github, planned):
