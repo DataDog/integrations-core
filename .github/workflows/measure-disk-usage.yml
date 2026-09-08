@@ -149,8 +149,6 @@ jobs:
             section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
           } > pr-comment/body.md
 
-      # Posted directly rather than via post-pr-comment.yml, which would only see this
-      # job's own head_sha (attributed to the default branch), not the original PR's.
       - name: Get token via dd-octo-sts
         id: octo-sts
         if: github.event.workflow_run.event == 'pull_request'
