@@ -577,7 +577,8 @@ def test_large_run_stays_within_budget_and_says_what_was_dropped():
     # targets. The body is dense with three-byte emoji and block-drawing characters, so a character
     # count would understate it.
     assert len(body.encode("utf-8")) <= GITHUB_COMMENT_HARD_LIMIT
-    # The header survives intact: totals and every batch row are the highest-priority content.
+    # The header survives intact: the notice, totals and every batch row are the top content.
+    assert "Dispatcher beta: informational only" in body
     assert "**240/240 jobs**" in body
     assert body.count("<tr><td><code>batch-") == 10
     assert "not shown — the comment reached its size limit" in body
@@ -840,6 +841,25 @@ FALLBACK_TIERS = [
     pytest.param(render_minimal_comment, id="minimal"),
 ]
 
+NOTICE_TIERS = [
+    pytest.param(render_comment, id="full"),
+    *FALLBACK_TIERS,
+]
+
+
+@pytest.mark.parametrize("render", NOTICE_TIERS)
+def test_every_tier_reports_itself_as_informational(render: Callable[[DispatcherProgress], str]):
+    """The report runs alongside the CI that decides merges, so it must say it is advisory."""
+    progress = DispatcherProgress(batches=(batch_progress("batch-01", job_progress(attempt())),), done=True)
+
+    body = render(progress)
+
+    heading = body.index("## ")
+    notice = body.index("Dispatcher beta: informational only")
+    assert heading < notice < body.index("### Batches")
+    assert "You can ignore this report and its statuses" in body
+    assert "Existing CI remains the merge signal" in body
+
 
 @pytest.mark.parametrize("render", FALLBACK_TIERS)
 def test_a_fallback_tier_does_not_point_at_the_section_it_dropped(render: Callable[[DispatcherProgress], str]):
@@ -927,6 +947,7 @@ def test_a_cancelled_run_with_nothing_gathered_still_says_it_ran(monkeypatch):
 
     assert body.startswith(COMMENT_MARKER)
     assert CANCELLED_HEADING in body
+    assert "Dispatcher beta: informational only" in body
     assert "https://github.com/DataDog/integrations-core/actions/runs/12345" in body
 
 
