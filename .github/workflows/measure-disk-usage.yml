@@ -149,11 +149,8 @@ jobs:
             section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
           } > pr-comment/body.md
 
-      # Posted directly rather than via post-pr-comment.yml: that workflow is itself
-      # workflow_run-triggered, so by the time it fired off this job's completion it would
-      # only see this job's own head_sha/head_branch, which GitHub attributes to the default
-      # branch rather than to the PR that started this chain. Posting here instead means the
-      # PR is resolved from this job's own (correctly PR-scoped) workflow_run event.
+      # Posted directly rather than via post-pr-comment.yml, which would only see this
+      # job's own head_sha (attributed to the default branch), not the original PR's.
       - name: Get token via dd-octo-sts
         id: octo-sts
         if: github.event.workflow_run.event == 'pull_request'
