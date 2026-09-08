@@ -36,7 +36,7 @@ MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
 MINIMUM_LENGTH_COMMIT = 7
 
 
-@click.command()
+@click.command(short_help='Compare sizes between two commits')
 @click.argument("first_commit")
 @click.argument("second_commit")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
