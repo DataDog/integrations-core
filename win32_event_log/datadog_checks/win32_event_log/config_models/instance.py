@@ -36,6 +36,12 @@ class Filters(BaseModel):
                 'information',
                 'success audit',
                 'failure audit',
+                'Success',
+                'Error',
+                'Warning',
+                'Information',
+                'Success Audit',
+                'Failure Audit',
             ], ...
         ]
     ] = None

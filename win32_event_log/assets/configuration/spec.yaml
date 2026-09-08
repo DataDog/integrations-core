@@ -177,6 +177,9 @@ files:
           type: array
           items:
             type: string
+            # Both spellings are accepted: the check lowercases every entry before
+            # validation, and the capitalized form is what the Windows Event Viewer
+            # UI and the documented example below use.
             enum:
             - success
             - error
@@ -184,6 +187,12 @@ files:
             - information
             - success audit
             - failure audit
+            - Success
+            - Error
+            - Warning
+            - Information
+            - Success Audit
+            - Failure Audit
         - name: id
           type: array
           items:
