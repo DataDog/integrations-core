@@ -12,6 +12,8 @@ from pydantic import ValidationError
 
 from datadog_checks.base.utils import remote_queries as rq
 
+AGENT_HOSTNAME = 'rq-proof-agent-a'
+
 
 @pytest.fixture
 def delivery():
@@ -81,12 +83,19 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
     row = {'value': 'a\n\u2603'}
     encoded = json.dumps(row).encode()
     prefix = rq.page_prefix(
-        run_id=delivery.run_id, task_id=delivery.task_id, batch_index=0, record_offset=0, schema_json=schema_json
+        run_id=delivery.run_id,
+        task_id=delivery.task_id,
+        batch_index=0,
+        record_offset=0,
+        agent_hostname=AGENT_HOSTNAME,
+        schema_json=schema_json,
     )
     limit = len(prefix) + len(encoded) + 3
     delivery = bounded_delivery(delivery, maxFileBytes=limit, maxSchemaBytes=len(schema_json or b'') or 1)
     uploads = Uploads()
-    writer = rq.PageWriter(delivery, creds, uploads, schema_json, lambda: None, rq.RemoteQueryRunStats())
+    writer = rq.PageWriter(
+        delivery, creds, uploads, AGENT_HOSTNAME, schema_json, lambda: None, rq.RemoteQueryRunStats()
+    )
     for _ in range(3):
         writer.add_row(encoded)
     result = writer.finish()
@@ -97,6 +106,7 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
         assert envelope['data']['items'] == [row]
         assert envelope['run_id'] == delivery.run_id
         assert envelope['task_id'] == delivery.task_id
+        assert envelope['agent_hostname'] == AGENT_HOSTNAME
         assert envelope['batch_index'] == page.batch_index == index
         assert envelope['record_offset'] == page.record_offset == index
         assert page.rows == 1
@@ -118,10 +128,12 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
 @pytest.mark.parametrize('schema,pages', [(None, 0), (b'[{"column_name":"value","vendor_data_type":"int"}]', 1)])
 def test_empty_result_keeps_requested_schema(delivery, creds, schema, pages):
     uploads = Uploads()
-    writer = rq.PageWriter(delivery, creds, uploads, schema, lambda: None, rq.RemoteQueryRunStats())
+    writer = rq.PageWriter(delivery, creds, uploads, AGENT_HOSTNAME, schema, lambda: None, rq.RemoteQueryRunStats())
     assert writer.finish()['pageCount'] == pages
     if pages:
-        assert json.loads(uploads.pages[0][1])['data']['items'] == []
+        envelope = json.loads(uploads.pages[0][1])
+        assert envelope['data']['items'] == []
+        assert envelope['agent_hostname'] == AGENT_HOSTNAME
 
 
 @pytest.mark.parametrize(
@@ -132,7 +144,12 @@ def test_page_limits_fail_without_final_success(delivery, creds, bound, error):
     size = (
         len(
             rq.page_prefix(
-                run_id=delivery.run_id, task_id=delivery.task_id, batch_index=0, record_offset=0, schema_json=None
+                run_id=delivery.run_id,
+                task_id=delivery.task_id,
+                batch_index=0,
+                record_offset=0,
+                agent_hostname=AGENT_HOSTNAME,
+                schema_json=None,
             )
         )
         + len(row)
@@ -146,7 +163,7 @@ def test_page_limits_fail_without_final_success(delivery, creds, bound, error):
         maxResultBytes=size if bound == 'total' else 8192,
     )
     uploads = Uploads()
-    writer = rq.PageWriter(delivery, creds, uploads, None, lambda: None, rq.RemoteQueryRunStats())
+    writer = rq.PageWriter(delivery, creds, uploads, AGENT_HOSTNAME, None, lambda: None, rq.RemoteQueryRunStats())
     try:
         with pytest.raises(rq.RemoteQueryFailure) as failure:
             writer.add_row(row + b' ' if bound == 'page' else row)
@@ -169,7 +186,13 @@ def test_failed_upload_releases_page(delivery, creds, failure):
         return {**receipt(page), 'rows': page.rows + 1}
 
     writer = rq.PageWriter(
-        delivery, creds, SimpleNamespace(put_page=put_page), None, lambda: None, rq.RemoteQueryRunStats()
+        delivery,
+        creds,
+        SimpleNamespace(put_page=put_page),
+        AGENT_HOSTNAME,
+        None,
+        lambda: None,
+        rq.RemoteQueryRunStats(),
     )
     writer.add_row(b'{"value":1}')
     with pytest.raises(rq.RemoteQueryFailure):

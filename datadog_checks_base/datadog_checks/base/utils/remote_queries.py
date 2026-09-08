@@ -265,11 +265,24 @@ def encode_float(out: bytearray, value: float) -> None:
         encode_non_finite_text(out, '-Infinity')
 
 
-def page_prefix(*, run_id: str, task_id: str, batch_index: int, record_offset: int, schema_json: bytes | None) -> bytes:
-    """The envelope bytes through the opening of ``data.items``, with no trailing space."""
+def page_prefix(
+    *,
+    run_id: str,
+    task_id: str,
+    batch_index: int,
+    record_offset: int,
+    agent_hostname: str,
+    schema_json: bytes | None,
+) -> bytes:
+    """The envelope bytes through the opening of ``data.items``, with no trailing space.
+
+    ``agent_hostname`` is the executing host's Agent-reported identity, always stamped so the
+    console can attribute a run to the agent that produced its pages. It is host identity,
+    not job data, so it is threaded from the executing check instance, never the delivery.
+    """
     head = (
-        '{"version":1,"run_id":%s,"task_id":%s,"batch_index":%d,"record_offset":%d,'
-        % (json.dumps(run_id), json.dumps(task_id), batch_index, record_offset)
+        '{"version":1,"run_id":%s,"task_id":%s,"batch_index":%d,"record_offset":%d,"agent_hostname":%s,'
+        % (json.dumps(run_id), json.dumps(task_id), batch_index, record_offset, json.dumps(agent_hostname))
     ).encode('utf-8')
     parts = [head]
     if schema_json is not None:
@@ -292,6 +305,7 @@ class PageWriter:
         delivery: RemoteQueryResultDelivery,
         creds: UploadCredentials,
         client: UploadClient,
+        agent_hostname: str,
         schema_json: bytes | None,
         guard: Callable[[], None],
         stats: RemoteQueryRunStats,
@@ -299,6 +313,7 @@ class PageWriter:
         self._delivery = delivery
         self._creds = creds
         self._client = client
+        self._agent_hostname = agent_hostname
         self._schema_json = schema_json
         self._guard = guard
         self._stats = stats
@@ -354,6 +369,7 @@ class PageWriter:
             task_id=self._delivery.task_id,
             batch_index=self._stats.pages_emitted,
             record_offset=self._stats.rows_emitted,
+            agent_hostname=self._agent_hostname,
             schema_json=self._schema_json,
         )
         if len(prefix) + len(PAGE_SUFFIX) > self._delivery.limits.max_file_bytes:

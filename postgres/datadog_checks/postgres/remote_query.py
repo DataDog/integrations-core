@@ -390,7 +390,10 @@ def resolve_vendor_types(control_cursor: Any, columns: Sequence[ResultColumn]) -
 
 
 def build_schema_json(
-    control_cursor: Any, columns: Sequence[ResultColumn], delivery: rq.RemoteQueryResultDelivery
+    control_cursor: Any,
+    columns: Sequence[ResultColumn],
+    delivery: rq.RemoteQueryResultDelivery,
+    agent_hostname: str,
 ) -> bytes:
     """Build the ordered schema entries, rejecting incomplete metadata and oversize schemas.
 
@@ -415,6 +418,7 @@ def build_schema_json(
             task_id=delivery.task_id,
             batch_index=0,
             record_offset=0,
+            agent_hostname=agent_hostname,
             schema_json=schema_json,
         )
     )
@@ -479,9 +483,11 @@ def produce_remote_query(
                     validate_columns(columns, limits.max_columns)
                     schema_json = None
                     if request.include_schema:
-                        schema_json = build_schema_json(control, columns, delivery)
+                        schema_json = build_schema_json(control, columns, delivery, check.hostname)
 
-                    writer = rq.PageWriter(delivery, creds, client, schema_json, guard, stats)
+                    # The executing check's Agent-reported hostname: the stamp must match the
+                    # agent node identity Fleet reports, never socket.gethostname().
+                    writer = rq.PageWriter(delivery, creds, client, check.hostname, schema_json, guard, stats)
                     guard()
                     try:
                         while True:

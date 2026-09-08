@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import socket
 import uuid as uuid_module
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
@@ -27,6 +28,8 @@ from datadog_checks.postgres.remote_query import (
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
 UPLOAD_ID = 'upload-01k'
+# The Agent-reported hostname every fake check carries, stamped into every page envelope.
+AGENT_HOSTNAME = 'rq-proof-agent-a'
 BASE_URL = 'https://dd.datad0g.com/api/unstable/its-agent-intake'
 TOKEN = 'scoped-upload-token'
 
@@ -228,11 +231,18 @@ class FakeUploadClient:
 
 
 def make_check(
-    host='localhost', port=5432, dbname='datadog_test', pool=None, check_database_identifier=None, **metadata
+    host='localhost',
+    port=5432,
+    dbname='datadog_test',
+    pool=None,
+    check_database_identifier=None,
+    hostname=AGENT_HOSTNAME,
+    **metadata,
 ):
     check = SimpleNamespace(
         _config=SimpleNamespace(host=host, port=port, dbname=dbname, **metadata),
         db_pool=pool if pool is not None else FakePool(),
+        hostname=hostname,
     )
     if check_database_identifier is not None:
         check.database_identifier = check_database_identifier
@@ -343,9 +353,14 @@ def assert_success(events):
     return event_metadata(events[-1])
 
 
-def prefix_bytes(batch_index=0, record_offset=0, schema_json=None):
+def prefix_bytes(batch_index=0, record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=None):
     return rq.page_prefix(
-        run_id=RUN_ID, task_id=TASK_ID, batch_index=batch_index, record_offset=record_offset, schema_json=schema_json
+        run_id=RUN_ID,
+        task_id=TASK_ID,
+        batch_index=batch_index,
+        record_offset=record_offset,
+        agent_hostname=agent_hostname,
+        schema_json=schema_json,
     )
 
 
@@ -727,12 +742,34 @@ def test_producer_writes_exact_v1_envelope_json(monkeypatch):
         'version': 1,
         'run_id': RUN_ID,
         'task_id': TASK_ID,
+        'agent_hostname': AGENT_HOSTNAME,
         'batch_index': 0,
         'record_offset': 0,
         'data': {'items': [{'value': 1}]},
     }
     assert 'schema' not in parsed
     assert 'total_records' not in parsed
+
+
+def test_producer_stamps_agent_reported_hostname_from_the_check_instance(monkeypatch):
+    """The stamp is the check instance's Agent-reported hostname, never the machine's socket name."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    fake = FakeUploadClient()
+    # By construction this value differs from the machine's socket name on every host, so a
+    # matching stamp can only come from the check instance (what the Agent reported and
+    # Fleet matches against the agent node identity), never from socket.gethostname().
+    check_hostname = 'stamp-check-{}'.format(socket.gethostname())
+    check = make_check(pool=pool, hostname=check_hostname)
+
+    events = collect_events(valid_request(), check, client=fake)
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    envelope = json.loads(page)
+    assert envelope['agent_hostname'] == check_hostname
+    assert envelope['agent_hostname'] != socket.gethostname()
 
 
 def test_producer_executes_query_exactly_once_in_read_only_transaction_with_timeout(monkeypatch):

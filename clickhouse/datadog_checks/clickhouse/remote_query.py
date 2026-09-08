@@ -639,7 +639,9 @@ def validate_columns(columns: Sequence[ResultColumn], max_columns: int) -> None:
         seen.add(column.name)
 
 
-def build_schema_json(columns: Sequence[ResultColumn], delivery: rq.RemoteQueryResultDelivery) -> bytes:
+def build_schema_json(
+    columns: Sequence[ResultColumn], delivery: rq.RemoteQueryResultDelivery, agent_hostname: str
+) -> bytes:
     """Build the ordered schema entries, rejecting oversize schemas.
 
     The encoded schema repeats in every page, so it must fit both ``maxSchemaBytes`` and the
@@ -659,6 +661,7 @@ def build_schema_json(columns: Sequence[ResultColumn], delivery: rq.RemoteQueryR
             task_id=delivery.task_id,
             batch_index=0,
             record_offset=0,
+            agent_hostname=agent_hostname,
             schema_json=schema_json,
         )
     )
@@ -805,6 +808,7 @@ def _run_streamed_query(
     clickhouse_client: ClickhouseClient,
     creds: rq.UploadCredentials,
     client: rq.UploadClient,
+    agent_hostname: str,
     guard: Callable[[], None],
     stats: rq.RemoteQueryRunStats,
 ) -> dict[str, Any]:
@@ -832,9 +836,11 @@ def _run_streamed_query(
         bounds.bind_columns(columns)
         schema_json = None
         if request.include_schema:
-            schema_json = build_schema_json(columns, delivery)
+            schema_json = build_schema_json(columns, delivery, agent_hostname)
 
-        writer = rq.PageWriter(delivery, creds, client, schema_json, guard, stats)
+        # The executing check's Agent-reported hostname: the stamp must match the
+        # agent node identity Fleet reports, never socket.gethostname().
+        writer = rq.PageWriter(delivery, creds, client, agent_hostname, schema_json, guard, stats)
         try:
             guard()
             for line in lines:
@@ -905,7 +911,7 @@ def produce_remote_query(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
         try:
-            receipt = _run_streamed_query(request, clickhouse_client, creds, client, guard, stats)
+            receipt = _run_streamed_query(request, clickhouse_client, creds, client, check.hostname, guard, stats)
         except rq.RemoteQueryFailure:
             raise
         except clickhouse_errors.OperationalError:

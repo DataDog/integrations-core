@@ -25,6 +25,8 @@ TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
 UPLOAD_ID = 'upload-01k'
 BASE_URL = 'https://dd.datad0g.com/api/unstable/its-agent-intake'
 TOKEN = 'scoped-upload-token'
+# The Agent-reported hostname every fake check carries, stamped into every page envelope.
+AGENT_HOSTNAME = 'rq-proof-agent-a'
 
 
 # ---------------------------------------------------------------------------
@@ -188,10 +190,18 @@ class FakeUploadClient:
         self.abort_calls += 1
 
 
-def make_check(server='localhost', port=8123, db='default', pool_manager=None, check_database_identifier=None):
+def make_check(
+    server='localhost',
+    port=8123,
+    db='default',
+    pool_manager=None,
+    check_database_identifier=None,
+    hostname=AGENT_HOSTNAME,
+):
     check = SimpleNamespace(
         _config=SimpleNamespace(server=server, port=port, db=db),
         _pool_manager=pool_manager if pool_manager is not None else object(),
+        hostname=hostname,
     )
     if check_database_identifier is not None:
         check.database_identifier = check_database_identifier
@@ -325,9 +335,14 @@ def assert_success(events):
     return event_metadata(events[-1])
 
 
-def prefix_bytes(batch_index=0, record_offset=0, schema_json=None):
+def prefix_bytes(batch_index=0, record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=None):
     return rq.page_prefix(
-        run_id=RUN_ID, task_id=TASK_ID, batch_index=batch_index, record_offset=record_offset, schema_json=schema_json
+        run_id=RUN_ID,
+        task_id=TASK_ID,
+        batch_index=batch_index,
+        record_offset=record_offset,
+        agent_hostname=agent_hostname,
+        schema_json=schema_json,
     )
 
 
@@ -854,6 +869,7 @@ def test_producer_writes_exact_v1_envelope_json(monkeypatch):
         'version': 1,
         'run_id': RUN_ID,
         'task_id': TASK_ID,
+        'agent_hostname': AGENT_HOSTNAME,
         'batch_index': 0,
         'record_offset': 0,
         'data': {'items': [{'value': 1}]},
