@@ -1,0 +1,55 @@
+# Trust policy for Measure Disk Usage's own PR-comment posting
+#
+# This policy grants a scoped, ephemeral token for posting the disk-usage
+# diff comment directly from measure-disk-usage.yml. It is only reachable
+# from the version of that workflow committed to master; workflow_run
+# always runs the default-branch version of the workflow, so fork-PR
+# modifications cannot reach this policy.
+#
+# Naming convention:
+#   self:                Only this repository (DataDog/integrations-core) can use this policy
+#   measure-disk-usage:  The workflow this policy is scoped to
+#   workflow-run:        Triggered by workflow_run events
+#
+# Security model:
+#   - event_name pinned to workflow_run (runs on master by design).
+#   - ref / ref_protected pinned to master so a rogue fork PR cannot mint this token
+#     even if it manages to invoke something else.
+#   - job_workflow_ref pinned to measure-disk-usage.yml on master so unrelated
+#     workflow_run-triggered workflows cannot reuse this policy.
+#
+# Permissions granted:
+#   - pull_requests: write - Create and update the disk-usage diff comment. Although
+#                            PR conversation comments are served by the Issues API
+#                            endpoint (/repos/.../issues/{n}/comments), the endpoint
+#                            accepts either issues:write or pull_requests:write, and
+#                            we only ever comment on pull requests, never on plain
+#                            issues. pull_requests:write also subsumes the PR-number
+#                            lookup (commits/{sha}/pulls).
+#
+# Why this workflow posts directly instead of going through post-pr-comment.yml:
+#   post-pr-comment.yml is itself workflow_run-triggered, so by the time it fired
+#   off this job's completion it would only see this job's own head_sha/head_branch,
+#   which GitHub attributes to the default branch rather than to the PR that started
+#   the chain two hops back. Posting here instead resolves the PR from this job's own
+#   workflow_run event, which correctly carries the original PR's head SHA.
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.measure-disk-usage.workflow-run
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  event_name: workflow_run
+  ref: refs/heads/master
+  ref_protected: "true"
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/measure-disk-usage\.yml@refs/heads/master
+  repository: DataDog/integrations-core
+
+permissions:
+  pull_requests: write

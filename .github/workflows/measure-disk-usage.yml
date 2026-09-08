@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
-      # needed for dd-sts
+      # needed for dd-sts (push) and dd-octo-sts (pull_request)
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -142,19 +142,63 @@ jobs:
 
           mkdir -p pr-comment
           {
+            printf '<!-- pr-comment:measure-disk-usage -->\n\n'
             printf '## Disk usage change\n\n'
             printf 'Commit `%s` compared against `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
             section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
             section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
           } > pr-comment/body.md
 
-      - name: Upload PR comment artifact
+      # Posted directly rather than via post-pr-comment.yml: that workflow is itself
+      # workflow_run-triggered, so by the time it fired off this job's completion it would
+      # only see this job's own head_sha/head_branch, which GitHub attributes to the default
+      # branch rather than to the PR that started this chain. Posting here instead means the
+      # PR is resolved from this job's own (correctly PR-scoped) workflow_run event.
+      - name: Get token via dd-octo-sts
+        id: octo-sts
         if: github.event.workflow_run.event == 'pull_request'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         with:
-          name: pr-comment
-          path: pr-comment/body.md
-          if-no-files-found: error
+          scope: DataDog/integrations-core
+          policy: self.measure-disk-usage.workflow-run
+
+      - name: Resolve PR number from head SHA
+        id: pr
+        if: github.event.workflow_run.event == 'pull_request'
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          number=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
+            --jq '[.[] | select(.state == "open")][0].number // empty')
+          if [[ -z "$number" ]]; then
+            echo "No open PR matches head SHA ${HEAD_SHA}; nothing to post." >&2
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=$number" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find existing comment
+        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.skip != 'true'
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: find_comment
+        with:
+          token: ${{ steps.octo-sts.outputs.token }}
+          issue-number: ${{ steps.pr.outputs.number }}
+          body-includes: '<!-- pr-comment:measure-disk-usage -->'
+          comment-author: 'dd-octo-sts[bot]'
+
+      - name: Post comment
+        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.skip != 'true'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          token: ${{ steps.octo-sts.outputs.token }}
+          issue-number: ${{ steps.pr.outputs.number }}
+          body-path: pr-comment/body.md
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          edit-mode: replace
 
       - name: Upload JSON uncompressed sizes artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
