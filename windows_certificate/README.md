@@ -87,6 +87,38 @@ instances:
       - .*
 ```
 
+Beginning with Agent v7.83.0, the integration supports `filters.include` and `filters.exclude` to scope certificate collection using [Go `regexp`][13] patterns matched against tag values. Each rule maps a tag key (for example `certificate_thumbprint`, `subject_CN`, or `subject_alt_name_dns`) to a pattern:
+
+- `include`: a certificate must satisfy **all** include rules to be reported. A certificate that has no tag for a given include key is excluded.
+- `exclude`: a certificate is dropped if **any** exclude rule matches one of its tag values.
+- When both are specified, `include` is evaluated first, then `exclude`.
+- An invalid regex pattern causes the check to fail at configuration time.
+
+A filter rule only matches a tag that is actually collected. Tags emitted by the opt-in flags described in [Tags](#tags) (`subject_alt_name_dns`, `certificate_template_name`, `signature_algorithm`, and similar) can only be used as filter keys when the corresponding `*_tag` flag is enabled; otherwise the rule is dropped with a warning instead of excluding every certificate. `certificate_store` and `server` are not supported as filter keys.
+
+This example configuration reports only certificates with a specific thumbprint:
+
+```yaml
+instances:
+  - certificate_store: ROOT
+    filters:
+      include:
+        certificate_thumbprint: "^3a7b9c"
+```
+
+This example configuration scopes collection to certificates using the `WebServer` template while excluding any with `staging` in the subject CN (`certificate_template_tag` must be enabled to filter on `certificate_template_name`):
+
+```yaml
+instances:
+  - certificate_store: ROOT
+    certificate_template_tag: true
+    filters:
+      include:
+        certificate_template_name: "WebServer"
+      exclude:
+        subject_CN: "staging"
+```
+
 ### Tags
 
 The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the CRL's issuer and thumbprint.
