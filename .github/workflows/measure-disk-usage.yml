@@ -157,19 +157,16 @@ jobs:
           scope: DataDog/integrations-core
           policy: self.measure-disk-usage.workflow-run
 
-      - name: Resolve PR number from head SHA
+      - name: Resolve PR number
         id: pr
         if: github.event.workflow_run.event == 'pull_request'
         env:
-          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          REPO: ${{ github.repository }}
+          PULL_REQUESTS: ${{ toJSON(github.event.workflow_run.pull_requests) }}
         run: |
           set -euo pipefail
-          number=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
-            --jq '[.[] | select(.state == "open")][0].number // empty')
+          number=$(echo "$PULL_REQUESTS" | jq -r '.[0].number // empty')
           if [[ -z "$number" ]]; then
-            echo "No open PR matches head SHA ${HEAD_SHA}; nothing to post." >&2
+            echo "No PR associated with this workflow_run; nothing to post." >&2
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "number=$number" >> "$GITHUB_OUTPUT"
