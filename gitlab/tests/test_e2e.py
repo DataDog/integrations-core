@@ -4,7 +4,10 @@
 
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.gitlab import GitlabCheck
+from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
 
 from .common import assert_check
 
@@ -43,3 +46,19 @@ def test_e2e(dd_agent_check, get_config, use_openmetrics):
     # Excluding gitlab.rack.http_requests_total because it is a distribution metric
     # (its sum and count metrics are in the metadata)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=["gitlab.rack.http_requests_total"])
+
+
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(rate=True)
+
+    # The discovered candidate only sets `openmetrics_endpoint`; `gitlab_url` isn't populated by discovery,
+    # so the readiness/liveness/health service checks and the gitlab_host/gitlab_port tags (which are only
+    # added when `gitlab_url` is configured, see `get_tags()` in common.py) aren't asserted here.
+    aggregator.assert_service_check('gitlab.openmetrics.health', status=GitlabCheckV2.OK)
+    # Excluding gitlab.rack.http_requests_total because it is a distribution metric
+    # (its sum and count metrics are in the metadata)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=["gitlab.rack.http_requests_total"])
+
+
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, GitlabCheck)

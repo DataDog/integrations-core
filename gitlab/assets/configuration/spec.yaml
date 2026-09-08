@@ -2,6 +2,13 @@ name: Gitlab
 fleet_configurable: true
 files:
 - name: gitlab.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 80
+      candidates:
+      - openmetrics_endpoint: "http://{service.host}:{port.number}/-/metrics"
   options:
   - template: init_config
     options:
@@ -156,3 +163,11 @@ files:
       path: /var/log/gitlab/nginx/*.log
       service: <SERVICE_NAME>
       source: nginx
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - gitlab-ce
+      - gitlab-ee
+  - template: auto_conf/discovery
