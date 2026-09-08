@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "title": "ClickHouse active query count is high",
+  "tags": [
+    "integration:clickhouse"
+  ],
+  "description": "A high number of simultaneously executing queries can saturate ClickHouse thread pools and degrade performance for all users. This monitor tracks the number of concurrently active queries.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nClickHouse on {{host.name}} has a high number of concurrently active queries over the last 5 minutes. This may indicate query pile-up, long-running queries, or insufficient resources.\n\n## How to investigate\nCheck `system.processes` in ClickHouse for currently executing queries and identify any long-running or stuck queries.\n\n{{/is_alert}}",
+    "name": "[ClickHouse] High number of active queries on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 200,
+        "warning": 100
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:clickhouse.query.active{*} > 200",
+    "tags": [
+      "integration:clickhouse"
+    ],
+    "type": "query alert"
+  }
+}
