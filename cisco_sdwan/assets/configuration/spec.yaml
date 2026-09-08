@@ -82,6 +82,7 @@ files:
     - name: ca_file
       description: Use custom certificate authority when polling Cisco Manager.
       fleet_configurable: true
+      formats: ["path"]
       value:
         type: string
         example: <PATH_TO_CA_FILE>
