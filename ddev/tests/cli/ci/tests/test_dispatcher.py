@@ -5,25 +5,42 @@
 
 from __future__ import annotations
 
+import asyncio
+import dataclasses
 import os
 import signal
 import sys
 import time
+from collections.abc import AsyncIterator
 from pathlib import Path
+from typing import Any
 
+import httpx
 import pytest
 
+from ddev.cli.ci.tests import rate_limiting
 from ddev.cli.ci.tests.dispatcher import (
     CANCELLED_RATE_LIMITS,
     Dispatcher,
     DispatcherContext,
+    build_dispatcher,
 )
+from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
-from ddev.utils.github_async.models import ArtifactsList, WorkflowJob, WorkflowJobsList, WorkflowRun
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
+from ddev.utils.github_async.models import (
+    ArtifactsList,
+    IssueComment,
+    WorkflowJob,
+    WorkflowJobsList,
+    WorkflowJobStatus,
+    WorkflowRun,
+)
+from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
 from tests.cli.ci.tests.helpers import jobs_reported, make_batch, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
 
@@ -65,6 +82,7 @@ def build_bus(
             artifacts_base_path=tmp_path / "artifacts",
             poll_interval_seconds=0.0,
         ),
+        artifact_client=client,  # type: ignore[arg-type]
     )
     gatherer = TaskTestGatherer("test-gatherer", tmp_path / "results", batches)
     reporter = TaskRunReporter(
@@ -131,20 +149,110 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
     assert dispatches[0].kwargs["inputs"]["batch_id"] == "batch-01"
     assert dispatches[0].kwargs["inputs"]["checkout_sha"] == "refs/pull/42/merge"
 
-    # The plan is published before anything runs, then edited once the batch has been gathered.
+    # The initial plan and the final collected result both reach the same comment.
     created = client.calls_to("create_issue_comment")
     edited = client.calls_to("update_issue_comment")
     assert len(created) == 1
     assert created[0].kwargs["issue_number"] == 42
-    assert len(edited) == 1
+    assert edited
     assert jobs_reported(created[0].kwargs["body"]) == 0
-    assert jobs_reported(edited[0].kwargs["body"]) == 1
+    assert jobs_reported(edited[-1].kwargs["body"]) == 1
 
     outcome = dispatcher.outcome
     assert outcome is not None
     assert outcome.successful
     assert outcome.progress.done
     assert outcome.progress.passed == 1
+
+
+def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+):
+    events: list[RateLimitEvent] = []
+    requests: dict[str, str] = {}
+    job = make_job()
+    run_url = "https://github.com/DataDog/integrations-core/actions/runs/123"
+
+    def handle(request: httpx.Request) -> httpx.Response:
+        bucket = next(event for event in reversed(events) if isinstance(event, BucketEvent))
+        requests[request.url.path] = bucket.name
+        if request.url.path.endswith("/dispatches"):
+            return httpx.Response(200, json={"workflow_run_id": 123, "run_url": str(request.url), "html_url": run_url})
+        if request.url.path.endswith("/artifacts"):
+            return httpx.Response(200, json={"total_count": 0, "artifacts": []})
+        if request.url.path.endswith("/jobs"):
+            return httpx.Response(
+                200,
+                json={
+                    "total_count": 1,
+                    "jobs": [
+                        {"id": 1, "run_id": 123, "name": job.name, "status": "completed", "conclusion": "success"}
+                    ],
+                },
+            )
+        assert request.url.path == "/repos/DataDog/integrations-core/actions/runs/123"
+        return httpx.Response(
+            200, json={"id": 123, "status": "completed", "conclusion": "success", "html_url": run_url}
+        )
+
+    def make_client(token: str, *, rate_limiter: InstrumentedAsyncLimiter) -> AsyncGitHubClient:
+        return AsyncGitHubClient(token, rate_limiter=rate_limiter, transport=httpx.MockTransport(handle))
+
+    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
+    monkeypatch.setattr(rate_limiting, "event_logger", lambda _: events.append)
+    dispatcher = build_dispatcher(
+        batches=[make_batch(job)],
+        context=dataclasses.replace(CONTEXT, pr_number=None),
+        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
+        token="test-token",
+        artifacts_path=tmp_path / "artifacts",
+        output_path=tmp_path / "results",
+    )
+
+    dispatcher.run()
+
+    assert dispatcher.outcome.progress.done
+    prefix = "/repos/DataDog/integrations-core/actions/runs/123"
+    assert requests[f"{prefix}/artifacts"] == "artifacts"
+    assert requests[f"{prefix}/jobs"] == "default"
+    assert requests[prefix] == "default"
+
+
+def test_progress_reaches_the_comment_before_artifact_collection_finishes(
+    client: FakeAsyncGitHubClient, tmp_path: Path
+):
+    job = make_job()
+    mock_job_result(client, job, "success")
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
+    collecting_reported = asyncio.Event()
+    collection_released = False
+    update_comment = client.update_issue_comment
+    list_artifacts = client.list_workflow_run_artifacts
+
+    async def record_comment(
+        owner: str, repo: str, comment_id: int, body: str, **kwargs: Any
+    ) -> GitHubResponse[IssueComment]:
+        result = await update_comment(owner, repo, comment_id, body, **kwargs)
+        if "📥 collecting artifacts" in body:
+            collecting_reported.set()
+        return result
+
+    async def collect_after_reporting(*args: Any, **kwargs: Any) -> AsyncIterator[GitHubResponse[ArtifactsList]]:
+        nonlocal collection_released
+        async with asyncio.timeout(3):
+            await collecting_reported.wait()
+        collection_released = True
+        async for page in list_artifacts(*args, **kwargs):
+            yield page
+
+    client.update_issue_comment = record_comment
+    client.list_workflow_run_artifacts = collect_after_reporting
+
+    dispatcher.run()
+
+    assert collection_released
+    assert dispatcher.outcome.progress.done
+    assert dispatcher.outcome.final_report_published
 
 
 @pytest.mark.parametrize("client", ["failure"], indirect=True)
@@ -159,6 +267,30 @@ def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
     assert outcome is not None
     assert not outcome.successful
     assert outcome.progress.failed == 1
+
+
+def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsyncGitHubClient, tmp_path: Path):
+    job = make_job()
+    client.mock_response(
+        "get_workflow_run",
+        WorkflowRun(id=123, status="in_progress", html_url="https://github.com/o/r/actions/runs/123"),
+        once=True,
+    )
+    client.mock_response(
+        "list_workflow_jobs",
+        WorkflowJobsList(
+            total_count=1,
+            jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status=WorkflowJobStatus.IN_PROGRESS)],
+        ),
+        once=True,
+    )
+    client.mock_response("list_workflow_jobs", RuntimeError("Final job metadata unavailable"))
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
+
+    dispatcher.run()
+
+    assert not dispatcher.outcome.progress.done
+    assert not dispatcher.outcome.successful
 
 
 def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary):
