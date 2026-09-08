@@ -1,0 +1,262 @@
+# The Dispatcher executes trusted master code while the planner and test-batch jobs read the PR's merge tree.
+name: Test Dispatch
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_run:
+    workflows:
+      - Test Dispatch Trigger
+    types:
+      - completed
+
+permissions: {}
+
+# One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
+# revision cancels the previous Dispatcher run. Master pushes keep independent runs.
+concurrency:
+  group: test-dispatch-${{
+    github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
+    format('master-{0}', github.run_id) }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dispatch:
+    name: dispatch
+    runs-on: ubuntu-22.04
+    # Allow cleanup after the Dispatcher's three-hour ceiling.
+    timeout-minutes: 185
+    permissions:
+      contents: read
+      id-token: write # the octo-sts exchange; every write happens with the scoped token
+
+    if: >-
+      github.repository == 'DataDog/integrations-core'
+      && (
+        (github.event_name == 'push' && github.ref == 'refs/heads/master')
+        || (
+          github.event_name == 'workflow_run'
+          && github.event.workflow_run.conclusion == 'success'
+          && github.event.workflow_run.event == 'pull_request'
+        )
+      )
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # workflow_run executes current trusted code. A push tests that exact master revision.
+          ref: ${{ github.event_name == 'workflow_run' && 'refs/heads/master' || github.sha }}
+          fetch-depth: ${{ github.event_name == 'workflow_run' && 1 || 2 }}
+          persist-credentials: false
+
+      # Commit resolution records the local branch, but checking out a SHA leaves it detached.
+      - name: Attribute the pushed checkout to master
+        if: github.event_name == 'push'
+        run: git checkout -B master
+
+      - name: Get a scoped token
+        id: octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: DataDog/integrations-core
+          policy: self.test-dispatch
+
+      - name: Mark the run pending
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          STATUS_CONTEXT: Dispatcher / tests (beta, non-blocking)
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Refusing to post the pending status: no scoped token or full SHA."
+            exit 1
+          fi
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=${STATUS_CONTEXT}" \
+            -f "state=pending" \
+            -f "description=Planning and dispatching batches" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"posted \(.context) as \(.state), pointing at \(.target_url)"'
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      # setup-ddev always restores PR-writable caches. Install without them in this privileged job.
+      - name: Install uv
+        id: install_uv
+        continue-on-error: true
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: false
+
+      # Retry the setup-uv manifest fetch once, as setup-ddev does.
+      - name: Install uv (retry)
+        if: ${{ steps.install_uv.outcome == 'failure' }}
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: false
+
+      - name: Install ddev
+        run: uv pip install --system --no-cache -e ./datadog_checks_dev[cli] -e ./ddev
+
+      - name: Configure the trusted checkout
+        run: |
+          set -euo pipefail
+          ddev config set upgrade_check false
+          ddev config override
+
+      - name: Resolve the run
+        env:
+          DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          HEAD_REF: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          args=(
+            ci dispatch-tests
+            --resolve-only
+            --repo DataDog/integrations-core
+            --output-dir "$GITHUB_WORKSPACE/dispatcher-output"
+          )
+          if [[ "$EVENT_NAME" == workflow_run ]]; then
+            args+=(
+              --pr-head-repo "$HEAD_REPO"
+              --pr-head-ref "$HEAD_REF"
+              --pr-head-sha "$HEAD_SHA"
+            )
+          else
+            args+=(--commit "$PUSH_SHA")
+          fi
+          ddev "${args[@]}"
+
+      - name: Read the resolved run
+        id: resolved
+        run: |
+          set -euo pipefail
+          manifest=$GITHUB_WORKSPACE/dispatcher-output/run.json
+          if [[ ! -f "$manifest" ]]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "checkout_ref=$(jq -r '.checkout_ref' "$manifest")" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$(jq -r '.pr_number // empty' "$manifest")" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the planning tree
+        if: steps.resolved.outputs.pr_number != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # This checkout is data for trusted ddev to parse. Its code is executed only by test-batch.
+          ref: ${{ steps.resolved.outputs.checkout_ref }}
+          path: dispatcher-planning-repo
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-dispatcher-api-key
+
+      - name: Configure Datadog
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+        run: |
+          set -euo pipefail
+          # The key and site are stored for future Dispatcher monitoring; dispatching does not use them.
+          ddev config set orgs.default.api_key "$DD_API_KEY"
+          ddev config set orgs.default.site datadoghq.com
+
+      - name: Plan and dispatch the batches
+        id: dispatch
+        env:
+          DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          RESOLVED: ${{ steps.resolved.outputs.available }}
+          PR_NUMBER: ${{ steps.resolved.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+          if [[ "$RESOLVED" != true ]]; then
+            echo "No run remains to test."
+            exit 0
+          fi
+
+          planning_repo=$GITHUB_WORKSPACE
+          if [[ -n "$PR_NUMBER" ]]; then
+            planning_repo=$GITHUB_WORKSPACE/dispatcher-planning-repo
+          fi
+          cd "$planning_repo"
+          ddev config override
+
+          args=(
+            ci dispatch-tests
+            --run-manifest "$GITHUB_WORKSPACE/dispatcher-output/run.json"
+            --repo DataDog/integrations-core
+            --workflow test-batch.yml
+            --workflow-ref master
+            --output-dir "$GITHUB_WORKSPACE/dispatcher-output"
+            --pytest-args '-m "not flaky"'
+          )
+          if [[ -n "$PR_NUMBER" ]]; then
+            args+=(--minimum-base-package)
+          fi
+          # Deliver cancellation signals directly to ddev's cleanup handler.
+          exec ddev "${args[@]}"
+
+      # Settle pending statuses even after cancellation or setup failure.
+      - name: Settle the run's aggregate result
+        if: always()
+        timeout-minutes: 1
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          STATUS_CONTEXT: Dispatcher / tests (beta, non-blocking)
+          DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Refusing to settle the status: no scoped token or full SHA."
+            exit 1
+          fi
+          state=failure
+          description="Test dispatch did not complete"
+          if [[ "$DISPATCH_OUTCOME" == success ]]; then
+            state=success
+            description="Test dispatch completed"
+          fi
+
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=${STATUS_CONTEXT}" \
+            -f "state=${state}" \
+            -f "description=${description}" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"settled \(.context) as \(.state), pointing at \(.target_url)"'
+
+      - name: Show what the run produced
+        if: always()
+        run: |
+          if [[ -d dispatcher-output ]]; then
+            find dispatcher-output -type f | sort
+          else
+            echo "no output directory"
+          fi
+
+      - name: Upload the run's output
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: dispatcher-output
+          path: dispatcher-output
+          if-no-files-found: warn
