@@ -91,7 +91,7 @@ Beginning with Agent v7.83.0, the integration supports `filters.include` and `fi
 
 - `include`: a certificate must satisfy **all** include rules to be reported. A certificate that has no tag for a given include key is excluded.
 - `exclude`: a certificate is dropped if **any** exclude rule matches one of its tag values.
-- When both are specified, `include` is evaluated first, then `exclude`.
+- When both are specified, `exclude` takes precedence over `include`.
 - An invalid regex pattern causes the check to fail at configuration time.
 
 A filter rule only matches a tag that is actually collected. Tags emitted by the opt-in flags described in [Tags](#tags) (`subject_alt_name_dns`, `certificate_template_name`, `signature_algorithm`, and similar) can only be used as filter keys when the corresponding `*_tag` flag is enabled; otherwise the rule is dropped with a warning instead of excluding every certificate. `certificate_store` and `server` are not supported as filter keys.
