@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     )
 
 
-@click.command()
+@click.command(short_help='Show current integration and dependency sizes')
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
