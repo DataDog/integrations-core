@@ -60,6 +60,7 @@ files:
       value:
         type: integer
         example: 2000
+        maximum: 10000
     - name: lookback_time_window_minutes
       description: The time window to query when polling Cisco Manager metrics.
       fleet_configurable: true
