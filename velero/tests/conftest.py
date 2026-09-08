@@ -64,7 +64,7 @@ def setup_velero():
     save_state(NODE_AGENT_IP_STATE, get_node_agent_pod_ip())
 
 
-def get_node_agent_pod_ip():
+def get_node_agent_pod_ip() -> str:
     # There is no Service for the node-agent DaemonSet, so the pod IP is fetched directly.
     result = run_command(
         ['kubectl', 'get', 'pods', '--namespace', 'velero', '--output', 'json'],
