@@ -1,0 +1,1 @@
+Accept the capitalized ``filters.type`` values (``Error``, ``Warning``, ``Success Audit``, ...) in the config spec, matching what the check already accepts at runtime.
