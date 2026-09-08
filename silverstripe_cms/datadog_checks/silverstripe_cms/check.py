@@ -16,6 +16,8 @@ from .database_client import DatabaseClient
 
 
 class SilverstripeCMSCheck(AgentCheck):
+    """Collects health and performance metrics from a Silverstripe CMS instance and its database."""
+
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "silverstripe_cms"
 
