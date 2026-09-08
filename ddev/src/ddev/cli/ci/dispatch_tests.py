@@ -9,13 +9,15 @@ from typing import TYPE_CHECKING
 
 import click
 
+from ddev.cli.ci.dispatch_run import PullRequestResolver, resolve_run
+
 if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext, RunContext
+    from ddev.cli.ci.tests.dispatcher import DispatcherContext
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.cli.ci.tests.messages import TestBatch
-    from ddev.utils.github_async.models import PullRequest
+    from ddev.utils.git import ChangedFile
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 
@@ -27,22 +29,57 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     'pull_request',
     metavar='PR_NUMBER_OR_URL',
     default=None,
-    help='Pull request to test, as a number or a URL. Its branch, commits and target branch are read from GitHub.',
+    help='PR number or URL. Supplied head/base options constrain this PR; otherwise its context comes from GitHub.',
 )
-@click.option('--pr-number', type=int, default=None, help='Pull request number, when not using `--pr`.')
-@click.option('--checkout-sha', default=None, help='Ref the test workflow checks out. Defaults to the base commit.')
-@click.option('--base-sha', default=None, help='Commit the run reports against. Defaults to the local HEAD.')
-@click.option('--branch', default=None, help='Branch being tested. Defaults to the current branch.')
-@click.option('--target-branch', default=None, help='Target branch of the pull request, used as the comparison base.')
 @click.option(
-    '--context',
-    'run_context',
-    type=click.Choice(['pr', 'master', 'agent-test', 'release']),
+    '--pr-head-sha',
     default=None,
-    help='Kind of run. Defaults to `pr` when a pull request is known, `master` otherwise.',
+    metavar='SHA',
+    help='Expected PR head commit. Required for head-based PR lookup; use with `--pr` to skip stale revisions.',
+)
+@click.option(
+    '--pr-head-repo',
+    default=None,
+    metavar='OWNER/NAME',
+    help='Expected PR head repository. Required for head-based PR lookup; optional with `--pr`.',
+)
+@click.option(
+    '--pr-head-ref',
+    default=None,
+    metavar='BRANCH',
+    help='Expected PR head branch. Required for head-based PR lookup; optional with `--pr`.',
+)
+@click.option(
+    '--pr-base-ref',
+    default=None,
+    metavar='BRANCH',
+    help='Optional base branch to narrow or verify the pull request. Otherwise read from the resolved PR.',
+)
+@click.option(
+    '--commit',
+    default=None,
+    metavar='SHA',
+    help='Commit to compare with its first parent. Cannot be combined with PR options. Defaults to local HEAD.',
+)
+@click.option(
+    '--tags',
+    default=None,
+    metavar='"KEY:VALUE ..."',
+    help='Tags the run reports itself under, separated by spaces. Their meaning is the caller\'s to decide.',
+)
+@click.option(
+    '--pytest-args',
+    default=None,
+    metavar='ARGS',
+    help='Arguments every job appends to pytest, as one string. For example: -m "not flaky".',
 )
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
+@click.option(
+    '--minimum-base-package',
+    is_flag=True,
+    help='Also test every job against the oldest supported base package, as a second job per target.',
+)
 @click.option('--workflow', default=None, help='Workflow each batch is dispatched to.')
 @click.option('--workflow-ref', default=None, help='Ref the workflow definition is loaded from.')
 @click.option(
@@ -50,18 +87,20 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     default=None,
     help='Where the run writes what it produces: artifacts, coverage and test results.',
 )
-@click.option('--dry-run', is_flag=True, help='Show the plan and the resolved context without calling GitHub.')
+@click.option('--dry-run', is_flag=True, help='Show the plan without dispatching jobs. PR runs still read GitHub.')
 def dispatch_tests(
     app: Application,
     pull_request: str | None,
-    pr_number: int | None,
-    checkout_sha: str | None,
-    base_sha: str | None,
-    branch: str | None,
-    target_branch: str | None,
-    run_context: str | None,
+    pr_head_sha: str | None,
+    pr_head_repo: str | None,
+    pr_head_ref: str | None,
+    pr_base_ref: str | None,
+    commit: str | None,
+    tags: str | None,
+    pytest_args: str | None,
     repository: str | None,
     all_targets: bool,
+    minimum_base_package: bool,
     workflow: str | None,
     workflow_ref: str | None,
     output_dir: str | None,
@@ -70,24 +109,30 @@ def dispatch_tests(
     """Plan the tests a commit requires, run them as parallel batches of GitHub Actions jobs, and
     report the result to the pull request and to the run summary.
 
-    Every input can be passed explicitly, which is how a workflow calls it. Locally, `--pr` reads
-    the branch, commits and target branch from GitHub so only the pull request has to be named.
+    Pass `--pr` when the number is known, with `--pr-head-sha` to reject superseded revisions.
+    Otherwise use the head SHA, repository and branch from `workflow_run` to resolve the PR.
+    Its base and diff come from GitHub; `--commit` instead compares a default-branch commit
+    with its first parent using local git.
     """
     import logging
     from pathlib import Path
 
-    from ddev.cli.ci.tests.batching.build import HatchEnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext, RunContext, build_dispatcher
+    from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
+    from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.utils.github import resolve_owner_repo
 
-    requested_pr, token = validate_options(
+    owner, repo = resolve_owner_repo(app, repository)
+    pr_resolver, token = validate_options(
         app,
+        owner=owner,
+        repo=repo,
         pull_request=pull_request,
-        pr_number=pr_number,
-        branch=branch,
-        base_sha=base_sha,
-        target_branch=target_branch,
+        pr_head_sha=pr_head_sha,
+        pr_head_repo=pr_head_repo,
+        pr_head_ref=pr_head_ref,
+        pr_base_ref=pr_base_ref,
+        commit=commit,
         dry_run=dry_run,
     )
 
@@ -95,31 +140,18 @@ def dispatch_tests(
     logging.getLogger('httpx').setLevel(logging.WARNING)
 
     config = DispatcherConfig.from_repo_config(app.repo.config)
-    owner, repo = resolve_owner_repo(app, repository)
 
-    resolved_number = resolved_branch = resolved_sha = resolved_target = None
-    if requested_pr is not None:
-        resolved = fetch_pull_request(app, owner, repo, requested_pr, token)
-        if resolved.head is None or resolved.base is None:
-            app.abort(f'Pull request {resolved.number} reports no branch references.')
-        resolved_number = resolved.number
-        resolved_branch, resolved_sha, resolved_target = resolved.head.ref, resolved.head.sha, resolved.base.ref
-
-    pr_number = pr_number if pr_number is not None else resolved_number
-    branch = branch or resolved_branch or app.repo.git.current_branch()
-    base_sha = base_sha or resolved_sha or app.repo.git.latest_commit().sha
-    target_branch = target_branch or resolved_target
-    checkout_sha = checkout_sha or (f'refs/pull/{pr_number}/merge' if pr_number is not None else base_sha)
-    resolved_context = RunContext(run_context) if run_context else (RunContext.PR if pr_number else RunContext.MASTER)
+    run = resolve_run(app, pr_resolver=pr_resolver, commit=commit, token=token, all_targets=all_targets)
+    if run is None:
+        return
 
     batches = build_plan(
         app,
         config=config,
-        base_sha=base_sha,
-        run_context=resolved_context,
-        target_branch=target_branch,
+        changed_files=run.changed_files,
         all_targets=all_targets,
-        environment_provider=HatchEnvironmentProvider(app.platform, config.default_python_version),
+        minimum_base_package=minimum_base_package,
+        environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
     )
     if not batches:
         app.display_info('No affected target to test.')
@@ -128,14 +160,16 @@ def dispatch_tests(
     context = DispatcherContext(
         owner=owner,
         repo=repo,
-        run_context=resolved_context,
-        checkout_sha=checkout_sha,
-        base_sha=base_sha,
-        branch=branch,
+        tags=tuple(tags.split()) if tags else (),
+        pytest_args=pytest_args or '',
+        checkout_sha=run.checkout_sha,
+        base_sha=run.base_sha,
+        branch=run.branch,
+        is_fork=run.is_fork,
         workflow=workflow or config.workflow,
         workflow_ref=workflow_ref or config.workflow_ref,
-        target_branch=target_branch,
-        pr_number=pr_number,
+        target_branch=run.target_branch,
+        pr_number=run.pr_number,
     )
 
     display_plan(app, context, batches)
@@ -170,115 +204,92 @@ def dispatch_tests(
 def validate_options(
     app: Application,
     *,
+    owner: str,
+    repo: str,
     pull_request: str | None,
-    pr_number: int | None,
-    branch: str | None,
-    base_sha: str | None,
-    target_branch: str | None,
+    pr_head_sha: str | None,
+    pr_head_repo: str | None,
+    pr_head_ref: str | None,
+    pr_base_ref: str | None,
+    commit: str | None,
     dry_run: bool,
-) -> tuple[int | None, str]:
-    """Check every input before the run does any work, and return what checking them resolved.
-
-    That is the pull request ``--pr`` names, if any, and the GitHub token, empty when the run needs
-    none: a dry run planning from local git talks to nobody. Reading a pull request needs a token
-    even for a dry run, because the API client refuses to be built without one.
-    """
+) -> tuple[PullRequestResolver | None, str]:
+    """Validate run selection and authentication, returning a PR resolver when needed."""
     from ddev.utils.github import parse_pull_request_reference
 
-    requested_pr = None
-    if pull_request is not None:
-        resolved_by_pr = [
-            name
-            for name, value in (
-                ('`--pr-number`', pr_number),
-                ('`--branch`', branch),
-                ('`--base-sha`', base_sha),
-                ('`--target-branch`', target_branch),
-            )
-            if value is not None
-        ]
-        if resolved_by_pr:
-            app.abort(f'{", ".join(resolved_by_pr)} cannot be passed with `--pr`, which reads them from GitHub.')
-
-        requested_pr = parse_pull_request_reference(pull_request)
-        if requested_pr is None:
-            app.abort(f'`{pull_request}` is neither a pull request number nor a pull request URL.')
+    pr_options = {
+        '--pr': pull_request,
+        '--pr-head-repo': pr_head_repo,
+        '--pr-head-ref': pr_head_ref,
+        '--pr-head-sha': pr_head_sha,
+        '--pr-base-ref': pr_base_ref,
+    }
+    is_pr_run = any(value is not None for value in pr_options.values())
+    if commit is not None and is_pr_run:
+        raise click.UsageError('`--commit` cannot be combined with PR options.')
 
     token = app.config.github.token
-    if not token and (pull_request is not None or not dry_run):
+    needs_token = is_pr_run or not dry_run
+    if needs_token and not token:
         app.abort('A GitHub token is required. Set `github.token` in your ddev config.')
+    if not is_pr_run:
+        return None, token
 
-    return requested_pr, token
+    for option, value in pr_options.items():
+        if value == '':
+            raise click.UsageError(f'`{option}` must not be empty.')
 
+    number = None
+    if pull_request is not None:
+        number = parse_pull_request_reference(pull_request)
+        if number is None:
+            raise click.UsageError(f'`{pull_request}` is neither a pull request number nor a pull request URL.')
+    elif not all((pr_head_repo, pr_head_ref, pr_head_sha)):
+        raise click.UsageError('Specify `--pr` or all of `--pr-head-repo`, `--pr-head-ref`, and `--pr-head-sha`.')
 
-def fetch_pull_request(app: Application, owner: str, repo: str, number: int, token: str) -> PullRequest:
-    """Read pull request *number* from the GitHub API."""
-    import asyncio
+    if pr_head_repo is not None:
+        head_owner, _, head_name = pr_head_repo.partition('/')
+        if not head_owner or not head_name or '/' in head_name:
+            raise click.UsageError('`--pr-head-repo` must have the form OWNER/NAME.')
 
-    import httpx
-    from pydantic import ValidationError
-
-    from ddev.utils.github_async import async_github_client
-    from ddev.utils.github_errors import GitHubAuthenticationError
-
-    async def fetch() -> PullRequest:
-        async with async_github_client(token=token) as client:
-            response = await client.get_pull_request(owner, repo, number)
-            return response.data
-
-    try:
-        return asyncio.run(fetch())
-    except GitHubAuthenticationError as error:
-        app.abort(str(error))
-    except (httpx.HTTPError, ValidationError) as error:
-        app.abort(f'Could not read pull request {number}: {error}')
+    return PullRequestResolver(
+        owner=owner,
+        repo=repo,
+        number=number,
+        head_repo=pr_head_repo,
+        head_ref=pr_head_ref,
+        head_sha=pr_head_sha,
+        base_ref=pr_base_ref,
+    ), token
 
 
 def build_plan(
     app: Application,
     *,
     config: DispatcherConfig,
-    base_sha: str,
-    run_context: RunContext,
-    target_branch: str | None,
+    changed_files: list[ChangedFile] | None,
     all_targets: bool,
+    minimum_base_package: bool,
     environment_provider: EnvironmentProvider,
 ) -> list[TestBatch]:
     """Build the batches this run must execute, aborting with a readable message on a bad plan.
 
-    `--all` skips the comparison entirely: what changed is not what decides which targets run.
+    `--all` plans every eligible target, so it needs no comparison and `changed_files` is None.
     """
     from ddev.cli.ci.tests.batching.build import build_test_batches
     from ddev.cli.ci.tests.batching.exceptions import PlanningError
     from ddev.cli.ci.tests.batching.targets import all_target_rules
-    from ddev.cli.ci.tests.changes import CIContext, get_changed_files
-    from ddev.cli.ci.tests.dispatcher import RunContext
 
-    changed_files = []
-    rules = None
-    if all_targets:
-        rules = all_target_rules()
-    else:
-        ci_context = CIContext.PULL_REQUEST if run_context is RunContext.PR else CIContext.DEFAULT_BRANCH
-        try:
-            changed_files = get_changed_files(app.repo.git, base_sha, context=ci_context, target_branch=target_branch)
-        except ValueError as error:
-            app.abort(str(error))
-        except OSError as error:
-            # `GitRepository` reports a failed git invocation as OSError, and the usual cause is a
-            # commit the local clone has never fetched.
-            app.abort(
-                f'Could not compare {base_sha} against {target_branch or "its parent"} locally: {error}\n'
-                'Fetch the commit first, or pass `--all` to plan every target.'
-            )
+    rules = all_target_rules() if all_targets else None
 
     try:
         batches = build_test_batches(
             app.repo,
-            changed_files,
+            changed_files or [],
             environment_provider=environment_provider,
             config=config.batching,
             rules=rules,
+            minimum_base_package=minimum_base_package,
         )
     except PlanningError as error:
         app.abort(f'Could not build a test plan: {error}')
@@ -289,7 +300,6 @@ def build_plan(
 def display_plan(app: Application, context: DispatcherContext, batches: list[TestBatch]) -> None:
     app.display_header('Dispatcher plan')
     app.display_pair('Repository', f'{context.owner}/{context.repo}')
-    app.display_pair('Context', context.run_context.value)
     app.display_pair('Branch', context.branch)
     app.display_pair('Base commit', context.base_sha)
     app.display_pair('Checkout ref', context.checkout_sha)
@@ -297,6 +307,10 @@ def display_plan(app: Application, context: DispatcherContext, batches: list[Tes
         app.display_pair('Pull request', str(context.pr_number))
     if context.target_branch is not None:
         app.display_pair('Target branch', context.target_branch)
+    if context.tags:
+        app.display_pair('Tags', ' '.join(context.tags))
+    if context.pytest_args:
+        app.display_pair('Pytest args', context.pytest_args)
     app.display_pair('Workflow', f'{context.workflow} @ {context.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)

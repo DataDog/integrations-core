@@ -1,1 +1,0 @@
-Use a shared ``DDIGNORE_COMMENT`` constant for queries excluded from query metrics.

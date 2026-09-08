@@ -4,6 +4,7 @@
 import json
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
+from unittest import mock
 
 import pytest
 
@@ -463,6 +464,69 @@ def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggr
     assert collection_payloads_count == len(schema_events)
     for schema_event in schema_events[:-1]:
         assert 'collection_payloads_count' not in schema_event
+
+
+def test_metadata_collectors_honor_their_own_collection_intervals(integration_check, dbm_instance):
+    """
+    Each metadata sub-collector collects only once its own interval has elapsed. The intervals are
+    deliberately distinct so a collector that gates on a sibling's timestamp or interval fails here
+    instead of passing on coincidentally equal values.
+    """
+    # Extensions has no interval of its own; it shares collect_settings.collection_interval.
+    settings_interval, schemas_interval, column_statistics_interval = 600, 700, 800
+    dbm_instance['collect_settings'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': settings_interval,
+    }
+    dbm_instance['collect_schemas'] = {'enabled': True, 'collection_interval': schemas_interval}
+    dbm_instance['collect_column_statistics'] = {
+        'enabled': True,
+        'collection_interval': column_statistics_interval,
+    }
+
+    check = integration_check(dbm_instance)
+    # The first run establishes the connection and server version the collectors need, and takes the
+    # one collection each interval allows. Leave the job uncancelled so it can keep running below.
+    run_one_check(check, cancel=False)
+
+    metadata = check.metadata_samples
+
+    # wraps= leaves the real method in place, so each collector still stamps its own timestamp.
+    def spy_on(method_name):
+        return mock.patch.object(metadata, method_name, wraps=getattr(metadata, method_name))
+
+    with (
+        spy_on('_collect_postgres_settings') as settings,
+        spy_on('_collect_postgres_extensions') as extensions,
+        spy_on('_collect_postgres_schemas') as schemas,
+        spy_on('_collect_column_statistics') as column_statistics,
+    ):
+
+        def counts_after_ticks(ticks=1):
+            for _ in range(ticks):
+                metadata.run_job()
+            return {
+                'settings': settings.call_count,
+                'extensions': extensions.call_count,
+                'schemas': schemas.call_count,
+                'column_statistics': column_statistics.call_count,
+            }
+
+        # The first run stamped every collector, so no number of ticks collects anything.
+        assert counts_after_ticks(3) == {'settings': 0, 'extensions': 0, 'schemas': 0, 'column_statistics': 0}
+
+        # Retire one timestamp at a time; only the collector that owns it may become due.
+        metadata._last_schemas_query_time -= schemas_interval + 1
+        assert counts_after_ticks() == {'settings': 0, 'extensions': 0, 'schemas': 1, 'column_statistics': 0}
+
+        metadata._last_column_statistics_query_time -= column_statistics_interval + 1
+        assert counts_after_ticks() == {'settings': 0, 'extensions': 0, 'schemas': 1, 'column_statistics': 1}
+
+        # Settings and extensions share one interval, so they come due together.
+        metadata._time_since_last_settings_query -= settings_interval + 1
+        metadata._time_since_last_extension_query -= settings_interval + 1
+        assert counts_after_ticks() == {'settings': 1, 'extensions': 1, 'schemas': 1, 'column_statistics': 1}
 
 
 def assert_fields(keys: List[str], fields: List[str]):

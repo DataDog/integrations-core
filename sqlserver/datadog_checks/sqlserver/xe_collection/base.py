@@ -27,11 +27,6 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cance
 
 from .xml_tools import extract_int_value, extract_value
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 
 def agent_check_getter(self):
     return self._check
@@ -473,7 +468,7 @@ class XESessionBase(DBMAsyncJob):
         return {
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": self._determine_dbm_type(),
             "collection_interval": self.collection_interval,
@@ -604,7 +599,7 @@ class XESessionBase(DBMAsyncJob):
             batched_payload = {
                 "host": self._check.resolved_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
                 "dbm_type": self._determine_dbm_type(),
                 "collection_interval": self.collection_interval,
@@ -802,7 +797,7 @@ class XESessionBase(DBMAsyncJob):
             "timestamp": time() * 1000,
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
             "ddtags": ",".join(self._check.tag_manager.get_tags()),

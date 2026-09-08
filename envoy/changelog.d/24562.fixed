@@ -1,1 +1,0 @@
-Require `datadog-checks-base>=38.0.0` since config discovery's IPv6 handling relies on it.

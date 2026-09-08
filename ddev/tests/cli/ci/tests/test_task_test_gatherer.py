@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 import shutil
 import threading
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -186,6 +187,57 @@ def _find_result(gatherer: TaskTestGatherer, integration: str) -> JobResult:
 # ---------------------------------------------------------------------------
 
 
+def _stopping_before_gathering(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
+    bus.stopping = True
+
+
+def _stopping_once_the_last_job_is_gathered(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
+    """Flips after the per-job loop, the window that loop's own check cannot see."""
+    build_status = gatherer._build_workflow_status
+
+    def cancelled_while_building(*args, **kwargs):
+        bus.stopping = True
+        return build_status(*args, **kwargs)
+
+    gatherer._build_workflow_status = cancelled_while_building  # type: ignore[method-assign]
+
+
+@pytest.mark.parametrize(
+    "start_stopping",
+    [
+        pytest.param(_stopping_before_gathering, id="before_gathering"),
+        pytest.param(_stopping_once_the_last_job_is_gathered, id="after_the_last_job"),
+    ],
+)
+def test_a_shutting_down_bus_abandons_gathering_without_registering_the_batch(
+    tmp_path: Path, start_stopping: Callable[[TaskTestGatherer, RecordingBus], None]
+):
+    """Gathering runs in a thread the bus cannot interrupt, so it has to give up on its own.
+
+    Registering what it managed to gather would be worse than registering nothing: the batch would
+    read as finished while holding a fraction of its jobs, and a run that never completed could then
+    report as done.
+    """
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1")
+
+    gatherer = _make_gatherer(tmp_path)
+    bus = RecordingBus()
+    gatherer.bus = bus  # type: ignore[assignment]
+    start_stopping(gatherer, bus)
+
+    gatherer.process_message(
+        _batch_finished(
+            artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+        )
+    )
+
+    assert drain_queue(bus.queue) == []
+    assert _registry(gatherer) == []
+    # Still planned, so nothing downstream can read the batch as one that finished.
+    assert gatherer._progress_by_batch["batch-1"].state is ExecutionState.PLANNED
+
+
 def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
@@ -320,6 +372,42 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
     coverage_dir = tmp_path / "out" / "coverage"
     assert (coverage_dir / "ntp_py3.13_linux.xml").is_file()
     assert (coverage_dir / "ntp_py3.13_windows.xml").is_file()
+
+
+def test_minimum_base_package_replica_organizes_beside_its_original(tmp_path: Path):
+    # The pair shares target, environment and platform, so only the variant separates their output.
+    artifacts = tmp_path / "artifacts" / "100"
+    original_dir = _make_job_tree(artifacts, "ntp-job", e2e=False)
+    replica_dir = _make_job_tree(artifacts, "minimum-base-package-ntp-job", coverage=False, e2e=False)
+
+    original = _batch_job("ntp (py3.13)")
+    replica = make_job(
+        "minimum-base-package-ntp (py3.13)",
+        target="ntp",
+        minimum_base_package=True,
+        coverage=False,
+    )
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [original, replica]})
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(original, _workflow_job(original.name, "success"), original_dir),
+                _batch_job_result(replica, _workflow_job(replica.name, "success"), replica_dir),
+            ],
+        )
+    )
+
+    test_results_dir = tmp_path / "out" / "test_results"
+    assert (test_results_dir / "ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
+    assert (test_results_dir / "minimum-base-package-ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
+
+    # The replica reports no coverage, and its absence is not a lost artifact.
+    coverage_files = sorted(path.name for path in (tmp_path / "out" / "coverage").iterdir())
+    assert coverage_files == ["ntp_py3.13_linux.xml"]
+
+    [status] = _registry(gatherer)
+    assert (status.success_count, status.failed_count) == (2, 0)
 
 
 def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path):

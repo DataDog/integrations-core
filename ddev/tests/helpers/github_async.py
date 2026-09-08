@@ -14,7 +14,7 @@ Quick reference:
         # Sticky default for all matching calls
         fake_async_github.mock_response(
             'create_pull_request',
-            PullRequest(number=5, html_url='https://github.com/x/pr/5'),
+            PullRequest(number=5, html_url='https://github.com/x/pr/5', changed_files=1),
         )
 
         # Partial match: only PR #5 gets the override
@@ -36,9 +36,10 @@ Quick reference:
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
+from copy import copy
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 import httpx
 
@@ -46,14 +47,20 @@ from ddev.utils.github_async import COMMENT_BODY_LIMIT, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
+    CheckRunConclusion,
+    CheckRunStatus,
     IssueComment,
     Label,
     PullRequest,
+    PullRequestFile,
+    PullRequestReviewComment,
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
 )
+from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
+from ddev.utils.rate_limiting import InstrumentedAsyncLimiter, RelaxedRateLimits
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
@@ -110,16 +117,23 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
     """Built-in default responses used when no `mock_response` matches a call."""
     return {
         'create_pull_request': lambda: GitHubResponse(
-            data=PullRequest(number=1, html_url='https://github.com/test/repo/pull/1'),
+            data=PullRequest(number=1, html_url='https://github.com/test/repo/pull/1', changed_files=1),
             headers={},
         ),
         'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        # Cancelling returns nothing, and a run already terminal is the outcome asked for.
+        'cancel_workflow_run': lambda: None,
+        'enter_shutdown_mode': lambda: None,
         'create_issue_comment': lambda: GitHubResponse(
             data=IssueComment(
                 id=DEFAULT_COMMENT_ID,
                 body='',
                 html_url='https://github.com/test/repo/issues/1#issuecomment-1',
             ),
+            headers={},
+        ),
+        'create_pr_review_comment': lambda: GitHubResponse(
+            data=PullRequestReviewComment(id=1, body='', path='file.py', commit_id='abc123'),
             headers={},
         ),
         'update_issue_comment': lambda: GitHubResponse(
@@ -138,6 +152,10 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         # Default to "no existing PRs" so the --from-pr idempotency check does not skip a base
         # unless a test explicitly registers an existing backport PR.
         'list_pull_requests': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        # An empty page; tests that need changed files register their own list of PullRequestFile.
+        'list_pull_request_files': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        # Default to "this commit belongs to no open pull request", the same shape a closed one gives.
+        'list_commit_pulls': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         'create_workflow_dispatch': lambda: GitHubResponse(
             data=WorkflowDispatchResult(
                 workflow_run_id=123,
@@ -258,6 +276,8 @@ class FakeAsyncGitHubClient:
         repo: str,
         pull_number: int,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[PullRequest]:
         return self._call(
             'get_pull_request',
@@ -276,6 +296,8 @@ class FakeAsyncGitHubClient:
         base: str | None = None,
         per_page: int = 100,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[list[PullRequest]]:
         return self._call(
             'list_pull_requests',
@@ -298,6 +320,8 @@ class FakeAsyncGitHubClient:
         body: str = '',
         draft: bool = False,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[PullRequest]:
         return self._call(
             'create_pull_request',
@@ -318,6 +342,8 @@ class FakeAsyncGitHubClient:
         issue_number: int,
         body: str,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[IssueComment]:
         _ensure_body_fits(body)
         return self._call(
@@ -329,6 +355,35 @@ class FakeAsyncGitHubClient:
             timeout=timeout,
         )
 
+    async def create_pr_review_comment(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        body: str,
+        commit_id: str,
+        path: str,
+        position: int | None = None,
+        line: int | None = None,
+        side: Literal['LEFT', 'RIGHT'] | None = None,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[PullRequestReviewComment]:
+        return self._call(
+            'create_pr_review_comment',
+            owner=owner,
+            repo=repo,
+            pull_number=pull_number,
+            body=body,
+            commit_id=commit_id,
+            path=path,
+            position=position,
+            line=line,
+            side=side,
+            timeout=timeout,
+        )
+
     async def update_issue_comment(
         self,
         owner: str,
@@ -336,6 +391,8 @@ class FakeAsyncGitHubClient:
         comment_id: int,
         body: str,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[IssueComment]:
         _ensure_body_fits(body)
         return self._call(
@@ -354,6 +411,8 @@ class FakeAsyncGitHubClient:
         issue_number: int,
         per_page: int = 100,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
         """Async-generator mirror.
 
@@ -378,6 +437,72 @@ class FakeAsyncGitHubClient:
         for page in pages:
             yield page
 
+    async def list_commit_pulls(
+        self,
+        owner: str,
+        repo: str,
+        commit_sha: str,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequest]]]:
+        """Async-generator mirror.
+
+        A page is itself a list of pull requests, so pages are registered explicitly: one
+        `GitHubResponse` for one page, a list of them for several.
+        """
+        self._record(
+            'list_commit_pulls',
+            owner=owner,
+            repo=repo,
+            commit_sha=commit_sha,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_commit_pulls',
+            {'owner': owner, 'repo': repo, 'commit_sha': commit_sha, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            yield page
+
+    async def list_pull_request_files(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[PullRequestFile]]]:
+        """Async-generator mirror.
+
+        A page is itself a list of files, so pages are registered explicitly: one `GitHubResponse`
+        for one page, a list of them for several.
+        """
+        self._record(
+            'list_pull_request_files',
+            owner=owner,
+            repo=repo,
+            pull_number=pull_number,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_pull_request_files',
+            {'owner': owner, 'repo': repo, 'pull_number': pull_number, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            yield page
+
     async def add_labels_to_issue(
         self,
         owner: str,
@@ -385,6 +510,8 @@ class FakeAsyncGitHubClient:
         issue_number: int,
         labels: list[str],
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[list[Label]]:
         return self._call(
             'add_labels_to_issue',
@@ -404,6 +531,7 @@ class FakeAsyncGitHubClient:
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
         *,
+        retry: RetryPolicy | None = None,
         return_run_details: bool = False,
     ) -> GitHubResponse[Any]:
         return self._call(
@@ -423,6 +551,8 @@ class FakeAsyncGitHubClient:
         repo: str,
         run_id: int,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[WorkflowRun]:
         return self._call(
             'get_workflow_run',
@@ -432,16 +562,38 @@ class FakeAsyncGitHubClient:
             timeout=timeout,
         )
 
+    async def cancel_workflow_run(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> None:
+        self._call(
+            'cancel_workflow_run',
+            owner=owner,
+            repo=repo,
+            run_id=run_id,
+            timeout=timeout,
+        )
+
+    def enter_shutdown_mode(self, *, rate_limits: RelaxedRateLimits | None = None) -> None:
+        self._call('enter_shutdown_mode', rate_limits=rate_limits)
+
     async def create_check_run(
         self,
         owner: str,
         repo: str,
         name: str,
         head_sha: str,
-        status: str,
+        status: CheckRunStatus,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[CheckRun]:
         return self._call(
             'create_check_run',
@@ -460,13 +612,15 @@ class FakeAsyncGitHubClient:
         owner: str,
         repo: str,
         check_run_id: int,
-        status: str | None = None,
-        conclusion: str | None = None,
+        status: CheckRunStatus | None = None,
+        conclusion: CheckRunConclusion | None = None,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> GitHubResponse[CheckRun]:
-        if status == 'completed' and conclusion is None:
+        if status == CheckRunStatus.COMPLETED and conclusion is None:
             raise ValueError("A conclusion is required when a check run status is 'completed'.")
         return self._call(
             'update_check_run',
@@ -487,6 +641,8 @@ class FakeAsyncGitHubClient:
         run_id: int,
         per_page: int = 30,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> AsyncIterator[GitHubResponse[ArtifactsList]]:
         """Async-generator mirror. A registered response may be a single page or a list of pages."""
         self._record(
@@ -517,6 +673,8 @@ class FakeAsyncGitHubClient:
         run_id: int,
         per_page: int = 30,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
         """Async-generator mirror. A registered response may be a single page or a list of pages."""
         self._record(
@@ -545,6 +703,8 @@ class FakeAsyncGitHubClient:
         archive_download_url: str,
         dest_path: Any,
         timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
     ) -> None:
         """Side-effecting mirror that returns ``None``; registered exceptions are raised."""
         self._record(
@@ -561,6 +721,10 @@ class FakeAsyncGitHubClient:
             raise response
         Path(dest_path).mkdir(parents=True, exist_ok=True)
         return None
+
+    def with_rate_limit(self, rate_limiter: InstrumentedAsyncLimiter) -> Self:
+        self._record('with_rate_limit', rate_limiter=rate_limiter)
+        return copy(self)
 
     async def aclose(self) -> None:
         return None

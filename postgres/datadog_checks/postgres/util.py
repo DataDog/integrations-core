@@ -60,6 +60,9 @@ TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_
 # Prepended to queries that should be excluded from query metrics collection.
 DDIGNORE_COMMENT = '/* DDIGNORE */'
 
+# Query text Postgres returns when the monitoring role cannot see a statement.
+INSUFFICIENT_PRIVILEGE = '<insufficient privilege>'
+
 
 # Central map of diagnostic metadata for every DatabaseConfigurationError code. Used by both the
 # runtime `record_warning` path (so `agent diagnose` sees the same remediation text as `agent status`)
@@ -152,7 +155,7 @@ DIAGNOSTIC_METADATA = {
         "docs_anchor": DatabaseConfigurationError.missing_pg_monitor_role.value,
     },
     DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity: {
-        "description": "pg_stat_activity rows are being masked as `<insufficient privilege>`.",
+        "description": f"pg_stat_activity rows are being masked as `{INSUFFICIENT_PRIVILEGE}`.",
         "remediation": "Grant pg_monitor to the datadog user so activity rows are visible across users.",
         "docs_anchor": DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value,
     },

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2026-09-02
+
+***Changed***:
+
+* [Cisco ACI] Stop passing hostname when emitting metrics ([#24707](https://github.com/DataDog/integrations-core/pull/24707))
+
+***Added***:
+
+* [Cisco ACI] Add new endpoint to process APIC interfaces to enable topology ([#24193](https://github.com/DataDog/integrations-core/pull/24193))
+
 ## 5.1.0 / 2026-08-24
 
 ***Security***:

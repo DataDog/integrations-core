@@ -20,12 +20,6 @@ from datadog_checks.mysql.cursor import CommenterDictCursor
 
 from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, get_truncation_state, warning_with_tags
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-
 ACTIVITY_QUERY = """\
 SELECT
     thread_a.thread_id,
@@ -411,7 +405,7 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
             "host": self._check.reported_hostname,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "mysql",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,

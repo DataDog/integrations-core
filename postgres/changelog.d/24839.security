@@ -1,1 +1,0 @@
-Send the explain PREPARE for a parameterized query over the extended query protocol, so the server rejects sampled text holding more than one statement.

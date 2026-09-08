@@ -179,6 +179,22 @@ def test_multi_query_execution(aggregator):
     assert all('status:success' in m.tags for m in status_metrics)
 
 
+def test_queries_with_same_monitor_id_all_execute(aggregator):
+    queries = [
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT first_query'},
+        {**deepcopy(BASE_QUERY), 'monitor_id': 0, 'query': 'SELECT second_query'},
+    ]
+    mock_cursor = _make_mock_cursor()
+
+    _setup_and_run(queries=queries, mock_cursor=mock_cursor)
+
+    assert [call.args[0] for call in mock_cursor.execute.call_args_list] == [
+        'SELECT first_query',
+        'SELECT second_query',
+    ]
+    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 2
+
+
 # ── Per-dbname connections ────────────────────────────────────────────────────
 
 
@@ -356,7 +372,12 @@ def test_connection_failure_retries_every_query_in_group(aggregator):
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
     failure_metrics = aggregator.metrics('dd.sqlserver.data_observability.connection_failures')
     assert len(failure_metrics) == 2
-    assert set(check.data_observability._pending_retries.keys()) == {1, 2}
+    pending = [
+        scheduled.pending_retry
+        for scheduled in check.data_observability._scheduled_queries
+        if scheduled.pending_retry is not None
+    ]
+    assert {due.query.monitor_id for due in pending} == {1, 2}
 
 
 def test_connection_failure_retried_on_next_poll(aggregator, monkeypatch):
@@ -366,7 +387,7 @@ def test_connection_failure_retried_on_next_poll(aggregator, monkeypatch):
     Uses a cron query deliberately: CronScheduler.due_ticks() consumes the tick as soon as
     it's reported, so — unlike an interval query, which would naturally still look "due"
     on the next poll regardless of any retry bookkeeping — a cron query only fires again
-    here because of the `_pending_retries` mechanism. This protects that mechanism from
+    here because of the per-query pending retry state. This protects that mechanism from
     regressing silently.
     """
     from datadog_checks.sqlserver.connection_errors import SQLConnectionError
@@ -400,6 +421,45 @@ def test_connection_failure_retried_on_next_poll(aggregator, monkeypatch):
     aggregator.reset()
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
+
+
+def test_cron_queries_with_same_monitor_id_are_retried_independently(aggregator, monkeypatch):
+    from datadog_checks.sqlserver.connection_errors import SQLConnectionError
+
+    queries = [
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT first_query'},
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT second_query'},
+    ]
+    monkeypatch.setattr(
+        'datadog_checks.sqlserver.data_observability.time.time',
+        lambda: float(_BASE_EPOCH + 65),
+    )
+    mock_cursor = _make_mock_cursor()
+    check = _make_cron_check(queries=queries)
+    mock_connection, _, _ = _attach_conn(check, mock_cursor)
+
+    call_count = 0
+    real_side_effect = mock_connection._open_managed_db_connections.side_effect
+
+    @contextmanager
+    def flaky_open_managed(db_key, db_name=None, key_prefix=None):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise SQLConnectionError("could not connect")
+        with real_side_effect(db_key, db_name=db_name, key_prefix=key_prefix) as ctx:
+            yield ctx
+
+    mock_connection._open_managed_db_connections = MagicMock(side_effect=flaky_open_managed)
+
+    check.data_observability.run_job()
+    check.data_observability.run_job()
+
+    assert [call.args[0] for call in mock_cursor.execute.call_args_list] == [
+        'SELECT first_query',
+        'SELECT second_query',
+    ]
+    assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 2
 
 
 def test_error_event_payload(aggregator):
@@ -448,15 +508,15 @@ def test_per_query_interval_tracking(aggregator):
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
-    # Reset _last_execution to force re-run
+    # Reset last_execution to force re-run
     aggregator.reset()
-    check.data_observability._last_execution = {1: 0.0}
+    check.data_observability._scheduled_queries[0].last_execution = 0.0
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
 
 
 def test_failed_query_updates_last_execution(aggregator):
-    """A failed query still updates _last_execution so it is not retried until the next interval."""
+    """A failed query still updates last_execution so it is not retried until the next interval."""
     import pyodbc
 
     mock_cursor = _make_mock_cursor()
@@ -468,7 +528,7 @@ def test_failed_query_updates_last_execution(aggregator):
     check._connection = mock_connection
 
     check.data_observability.run_job()
-    assert 1 in check.data_observability._last_execution
+    assert check.data_observability._scheduled_queries[0].last_execution is not None
 
     aggregator.reset()
     check.data_observability.run_job()
@@ -827,7 +887,7 @@ def test_invalid_cron_schedule_filtered_at_init(aggregator, caplog):
     instance = _make_do_instance(queries=[bad, good])
     with caplog.at_level(logging.WARNING):
         check = _create_check(instance)
-    assert {q.monitor_id for q in check.data_observability._queries} == {1}
+    assert {scheduled.query.monitor_id for scheduled in check.data_observability._scheduled_queries} == {1}
     assert any('invalid cron schedule' in r.message and "'not-a-cron'" in r.message for r in caplog.records)
 
     _attach_conn(check)
@@ -861,7 +921,7 @@ def test_query_without_schedule_or_positive_interval_filtered_at_init(caplog):
     instance = _make_do_instance(queries=[query])
     with caplog.at_level(logging.WARNING):
         check = _create_check(instance)
-    assert check.data_observability._queries == ()
+    assert check.data_observability._scheduled_queries == ()
     assert any('neither schedule nor positive interval_seconds' in r.message for r in caplog.records)
 
 
@@ -884,7 +944,7 @@ def test_lateness_metric_emitted_for_cron(aggregator, monkeypatch):
     # Scheduler caches next_tick = 00:50:00.
     check.data_observability.run_job()
     mid = CRON_QUERY['monitor_id']
-    scheduled_tick = check.data_observability._schedulers[mid].next_tick
+    scheduled_tick = check.data_observability._scheduled_queries[0].scheduler.next_tick
 
     # Step 2: Advance to 00:52:00 — 2 minutes late
     current_time[0] = fire_time
@@ -951,11 +1011,11 @@ def test_lateness_clamped_at_zero(aggregator, monkeypatch):
     from datadog_checks.sqlserver.data_observability import DueQuery
 
     skewed_scheduled = current_time[0] + 100.0
-    q = check.data_observability._queries[0]
+    scheduled_query = check.data_observability._scheduled_queries[0]
     with patch.object(
         check.data_observability,
         '_get_due_queries',
-        return_value=[DueQuery(q, skewed_scheduled, "cron")],
+        return_value=[DueQuery(scheduled_query, skewed_scheduled)],
     ):
         aggregator.reset()
         check.data_observability.run_job()
@@ -1016,6 +1076,24 @@ def test_starved_query_eventually_fires(aggregator, monkeypatch):
     assert b_lateness[0].value > 0.0
 
 
+def test_cron_queries_with_same_monitor_id_have_independent_schedulers(monkeypatch):
+    queries = [
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT first_query', 'schedule': '50 * * * *'},
+        {**deepcopy(CRON_QUERY), 'monitor_id': 0, 'query': 'SELECT second_query', 'schedule': '51 * * * *'},
+    ]
+    current_time = [float(_BASE_EPOCH)]
+    monkeypatch.setattr('datadog_checks.sqlserver.data_observability.time.time', lambda: current_time[0])
+    check = _make_cron_check(queries=queries)
+
+    assert check.data_observability._get_due_queries() == []
+
+    current_time[0] = _BASE_EPOCH + 65
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT first_query']
+
+    current_time[0] = _BASE_EPOCH + 125
+    assert [due.query.query for due in check.data_observability._get_due_queries()] == ['SELECT second_query']
+
+
 # ---------------------------------------------------------------------------
 # Cron startup lookback window (recovery of fires lost across check restarts)
 # ---------------------------------------------------------------------------
@@ -1072,8 +1150,8 @@ def test_failed_cron_query_advances_next_run(aggregator, monkeypatch):
     # First run: lookback recovery fires (5s within 300s window); scheduler caches next_tick = 01:50:00.
     # The query fails; aggregator records an error metric that we discard below.
     check.data_observability.run_job()
-    mid = CRON_QUERY['monitor_id']
-    registered = check.data_observability._schedulers[mid].next_tick
+    scheduler = check.data_observability._scheduled_queries[0].scheduler
+    registered = scheduler.next_tick
 
     # Jump past the next tick and let the failing query fire again.
     current_time[0] = _BASE_EPOCH + 3665  # ~01:50:05
@@ -1085,7 +1163,7 @@ def test_failed_cron_query_advances_next_run(aggregator, monkeypatch):
 
     # next_tick must have advanced past the just-fired tick; otherwise the very next
     # poll would re-fire the same tick in a tight loop.
-    advanced = check.data_observability._schedulers[mid].next_tick
+    advanced = scheduler.next_tick
     assert advanced > registered
     assert advanced >= current_time[0]
 

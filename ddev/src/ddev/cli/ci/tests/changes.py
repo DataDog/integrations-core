@@ -1,42 +1,77 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Selection of the commits a CI run compares to find what it must test."""
+"""Where a CI run gets the changes it must test.
+
+A pull request reads its diff from the API because the merge base it would need locally is not in
+the checkout: the target branch has no local ref, and under `workflow_run` the head commit is
+absent too.
+"""
 
 from __future__ import annotations
 
-import enum
 from typing import TYPE_CHECKING
 
+from ddev.utils.git import ChangedFile, ChangeType
+
 if TYPE_CHECKING:
-    from ddev.utils.git import ChangedFile, GitRepository
+    from ddev.utils.git import GitRepository
+    from ddev.utils.github_async import AsyncGitHubClient
+    from ddev.utils.github_async.models import PullRequestFile
 
 
-class CIContext(enum.Enum):
-    """The comparison context that determines which revisions are diffed."""
-
-    PULL_REQUEST = enum.auto()
-    DEFAULT_BRANCH = enum.auto()
+class ChangeResolutionError(Exception):
+    """Raised when the changes a run is responsible for cannot be established."""
 
 
-def get_changed_files(
-    git: GitRepository,
-    tested_commit: str,
-    *,
-    context: CIContext,
-    target_branch: str | None = None,
+CHANGE_TYPES = {
+    "added": ChangeType.ADDED,
+    "removed": ChangeType.DELETED,
+    "modified": ChangeType.MODIFIED,
+    "renamed": ChangeType.RENAMED,
+    "copied": ChangeType.COPIED,
+    "changed": ChangeType.MODIFIED,
+    "unchanged": ChangeType.MODIFIED,
+}
+
+
+def changes_in_commit(git: GitRepository, commit: str) -> list[ChangedFile]:
+    """Return what *commit* itself contributed, comparing it with its first parent."""
+    try:
+        return git.changed_files(f"{commit}^1", commit)
+    except OSError as error:
+        raise ChangeResolutionError(
+            f"Could not compare {commit} with its parent: {error}\n"
+            "The checkout needs the parent commit, which `fetch-depth: 2` provides."
+        ) from error
+    except ValueError as error:
+        raise ChangeResolutionError(f"Could not read the diff of {commit}: {error}") from error
+
+
+async def changes_in_pull_request(
+    client: AsyncGitHubClient, owner: str, repo: str, pull_number: int, expected_total: int
 ) -> list[ChangedFile]:
-    """Return the changes the tested commit is responsible for.
+    """Return the files a pull request changes, read from the API.
 
-    A pull request is compared with the merge base of its target branch, so unrelated commits
-    landing on that branch meanwhile do not count as changes. On the default branch the comparison
-    is against the tested commit's first parent, which is the commit's own contribution.
+    The endpoint stops at 3000 files without reporting that it did, so a total that disagrees with
+    `expected_total` (`changed_files` on the pull request) aborts rather than planning a subset.
+    A run with nothing to compare never reaches here, so the total is always a count to check.
     """
-    if context is CIContext.PULL_REQUEST:
-        if not target_branch:
-            raise ValueError("A target branch is required to compare a pull request against its merge base")
-        base = target_branch
-    else:
-        base = f"{tested_commit}^1"
+    files: list[PullRequestFile] = []
+    async for page in client.list_pull_request_files(owner, repo, pull_number):
+        files.extend(page.data)
 
-    return git.changed_files(base, tested_commit)
+    if len(files) != expected_total:
+        raise ChangeResolutionError(
+            f"Pull request {pull_number} reports {expected_total} changed files but the API listed "
+            f"{len(files)}. Planning from an incomplete list would leave part of the change untested."
+        )
+
+    return [
+        ChangedFile(
+            change_type=CHANGE_TYPES.get(changed.status, ChangeType.MODIFIED),
+            path=changed.filename,
+            previous_path=changed.previous_filename,
+        )
+        for changed in files
+    ]

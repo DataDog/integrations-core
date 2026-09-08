@@ -1,1 +1,0 @@
-Add the ``mysql.uptime`` metric, reporting the number of seconds the server has been up.
