@@ -253,7 +253,10 @@ def test_diff_invalid_platform_and_version(ddev):
 def test_diff_sends_metrics_to_dd(
     ddev, mock_size_diff_dependencies, flag, value, expected_org, expected_key, compressed
 ):
-    with patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send:
+    with (
+        patch("ddev.cli.size.diff.initialize_dd_client"),
+        patch("ddev.cli.size.diff.send_diff_metrics_to_dd") as mock_send,
+    ):
         cli_args = [
             "size",
             "diff",
@@ -294,3 +297,13 @@ def test_diff_org_and_key_are_mutually_exclusive(ddev, mock_size_diff_dependenci
 
     assert result.exit_code != 0
     mock_send.assert_not_called()
+
+
+def test_diff_invalid_org_aborts_before_diffing(ddev):
+    with patch("ddev.cli.size.diff.GitRepo") as mock_git_repo:
+        result = ddev("size", "diff", "commit1", "commit2", "--to-dd-org", "does-not-exist")
+
+    assert result.exit_code != 0
+    assert "No organization named `does-not-exist` found in config file" in result.output
+    assert "Traceback" not in result.output
+    mock_git_repo.assert_not_called()

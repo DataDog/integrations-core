@@ -22,6 +22,7 @@ from ddev.cli.size.utils.common_funcs import (
     get_gitignore_files,
     get_valid_platforms,
     get_valid_versions,
+    initialize_dd_client,
     is_correct_dependency,
     is_valid_integration_file,
     request_wheel,
@@ -502,6 +503,21 @@ def test_save_markdown_orders_sections_deterministically():
 
     written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
     assert re.findall(r"<summary>(\S+), Python", written_content) == sorted(platforms)
+
+
+@pytest.mark.parametrize(
+    "org_config, expected_message",
+    [
+        pytest.param({"api_key": "", "site": "datadoghq.com"}, "No API key found in config file", id="empty_api_key"),
+        pytest.param({"api_key": "key", "site": ""}, "No site found in config file", id="empty_site"),
+    ],
+)
+def test_initialize_dd_client_rejects_empty_values(org_config, expected_message):
+    app = MagicMock()
+    app.config.orgs = {"default": org_config}
+
+    with pytest.raises(RuntimeError, match=expected_message):
+        initialize_dd_client(app, "default", None)
 
 
 def test_send_diff_metrics_to_dd_metric_shape():

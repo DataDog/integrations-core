@@ -882,9 +882,9 @@ def initialize_dd_client(app: Application, org: str | None, key: str | None) -> 
     else:
         config_file_info = {'api_key': key, 'site': 'datadoghq.com'}
 
-    if "api_key" not in config_file_info:
+    if not config_file_info.get("api_key"):
         raise RuntimeError("No API key found in config file")
-    if "site" not in config_file_info:
+    if not config_file_info.get("site"):
         raise RuntimeError("No site found in config file")
 
     initialize(

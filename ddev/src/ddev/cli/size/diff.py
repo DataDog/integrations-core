@@ -90,7 +90,11 @@ def diff(
         if to_dd_org and to_dd_key:
             raise click.BadParameter("Specify either --to-dd-org or --to-dd-key, not both")
         if to_dd_org or to_dd_key:
-            initialize_dd_client(app, to_dd_org, to_dd_key)
+            try:
+                initialize_dd_client(app, to_dd_org, to_dd_key)
+            except RuntimeError as e:
+                progress.stop()
+                app.abort(str(e))
         repo_url = app.repo.path
 
         with GitRepo(repo_url) as gitRepo:
