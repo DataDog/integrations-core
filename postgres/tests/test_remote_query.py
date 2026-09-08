@@ -58,7 +58,7 @@ class FakeAdapters:
 
 
 class FakeControlCursor:
-    """Plain cursor for BEGIN/SET LOCAL/ROLLBACK and the one format_type catalog lookup."""
+    """Plain cursor for BEGIN/SET LOCAL/ROLLBACK, the schema lookup, and the gate existence lookup."""
 
     def __init__(self, pool):
         self.pool = pool
@@ -81,7 +81,16 @@ class FakeControlCursor:
         return rows
 
     def fetchone(self):
-        pytest.fail('statement_timeout should not be read outside transaction-local settings')
+        assert self.executed, 'fetchone called before any execute'
+        query, params = self.executed[-1]
+        assert 'pg_catalog.pg_database' in query, 'fetchone is only expected for the gate existence lookup'
+        assert isinstance(params, tuple) and len(params) == 1
+        if self.pool.existence_query_error is not None:
+            raise self.pool.existence_query_error
+        # A missing mapping entry means the database does not exist on the endpoint.
+        if self.pool.pg_database is None or self.pool.pg_database.get(params[0], False):
+            return (1,)
+        return None
 
 
 class FakeServerCursor:
@@ -147,6 +156,8 @@ class FakePool:
         row_provider=None,
         fetch_log=None,
         connection_errors=None,
+        pg_database=None,
+        existence_query_error=None,
     ):
         self.rows = rows or []
         self.description = description or [FakeColumn('value', 23)]
@@ -159,6 +170,11 @@ class FakePool:
         # Per-dbname connection failures raised from get_connection, e.g. psycopg
         # InvalidCatalogName for a database that does not exist on the endpoint.
         self.connection_errors = connection_errors or {}
+        # Models pg_catalog.pg_database for the dynamic gate existence lookup: a mapping
+        # dbname -> datallowconn, or None for the permissive default (every requested
+        # database exists and allows connections).
+        self.pg_database = pg_database
+        self.existence_query_error = existence_query_error
         self.requested_dbnames = []
         self.cursors = []
 
@@ -686,8 +702,11 @@ def test_dynamic_tuple_requested_dbname_executes_on_requested_database(monkeypat
     events = collect_events(valid_request(dbname='analytics'), check, client=FakeUploadClient())
 
     assert_success(events)
-    # The gate warms the pool entry for the requested database, then the producer reuses it.
-    assert pool.requested_dbnames == ['analytics', 'analytics']
+    # The gate classifies existence on the configured database's connection, warms the pool
+    # entry for the requested database, then the producer reuses it.
+    assert pool.requested_dbnames == ['datadog_test', 'analytics', 'analytics']
+    # The existence lookup ran on the configured connection with the requested name bound.
+    assert pool.cursors[0].executed == [(remote_query.REMOTE_QUERY_DATABASE_EXISTENCE_QUERY, ('analytics',))]
 
 
 def test_dynamic_tuple_requested_dbname_matches_when_configured_dbname_is_absent(monkeypatch):
@@ -699,13 +718,61 @@ def test_dynamic_tuple_requested_dbname_matches_when_configured_dbname_is_absent
     events = collect_events(valid_request(dbname='datadog_test'), check, client=FakeUploadClient())
 
     assert_success(events)
+    # Probe-only gate path: no configured connection to classify existence on, so the flow
+    # goes straight to the probe and the producer on the requested database.
     assert pool.requested_dbnames == ['datadog_test', 'datadog_test']
+    assert all('pg_catalog.pg_database' not in entry[0] for cursor in pool.cursors for entry in cursor.executed)
 
 
-def test_dynamic_tuple_unknown_requested_dbname_fails_target_not_found(monkeypatch):
+def test_dynamic_gate_missing_database_fails_fast_target_not_found(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)], pg_database={'datadog_test': True})
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
+
+    events = collect_events(valid_request(dbname='analytics'), check)
+
+    assert_failed_event(events, 'target_not_found', 'does not exist')
+    # The catalog lookup classifies the miss before any connection to the requested
+    # database is attempted: one existence lookup on the configured connection and no probe.
+    assert pool.requested_dbnames == ['datadog_test']
+    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
+    assert [event.event_type for event in events] == ['error']
+
+
+def test_dynamic_gate_datallowconn_false_fails_target_not_found(monkeypatch):
+    """A database that exists but disallows connections is not a query target."""
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)], pg_database={'datadog_test': True, 'analytics': False})
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
+
+    events = collect_events(valid_request(dbname='analytics'), check)
+
+    assert_failed_event(events, 'target_not_found', 'does not allow connections')
+    assert pool.requested_dbnames == ['datadog_test']
+    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
+
+
+def test_dynamic_gate_existence_query_error_fails_closed_target_unavailable(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)], existence_query_error=psycopg_errors.OperationalError('catalog lookup broke'))
+    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
+
+    events = collect_events(valid_request(dbname='analytics'), check)
+
+    assert_failed_event(events, 'target_unavailable', 'Unable to verify')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    # A failing existence lookup never becomes a silent no-match: the request fails
+    # visibly before the probe or any producer execution.
+    assert pool.requested_dbnames == ['datadog_test']
+    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
+
+
+def test_dynamic_tuple_probe_invalid_catalog_name_fails_target_not_found(monkeypatch):
+    """Defense in depth: a catalog-existing database whose probe surfaces InvalidCatalogName."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(
         rows=[(1,)],
+        pg_database={'datadog_test': True, 'postgres': True},
         connection_errors={'postgres': psycopg_errors.InvalidCatalogName('database "postgres" does not exist')},
     )
     check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
@@ -713,16 +780,18 @@ def test_dynamic_tuple_unknown_requested_dbname_fails_target_not_found(monkeypat
     events = collect_events(valid_request(dbname='postgres'), check)
 
     assert_failed_event(events, 'target_not_found', 'does not exist')
-    # One gate probe and no producer execution: no cursor was created and no run started.
-    assert pool.requested_dbnames == ['postgres']
-    assert pool.cursors == []
+    # Existence lookup on the configured connection, then one probe; no producer execution.
+    assert pool.requested_dbnames == ['datadog_test', 'postgres']
+    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
     assert [event.event_type for event in events] == ['error']
 
 
 def test_dynamic_tuple_connection_error_fails_retryable_target_unavailable(monkeypatch):
+    """Existence passes but the probe fails: the database exists, connecting to it does not."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(
         rows=[(1,)],
+        pg_database={'datadog_test': True, 'analytics': True},
         connection_errors={'analytics': psycopg_errors.OperationalError('connection refused')},
     )
     check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
@@ -731,8 +800,8 @@ def test_dynamic_tuple_connection_error_fails_retryable_target_unavailable(monke
 
     assert_failed_event(events, 'target_unavailable', 'connection refused')
     assert event_metadata(events[-1])['error']['retryable'] is True
-    assert pool.requested_dbnames == ['analytics']
-    assert pool.cursors == []
+    assert pool.requested_dbnames == ['datadog_test', 'analytics']
+    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
 
 
 def test_dynamic_database_instance_with_requested_dbname_executes_on_requested_database(monkeypatch):
@@ -751,13 +820,14 @@ def test_dynamic_database_instance_with_requested_dbname_executes_on_requested_d
     events = collect_events(request, check, client=FakeUploadClient())
 
     assert_success(events)
-    assert pool.requested_dbnames == ['analytics', 'analytics']
+    assert pool.requested_dbnames == ['datadog_test', 'analytics', 'analytics']
 
 
 def test_dynamic_database_instance_with_unknown_requested_dbname_fails_target_not_found(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(
         rows=[(1,)],
+        pg_database={'datadog_test': True, 'analytics': True},
         connection_errors={'analytics': psycopg_errors.InvalidCatalogName('database "analytics" does not exist')},
     )
     check = make_check(
@@ -773,8 +843,8 @@ def test_dynamic_database_instance_with_unknown_requested_dbname_fails_target_no
     events = collect_events(request, check)
 
     assert_failed_event(events, 'target_not_found', 'does not exist')
-    assert pool.requested_dbnames == ['analytics']
-    assert pool.cursors == []
+    assert pool.requested_dbnames == ['datadog_test', 'analytics']
+    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
 
 
 def test_dynamic_gate_dbstrict_rejects_requested_database_without_pool_access(monkeypatch):

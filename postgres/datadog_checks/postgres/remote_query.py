@@ -604,13 +604,54 @@ def _dynamic_database_requested(requested_dbname: str | None, configured_dbname:
     return requested_dbname is not None and requested_dbname != configured_dbname
 
 
-def _gate_dynamic_database(check: 'PostgreSql', db_pool: Any, requested_dbname: str) -> None:
-    """Fail closed unless the requested database is in scope and exists on the matched endpoint.
+# A requested database must both exist and allow connections, so ``datallowconn`` is part of
+# "exists" for targeting. ``pg_catalog.pg_database`` is visible to every role.
+REMOTE_QUERY_DATABASE_EXISTENCE_QUERY = 'SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s AND datallowconn'
 
-    The scope is the effective one that already narrows instance metrics: ``dbstrict`` pins the
-    instance to its configured database and ``ignore_databases`` holds ILIKE exclusion patterns.
-    The existence probe opens and releases one pooled connection — warming the same pool entry
-    the producer reuses — and never runs the customer's SQL.
+
+def _verify_requested_database_exists(db_pool: Any, configured_dbname: str, requested_dbname: str) -> None:
+    """Classify the requested database with one catalog lookup on the open configured connection.
+
+    psycopg_pool cannot classify a missing database at connect time: the server's FATAL response
+    surfaces from a raw connect only as ``OperationalError`` with no SQLSTATE, and through a pool
+    only as ``PoolTimeout`` after the pool's ~30s retry window. This bounded lookup therefore
+    answers existence exactly and fast, on the configured database's existing pool entry (no new
+    pool, no retained cache), before the probe can spend that budget. It never runs the
+    customer's SQL; a failure of the lookup itself fails closed and visible.
+    """
+    try:
+        with db_pool.get_connection(configured_dbname) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(REMOTE_QUERY_DATABASE_EXISTENCE_QUERY, (requested_dbname,))
+                if cursor.fetchone() is None:
+                    raise rq.RemoteQueryFailure(
+                        'target_not_found',
+                        'Requested database does not exist on the matched connection or does not allow connections.',
+                    )
+    except rq.RemoteQueryFailure:
+        raise
+    except Exception as e:
+        raise rq.RemoteQueryFailure(
+            'target_unavailable',
+            'Unable to verify the requested database on the matched connection: {}'.format(e),
+            retryable=True,
+        ) from e
+
+
+def _gate_dynamic_database(
+    check: 'PostgreSql', db_pool: Any, requested_dbname: str, configured_dbname: str | None
+) -> None:
+    """Fail closed unless the requested database is in scope, known, and connectable.
+
+    The two-step gate, in order: scope, then existence, then warm/permission. Scope is the
+    effective one that already narrows instance metrics: ``dbstrict`` pins the instance to its
+    configured database and ``ignore_databases`` holds ILIKE exclusion patterns. Existence is
+    one ``pg_catalog.pg_database`` lookup on the check's already-open configured-database
+    connection (only when a configured database exists). The probe then opens and releases one
+    connection to the requested database — warming the same pool entry the producer reuses —
+    and verifies connect permission, with the ``InvalidCatalogName`` catch kept as
+    defense-in-depth if any layer ever surfaces it. The customer's SQL is never run while
+    resolving; every failure is fail-closed and visible, never a silent no-match.
     """
     config = getattr(check, '_config', None)
     if getattr(config, 'dbstrict', False):
@@ -624,6 +665,8 @@ def _gate_dynamic_database(check: 'PostgreSql', db_pool: Any, requested_dbname: 
             'target_not_found',
             'Requested database is excluded by the matched instance ignore_databases filter.',
         )
+    if configured_dbname is not None:
+        _verify_requested_database_exists(db_pool, configured_dbname, requested_dbname)
     try:
         with db_pool.get_connection(requested_dbname):
             pass
@@ -632,8 +675,8 @@ def _gate_dynamic_database(check: 'PostgreSql', db_pool: Any, requested_dbname: 
             'target_not_found', 'Requested database does not exist on the matched connection.'
         ) from e
     except Exception as e:
-        # Any other connection failure (unreachable endpoint, authentication, pool unavailable)
-        # is retryable and stays visible: never a silent no-match and never a success.
+        # The database exists but permission or connectivity failed: retryable and visible,
+        # never a silent no-match and never a success.
         raise rq.RemoteQueryFailure(
             'target_unavailable', 'Unable to connect to the requested database: {}'.format(e), retryable=True
         ) from e
@@ -777,7 +820,7 @@ def iter_agent_rpc_stream_events(
 
     if _dynamic_database_requested(target.dbname, configured_dbname):
         try:
-            _gate_dynamic_database(check, db_pool, target.dbname)
+            _gate_dynamic_database(check, db_pool, target.dbname, configured_dbname)
         except rq.RemoteQueryFailure as e:
             yield rq.failed_event(e.code, e.message, retryable=e.retryable, elapsed_ms=rq.elapsed_ms(started_at))
             return
