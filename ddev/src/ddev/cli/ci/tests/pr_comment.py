@@ -56,6 +56,15 @@ CANCELLED_NOTE = "Anything below is what had been gathered by then, and batches 
 # Said instead when no batch ever reported, where the note above would point at results that are absent.
 CANCELLED_WITHOUT_RESULTS_NOTE = "The run was cancelled before any batch reported, so there are no results to show."
 
+# Said in every report while Dispatcher runs in shadow mode: it does not decide merges yet, so its
+# result must not be mistaken for the merge signal.
+SHADOW_NOTICE = (
+    "> **Dispatcher beta: informational only**\n"
+    ">\n"
+    "> Dispatcher is running alongside existing CI while we validate it. You can ignore this report "
+    "and its statuses. Existing CI remains the merge signal."
+)
+
 # Blocks are joined by a blank line, so each one costs two bytes beyond its own length. Newlines are
 # one byte in UTF-8, so this is the same number in either unit.
 SECTION_SEPARATOR = 2
@@ -157,7 +166,7 @@ def render_cancelled_notice() -> str:
     There is no snapshot to render, and the comment is the only place a reader learns the run existed.
     """
     footer = _footer(None, cancelled=True)
-    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
+    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{SHADOW_NOTICE}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
 
 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
@@ -189,8 +198,8 @@ def summary_line(progress: DispatcherProgress) -> str:
 
 
 def _header(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: bool = False) -> str:
-    """Marker, heading, in-progress alert and totals: the part that must never be truncated."""
-    blocks = [COMMENT_MARKER, _heading(progress, cancelled=cancelled)]
+    """Marker, heading, notice, in-progress alert and totals: the part that must never be truncated."""
+    blocks = [COMMENT_MARKER, _heading(progress, cancelled=cancelled), SHADOW_NOTICE]
     alert = _alert(progress, shows_unavailable=shows_unavailable, cancelled=cancelled)
     if alert is not None:
         blocks.append(alert)
