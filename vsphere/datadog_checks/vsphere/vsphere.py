@@ -242,6 +242,7 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
+        unmetered = []  # type: List[str]
         for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
@@ -361,22 +362,26 @@ class VSphereCheck(AgentCheck):
             if metering_property is not None:
                 metering_value = properties.get(metering_property)
                 if metering_value is None:
-                    self.log.warning(
-                        "No %s value for %s %s, not submitting its usage metering metric",
-                        metering_property,
-                        mor_type_str,
-                        mor_name,
-                    )
+                    unmetered.append('{} {} (no {})'.format(mor_type_str, mor_name, metering_property))
                 elif not mor_payload.get('hostname'):
                     # Submitting without a hostname would attribute the count to the Agent's own
                     # host, inflating it. A missing point is preferable to a misattributed one.
-                    self.log.warning(
-                        "No hostname for %s %s, not submitting its usage metering metric", mor_type_str, mor_name
-                    )
+                    unmetered.append('{} {} (no hostname)'.format(mor_type_str, mor_name))
                 else:
                     mor_payload["metering"] = {metering_property: metering_value}
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
+
+        if unmetered:
+            # Summarized rather than logged per resource: the causes are systemic (a restricted
+            # vCenter role, VMware Tools missing fleet-wide), so a large environment would
+            # otherwise warn thousands of times on every refresh.
+            self.log.warning(
+                "Not submitting usage metering metrics for %d resource(s), first 10: %s",
+                len(unmetered),
+                unmetered[:10],
+            )
+            self.log.debug("Resources with no usage metering metric: %s", unmetered)
 
     def submit_metrics_callback(self, query_results):
         # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None

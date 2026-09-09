@@ -3340,7 +3340,37 @@ def test_usage_metering_metrics_missing_property(
 
     aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=0)
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=2)
-    assert 'No summary.hardware.numCpuCores value for host host1' in caplog.text
+    assert 'host host1 (no summary.hardware.numCpuCores)' in caplog.text
+
+
+def test_usage_metering_metrics_no_resolved_hostname(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
+):
+    """A resource with no hostname is not metered: the count would land on the Agent's own host."""
+    caplog.set_level(logging.WARNING)
+    realtime_instance['use_guest_hostname'] = True
+    # vCenter reports an empty guest.hostName for a VM that is not running VMware Tools.
+    blank_guest_hostname = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            (
+                vim.ObjectContent(
+                    obj=content.obj,
+                    propSet=list(content.propSet) + [vmodl.DynamicProperty(name='guest.hostName', val='')],
+                )
+                if isinstance(content.obj, vim.VirtualMachine)
+                else content
+            )
+            for content in properties_ex.objects
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(return_value=blank_guest_hostname)
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=0)
+    aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=1, value=16, hostname='host1')
+    assert 'vm vm1 (no hostname)' in caplog.text
 
 
 @pytest.mark.parametrize(

@@ -462,11 +462,12 @@ files:
           you have configured to monitor. These are configuration properties such as disk information
           in a VM and DRS config status in clusters.
 
-          Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
-          Note: `vsphere.vm.summary.config.numCpu` and `vsphere.host.summary.hardware.numCpuCores` are
+          Note1: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
+          Note2: `vsphere.vm.summary.config.numCpu` and `vsphere.host.summary.hardware.numCpuCores` are
           collected on every run whether or not this option is enabled, and cannot be excluded with
           `metric_filters`. They still honor `resource_filters` and `collection_type`, so an instance
-          using `collection_type: historical` does not collect the host metric.
+          using `collection_type: historical` does not collect the host metric. Powered-off virtual
+          machines are not reported at all.
           Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
           very CPU intensive and put pressure on the vCenter Server.
         value:
