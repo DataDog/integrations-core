@@ -229,7 +229,7 @@ def test_http_page_retry_replays_exact_body_and_headers(monkeypatch, creds, trig
         'dd-api-key': 'test-api-key',
         'dd-application-key': 'test-app-key',
         'Authorization': 'Bearer test-token',
-        'Content-Type': 'application/octet-stream',
+        'Content-Type': 'application/json',
         'Content-Length': str(len(payload)),
         'X-DD-Page-Bytes': str(len(payload)),
         'X-DD-Page-Rows': '1',

@@ -531,7 +531,7 @@ class RequestsUploadClient:
         every bounded retry rewinds the buffer and resends byte-identical content for the
         same page index.
         """
-        headers = self._headers(creds, 'application/octet-stream')
+        headers = self._headers(creds, 'application/json')
         headers['X-DD-Page-Bytes'] = str(page.page_bytes)
         headers['X-DD-Page-Rows'] = str(page.rows)
         headers['X-DD-Record-Offset'] = str(page.record_offset)
