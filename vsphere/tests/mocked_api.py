@@ -57,8 +57,7 @@ class MockedAPI(object):
             self.infrastructure_data[current_mor]['runtime.host_moid'] = subtree['runtime.host']
         if 'guest.hostName' in subtree:
             self.infrastructure_data[current_mor]['guest.hostName'] = subtree['guest.hostName']
-        # Mirror `VSphereAPI.get_infrastructure`, which returns the usage metering properties in the flat
-        # property dict for every configuration, since they are deliberately not part of ALL_PROPERTIES.
+        # Mirror `get_infrastructure`: metering properties stay in the flat dict in every config.
         for metering_property in METERING_PROPERTY_BY_RESOURCE_TYPE.values():
             if metering_property in subtree:
                 self.infrastructure_data[current_mor][metering_property] = subtree[metering_property]

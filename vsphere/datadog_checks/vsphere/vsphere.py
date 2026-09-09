@@ -348,22 +348,15 @@ class VSphereCheck(AgentCheck):
 
             mor_payload["tags"] = tags  # type: Dict[str, Any]
 
-            # Hypervisor usage metering values are stored at the top level of the payload, next to
-            # `tags` and `hostname`, rather than under `properties`. `clear_properties()` empties only
-            # the `properties` sub-dict after each refresh, so keeping them here is what lets `check()`
-            # re-submit them on runs that do not refresh the cache.
+            # Top-level, not under `properties`: `clear_properties()` empties only that sub-dict,
+            # so this survives between refreshes for `check()` to re-submit on every run.
             metering_property = METERING_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
             if metering_property is not None:
                 metering_value = properties.get(metering_property)
                 if metering_value is not None:
                     mor_payload["metering"] = {metering_property: metering_value}
                 else:
-                    self.log.debug(
-                        "No %s value for %s resource %s; usage metering metric will not be submitted",
-                        metering_property,
-                        mor_type_str,
-                        mor_name,
-                    )
+                    self.log.debug("No %s value for %s %s", metering_property, mor_type_str, mor_name)
 
             if hostname:
                 if self._config.hostname_transform == 'upper':
@@ -843,12 +836,7 @@ class VSphereCheck(AgentCheck):
 
     def _resource_metric_tags(self, resource_tags):
         # type: (List[str]) -> List[str]
-        """Build the tag list for a metric submitted against a resource's own hostname.
-
-        When `excluded_host_tags` is configured, only those tags go on the metric; the rest reach the
-        backend as external host tags instead. Otherwise every resource tag is kept on the metric.
-        Shared by the property-metric and metering paths so the two tag identically.
-        """
+        """Build the tag list for a metric submitted against a resource's own hostname."""
         base_tags = []  # type: List[str]
         if self._config.excluded_host_tags:
             base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
@@ -1212,9 +1200,8 @@ class VSphereCheck(AgentCheck):
                     hostname=None,
                 )
 
-                # Metering metrics are submitted from this loop rather than with the property metrics
-                # so that they appear on every run instead of once per infrastructure cache refresh,
-                # and they carry a hostname because usage is attributed per VM and per ESXi host.
+                # Submitted here, not with the property metrics, so they emit on every run. Unlike
+                # `.count` above they carry a hostname: usage is attributed per VM and per host.
                 metering = mor_props.get('metering')
                 if metering:
                     metering_tags = self._resource_metric_tags(resource_tags)

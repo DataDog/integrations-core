@@ -140,14 +140,9 @@ VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
 ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
 
-# Properties fetched for every customer regardless of `collect_property_metrics`, because they feed
-# hypervisor usage metering and a billing signal must not be opt-in or suppressible by a metric filter.
-# They are submitted from the per-run loop in `check()` rather than the property-metric path, so their
-# cadence is `min_collection_interval` instead of `refresh_infrastructure_cache_interval`.
-#
-# Keep these OUT of the *_SIMPLE_PROPERTIES lists above: `VSphereAPI.get_infrastructure` moves every
-# path in ALL_PROPERTIES into a nested `properties` sub-dict, so membership there would make the flat
-# lookup in `refresh_infrastructure_cache` return None *only* when property metrics are enabled.
+# Fetched regardless of `collect_property_metrics`, since usage metering must not be opt-in.
+# Keep out of the *_SIMPLE_PROPERTIES lists above: `get_infrastructure` moves ALL_PROPERTIES paths
+# into a nested `properties` dict, which would break the flat lookup only when the option is on.
 VM_METERING_PROPERTY = "summary.config.numCpu"
 HOST_METERING_PROPERTY = "summary.hardware.numCpuCores"
 

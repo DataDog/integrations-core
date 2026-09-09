@@ -312,7 +312,7 @@ PROPERTIES_EX_VM_OFF = vim.PropertyCollector.RetrieveResult(
                     name='runtime.powerState',
                     val=vim.VirtualMachinePowerState.poweredOff,
                 ),
-                # vCenter reports a vCPU count for powered-off VMs too; the check skips them anyway.
+                # Reported for powered-off VMs too; the check skips them anyway.
                 vmodl.DynamicProperty(
                     name='summary.config.numCpu',
                     val=4,
@@ -352,7 +352,6 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                     name='runtime.powerState',
                     val=vim.VirtualMachinePowerState.poweredOn,
                 ),
-                # Always fetched, regardless of `collect_property_metrics`, for usage metering.
                 vmodl.DynamicProperty(
                     name='summary.config.numCpu',
                     val=2,
@@ -432,7 +431,6 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                     name='name',
                     val='host1',
                 ),
-                # Always fetched, regardless of `collect_property_metrics`, for usage metering.
                 vmodl.DynamicProperty(
                     name='summary.hardware.numCpuCores',
                     val=16,
@@ -807,7 +805,6 @@ VM_PROPERTIES_EX = mock.MagicMock(
                         name='name',
                         val='host1',
                     ),
-                    # Always fetched, regardless of `collect_property_metrics`, for usage metering.
                     vmodl.DynamicProperty(
                         name='summary.hardware.numCpuCores',
                         val=16,
@@ -837,8 +834,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                         name='name',
                         val='host2',
                     ),
-                    # host2 is `notResponding` and in maintenance mode, and still reports its core
-                    # count: the metering metric is not gated on host state.
+                    # Not gated on host state: host2 is notResponding and in maintenance mode.
                     vmodl.DynamicProperty(
                         name='summary.hardware.numCpuCores',
                         val=8,
