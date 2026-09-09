@@ -8,6 +8,22 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
+BUNDLED_NFSIOSTAT_PATHS = (
+    '/opt/datadog-agent/embedded/sbin/nfsiostat',
+    '/opt/datadog-packages/datadog-agent/stable/embedded/sbin/nfsiostat',
+)
+SOURCE_NFSIOSTAT_PATH = '/usr/local/sbin/nfsiostat'
+
+
+def _build_bundled_nfsiostat_command(nfsiostat_path: str) -> list[str]:
+    """Build the command for an Agent-bundled nfsiostat script."""
+    embedded_path = os.path.dirname(os.path.dirname(nfsiostat_path))
+    python_path = os.path.join(embedded_path, 'bin', 'python')
+    if os.path.exists(python_path):
+        return [python_path, nfsiostat_path, '1', '2']
+
+    return [nfsiostat_path, '1', '2']
+
 
 class NfsStatCheck(AgentCheck):
     metric_prefix = 'system.nfs.'
@@ -18,17 +34,18 @@ class NfsStatCheck(AgentCheck):
         if init_config.get('nfsiostat_path'):
             self.nfs_cmd = init_config['nfsiostat_path'].split() + ['1', '2']
         else:
-            # if not, check if it's installed in the opt dir, if so use that
-            if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
-                self.nfs_cmd = ['/opt/datadog-agent/embedded/sbin/nfsiostat', '1', '2']
-            # if not, then check if it is in the default place
-            elif os.path.exists('/usr/local/sbin/nfsiostat'):
-                self.nfs_cmd = ['/usr/local/sbin/nfsiostat', '1', '2']
+            for nfsiostat_path in BUNDLED_NFSIOSTAT_PATHS:
+                if os.path.exists(nfsiostat_path):
+                    self.nfs_cmd = _build_bundled_nfsiostat_command(nfsiostat_path)
+                    break
             else:
-                raise Exception(
-                    'nfsstat check requires nfsiostat be installed, please install it '
-                    '(through nfs-utils) or set the path to the installed version'
-                )
+                if os.path.exists(SOURCE_NFSIOSTAT_PATH):
+                    self.nfs_cmd = [SOURCE_NFSIOSTAT_PATH, '1', '2']
+                else:
+                    raise Exception(
+                        'nfsstat check requires nfsiostat be installed, please install it '
+                        '(through nfs-utils) or set the path to the installed version'
+                    )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
         self.disable_missing_mountpoints_warning = is_affirmative(
             self.instance.get('disable_missing_mountpoints_warning', False)
@@ -40,6 +57,10 @@ class NfsStatCheck(AgentCheck):
         this_device = []
         custom_tags = instance.get("tags", [])
         stats = stat_out.splitlines()
+
+        def add_device(device_data: list[list[str]]) -> None:
+            if len(device_data) >= 7:
+                all_devices.append(Device(device_data, self.log))
 
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
@@ -54,14 +75,12 @@ class NfsStatCheck(AgentCheck):
                 continue
             elif l.find('mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
-                device = Device(this_device, self.log)
-                all_devices.append(device)
+                add_device(this_device)
                 this_device = []
             this_device.append(l.strip().split())
 
         # Add the last device into the array
-        device = Device(this_device, self.log)
-        all_devices.append(device)
+        add_device(this_device)
 
         # Disregard the first half of device stats (report 1 of 2)
         # as that is the moving average
@@ -88,8 +107,7 @@ class Device(object):
         self.log.info(self._device_header)
         self.device_name = self._device_header[0]
         self.mount = self._device_header[-1][:-1]
-        self.nfs_server = self.device_name.split(':')[0]
-        self.nfs_export = self.device_name.split(':')[1]
+        self.nfs_server, _, self.nfs_export = self.device_name.partition(':')
 
     def _parse_ops(self):
         ops = self._device_data[2]
