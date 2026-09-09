@@ -86,17 +86,6 @@ RC_AUTO = '__rc_auto_sentinel__'
     show_default=True,
     help='Skip checking GitHub for open PRs targeting this release branch before tagging.',
 )
-@click.option(
-    '--skip-agent-pr',
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help=(
-        'Skip opening the datadog-agent PR that pins `INTEGRATIONS_CORE_VERSION` in `release.json` '
-        '(against the Agent `main` for the first RC of a milestone, against the matching Agent '
-        'release branch otherwise).'
-    ),
-)
 @click.pass_obj
 def tag(
     app: Application,
@@ -106,7 +95,6 @@ def tag(
     rc: str | None,
     yes: bool,
     skip_open_pr_check: bool,
-    skip_agent_pr: bool,
 ) -> None:
     """
     Tag a release branch with a release-candidate or final-release tag.
@@ -137,9 +125,6 @@ def tag(
       included in the tag.
     - `--yes/-y` skips all yes/no confirmations (target-branch, backward-RC, final tag).
     - `--skip-open-pr-check` skips the GitHub query for open PRs targeting the branch.
-    - `--skip-agent-pr` skips opening the datadog-agent PR that pins `INTEGRATIONS_CORE_VERSION`
-      in `release.json`. The PR targets the Agent `main` when tagging the first RC of a milestone
-      (`X.Y.0-rc.1`) and the matching Agent release branch for every other tag.
     """
     if final and rc is not None:
         raise click.UsageError('`--final` and `--rc` are mutually exclusive.')
@@ -171,8 +156,7 @@ def tag(
     if build_agent_yaml_needs_update:
         _trigger_build_agent_yaml_update_workflow(app, target_branch)
 
-    if not skip_agent_pr:
-        _open_datadog_agent_bump_pr(app, git, target_branch, new_tag, pin_ref)
+    _open_datadog_agent_bump_pr(app, git, target_branch, new_tag, pin_ref)
 
 
 def _warn_if_build_agent_yaml_stale(app: Application, git: GitRepository, ref: str) -> bool:
@@ -431,11 +415,11 @@ def _open_datadog_agent_bump_pr(
     """Open a PR on datadog-agent pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit.
 
     The pin is the integrations-core commit SHA that `effective_ref` (what the tag was placed on)
-    resolves to. The PR targets the Agent `main` when the tag is the first RC of a milestone
-    (`X.Y.0-rc.1`, tagged before the Agent release branch is cut) and the Agent release branch
-    matching ours (`target_branch`) for every other tag. It is built through the async GitHub
-    client so no local checkout of datadog-agent is required.
+    resolves to. It is built through the async GitHub client so no local checkout of datadog-agent
+    is required.
     """
+    # The Agent repo has no release branch yet when the first RC of a milestone is tagged,
+    # so that pin goes to `main`; every other tag targets the matching Agent release branch.
     agent_base_branch = 'main' if _is_first_rc_of_milestone(new_tag) else target_branch
 
     import asyncio
@@ -560,11 +544,7 @@ async def _create_agent_bump_pr(
 
 
 def _is_first_rc_of_milestone(tag: str) -> bool:
-    """Whether `tag` is `X.Y.0-rc.1`, the first RC of a milestone.
-
-    That tag is created before the Agent release branch is cut, so its pin goes to the Agent
-    `main` instead.
-    """
+    """Whether `tag` is `X.Y.0-rc.1`, the first RC of a milestone."""
     version = Version(tag)
     return version.micro == 0 and version.pre == ('rc', 1)
 

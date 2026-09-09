@@ -676,26 +676,6 @@ def test_agent_pr_final_tag_targets_release_branch_and_bumps_pin(ddev, agent_pr_
     assert 'Datadog-agent bump PR created' in result.output
 
 
-def test_skip_agent_pr_does_not_open_pr(ddev, agent_pr_git, fake_async_github, config_file):
-    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
-    config_file.save()
-
-    result = ddev(
-        'release',
-        'branch',
-        'tag',
-        '--release',
-        '7.56.x',
-        '--final',
-        '--skip-open-pr-check',
-        '--skip-agent-pr',
-        input='y\n',
-    )
-
-    assert result.exit_code == 0, result.output
-    fake_async_github.assert_not_called('create_pull_request')
-
-
 def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
