@@ -21,7 +21,7 @@ def delivery():
         {
             'runId': 'run-1',
             'taskId': 'task-1',
-            'artifactVersion': 1,
+            'artifactVersion': 2,
             'uploadId': 'upload-1',
             'baseUrl': 'https://intake.example',
             'token': 'test-token',
@@ -85,12 +85,11 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
     prefix = rq.page_prefix(
         run_id=delivery.run_id,
         task_id=delivery.task_id,
-        batch_index=0,
         record_offset=0,
         agent_hostname=AGENT_HOSTNAME,
         schema_json=schema_json,
     )
-    limit = len(prefix) + len(encoded) + 3
+    limit = len(prefix) + len(encoded) + len(rq.PAGE_SUFFIX)
     delivery = bounded_delivery(delivery, maxFileBytes=limit, maxSchemaBytes=len(schema_json or b'') or 1)
     uploads = Uploads()
     writer = rq.PageWriter(
@@ -103,12 +102,19 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
     assert len(uploads.pages) == 3
     for index, (page, payload) in enumerate(uploads.pages):
         envelope = json.loads(payload)
-        assert envelope['data']['items'] == [row]
-        assert envelope['run_id'] == delivery.run_id
+        expected_keys = ['contract_version', 'crawl_id', 'task_id', 'record_offset', 'agent_hostname']
+        if include_schema:
+            expected_keys.append('schema')
+        assert list(envelope) == expected_keys + ['data']
+        assert envelope['contract_version'] == rq.REMOTE_QUERY_ARTIFACT_VERSION == 2
+        assert envelope['crawl_id'] == delivery.run_id
         assert envelope['task_id'] == delivery.task_id
         assert envelope['agent_hostname'] == AGENT_HOSTNAME
-        assert envelope['batch_index'] == page.batch_index == index
+        assert 'run_id' not in envelope
+        assert 'batch_index' not in envelope
+        assert page.batch_index == index
         assert envelope['record_offset'] == page.record_offset == index
+        assert envelope['data'] == [row]
         assert page.rows == 1
         assert page.page_bytes == len(payload) <= limit
         assert page.sha256_hex == hashlib.sha256(payload).hexdigest()
@@ -132,7 +138,7 @@ def test_empty_result_keeps_requested_schema(delivery, creds, schema, pages):
     assert writer.finish()['pageCount'] == pages
     if pages:
         envelope = json.loads(uploads.pages[0][1])
-        assert envelope['data']['items'] == []
+        assert envelope['data'] == []
         assert envelope['agent_hostname'] == AGENT_HOSTNAME
 
 
@@ -146,14 +152,13 @@ def test_page_limits_fail_without_final_success(delivery, creds, bound, error):
             rq.page_prefix(
                 run_id=delivery.run_id,
                 task_id=delivery.task_id,
-                batch_index=0,
                 record_offset=0,
                 agent_hostname=AGENT_HOSTNAME,
                 schema_json=None,
             )
         )
         + len(row)
-        + 3
+        + len(rq.PAGE_SUFFIX)
     )
     delivery = bounded_delivery(
         delivery,
@@ -337,7 +342,7 @@ def test_database_instance_target_accepts_requested_dbname():
         (('includeSchema',), 'true'),
         (('target', 'port'), '5432'),
         (('resultDelivery',), None),
-        (('resultDelivery', 'artifactVersion'), 2),
+        (('resultDelivery', 'artifactVersion'), 1),
         (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
         (('resultDelivery', 'limits', 'maxResultBytes'), 10 * 1024**3 + 1),
         (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),

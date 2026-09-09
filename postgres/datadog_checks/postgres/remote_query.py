@@ -417,7 +417,6 @@ def build_schema_json(
         rq.page_prefix(
             run_id=delivery.run_id,
             task_id=delivery.task_id,
-            batch_index=0,
             record_offset=0,
             agent_hostname=agent_hostname,
             schema_json=schema_json,

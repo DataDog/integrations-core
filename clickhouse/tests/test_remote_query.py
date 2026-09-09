@@ -234,7 +234,7 @@ def valid_result_delivery(**extra):
     result_delivery = {
         'runId': RUN_ID,
         'taskId': TASK_ID,
-        'artifactVersion': 1,
+        'artifactVersion': 2,
         'uploadId': UPLOAD_ID,
         'baseUrl': BASE_URL,
         'token': TOKEN,
@@ -335,11 +335,10 @@ def assert_success(events):
     return event_metadata(events[-1])
 
 
-def prefix_bytes(batch_index=0, record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=None):
+def prefix_bytes(record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=None):
     return rq.page_prefix(
         run_id=RUN_ID,
         task_id=TASK_ID,
-        batch_index=batch_index,
         record_offset=record_offset,
         agent_hostname=agent_hostname,
         schema_json=schema_json,
@@ -659,7 +658,7 @@ def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    assert json.loads(page)['data']['items'] == [{'payload': '\x00ab'}]
+    assert json.loads(page)['data'] == [{'payload': '\x00ab'}]
     assert b'"payload":"\\u0000ab"' in page
 
 
@@ -823,7 +822,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['resultDelivery']['uploadId'] == UPLOAD_ID
     assert started['resultDelivery']['runId'] == RUN_ID
     assert started['resultDelivery']['taskId'] == TASK_ID
-    assert started['resultDelivery']['artifactVersion'] == 1
+    assert started['resultDelivery']['artifactVersion'] == 2
     assert 'partBytes' not in started['resultDelivery']
     assert started['resultDelivery']['limits'] == {
         'maxFileBytes': 104857600,
@@ -853,7 +852,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert all(event.payload == b'' for event in events)
 
 
-def test_producer_writes_exact_v1_envelope_json(monkeypatch):
+def test_producer_writes_exact_v2_envelope_json(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(rows=[[1]])
     fake = FakeUploadClient()
@@ -866,13 +865,12 @@ def test_producer_writes_exact_v1_envelope_json(monkeypatch):
     assert page == (prefix_bytes() + b'{"value":1}' + rq.PAGE_SUFFIX)
     parsed = json.loads(page)
     assert parsed == {
-        'version': 1,
-        'run_id': RUN_ID,
+        'contract_version': 2,
+        'crawl_id': RUN_ID,
         'task_id': TASK_ID,
         'agent_hostname': AGENT_HOSTNAME,
-        'batch_index': 0,
         'record_offset': 0,
-        'data': {'items': [{'value': 1}]},
+        'data': [{'value': 1}],
     }
     assert 'schema' not in parsed
     assert 'total_records' not in parsed
@@ -956,10 +954,10 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(m
     pages = assembled_pages(fake)
     assert list(pages) == [0]
     parsed = json.loads(pages[0])
-    assert parsed['batch_index'] == 0
+    assert 'batch_index' not in parsed
     assert parsed['record_offset'] == 0
     assert parsed['schema'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8'}]
-    assert parsed['data'] == {'items': []}
+    assert parsed['data'] == []
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
     assert final['upload_receipt']['totalBytes'] == len(pages[0])
@@ -1063,12 +1061,11 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
     pages = assembled_pages(fake)
     assert list(pages) == [0, 1]
     parsed_pages = [json.loads(page) for page in pages.values()]
-    assert parsed_pages[0]['batch_index'] == 0
+    assert 'batch_index' not in parsed_pages[0]
     assert parsed_pages[0]['record_offset'] == 0
-    assert parsed_pages[0]['data']['items'] == [{'city': 'New York', 'country': 'USA'}]
-    assert parsed_pages[1]['batch_index'] == 1
+    assert parsed_pages[0]['data'] == [{'city': 'New York', 'country': 'USA'}]
     assert parsed_pages[1]['record_offset'] == 1
-    assert parsed_pages[1]['data']['items'] == [{'city': 'Paris', 'country': 'France'}]
+    assert parsed_pages[1]['data'] == [{'city': 'Paris', 'country': 'France'}]
     # The schema repeats identically and in result-column order on every page.
     assert parsed_pages[0]['schema'] == parsed_pages[1]['schema'] == schema_entries
     assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
@@ -1097,7 +1094,7 @@ def test_producer_schema_carries_clickhouse_type_strings(monkeypatch):
         {'column_name': 'name', 'vendor_data_type': 'LowCardinality(String)'},
         {'column_name': 'flag', 'vendor_data_type': 'Bool'},
     ]
-    assert parsed['data']['items'] == [{'count': None, 'name': 'x', 'flag': True}]
+    assert parsed['data'] == [{'count': None, 'name': 'x', 'flag': True}]
 
 
 def test_producer_enforces_max_schema_bytes(monkeypatch):
@@ -1362,7 +1359,7 @@ def test_value_contract_producer_emits_pinned_row_json(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    parsed = json.loads(page, parse_float=Decimal)['data']['items'][0]
+    parsed = json.loads(page, parse_float=Decimal)['data'][0]
     assert parsed == {
         'null_value': None,
         'bool_value': True,
@@ -1740,7 +1737,7 @@ def real_server_request(instance, query, include_schema=False):
         'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 1,
+            'artifactVersion': 2,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
             'token': TOKEN,
@@ -1782,7 +1779,7 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
         'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 1,
+            'artifactVersion': 2,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
             'token': TOKEN,
@@ -1798,13 +1795,13 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
     pages = assembled_pages(fake)
     assert list(pages) == [0]
     page = json.loads(pages[0])
-    assert page['version'] == 1
-    assert page['run_id'] == RUN_ID
+    assert page['contract_version'] == 2
+    assert page['crawl_id'] == RUN_ID
     assert page['task_id'] == TASK_ID
-    assert page['batch_index'] == 0
+    assert 'batch_index' not in page
     assert page['record_offset'] == 0
     assert page['schema'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8'}]
-    assert page['data']['items'] == [{'value': 1}]
+    assert page['data'] == [{'value': 1}]
     # One complete page uploaded as one direct PUT: exact whole-page identity, rows exact.
     (page_call,) = fake.put_page_calls
     assert page_call.batch_index == 0
@@ -1836,7 +1833,7 @@ def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clic
     (page,) = assembled_pages(fake).values()
     # The payload is the exact three bytes NUL, 'a', 'b': the page JSON value equals the
     # decoded payload, with the NUL escaped the same way the server rendered it.
-    assert json.loads(page)['data']['items'] == [{'payload': '\x00ab'}]
+    assert json.loads(page)['data'] == [{'payload': '\x00ab'}]
     assert b'"payload":"\\u0000ab"' in page
 
 
@@ -1879,7 +1876,7 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
     assert page_call.rows == 1
     assert page_call.sha256_hex == hashlib.sha256(pages[0]).hexdigest()
     assert fake.run_finalize_calls == 1
-    (item,) = json.loads(pages[0])['data']['items']
+    (item,) = json.loads(pages[0])['data']
     if expected_payload_bytes is not None:
         # The single payload column carries exactly the intended byte count of 'x' bytes.
         assert item == {'payload': 'x' * expected_payload_bytes}
