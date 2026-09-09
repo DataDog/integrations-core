@@ -34,38 +34,12 @@ FRONTEND_METRICS_MOCK = [
     'frontend.inflight_requests',
     'frontend.active_requests',
     'frontend.disconnected_clients',
-    'frontend.request_duration.seconds.count',
-    'frontend.request_duration.seconds.sum',
-    'frontend.input_sequence_tokens.count',
-    'frontend.input_sequence_tokens.sum',
-    'frontend.output_sequence_tokens.count',
-    'frontend.output_sequence_tokens.sum',
     'frontend.output_tokens.count',
-    'frontend.time_to_first_token.seconds.count',
-    'frontend.time_to_first_token.seconds.sum',
-    'frontend.inter_token_latency.seconds.count',
-    'frontend.inter_token_latency.seconds.sum',
-    'frontend.embedding_latency.seconds.count',
-    'frontend.embedding_latency.seconds.sum',
-    'frontend.tokenizer_latency_ms.count',
-    'frontend.tokenizer_latency_ms.sum',
-    'frontend.cached_tokens.count',
-    'frontend.cached_tokens.sum',
     'frontend.kv_hit_rate',
-    'frontend.kv_transfer_estimated_latency.seconds.count',
-    'frontend.kv_transfer_estimated_latency.seconds.sum',
     'frontend.shared_cache_hit_rate',
     'frontend.shared_cache_beyond_blocks',
     'frontend.non_max_overlap_selections.count',
     'frontend.overlap_blocks_lost',
-    'frontend.images_per_request.count',
-    'frontend.images_per_request.sum',
-    'frontend.videos_per_request.count',
-    'frontend.videos_per_request.sum',
-    'frontend.audio_per_request.count',
-    'frontend.audio_per_request.sum',
-    'frontend.image_tokens_per_request.count',
-    'frontend.image_tokens_per_request.sum',
     'frontend.model.total_kv_blocks',
     'frontend.model.max_num_seqs',
     'frontend.model.max_num_batched_tokens',
@@ -97,19 +71,11 @@ WORKER_METRICS_MOCK = [
     'component.request_bytes.count',
     'component.response_bytes.count',
     'component.inflight_requests',
-    'component.request_duration.seconds.count',
-    'component.request_duration.seconds.sum',
     'component.errors.count',
     'component.cancellation.count',
-    'component.network_transit.seconds.count',
-    'component.network_transit.seconds.sum',
-    'component.time_to_first_response.seconds.count',
-    'component.time_to_first_response.seconds.sum',
     'component.queue_depth',
     'component.queue_capacity',
     'component.enqueue_rejected.count',
-    'component.permit_wait.seconds.count',
-    'component.permit_wait.seconds.sum',
     'component.pool_active_tasks',
     'component.pool_capacity',
     'component.uptime_seconds',
@@ -122,6 +88,11 @@ WORKER_METRICS_MOCK = [
     'component.kv_cache.total_blocks',
     'component.kv_cache.gpu_cache_usage_percent',
     'component.kv_cache.hit_rate',
+    'component.kv_cache.events_applied.count',
+    'component.router.requests.count',
+    'component.router.requests_started.count',
+    'component.router.non_max_overlap_selections.count',
+    'rejection.requests.count',
 ]
 
 
@@ -141,6 +112,11 @@ FRONTEND_HISTOGRAM_BUCKETS_MOCK = [
     'frontend.embedding_latency.seconds',
     'frontend.kv_transfer_estimated_latency.seconds',
     'frontend.cached_tokens',
+    'router.overhead.block_hashing_ms',
+    'router.overhead.indexer_find_matches_ms',
+    'router.overhead.seq_hashing_ms',
+    'router.overhead.scheduling_ms',
+    'router.overhead.total_ms',
 ]
 
 WORKER_HISTOGRAM_BUCKETS_MOCK = [
@@ -148,7 +124,20 @@ WORKER_HISTOGRAM_BUCKETS_MOCK = [
     'component.network_transit.seconds',
     'component.time_to_first_response.seconds',
     'component.permit_wait.seconds',
+    'component.router.time_to_first_token.seconds',
+    'component.router.inter_token_latency.seconds',
+    'component.router.input_sequence_tokens',
+    'component.router.output_sequence_tokens',
+    'component.router.kv_hit_rate',
+    'component.router.overlap_blocks_lost',
 ]
+
+FRONTEND_METRICS_MOCK.extend(
+    f'{metric}.{suffix}' for metric in FRONTEND_HISTOGRAM_BUCKETS_MOCK for suffix in ('count', 'sum')
+)
+WORKER_METRICS_MOCK.extend(
+    f'{metric}.{suffix}' for metric in WORKER_HISTOGRAM_BUCKETS_MOCK for suffix in ('count', 'sum')
+)
 
 FRONTEND_METRICS_MOCK = [f'dynamo.{m}' for m in FRONTEND_METRICS_MOCK]
 WORKER_METRICS_MOCK = [f'dynamo.{m}' for m in WORKER_METRICS_MOCK]

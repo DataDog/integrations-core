@@ -25,7 +25,7 @@ files:
           `dynamo.component.*` metrics in addition to frontend metrics.
 
           For more information refer to:
-          https://docs.nvidia.com/dynamo/latest/observability/metrics.html
+          https://docs.nvidia.com/dynamo/dev/reference/observability/metrics-catalog
         histogram_buckets_as_distributions.value.example: true
         histogram_buckets_as_distributions.description: |
           Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly

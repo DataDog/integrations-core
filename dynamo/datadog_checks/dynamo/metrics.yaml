@@ -54,6 +54,13 @@ dynamo_frontend_lora_churn_loads: frontend.lora.churn_loads
 dynamo_frontend_lora_churn_unloads: frontend.lora.churn_unloads
 dynamo_frontend_lora_overflow_count: frontend.lora.overflow_count
 
+# Per-request routing overhead metrics exposed on the frontend endpoint when KV routing is enabled.
+dynamo_router_overhead_block_hashing_ms: router.overhead.block_hashing_ms
+dynamo_router_overhead_indexer_find_matches_ms: router.overhead.indexer_find_matches_ms
+dynamo_router_overhead_seq_hashing_ms: router.overhead.seq_hashing_ms
+dynamo_router_overhead_scheduling_ms: router.overhead.scheduling_ms
+dynamo_router_overhead_total_ms: router.overhead.total_ms
+
 # Metrics exposed by Dynamo backend workers (python -m dynamo.vllm/dynamo.sglang/dynamo.trtllm) on the
 # system status server enabled via the DYN_SYSTEM_PORT env var (commonly 8081, or 9090 under the k8s operator).
 # Source: lib/runtime/src/metrics/prometheus_names.rs (work_handler, task_tracker, distributed_runtime, kvstats)
@@ -79,10 +86,23 @@ dynamo_component_tasks_success: component.tasks_success
 dynamo_component_tasks_cancelled: component.tasks_cancelled
 dynamo_component_tasks_failed: component.tasks_failed
 dynamo_component_tasks_rejected: component.tasks_rejected
-# KV cache stats, portable across the vLLM / SGLang / TensorRT-LLM backends Dynamo can drive.
+# Requests rejected when the worker's engine and overflow queue are both at capacity.
+dynamo_rejection_request: rejection.requests
+# KV cache stats, portable across the vLLM, SGLang, and TensorRT-LLM backends Dynamo can drive.
 dynamo_component_total_blocks: component.kv_cache.total_blocks
 dynamo_component_gpu_cache_usage_percent: component.kv_cache.gpu_cache_usage_percent
 dynamo_component_kv_cache_hit_rate: component.kv_cache.hit_rate
+dynamo_component_kv_cache_events_applied: component.kv_cache.events_applied
+# Aggregate request metrics exposed by the KV router through the component metrics hierarchy.
+dynamo_component_router_requests: component.router.requests
+dynamo_component_router_requests_started: component.router.requests_started
+dynamo_component_router_time_to_first_token_seconds: component.router.time_to_first_token.seconds
+dynamo_component_router_inter_token_latency_seconds: component.router.inter_token_latency.seconds
+dynamo_component_router_input_sequence_tokens: component.router.input_sequence_tokens
+dynamo_component_router_output_sequence_tokens: component.router.output_sequence_tokens
+dynamo_component_router_kv_hit_rate: component.router.kv_hit_rate
+dynamo_component_router_non_max_overlap_selections: component.router.non_max_overlap_selections
+dynamo_component_router_overlap_blocks_lost: component.router.overlap_blocks_lost
 # The TensorRT-LLM engine publishes its own hit-rate gauge under this name instead of Dynamo's
 # portable dynamo_component_kv_cache_hit_rate, which requires the KV event consolidator to be
 # configured (kv_connector_config) and is otherwise never emitted for this backend.

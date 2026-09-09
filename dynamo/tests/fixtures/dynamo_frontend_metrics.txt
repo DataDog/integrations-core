@@ -354,3 +354,110 @@ dynamo_frontend_lora_churn_unloads_total{model="meta-llama/Llama-3-8B-Instruct"}
 # HELP dynamo_frontend_lora_overflow_count frontend.lora.overflow_count
 # TYPE dynamo_frontend_lora_overflow_count gauge
 dynamo_frontend_lora_overflow_count{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+# Routing-overhead families are registered only when KV routing is enabled.
+# HELP dynamo_router_overhead_block_hashing_ms Time spent computing block hashes in milliseconds
+# TYPE dynamo_router_overhead_block_hashing_ms histogram
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.001"} 3
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.002"} 6
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.004"} 9
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.008"} 12
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.016"} 15
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.032"} 18
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.064"} 21
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.128"} 24
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.256"} 27
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="0.512"} 30
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="1.024"} 33
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="2.048"} 36
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="4.096"} 39
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="8.192"} 42
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="16.384"} 45
+dynamo_router_overhead_block_hashing_ms_bucket{router_id="12345",le="+Inf"} 48
+dynamo_router_overhead_block_hashing_ms_count{router_id="12345"} 48
+dynamo_router_overhead_block_hashing_ms_sum{router_id="12345"} 42.0
+# HELP dynamo_router_overhead_indexer_find_matches_ms Time spent in indexer find_matches in milliseconds
+# TYPE dynamo_router_overhead_indexer_find_matches_ms histogram
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="0.01"} 3
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="0.03"} 6
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="0.09"} 9
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="0.27"} 12
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="0.81"} 15
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="2.43"} 18
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="7.29"} 21
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="21.87"} 24
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="65.61"} 27
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="196.83"} 30
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="590.49"} 33
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="1771.47"} 36
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="5314.41"} 39
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="15943.23"} 42
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="47829.69"} 45
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="143489.07"} 48
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="430467.21"} 51
+dynamo_router_overhead_indexer_find_matches_ms_bucket{router_id="12345",le="+Inf"} 54
+dynamo_router_overhead_indexer_find_matches_ms_count{router_id="12345"} 54
+dynamo_router_overhead_indexer_find_matches_ms_sum{router_id="12345"} 42.0
+# HELP dynamo_router_overhead_seq_hashing_ms Time spent computing sequence hashes in milliseconds
+# TYPE dynamo_router_overhead_seq_hashing_ms histogram
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.001"} 3
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.002"} 6
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.004"} 9
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.008"} 12
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.016"} 15
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.032"} 18
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.064"} 21
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.128"} 24
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.256"} 27
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="0.512"} 30
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="1.024"} 33
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="2.048"} 36
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="4.096"} 39
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="8.192"} 42
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="16.384"} 45
+dynamo_router_overhead_seq_hashing_ms_bucket{router_id="12345",le="+Inf"} 48
+dynamo_router_overhead_seq_hashing_ms_count{router_id="12345"} 48
+dynamo_router_overhead_seq_hashing_ms_sum{router_id="12345"} 42.0
+# HELP dynamo_router_overhead_scheduling_ms Time spent in scheduler worker selection in milliseconds
+# TYPE dynamo_router_overhead_scheduling_ms histogram
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="0.01"} 3
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="0.03"} 6
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="0.09"} 9
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="0.27"} 12
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="0.81"} 15
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="2.43"} 18
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="7.29"} 21
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="21.87"} 24
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="65.61"} 27
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="196.83"} 30
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="590.49"} 33
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="1771.47"} 36
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="5314.41"} 39
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="15943.23"} 42
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="47829.69"} 45
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="143489.07"} 48
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="430467.21"} 51
+dynamo_router_overhead_scheduling_ms_bucket{router_id="12345",le="+Inf"} 54
+dynamo_router_overhead_scheduling_ms_count{router_id="12345"} 54
+dynamo_router_overhead_scheduling_ms_sum{router_id="12345"} 42.0
+# HELP dynamo_router_overhead_total_ms Total routing overhead per request in milliseconds
+# TYPE dynamo_router_overhead_total_ms histogram
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="0.01"} 3
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="0.03"} 6
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="0.09"} 9
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="0.27"} 12
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="0.81"} 15
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="2.43"} 18
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="7.29"} 21
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="21.87"} 24
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="65.61"} 27
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="196.83"} 30
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="590.49"} 33
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="1771.47"} 36
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="5314.41"} 39
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="15943.23"} 42
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="47829.69"} 45
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="143489.07"} 48
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="430467.21"} 51
+dynamo_router_overhead_total_ms_bucket{router_id="12345",le="+Inf"} 54
+dynamo_router_overhead_total_ms_count{router_id="12345"} 54
+dynamo_router_overhead_total_ms_sum{router_id="12345"} 42.0

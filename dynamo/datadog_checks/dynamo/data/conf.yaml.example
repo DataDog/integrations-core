@@ -59,7 +59,7 @@ instances:
     ## `dynamo.component.*` metrics in addition to frontend metrics.
     ##
     ## For more information refer to:
-    ## https://docs.nvidia.com/dynamo/latest/observability/metrics.html
+    ## https://docs.nvidia.com/dynamo/dev/reference/observability/metrics-catalog
     #
   - openmetrics_endpoint: http://localhost:8000/metrics
 

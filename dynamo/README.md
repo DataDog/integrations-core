@@ -57,10 +57,8 @@ its own instance if you want both:
 
 2. [Restart the Agent][5].
 
-This check matches Dynamo's default metric names. If your deployment sets `DYN_METRICS_PREFIX` to
-rename the frontend's `dynamo_frontend_` prefix, set `raw_metric_prefix` on the frontend instance to
-that value so the metrics still map. Worker metrics are unaffected: Dynamo always emits those with
-the `dynamo_component_` prefix.
+This check matches Dynamo's default metric names. Custom frontend metric prefixes configured through
+`DYN_METRICS_PREFIX` are not supported.
 
 ### Validation
 
