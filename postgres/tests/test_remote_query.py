@@ -983,6 +983,8 @@ def test_producer_stamps_agent_reported_hostname_from_the_check_instance(monkeyp
 def test_producer_executes_query_exactly_once_in_read_only_transaction_with_timeout(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
+    # A constant clock keeps the remaining-wall derivation of the statement timeout exact.
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
 
@@ -1007,42 +1009,93 @@ def test_producer_executes_query_exactly_once_in_read_only_transaction_with_time
     assert server.closed
 
 
-def test_producer_applies_instance_remote_queries_timeout_over_delivery_limit(monkeypatch):
+def test_producer_caps_instance_timeout_at_the_producer_wall(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
+    # The instance override is larger than the delivered limit, so it cannot lengthen the
+    # run: the effective statement timeout is capped at the remaining producer wall.
     check = make_check(pool=pool, remote_queries=RemoteQueries(timeout_ms=300_000))
 
     events = collect_events(valid_request(), check, client=fake)
 
     assert_success(events)
     control = pool.cursors[0]
-    # The instance-configured DB-protective timeout overrides the delivery-injected limit.
     assert [entry[0] for entry in control.executed] == [
         'BEGIN READ ONLY',
-        'SET LOCAL statement_timeout = 300000',
+        'SET LOCAL statement_timeout = 5000',
         'ROLLBACK',
     ]
 
 
-def test_statement_timeout_resolution_prefers_instance_timeout():
-    limits = rq.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
+def test_producer_honors_instance_timeout_shorter_than_the_wall(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
+    pool = FakePool(rows=[(1,)])
+    fake = FakeUploadClient()
+    # The instance override is the smaller value, so it is the effective statement timeout.
+    check = make_check(pool=pool, remote_queries=RemoteQueries(timeout_ms=3_000))
+
+    events = collect_events(valid_request(), check, client=fake)
+
+    assert_success(events)
+    control = pool.cursors[0]
+    assert [entry[0] for entry in control.executed] == [
+        'BEGIN READ ONLY',
+        'SET LOCAL statement_timeout = 3000',
+        'ROLLBACK',
+    ]
+
+
+def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    fake = FakeUploadClient()
+    check = make_check(pool=pool, remote_queries=RemoteQueries(timeout_ms=300_000))
+    request = valid_request()
+    request['resultDelivery']['limits']['timeoutMs'] = 1000
+    # The wall is the delivered 1 s even though the instance override is 300 s: the run must
+    # expire at the delivered wall, which is exactly the case the old replacement semantics
+    # silently allowed to run past its parent budget.
+    clock = iter([100.0] * 4 + [101.5] * 50)
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(clock))
+
+    events = collect_events(request, check, client=fake)
+
+    assert_failed_event(events, 'timeout')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    control = pool.cursors[0]
+    assert [entry[0] for entry in control.executed] == [
+        'BEGIN READ ONLY',
+        'SET LOCAL statement_timeout = 1000',
+        'ROLLBACK',
+    ]
+    assert fake.abort_calls == 1
+
+
+def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wall(monkeypatch):
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
+    deadline = 105.0  # a 5 s wall with 5 s remaining, matching the delivered limit
+
+    # An override larger than the wall is capped: it may shorten the run, never lengthen it.
     check = make_check(remote_queries=SimpleNamespace(timeout_ms=300_000))
+    assert remote_query._resolve_statement_timeout_ms(check, deadline) == 5_000
 
-    assert remote_query._resolve_statement_timeout_ms(check, limits) == 300_000
+    # An override shorter than the remaining wall is honored as the statement timeout.
+    check = make_check(remote_queries=SimpleNamespace(timeout_ms=3_000))
+    assert remote_query._resolve_statement_timeout_ms(check, deadline) == 3_000
 
+    # Without a positive instance override, the remaining wall applies.
+    check = make_check(remote_queries=SimpleNamespace(timeout_ms=None))
+    assert remote_query._resolve_statement_timeout_ms(check, deadline) == 5_000
 
-@pytest.mark.parametrize(
-    'remote_queries',
-    [None, SimpleNamespace(timeout_ms=None), SimpleNamespace(timeout_ms=0)],
-    ids=['section-unset', 'timeout-unset', 'timeout-non-positive'],
-)
-def test_statement_timeout_resolution_falls_back_to_delivery_limit(remote_queries):
-    limits = rq.RemoteQueryUploadLimits.model_validate(valid_limits(timeoutMs=7_777))
-    check = make_check(remote_queries=remote_queries)
-
-    assert remote_query._resolve_statement_timeout_ms(check, limits) == 7_777
+    # An expired wall must not disable the database-side protection: the remainder clamps
+    # to 1 ms instead of reaching a zero statement timeout.
+    assert remote_query._resolve_statement_timeout_ms(check, 99.0) == 1
 
 
 def test_producer_rolls_back_transaction_on_failure(monkeypatch):

@@ -878,6 +878,8 @@ def test_producer_writes_exact_v2_envelope_json(monkeypatch):
 
 def test_producer_executes_query_exactly_once_verbatim_with_readonly_settings(monkeypatch):
     patch_upload_credentials(monkeypatch)
+    # A constant clock keeps the remaining-wall derivation of max_execution_time exact.
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
     clickhouse_client = make_client(rows=[[1]])
     fake = FakeUploadClient()
     request = valid_request()
@@ -898,6 +900,38 @@ def test_producer_executes_query_exactly_once_verbatim_with_readonly_settings(mo
     assert clickhouse_client.stream.read_sizes  # rows were read in bounded chunks
     assert clickhouse_client.stream.closed
     assert clickhouse_client.closed
+
+
+def test_client_and_server_timeouts_derive_from_the_remaining_wall(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    captured = {}
+
+    def create_remote_query_client(send_receive_timeout=None):
+        captured['send_receive_timeout'] = send_receive_timeout
+        return captured.setdefault('client', make_client(rows=[[1]]))
+
+    check = make_check()
+    check.create_remote_query_client = create_remote_query_client
+    request = valid_request()
+    request['resultDelivery']['limits']['timeoutMs'] = 30_000
+    # 20 s of the 30 s wall are already consumed when the client is created and the stream
+    # opens, so the send/receive timeout and max_execution_time must come from the remaining
+    # 10 s rather than the full delivered budget.
+    clock = iter([100.0, 120.0, 120.0] + [120.0] * 50)
+    monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(clock))
+
+    events = collect_events(request, check, upload_client=FakeUploadClient())
+
+    assert_success(events)
+    assert captured['send_receive_timeout'] == 10
+    assert captured['client'].raw_stream_calls == [
+        {
+            'query': 'SELECT 1 AS value',
+            'settings': {'readonly': 1, 'max_execution_time': 10.0},
+            'fmt': remote_query.REMOTE_QUERY_STREAM_FORMAT,
+        }
+    ]
 
 
 def test_producer_omits_settings_for_readonly_profile_users(monkeypatch):
@@ -1549,7 +1583,10 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     clickhouse_client = make_client(rows=[[1], [2], [3]])
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
-    values = iter([0.0, 0.0] + [10.0] * 50)
+    # The leading zeros cover every earlier clock read (started_at, the client factory's and
+    # settings' remaining-time derivations, and the per-row guards) so the wall still expires
+    # at the page-close guard, after rows were produced.
+    values = iter([0.0] * 7 + [10.0] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
 
     events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)

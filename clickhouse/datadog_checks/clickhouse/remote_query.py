@@ -739,6 +739,9 @@ class LineBoundTracker:
 def resolve_readonly_settings(client: ClickhouseClient, timeout_ms: int) -> dict[str, Any]:
     """Per-request settings enforcing the read-only posture and a server-side timeout.
 
+    ``timeout_ms`` is the remaining run wall in milliseconds at the time the request is
+    sent, so a stream opened late cannot overrun the run-wide deadline.
+
     ClickHouse ``readonly`` levels: 0 no restrictions, 1 read-only with settings frozen,
     2 read-only with settings changes allowed (except ``readonly`` itself). The client's
     server-settings discovery reports the connected user's current level:
@@ -810,11 +813,12 @@ def _run_streamed_query(
     agent_hostname: str,
     guard: Callable[[], None],
     stats: rq.RemoteQueryRunStats,
+    deadline: float,
 ) -> dict[str, Any]:
     """Stream the query result into bounded JSON pages and return the run receipt."""
     delivery = request.result_delivery
     limits = delivery.limits
-    settings = resolve_readonly_settings(clickhouse_client, limits.timeout_ms)
+    settings = resolve_readonly_settings(clickhouse_client, rq.remaining_wall_ms(deadline))
     # The user query is passed verbatim; the client appends the FORMAT clause.
     stream = clickhouse_client.raw_stream(request.query, settings=settings, fmt=REMOTE_QUERY_STREAM_FORMAT)
     try:
@@ -877,8 +881,7 @@ def produce_remote_query(
     client: rq.UploadClient,
     started_at: float,
     stats: rq.RemoteQueryRunStats,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', rq.RemoteQueryUploadLimits], ClickhouseClient]
-    | None = None,
+    clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
 ) -> dict[str, Any]:
     """Execute the validated query once and return the compact run receipt.
 
@@ -898,7 +901,9 @@ def produce_remote_query(
     try:
         factory = clickhouse_client_factory if clickhouse_client_factory is not None else _default_client_factory
         try:
-            clickhouse_client = factory(check, limits)
+            # The send/receive timeout derives from the remaining wall, not the full delivered
+            # budget, so a client created late cannot wait past the run-wide deadline.
+            clickhouse_client = factory(check, max(1, math.ceil(deadline - time.monotonic())))
         except rq.RemoteQueryFailure:
             raise
         except Exception:
@@ -910,7 +915,9 @@ def produce_remote_query(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
         try:
-            receipt = _run_streamed_query(request, clickhouse_client, creds, client, check.hostname, guard, stats)
+            receipt = _run_streamed_query(
+                request, clickhouse_client, creds, client, check.hostname, guard, stats, deadline
+            )
         except rq.RemoteQueryFailure:
             raise
         except clickhouse_errors.OperationalError:
@@ -953,19 +960,20 @@ def produce_remote_query(
                 LOGGER.debug('Unable to close the remote query client', exc_info=True)
 
 
-def _default_client_factory(check: 'ClickhouseCheck', limits: rq.RemoteQueryUploadLimits) -> ClickhouseClient:
+def _default_client_factory(check: 'ClickhouseCheck', timeout_seconds: int) -> ClickhouseClient:
     """Create the per-run client from the matched check.
 
-    The read timeout bounds a single silent read, so it is derived from the run deadline
-    rather than the check's own (short) ``read_timeout``; the client-side deadline guard
-    remains the authoritative cumulative bound.
+    ``timeout_seconds`` is the remaining run wall, so the send/receive timeout bounds a
+    single silent socket read inside the run deadline rather than the check's own (short)
+    ``read_timeout``; the client-side deadline guard remains the authoritative cumulative
+    bound.
     """
     factory = getattr(check, 'create_remote_query_client', None)
     if factory is None:
         raise rq.RemoteQueryFailure(
             'target_unavailable', 'The matched ClickHouse check cannot create a remote query client.'
         )
-    return factory(send_receive_timeout=max(1, math.ceil(limits.timeout_ms / 1000)))
+    return factory(send_receive_timeout=timeout_seconds)
 
 
 # ---------------------------------------------------------------------------
@@ -1041,8 +1049,7 @@ def _execute_upload_stream(
     check: 'ClickhouseCheck',
     emit: rq.RemoteQueryEmit,
     http_client: rq.UploadClient | None = None,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', rq.RemoteQueryUploadLimits], ClickhouseClient]
-    | None = None,
+    clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
     events = iter_agent_rpc_stream_events(
@@ -1060,8 +1067,7 @@ def iter_agent_rpc_stream_events(
     request: Any,
     registry: ClickhouseCheckRegistry,
     http_client: rq.UploadClient | None = None,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', rq.RemoteQueryUploadLimits], ClickhouseClient]
-    | None = None,
+    clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
 ) -> Iterator[rq.RemoteQueryEvent]:
     """Yield producer events for unit tests and callback adaptation."""
     started_at = time.monotonic()
@@ -1104,7 +1110,7 @@ def iter_agent_rpc_stream_events(
         return
 
     check = matches[0]
-    creds = rq.resolve_upload_credentials(parsed_request.result_delivery)
+    creds = rq.resolve_upload_credentials(parsed_request.result_delivery, started_at)
     if not creds.api_key or not creds.app_key:
         yield rq.failed_event(
             'credentials_unavailable',

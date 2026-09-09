@@ -262,6 +262,90 @@ def test_http_terminal_rejections_are_not_retried(monkeypatch, creds, status):
     assert len(calls) == 1
 
 
+def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
+    import requests
+
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(0, 0, len(payload), 1, hashlib.sha256(payload).hexdigest())
+    attempts = []
+    sent = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        sent.append(data.read())
+        return SimpleNamespace(status_code=200, content=json.dumps(receipt(page)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    # The wall is 100 s away, but the per-attempt bound is 55 s: the first attempt's body read
+    # happens past it and is killed mid-body; the second, rewound attempt succeeds.
+    clock = iter([0.0, 0.0, 56.0, 56.0, 56.0] + [56.0] * 10)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    wall_creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=100.0
+    )
+    with io.BytesIO(payload) as body:
+        assert rq.RequestsUploadClient().put_page(wall_creds, page, body) == receipt(page)
+    assert len(attempts) == 2
+    assert sent == [payload]
+
+
+def test_http_page_attempt_bound_never_exceeds_the_run_wall(monkeypatch, creds):
+    import requests
+
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(0, 0, len(payload), 1, hashlib.sha256(payload).hexdigest())
+    attempts = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        data.read()
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    # The wall is 50 s away, inside the 55 s attempt bound, so the attempt's own deadline is
+    # the wall: a partially consumed budget bounds the page attempt, the killed attempt is not
+    # retried past the wall, and the run surfaces the retryable wall timeout.
+    clock = iter([0.0, 0.0, 51.0, 51.5] + [51.5] * 10)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    wall_creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=50.0
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
+        rq.RequestsUploadClient().put_page(wall_creds, page, body)
+    assert failure.value.code == 'timeout'
+    assert failure.value.retryable
+    assert len(attempts) == 1
+
+
+def test_http_retry_sequence_never_extends_the_run_wall(monkeypatch, creds):
+    import requests
+
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(0, 0, len(payload), 1, hashlib.sha256(payload).hexdigest())
+    attempts = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    # A transient rejection followed by an expired wall: the sequence refuses to start another
+    # attempt and surfaces the retryable wall timeout instead of uploading past the wall.
+    clock = iter([0.0, 0.0, 51.5] + [51.5] * 10)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    wall_creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=50.0
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
+        rq.RequestsUploadClient().put_page(wall_creds, page, body)
+    assert failure.value.code == 'timeout'
+    assert failure.value.retryable
+    assert len(attempts) == 1
+
+
 def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
     import requests
 
@@ -344,7 +428,7 @@ def test_database_instance_target_accepts_requested_dbname():
         (('resultDelivery',), None),
         (('resultDelivery', 'artifactVersion'), 1),
         (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
-        (('resultDelivery', 'limits', 'maxResultBytes'), 10 * 1024**3 + 1),
+        (('resultDelivery', 'limits', 'maxResultBytes'), rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
         (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
     ],
 )
@@ -380,6 +464,66 @@ def test_target_normalization():
 def test_limits_reject_invalid_bounds(delivery, mutation):
     with pytest.raises(ValidationError):
         bounded_delivery(delivery, **mutation)
+
+
+def test_result_ceiling_is_the_pinned_server_contract(delivery):
+    # The ceiling is 100 binary GiB (stricter than decimal 100 GB): exactly that validates and
+    # one byte more is rejected, so the shared ceiling cannot drift from the server-owned
+    # contract or silently fall back to a smaller value.
+    assert rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES == 100 * 1024**3
+    limits = bounded_delivery(delivery, maxResultBytes=rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES).limits
+    assert limits.max_result_bytes == rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES
+    with pytest.raises(ValidationError):
+        bounded_delivery(delivery, maxResultBytes=rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1)
+
+
+def test_page_writer_result_cap_boundaries(delivery, creds):
+    # One row per page keeps the page arithmetic exact: the frame is sized to a single row, so
+    # three rows produce three pages whose byte total is measured, then pinned as the exact
+    # cap (the last row lands exactly on it) and one byte below it (cap-plus-one fails).
+    row = b'{"value":"aaaa"}'
+    frame = (
+        len(
+            rq.page_prefix(
+                run_id=delivery.run_id,
+                task_id=delivery.task_id,
+                batch_index=0,
+                record_offset=0,
+                agent_hostname=AGENT_HOSTNAME,
+                schema_json=None,
+            )
+        )
+        + len(row)
+        + len(rq.PAGE_SUFFIX)
+    )
+    delivery = bounded_delivery(delivery, maxFileBytes=frame, maxSchemaBytes=frame, maxRowBytes=len(row), maxPages=8)
+
+    def run(max_result_bytes):
+        scoped = bounded_delivery(delivery, maxResultBytes=max_result_bytes)
+        uploads = Uploads()
+        writer = rq.PageWriter(scoped, creds, uploads, AGENT_HOSTNAME, None, lambda: None, rq.RemoteQueryRunStats())
+        try:
+            for _ in range(3):
+                writer.add_row(row)
+            return writer.finish(), uploads
+        finally:
+            writer.discard()
+
+    measured, uploads = run(rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES)
+    total = measured['totalBytes']
+    assert measured['pageCount'] == 3 == len(uploads.pages)
+    assert total == sum(page.page_bytes for page, _ in uploads.pages)
+
+    # Exact cap: the third row lands exactly on maxResultBytes (the last page fits it).
+    exact, exact_uploads = run(total)
+    assert exact['totalBytes'] == total
+    assert [page.batch_index for page, _ in exact_uploads.pages] == [0, 1, 2]
+
+    # Cap-plus-one: one byte less budget fails the row that would cross the cap.
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        run(total - 1)
+    assert failure.value.code == 'max_result_bytes_exceeded'
+    assert all(body.closed for body in exact_uploads.bodies)
 
 
 @pytest.mark.parametrize('value,expected', [(None, True), (' yes ', True), ('false', False), (False, False)])
