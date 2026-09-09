@@ -7,11 +7,15 @@ import hashlib
 import json
 import logging
 import time
+from collections.abc import Callable
+from typing import Any
 from unittest import mock
 
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
 
@@ -2007,6 +2011,118 @@ def test_consumer_membership_members_sorted_by_member_id(check):
     assert len(events) == 1
     assert events[0]['member_ids'] == ['m-c1', 'm-c2']
     assert [m['member_id'] for m in events[0]['members']] == ['m-c1', 'm-c2']
+
+
+def test_consumer_membership_unchanged_snapshot_keeps_collecting_metrics(
+    check: Callable[..., KafkaCheck], aggregator: AggregatorStub
+):
+    members = [
+        _make_member(client_id='c1', assignment_tps=[('orders', 1), ('orders', 0), ('payments', 0)]),
+        _make_member(client_id='c2'),
+    ]
+    describe_result = _make_group_describe(members=members)
+    with mock.patch('time.time', return_value=1000.0) as clock:
+        kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+        collector = kafka_consumer_check.metadata_collector
+
+        # Broker response ordering is not a change to membership or assignments.
+        describe_result.members.reverse()
+        members[0].assignment.topic_partitions.reverse()
+        clock.return_value += 15
+        collector._collect_consumer_group_metadata(collector.client.kafka_client.list_topics.return_value)
+
+    assert len(consumer_membership_events(kafka_consumer_check)) == 1
+    aggregator.assert_metric('kafka.consumer_group.count', value=1, count=2)
+    aggregator.assert_metric('kafka.consumer_group.members', value=2, count=2)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=0, count=2)
+    aggregator.assert_metric('kafka.consumer_group.member.partitions', count=4)
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+@pytest.mark.parametrize(
+    'attribute, value, event_field, expected',
+    [
+        pytest.param('member_id', 'm-new', 'member_id', 'm-new', id='member-id'),
+        pytest.param('client_id', 'new-client', 'client_id', 'new-client', id='client-id'),
+        pytest.param('host', 'new-host', 'member_host', 'new-host', id='host'),
+        pytest.param(
+            'assignment',
+            _make_assignment([('other-topic', 1)]),
+            'topic_partitions',
+            [{'topic': 'other-topic', 'partition': 1}],
+            id='assignment',
+        ),
+        pytest.param('assignment', None, 'topic_partitions', [], id='assignment-removed'),
+    ],
+)
+def test_consumer_membership_changed_snapshot(
+    check: Callable[..., KafkaCheck],
+    aggregator: AggregatorStub,
+    attribute: str,
+    value: Any,
+    event_field: str,
+    expected: Any,
+):
+    member = _make_member()
+    describe_result = _make_group_describe(members=[member])
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+    collector = kafka_consumer_check.metadata_collector
+
+    setattr(member, attribute, value)
+    collector._collect_consumer_group_metadata(collector.client.kafka_client.list_topics.return_value)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 2
+    assert events[1]['members'][0][event_field] == expected
+    assert events[1]['member_ids'] == [member.member_id]
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=int(attribute == 'member_id'))
+
+
+def test_consumer_membership_empty_and_repopulated_group(check: Callable[..., KafkaCheck]):
+    member = _make_member()
+    describe_result = _make_group_describe(members=[member])
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+    collector = kafka_consumer_check.metadata_collector
+    metadata = collector.client.kafka_client.list_topics.return_value
+
+    describe_result.members = []
+    describe_result.state.name = 'EMPTY'
+    collector._collect_consumer_group_metadata(metadata)
+    collector._collect_consumer_group_metadata(metadata)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 2
+    assert events[1]['member_ids'] == []
+    assert events[1]['members'] == []
+
+    describe_result.members = [member]
+    describe_result.state.name = 'STABLE'
+    collector._collect_consumer_group_metadata(metadata)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 3
+    assert events[2]['members'] == events[0]['members']
+    assert events[2]['member_ids'] == events[0]['member_ids']
+
+
+@pytest.mark.parametrize('empty', [False, True], ids=['populated', 'empty'])
+def test_consumer_membership_snapshot_refresh(check: Callable[..., KafkaCheck], empty: bool):
+    describe_result = _make_group_describe(members=[] if empty else [_make_member()])
+    with mock.patch('time.time', return_value=1000.0) as clock:
+        kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+        collector = kafka_consumer_check.metadata_collector
+        metadata = collector.client.kafka_client.list_topics.return_value
+
+        clock.return_value = 1000.0 + EVENT_CACHE_TTL - 1
+        collector._collect_consumer_group_metadata(metadata)
+        assert len(consumer_membership_events(kafka_consumer_check)) == 1
+
+        clock.return_value += 1
+        collector._collect_consumer_group_metadata(metadata)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 2
+    assert events[1] == {**events[0], 'collection_timestamp': (1000 + EVENT_CACHE_TTL) * 1000}
 
 
 def test_heartbeat_connect_api_status_present_when_urls_configured(check):
