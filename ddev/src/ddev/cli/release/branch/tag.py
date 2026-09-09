@@ -428,12 +428,15 @@ def _open_datadog_agent_bump_pr(
         )
         return
 
+    open_manually_hint = (
+        f'open one manually against `{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`'
+    )
+
     token = app.config.github.token
     if not token:
         app.display_warning(
             'The tag was pushed, but a GitHub token is required to open the datadog-agent bump PR.\n'
-            'Set `github.token` in your ddev config, then open one manually against '
-            f'`{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
+            f'Set `github.token` in your ddev config, then {open_manually_hint}.'
         )
         return
 
@@ -466,8 +469,7 @@ def _open_datadog_agent_bump_pr(
     except GitHubAuthenticationError:
         app.display_warning(
             'The tag was pushed, but the datadog-agent bump PR could not be created due to authentication.\n'
-            f'Open one manually against `{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` '
-            f'to `{commit_sha}`.'
+            f'To recover, {open_manually_hint}.'
         )
         raise
     except _AgentPRCreationError as e:
@@ -485,8 +487,7 @@ def _open_datadog_agent_bump_pr(
     except (httpx.HTTPError, ValidationError) as e:
         app.display_warning(
             f'The tag was pushed, but the datadog-agent bump PR could not be created: {e}\n'
-            f'Open one manually against `{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` '
-            f'to `{commit_sha}`.'
+            f'To recover, {open_manually_hint}.'
         )
     else:
         if pr_url is None:
