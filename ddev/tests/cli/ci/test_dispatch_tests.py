@@ -434,26 +434,36 @@ def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
     ],
     ids=['dry-run', 'no-open-pull-request'],
 )
-def test_an_early_exit_still_closes_the_monitoring_runtime(
-    ddev: CliRunner, github: FakeAsyncGitHubClient, planned: MagicMock, mocker, extra_options, asserted_output
+def test_early_exit_disables_monitoring(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    extra_options: list[str],
+    asserted_output: str,
 ):
     if [*HEAD_LOOKUP_OPTIONS] == extra_options:
         github.mock_response('list_pull_requests', pulls_page())
 
-    closed: list[MonitoringRuntime] = []
+    sink = RecordingSink()
+    monitors: list[ComponentMonitor] = []
 
-    class SpyRuntime(MonitoringRuntime):
-        def close(self) -> None:
-            closed.append(self)
-            super().close()
+    def make_runtime(**kwargs: Any) -> MonitoringRuntime:
+        runtime = MonitoringRuntime(metrics_sink=sink, **kwargs)
+        monitor = runtime.component('dispatcher')
+        monitor.metrics.count('before-exit')
+        monitors.append(monitor)
+        return runtime
 
-    mocker.patch('ddev.monitoring.MonitoringRuntime', SpyRuntime)
+    mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
 
     result = ddev('ci', 'dispatch-tests', *extra_options)
 
     assert result.exit_code == 0, result.output
     assert asserted_output in result.output
-    assert len(closed) == 1
+    [monitor] = monitors
+    monitor.metrics.count('after-exit')
+    assert [record.name for record in sink.records] == ['before-exit']
 
 
 def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev, local_changes, mocker):
