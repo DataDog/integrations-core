@@ -15,9 +15,11 @@ from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import (
     ALL_PROPERTIES,
     ALL_RESOURCES,
+    HOST_METERING_PROPERTY,
     MAX_QUERY_METRICS_OPTION,
     MOR_TYPE_AS_STRING,
     UNLIMITED_HIST_METRICS_PER_QUERY,
+    VM_METERING_PROPERTY,
     VSAN_EVENT_IDS,
 )
 from datadog_checks.vsphere.metrics import (
@@ -195,6 +197,9 @@ class VSphereAPI(object):
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
                 property_spec.pathSet.append("guest.hostName")
+                property_spec.pathSet.append(VM_METERING_PROPERTY)
+            elif resource == vim.HostSystem:
+                property_spec.pathSet.append(HOST_METERING_PROPERTY)
 
             if self.config.collect_property_metrics:
                 properties = properties_to_collect(MOR_TYPE_AS_STRING.get(resource), self.config.metric_filters)

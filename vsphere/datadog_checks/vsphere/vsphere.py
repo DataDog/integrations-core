@@ -26,6 +26,7 @@ from datadog_checks.vsphere.constants import (
     HOST_RESOURCES,
     INFRA_MODE_METRIC,
     MAX_QUERY_METRICS_OPTION,
+    METERING_PROPERTY_BY_RESOURCE_TYPE,
     PROPERTY_COUNT_METRICS,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
@@ -346,6 +347,23 @@ class VSphereCheck(AgentCheck):
                         )
 
             mor_payload["tags"] = tags  # type: Dict[str, Any]
+
+            # Hypervisor usage metering values are stored at the top level of the payload, next to
+            # `tags` and `hostname`, rather than under `properties`. `clear_properties()` empties only
+            # the `properties` sub-dict after each refresh, so keeping them here is what lets `check()`
+            # re-submit them on runs that do not refresh the cache.
+            metering_property = METERING_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
+            if metering_property is not None:
+                metering_value = properties.get(metering_property)
+                if metering_value is not None:
+                    mor_payload["metering"] = {metering_property: metering_value}
+                else:
+                    self.log.debug(
+                        "No %s value for %s resource %s; usage metering metric will not be submitted",
+                        metering_property,
+                        mor_type_str,
+                        mor_name,
+                    )
 
             if hostname:
                 if self._config.hostname_transform == 'upper':
@@ -823,6 +841,22 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
+    def _resource_metric_tags(self, resource_tags):
+        # type: (List[str]) -> List[str]
+        """Build the tag list for a metric submitted against a resource's own hostname.
+
+        When `excluded_host_tags` is configured, only those tags go on the metric; the rest reach the
+        backend as external host tags instead. Otherwise every resource tag is kept on the metric.
+        Shared by the property-metric and metering paths so the two tag identically.
+        """
+        base_tags = []  # type: List[str]
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
+        base_tags.extend(self._config.base_tags)
+        return base_tags
+
     def submit_property_metric(
         self,
         metric_name,  # type: str
@@ -1058,12 +1092,7 @@ class VSphereCheck(AgentCheck):
             )
             return
 
-        base_tags = []
-        if self._config.excluded_host_tags:
-            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
-        else:
-            base_tags.extend(resource_tags)
-        base_tags.extend(self._config.base_tags)
+        base_tags = self._resource_metric_tags(resource_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
@@ -1170,18 +1199,33 @@ class VSphereCheck(AgentCheck):
                 # delete property data from the cache since it won't be used until next cache refresh
                 self.infrastructure_cache.clear_properties()
 
-        # Submit the number of resources that are monitored
+        # Submit the number of resources that are monitored, and the usage metering metrics
         for resource_type in self._config.collected_resource_types:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
-                # Explicitly do not attach any host to those metrics.
                 resource_tags = mor_props.get('tags', [])
+                # Explicitly do not attach any host to those metrics.
                 self.count(
                     '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
                     1,
                     tags=self._config.base_tags + resource_tags,
                     hostname=None,
                 )
+
+                # Metering metrics are submitted from this loop rather than with the property metrics
+                # so that they appear on every run instead of once per infrastructure cache refresh,
+                # and they carry a hostname because usage is attributed per VM and per ESXi host.
+                metering = mor_props.get('metering')
+                if metering:
+                    metering_tags = self._resource_metric_tags(resource_tags)
+                    metering_hostname = mor_props.get('hostname')
+                    for property_name, value in metering.items():
+                        self.gauge(
+                            '{}.{}'.format(MOR_TYPE_AS_STRING[resource_type], property_name),
+                            value,
+                            tags=metering_tags,
+                            hostname=metering_hostname,
+                        )
 
         # Creating a thread pool and starting metric collection
         self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)
