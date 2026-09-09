@@ -2,6 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 23.5.0 / 2026-09-02
+
+***Deprecated***:
+
+* Deprecate ``include_instance_metrics`` in favor of ``database_metrics.instance_metrics.enabled``. ([#24953](https://github.com/DataDog/integrations-core/pull/24953))
+
+***Added***:
+
+* Add Data Observability async job module to execute RC-delivered monitoring queries per database. ([#24085](https://github.com/DataDog/integrations-core/pull/24085))
+* Add ``index_usage_table_names`` and ``table_size_table_names`` to bound the tables scanned by index usage and table size metrics. ([#24951](https://github.com/DataDog/integrations-core/pull/24951))
+
+***Fixed***:
+
+* Collect the database name on Azure SQL Database when ``query_metrics.disable_secondary_tags`` is enabled. Previously the setting dropped ``database_name`` entirely, which stopped query metrics from resolving the ``azure_sql_server_database`` resource and silently removed the Azure enrichment tags (``cloud_provider``, ``region``, ``resource_group``, ``subscription_id``, ``tenant_name`` and others) in addition to the documented ``db`` tag. ([#24823](https://github.com/DataDog/integrations-core/pull/24823))
+* Speed up performance counter metric collection on instances with many autodiscovered databases. ([#24876](https://github.com/DataDog/integrations-core/pull/24876))
+* Fix DBM<>APM correlation comments being dropped from Query Samples and Query Metrics for non-stored-procedure statements. ([#24899](https://github.com/DataDog/integrations-core/pull/24899))
+* Fix a connection leak in ``stored_procedure`` metric collection when the procedure call raises an exception. ([#24904](https://github.com/DataDog/integrations-core/pull/24904))
+* Further speed up performance counter metric collection on instances with many autodiscovered databases, and skip fraction metrics whose base counter is missing for an instance instead of ending the collection early. ([#24908](https://github.com/DataDog/integrations-core/pull/24908))
+* Collapse per-database service checks and database file queries into batched requests. ([#24950](https://github.com/DataDog/integrations-core/pull/24950))
+* Restrict instance-level file stats, database stats, and database backup metrics to the databases selected by autodiscovery. ([#24952](https://github.com/DataDog/integrations-core/pull/24952))
+* Make ``database_metrics.instance_metrics.enabled`` gate instance metric collection instead of being ignored. ([#24953](https://github.com/DataDog/integrations-core/pull/24953))
+* Track operation time for database metric executors so each collector reports its own duration. ([#24954](https://github.com/DataDog/integrations-core/pull/24954))
+* Move the check onto the shared ``DatabaseCheck`` async job registry and cancellation lifecycle so async jobs stop and release their resources when the Agent unschedules the check. ([#24985](https://github.com/DataDog/integrations-core/pull/24985))
+* Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#24998](https://github.com/DataDog/integrations-core/pull/24998))
+* Cache the Agent version instead of resolving it for every payload. ([#25023](https://github.com/DataDog/integrations-core/pull/25023))
+
 ## 23.4.0 / 2026-08-05
 
 ***Added***:

@@ -34,7 +34,6 @@ class Fabric:
         self.log = check.log
         self.submit_metrics = check.submit_metrics
         self.tagger = self.check.tagger
-        self.external_host_tags = self.check.external_host_tags
         self.event_platform_event = check.event_platform_event
 
     def ndm_enabled(self):
@@ -82,8 +81,6 @@ class Fabric:
         device_metadata = []
         interface_metadata = []
         for n in nodes:
-            hostname = helpers.get_fabric_hostname(n)
-
             node = n.get('fabricNode', {})
             node_attrs = node.get('attributes', {})
             node_id = node_attrs.get('id', {})
@@ -93,7 +90,6 @@ class Fabric:
             user_tags = self.instance.get('tags', [])
             tags = self.tagger.get_fabric_tags(n, 'fabricNode')
             tags.extend(ndm.common_tags(node_attrs.get('address', ''), device_hostname, self.namespace))
-            self.external_host_tags[hostname] = tags + self.check_tags + user_tags
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
             if not node_id or not pod_id:
@@ -106,13 +102,13 @@ class Fabric:
                     device_id = '{}:{}'.format(self.namespace, node_attrs.get('address', ''))
                     tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
 
-                self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
+                self.submit_process_metric(n, tags + self.check_tags + user_tags)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
             if node_attrs.get('role') != "controller":
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
-                    self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
+                    self.submit_fabric_metric(stats, tags, 'fabricNode')
                     eth_metadata = self.process_eth(node_attrs)
                     if self.ndm_enabled():
                         interface_metadata.extend(eth_metadata)
@@ -129,7 +125,6 @@ class Fabric:
 
     def process_eth(self, node):
         self.log.info("processing ethernet ports for %s", node.get('id'))
-        hostname = helpers.get_fabric_hostname(node)
         device_hostname = node.get('name', '')
         pod_id = helpers.get_pod_from_dn(node['dn'])
         common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
@@ -154,13 +149,9 @@ class Fabric:
                     ),
                 )
                 tags.append('interface:{}'.format(interface_metadata.name))
-                self.submit_interface_status_metric(
-                    interface_metadata.status,
-                    tags,
-                    device_hostname,
-                )
+                self.submit_interface_status_metric(interface_metadata.status, tags)
             stats = e.get('l1PhysIf', {}).get('children', [])
-            self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
+            self.submit_fabric_metric(stats, tags, 'l1PhysIf')
         self.log.info("finished processing ethernet ports for %s", node['id'])
         return interfaces
 
@@ -193,7 +184,7 @@ class Fabric:
         self.log.info("finished processing controller ethernet ports for %s", node['id'])
         return interfaces
 
-    def submit_fabric_metric(self, stats, tags, obj_type, hostname=None):
+    def submit_fabric_metric(self, stats, tags, obj_type):
         for s in stats:
             name = list(s.keys())[0]
             # we only want to collect the 5 minutes metrics.
@@ -214,9 +205,9 @@ class Fabric:
                     if mval and helpers.check_metric_can_be_zero(cisco_metric, mval, json_attrs):
                         metrics[mname] = mval
 
-            self.submit_metrics(metrics, tags, hostname=hostname, instance=self.instance)
+            self.submit_metrics(metrics, tags + self.check_tags, instance=self.instance)
 
-    def submit_process_metric(self, obj, tags, hostname=None):
+    def submit_process_metric(self, obj, tags):
         attrs = helpers.get_attributes(obj)
         node_id = helpers.get_node_from_dn(attrs['dn'])
         pod_id = helpers.get_pod_from_dn(attrs['dn'])
@@ -232,67 +223,67 @@ class Fabric:
                 if data.get('index') == '0':
                     value = data.get('currentAvg')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.cpu.avg', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.cpu.avg', value, tags=tags)
                     value = data.get('currentMax')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.cpu.max', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.cpu.max', value, tags=tags)
                     value = data.get('currentMin')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.cpu.min', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.cpu.min', value, tags=tags)
 
             if d.get("procSysCPUHist5min", {}).get('attributes'):
                 data = d.get("procSysCPUHist5min").get("attributes", {})
                 value = data.get('idleMax')
                 if value:
-                    self.gauge('cisco_aci.fabric.node.cpu.idle.max', value, tags=tags, hostname=hostname)
+                    self.gauge('cisco_aci.fabric.node.cpu.idle.max', value, tags=tags)
                     not_idle = 100.0 - float(value)
-                    self.gauge('cisco_aci.fabric.node.cpu.max', not_idle, tags=tags, hostname=hostname)
+                    self.gauge('cisco_aci.fabric.node.cpu.max', not_idle, tags=tags)
                 value = data.get('idleMin')
                 if value:
-                    self.gauge('cisco_aci.fabric.node.cpu.idle.min', value, tags=tags, hostname=hostname)
+                    self.gauge('cisco_aci.fabric.node.cpu.idle.min', value, tags=tags)
                     not_idle = 100.0 - float(value)
-                    self.gauge('cisco_aci.fabric.node.cpu.min', not_idle, tags=tags, hostname=hostname)
+                    self.gauge('cisco_aci.fabric.node.cpu.min', not_idle, tags=tags)
                 value = data.get('idleAvg')
                 if value:
-                    self.gauge('cisco_aci.fabric.node.cpu.idle.avg', value, tags=tags, hostname=hostname)
+                    self.gauge('cisco_aci.fabric.node.cpu.idle.avg', value, tags=tags)
                     not_idle = 100.0 - float(value)
-                    self.gauge('cisco_aci.fabric.node.cpu.avg', not_idle, tags=tags, hostname=hostname)
+                    self.gauge('cisco_aci.fabric.node.cpu.avg', not_idle, tags=tags)
 
             if d.get("procMemHist5min", {}).get('attributes'):
                 data = d.get("procMemHist5min").get("attributes", {})
                 if data.get('index') == '0':
                     value = data.get('currentAvg')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.avg', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.avg', value, tags=tags)
                     value = data.get('currentMax')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.max', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.max', value, tags=tags)
                     value = data.get('currentMin')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.min', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.min', value, tags=tags)
 
             if d.get("procSysMemHist5min", {}).get('attributes'):
                 data = d.get("procSysMemHist5min").get("attributes", {})
                 if data.get('index') == '0':
                     value = data.get('usedAvg')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.avg', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.avg', value, tags=tags)
                     value = data.get('usedMax')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.max', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.max', value, tags=tags)
                     value = data.get('usedMin')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.min', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.min', value, tags=tags)
 
                     value = data.get('freeAvg')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.free.avg', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.free.avg', value, tags=tags)
                     value = data.get('freeMax')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.free.max', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.free.max', value, tags=tags)
                     value = data.get('freeMin')
                     if value:
-                        self.gauge('cisco_aci.fabric.node.mem.free.min', value, tags=tags, hostname=hostname)
+                        self.gauge('cisco_aci.fabric.node.mem.free.min', value, tags=tags)
 
     def get_fabric_type(self, obj_type):
         if obj_type == 'fabricNode':
@@ -302,8 +293,8 @@ class Fabric:
         if obj_type == 'l1PhysIf':
             return 'port'
 
-    def submit_interface_status_metric(self, status, tags, hostname):
+    def submit_interface_status_metric(self, status, tags):
         if status:
             new_tags = tags.copy()
             new_tags.extend(["status:{}".format(status)])
-            self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)
+            self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags)

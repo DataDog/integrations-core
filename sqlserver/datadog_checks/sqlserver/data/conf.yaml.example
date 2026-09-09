@@ -301,6 +301,18 @@ instances:
         #
         # table_size_metrics: {}
 
+    ## @param include_instance_metrics - boolean - optional - default: true
+    ## DEPRECATED: Use `database_metrics.instance_metrics.enabled` instead.
+    ## Enable collection of server-level instance metrics. Defaults to true.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.84.0
+    ## Migration: Use `database_metrics.instance_metrics.enabled` instead.
+    #
+    # include_instance_metrics: true
+
     ## Configure collection of SQL Server Agent jobs events and metrics
     #
     # agent_jobs:
@@ -327,6 +339,21 @@ instances:
     ## Note: Each object name is unique to each database.
     #
     # db_fragmentation_object_names: []
+
+    ## @param index_usage_table_names - list of strings - optional
+    ## Index usage metrics normally emit metrics for all user tables and their indexes within a database.
+    ## This option allows you to specify exact table names to query for index usage metrics.
+    ## Specify table names, not index names; metrics are collected for every index belonging to each matching table.
+    ## Note: Each table name is unique to each database.
+    #
+    # index_usage_table_names: []
+
+    ## @param table_size_table_names - list of strings - optional
+    ## Table size metrics normally emit metrics for all user tables within a database.
+    ## This option allows you to specify exact table names to query for table size metrics.
+    ## Note: Each table name is unique to each database.
+    #
+    # table_size_table_names: []
 
     ## @param adoprovider - string - optional - default: MSOLEDBSQL
     ## Choose the ADO provider.  Note that SQLOLEDB is deprecated.  To use the MSOLEDBSQL

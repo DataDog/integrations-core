@@ -1376,11 +1376,31 @@ class ClusterMetadataCollector:
             'log.cleaner.enable',
         }
 
+        # Topic-level configs that should always be kept (not truncated).
+        # Without this, retention.ms and retention.bytes get dropped when a topic
+        # has 30+ configs (e.g. tiered-storage topics) because they sort late
+        # alphabetically and the max_configs cap cuts them.
+        important_topic_configs = {
+            # Retention (topic-level)
+            'retention.ms',
+            'retention.bytes',
+            'local.retention.ms',
+            'local.retention.bytes',
+            # Cleanup
+            'cleanup.policy',
+            # Message size
+            'max.message.bytes',
+            # Tiered storage
+            'remote.storage.enable',
+        }
+
+        all_important_configs = important_broker_configs | important_topic_configs
+
         important_found = {}
         remaining = {}
 
         for key, value in config_data.items():
-            if key in important_broker_configs:
+            if key in all_important_configs:
                 important_found[key] = value
             else:
                 remaining[key] = value

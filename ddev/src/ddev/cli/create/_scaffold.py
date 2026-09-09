@@ -452,6 +452,7 @@ def _write_files_with_cleanup_hint(
 def _display_tree(app: Application, root: Path, files: list[TemplateFile]) -> None:
     tree: defaultdict = defaultdict(dict)
     for f in files:
+        rel: _StdPath
         try:
             rel = f.target_path.relative_to(root)
         except ValueError:

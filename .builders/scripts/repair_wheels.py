@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import os
 import re
 import shutil
 import sys
+import tempfile
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import NamedTuple
 from zipfile import ZipFile
 
 from utils import iter_wheels
+
+
+MACOS_DDTRACE_LIBDDWAF_PATTERN = 'ddtrace/appsec/_ddwaf/libddwaf/*/lib/libddwaf.dylib'
 
 
 def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
@@ -41,6 +47,55 @@ class WheelName(NamedTuple):
 
     def __str__(self):
         return '-'.join([self.name, self.version, self.python_tag, self.abi_tag, self.platform_tag]) + '.whl'
+
+
+def _strip_macos_ddtrace_libddwaf(wheel: Path) -> list[str]:
+    if WheelName.parse(wheel.name).name != 'ddtrace':
+        return []
+
+    removed = find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN])
+
+    if not removed:
+        return []
+
+    removed_set = set(removed)
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=wheel.parent, suffix='.whl', delete=False) as temp_file:
+            temp_path = Path(temp_file.name)
+
+        with ZipFile(wheel) as source, ZipFile(temp_path, 'w') as destination:
+            for info in source.infolist():
+                if info.filename in removed_set:
+                    continue
+
+                contents = source.read(info)
+                if info.filename.endswith('.dist-info/RECORD'):
+                    record = io.StringIO(contents.decode('utf-8'), newline='')
+                    updated_record = io.StringIO(newline='')
+                    writer = csv.writer(updated_record, lineterminator='\n')
+                    writer.writerows(row for row in csv.reader(record) if not row or row[0] not in removed_set)
+                    contents = updated_record.getvalue().encode('utf-8')
+
+                destination.writestr(info, contents)
+
+        shutil.copymode(wheel, temp_path)
+        os.replace(temp_path, wheel)
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+
+    return removed
+
+
+def _find_record_references(wheel: Path, pattern: str) -> list[str]:
+    with ZipFile(wheel) as archive:
+        references: list[str] = []
+        for record_path in (name for name in archive.namelist() if name.endswith('.dist-info/RECORD')):
+            with archive.open(record_path) as record_file:
+                record = io.TextIOWrapper(record_file, encoding='utf-8')
+                references.extend(row[0] for row in csv.reader(record) if row and fnmatch(row[0], pattern))
+    return references
 
 
 def check_unacceptable_files(
@@ -214,6 +269,10 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
 
     for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
+        wheel_name = WheelName.parse(wheel.name)
+        if wheel_name.name == 'ddtrace' and find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN]):
+            shutil.move(wheel, Path(source_built_dir) / wheel.name)
+            continue
         print('Using existing wheel')
         shutil.move(wheel, external_dir)
 
@@ -231,9 +290,23 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
             continue
 
         # Platform dependent wheels: prune excluded files, verify target architecture & macOS version
+        removed_libddwaf = _strip_macos_ddtrace_libddwaf(wheel)
+        if removed_libddwaf:
+            print('Removed bundled libddwaf from Agent ddtrace wheel:')
+            print('\n'.join(removed_libddwaf))
+
+            # Verify on the stripped input rather than delocate's output: delocate renames the
+            # output wheel to match the macOS version it scans off the binaries, so its final
+            # name is not known here. It only ever copies libraries in, so an input that is
+            # clean of libddwaf guarantees the output is too.
+            remaining_libddwaf = find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN])
+            stale_record_entries = _find_record_references(wheel, MACOS_DDTRACE_LIBDDWAF_PATTERN)
+            if remaining_libddwaf or stale_record_entries:
+                raise RuntimeError(f'Failed to remove bundled libddwaf from {wheel.name}')
+
         copied_libs = delocate_wheel(
             str(wheel),
-            os.path.join(built_dir, wheel.name),
+            str(Path(built_dir) / wheel.name),
             copy_filt_func=copy_filt_func,
             require_archs=[os.uname().machine],
             require_target_macos_version=min_macos_version,

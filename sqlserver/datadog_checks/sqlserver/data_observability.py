@@ -7,7 +7,7 @@ import math
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
@@ -15,6 +15,7 @@ from datadog_checks.base.utils.serialization import json
 
 from .connection import split_sqlserver_host_port
 from .connection_errors import SQLConnectionError
+from .utils import raise_if_cancelled
 
 try:
     import pyodbc
@@ -45,14 +46,35 @@ CRON_STARTUP_LOOKBACK_SECONDS = 300
 
 DEFAULT_COLLECTION_INTERVAL_SECONDS = 10
 
-Mode = Literal["cron", "interval"]
+
+@dataclass
+class CronScheduledQuery:
+    mode: ClassVar[Literal["cron"]] = "cron"
+    query: Query
+    scheduler: CronScheduler
+    pending_retry: DueQuery | None = None
+
+
+@dataclass
+class IntervalScheduledQuery:
+    mode: ClassVar[Literal["interval"]] = "interval"
+    query: Query
+    interval_seconds: int
+    last_execution: float | None = None
+    pending_retry: DueQuery | None = None
+
+
+ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
 
 
 @dataclass(frozen=True)
 class DueQuery:
-    query: Query
+    scheduled_query: ScheduledQuery
     scheduled_time: float
-    mode: Mode
+
+    @property
+    def query(self) -> Query:
+        return self.scheduled_query.query
 
 
 _EXPECTED_DB_EXCEPTIONS: list[type[Exception]] = [SQLConnectionError]
@@ -66,11 +88,6 @@ class SqlServerDataObservability(DBMAsyncJob):
     def __init__(self, check: SQLServer, config: InstanceConfig):
         self._check = check
         self._config = config
-        self._last_execution: dict[int, float] = {}
-        # Due queries whose connection attempt failed last pass. Retried on the next
-        # poll regardless of mode, since CronScheduler.due_ticks() already consumed
-        # the tick for cron queries and cannot be "un-consumed".
-        self._pending_retries: dict[int, DueQuery] = {}
         collection_interval = config.data_observability.collection_interval
         if not collection_interval or collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL_SECONDS
@@ -85,22 +102,21 @@ class SqlServerDataObservability(DBMAsyncJob):
             job_name="data-observability",
         )
         # Filter bad queries on check construction.
-        self._queries, self._schedulers = self._filter_valid_queries(self._do_config.queries or ())
+        self._scheduled_queries = self._filter_valid_queries(self._do_config.queries or ())
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
 
     @property
     def _do_config(self):
         return self._config.data_observability
 
-    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
-        valid: list[Query] = []
-        schedulers: dict[int, CronScheduler] = {}
+    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[ScheduledQuery, ...]:
+        valid: list[ScheduledQuery] = []
         for q in queries:
             if q.schedule:
                 try:
-                    schedulers[q.monitor_id] = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
+                    scheduler = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
                 except (ValueError, TypeError) as e:
                     self._log.warning(
                         "Skipping DO query monitor_id=%d: invalid cron schedule %r (%s). "
@@ -111,34 +127,46 @@ class SqlServerDataObservability(DBMAsyncJob):
                         q.monitor_id,
                     )
                     continue
-            elif not (q.interval_seconds and q.interval_seconds > 0):
+                valid.append(CronScheduledQuery(query=q, scheduler=scheduler))
+                continue
+
+            interval_seconds = q.interval_seconds
+            if not interval_seconds or interval_seconds <= 0:
                 self._log.warning(
                     "Skipping DO query monitor_id=%d: neither schedule nor positive interval_seconds set",
                     q.monitor_id,
                 )
                 continue
-            valid.append(q)
-        return tuple(valid), schedulers
+            valid.append(IntervalScheduledQuery(query=q, interval_seconds=interval_seconds))
+        return tuple(valid)
 
     def _get_due_queries(self) -> list[DueQuery]:
         now = time.time()
         due: list[DueQuery] = []
-        for q in self._queries:
-            if q.schedule:
+        for scheduled_query in self._scheduled_queries:
+            newly_due = None
+            if isinstance(scheduled_query, CronScheduledQuery):
                 # +0.001 so a poll landing exactly on a tick boundary is treated
                 # as due (CronScheduler.previous_tick uses strict less-than).
-                ticks = self._schedulers[q.monitor_id].due_ticks(now + 0.001)
+                ticks = scheduled_query.scheduler.due_ticks(now + 0.001)
                 if ticks:
                     # Take the latest elapsed tick; earlier ones are already in the past
                     # and do not need separate execution.
-                    due.append(DueQuery(q, ticks[-1], "cron"))
+                    newly_due = DueQuery(scheduled_query, ticks[-1])
             else:
-                last = self._last_execution.get(q.monitor_id)
-                if last is None or now - last >= q.interval_seconds:
+                last = scheduled_query.last_execution
+                if last is None or now - last >= scheduled_query.interval_seconds:
                     # Seed: treat first sight as if the previous interval just completed,
                     # so the scheduled_time for DueQuery is now and lateness is 0.
-                    scheduled = (last + q.interval_seconds) if last is not None else now
-                    due.append(DueQuery(q, scheduled, "interval"))
+                    scheduled = (last + scheduled_query.interval_seconds) if last is not None else now
+                    newly_due = DueQuery(scheduled_query, scheduled)
+
+            if newly_due is not None:
+                scheduled_query.pending_retry = None
+                due.append(newly_due)
+            elif scheduled_query.pending_retry is not None:
+                due.append(scheduled_query.pending_retry)
+                scheduled_query.pending_retry = None
         return due
 
     def _build_base_tags(self) -> list[str]:
@@ -163,9 +191,8 @@ class SqlServerDataObservability(DBMAsyncJob):
         """Execute a query, catching expected DB exceptions per-query so the loop continues."""
         monitor_id = query_spec.monitor_id
         start = time.time()
+        raise_if_cancelled(self._cancel_event)
         try:
-            if self._cancel_event.is_set():
-                raise Exception("Job loop cancelled. Aborting query.")
             cursor.execute(query_spec.query)
             # cursor.description is None when the query produced no result set
             # (e.g. INSERT, UPDATE, DELETE, or a syntax error that executed without
@@ -233,7 +260,7 @@ class SqlServerDataObservability(DBMAsyncJob):
 
     def _queue_for_retry(self, due: DueQuery, base_tags: list[str]) -> None:
         q = due.query
-        self._pending_retries[q.monitor_id] = due
+        due.scheduled_query.pending_retry = due
         self._check.count(
             'dd.sqlserver.data_observability.connection_failures',
             1,
@@ -266,8 +293,8 @@ class SqlServerDataObservability(DBMAsyncJob):
         # Advance scheduling state before emission so an emit-side error cannot
         # leave the query stuck re-firing the same tick.
         # For cron mode, due_ticks() already advanced the scheduler's internal state.
-        if due.mode == "interval":
-            self._last_execution[q.monitor_id] = time.time()
+        if isinstance(due.scheduled_query, IntervalScheduledQuery):
+            due.scheduled_query.last_execution = time.time()
 
         try:
             self._check.gauge(
@@ -291,7 +318,7 @@ class SqlServerDataObservability(DBMAsyncJob):
             self._check.gauge(
                 'dd.sqlserver.data_observability.query_fire_lateness_seconds',
                 lateness,
-                tags=tags + [f'mode:{due.mode}'],
+                tags=tags + [f'mode:{due.scheduled_query.mode}'],
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
@@ -322,12 +349,9 @@ class SqlServerDataObservability(DBMAsyncJob):
                 pass
 
     def run_job(self):
-        # Merge queries still pending retry from a previous failed connection attempt
-        # with newly due queries, keyed by monitor_id so a fresher tick wins.
-        due_by_monitor_id = dict(self._pending_retries)
-        self._pending_retries = {}
-        due_by_monitor_id.update({due.query.monitor_id: due for due in self._get_due_queries()})
-        due_queries = list(due_by_monitor_id.values())
+        # Each physical query owns its scheduling and retry state. A newly due
+        # execution replaces that query's older retry so outages cannot build a backlog.
+        due_queries = self._get_due_queries()
         if not due_queries:
             self._log.debug("No data observability queries due for execution.")
             return
@@ -346,6 +370,7 @@ class SqlServerDataObservability(DBMAsyncJob):
 
         for group in queries_by_dbname.values():
             conn_dbname = group[0].query.dbname
+            raise_if_cancelled(self._cancel_event)
             try:
                 with self._check.connection._open_managed_db_connections(
                     self._check.connection.DEFAULT_DB_KEY,

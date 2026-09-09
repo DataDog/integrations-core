@@ -69,6 +69,14 @@ mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+Data Observability uses a dedicated connection. If you enable it with Database Monitoring,
+allow one additional connection:
+
+```shell
+mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 6;
+Query OK, 0 rows affected (0.00 sec)
+```
+
 Grant the `datadog` user the process privilege:
 
 ```shell

@@ -34,10 +34,19 @@ class AgentLogger(logging.getLoggerClass()):
 
 
 class CheckLoggingAdapter(logging.LoggerAdapter):
-    def __init__(self, logger, check):
+    def __init__(self, logger, check_id=''):
         super(CheckLoggingAdapter, self).__init__(logger, {})
-        self.check = check
-        self.check_id = self.check.check_id
+        self.set_check_id(check_id)
+
+    def set_check_id(self, check_id: str) -> None:
+        """
+        Stamp ``check_id`` onto every record this adapter processes from now on.
+
+        An empty ``check_id`` is recorded as ``unknown``, which is what records logged before the
+        Agent assigns an id carry.
+        """
+        self.check_id = check_id
+        self.extra['_check_id'] = check_id or 'unknown'
 
     def setup_sanitization(self, sanitize: Callable[[str], str]) -> None:
         for handler in self.logger.handlers:
@@ -45,16 +54,6 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
                 handler.setFormatter(SanitizationFormatter(handler.formatter, sanitize=sanitize))
 
     def process(self, msg, kwargs):
-        # Cache for performance
-        if not self.check_id:
-            self.check_id = self.check.check_id
-            # Default to `unknown` for checks that log during
-            # `__init__` and therefore have no `check_id` yet
-            self.extra['_check_id'] = self.check_id or 'unknown'
-            if self.check_id:
-                # Break the reference cycle, once we resolved check_id we don't need the check anymore
-                self.check = None
-
         kwargs.setdefault('extra', self.extra)
         return msg, kwargs
 

@@ -9,10 +9,11 @@ DO NOT add new metrics to this module. Instead, use the `database_metrics` modul
 Collection of metric classes for specific SQL Server tables.
 """
 
-from __future__ import division
+from __future__ import annotations, division
 
 from collections import defaultdict
 from functools import partial
+from typing import Any
 
 # Queries
 ALL_INSTANCES = 'ALL'
@@ -86,122 +87,128 @@ class BaseSqlServerMetric(object):
         raise NotImplementedError
 
 
+# A snapshot of sys.dm_os_performance_counters, indexed for lookup by the two columns a metric knows about
+# itself: counter name, then instance name, then the (object name, counter value) of each row underneath.
+PerfCounterIndex = dict[str, dict[str, list[tuple[str, int]]]]
+
+
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-performance-counters-transact-sql
-class SqlSimpleMetric(BaseSqlServerMetric):
+class SqlPerfCounterMetric(BaseSqlServerMetric):
+    """Base class for the metrics read from sys.dm_os_performance_counters.
+
+    Subclasses differ only in how they turn counter values into metrics, so they share a single query and a
+    single snapshot of the table: scanning it costs the same whether two rows come back or thousands, so a
+    query per subclass is pure overhead.
+    """
+
     TABLE = 'sys.dm_os_performance_counters'
-    DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
     QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
                     from {table} where counter_name in ({{placeholders}})""".format(table=TABLE)
-    OPERATION_NAME = 'simple_metrics'
+    OPERATION_NAME = 'perf_counter_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
-        return cls._fetch_generic_values(cursor, counters_list, logger)
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        for counter_name_long, instance_name_long, object_name, cntr_value in rows:
-            counter_name = counter_name_long.strip()
-            instance_name = instance_name_long.strip()
-            object_name = object_name.strip()
-            if counter_name.strip() == self.sql_name:
-                matched = False
-                metric_tags = list(self.tags)
-
-                if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
-                    (instance_name == self.instance or instance_name == self.physical_db_name)
-                    and (not self.object_name or object_name == self.object_name)
-                ):
-                    matched = True
-
-                if matched:
-                    if self.instance == ALL_INSTANCES:
-                        metric_tags.append('{}:{}'.format(self.tag_by, instance_name.strip()))
-                    self.report_function(self.metric_name, cntr_value, tags=metric_tags)
-                    if self.instance != ALL_INSTANCES:
-                        break
-
-
-class SqlFractionMetric(BaseSqlServerMetric):
-    TABLE = 'sys.dm_os_performance_counters'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """select counter_name, cntr_type, cntr_value, instance_name, object_name
-                    from {table}
-                    where counter_name in ({{placeholders}})
-                    order by cntr_type;""".format(table=TABLE)
-    OPERATION_NAME = 'fraction_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
-        placeholders = ', '.join('?' for _ in counters_list)
-        query = cls.QUERY_BASE.format(placeholders=placeholders)
-
-        logger.debug("%s: fetch_all executing query: %s, %s", cls.__name__, query, str(counters_list))
-        cursor.execute(query, counters_list)
-        rows = cursor.fetchall()
-        results = defaultdict(list)
-
-        for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
-            counter_result = {
-                'cntr_type': cntr_type,
-                'cntr_value': cntr_value,
-                'instance_name': instance_name.strip(),
-                'object_name': object_name.strip(),
-            }
-            logger.debug("Adding new counter_result %s", str(counter_result))
-            results[counter_name.strip()].append(counter_result)
+    def fetch_all_values(
+        cls,
+        cursor: Any,
+        counters_list: list[str],
+        logger: Any,
+        databases: list[str] | None = None,
+        engine_edition: str | None = None,
+    ) -> tuple[PerfCounterIndex, None]:
+        rows, _ = cls._fetch_generic_values(cursor, counters_list, logger)
+        # The name columns are nchar(128), so every value arrives blank-padded. Strip once here and index by
+        # counter name and instance name so each metric can look its own rows up directly: with autodiscovery
+        # both the number of metrics and the number of rows grow with the database count, so scanning rows per
+        # metric is quadratic.
+        results = defaultdict(lambda: defaultdict(list))
+        for counter_name, instance_name, object_name, cntr_value in rows:
+            results[counter_name.strip()][instance_name.strip()].append((object_name.strip(), cntr_value))
         return results, None
+
+    def _configured_instance_names(self) -> tuple[str, ...]:
+        """The instance names this metric collects from, in precedence order.
+
+        The physical database name is a fallback for the logical one and differs from it only on Azure SQL
+        Database; skip it when the two match so the metric is not reported twice.
+        """
+        if self.physical_db_name and self.physical_db_name != self.instance:
+            return (self.instance, self.physical_db_name)
+        return (self.instance,)
+
+
+class SqlSimpleMetric(SqlPerfCounterMetric):
+    DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
+
+    def fetch_metric(self, results, columns, values_cache=None):
+        counters_by_instance = results.get(self.sql_name)
+        if not counters_by_instance:
+            return
+
+        if self.instance == ALL_INSTANCES:
+            for instance_name, counters in counters_by_instance.items():
+                if instance_name == "_Total":
+                    continue
+                metric_tags = [*self.tags, '{}:{}'.format(self.tag_by, instance_name)]
+                for _object_name, cntr_value in counters:
+                    self.report_function(self.metric_name, cntr_value, tags=metric_tags)
+            return
+
+        for instance_name in self._configured_instance_names():
+            for object_name, cntr_value in counters_by_instance.get(instance_name, ()):
+                if not self.object_name or object_name == self.object_name:
+                    self.report_function(self.metric_name, cntr_value, tags=list(self.tags))
+                    return
+
+
+class SqlFractionMetric(SqlPerfCounterMetric):
+    DEFAULT_METRIC_TYPE = 'gauge'
 
     def fetch_metric(self, results, columns, values_cache=None):
         if not self.base_name:
             self.log.error('Skipping counter. Missing base counter name')
             return
-        num_counters = results.get(self.sql_name.strip())
-        base_counters = results.get(self.base_name.strip())
-        if not num_counters or not base_counters:
+        numerators = results.get(self.sql_name.strip())
+        bases = results.get(self.base_name.strip())
+        if not numerators or not bases:
             self.log.error(
-                'Skipping counter. Missing numerator and/or base counters \nsql_name=%s \nbase_name=%s \nresults=%s',
+                'Skipping counter. Missing numerator and/or base counters \nsql_name=%s \nbase_name=%s',
                 self.sql_name,
                 self.base_name,
-                str(results),
             )
             return
 
-        base_by_key = {}
+        if self.instance == ALL_INSTANCES:
+            instance_names = list(numerators)
+        else:
+            instance_names = self._configured_instance_names()
 
-        # let's organize each base counter by key
-        for base in base_counters:
-            key = '{}::{}'.format(base['instance_name'], base['object_name'])
-            if base_by_key.get(key):
-                self.log.warning('Found duplicate base counters for key:%s', key)
-            base_by_key[key] = base
-
-        for numerator in num_counters:
-            instance_name = numerator['instance_name']
-            object_name = numerator['object_name']
-            if (
-                self.instance != ALL_INSTANCES
-                and instance_name != self.instance
-                and instance_name != self.physical_db_name
-            ):
-                continue
-            if self.object_name and self.object_name != object_name:
-                continue
-            key = '{}::{}'.format(numerator['instance_name'], numerator['object_name'])
-            corresponding_base = base_by_key.get(key)
-
-            if not corresponding_base:
-                self.log.warning(
-                    'Could not find corresponding base counter for sql_name: %s base_name: %s',
-                    self.sql_name,
-                    self.base_name,
-                )
-
-            metric_tags = list(self.tags)
+        for instance_name in instance_names:
             if self.instance == ALL_INSTANCES:
-                metric_tags.append('{}:{}'.format(self.tag_by, instance_name))
-            self.report_fraction(
-                numerator['cntr_value'], corresponding_base['cntr_value'], metric_tags, previous_values=values_cache
-            )
+                metric_tags = [*self.tags, '{}:{}'.format(self.tag_by, instance_name)]
+            else:
+                metric_tags = list(self.tags)
+
+            for object_name, cntr_value in numerators.get(instance_name, ()):
+                if self.object_name and self.object_name != object_name:
+                    continue
+                base_value = self._base_value(bases.get(instance_name), object_name)
+                if base_value is None:
+                    self.log.warning(
+                        'Could not find corresponding base counter for sql_name: %s base_name: %s',
+                        self.sql_name,
+                        self.base_name,
+                    )
+                    continue
+
+                self.report_fraction(cntr_value, base_value, metric_tags, previous_values=values_cache)
+
+    @staticmethod
+    def _base_value(base_counters: list[tuple[str, int]] | None, object_name: str) -> int | None:
+        """The value of the base counter recorded under the same object as the numerator, if there is one."""
+        for base_object_name, base_value in base_counters or ():
+            if base_object_name == object_name:
+                return base_value
+        return None
 
     def report_fraction(self, value, base, metric_tags, previous_values):
         try:
@@ -221,8 +228,6 @@ class SqlIncrFractionMetric(SqlFractionMetric):
     As such, to get a snapshot-like reading of the last second only, you must compare the delta between
     the current value and the base value (denominator) between two collection points that are one second apart.
     """
-
-    OPERATION_NAME = 'incr_fraction_metrics'
 
     def report_fraction(self, value, base, metric_tags, previous_values):
         # return if nil is passed as the values cache, as this should be instantiated

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.0 / 2026-09-02
+
+***Added***:
+
+* Add ``metrics_prefix`` to the ``discovery`` block of ``auto_conf.yaml``. ([#24861](https://github.com/DataDog/integrations-core/pull/24861))
+
 ## 2.0.0 / 2026-08-05
 
 ***Changed***:

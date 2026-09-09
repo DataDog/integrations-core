@@ -10,9 +10,10 @@ class Capacity:
     Collect capacity metrics from the APIC
     """
 
-    def __init__(self, api, instance, check_tags=None, gauge=None, log=None):
+    def __init__(self, api, instance, namespace, check_tags=None, gauge=None, log=None):
         self.api = api
         self.instance = instance
+        self.namespace = namespace
         self.user_tags = instance.get('tags', [])
         self.check_tags = check_tags
         if not self.check_tags:
@@ -54,8 +55,7 @@ class Capacity:
                 if not dn:
                     continue
                 tags = helpers.parse_capacity_tags(dn)
-                tags += self.user_tags + self.check_tags
-                hostname = helpers.get_hostname_from_dn(dn)
+                tags += self.user_tags + self.check_tags + ['device_namespace:{}'.format(self.namespace)]
                 children = d.get('children', [])
                 for child in children:
                     child_attrs = child.get(c, {}).get('attributes')
@@ -65,7 +65,7 @@ class Capacity:
                         value = child_attrs.get(cisco_metric)
                         if not value:
                             continue
-                        self.gauge(dd_metric, value, tags=tags, hostname=hostname)
+                        self.gauge(dd_metric, value, tags=tags)
 
     def _get_contexts(self):
         for c, metric_dict in aci_metrics.CAPACITY_CONTEXT_METRICS.items():
@@ -85,10 +85,9 @@ class Capacity:
                     continue
                 dn = attr.get('dn', '')
                 tags = helpers.parse_capacity_tags(dn)
-                hostname = helpers.get_hostname_from_dn(dn)
-                tags += self.check_tags + self.user_tags
-                self.gauge(utilized_metric_name, value, tags=tags, hostname=hostname)
-                self.gauge(limit_metric_name, limit_value, tags=tags, hostname=hostname)
+                tags += self.check_tags + self.user_tags + ['device_namespace:{}'.format(self.namespace)]
+                self.gauge(utilized_metric_name, value, tags=tags)
+                self.gauge(limit_metric_name, limit_value, tags=tags)
 
     def _get_apic_capacity_limits(self):
         tags = self.user_tags + self.check_tags

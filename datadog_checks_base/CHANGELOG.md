@@ -2,6 +2,57 @@
 
 <!-- towncrier release notes start -->
 
+## 38.3.1 / 2026-09-03
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
+## 38.3.0 / 2026-09-02
+
+***Added***:
+
+* Improve docstrings in metrics_mapping module for cleaner API reference rendering. ([#22773](https://github.com/DataDog/integrations-core/pull/22773))
+* Add an Agent Health issue when OpenMetrics checks drop metrics at the configured limit. ([#24819](https://github.com/DataDog/integrations-core/pull/24819))
+
+***Fixed***:
+
+* Fix OpenMetrics V2 checks flushing a monotonic counter's full raw value on the scrape following its first observation, when ``share_labels``/``target_info`` is configured and the shared-label source metric is ordered after the metrics it tags in the scrape payload. ([#24884](https://github.com/DataDog/integrations-core/pull/24884))
+* Stop an OpenMetrics V2 instance that configures ``rename_labels`` from silently discarding the renames its check declares in ``get_default_config``. The instance's renames are now merged with the check's declared renames entry by entry, with the instance's own entries taking precedence, instead of replacing them wholesale. ([#24921](https://github.com/DataDog/integrations-core/pull/24921))
+
+## 38.2.0 / 2026-08-27
+
+***Added***:
+
+* Implement the ``agent_version`` property on the ``DatabaseCheck`` base class. ([#24905](https://github.com/DataDog/integrations-core/pull/24905))
+
+## 38.1.0 / 2026-08-20
+
+***Added***:
+
+* Add QueryStats, ObfuscationLookup and resolve_obfuscations for incremental query metrics collection. ([#24791](https://github.com/DataDog/integrations-core/pull/24791))
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+* Add a cancellation lifecycle to ``DatabaseCheck`` so DBM integrations get thread-safe ``cancel()`` handling with a ``shutdown()`` teardown hook. ([#24844](https://github.com/DataDog/integrations-core/pull/24844))
+
+***Fixed***:
+
+* Fix AIA chasing crashing when the CA Issuers response is DER-encoded. ([#24683](https://github.com/DataDog/integrations-core/pull/24683))
+* Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
+
+## 38.0.2 / 2026-08-26
+
+***Fixed***:
+
+* Bump ddtrace to 4.12.2 to remediate CVE-2026-50271 (W3C baggage header DoS). ([#24864](https://github.com/DataDog/integrations-core/pull/24864))
+
+## 38.0.1 / 2026-08-24
+
+***Fixed***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c, and bump pyopenssl to 26.4.0 for compatibility. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+*Note: This release is bundled with the `7.83.x` Agent and does not include changes from the `38.1.0` release.*
+
 ## 38.0.0 / 2026-08-05
 
 ***Changed***:

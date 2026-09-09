@@ -14,6 +14,7 @@ from datadog_checks.dev.subprocess import run_command
 from .common import BATCH_OBJECTS, USE_AUTH
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 opj = os.path.join
 
 NAMESPACE = 'weaviate'
@@ -21,6 +22,7 @@ NAMESPACE = 'weaviate'
 # weaviate_auth.yaml), so the API endpoint uses Service DNS while metrics fall back to the pod IP.
 WEAVIATE_API_ENDPOINT = f'http://weaviate.{NAMESPACE}.svc.cluster.local:80'
 POD_IP_STATE = 'weaviate_pod_ip'
+KUBECONFIG_STATE = 'weaviate_kubeconfig'
 
 
 def setup_weaviate():
@@ -95,6 +97,7 @@ def make_weaviate_request():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_weaviate]) as kubeconfig:
+        save_state(KUBECONFIG_STATE, kubeconfig)
         weaviate_metrics_port = 2112
 
         instance = {
@@ -104,6 +107,17 @@ def dd_environment():
         if USE_AUTH:
             instance['headers'] = {'Authorization': 'Bearer test123'}
 
-        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+        metadata = {
+            'agent_type': 'kubernetes',
+            'kubernetes': {
+                'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'weaviate', 'data', 'auto_conf.yaml'),
+            },
+        }
 
         yield instance, metadata
+
+
+@pytest.fixture(scope='session')
+def weaviate_kubeconfig():
+    return get_state(KUBECONFIG_STATE)

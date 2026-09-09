@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from unittest import mock
+
 import pytest
 
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
@@ -80,6 +82,28 @@ def test_databases_include_and_exclude_filter(dbm_instance, integration_check):
         assert f'dogs_{n}' not in database_names
     assert 'dogs' not in database_names
     assert 'datadog_test' not in database_names
+
+
+def test_databases_dbstrict(dbm_instance, integration_check):
+    dbm_instance['dbstrict'] = True
+    check = integration_check(dbm_instance)
+    collector = PostgresSchemaCollector(check)
+
+    databases = collector._get_databases()
+    database_names = [database['name'] for database in databases]
+    assert database_names == [dbm_instance['dbname']]
+
+
+def test_databases_dbstrict_with_autodiscovery(dbm_instance, integration_check):
+    dbm_instance['dbstrict'] = True
+    dbm_instance['database_autodiscovery'] = {'enabled': True, 'include': ['^dogs_[0-9]$']}
+    check = integration_check(dbm_instance)
+    collector = PostgresSchemaCollector(check)
+
+    with mock.patch.object(check.autodiscovery, 'get_items', return_value=['dogs_3']):
+        databases = collector._get_databases()
+    database_names = [database['name'] for database in databases]
+    assert database_names == ['dogs_3']
 
 
 def test_get_cursor(dbm_instance, integration_check):

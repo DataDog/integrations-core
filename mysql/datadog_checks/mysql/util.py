@@ -100,6 +100,7 @@ class ManagedAuthConnectionMixin:
         self._uses_managed_auth (bool)
         self._db_created_at (float, timestamp)
         self._db (connection or None)
+        self._cancel_event (event.Event, used to abort queries if the Agent has unscheduled this check)
 
     Subclasses must implement:
         _close_db_conn() - closes self._db
@@ -112,6 +113,11 @@ class ManagedAuthConnectionMixin:
         if not self._uses_managed_auth or not self._db:
             return False
         return (time.time() - self._db_created_at) >= self.MANAGED_AUTH_RECONNECT_INTERVAL
+
+    def _raise_if_cancelled(self):
+        """Abort before a query if the Agent has unscheduled this check."""
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
 
     def _get_db_connection(self):
         """Get or create database connection, reconnecting periodically for managed auth."""

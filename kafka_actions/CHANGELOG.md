@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 2.10.0 / 2026-09-02
+
+***Added***:
+
+* Emit updated topic config to the event platform after a successful update_topic_config or delete_topic_config action, so the UI reflects changes immediately without waiting for the kafka_consumer check cache to expire. ([#24967](https://github.com/DataDog/integrations-core/pull/24967))
+
+***Fixed***:
+
+* Fix unintended config resets by switching from deprecated alter_configs (PUT semantics) to incremental_alter_configs (PATCH semantics) in update_topic_config and delete_topic_config. ([#24967](https://github.com/DataDog/integrations-core/pull/24967))
+
 ## 2.9.0 / 2026-08-05
 
 ***Security***:

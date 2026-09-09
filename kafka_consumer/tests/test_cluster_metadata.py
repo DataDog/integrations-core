@@ -2079,3 +2079,62 @@ def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
         result = kafka_consumer_check._collect_connect_status('test-cluster')
 
     assert result == {}
+
+
+def test_truncate_config_preserves_retention_keys_for_topic(check):
+    """_truncate_config_for_event must keep retention.ms and retention.bytes even when
+    a topic has 30+ configs (e.g. tiered-storage topics).
+
+    Without the important_topic_configs set, retention.ms and retention.bytes sort
+    late alphabetically and get cut by the max_configs=30 cap.
+    """
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    # Simulate 32 topic configs (as returned by describe_configs for a tiered-storage topic)
+    topic_configs = {
+        'cleanup.policy': 'delete',
+        'compression.gzip.level': '-1',
+        'compression.lz4.level': '9',
+        'compression.type': 'producer',
+        'compression.zstd.level': '3',
+        'delete.retention.ms': '86400000',
+        'file.delete.delay.ms': '60000',
+        'flush.messages': '9223372036854775807',
+        'flush.ms': '9223372036854775807',
+        'follower.replication.throttled.replicas': '',
+        'index.interval.bytes': '4096',
+        'leader.replication.throttled.replicas': '',
+        'local.retention.bytes': '-2',
+        'local.retention.ms': '3600000',
+        'max.compaction.lag.ms': '9223372036854775807',
+        'max.message.bytes': '20971520',
+        'message.downconversion.enable': 'true',
+        'message.format.version': '3.0-IV1',
+        'message.timestamp.after.max.ms': '9223372036854775807',
+        'message.timestamp.before.max.ms': '9223372036854775807',
+        'message.timestamp.difference.max.ms': '9223372036854775807',
+        'message.timestamp.type': 'LogAppendTime',
+        'min.cleanable.dirty.ratio': '0.5',
+        'min.compaction.lag.ms': '0',
+        'min.insync.replicas': '1',
+        'preallocate': 'false',
+        'remote.log.copy.disable': 'false',
+        'remote.log.delete.on.disable': 'false',
+        'remote.storage.enable': 'true',
+        'retention.bytes': '-1',
+        'retention.ms': '14400000',
+        'unclean.leader.election.enable': 'false',
+    }
+
+    result = collector._truncate_config_for_event(topic_configs, max_configs=30)
+
+    assert 'retention.ms' in result, 'retention.ms must not be truncated'
+    assert 'retention.bytes' in result, 'retention.bytes must not be truncated'
+    assert 'local.retention.ms' in result, 'local.retention.ms must not be truncated'
+    assert 'local.retention.bytes' in result, 'local.retention.bytes must not be truncated'
+    assert 'cleanup.policy' in result, 'cleanup.policy must not be truncated'
+    assert 'max.message.bytes' in result, 'max.message.bytes must not be truncated'
+    assert 'remote.storage.enable' in result, 'remote.storage.enable must not be truncated'
+    assert len(result) == 30, 'should respect max_configs=30'

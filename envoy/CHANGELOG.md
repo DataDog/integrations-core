@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.0 / 2026-09-02
+
+***Added***:
+
+* Add container-based config discovery support. ([#24562](https://github.com/DataDog/integrations-core/pull/24562))
+* Add metrics for successful and failed gRPC access log flushes. ([#24785](https://github.com/DataDog/integrations-core/pull/24785))
+
+***Fixed***:
+
+* Require `datadog-checks-base>=38.0.0` since config discovery's IPv6 handling relies on it. ([#24562](https://github.com/DataDog/integrations-core/pull/24562))
+
 ## 6.7.0 / 2026-08-05
 
 ***Added***:

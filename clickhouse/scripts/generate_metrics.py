@@ -75,12 +75,14 @@ KIND_SPECS = {
 # The async metrics and profile events tables are not always populated on a freshly started server.
 OPTIONAL_KINDS = frozenset({MetricKind.ASYNC_METRICS, MetricKind.EVENTS})
 
-# Metrics that don't come from the system tables above but may show up in a check run, so the tests
-# have to tolerate them. The JIT execution counter comes from the legacy query set, which stays
-# enabled next to the advanced queries, and only appears once a compiled function is actually run.
+# Metrics that don't come from the bulk system tables above but may show up in a check run, so the
+# tests have to tolerate them. The JIT execution counter comes from the legacy query set, which stays
+# enabled next to the advanced queries. The errors metric comes from a separate system.errors query.
+# Both are only emitted when the corresponding events occur.
 EXTRA_OPTIONAL_METRICS = [
     'clickhouse.compilation.function.execute.count',
     'clickhouse.compilation.function.execute.total',
+    'clickhouse.errors.raised',
 ]
 
 
