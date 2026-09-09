@@ -49,7 +49,7 @@ REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES = frozenset(('false', 'no', '0', 'n', 'off
 REMOTE_QUERY_UPLOAD_MAX_FILE_BYTES = 128 * 1024 * 1024
 
 
-REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 10 * 1024 * 1024 * 1024
+REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 100 * 1024 * 1024 * 1024
 
 
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
@@ -139,6 +139,8 @@ class RemoteQueryUploadLimits(BaseModel):
     max_row_bytes: StrictInt = Field(alias='maxRowBytes', ge=1)
     max_columns: StrictInt = Field(alias='maxColumns', ge=1)
     max_schema_bytes: StrictInt = Field(alias='maxSchemaBytes', ge=1)
+    # The page-count ceiling itself is worker/intake-owned: the integration only enforces
+    # the delivered value.
     max_pages: StrictInt = Field(alias='maxPages', ge=1)
     # The delivery-injected timeout is authoritative only for instances that do not configure
     # remote_queries.timeout_ms: the instance config owns the customer-DB-protective override.

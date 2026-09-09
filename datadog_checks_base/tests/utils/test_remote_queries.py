@@ -339,7 +339,7 @@ def test_database_instance_target_accepts_requested_dbname():
         (('resultDelivery',), None),
         (('resultDelivery', 'artifactVersion'), 2),
         (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
-        (('resultDelivery', 'limits', 'maxResultBytes'), 10 * 1024**3 + 1),
+        (('resultDelivery', 'limits', 'maxResultBytes'), rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
         (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
     ],
 )
@@ -375,6 +375,66 @@ def test_target_normalization():
 def test_limits_reject_invalid_bounds(delivery, mutation):
     with pytest.raises(ValidationError):
         bounded_delivery(delivery, **mutation)
+
+
+def test_result_ceiling_is_the_pinned_server_contract(delivery):
+    # The ceiling is 100 binary GiB (stricter than decimal 100 GB): exactly that validates and
+    # one byte more is rejected, so the shared ceiling cannot drift from the server-owned
+    # contract or silently fall back to a smaller value.
+    assert rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES == 100 * 1024**3
+    limits = bounded_delivery(delivery, maxResultBytes=rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES).limits
+    assert limits.max_result_bytes == rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES
+    with pytest.raises(ValidationError):
+        bounded_delivery(delivery, maxResultBytes=rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1)
+
+
+def test_page_writer_result_cap_boundaries(delivery, creds):
+    # One row per page keeps the page arithmetic exact: the frame is sized to a single row, so
+    # three rows produce three pages whose byte total is measured, then pinned as the exact
+    # cap (the last row lands exactly on it) and one byte below it (cap-plus-one fails).
+    row = b'{"value":"aaaa"}'
+    frame = (
+        len(
+            rq.page_prefix(
+                run_id=delivery.run_id,
+                task_id=delivery.task_id,
+                batch_index=0,
+                record_offset=0,
+                agent_hostname=AGENT_HOSTNAME,
+                schema_json=None,
+            )
+        )
+        + len(row)
+        + len(rq.PAGE_SUFFIX)
+    )
+    delivery = bounded_delivery(delivery, maxFileBytes=frame, maxSchemaBytes=frame, maxRowBytes=len(row), maxPages=8)
+
+    def run(max_result_bytes):
+        scoped = bounded_delivery(delivery, maxResultBytes=max_result_bytes)
+        uploads = Uploads()
+        writer = rq.PageWriter(scoped, creds, uploads, AGENT_HOSTNAME, None, lambda: None, rq.RemoteQueryRunStats())
+        try:
+            for _ in range(3):
+                writer.add_row(row)
+            return writer.finish(), uploads
+        finally:
+            writer.discard()
+
+    measured, uploads = run(rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES)
+    total = measured['totalBytes']
+    assert measured['pageCount'] == 3 == len(uploads.pages)
+    assert total == sum(page.page_bytes for page, _ in uploads.pages)
+
+    # Exact cap: the third row lands exactly on maxResultBytes (the last page fits it).
+    exact, exact_uploads = run(total)
+    assert exact['totalBytes'] == total
+    assert [page.batch_index for page, _ in exact_uploads.pages] == [0, 1, 2]
+
+    # Cap-plus-one: one byte less budget fails the row that would cross the cap.
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        run(total - 1)
+    assert failure.value.code == 'max_result_bytes_exceeded'
+    assert all(body.closed for body in exact_uploads.bodies)
 
 
 @pytest.mark.parametrize('value,expected', [(None, True), (' yes ', True), ('false', False), (False, False)])
