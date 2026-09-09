@@ -1,25 +1,21 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Renders a ``DispatcherProgress`` snapshot into the body of the single Dispatcher PR comment.
+"""Render progress and optional shutdown context as the shared Dispatcher PR report.
 
-Branches only on ``ExecutionState``, ``Status`` and ``ProgressError``, so the comment is a projection
-of the aggregate rather than a second source of truth. The one exception is the footer, which reads
-the run's own commit and URL from the environment.
-
-Laid out like the Datadog CI Visibility comment. Emoji carry the state rather than badge images, which
-would be SVGs on a host we do not publish to; the progress bar is the one image, drawn from pixels
-committed to this repository.
+The footer adds the commit and workflow URL from the environment.
 """
 
 from __future__ import annotations
 
 import html
+import re
 from functools import partial
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.utils.github_actions import get_commit_sha, get_workflow_run_url
 from ddev.utils.github_async import COMMENT_BODY_LIMIT
 
@@ -52,9 +48,27 @@ PROGRESS_BAR_SEGMENTS = ("passed", "failed", "skipped", "pending")
 
 # Terminal but unfinished, which no other state in a report expresses: the rest derive from `done`.
 CANCELLED_HEADING = "## 🚫 Dispatcher tests · cancelled"
-CANCELLED_NOTE = "Anything below is what had been gathered by then, and batches still running were cancelled too."
+CANCELLED_NOTE = "Anything below is what had been gathered by then, and batches still running were asked to stop too."
 # Said instead when no batch ever reported, where the note above would point at results that are absent.
 CANCELLED_WITHOUT_RESULTS_NOTE = "The run was cancelled before any batch reported, so there are no results to show."
+# Shutdown kind overrides progress.done in a terminal report.
+FAILED_HEADING = "## 🛑 Dispatcher tests · stopped by a fatal error"
+TIMED_OUT_HEADING = "## 🛑 Dispatcher tests · stopped at the time limit"
+STOPPED_NOTE = "Anything below is what had been gathered by then; the remote jobs still running were asked to stop."
+STOPPED_WITHOUT_RESULTS_NOTE = "The run stopped before any batch reported, so there are no results to show."
+SHUTDOWN_HEADINGS = {
+    ShutdownKind.CANCELLED: CANCELLED_HEADING,
+    ShutdownKind.FAILED: FAILED_HEADING,
+    ShutdownKind.TIMED_OUT: TIMED_OUT_HEADING,
+}
+SHUTDOWN_ALERT_LEAD = {
+    ShutdownKind.CANCELLED: "The run was cancelled before it finished.",
+    ShutdownKind.FAILED: "The run stopped on a fatal error and did not finish.",
+    ShutdownKind.TIMED_OUT: "The run reached its time limit and stopped before it finished.",
+}
+# One line is the whole budget for a terminal reason: a traceback would be noise in a comment, and an
+# unbounded error string could crowd out the results it is meant to qualify.
+SHUTDOWN_REASON_LIMIT = 512
 
 # Said in every report while Dispatcher runs in shadow mode: it does not decide merges yet, so its
 # result must not be mistaken for the merge signal.
@@ -102,33 +116,33 @@ def _size(text: str) -> int:
     return len(text.encode("utf-8"))
 
 
-def render_comment(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
+def render_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
     """First of three tiers, budgeted in bytes against the client's own limit so the two cannot drift.
 
     The message's ``revision`` is deliberately not rendered: internal ordering metadata, already logged.
     """
     return _render(
-        progress, (partial(_failures, detail=True), _unavailable, _retried), shows_unavailable=True, cancelled=cancelled
+        progress, (partial(_failures, detail=True), _unavailable, _retried), shows_unavailable=True, shutdown=shutdown
     )
 
 
-def render_compact_comment(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
+def render_compact_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
     """Second tier: the failures keep their detail, the secondary sections go.
 
     Which tests failed is why anyone opens the comment; a retried-job list is one line per retry and can
     be the largest section in a flaky run.
     """
-    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False, cancelled=cancelled)
+    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False, shutdown=shutdown)
 
 
-def render_minimal_comment(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
+def render_minimal_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
     """Last tier: batches, totals and a line per failed job, without naming the failed tests.
 
     The per-test lists are the dominant cost — 2.1 kB for a job with 40 failures against ~150 bytes for
     its summary line — so dropping them is what makes this fit. Only the batch table is unbudgeted, and
     it would need ~464 batches to exhaust the limit on its own.
     """
-    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False, cancelled=cancelled)
+    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False, shutdown=shutdown)
 
 
 def _render(
@@ -136,15 +150,15 @@ def _render(
     sections: tuple[SectionBuilder, ...],
     *,
     shows_unavailable: bool,
-    cancelled: bool = False,
+    shutdown: ShutdownRequest | None = None,
 ) -> str:
     """Assemble a body from the header, whichever *sections* this tier keeps, and the footer.
 
     ``shows_unavailable`` tells the header whether this tier keeps ``_unavailable``, so the alert can
     neither point at a section that is not here nor stay silent about results it dropped.
     """
-    header = _header(progress, shows_unavailable=shows_unavailable, cancelled=cancelled)
-    footer = _footer(progress, cancelled=cancelled)
+    header = _header(progress, shows_unavailable=shows_unavailable, shutdown=shutdown)
+    footer = _footer(progress, shutdown=shutdown)
 
     # The header and footer always survive; the detail sections compete for what is left. Two
     # newlines join every block, so each section costs its own length plus that separator.
@@ -160,13 +174,12 @@ def _render(
     return "\n\n".join([header, *built, footer])
 
 
-def render_cancelled_notice() -> str:
-    """What a run cancelled before any batch reported has to say: that it ran, and that it stopped.
-
-    There is no snapshot to render, and the comment is the only place a reader learns the run existed.
-    """
-    footer = _footer(None, cancelled=True)
-    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{SHADOW_NOTICE}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
+def render_shutdown_notice(request: ShutdownRequest) -> str:
+    """Render a terminal notice when no progress snapshot exists."""
+    blocks = [COMMENT_MARKER, SHUTDOWN_HEADINGS[request.kind], SHADOW_NOTICE]
+    blocks.append(_shutdown_alert(request, without_results=True))
+    blocks.append(_footer(None, shutdown=request))
+    return "\n\n".join(blocks)
 
 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
@@ -183,9 +196,12 @@ def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
     return f"{RUN_SUMMARY_COMMENT_FAILED_NOTE}\n\n{report}"
 
 
-def summary_line(progress: DispatcherProgress) -> str:
-    """One-line plain-text summary, for logging a run that has no PR to comment on."""
-    state = "complete" if progress.done else "in progress"
+def summary_line(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+    """Summarize progress and its terminal state for logs."""
+    if shutdown is None:
+        state = "complete" if progress.done else "in progress"
+    else:
+        state = f"stopped ({shutdown.kind.value})"
     return (
         f"Dispatcher tests {state}: {progress.complete}/{progress.total} jobs, "
         f"{progress.passed} passed, {progress.failed} failed, {progress.skipped} skipped"
@@ -197,10 +213,10 @@ def summary_line(progress: DispatcherProgress) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _header(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: bool = False) -> str:
+def _header(progress: DispatcherProgress, *, shows_unavailable: bool, shutdown: ShutdownRequest | None = None) -> str:
     """Marker, heading, notice, in-progress alert and totals: the part that must never be truncated."""
-    blocks = [COMMENT_MARKER, _heading(progress, cancelled=cancelled), SHADOW_NOTICE]
-    alert = _alert(progress, shows_unavailable=shows_unavailable, cancelled=cancelled)
+    blocks = [COMMENT_MARKER, _heading(progress, shutdown=shutdown), SHADOW_NOTICE]
+    alert = _alert(progress, shows_unavailable=shows_unavailable, shutdown=shutdown)
     if alert is not None:
         blocks.append(alert)
     blocks.append(_totals(progress))
@@ -208,10 +224,10 @@ def _header(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled:
     return "\n\n".join(blocks)
 
 
-def _heading(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
+def _heading(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
     """The run's outcome in one line. A failure outranks an unestablished result, which outranks a pass."""
-    if cancelled:
-        return CANCELLED_HEADING
+    if shutdown is not None:
+        return SHUTDOWN_HEADINGS[shutdown.kind]
     if not progress.done:
         return "## 🔄 Dispatcher tests · in progress"
     if _has_failure(progress):
@@ -221,15 +237,17 @@ def _heading(progress: DispatcherProgress, *, cancelled: bool = False) -> str:
     return "## ✅ Dispatcher tests · passed"
 
 
-def _alert(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: bool = False) -> str | None:
+def _alert(
+    progress: DispatcherProgress, *, shows_unavailable: bool, shutdown: ShutdownRequest | None = None
+) -> str | None:
     """A native GitHub alert, so an unfinished run cannot be mistaken for a final one at a glance.
 
     A fallback tier sheds the section that lists unestablished results, so the alert states the count
     itself rather than pointing below, and carries it alongside a failure too. Without that, a fallback
     body would read as though every result was established.
     """
-    if cancelled:
-        return f"> [!CAUTION]\n> **The run was cancelled before it finished.** {CANCELLED_NOTE}"
+    if shutdown is not None:
+        return _shutdown_alert(shutdown)
     if not progress.done:
         phase = "Tests finished; collecting results." if _collecting_results(progress) else "Tests are still running."
         return f"> [!NOTE]\n> **{phase}** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
@@ -512,17 +530,37 @@ def _list_section(heading: str, entries: list[str], budget: int, noun: str) -> s
 # ---------------------------------------------------------------------------
 
 
-def _footer(progress: DispatcherProgress | None, *, cancelled: bool = False) -> str:
+def _shutdown_alert(request: ShutdownRequest, *, without_results: bool = False) -> str:
+    """Explain the stop without implying absent results were gathered."""
+    lead = f"> [!CAUTION]\n> **{SHUTDOWN_ALERT_LEAD[request.kind]}**"
+    if request.kind is ShutdownKind.CANCELLED:
+        note = CANCELLED_WITHOUT_RESULTS_NOTE if without_results else CANCELLED_NOTE
+        return f"{lead} {note}"
+    note = STOPPED_WITHOUT_RESULTS_NOTE if without_results else STOPPED_NOTE
+    return f"{lead} {note}\n> Reason: {_shutdown_reason(request)}"
+
+
+def _shutdown_reason(request: ShutdownRequest) -> str:
+    """Render a bounded reason as literal Markdown, including embedded backticks."""
+    reason = " ".join(str(request.error).split())
+    if len(reason) > SHUTDOWN_REASON_LIMIT:
+        reason = reason[: SHUTDOWN_REASON_LIMIT - 3].rstrip() + "..."
+    longest_backticks = max((len(run) for run in re.findall(r"`+", reason)), default=0)
+    delimiter = "`" * (longest_backticks + 1)
+    return f"{delimiter} {reason} {delimiter}"
+
+
+def _footer(progress: DispatcherProgress | None, *, shutdown: ShutdownRequest | None = None) -> str:
     """Whether this is the last word, and where the run that produced it lives.
 
     No status emoji on a finished run: the outcome is the heading's job, and a ✅ here read as "all
     good" on a run that had failed. What a reader cannot get anywhere else in the comment is which
     commit was tested and where Dispatcher itself ran, so that is what this says.
     """
-    if not cancelled and (progress is None or not progress.done):
+    if shutdown is None and (progress is None or not progress.done):
         return f"<sub>\n⏳ {FOOTER_RUNNING_NOTE}\n</sub>"
 
-    note = "Dispatcher was cancelled" if cancelled else "Dispatcher finished"
+    note = "Dispatcher finished" if shutdown is None else f"Dispatcher {shutdown.kind.value}"
     if sha := get_commit_sha():
         note += f" on <code>{html.escape(sha)}</code>"
     if run_url := get_workflow_run_url():

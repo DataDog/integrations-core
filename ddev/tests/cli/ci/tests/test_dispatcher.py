@@ -39,24 +39,37 @@ from ddev.cli.ci.tests.messages import (
     TestBatch,
     UpdatePRComment,
 )
-from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING
+from ddev.cli.ci.tests.pr_comment import (
+    CANCELLED_HEADING,
+    FAILED_HEADING,
+    FOOTER_RUNNING_NOTE,
+    TIMED_OUT_HEADING,
+)
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
+from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import MonitoringRuntime, console_formatter
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     IssueComment,
+    WorkflowDispatchResult,
     WorkflowJob,
     WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
 )
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
-from tests.cli.ci.tests.helpers import jobs_reported, make_batch, make_job
+from tests.cli.ci.tests.helpers import (
+    invalid_response_error,
+    jobs_reported,
+    make_batch,
+    make_job,
+)
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.monitoring import RecordingSink
 
@@ -83,6 +96,7 @@ def build_bus(
     batches: list[TestBatch],
     *,
     pr_number: int | None = 42,
+    max_timeout: float = 30,
 ) -> Dispatcher:
     """A Dispatcher over the three real tasks, so the subscriptions under test are production's."""
     runner = TaskTestRunner(
@@ -112,7 +126,7 @@ def build_bus(
         runner=runner,
         gatherer=gatherer,
         reporter=reporter,
-        max_timeout=30,
+        max_timeout=max_timeout,
         grace_period=0.2,
     )
 
@@ -388,6 +402,152 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
     # The run page is rendered from the same report, so it cannot claim the run is still going.
     assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert not outcome.successful
+    assert outcome.shutdown is not None
+    assert outcome.shutdown.kind is ShutdownKind.CANCELLED
+
+
+def test_a_timed_out_run_reports_itself_and_cancels_what_it_started(
+    client: FakeAsyncGitHubClient, tmp_path: Path, step_summary: Path
+):
+    """A timeout produces a terminal report and requests cancellation of unfinished runs."""
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())], max_timeout=0.5)
+    a_run_that_never_finishes(client)
+
+    dispatcher.run()
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert not outcome.successful
+    assert not dispatcher.cancelled
+    assert outcome.shutdown is not None
+    assert outcome.shutdown.kind is ShutdownKind.TIMED_OUT
+    assert len(client.calls_to("enter_shutdown_mode")) == 1
+    assert client.last_call("enter_shutdown_mode").kwargs == {"rate_limits": CANCELLED_RATE_LIMITS}
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
+    terminal_body = client.last_call("update_issue_comment").kwargs["body"]
+    assert TIMED_OUT_HEADING in terminal_body
+    assert "max_timeout" in terminal_body
+    assert "Dispatcher tests · in progress" not in terminal_body
+    assert FOOTER_RUNNING_NOTE not in terminal_body
+    assert TIMED_OUT_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
+
+
+def stop_from_inside_the_run(
+    dispatcher: Dispatcher, client: FakeAsyncGitHubClient, *, request: ShutdownRequest
+) -> None:
+    """Request a shutdown once a remote run is tracked."""
+    got_workflow_run = client.get_workflow_run
+
+    async def stop_once_a_run_is_in_flight(owner: str, repo: str, run_id: int) -> GitHubResponse[WorkflowRun]:
+        response = await got_workflow_run(owner, repo, run_id)
+        dispatcher.request_shutdown(request)
+        return response
+
+    client.get_workflow_run = stop_once_a_run_is_in_flight  # type: ignore[method-assign]
+
+    dispatcher.run()
+
+
+def dispatched_run(run_id: int) -> WorkflowDispatchResult:
+    return WorkflowDispatchResult(
+        workflow_run_id=run_id,
+        run_url=f"https://api.github.com/repos/o/r/actions/runs/{run_id}",
+        html_url=f"https://github.com/o/r/actions/runs/{run_id}",
+    )
+
+
+def running_run(run_id: int) -> WorkflowRun:
+    return WorkflowRun(
+        id=run_id,
+        name="test-batch",
+        status="in_progress",
+        conclusion=None,
+        html_url=f"https://github.com/o/r/actions/runs/{run_id}",
+    )
+
+
+@pytest.mark.parametrize("shutdown_mode_fails", [False, True], ids=["shutdown-ok", "shutdown-fails"])
+def test_a_fatal_response_failure_cancels_every_dispatched_run(
+    client: FakeAsyncGitHubClient,
+    tmp_path: Path,
+    step_summary: Path,
+    shutdown_mode_fails: bool,
+):
+    """A bad live jobs response stops polling and requests cancellation of every unfinished run."""
+    client.mock_response("create_workflow_dispatch", dispatched_run(123), once=True)
+    client.mock_response("create_workflow_dispatch", dispatched_run(456), once=True)
+    client.mock_response("get_workflow_run", running_run(123), run_id=123)
+    client.mock_response("get_workflow_run", running_run(456), run_id=456)
+    client.mock_response("list_workflow_jobs", WorkflowJobsList(total_count=0, jobs=[]), run_id=123)
+    client.mock_response("list_workflow_jobs", invalid_response_error(), run_id=456)
+    if shutdown_mode_fails:
+        client.mock_response("enter_shutdown_mode", RuntimeError("shutdown mode is broken"))
+    batches = [
+        make_batch(make_job()),
+        make_batch(make_job("job-2"), batch_id="batch-02"),
+    ]
+    dispatcher = build_bus(client, tmp_path, batches)
+
+    with pytest.raises(FatalProcessingError, match="batch-02") as exc_info:
+        dispatcher.run()
+
+    assert "run 456" in str(exc_info.value)
+    assert len(client.calls_to("enter_shutdown_mode")) == 1
+    assert client.last_call("enter_shutdown_mode").kwargs == {"rate_limits": CANCELLED_RATE_LIMITS}
+    assert sorted(call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")) == [123, 456]
+    assert not dispatcher.cancelled
+    for call in client.calls_to("update_issue_comment"):
+        assert CANCELLED_HEADING not in call.kwargs["body"]
+    terminal_body = client.last_call("update_issue_comment").kwargs["body"]
+    assert FAILED_HEADING in terminal_body
+    assert "Dispatcher tests · in progress" not in terminal_body
+    assert FOOTER_RUNNING_NOTE not in terminal_body
+    assert "listing workflow jobs (batch batch-02, run 456)" in terminal_body
+    summary = step_summary.read_text(encoding="utf-8")
+    assert FAILED_HEADING in summary
+    assert "listing workflow jobs (batch batch-02, run 456)" in summary
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert not outcome.progress.done
+    assert not outcome.successful
+
+
+def test_a_programmatic_stop_goes_through_the_same_path_as_a_signal(
+    client: FakeAsyncGitHubClient, tmp_path: Path, step_summary: Path
+):
+    """A programmatic stop reports and cleans up without receiving an OS signal."""
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())])
+    a_run_that_never_finishes(client)
+
+    stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+
+    assert dispatcher.cancelled
+    assert client.last_call("enter_shutdown_mode").kwargs == {"rate_limits": CANCELLED_RATE_LIMITS}
+    assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
+    assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
+
+
+def test_a_comment_write_failure_does_not_prevent_remote_cancellation(
+    client: FakeAsyncGitHubClient, tmp_path: Path, step_summary: Path
+):
+    """A failed comment write does not prevent remote cancellation or the terminal step summary."""
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())])
+    a_run_that_never_finishes(client)
+    for method in ("update_issue_comment", "create_issue_comment", "list_issue_comments"):
+        client.mock_response(method, RuntimeError("the comment API is down"))
+
+    stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+
+    assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
+    assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert not outcome.successful
 
 
 @requires_signals

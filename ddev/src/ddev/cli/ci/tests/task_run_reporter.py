@@ -13,13 +13,14 @@ import httpx
 
 from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
-    render_cancelled_notice,
     render_comment,
     render_compact_comment,
     render_minimal_comment,
+    render_shutdown_notice,
     summary_line,
 )
 from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.event_bus.shutdown import ShutdownRequest
 from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_errors import GitHubBodyTooLongError
 
@@ -28,23 +29,19 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async import AsyncGitHubClient
 
-# Editing the tracked comment can fail because it is not ours to edit (403) or no longer exists
-# (404). Neither improves on retry, but both are recoverable by writing a comment we do own.
+# Replace comments that cannot be edited or no longer exist.
 UNUSABLE_COMMENT_STATUSES = (403, 404)
 
-# Enough passes for everything a failed write can change about the next one: two steps down the
-# comment tiers, plus giving up on a comment we may not edit, which can repeat because the
-# replacement can itself be refused. One more than the sum, for the pass that lands.
+# Allow size fallbacks and comment replacement without retrying indefinitely.
 MAX_WRITE_PASSES = 5
-# The cancelled report competes with cancelling the dispatched runs for the same few seconds, and the
-# tier ladder can make several requests, so the whole write is bounded rather than each request.
-CANCELLED_WRITE_TIMEOUT = 4.0
+# Includes lock acquisition and all terminal write attempts.
+SHUTDOWN_WRITE_TIMEOUT = 4.0
 
 
 class CommentRenderer(Protocol):
     """Renders a whole report from a snapshot. Every tier takes the same arguments."""
 
-    def __call__(self, progress: DispatcherProgress, *, cancelled: bool = False) -> str: ...
+    def __call__(self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str: ...
 
 
 # Smaller renderings to fall back on, largest first, when a body is refused for being too long.
@@ -54,12 +51,7 @@ FALLBACK_TIERS: tuple[CommentRenderer, ...] = (render_compact_comment, render_mi
 
 @dataclass(frozen=True)
 class RunReporterOptions:
-    """Configuration for a ``TaskRunReporter``.
-
-    ``pr_number`` is ``None`` for the runs that have no pull request to comment on — a push to
-    ``master``, the nightly schedule, and merge-queue runs. Those render to the log and to
-    ``latest_body``.
-    """
+    """Report destination. Without a PR number, reports are retained locally."""
 
     owner: str
     repo: str
@@ -67,21 +59,11 @@ class RunReporterOptions:
 
 
 class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
-    """Reports on a Dispatcher run, by projecting its ``DispatcherProgress`` snapshots onto one report.
+    """Render progress snapshots and publish the newest revision to one PR comment.
 
-    That report goes to a pull-request comment when the run has a pull request, and otherwise only to
-    ``latest_body``, for the orchestrator to publish to the GitHub Actions run summary.
-
-    A serialized projection that renders the newest snapshot and ignores stale revisions, so the report
-    cannot regress. Ordering holds within one Dispatcher execution, which workflow concurrency
-    guarantees is the only one running. Terminal consumer: it emits no further messages.
-
-    **Failing to write the comment never fails the run.** The problem is recorded in
-    ``pr_comment_failed`` and the report kept in ``latest_body``, for the orchestrator to publish.
-    Transient failures are not retried here — that is the GitHub client's job.
-
-    ``COMMENT_MARKER`` finds the comment, so a later run edits it rather than adding another. It does
-    not prove ownership, though, so an edit GitHub refuses means "not our comment".
+    Retain the report in ``latest_body``, even without a PR or after a failed write.
+    Record publication failures in ``pr_comment_failed``. Writes are serialized
+    and stale revisions are ignored within this instance.
     """
 
     def __init__(
@@ -96,13 +78,11 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._client = client
         self._options = options
         self._comment_id: int | None = None
-        # Comments GitHub refused to let us edit. Forgetting the id alone is not enough: the marker
-        # lookup would find the same comment again on the next attempt and retry the same refusal.
+        # Exclude rejected comments from subsequent marker lookups.
         self._unusable_comment_ids: set[int] = set()
-        # Revisions start at 0 (the initial plan), so nothing can have been rendered yet.
+        # The initial plan has revision 0.
         self._latest_revision = -1
         self._latest_body: str | None = None
-        # Frozen, so holding a reference cannot read a half-updated snapshot.
         self._latest_progress: DispatcherProgress | None = None
         self._pr_comment_failed = False
         self._final_report_published = False
@@ -112,10 +92,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
 
     @property
     def latest_body(self) -> str | None:
-        """The newest report rendered, or ``None`` if no snapshot has arrived yet.
-
-        Retained whether or not it reached GitHub, and the only report a run without a pull request has.
-        """
+        """The latest rendered report, retained regardless of publication success."""
         return self._latest_body
 
     @property
@@ -125,7 +102,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
 
     @property
     def final_report_published(self) -> bool:
-        """Whether a completed run's report was not lost: it reached the comment, or had none to reach."""
+        """Whether the final report was published, or retained when no PR exists."""
         return self._final_report_published
 
     async def process_message(self, message: UpdatePRComment):
@@ -133,9 +110,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         body = render_comment(message.progress)
         log_extra: dict[str, object] = {"revision": message.revision, "done": message.progress.done}
 
-        # The lock spans revision validation, the write and the retained report, all of which may
-        # only move forwards. Batches finish concurrently, so without this a slow early revision
-        # could overwrite a later one and make the report go backwards.
+        # Serialize revision checks and writes so older updates cannot overwrite newer ones.
         async with self._lock:
             if message.revision <= self._latest_revision:
                 self._logger.info(
@@ -143,8 +118,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 )
                 return
 
-            # Before the write, so a failed one keeps the report it should have published. `_write`
-            # can return False or raise something it does not catch, and both must not lose results.
+            # Retain the report before any write that could fail or be interrupted.
             self._latest_body = body
             self._latest_progress = message.progress
             self._latest_revision = message.revision
@@ -154,45 +128,36 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 self._logger.info("No pull request to update: %s", summary_line(message.progress), extra=log_extra)
                 published = True
             else:
+                self._pr_comment_failed = True
                 published = await self._write(pr_number, body, message.progress, log_extra)
                 self._pr_comment_failed = not published
 
             if message.progress.done and published:
                 self._final_report_published = True
 
-    async def publish_cancelled(self) -> None:
-        """Report the run as cancelled, whatever it had rendered so far.
+    async def publish_shutdown(self, request: ShutdownRequest) -> None:
+        """Publish a terminal report within one deadline, including lock acquisition.
 
-        The comment is the only place a reader learns the run happened at all, so one goes out even
-        when no snapshot ever arrived; silence is indistinguishable from a run that hung.
-
-        Under the same lock as a normal report, so it cannot interleave with one in flight, and last
-        because nothing supersedes it.
+        Timing out before acquiring the lock leaves the retained report unchanged.
         """
-        async with self._lock:
+        async with asyncio.timeout(SHUTDOWN_WRITE_TIMEOUT), self._lock:
             progress = self._latest_progress
-            body = render_cancelled_notice() if progress is None else render_comment(progress, cancelled=True)
-            log_extra: dict[str, object] = {"revision": self._latest_revision, "cancelled": True}
-            # Before the write, and read by the run summary, so both places say the same thing.
+            body = render_shutdown_notice(request) if progress is None else render_comment(progress, shutdown=request)
+            log_extra: dict[str, object] = {"revision": self._latest_revision, "shutdown": request.kind.value}
             self._latest_body = body
-            # Held in state rather than left to call order, so a later revision cannot overwrite it.
+            # Reject all subsequent progress revisions, even if this write fails.
             self._latest_revision = sys.maxsize
 
             pr_number = self._options.pr_number
             if pr_number is None:
-                self._logger.warning("Run cancelled; no pull request to report it on", extra=log_extra)
+                self._logger.warning("Run %s; no pull request to report it on", request.kind.value, extra=log_extra)
                 return
 
-            # Recorded before the attempt, not after: the caller gathers this with `return_exceptions`,
-            # so anything raised here is absorbed and the run summary would otherwise be rendered as
-            # though the comment were current. `RateLimitWaitAbandoned` is the expected one, since the
-            # cancellation path shortens the limiter's wait precisely so it fires.
             self._pr_comment_failed = True
-            async with asyncio.timeout(CANCELLED_WRITE_TIMEOUT):
-                published = await self._write(pr_number, body, progress, log_extra, cancelled=True)
+            published = await self._write(pr_number, body, progress, log_extra, shutdown=request)
             self._pr_comment_failed = not published
             if published:
-                self._logger.info("Run reported as cancelled", extra=log_extra)
+                self._logger.info("Run reported as %s", request.kind.value, extra=log_extra)
 
     async def _write(
         self,
@@ -201,28 +166,21 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         progress: DispatcherProgress | None,
         log_extra: dict[str, object],
         *,
-        cancelled: bool = False,
+        shutdown: ShutdownRequest | None = None,
     ) -> bool:
-        """Write *body* to the comment, stepping down the tiers if it is too long. Did it land?
+        """Return whether publication succeeded, using smaller bodies or a replacement comment.
 
-        Not a retry loop: a pass continues only after changing what the next one does — a smaller tier,
-        or forgetting a comment GitHub will not let us edit — and stops otherwise. Both ways of learning
-        a body is too long arrive as ``GitHubBodyTooLongError``, so there is one thing to catch.
+        The GitHub client handles transient retries.
         """
         rendered = body
-        # Rendered lazily and never revisited, so a tier already refused is not sent again, and a tier
-        # that renders what was just refused costs nothing to skip.
-        tiers = (
-            (render(progress, cancelled=cancelled) for render in FALLBACK_TIERS) if progress is not None else iter(())
-        )
+        # Render fallback tiers only when needed, skipping duplicate bodies.
+        tiers = (render(progress, shutdown=shutdown) for render in FALLBACK_TIERS) if progress is not None else iter(())
         for _ in range(MAX_WRITE_PASSES):
             try:
                 await self._submit(pr_number, rendered)
             except GitHubBodyTooLongError as error:
                 smaller = next((candidate for candidate in tiers if candidate != rendered), None)
                 if smaller is None:
-                    # Unreachable while the last tier drops the per-test detail and budgets the rest.
-                    # Reported rather than asserted, because a wrong assumption here must not crash.
                     self._logger.error("PR comment too long at every tier: %s", error, extra=log_extra)
                     return False
                 rendered = smaller
@@ -244,8 +202,6 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 )
                 return True
 
-        # Every pass was refused the comment it targeted, including ones we had just created, so
-        # there is nothing left to recover to.
         self._logger.error("PR comment write found no comment it may edit", extra=log_extra)
         return False
 
@@ -266,20 +222,14 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
 
         async for page in self._client.list_issue_comments(self._options.owner, self._options.repo, pr_number):
             for comment in page.data:
-                # Only at the start: quoting our comment copies the marker into the quote, and that
-                # copy belongs to whoever wrote the reply. A quote is prefixed with "> ", so anchoring
-                # here rules it out. It still does not prove ownership — see the 403 recovery.
+                # A quoted marker must not identify someone else's reply as our report.
                 if comment.body.startswith(COMMENT_MARKER) and comment.id not in self._unusable_comment_ids:
                     self._comment_id = comment.id
                     return comment.id
         return None
 
     def _forget_unusable_comment(self, error: httpx.HTTPError, log_extra: dict[str, object]) -> bool:
-        """Drop the tracked comment when GitHub says we may not edit it, or it is gone.
-
-        Returns whether anything was forgotten, meaning the next pass should create instead. The marker
-        only identifies a comment, so the one it points at may belong to whoever pasted it.
-        """
+        """Discard an inaccessible comment and return whether to try a replacement."""
         if self._comment_id is None or not isinstance(error, httpx.HTTPStatusError):
             return False
         if error.response.status_code not in UNUSABLE_COMMENT_STATUSES:

@@ -59,7 +59,7 @@ Always ensure the shape of the API endpoint, including the request body and the
 response schema, is validated and that every decision is backed by evidence with
 a reference. Never assume a shape.
 
-The source of truth is GitHub's official OpenAPI description, pinned to the API
+The baseline contract is GitHub's official OpenAPI description, pinned to the API
 version this client targets. That version is the `GITHUB_API_VERSION` constant
 in `client.py` (the same value sent in the `X-GitHub-Api-Version` request
 header). Always resolve the description for that exact version rather than a
@@ -87,6 +87,11 @@ With that schema in hand:
 - Cite the reference for the schema decisions you make, the same way the existing
   models do in their docstrings (a `https://docs.github.com/...` or
   `rest-api-description` link).
+
+Narrow compatibility exceptions are allowed when verified GitHub responses or
+official endpoint documentation demonstrate a schema mismatch. Document the reason
+and cite the evidence beside the model, and cover the affected behavior in an
+endpoint test.
 
 ## Document every endpoint method with a GitHub API reference
 
