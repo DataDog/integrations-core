@@ -147,7 +147,7 @@ treemap*.png
 .claude/*
 !.claude/skills/
 .claude/skills/*
-!.claude/skills/evalya-onboard/
+!.claude/skills/onboard-evalya/
 
 # Claude Code PR review artifacts
 .agint-review/

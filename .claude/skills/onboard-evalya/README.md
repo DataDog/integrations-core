@@ -1,10 +1,10 @@
-# evalya-onboard
+# onboard-evalya
 
 Onboard a Datadog integration to evalya: build a `<integration>-full` fixture that spins up a
 live instance plus a workload that drives the check to emit 100% of the metrics used in the
 integration's OOTB dashboards. Modeled on the `redisdb/tests/` exemplar.
 
-Invoke with `/evalya-onboard <integration>` (or ask to "onboard <x> to evalya").
+Invoke with `/onboard-evalya <integration>` (or ask to "onboard <x> to evalya").
 
 ## Layout
 
@@ -20,7 +20,7 @@ Invoke with `/evalya-onboard <integration>` (or ask to "onboard <x> to evalya").
 The only cycle is step 5 (the coverage loop); everything else is linear.
 
 ```
-              /evalya-onboard <integration>
+              /onboard-evalya <integration>
                          │
               ┌──────────▼───────────┐
               │  GUARDRAILS (gate)   │  ddev config override (worktree)

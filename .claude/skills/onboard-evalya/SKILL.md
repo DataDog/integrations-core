@@ -1,5 +1,5 @@
 ---
-name: evalya-onboard
+name: onboard-evalya
 description: Use when the user asks to onboard, add, or set up an integration for evalya, create an evalya.yaml or evalya fixture, or build a full metric-coverage E2E fixture for a Datadog Agent integration in integrations-core. Drives a guided workflow that extracts the integration's OOTB dashboard metrics as the coverage target, authors a `<integration>-full` evalya task (reusing existing tests/compose files) with a seed + continuous activity-gen workload, then iterates a coverage loop until the running check emits every target metric. Triggers on "onboard <x> to evalya", "add an evalya fixture", "evalya.yaml for <x>", "full-coverage fixture". Do NOT use for writing ordinary pytest E2E tests or ddev env configs unrelated to evalya.
 ---
 
@@ -11,7 +11,7 @@ canonical exemplar is `redisdb/tests/` (`evalya.yaml`, `compose/full-coverage.co
 `activity-gen.sh`, `proxy/`). Read `references/redis-exemplar.md` before authoring; it is the
 pattern this skill reproduces.
 
-The target integration is given as the argument (`/evalya-onboard <integration>`). If absent, ask.
+The target integration is given as the argument (`/onboard-evalya <integration>`). If absent, ask.
 
 ## Non-negotiables
 
@@ -34,7 +34,7 @@ The target integration is given as the argument (`/evalya-onboard <integration>`
 Run the extractor (policy: **all** dashboard metrics):
 
 ```shell
-python3 .claude/skills/evalya-onboard/scripts/dashboard_metrics.py <integration>
+python3 .claude/skills/onboard-evalya/scripts/dashboard_metrics.py <integration>
 ```
 
 It prints `target` (every metric referenced in `assets/dashboards/*.json`), `in_metadata` (with
