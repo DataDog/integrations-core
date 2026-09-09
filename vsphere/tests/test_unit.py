@@ -3403,6 +3403,22 @@ def test_usage_metering_metrics_no_resolved_hostname(
     assert 'vm vm1 (no hostname)' in caplog.text
 
 
+def test_usage_metering_metrics_metric_filters_warning(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance
+):
+    """`metric_filters` cannot exclude a metering metric, so warn rather than silently overriding it."""
+    caplog.set_level(logging.WARNING)
+    realtime_instance['metric_filters'] = {'vm': [r'vm\.cpu\..*']}
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    assert "Metric 'vm.summary.config.numCpu' is always collected for usage metering" in caplog.text
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
+    # No `host` filters were configured, so the host marker is unaffected and must not warn.
+    assert 'summary.hardware.numCpuCores' not in caplog.text
+
+
 @pytest.mark.parametrize(
     ('max_query_metrics', 'metrics_per_query', 'max_historical_metrics', 'expected_batch_num'),
     [

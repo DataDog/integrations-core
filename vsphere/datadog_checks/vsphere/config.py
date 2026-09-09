@@ -30,6 +30,7 @@ from datadog_checks.vsphere.constants import (
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL,
     HOSTNAME_CASE_OPTIONS,
+    METERING_PROPERTY_BY_RESOURCE_TYPE,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
@@ -37,7 +38,11 @@ from datadog_checks.vsphere.constants import (
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.metrics import RESOURCES_WITH_HISTORICAL_METRICS, RESOURCES_WITH_REALTIME_METRICS
-from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
+from datadog_checks.vsphere.resource_filters import (  # noqa: F401
+    ResourceFilter,
+    create_resource_filter,
+    match_any_regex,
+)
 from datadog_checks.vsphere.types import (  # noqa: F401
     InstanceConfig,
     MetricFilterConfig,
@@ -128,6 +133,7 @@ class VSphereConfig(object):
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
         self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
+        self._warn_unfilterable_metering_metrics()
         self.event_resource_filters = self._normalize_event_resource_filters(
             instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
         )
@@ -303,6 +309,19 @@ class VSphereConfig(object):
             metric_filters[resource_type] = filters
 
         return {k: [re.compile(r) for r in v] for k, v in metric_filters.items()}
+
+    def _warn_unfilterable_metering_metrics(self):
+        # type: () -> None
+        for resource_type, metering_property in METERING_PROPERTY_BY_RESOURCE_TYPE.items():
+            filters = self.metric_filters.get(resource_type)
+            metric_name = '{}.{}'.format(resource_type, metering_property)
+            if filters and not match_any_regex(metric_name, filters):
+                self.log.warning(
+                    "Metric '%s' is always collected for usage metering, even though the metric_filters "
+                    "configured for '%s' exclude it.",
+                    metric_name,
+                    resource_type,
+                )
 
     def _normalize_event_resource_filters(self, filters):
         return [filter.lower() for filter in filters]

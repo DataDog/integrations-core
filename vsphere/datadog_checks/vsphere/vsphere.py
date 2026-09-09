@@ -244,6 +244,9 @@ class VSphereCheck(AgentCheck):
         self.infrastructure_cache.set_all_tags(all_tags)
 
         unmetered = []  # type: List[str]
+        unmetered_total = 0
+        # Only the debug dump needs every entry; the warning names at most UNMETERED_LOG_SAMPLE_SIZE.
+        log_all_unmetered = self.log.isEnabledFor(logging.DEBUG)
         for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
@@ -363,21 +366,27 @@ class VSphereCheck(AgentCheck):
             if metering_property is not None:
                 metering_value = properties.get(metering_property)
                 if metering_value is None:
-                    unmetered.append('{} {} (no {})'.format(mor_type_str, mor_name, metering_property))
+                    reason = 'no {}'.format(metering_property)
                 elif not mor_payload.get('hostname'):
                     # Submitting without a hostname would attribute the count to the Agent's own
                     # host, inflating it. A missing point is preferable to a misattributed one.
-                    unmetered.append('{} {} (no hostname)'.format(mor_type_str, mor_name))
+                    reason = 'no hostname'
                 else:
                     mor_payload["metering"] = metering_value
+                    reason = None
+
+                if reason is not None:
+                    unmetered_total += 1
+                    if log_all_unmetered or len(unmetered) < UNMETERED_LOG_SAMPLE_SIZE:
+                        unmetered.append('{} {} ({})'.format(mor_type_str, mor_name, reason))
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
-        if unmetered:
+        if unmetered_total:
             # Summarized rather than logged per resource: the causes are systemic (a restricted
             # vCenter role, VMware Tools missing fleet-wide), so a large environment would
             # otherwise warn thousands of times on every refresh.
-            truncated = len(unmetered) > UNMETERED_LOG_SAMPLE_SIZE
+            truncated = unmetered_total > UNMETERED_LOG_SAMPLE_SIZE
             self.log.warning(
                 "Not collecting %s for %d resource(s)%s: %s. A missing property usually means the vCenter "
                 "user cannot read it; a missing hostname means none could be resolved for the resource.",
@@ -385,11 +394,12 @@ class VSphereCheck(AgentCheck):
                     'vsphere.{}.{}'.format(resource_type, metering_property)
                     for resource_type, metering_property in METERING_PROPERTY_BY_RESOURCE_TYPE.items()
                 ),
-                len(unmetered),
+                unmetered_total,
                 " (showing {})".format(UNMETERED_LOG_SAMPLE_SIZE) if truncated else "",
                 ", ".join(unmetered[:UNMETERED_LOG_SAMPLE_SIZE]),
             )
-            self.log.debug("Resources with no usage metering metric: %s", unmetered)
+            if log_all_unmetered:
+                self.log.debug("Resources with no usage metering metric: %s", unmetered)
 
     def submit_metrics_callback(self, query_results):
         # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None
