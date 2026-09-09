@@ -142,8 +142,10 @@ class RemoteQueryUploadLimits(BaseModel):
     # The page-count ceiling itself is worker/intake-owned: the integration only enforces
     # the delivered value.
     max_pages: StrictInt = Field(alias='maxPages', ge=1)
-    # The delivery-injected timeout is authoritative only for instances that do not configure
-    # remote_queries.timeout_ms: the instance config owns the customer-DB-protective override.
+    # The delivery-injected timeout is the run-wide monotonic hard wall: it covers target
+    # resolution, query execution, page construction, upload, and retries, and no instance
+    # configuration may lengthen it. An instance-configured database timeout may shorten
+    # the effective database statement timeout, never the wall itself.
     timeout_ms: StrictInt = Field(default=REMOTE_QUERY_DEFAULT_TIMEOUT_MS, alias='timeoutMs', ge=1)
 
     @model_validator(mode='after')
@@ -415,6 +417,16 @@ def raise_if_timed_out(deadline: float) -> None:
         raise RemoteQueryFailure('timeout', 'Remote query exceeded timeoutMs.', retryable=True)
 
 
+def remaining_wall_ms(deadline: float) -> int:
+    """The wall's remaining milliseconds, clamped to at least 1.
+
+    Derived database timeouts must never reach 0: a zero PostgreSQL statement timeout or a
+    zero ClickHouse ``max_execution_time`` would disable the database-side protection
+    entirely instead of expiring the run.
+    """
+    return max(1, int((deadline - time.monotonic()) * 1000))
+
+
 def raise_if_cancelled(check: Any) -> None:
     # The Agent runtime exposes ``is_cancelled`` as a plain bool attribute on the check
     # object, while other runtimes (and test doubles) may expose a callable hook; honor
@@ -480,6 +492,16 @@ REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE = 'page_upload_in_progress'
 REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
 
 
+# The socket read timeout below is only a stall backstop: it fires when the socket is fully
+# silent for its full span, so a slow-drip response never triggers it and it is not a wall on
+# one request's duration. The attempt bound is that wall: it bounds one whole-page upload
+# HTTP attempt below the effective public request ceiling measured through the intake data
+# plane (~123-124 s, public frontend ingress), with more than 2x headroom, so a page that
+# cannot fit the window (application work is budgeted at ~50 s) fails and retries instead of
+# hanging until the edge kill or the stall backstop fires.
+REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS = 55
+
+
 REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 300
 
 
@@ -497,6 +519,9 @@ class UploadCredentials:
     app_key: str
     token: str
     test_drive: str | None
+    # The run-wide monotonic hard wall for this session's upload requests; None means the
+    # request is not wall-scoped (best-effort abort, or a test double driving the client).
+    wall_deadline: float | None = None
 
 
 class UploadClient(Protocol):
@@ -505,6 +530,38 @@ class UploadClient(Protocol):
     def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]: ...
 
     def abort(self, creds: UploadCredentials) -> None: ...
+
+
+class UploadAttemptExpired(Exception):
+    """One HTTP upload attempt passed its per-attempt deadline; the run itself may retry."""
+
+
+class DeadlinedPageBody:
+    """A file-like view over one page body that kills its HTTP attempt at a deadline.
+
+    A page is fully buffered before its request starts, so the request carries a stable
+    Content-Length and streams the body through ``read``. Checking the attempt deadline at
+    every read bounds the attempt's wall-clock upload time even while the socket keeps
+    accepting bytes, which the socket-level stall timeout cannot do. The position lives in
+    the underlying buffer, so the retry loop's whole-page rewind applies to the view too.
+    """
+
+    def __init__(self, body: BinaryIO, deadline: float):
+        self._body = body
+        self._deadline = deadline
+
+    def read(self, amount: int | None = -1) -> bytes:
+        if time.monotonic() > self._deadline:
+            raise UploadAttemptExpired('Page upload attempt exceeded its per-attempt deadline.')
+        if amount is None or amount < 0:
+            return self._body.read()
+        return self._body.read(amount)
+
+    def seek(self, *args: Any) -> Any:
+        return self._body.seek(*args)
+
+    def tell(self) -> int:
+        return self._body.tell()
 
 
 class RequestsUploadClient:
@@ -549,19 +606,22 @@ class RequestsUploadClient:
             buffer,
             self._timeout,
             retryable_error_codes=frozenset((REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE,)),
+            deadline=creds.wall_deadline,
         )
         return parse_page_receipt_body(response_body)
 
     def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        _status, body = upload_with_retry('POST', url, headers, b'{}', self._timeout)
+        _status, body = upload_with_retry('POST', url, headers, b'{}', self._timeout, deadline=creds.wall_deadline)
         return parse_finalize_run_body(body)
 
     def abort(self, creds: UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
         try:
+            # Abort is cleanup: it must stay possible after the run wall expired (that is
+            # exactly when it runs), so it carries no deadline.
             upload_with_retry('POST', url, headers, b'{}', self._timeout)
         except RemoteQueryFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
@@ -675,18 +735,34 @@ def upload_with_retry(
     body: bytes | BinaryIO,
     timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
     retryable_error_codes: frozenset[str] = frozenset(),
+    deadline: float | None = None,
 ) -> tuple[int, bytes]:
+    """Send one intake request with bounded retries; ``deadline`` is the run-wide wall.
+
+    With a deadline, no attempt starts after the wall and every whole-page attempt is
+    additionally bounded by ``REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS`` capped at the wall,
+    so a bounded retry sequence can never meaningfully extend the wall. A page attempt
+    that passes its own bound is killed mid-body and retried with whole-page rewind.
+    """
     import requests  # lazy: only the POC upload path needs it
 
     backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
     last_err: Any = None
     for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
+        if deadline is not None:
+            raise_if_timed_out(deadline)
         if not isinstance(body, bytes):
             # Whole-page retry: rewind the buffer so every attempt sends byte-identical
             # content for the same page index with unchanged declared metadata.
             body.seek(0)
+        request_body: bytes | BinaryIO = body
+        if deadline is not None and not isinstance(body, bytes):
+            attempt_deadline = min(deadline, time.monotonic() + REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS)
+            request_body = DeadlinedPageBody(body, attempt_deadline)
         try:
-            resp = requests.request(method, url, headers=dict(headers), data=body, timeout=timeout)
+            resp = requests.request(method, url, headers=dict(headers), data=request_body, timeout=timeout)
+        except UploadAttemptExpired as e:
+            last_err = e
         except requests.exceptions.RequestException as e:
             last_err = e
         else:
@@ -750,7 +826,12 @@ def validate_test_drive_name(value: str | None) -> str | None:
     return name
 
 
-def resolve_upload_credentials(delivery: RemoteQueryResultDelivery) -> UploadCredentials:
+def resolve_upload_credentials(delivery: RemoteQueryResultDelivery, started_at: float) -> UploadCredentials:
+    """Build the session credentials, carrying the run-wide wall for upload retries.
+
+    The wall is derived from the same started-at origin and delivered timeout the producer
+    uses for its monotonic guard, so the guard and the upload client enforce one deadline.
+    """
     test_drive = validate_test_drive_name(get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY))
     return UploadCredentials(
         base_url=delivery.base_url,
@@ -759,6 +840,7 @@ def resolve_upload_credentials(delivery: RemoteQueryResultDelivery) -> UploadCre
         app_key=get_agent_config('app_key'),
         token=delivery.token,
         test_drive=test_drive,
+        wall_deadline=started_at + delivery.limits.timeout_ms / 1000,
     )
 
 

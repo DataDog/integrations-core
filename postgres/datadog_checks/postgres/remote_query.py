@@ -448,16 +448,19 @@ def produce_remote_query(
     """Execute the validated query once and return the compact run receipt.
 
     The query runs exactly once, through a named server-side cursor declared inside the
-    existing read-only transaction with the resolved statement timeout applied (the
-    instance-configured ``remote_queries.timeout_ms`` override, or the delivery-injected
-    limit when the instance does not configure one); it is never wrapped in a probe and
-    never executed twice. Bounded row batches are fetched from the same cursor and encoded
-    one row at a time.
+    existing read-only transaction with the effective statement timeout applied — the
+    smaller of the instance-configured ``remote_queries.timeout_ms`` and the remaining
+    run-wide wall, where the wall is the delivered ``limits.timeout_ms`` that no instance
+    setting may lengthen; it is never wrapped in a probe and never executed twice. Bounded
+    row batches are fetched from the same cursor and encoded one row at a time.
     """
     delivery = request.result_delivery
     limits = delivery.limits
-    statement_timeout_ms = _resolve_statement_timeout_ms(check, limits)
-    deadline = started_at + statement_timeout_ms / 1000
+    # The delivered timeout is the run-wide monotonic hard wall; the instance-configured
+    # remote_queries.timeout_ms may shorten the statement timeout below it but never
+    # replace or lengthen the wall.
+    deadline = started_at + limits.timeout_ms / 1000
+    statement_timeout_ms = _resolve_statement_timeout_ms(check, deadline)
     # Keep a batch of permitted-size rows within a page-sized encoded budget.
     # Driver allocations still need headroom; row size is checked after decoding.
     fetch_rows = max(1, min(REMOTE_QUERY_FETCH_BATCH_ROWS, limits.max_file_bytes // limits.max_row_bytes))
@@ -474,8 +477,8 @@ def produce_remote_query(
                 control.execute('BEGIN READ ONLY')
                 in_transaction = True
                 # SET statements do not accept bind parameters, so the timeout is inlined; it
-                # is a validated positive int from the resolved instance override or the
-                # server-injected limits, never raw text.
+                # is a validated positive int resolved from the instance override and the
+                # remaining wall, never raw text.
                 control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
                 with conn.cursor(name=cursor_name) as server_cursor:
                     register_exact_loaders(server_cursor)
@@ -519,22 +522,25 @@ def produce_remote_query(
                         LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
 
 
-def _resolve_statement_timeout_ms(check: 'PostgreSql', limits: rq.RemoteQueryUploadLimits) -> int:
+def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
     """Resolve the statement timeout that protects the customer database for this run.
 
-    The instance config ``remote_queries.timeout_ms`` owns this DB-protective bound: it caps
-    how long the read-only remote query transaction may hold its snapshot on this instance's
-    database, and per-instance granularity is the point (a warehouse instance can allow
-    minutes while an OLTP instance allows seconds). When the instance does not configure it,
-    the delivery-injected ``limits.timeout_ms`` stays authoritative as the worker's legacy
-    fallback for unconfigured instances, so behavior is exactly as before. The delivery
-    limits object is never mutated; the value is resolved locally for each run.
+    ``deadline`` is the run-wide hard wall derived from the delivered ``limits.timeout_ms``:
+    it covers target resolution, query execution, page construction, upload, and retries,
+    and instance configuration can never lengthen it. The instance config
+    ``remote_queries.timeout_ms`` stays a customer-database protection with per-instance
+    granularity (a warehouse instance can allow minutes while an OLTP instance allows
+    seconds), but it may only shorten the run: the effective statement timeout is the smaller
+    of the positive instance value and the remaining wall, and the wall's remainder applies
+    when the instance does not configure one. The value is resolved locally per run; the
+    delivery limits object is never mutated.
     """
     config = getattr(check, '_config', None)
     instance_timeout_ms = getattr(getattr(config, 'remote_queries', None), 'timeout_ms', None)
+    remaining_ms = rq.remaining_wall_ms(deadline)
     if isinstance(instance_timeout_ms, int) and instance_timeout_ms > 0:
-        return instance_timeout_ms
-    return limits.timeout_ms
+        return min(instance_timeout_ms, remaining_ms)
+    return remaining_ms
 
 
 # ---------------------------------------------------------------------------
@@ -792,7 +798,7 @@ def iter_agent_rpc_stream_events(
         )
         return
 
-    creds = rq.resolve_upload_credentials(parsed_request.result_delivery)
+    creds = rq.resolve_upload_credentials(parsed_request.result_delivery, started_at)
     if not creds.api_key or not creds.app_key:
         yield rq.failed_event(
             'credentials_unavailable',

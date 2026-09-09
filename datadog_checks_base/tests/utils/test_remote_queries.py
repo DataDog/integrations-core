@@ -257,6 +257,90 @@ def test_http_terminal_rejections_are_not_retried(monkeypatch, creds, status):
     assert len(calls) == 1
 
 
+def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
+    import requests
+
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(0, 0, len(payload), 1, hashlib.sha256(payload).hexdigest())
+    attempts = []
+    sent = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        sent.append(data.read())
+        return SimpleNamespace(status_code=200, content=json.dumps(receipt(page)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    # The wall is 100 s away, but the per-attempt bound is 55 s: the first attempt's body read
+    # happens past it and is killed mid-body; the second, rewound attempt succeeds.
+    clock = iter([0.0, 0.0, 56.0, 56.0, 56.0] + [56.0] * 10)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    wall_creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=100.0
+    )
+    with io.BytesIO(payload) as body:
+        assert rq.RequestsUploadClient().put_page(wall_creds, page, body) == receipt(page)
+    assert len(attempts) == 2
+    assert sent == [payload]
+
+
+def test_http_page_attempt_bound_never_exceeds_the_run_wall(monkeypatch, creds):
+    import requests
+
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(0, 0, len(payload), 1, hashlib.sha256(payload).hexdigest())
+    attempts = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        data.read()
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    # The wall is 50 s away, inside the 55 s attempt bound, so the attempt's own deadline is
+    # the wall: a partially consumed budget bounds the page attempt, the killed attempt is not
+    # retried past the wall, and the run surfaces the retryable wall timeout.
+    clock = iter([0.0, 0.0, 51.0, 51.5] + [51.5] * 10)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    wall_creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=50.0
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
+        rq.RequestsUploadClient().put_page(wall_creds, page, body)
+    assert failure.value.code == 'timeout'
+    assert failure.value.retryable
+    assert len(attempts) == 1
+
+
+def test_http_retry_sequence_never_extends_the_run_wall(monkeypatch, creds):
+    import requests
+
+    payload = b'{"value":1}'
+    page = rq.PageUploadMetadata(0, 0, len(payload), 1, hashlib.sha256(payload).hexdigest())
+    attempts = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    # A transient rejection followed by an expired wall: the sequence refuses to start another
+    # attempt and surfaces the retryable wall timeout instead of uploading past the wall.
+    clock = iter([0.0, 0.0, 51.5] + [51.5] * 10)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    wall_creds = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=50.0
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
+        rq.RequestsUploadClient().put_page(wall_creds, page, body)
+    assert failure.value.code == 'timeout'
+    assert failure.value.retryable
+    assert len(attempts) == 1
+
+
 def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
     import requests
 
