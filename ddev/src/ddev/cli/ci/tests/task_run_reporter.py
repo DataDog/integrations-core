@@ -20,6 +20,7 @@ from ddev.cli.ci.tests.pr_comment import (
     summary_line,
 )
 from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_errors import GitHubBodyTooLongError
 
 if TYPE_CHECKING:
@@ -83,7 +84,14 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
     not prove ownership, though, so an edit GitHub refuses means "not our comment".
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: RunReporterOptions):
+    def __init__(
+        self,
+        name: str,
+        client: AsyncGitHubClient,
+        options: RunReporterOptions,
+        *,
+        monitor: ComponentMonitor | None = None,
+    ):
         super().__init__(name)
         self._client = client
         self._options = options
@@ -100,6 +108,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._final_report_published = False
         self._lock = asyncio.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
+        self.monitor = monitor
 
     @property
     def latest_body(self) -> str | None:
