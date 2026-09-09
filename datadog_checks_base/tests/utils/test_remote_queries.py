@@ -487,7 +487,6 @@ def test_page_writer_result_cap_boundaries(delivery, creds):
             rq.page_prefix(
                 run_id=delivery.run_id,
                 task_id=delivery.task_id,
-                batch_index=0,
                 record_offset=0,
                 agent_hostname=AGENT_HOSTNAME,
                 schema_json=None,
