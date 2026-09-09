@@ -676,6 +676,43 @@ def test_agent_pr_final_tag_targets_release_branch_and_bumps_pin(ddev, agent_pr_
     assert 'Datadog-agent bump PR created' in result.output
 
 
+def test_agent_pr_pins_the_ref_commit_not_the_branch_tip(ddev, agent_pr_git, fake_async_github, config_file):
+    """`--ref` tags a non-tip commit; the pin must follow that commit, not the branch tip."""
+    ref_commit_sha = 'cafef00d' * 5
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    _mock_release_json(fake_async_github)
+
+    def dispatch(*args):
+        # Give the `--ref` commit a distinct SHA from the branch tip so the test can tell the pin
+        # followed the right one.
+        if args[:2] == ('rev-parse', '--verify') and 'cafef00d' in args[2]:
+            return f'{ref_commit_sha}\n'
+        return _capture_dispatch(*args)
+
+    agent_pr_git.capture.side_effect = dispatch
+
+    result = ddev(
+        'release',
+        'branch',
+        'tag',
+        '--release',
+        '7.56.x',
+        '--final',
+        '--ref',
+        'cafef00d',
+        '--skip-open-pr-check',
+        input='y\n',
+    )
+
+    assert result.exit_code == 0, result.output
+    agent_pr_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ref_commit_sha)
+    committed = base64.b64decode(
+        fake_async_github.last_call('create_or_update_file_contents').kwargs['content']
+    ).decode()
+    assert f'"INTEGRATIONS_CORE_VERSION": "{ref_commit_sha}"' in committed
+
+
 def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
