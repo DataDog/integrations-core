@@ -262,12 +262,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Alert
-    path: ocsf.is_alert
-    source: log
-    type: boolean
-  - groups:
-      - OCSF
     name: Event Code
     path: ocsf.metadata.event_code
     source: log
@@ -312,12 +306,12 @@ facets:
     type: integer
   - groups:
       - OCSF
-    name: Connection Direction
+    name: Connection Info Direction
     path: ocsf.connection_info.direction
     source: log
   - groups:
       - OCSF
-    name: Connection Info Protocol Name
+    name: Protocol Name
     path: ocsf.connection_info.protocol_name
     source: log
   - groups:
@@ -330,37 +324,31 @@ facets:
     name: Traffic Bytes
     path: ocsf.traffic.bytes
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Traffic Bytes In
     path: ocsf.traffic.bytes_in
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Traffic Bytes Out
     path: ocsf.traffic.bytes_out
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Traffic Packets
     path: ocsf.traffic.packets
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Traffic Packets In
     path: ocsf.traffic.packets_in
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Traffic Packets Out
     path: ocsf.traffic.packets_out
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Finding Info Unique ID
@@ -368,7 +356,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Finding Information Analytic Name
+    name: Finding Info Analytic Name
     path: ocsf.finding_info.analytic.name
     source: log
   - groups:
@@ -396,7 +384,7 @@ facets:
     type: integer
   - groups:
       - OCSF
-    name: Finding Information Product Name
+    name: Finding Info Product Name
     path: ocsf.finding_info.product.name
     source: log
   - groups:
@@ -406,7 +394,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Finding Information Analytic Unique ID
+    name: Finding Info Analytic UID
     path: ocsf.finding_info.analytic.uid
     source: log
   - groups:
