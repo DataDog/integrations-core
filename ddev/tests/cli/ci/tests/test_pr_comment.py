@@ -10,6 +10,7 @@ read as success, and nothing is dropped silently.
 
 from __future__ import annotations
 
+import dataclasses
 import re
 from collections.abc import Callable
 
@@ -124,6 +125,60 @@ def test_a_running_batch_and_a_retrying_batch_are_indistinguishable():
 
     assert chips[0] == chips[1]
     assert "🔄 in progress" in chips[0]
+
+
+def test_collection_shows_execution_outcomes_while_test_details_are_pending():
+    failed = dataclasses.replace(attempt(Status.FAILURE), reports=None)
+    passed = dataclasses.replace(attempt(), reports=None)
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(failed),
+                job_progress(passed, target="postgres"),
+                state=ExecutionState.ARTIFACT_DOWNLOAD,
+                status=Status.FAILURE,
+            ),
+        ),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "**Tests finished; collecting results.**" in body
+    assert "❌ failed · 📥 collecting artifacts" in body
+    assert "**2/2 jobs**" in body
+    assert 'href="https://github.com/o/r/actions/runs/1/job/9"' in body
+    assert "Test details pending artifact collection." in body
+    assert set(_progress_bar_of(body)) == {"passed", "failed"}
+
+
+@pytest.mark.parametrize("job_finished", [False, True], ids=["awaiting-job-status", "job-passed"])
+def test_workflow_only_failure_requires_observed_job_outcomes(job_finished: bool):
+    job = job_progress(attempt()) if job_finished else job_progress()
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job, state=ExecutionState.ARTIFACT_DOWNLOAD, status=Status.FAILURE),),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "❌ failed · 📥 collecting artifacts" in body
+    assert ("the workflow failed with no tracked job failure" in body) is job_finished
+
+
+def test_running_attempts_remain_pending_in_the_batch_table():
+    running = dataclasses.replace(attempt(), state=ExecutionState.RUNNING, status=None, conclusion=None, reports=None)
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(running), state=ExecutionState.RUNNING, status=None),),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "**0/1 jobs**" in body
+    assert "<td>0/1</td>" in body
+    assert "⏳ 1 pending" in body
 
 
 def test_final_snapshot_reads_as_complete_with_failures():

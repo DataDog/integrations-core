@@ -15,7 +15,7 @@ from ddev.utils.platform import PlatformName
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ddev.cli.ci.tests.progress import DispatcherProgress
+    from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState
     from ddev.utils.github_async.models import WorkflowJob
     from ddev.utils.junit import JUnitReport, JUnitTestCase
 
@@ -182,8 +182,24 @@ class TestBatch(BaseMessage):
 
 
 @dataclass
+class BatchProgressUpdate(BaseMessage):
+    """Cumulative execution observations, before artifact collection and final gathering.
+
+    ``sequence`` increases within a batch run so receivers can discard out-of-order snapshots.
+    """
+
+    batch_id: str
+    run_id: int
+    workflow_url: str
+    state: ExecutionState
+    sequence: int
+    jobs: tuple[WorkflowJob, ...] = ()
+    status: Status | None = None
+
+
+@dataclass
 class BatchFinished(BaseMessage):
-    """Emitted when a GitHub Actions test workflow has completed.
+    """Emitted after a completed workflow's artifact collection finishes.
 
     ``batch_id`` is the identity of the ``TestBatch`` this run came from, so the gatherer can resolve
     it in the plan.
@@ -200,10 +216,10 @@ class BatchFinished(BaseMessage):
 
 @dataclass
 class UpdatePRComment(BaseMessage):
-    """Emitted per finished batch to request a PR comment update.
+    """Request publication of a changed aggregate snapshot.
 
-    ``revision`` is ordering metadata: revision ``0`` is the initial plan, then one per consumed
-    ``BatchFinished``. The run reporter renders the latest and rejects stale revisions. ``progress`` is
+    ``revision`` starts at ``0`` for the initial plan and advances only when progress changes.
+    The run reporter renders the latest and rejects stale revisions. ``progress`` is
     the whole payload, including whether the run is done and every count the comment needs.
     """
 

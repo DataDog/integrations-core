@@ -11,7 +11,7 @@ import signal
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.messages import BatchFinished, TestBatch, UpdatePRComment
+from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
 from ddev.cli.ci.tests.status import Status
@@ -90,7 +90,7 @@ class Dispatcher(EventBusOrchestrator):
     """Runs a batching plan to completion and publishes its result.
 
     The whole plan is known before the bus starts, so `on_initialize` queues the initial update and
-    every batch: `TestBatch` -> runner -> `BatchFinished` -> gatherer -> `UpdatePRComment` -> reporter.
+    every batch: `TestBatch` -> runner -> progress/results -> gatherer -> `UpdatePRComment` -> reporter.
     """
 
     def __init__(
@@ -115,7 +115,7 @@ class Dispatcher(EventBusOrchestrator):
         self._cancelled = False
 
         self.register_processor(runner, [TestBatch])
-        self.register_processor(gatherer, [BatchFinished])
+        self.register_processor(gatherer, [BatchFinished, BatchProgressUpdate])
         self.register_processor(reporter, [UpdatePRComment])
 
     @property
@@ -207,16 +207,15 @@ def build_dispatcher(
 ) -> Dispatcher:
     """Assemble the client, the three tasks and the Dispatcher from a plan and its run context.
 
-    One client and one rate limiter are shared by every task, so the run's request rate is bounded
-    as a whole rather than per task. The limiter tier is chosen from every integration in the plan,
-    which is the slowest thing the run will wait on.
+    One HTTP pool is shared by every task. Artifact collection uses its own local bucket;
+    all buckets share the provider's budget and pauses.
     """
     from ddev.utils.github_async import AsyncGitHubClient
 
     active_logger = run_logger or logger
     integrations = frozenset(integration for batch in batches for integration in batch.integrations)
-    rate_limiter = RateLimiterFactory(config.github_rate_limits, active_logger).get_limiter(integrations)
-    client = AsyncGitHubClient(token, rate_limiter=rate_limiter)
+    rate_limiters = RateLimiterFactory(config.github_rate_limits, active_logger)
+    client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations))
 
     runner = TaskTestRunner(
         "test-runner",
@@ -234,6 +233,7 @@ def build_dispatcher(
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
         ),
+        artifact_client=client.with_rate_limit(rate_limiters.artifacts),
     )
     gatherer = TaskTestGatherer("test-gatherer", output_path, batches)
     reporter = TaskRunReporter(
