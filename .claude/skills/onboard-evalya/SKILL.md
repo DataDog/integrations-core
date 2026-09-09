@@ -1,12 +1,13 @@
 ---
 name: onboard-evalya
-description: Use when the user asks to onboard, add, or set up an integration for evalya, create an evalya.yaml or evalya fixture, or build a full metric-coverage E2E fixture for a Datadog Agent integration in integrations-core. Drives a guided workflow that extracts the integration's OOTB dashboard metrics as the coverage target, authors a `<integration>-full` evalya task (reusing existing tests/compose files) with a seed + continuous activity-gen workload, then iterates a coverage loop until the running check emits every target metric. Triggers on "onboard <x> to evalya", "add an evalya fixture", "evalya.yaml for <x>", "full-coverage fixture". Do NOT use for writing ordinary pytest E2E tests or ddev env configs unrelated to evalya.
+description: Use when the user asks to onboard, add, or set up an integration for evalya, create an evalya.yaml or evalya fixture, or build a full metric-coverage E2E fixture for a Datadog Agent integration in integrations-core. Drives a guided workflow that extracts the integration's OOTB dashboard and recommended-monitor metrics as the coverage target, authors a `<integration>-full` evalya task (reusing existing tests/compose files) with a seed + continuous activity-gen workload, then iterates a coverage loop until the running check emits every target metric. Triggers on "onboard <x> to evalya", "add an evalya fixture", "evalya.yaml for <x>", "full-coverage fixture". Do NOT use for writing ordinary pytest E2E tests or ddev env configs unrelated to evalya.
 ---
 
 # Onboard an integration to evalya
 
 Build a `<integration>-full` evalya fixture that spins up a live instance plus a workload that
-drives the integration's check to emit **100% of the metrics used in its OOTB dashboards**. The
+drives the integration's check to emit **100% of the metrics used in its OOTB dashboards and
+recommended monitors**. The
 canonical exemplar is `redisdb/tests/` (`evalya.yaml`, `compose/full-coverage.compose`,
 `activity-gen.sh`, `proxy/`). Read `references/redis-exemplar.md` before authoring; it is the
 pattern this skill reproduces.
@@ -31,14 +32,19 @@ The target integration is given as the argument (`/onboard-evalya <integration>`
 
 ### 1. Establish the coverage target
 
-Run the extractor (policy: **all** dashboard metrics):
+The coverage target is the metrics the integration puts in front of users: everything referenced
+in its OOTB **dashboards** (`assets/dashboards/*.json`) and its recommended **monitors**
+(`assets/monitors/*.json`). Monitors routinely alert on metrics no dashboard plots, so they are a
+first-class input, not an afterthought. Run the extractor (policy: **all** dashboard + monitor
+metrics):
 
 ```shell
-python3 .claude/skills/onboard-evalya/scripts/dashboard_metrics.py <integration>
+python3 .claude/skills/onboard-evalya/scripts/asset_metrics.py <integration>
 ```
 
-It prints `target` (every metric referenced in `assets/dashboards/*.json`), `in_metadata` (with
-type), and `missing_from_metadata`. Triage `missing_from_metadata`:
+It prints `target` (the union of metrics across both asset types), `by_source` (which metrics came
+from dashboards vs monitors, so you can see what monitors added), `in_metadata` (with type), and
+`missing_from_metadata`. Triage `missing_from_metadata`:
 
 - **Cross-integration metrics** (e.g. `system.*`, `docker.*`) — the check under test does not emit
   these. Exclude them from the achievable target and record why.
