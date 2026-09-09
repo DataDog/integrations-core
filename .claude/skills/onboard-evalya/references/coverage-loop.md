@@ -69,7 +69,7 @@ require it.
 
 ## Multi-instance / multi-role checks
 
-Some integrations emit their dashboard metrics from **different node roles that no single endpoint
+Some integrations emit their target metrics from **different node roles that no single endpoint
 exposes**. Mongo is the canonical case: `chunks.*` come only from a check instance pointed at
 `mongos` (a `MongosDeployment`), while `replset.*`/`oplog.*` come only from an instance pointed at a
 shard replica-set member (a `ReplicaSetDeployment`) — one instance opens one connection and adopts

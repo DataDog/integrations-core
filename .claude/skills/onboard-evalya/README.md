@@ -2,7 +2,7 @@
 
 Onboard a Datadog integration to evalya: build a `<integration>-full` fixture that spins up a
 live instance plus a workload that drives the check to emit 100% of the metrics used in the
-integration's OOTB dashboards. Modeled on the `redisdb/tests/` exemplar.
+integration's OOTB dashboards and recommended monitors. Modeled on the `redisdb/tests/` exemplar.
 
 Invoke with `/onboard-evalya <integration>` (or ask to "onboard <x> to evalya").
 
@@ -13,7 +13,7 @@ Invoke with `/onboard-evalya <integration>` (or ask to "onboard <x> to evalya").
 | `SKILL.md` | The agent-facing workflow (what the model executes). |
 | `references/redis-exemplar.md` | Annotated walkthrough of the redisdb fixture. |
 | `references/coverage-loop.md` | The emitted-vs-target diff mechanism, the `-t 2` rule, multi-instance handling. |
-| `scripts/dashboard_metrics.py` | Deterministic extractor: dashboard metrics joined to `metadata.csv`. |
+| `scripts/asset_metrics.py` | Deterministic extractor: dashboard + monitor metrics joined to `metadata.csv`. |
 
 ## Workflow
 
@@ -28,9 +28,10 @@ The only cycle is step 5 (the coverage loop); everything else is linear.
               └──────────┬───────────┘
                          │
    ┌─────────────────────▼─────────────────────┐
-   │ 1. TARGET                                  │  dashboard_metrics.py
-   │    dashboards/*.json  ──►  metric set      │  join metadata.csv
-   │    triage "missing": drop system.*,        │  = coverage exit condition
+   │ 1. TARGET                                  │  asset_metrics.py
+   │    dashboards/*.json + monitors/*.json     │  join metadata.csv
+   │        ──►  metric set (union)             │  = coverage exit condition
+   │    triage "missing": drop system.*,        │
    │    keep real gaps                          │
    └─────────────────────┬─────────────────────┘
                          │
@@ -86,7 +87,7 @@ The only cycle is step 5 (the coverage loop); everything else is linear.
 
 ## Worked example: rabbitmq
 
-The coverage loop, traced against a real run:
+The coverage loop, traced against a real run over the **dashboard** target (56 metrics):
 
 | Coverage | What moved it |
 |---|---|
@@ -96,5 +97,11 @@ The coverage loop, traced against a real run:
 | 54/56 | run the check twice (`-t 2`) so OpenMetrics counters appear |
 | 54/56 | stop: `process.max_tcp_sockets`/`open_tcp_sockets` are 3.x-only, unreachable on 4.x |
 
-Two findings this surfaced, now baked into the skill: a dashboard can mix check backends (needs
-one instance per backend), and a single `agent check` scrape emits zero OpenMetrics counters.
+This run predates adding monitors to the target. The recommended monitors contribute two more
+rabbitmq metrics not on any dashboard (`rabbitmq.alarms.free_disk_space.watermark`,
+`rabbitmq.queue.messages_unacknowledged.rate`), which a fresh run would need to verify and, if
+absent, drive from the workload. That is exactly why monitors are part of the target.
+
+Two findings this surfaced, now baked into the skill: a dashboard (or monitor set) can mix check
+backends (needs one instance per backend), and a single `agent check` scrape emits zero
+OpenMetrics counters.
