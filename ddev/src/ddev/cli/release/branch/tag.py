@@ -31,8 +31,6 @@ RELEASE_INPUT_REGEX = re.compile(r'^(\d+\.\d+)(\.x)?$')
 # Chosen so that `--rc auto` (which users could plausibly type) is rejected by `_parse_rc_value`
 # rather than silently treated as bare `--rc`.
 RC_AUTO = '__rc_auto_sentinel__'
-# Sentinel used by `--final` when the user provides the flag without a value, mirroring `RC_AUTO`.
-FINAL_AUTO = '__final_auto_sentinel__'
 
 
 @click.command
@@ -58,13 +56,9 @@ FINAL_AUTO = '__final_auto_sentinel__'
 @click.option(
     '--final',
     'final',
-    is_flag=False,
-    flag_value=FINAL_AUTO,
-    default=None,
-    help=(
-        'Tag a final release. Mutually exclusive with `--rc`. Pass `--final` alone to tag the next '
-        'patch version, or `--final N` to select patch N explicitly.'
-    ),
+    is_flag=True,
+    default=False,
+    help='Tag a final release. Mutually exclusive with `--rc`.',
 )
 @click.option(
     '--rc',
@@ -97,7 +91,7 @@ def tag(
     app: Application,
     release: str | None,
     ref: str | None,
-    final: str | None,
+    final: bool,
     rc: str | None,
     yes: bool,
     skip_open_pr_check: bool,
@@ -121,11 +115,7 @@ def tag(
     - `--rc` (default) tags a release candidate. Pass `--rc N` to pin the RC number; pass
       `--rc` alone to auto-suggest the next available RC. The command warns (but does not
       abort) if the requested number leaves a gap in the RC sequence.
-    - `--final` tags a final release; mutually exclusive with `--rc`. Pass `--final` alone to
-      tag the next patch version, or `--final N` to select patch N explicitly.
-    - Tagging an already-existing tag skips tag creation and only re-runs the follow-up steps
-      (the build_agent workflow dispatch and the datadog-agent pin PR), which is the recovery
-      path for a run whose follow-up steps failed.
+    - `--final` tags a final release; mutually exclusive with `--rc`.
 
     Other options:
 
@@ -136,11 +126,10 @@ def tag(
     - `--yes/-y` skips all yes/no confirmations (target-branch, backward-RC, final tag).
     - `--skip-open-pr-check` skips the GitHub query for open PRs targeting the branch.
     """
-    if final is not None and rc is not None:
+    if final and rc is not None:
         raise click.UsageError('`--final` and `--rc` are mutually exclusive.')
-    is_rc = final is None
+    is_rc = not final
     pinned_rc = _parse_rc_value(rc) if is_rc else None
-    pinned_patch = None if is_rc else _parse_final_value(final)
 
     current_branch = app.repo.git.current_branch()
     target_branch = _resolve_target_branch(app, release, yes, current_branch)
@@ -154,20 +143,13 @@ def tag(
     effective_ref = tag_ref if tag_ref is not None else f'origin/{target_branch}'
 
     build_agent_yaml_needs_update = _warn_if_build_agent_yaml_stale(app, git, effective_ref)
-    new_tag, tag_exists = _compute_new_tag(app, git, target_branch, is_rc, pinned_rc, pinned_patch, yes)
-    if tag_exists:
-        # Idempotent re-run: the tag is already pushed, so pin the commit it points at (the source
-        # of truth) rather than the branch tip, which may have moved on since.
-        click.echo(f'Tag {new_tag} already exists; skipping tag creation and re-running the follow-up steps.')
-        pin_ref = new_tag
-    else:
-        _confirm_and_push_tag(app, git, target_branch, new_tag, tag_ref, effective_ref, yes, skip_open_pr_check)
-        pin_ref = effective_ref
+    new_tag = _compute_new_tag(app, git, target_branch, is_rc, pinned_rc, yes)
+    _confirm_and_push_tag(app, git, target_branch, new_tag, tag_ref, effective_ref, yes, skip_open_pr_check)
 
     if build_agent_yaml_needs_update:
         _trigger_build_agent_yaml_update_workflow(app, target_branch)
 
-    _open_datadog_agent_bump_pr(app, git, target_branch, new_tag, pin_ref)
+    _open_datadog_agent_bump_pr(app, git, target_branch, new_tag, effective_ref)
 
 
 def _warn_if_build_agent_yaml_stale(app: Application, git: GitRepository, ref: str) -> bool:
@@ -190,15 +172,9 @@ def _compute_new_tag(
     target_branch: str,
     is_rc: bool,
     pinned_rc: int | None,
-    pinned_patch: int | None,
     yes: bool,
-) -> tuple[str, bool]:
-    """Compute the new tag string and whether it already exists.
-
-    Returns `(new_tag, tag_exists)`. When `tag_exists` is true the caller skips tag creation and
-    treats the run as idempotent, so the RC-gap and backward-move checks (which only make sense for
-    a tag being created) are skipped here too.
-    """
+) -> str:
+    """Compute the new tag string, validating RC bounds, existence, gaps, and backward moves."""
     major_minor_version = target_branch.replace('.x', '')
     this_release_tags = sorted(
         (
@@ -212,15 +188,11 @@ def _compute_new_tag(
     )
     last_patch, last_rc = _extract_patch_and_rc(this_release_tags)
     last_tag_was_final = last_rc is None
-    if not is_rc:
-        # Without `--final N` there is no way to select an existing final tag, so the default
-        # is always the next patch; `--final N` selects patch N for creation or recovery.
-        new_patch = pinned_patch if pinned_patch is not None else (last_patch + 1 if last_tag_was_final else last_patch)
-        new_tag = f'{major_minor_version}.{new_patch}'
-        return new_tag, Version(new_tag) in this_release_tags
-
     new_patch = last_patch + 1 if last_tag_was_final else last_patch
     new_tag = f'{major_minor_version}.{new_patch}'
+    if not is_rc:
+        return new_tag
+
     new_rc_guess = 1 if last_tag_was_final else last_rc + 1
     if pinned_rc is not None:
         next_rc = pinned_rc
@@ -238,19 +210,19 @@ def _compute_new_tag(
         # `_parse_rc_value`.
         app.abort('RC number must be at least 1.')
     new_tag += f'-rc.{next_rc}'
-    tag_exists = Version(new_tag) in this_release_tags
-    if not tag_exists:
-        _warn_on_rc_gap(app, next_rc, new_rc_guess, target_branch)
-        if not last_tag_was_final and next_rc < last_rc:
-            click.secho('!!! WARNING !!!')
-            if not _confirm(
-                yes,
-                f'The latest RC is {last_rc}. '
-                'You are about to go back in time by creating an RC with a number less than that. Are you sure? '
-                '[y/N]',
-            ):
-                app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
-    return new_tag, tag_exists
+    if Version(new_tag) in this_release_tags:
+        app.abort(f'Tag {new_tag} already exists. Switch to git to overwrite it.')
+    _warn_on_rc_gap(app, next_rc, new_rc_guess, target_branch)
+    if not last_tag_was_final and next_rc < last_rc:
+        click.secho('!!! WARNING !!!')
+        if not _confirm(
+            yes,
+            f'The latest RC is {last_rc}. '
+            'You are about to go back in time by creating an RC with a number less than that. Are you sure? '
+            '[y/N]',
+        ):
+            app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
+    return new_tag
 
 
 def _confirm_and_push_tag(
@@ -284,18 +256,6 @@ def _confirm_and_push_tag(
         click.echo(git.push(new_tag))
     except OSError as e:
         app.abort(f'Failed to create or push tag `{new_tag}`: {e}')
-
-
-def _parse_final_value(final: str | None) -> int | None:
-    if final is None or final == FINAL_AUTO:
-        return None
-    try:
-        value = int(final)
-    except ValueError as e:
-        raise click.UsageError(f'`--final` value must be a non-negative integer, got `{final}`.') from e
-    if value < 0:
-        raise click.UsageError(f'`--final` value must be a non-negative integer, got `{final}`.')
-    return value
 
 
 def _parse_rc_value(rc: str | None) -> int | None:
@@ -437,6 +397,10 @@ class _AgentBaseBranchMissing(Exception):
     """The datadog-agent branch to target with the pin PR does not exist yet."""
 
 
+class _AgentPRCreationError(Exception):
+    """Opening the datadog-agent PR failed after the head branch and pin commit were created."""
+
+
 def _open_datadog_agent_bump_pr(
     app: Application, git: GitRepository, target_branch: str, new_tag: str, effective_ref: str
 ) -> None:
@@ -481,7 +445,7 @@ def _open_datadog_agent_bump_pr(
     )
     commit_message = f'Bump integrations-core to {new_tag}'
 
-    async def run() -> tuple[str, bool] | None:
+    async def run() -> str | None:
         async with async_github_client(token=token) as client:
             return await _create_agent_bump_pr(
                 client, agent_base_branch, head_branch, commit_sha, title, body, commit_message
@@ -506,6 +470,18 @@ def _open_datadog_agent_bump_pr(
             f'to `{commit_sha}`.'
         )
         raise
+    except _AgentPRCreationError as e:
+        # The head branch and its pin commit already exist on datadog-agent, so opening the PR
+        # manually is all that is left.
+        gh_command = (
+            f'gh pr create --repo {DATADOG_AGENT_OWNER}/{DATADOG_AGENT_REPO} '
+            f'--base {agent_base_branch} --head {head_branch} --title {title!r} --body {body!r}'
+        )
+        app.display_warning(
+            f'The tag was pushed and the pin commit was made on `{head_branch}`, '
+            f'but the datadog-agent PR could not be created: {e}\n'
+            f'Open it manually:\n{gh_command}'
+        )
     except (httpx.HTTPError, ValidationError) as e:
         app.display_warning(
             f'The tag was pushed, but the datadog-agent bump PR could not be created: {e}\n'
@@ -519,11 +495,7 @@ def _open_datadog_agent_bump_pr(
                 'skipping datadog-agent PR.'
             )
         else:
-            url, created = pr_url
-            if created:
-                app.display_success(f'Datadog-agent bump PR created: {url}')
-            else:
-                app.display_success(f'Datadog-agent bump PR already open: {url}')
+            app.display_success(f'Datadog-agent bump PR created: {pr_url}')
 
 
 async def _create_agent_bump_pr(
@@ -534,20 +506,27 @@ async def _create_agent_bump_pr(
     title: str,
     body: str,
     commit_message: str,
-) -> tuple[str, bool] | None:
-    """Bump the pin and open the PR through `client`.
+) -> str | None:
+    """Bump the pin and open the PR through `client`, returning the PR URL (None if already pinned).
 
-    Returns `(pr_url, created)`, or None when `release.json` on the base branch already pins
-    `commit_sha`. The base blob is read at the commit SHA captured by `get_ref`, so the branch
-    point and the source blob come from one immutable snapshot even if the base branch moves.
-
-    Re-runs are idempotent: an open PR from `head_branch` is reported instead of recreated, and
-    a head branch left behind by a partially failed run is reused and updated (creating it
-    again would fail with HTTP 422).
+    The base blob is read at the commit SHA captured by `get_ref`, so the branch point and the
+    source blob come from one immutable snapshot even if the base branch moves. PR creation is
+    retried on server and transport errors; if it still fails, the head branch and pin commit
+    are already in place and `_AgentPRCreationError` tells the caller to hand the user the `gh`
+    command that finishes the job.
     """
     import base64
 
     import httpx
+    from pydantic import ValidationError
+
+    from ddev.utils.github_async.retry import (
+        RETRYABLE_SERVER_STATUSES,
+        RetryPolicy,
+        any_of,
+        on_pre_send_transport_error,
+        on_status,
+    )
 
     try:
         base = await client.get_ref(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'heads/{base_branch}')
@@ -563,45 +542,30 @@ async def _create_agent_bump_pr(
     if new_content == content:
         return None
 
-    prs = await client.list_pull_requests(
-        DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, state='open', head=f'{DATADOG_AGENT_OWNER}:{head_branch}'
+    await client.create_ref(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'refs/heads/{head_branch}', base.data.object.sha)
+    await client.create_or_update_file_contents(
+        DATADOG_AGENT_OWNER,
+        DATADOG_AGENT_REPO,
+        RELEASE_JSON_PATH,
+        message=commit_message,
+        content=base64.b64encode(new_content.encode('utf-8')).decode('ascii'),
+        sha=current.data.sha,
+        branch=head_branch,
     )
-    if prs.data:
-        return prs.data[0].html_url, False
-
+    retry_policy = RetryPolicy(should_retry=any_of(on_pre_send_transport_error, on_status(*RETRYABLE_SERVER_STATUSES)))
     try:
-        head_file = await client.get_content(
-            DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, RELEASE_JSON_PATH, ref=head_branch
-        )
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404:  # noqa: PLR2004
-            # First run: cut the head branch from the same snapshot the base blob was read from.
-            await client.create_ref(
-                DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'refs/heads/{head_branch}', base.data.object.sha
-            )
-            head_blob_sha = current.data.sha
-            head_content = content
-        else:
-            raise
-    else:
-        # Left over by a partially failed run: reuse it instead of creating a duplicate ref (422).
-        head_blob_sha = head_file.data.sha
-        head_content = base64.b64decode(head_file.data.content).decode('utf-8')
-
-    if head_content != new_content:
-        await client.create_or_update_file_contents(
+        pr = await client.create_pull_request(
             DATADOG_AGENT_OWNER,
             DATADOG_AGENT_REPO,
-            RELEASE_JSON_PATH,
-            message=commit_message,
-            content=base64.b64encode(new_content.encode('utf-8')).decode('ascii'),
-            sha=head_blob_sha,
-            branch=head_branch,
+            title=title,
+            head=head_branch,
+            base=base_branch,
+            body=body,
+            retry=retry_policy,
         )
-    pr = await client.create_pull_request(
-        DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, title=title, head=head_branch, base=base_branch, body=body
-    )
-    return pr.data.html_url, True
+    except (httpx.HTTPError, ValidationError) as e:
+        raise _AgentPRCreationError(str(e)) from e
+    return pr.data.html_url
 
 
 def _determine_agent_branch(tag: str, target_branch: str) -> str:

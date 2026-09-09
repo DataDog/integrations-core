@@ -372,6 +372,7 @@ class FakeAsyncGitHubClient:
             body=body,
             draft=draft,
             timeout=timeout,
+            retry=retry,
         )
 
     async def create_issue_comment(

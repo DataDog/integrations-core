@@ -168,6 +168,7 @@ async def test_assert_called_once_with_passes_on_single_exact_match(fake: FakeAs
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -235,6 +236,7 @@ async def test_assert_called_with_passes_on_exact_match(fake: FakeAsyncGitHubCli
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 

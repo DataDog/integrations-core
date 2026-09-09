@@ -11,7 +11,7 @@ from httpx import HTTPStatusError, Request, Response
 
 from ddev.cli.release.branch.tag import _open_datadog_agent_bump_pr as REAL_OPEN_DATADOG_AGENT_BUMP_PR
 from ddev.utils.git import GitRepository
-from ddev.utils.github_async.models import FileContent, PullRequestSimple
+from ddev.utils.github_async.models import FileContent
 from ddev.utils.github_errors import GitHubAuthenticationError
 
 ORIGIN_REF = 'origin/7.56.x'
@@ -273,39 +273,14 @@ def test_confirm_non_sequential_rc(ddev, git, rc_num):
     _assert_tag_pushed(git, result, f'7.56.0-rc.{rc_num}')
 
 
-@pytest.mark.parametrize('rc_num', ['1', '5', '11'])
-def test_existing_rc_tag_re_runs_follow_up_without_re_tagging(ddev, git, mocker, rc_num):
-    """Re-running for an existing RC tag is idempotent: no re-tag, but the follow-up steps run again.
+def test_existing_rc_tag_aborts(ddev, git):
+    """An already-pushed RC tag must not be created again; overwriting is a deliberate git job."""
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--rc', '1', '--yes')
 
-    This is the recovery path for when the datadog-agent release branch did not exist at tag time,
-    so the bump PR could not be opened until later.
-    """
-    open_pr = mocker.patch('ddev.cli.release.branch.tag._open_datadog_agent_bump_pr')
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', input=f'{rc_num}\n')
-
-    assert result.exit_code == 0, result.output
-    assert RC_NUMBER_PROMPT.format('12') in result.output
-    assert f'Tag 7.56.0-rc.{rc_num} already exists; skipping tag creation' in result.output
+    assert result.exit_code == 1, result.output
+    assert 'Tag 7.56.0-rc.1 already exists. Switch to git to overwrite it.' in result.output
     git.tag.assert_not_called()
     git.push.assert_not_called()
-    # The bump PR is (re)opened, pinning the commit the existing tag points at (its last argument).
-    open_pr.assert_called_once()
-    assert open_pr.call_args.args[-1] == f'7.56.0-rc.{rc_num}'
-
-
-def test_existing_final_tag_re_runs_follow_up_without_re_tagging(ddev, git, mocker):
-    """`--final N` selects an existing final tag so its follow-up steps can be re-run."""
-    git.tags.return_value = ['7.56.0']
-    open_pr = mocker.patch('ddev.cli.release.branch.tag._open_datadog_agent_bump_pr')
-
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '0', '--yes')
-
-    assert result.exit_code == 0, result.output
-    assert 'Tag 7.56.0 already exists; skipping tag creation' in result.output
-    git.tag.assert_not_called()
-    git.push.assert_not_called()
-    open_pr.assert_called_once()
-    assert open_pr.call_args.args[-2:] == ('7.56.0', '7.56.0')
 
 
 def test_abort_if_tag_less_than_one(ddev, git):
@@ -364,22 +339,6 @@ def test_final(ddev, git, latest_final_tag, expected_new_final_tag):
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
 
     _assert_tag_pushed(git, result, expected_new_final_tag)
-
-
-def test_final_with_explicit_patch(ddev, git):
-    """`--final N` tags patch N explicitly instead of the next patch version."""
-    git.tags.return_value.append('7.56.0')
-
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '2', '--yes')
-
-    _assert_tag_pushed(git, result, '7.56.2')
-
-
-@pytest.mark.parametrize('final_arg', ['--final=banana', '--final=1.5'])
-def test_final_invalid_value_aborts(ddev, git, final_arg):
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', final_arg)
-    assert result.exit_code != 0, result.output
-    assert '`--final` value must be a non-negative integer' in result.output
 
 
 def test_rc_with_explicit_value(ddev, git):
@@ -629,51 +588,22 @@ def agent_pr_git(basic_git, mocker):
 
 
 AGENT_BASE_COMMIT_SHA = 'a' * 40
-AGENT_HEAD_BLOB_SHA = 'headblob'
 
 
-def _release_json_file(release_json, blob_sha):
-    return FileContent(
-        type='file',
-        encoding='base64',
-        size=len(release_json),
-        name='release.json',
-        path='release.json',
-        content=base64.b64encode(release_json.encode()).decode(),
-        sha=blob_sha,
-    )
-
-
-def _mock_release_json(
-    fake_async_github,
-    release_json=AGENT_RELEASE_JSON,
-    head_branch=None,
-    head_release_json=None,
-):
-    """Register the datadog-agent `release.json` responses the fake serves to the pin-PR flow.
-
-    The base-branch read is matched on `ref=AGENT_BASE_COMMIT_SHA` (the fake's `get_ref` default),
-    and `release.json` on the head branch serves `head_release_json` — or a 404 (branch missing)
-    when `head_release_json` is None. Registering by ref keeps the base and head snapshots
-    distinguishable.
-    """
+def _mock_release_json(fake_async_github, release_json=AGENT_RELEASE_JSON):
+    """Register the datadog-agent `release.json` the fake serves on `get_content`."""
     fake_async_github.mock_response(
-        'get_content', _release_json_file(release_json, 'baseblob'), ref=AGENT_BASE_COMMIT_SHA
+        'get_content',
+        FileContent(
+            type='file',
+            encoding='base64',
+            size=len(release_json),
+            name='release.json',
+            path='release.json',
+            content=base64.b64encode(release_json.encode()).decode(),
+            sha='blobsha',
+        ),
     )
-    if head_branch is None:
-        return
-    if head_release_json is None:
-        fake_async_github.mock_response(
-            'get_content',
-            httpx.HTTPStatusError(
-                'Not Found', request=Request('GET', 'https://api.github.com'), response=Response(404)
-            ),
-            ref=head_branch,
-        )
-    else:
-        fake_async_github.mock_response(
-            'get_content', _release_json_file(head_release_json, AGENT_HEAD_BLOB_SHA), ref=head_branch
-        )
 
 
 def test_agent_pr_first_rc_of_milestone_targets_main(ddev, agent_pr_git, fake_async_github, config_file):
@@ -681,7 +611,7 @@ def test_agent_pr_first_rc_of_milestone_targets_main(ddev, agent_pr_git, fake_as
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
     agent_pr_git.tags.return_value = []
-    _mock_release_json(fake_async_github, head_branch='integrations-core/bump-7.56.0-rc.1')
+    _mock_release_json(fake_async_github)
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--skip-open-pr-check', input='\ny\n')
 
@@ -689,7 +619,7 @@ def test_agent_pr_first_rc_of_milestone_targets_main(ddev, agent_pr_git, fake_as
     agent_pr_git.tag.assert_called_once_with('7.56.0-rc.1', message='7.56.0-rc.1', ref=ORIGIN_REF)
     assert fake_async_github.last_call('get_ref').kwargs['ref'] == 'heads/main'
     # `release.json` is read at the commit SHA `get_ref` returned, not at the moving branch name.
-    assert fake_async_github.calls_to('get_content')[0].kwargs['ref'] == AGENT_BASE_COMMIT_SHA
+    assert fake_async_github.last_call('get_content').kwargs['ref'] == AGENT_BASE_COMMIT_SHA
     assert fake_async_github.last_call('create_pull_request').kwargs['base'] == 'main'
     assert 'against `main`' in result.output
 
@@ -697,13 +627,13 @@ def test_agent_pr_first_rc_of_milestone_targets_main(ddev, agent_pr_git, fake_as
 def test_agent_pr_later_rc_targets_release_branch(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-    _mock_release_json(fake_async_github, head_branch='integrations-core/bump-7.56.0-rc.12')
+    _mock_release_json(fake_async_github)
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--skip-open-pr-check', input='\ny\n')
 
     assert result.exit_code == 0, result.output
     agent_pr_git.tag.assert_called_once_with('7.56.0-rc.12', message='7.56.0-rc.12', ref=ORIGIN_REF)
-    assert fake_async_github.calls_to('get_content')[0].kwargs['ref'] == AGENT_BASE_COMMIT_SHA
+    assert fake_async_github.last_call('get_content').kwargs['ref'] == AGENT_BASE_COMMIT_SHA
     assert fake_async_github.last_call('create_pull_request').kwargs['base'] == '7.56.x'
 
 
@@ -712,20 +642,20 @@ def test_agent_pr_patch_rc1_targets_release_branch(ddev, agent_pr_git, fake_asyn
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
     agent_pr_git.tags.return_value = ['7.56.0']
-    _mock_release_json(fake_async_github, head_branch='integrations-core/bump-7.56.1-rc.1')
+    _mock_release_json(fake_async_github)
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--skip-open-pr-check', input='\ny\n')
 
     assert result.exit_code == 0, result.output
     agent_pr_git.tag.assert_called_once_with('7.56.1-rc.1', message='7.56.1-rc.1', ref=ORIGIN_REF)
-    assert fake_async_github.calls_to('get_content')[0].kwargs['ref'] == AGENT_BASE_COMMIT_SHA
+    assert fake_async_github.last_call('get_content').kwargs['ref'] == AGENT_BASE_COMMIT_SHA
     assert fake_async_github.last_call('create_pull_request').kwargs['base'] == '7.56.x'
 
 
 def test_agent_pr_final_tag_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-    _mock_release_json(fake_async_github, head_branch='integrations-core/bump-7.56.0')
+    _mock_release_json(fake_async_github)
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 
@@ -745,7 +675,7 @@ def test_agent_pr_pins_the_ref_commit_not_the_branch_tip(ddev, agent_pr_git, fak
     ref_commit_sha = 'cafef00d' * 5
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-    _mock_release_json(fake_async_github, head_branch='integrations-core/bump-7.56.0')
+    _mock_release_json(fake_async_github)
 
     def dispatch(*args):
         # Give the `--ref` commit a distinct SHA from the branch tip so the test can tell the pin
@@ -794,11 +724,12 @@ def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr_git, fake_asyn
     assert f'already pins `{RESOLVED_COMMIT_SHA}`' in result.output
 
 
-def test_agent_pr_api_failure_does_not_fail_the_pushed_tag(ddev, agent_pr_git, fake_async_github, config_file):
-    """The tag is already pushed when the PR is attempted, so a PR API error must only warn."""
+def test_agent_pr_creation_failure_prints_gh_command(ddev, agent_pr_git, fake_async_github, config_file):
+    """A PR-creation failure happens after the head branch and pin commit exist, so only the PR
+    is missing: the warning must carry the `gh` command that opens it."""
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
-    _mock_release_json(fake_async_github, head_branch='integrations-core/bump-7.56.0')
+    _mock_release_json(fake_async_github)
     fake_async_github.mock_response(
         'create_pull_request',
         httpx.HTTPStatusError('boom', request=Request('POST', 'https://api.github.com'), response=Response(500)),
@@ -810,6 +741,37 @@ def test_agent_pr_api_failure_does_not_fail_the_pushed_tag(ddev, agent_pr_git, f
     agent_pr_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     agent_pr_git.push.assert_called_once_with('7.56.0')
     assert 'could not be created' in result.output
+    assert (
+        'gh pr create --repo DataDog/datadog-agent --base 7.56.x --head integrations-core/bump-7.56.0 '
+        "--title 'Bump integrations-core to 7.56.0'" in result.output
+    )
+
+
+def test_agent_pr_creation_uses_http_retries(ddev, agent_pr_git, fake_async_github, config_file):
+    """PR creation passes a retry policy that retries server errors and pre-send transport errors,
+    not 4xx responses."""
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    _mock_release_json(fake_async_github)
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    retry = fake_async_github.last_call('create_pull_request').kwargs['retry']
+    assert retry is not None
+    server_error = HTTPStatusError(
+        'boom',
+        request=Request('POST', 'https://api.github.com'),
+        response=Response(503, request=Request('POST', 'https://api.github.com')),
+    )
+    client_error = HTTPStatusError(
+        'nope',
+        request=Request('POST', 'https://api.github.com'),
+        response=Response(404, request=Request('POST', 'https://api.github.com')),
+    )
+    assert retry.should_retry(server_error)
+    assert not retry.should_retry(client_error)
+    assert retry.attempts >= 2
 
 
 def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr_git, fake_async_github, config_file):
@@ -826,56 +788,6 @@ def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr_gi
     assert result.exit_code == 0, result.output
     agent_pr_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     assert 'the `7.56.x` branch does not exist on datadog-agent yet' in result.output
-
-
-def test_agent_pr_reports_existing_open_pr_on_rerun(ddev, agent_pr_git, fake_async_github, config_file):
-    """A rerun while the first run's PR is still open reports it instead of recreating it."""
-    existing_pr_url = 'https://github.com/DataDog/datadog-agent/pull/7'
-    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
-    config_file.save()
-    _mock_release_json(fake_async_github)
-    fake_async_github.mock_response(
-        'list_pull_requests',
-        [PullRequestSimple(number=7, html_url=existing_pr_url)],
-    )
-
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--rc', '11', '--yes')
-
-    assert result.exit_code == 0, result.output
-    assert 'Tag 7.56.0-rc.11 already exists; skipping tag creation' in result.output
-    assert (
-        fake_async_github.last_call('list_pull_requests').kwargs['head']
-        == 'DataDog:integrations-core/bump-7.56.0-rc.11'
-    )
-    fake_async_github.assert_not_called('create_ref')
-    fake_async_github.assert_not_called('create_or_update_file_contents')
-    fake_async_github.assert_not_called('create_pull_request')
-    assert f'Datadog-agent bump PR already open: {existing_pr_url}' in result.output
-
-
-def test_agent_pr_reuses_head_branch_left_by_failed_run(ddev, agent_pr_git, fake_async_github, config_file):
-    """A head branch from a partially failed run is reused and updated, not re-created (HTTP 422)."""
-    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
-    config_file.save()
-    _mock_release_json(
-        fake_async_github,
-        head_branch='integrations-core/bump-7.56.0-rc.11',
-        # The head branch was cut but the file commit never happened, so it still carries the
-        # base content — but its own blob SHA.
-        head_release_json=AGENT_RELEASE_JSON,
-    )
-
-    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--rc', '11', '--yes')
-
-    assert result.exit_code == 0, result.output
-    assert 'Tag 7.56.0-rc.11 already exists; skipping tag creation' in result.output
-    fake_async_github.assert_not_called('create_ref')
-    update = fake_async_github.last_call('create_or_update_file_contents')
-    assert update.kwargs['branch'] == 'integrations-core/bump-7.56.0-rc.11'
-    assert update.kwargs['sha'] == AGENT_HEAD_BLOB_SHA
-    committed = base64.b64decode(update.kwargs['content']).decode()
-    assert f'"INTEGRATIONS_CORE_VERSION": "{RESOLVED_COMMIT_SHA}"' in committed
-    assert 'Datadog-agent bump PR created' in result.output
 
 
 def test_bump_integrations_core_version_preserves_other_keys():
