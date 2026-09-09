@@ -6,20 +6,27 @@
 from __future__ import annotations
 
 import subprocess
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from ddev.monitoring import MonitoringRuntime
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest, PullRequestFile
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, listed_pull_request, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
 
 if TYPE_CHECKING:
     from pathlib import Path
     from unittest.mock import MagicMock
 
+    from pytest_mock import MockerFixture
+
+    from ddev.cli.application import Application
+    from ddev.cli.ci.tests.messages import TestBatch
     from ddev.config.file import ConfigFileWithOverrides
+    from ddev.monitoring import ComponentMonitor
     from tests.helpers.github_async import FakeAsyncGitHubClient
     from tests.helpers.runner import CliRunner
 
@@ -417,3 +424,108 @@ def test_all_targets_plans_without_reading_a_diff(ddev, github, planned):
     assert result.exit_code == 0, result.output
     github.assert_not_called('list_pull_request_files')
     assert planned.call_args.kwargs['changed_files'] is None
+
+
+@pytest.mark.parametrize(
+    ('extra_options', 'asserted_output'),
+    [
+        (['--dry-run'], 'Dry run: nothing was dispatched.'),
+        ([*HEAD_LOOKUP_OPTIONS], 'No open pull request matches the requested revision'),
+    ],
+    ids=['dry-run', 'no-open-pull-request'],
+)
+def test_an_early_exit_still_closes_the_monitoring_runtime(
+    ddev: CliRunner, github: FakeAsyncGitHubClient, planned: MagicMock, mocker, extra_options, asserted_output
+):
+    if [*HEAD_LOOKUP_OPTIONS] == extra_options:
+        github.mock_response('list_pull_requests', pulls_page())
+
+    closed: list[MonitoringRuntime] = []
+
+    class SpyRuntime(MonitoringRuntime):
+        def close(self) -> None:
+            closed.append(self)
+            super().close()
+
+    mocker.patch('ddev.monitoring.MonitoringRuntime', SpyRuntime)
+
+    result = ddev('ci', 'dispatch-tests', *extra_options)
+
+    assert result.exit_code == 0, result.output
+    assert asserted_output in result.output
+    assert len(closed) == 1
+
+
+def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev, local_changes, mocker):
+    sink = RecordingSink()
+
+    def make_runtime(**kwargs: Any) -> MonitoringRuntime:
+        return MonitoringRuntime(metrics_sink=sink, **kwargs)
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.metrics.count('plan')
+        return []
+
+    mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev(
+        'ci',
+        'dispatch-tests',
+        '--commit',
+        'a-sha',
+        '--dry-run',
+        '--tags',
+        'repo:contributor/other commit:sneaky team:platform',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert 'No affected target to test.' in result.output
+    [record] = sink.records
+    assert record.fields['repo'] == 'DataDog/integrations-core'
+    assert record.fields['commit'] == 'a-sha'
+    assert record.fields['team'] == 'platform'
+    assert record.fields['component'] == 'planner'
+
+
+@pytest.mark.usefixtures('local_changes')
+@pytest.mark.parametrize('global_options', [(), ('-qq',)], ids=['normal', 'quiet'])
+def test_console_visibility_does_not_change_structured_events(
+    ddev: CliRunner, mocker: MockerFixture, global_options: tuple[str, ...]
+):
+    json_handler = RecordingJsonHandler()
+
+    def make_runtime(**kwargs: Any) -> MonitoringRuntime:
+        runtime = MonitoringRuntime(**kwargs)
+        runtime.add_log_handler(json_handler)
+        return runtime
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.logger.info('planning batches')
+        return []
+
+    mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev(
+        *global_options,
+        'ci',
+        'dispatch-tests',
+        '--commit',
+        'a-sha',
+        '--dry-run',
+        '--tags',
+        'repo:contributor/other commit:sneaky team:platform',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert ('planning batches' in result.output) == (not global_options)
+    assert 'repo=' not in result.output
+    assert 'commit=' not in result.output
+    assert 'team=' not in result.output
+    [event] = json_handler.events
+    assert event['repo'] == 'DataDog/integrations-core'
+    assert event['commit'] == 'a-sha'
+    assert event['team'] == 'platform'
+    assert event['component'] == 'planner'
+    assert event['event'] == 'planning batches'

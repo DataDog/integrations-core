@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import contextvars
 import logging
 import math
 import signal
@@ -13,6 +14,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from concurrent.futures import wait as wait_for_futures
+from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
 from types import FrameType
 from typing import assert_never, cast
@@ -31,6 +33,7 @@ type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 # What `signal.getsignal` hands back: a Python callable, one of the `SIG_*` constants, or None for a
 # handler installed outside Python.
 type SignalHandler = Callable[[int, FrameType | None], object] | int | signal.Handlers | None
+type MessageScope = Callable[[BaseMessage], AbstractContextManager[None]]
 
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
 # How long the loop may block before re-reading the timeout and the stop flag.
@@ -144,6 +147,7 @@ class EventBusOrchestrator(ABC):
         grace_period: float = 10,
         executor: Executor | None = None,
         fail_fast: bool = False,
+        message_scope: MessageScope | None = None,
     ):
         """
         Args:
@@ -163,6 +167,8 @@ class EventBusOrchestrator(ABC):
                        the orchestrator. If False (default), such exceptions are logged
                        and processing continues. ``FatalProcessingError`` always stops the
                        orchestrator regardless of this flag.
+            message_scope: Context manager for each processor invocation, including success/error
+                           hooks. Derive context from the message; queues do not transfer it.
         """
         resolved_max_timeout = max_timeout if max_timeout is not None else math.inf
         self.__validate_parameters(resolved_max_timeout, grace_period)
@@ -178,6 +184,7 @@ class EventBusOrchestrator(ABC):
         self._sync_work: set[Future] = set()
         self._sync_work_lock = threading.Lock()
         self._stop_claim = threading.Lock()
+        self._message_scope = message_scope
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         self._processors: list[Processor] = []
@@ -412,8 +419,11 @@ class EventBusOrchestrator(ABC):
 
         Tracked through the pool's own future rather than this call, because cancelling the caller
         only cancels work the pool has not started yet; anything already running carries on.
+
+        Executor submission does not propagate contextvars; each invocation needs its own copy.
         """
-        future = self._executor.submit(work, message)
+        context = contextvars.copy_context()
+        future = self._executor.submit(context.run, work, message)
         with self._sync_work_lock:
             self._sync_work.add(future)
         future.add_done_callback(self._forget_sync_work)
@@ -777,29 +787,31 @@ class EventBusOrchestrator(ABC):
             )
             return
 
-        try:
-            match processor:
-                case AsyncProcessor():
-                    await cast(AsyncProcessor, processor).process_message(message)
-                case SyncProcessor():
-                    await self._run_in_worker(processor.process_message, message)
-                case _:
-                    assert_never(processor)
-        except (FatalProcessingError, asyncio.CancelledError):
-            raise
-        except Exception as processing_error:
-            await self._apply_error_policy(
-                MessageProcessingError(processor.name, message, processing_error),
-                processor.on_error,
-            )
-            return
+        scope = self._message_scope(message) if self._message_scope is not None else nullcontext()
+        with scope:
+            try:
+                match processor:
+                    case AsyncProcessor():
+                        await cast(AsyncProcessor, processor).process_message(message)
+                    case SyncProcessor():
+                        await self._run_in_worker(processor.process_message, message)
+                    case _:
+                        assert_never(processor)
+            except (FatalProcessingError, asyncio.CancelledError):
+                raise
+            except Exception as processing_error:
+                await self._apply_error_policy(
+                    MessageProcessingError(processor.name, message, processing_error),
+                    processor.on_error,
+                )
+                return
 
-        try:
-            await processor.on_success(message)
-        except (FatalProcessingError, asyncio.CancelledError):
-            raise
-        except Exception as e:
-            await self._apply_error_policy(
-                ProcessorHookError(HookName.ON_SUCCESS, processor.name, message, e),
-                processor.on_error,
-            )
+            try:
+                await processor.on_success(message)
+            except (FatalProcessingError, asyncio.CancelledError):
+                raise
+            except Exception as e:
+                await self._apply_error_policy(
+                    ProcessorHookError(HookName.ON_SUCCESS, processor.name, message, e),
+                    processor.on_error,
+                )
