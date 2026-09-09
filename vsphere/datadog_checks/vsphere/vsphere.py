@@ -368,7 +368,7 @@ class VSphereCheck(AgentCheck):
                     # host, inflating it. A missing point is preferable to a misattributed one.
                     unmetered.append('{} {} (no hostname)'.format(mor_type_str, mor_name))
                 else:
-                    mor_payload["metering"] = {metering_property: metering_value}
+                    mor_payload["metering"] = metering_value
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
@@ -377,9 +377,13 @@ class VSphereCheck(AgentCheck):
             # vCenter role, VMware Tools missing fleet-wide), so a large environment would
             # otherwise warn thousands of times on every refresh.
             self.log.warning(
-                "Not submitting usage metering metrics for %d resource(s), first 10: %s",
+                "Not collecting vsphere.vm.summary.config.numCpu or "
+                "vsphere.host.summary.hardware.numCpuCores for %d resource(s)%s: %s. A missing property "
+                "usually means the vCenter user cannot read it; a missing hostname means none could be "
+                "resolved for the resource.",
                 len(unmetered),
-                unmetered[:10],
+                " (showing 10)" if len(unmetered) > 10 else "",
+                ", ".join(unmetered[:10]),
             )
             self.log.debug("Resources with no usage metering metric: %s", unmetered)
 
@@ -1125,19 +1129,22 @@ class VSphereCheck(AgentCheck):
         resource_tags,  # type: List[str]
     ):
         # type: (...) -> None
-        metering = mor_props.get('metering')
-        if not metering:
+        """
+        Submit the usage metering gauge for one resource, reading the value cached by
+        `refresh_infrastructure_cache`. Called on every run so the metric emits at
+        `min_collection_interval` rather than at the cache refresh interval.
+        """
+        value = mor_props.get('metering')
+        if value is None:
             return
 
-        base_tags = self._resource_metric_tags(resource_tags)
-        hostname = mor_props.get('hostname')
-        for property_name, value in metering.items():
-            self.gauge(
-                '{}.{}'.format(MOR_TYPE_AS_STRING[resource_type], property_name),
-                value,
-                tags=base_tags,
-                hostname=hostname,
-            )
+        mor_type_str = MOR_TYPE_AS_STRING[resource_type]
+        self.gauge(
+            '{}.{}'.format(mor_type_str, METERING_PROPERTY_BY_RESOURCE_TYPE[mor_type_str]),
+            value,
+            tags=self._resource_metric_tags(resource_tags),
+            hostname=mor_props.get('hostname'),
+        )
 
     def check(self, _):
         # type: (Any) -> None
