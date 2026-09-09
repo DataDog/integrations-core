@@ -43,8 +43,8 @@ its own instance if you want both:
 
 - The **frontend** (default port `8000`), which exposes request-level metrics such as throughput,
   latency, time to first token, and KV cache hit rate under the `dynamo.frontend.*` namespace.
-- **Backend workers** (`python -m dynamo.vllm`, `python -m dynamo.sglang`, `python -m dynamo.trtllm`,
-  etc.), which expose a separate system status server enabled via the `DYN_SYSTEM_PORT` environment
+- **Backend workers** (`python -m dynamo.vllm`, `python -m dynamo.sglang`, and `python -m dynamo.trtllm`),
+  which expose a separate system status server enabled through the `DYN_SYSTEM_PORT` environment
   variable (commonly `8081` for local development, or `9090` under the Kubernetes operator). These
   report worker-level metrics such as task and queue health and KV cache block usage under the
   `dynamo.component.*` namespace.
@@ -64,7 +64,7 @@ This check matches Dynamo's default metric names. Custom frontend metric prefixe
 
 [Run the Agent's status subcommand][6] and look for `dynamo` under the Checks section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
@@ -74,7 +74,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 The Dynamo integration does not include any events.
 
-### Service Checks
+### Service checks
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
