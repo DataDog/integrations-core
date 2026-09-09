@@ -151,6 +151,9 @@ METERING_PROPERTY_BY_RESOURCE_TYPE = {
     'host': HOST_METERING_PROPERTY,
 }
 
+# How many unmetered resources to name in the summarized warning. The full list still goes to debug.
+UNMETERED_LOG_SAMPLE_SIZE = 10
+
 
 OBJECT_PROPERTIES_TO_METRIC_NAME = {
     "guest.net": ["guest.net.ipConfig.address", "guest.net"],

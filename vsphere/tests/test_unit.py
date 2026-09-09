@@ -3319,6 +3319,33 @@ def test_usage_metering_metrics_powered_off_vm(aggregator, realtime_instance, dd
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1)
 
 
+def test_usage_metering_metrics_resource_filter(aggregator, realtime_instance, dd_run_check, service_instance):
+    """A VM excluded by `resource_filters` is not metered, so a filtered-out resource is never billed.
+
+    The guarantee is positional rather than explicit: `refresh_infrastructure_cache` rejects filtered
+    resources with a `continue` that precedes the metering block, so they never reach the cache at all.
+    Hoisting that block any higher would silently start metering them.
+    """
+    realtime_instance['resource_filters'] = [
+        {
+            'type': 'blacklist',
+            'resource': 'vm',
+            'property': 'name',
+            'patterns': [
+                'vm1',
+            ],
+        }
+    ]
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=4, hostname='vm2')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1)
+    # Only VMs were filtered, so the host marker still reports.
+    aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=1, value=16, hostname='host1')
+
+
 def test_usage_metering_metrics_missing_property(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
 ):
@@ -3339,6 +3366,9 @@ def test_usage_metering_metrics_missing_property(
     dd_run_check(check)
 
     aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=0)
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=4, hostname='vm2')
+    # Unscoped, so nothing extra leaked in alongside those two points.
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=2)
     assert 'host host1 (no summary.hardware.numCpuCores)' in caplog.text
 

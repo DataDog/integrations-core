@@ -31,6 +31,7 @@ from datadog_checks.vsphere.constants import (
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
+    UNMETERED_LOG_SAMPLE_SIZE,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import (
@@ -376,14 +377,17 @@ class VSphereCheck(AgentCheck):
             # Summarized rather than logged per resource: the causes are systemic (a restricted
             # vCenter role, VMware Tools missing fleet-wide), so a large environment would
             # otherwise warn thousands of times on every refresh.
+            truncated = len(unmetered) > UNMETERED_LOG_SAMPLE_SIZE
             self.log.warning(
-                "Not collecting vsphere.vm.summary.config.numCpu or "
-                "vsphere.host.summary.hardware.numCpuCores for %d resource(s)%s: %s. A missing property "
-                "usually means the vCenter user cannot read it; a missing hostname means none could be "
-                "resolved for the resource.",
+                "Not collecting %s for %d resource(s)%s: %s. A missing property usually means the vCenter "
+                "user cannot read it; a missing hostname means none could be resolved for the resource.",
+                " or ".join(
+                    'vsphere.{}.{}'.format(resource_type, metering_property)
+                    for resource_type, metering_property in METERING_PROPERTY_BY_RESOURCE_TYPE.items()
+                ),
                 len(unmetered),
-                " (showing 10)" if len(unmetered) > 10 else "",
-                ", ".join(unmetered[:10]),
+                " (showing {})".format(UNMETERED_LOG_SAMPLE_SIZE) if truncated else "",
+                ", ".join(unmetered[:UNMETERED_LOG_SAMPLE_SIZE]),
             )
             self.log.debug("Resources with no usage metering metric: %s", unmetered)
 
