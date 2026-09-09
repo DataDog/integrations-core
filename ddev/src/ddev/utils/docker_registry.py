@@ -11,7 +11,11 @@ They are intentionally narrow: manifest existence checks and tag listings with
 
 from __future__ import annotations
 
+from functools import partial
+
 import httpx
+
+from ddev.utils.network import request_with_retries
 
 DEFAULT_REGISTRY_HOST = 'registry.datadoghq.com'
 
@@ -40,11 +44,14 @@ def manifest_exists(
     timeout: float = 10.0,
 ) -> bool:
     """Return True if `<host>/v2/<repository>/manifests/<tag>` resolves, False on 404."""
-    response = httpx.head(
-        f'https://{host}/v2/{repository}/manifests/{tag}',
-        headers={'Accept': MANIFEST_ACCEPT},
-        follow_redirects=True,
-        timeout=timeout,
+    response = request_with_retries(
+        partial(
+            httpx.head,
+            f'https://{host}/v2/{repository}/manifests/{tag}',
+            headers={'Accept': MANIFEST_ACCEPT},
+            follow_redirects=True,
+            timeout=timeout,
+        )
     )
     if response.status_code == 404:
         return False
@@ -68,7 +75,7 @@ def list_tags(
     url: str | None = f'https://{host}/v2/{repository}/tags/list?n={page_size}'
     tags: list[str] = []
     while url is not None:
-        response = httpx.get(url, timeout=timeout)
+        response = request_with_retries(partial(httpx.get, url, timeout=timeout))
         response.raise_for_status()
         try:
             payload = response.json()
