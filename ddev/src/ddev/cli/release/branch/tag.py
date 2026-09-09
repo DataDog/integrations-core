@@ -418,9 +418,7 @@ def _open_datadog_agent_bump_pr(
     resolves to. It is built through the async GitHub client so no local checkout of datadog-agent
     is required.
     """
-    # The Agent repo has no release branch yet when the first RC of a milestone is tagged,
-    # so that pin goes to `main`; every other tag targets the matching Agent release branch.
-    agent_base_branch = 'main' if _is_first_rc_of_milestone(new_tag) else target_branch
+    agent_base_branch = _determine_agent_branch(new_tag, target_branch)
 
     import asyncio
 
@@ -543,10 +541,15 @@ async def _create_agent_bump_pr(
     return pr.data.html_url
 
 
-def _is_first_rc_of_milestone(tag: str) -> bool:
-    """Whether `tag` is `X.Y.0-rc.1`, the first RC of a milestone."""
+def _determine_agent_branch(tag: str, target_branch: str) -> str:
+    """The datadog-agent branch to target with the pin PR.
+
+    The Agent repo has no release branch yet when the first RC of a milestone is tagged
+    (`X.Y.0-rc.1`), so that pin goes to `main`; every other tag targets the matching Agent
+    release branch.
+    """
     version = Version(tag)
-    return version.micro == 0 and version.pre == ('rc', 1)
+    return 'main' if version.micro == 0 and version.pre == ('rc', 1) else target_branch
 
 
 def _bump_integrations_core_version(content: str, commit_sha: str) -> str:
