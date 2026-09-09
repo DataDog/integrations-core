@@ -645,16 +645,16 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.bytes_read` to `ocsf.traffic.bytes_in`
+              name: Map `network.bytes_written` to `ocsf.traffic.bytes_in`
               sources:
-                - network.bytes_read
+                - network.bytes_written
               target: ocsf.traffic.bytes_in
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.bytes_written` to `ocsf.traffic.bytes_out`
+              name: Map `network.bytes_read` to `ocsf.traffic.bytes_out`
               sources:
-                - network.bytes_written
+                - network.bytes_read
               target: ocsf.traffic.bytes_out
               preserveSource: true
               overrideOnConflict: true

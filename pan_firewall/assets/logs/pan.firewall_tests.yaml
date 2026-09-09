@@ -70,8 +70,8 @@ tests:
         time: 1620102277000
         traffic:
           bytes: 16680918
-          bytes_in: 16415457
-          bytes_out: 265461
+          bytes_in: 265461
+          bytes_out: 16415457
           chunks: 0
           chunks_in: 0
           chunks_out: 0
