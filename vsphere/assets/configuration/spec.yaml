@@ -262,6 +262,9 @@ files:
 
           Note2: 'host' filters are ignored when collecting historical metrics as this resource does not
                   have historical metrics. They will work only with "collection_type: realtime".
+
+          Note3: `vm.summary.config.numCpu` and `host.summary.hardware.numCpuCores` are always collected
+                  and cannot be excluded with these filters.
         value:
           example:
             vm:
@@ -461,7 +464,9 @@ files:
 
           Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
           Note: `vsphere.vm.summary.config.numCpu` and `vsphere.host.summary.hardware.numCpuCores` are
-          collected on every run whether or not this option is enabled.
+          collected on every run whether or not this option is enabled, and cannot be excluded with
+          `metric_filters`. They still honor `resource_filters` and `collection_type`, so an instance
+          using `collection_type: historical` does not collect the host metric.
           Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
           very CPU intensive and put pressure on the vCenter Server.
         value:

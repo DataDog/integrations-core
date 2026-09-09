@@ -1,1 +1,1 @@
-Collect the vCPU count of each monitored VM (`vsphere.vm.summary.config.numCpu`) and the CPU core count of each monitored ESXi host (`vsphere.host.summary.hardware.numCpuCores`) on every check run, regardless of the `collect_property_metrics` setting.
+Collect the CPU core count of each monitored ESXi host as `vsphere.host.summary.hardware.numCpuCores`.

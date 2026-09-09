@@ -348,22 +348,33 @@ class VSphereCheck(AgentCheck):
 
             mor_payload["tags"] = tags  # type: Dict[str, Any]
 
-            # Top-level, not under `properties`: `clear_properties()` empties only that sub-dict,
-            # so this survives between refreshes for `check()` to re-submit on every run.
-            metering_property = METERING_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
-            if metering_property is not None:
-                metering_value = properties.get(metering_property)
-                if metering_value is not None:
-                    mor_payload["metering"] = {metering_property: metering_value}
-                else:
-                    self.log.debug("No %s value for %s %s", metering_property, mor_type_str, mor_name)
-
             if hostname:
                 if self._config.hostname_transform == 'upper':
                     hostname = hostname.upper()
                 elif self._config.hostname_transform == 'lower':
                     hostname = hostname.lower()
                 mor_payload['hostname'] = hostname
+
+            # Top-level, not under `properties`: `clear_properties()` empties only that sub-dict,
+            # so this survives between refreshes for `check()` to re-submit on every run.
+            metering_property = METERING_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
+            if metering_property is not None:
+                metering_value = properties.get(metering_property)
+                if metering_value is None:
+                    self.log.warning(
+                        "No %s value for %s %s, not submitting its usage metering metric",
+                        metering_property,
+                        mor_type_str,
+                        mor_name,
+                    )
+                elif not mor_payload.get('hostname'):
+                    # Submitting without a hostname would attribute the count to the Agent's own
+                    # host, inflating it. A missing point is preferable to a misattributed one.
+                    self.log.warning(
+                        "No hostname for %s %s, not submitting its usage metering metric", mor_type_str, mor_name
+                    )
+                else:
+                    mor_payload["metering"] = {metering_property: metering_value}
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
@@ -1102,6 +1113,27 @@ class VSphereCheck(AgentCheck):
 
         self.submit_simple_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
 
+    def submit_metering_metrics(
+        self,
+        resource_type,  # type: Type[vim.ManagedEntity]
+        mor_props,  # type: Dict[str, Any]
+        resource_tags,  # type: List[str]
+    ):
+        # type: (...) -> None
+        metering = mor_props.get('metering')
+        if not metering:
+            return
+
+        base_tags = self._resource_metric_tags(resource_tags)
+        hostname = mor_props.get('hostname')
+        for property_name, value in metering.items():
+            self.gauge(
+                '{}.{}'.format(MOR_TYPE_AS_STRING[resource_type], property_name),
+                value,
+                tags=base_tags,
+                hostname=hostname,
+            )
+
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
@@ -1200,19 +1232,8 @@ class VSphereCheck(AgentCheck):
                     hostname=None,
                 )
 
-                # Submitted here, not with the property metrics, so they emit on every run. Unlike
-                # `.count` above they carry a hostname: usage is attributed per VM and per host.
-                metering = mor_props.get('metering')
-                if metering:
-                    metering_tags = self._resource_metric_tags(resource_tags)
-                    metering_hostname = mor_props.get('hostname')
-                    for property_name, value in metering.items():
-                        self.gauge(
-                            '{}.{}'.format(MOR_TYPE_AS_STRING[resource_type], property_name),
-                            value,
-                            tags=metering_tags,
-                            hostname=metering_hostname,
-                        )
+                # Submitted here, not with the property metrics, so they emit on every run.
+                self.submit_metering_metrics(resource_type, mor_props, resource_tags)
 
         # Creating a thread pool and starting metric collection
         self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)

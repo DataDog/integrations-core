@@ -310,7 +310,7 @@ vsphere.vm.guest.toolsRunningStatus,count,300,,,"Information about the current s
 vsphere.vm.guest.toolsVersion,count,300,,,"Information about the current version of VMware Tools, tagged by `toolsversion`. [Property Metric]",0,vsphere,vm tools version,,
 vsphere.vm.guest.toolsVersionStatus2,count,300,,,"Information about the current version status of VMware Tools, tagged by `toolsversionstatus2`. [Property Metric]",0,vsphere,vm tools version status,,
 vsphere.vm.summary.config.memorySizeMB,gauge,300,megabyte,,"Memory size of the virtual machine, in MB. [Property Metric]",0,vsphere,vm memory size,,
-vsphere.vm.summary.config.numCpu,gauge,,,,Number of processors present in this virtual machine.,0,vsphere,vm num cpu,,
+vsphere.vm.summary.config.numCpu,gauge,,core,,Number of processors present in this virtual machine.,0,vsphere,vm num cpu,,
 vsphere.vm.summary.config.numEthernetCards,gauge,300,,,Number of virtual network adapters. [Property Metric],0,vsphere,vm ethernet cards,,
 vsphere.vm.summary.config.numVirtualDisks,gauge,300,,,Number of virtual disks attached to the virtual machine. [Property Metric],0,vsphere,vm virtual disks,,
 vsphere.vm.summary.quickStats.uptimeSeconds,gauge,300,second,,The system uptime of the VM in seconds. [Property Metric],0,vsphere,vm uptime,,

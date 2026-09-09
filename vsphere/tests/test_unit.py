@@ -3315,6 +3315,32 @@ def test_usage_metering_metrics_powered_off_vm(aggregator, realtime_instance, dd
 
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm2')
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=0, hostname='vm1')
+    # Unscoped, so a regression submitting vm1 under a different hostname fails here too.
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1)
+
+
+def test_usage_metering_metrics_missing_property(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
+):
+    """A resource whose metering property is absent is skipped, and the other resources still report."""
+    caplog.set_level(logging.WARNING)
+    stripped = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=content.obj,
+                propSet=[prop for prop in content.propSet if prop.name != 'summary.hardware.numCpuCores'],
+            )
+            for content in properties_ex.objects
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(return_value=stripped)
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=0)
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=2)
+    assert 'No summary.hardware.numCpuCores value for host host1' in caplog.text
 
 
 @pytest.mark.parametrize(
