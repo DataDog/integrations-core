@@ -1,0 +1,6 @@
+{
+  "errorMessage": "  One of siteId, deviceId, clientMac or applicationName must be provided.",
+  "response": [],
+  "totalCount": 0,
+  "version": "1.0"
+}

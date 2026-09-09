@@ -1,0 +1,10 @@
+{
+  "response": [
+    {
+      "detail": null,
+      "errorCode": 14029,
+      "message": "siteIds mandatory"
+    }
+  ],
+  "version": "1.0"
+}

@@ -1,0 +1,10 @@
+{
+    "response": [
+        {
+            "errorCode": 2600,
+            "message": "Device family value is not allowed, Valid Example: (Switches and Hubs,Routers,Wireless Controller,Third Party Device) or Unified AP or Wired Client or Wireless Client",
+            "detail": null
+        }
+    ],
+    "version": "1.0"
+}

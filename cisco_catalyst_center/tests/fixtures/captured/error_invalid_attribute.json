@@ -1,0 +1,10 @@
+{
+  "response": [
+    {
+      "detail": null,
+      "errorCode": 14001,
+      "message": "Invalid attribute provided"
+    }
+  ],
+  "version": null
+}
