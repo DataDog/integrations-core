@@ -1513,6 +1513,10 @@ integration/terraform:
 - changed-files:
   - any-glob-to-any-file:
     - terraform/**/*
+integration/thermal:
+- changed-files:
+  - any-glob-to-any-file:
+    - thermal/**/*
 integration/tibco_ems:
 - changed-files:
   - any-glob-to-any-file:
