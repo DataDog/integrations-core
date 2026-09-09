@@ -4,7 +4,7 @@ dynamo.component.enqueue_rejected.count,count,,,,Enqueuing failures because the 
 dynamo.component.errors.count,count,,,,Total number of errors in worker handler processing.,0,dynamo,,,
 dynamo.component.inflight_requests,gauge,,,,Number of requests currently being processed by the worker handler.,0,dynamo,,,
 dynamo.component.kv_cache.events_applied.count,count,,,,Total number of KV cache events applied to the router index.,0,dynamo,,,
-dynamo.component.kv_cache.gpu_cache_usage_percent,gauge,,,,GPU KV cache usage as a percentage.,0,dynamo,,,
+dynamo.component.kv_cache.gpu_cache_usage_percent,gauge,,fraction,,GPU KV cache usage as a fraction.,0,dynamo,,,
 dynamo.component.kv_cache.hit_rate,gauge,,fraction,,"KV cache hit rate, portable across vLLM, SGLang, and TensorRT-LLM backends.",0,dynamo,,,
 dynamo.component.kv_cache.total_blocks,gauge,,,,KV cache blocks available on the worker.,0,dynamo,,,
 dynamo.component.network_transit.seconds,gauge,,second,,Wall-clock time from frontend send to backend receive (distribution).,0,dynamo,,,

@@ -172,7 +172,7 @@ dynamo_frontend_cached_tokens_count{model="meta-llama/Llama-3-8B-Instruct"} 30
 dynamo_frontend_cached_tokens_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
 # HELP dynamo_frontend_kv_hit_rate frontend.kv_hit_rate
 # TYPE dynamo_frontend_kv_hit_rate gauge
-dynamo_frontend_kv_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+dynamo_frontend_kv_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 0.314
 # HELP dynamo_frontend_kv_transfer_estimated_latency_seconds frontend.kv_transfer_estimated_latency.seconds
 # TYPE dynamo_frontend_kv_transfer_estimated_latency_seconds histogram
 dynamo_frontend_kv_transfer_estimated_latency_seconds_bucket{model="meta-llama/Llama-3-8B-Instruct",le="0.025"} 3
@@ -189,7 +189,7 @@ dynamo_frontend_kv_transfer_estimated_latency_seconds_count{model="meta-llama/Ll
 dynamo_frontend_kv_transfer_estimated_latency_seconds_sum{model="meta-llama/Llama-3-8B-Instruct"} 5.4
 # HELP dynamo_frontend_shared_cache_hit_rate frontend.shared_cache_hit_rate
 # TYPE dynamo_frontend_shared_cache_hit_rate gauge
-dynamo_frontend_shared_cache_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 3.14
+dynamo_frontend_shared_cache_hit_rate{model="meta-llama/Llama-3-8B-Instruct"} 0.314
 # HELP dynamo_frontend_shared_cache_beyond_blocks frontend.shared_cache_beyond_blocks
 # TYPE dynamo_frontend_shared_cache_beyond_blocks gauge
 dynamo_frontend_shared_cache_beyond_blocks{model="meta-llama/Llama-3-8B-Instruct"} 3.14
