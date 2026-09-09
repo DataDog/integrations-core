@@ -92,8 +92,9 @@ RC_AUTO = '__rc_auto_sentinel__'
     default=False,
     show_default=True,
     help=(
-        'Skip opening the datadog-agent PR that bumps `INTEGRATIONS_CORE_VERSION` in `release.json` '
-        'on the matching Agent release branch.'
+        'Skip opening the datadog-agent PR that pins `INTEGRATIONS_CORE_VERSION` in `release.json` '
+        '(against the Agent `main` for the first RC of a milestone, against the matching Agent '
+        'release branch otherwise).'
     ),
 )
 @click.pass_obj
@@ -136,8 +137,9 @@ def tag(
       included in the tag.
     - `--yes/-y` skips all yes/no confirmations (target-branch, backward-RC, final tag).
     - `--skip-open-pr-check` skips the GitHub query for open PRs targeting the branch.
-    - `--skip-agent-pr` skips opening the datadog-agent PR that bumps `INTEGRATIONS_CORE_VERSION`
-      in `release.json` on the matching Agent release branch (targets the branch, never `main`).
+    - `--skip-agent-pr` skips opening the datadog-agent PR that pins `INTEGRATIONS_CORE_VERSION`
+      in `release.json`. The PR targets the Agent `main` when tagging the first RC of a milestone
+      (`X.Y.0-rc.1`) and the matching Agent release branch for every other tag.
     """
     if final and rc is not None:
         raise click.UsageError('`--final` and `--rc` are mutually exclusive.')
@@ -419,8 +421,8 @@ def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str
         )
 
 
-class _AgentReleaseBranchMissing(Exception):
-    """The Agent release branch matching ours does not exist on datadog-agent yet."""
+class _AgentBaseBranchMissing(Exception):
+    """The datadog-agent branch to target with the pin PR does not exist yet."""
 
 
 def _open_datadog_agent_bump_pr(
@@ -429,10 +431,13 @@ def _open_datadog_agent_bump_pr(
     """Open a PR on datadog-agent pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit.
 
     The pin is the integrations-core commit SHA that `effective_ref` (what the tag was placed on)
-    resolves to. The PR targets the Agent release branch matching ours (`target_branch`), never
-    `main`, and is built through the async GitHub client so no local checkout of datadog-agent is
-    required.
+    resolves to. The PR targets the Agent `main` when the tag is the first RC of a milestone
+    (`X.Y.0-rc.1`, tagged before the Agent release branch is cut) and the Agent release branch
+    matching ours (`target_branch`) for every other tag. It is built through the async GitHub
+    client so no local checkout of datadog-agent is required.
     """
+    agent_base_branch = 'main' if _is_first_rc_of_milestone(new_tag) else target_branch
+
     import asyncio
 
     import httpx
@@ -454,7 +459,7 @@ def _open_datadog_agent_bump_pr(
         app.display_warning(
             'The tag was pushed, but a GitHub token is required to open the datadog-agent bump PR.\n'
             'Set `github.token` in your ddev config, then open one manually against '
-            f'`{target_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
+            f'`{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
         )
         return
 
@@ -469,33 +474,39 @@ def _open_datadog_agent_bump_pr(
     async def run() -> str | None:
         async with async_github_client(token=token) as client:
             return await _create_agent_bump_pr(
-                client, target_branch, head_branch, commit_sha, title, body, commit_message
+                client, agent_base_branch, head_branch, commit_sha, title, body, commit_message
             )
 
-    app.display_waiting(f'Opening datadog-agent PR to bump integrations-core to {new_tag} ({commit_sha})...')
+    app.display_waiting(
+        f'Opening datadog-agent PR to bump integrations-core to {new_tag} ({commit_sha}) '
+        f'against `{agent_base_branch}`...'
+    )
     try:
         pr_url = asyncio.run(run())
-    except _AgentReleaseBranchMissing:
+    except _AgentBaseBranchMissing:
         app.display_warning(
-            f'The tag was pushed, but the `{target_branch}` release branch does not exist on '
+            f'The tag was pushed, but the `{agent_base_branch}` branch does not exist on '
             f'datadog-agent yet, so no bump PR was opened.\n'
             f'Once it is cut, open one pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
         )
     except GitHubAuthenticationError:
         app.display_warning(
             'The tag was pushed, but the datadog-agent bump PR could not be created due to authentication.\n'
-            f'Open one manually against `{target_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
+            f'Open one manually against `{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` '
+            f'to `{commit_sha}`.'
         )
         raise
     except (httpx.HTTPError, ValidationError) as e:
         app.display_warning(
             f'The tag was pushed, but the datadog-agent bump PR could not be created: {e}\n'
-            f'Open one manually against `{target_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
+            f'Open one manually against `{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` '
+            f'to `{commit_sha}`.'
         )
     else:
         if pr_url is None:
             app.display_warning(
-                f'`{RELEASE_JSON_PATH}` on `{target_branch}` already pins `{commit_sha}`; skipping datadog-agent PR.'
+                f'`{RELEASE_JSON_PATH}` on `{agent_base_branch}` already pins `{commit_sha}`; '
+                'skipping datadog-agent PR.'
             )
         else:
             app.display_success(f'Datadog-agent bump PR created: {pr_url}')
@@ -503,7 +514,7 @@ def _open_datadog_agent_bump_pr(
 
 async def _create_agent_bump_pr(
     client: AsyncGitHubClient,
-    target_branch: str,
+    base_branch: str,
     head_branch: str,
     commit_sha: str,
     title: str,
@@ -512,7 +523,7 @@ async def _create_agent_bump_pr(
 ) -> str | None:
     """Bump the pin and open the PR through `client`, returning the PR URL (None if already pinned).
 
-    The release.json blob is read from `target_branch`; when it already pins `commit_sha` no branch
+    The release.json blob is read from `base_branch`; when it already pins `commit_sha` no branch
     is created and None is returned. Otherwise a branch is cut from the base commit and the edited
     file is committed to it (the blob SHA matches because the branch starts at that same commit).
     """
@@ -521,12 +532,12 @@ async def _create_agent_bump_pr(
     import httpx
 
     try:
-        base = await client.get_ref(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'heads/{target_branch}')
+        base = await client.get_ref(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'heads/{base_branch}')
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:  # noqa: PLR2004
-            raise _AgentReleaseBranchMissing from e
+            raise _AgentBaseBranchMissing from e
         raise
-    current = await client.get_content(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, RELEASE_JSON_PATH, ref=target_branch)
+    current = await client.get_content(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, RELEASE_JSON_PATH, ref=base_branch)
     content = base64.b64decode(current.data.content).decode('utf-8')
     new_content = _bump_integrations_core_version(content, commit_sha)
     if new_content == content:
@@ -543,9 +554,19 @@ async def _create_agent_bump_pr(
         branch=head_branch,
     )
     pr = await client.create_pull_request(
-        DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, title=title, head=head_branch, base=target_branch, body=body
+        DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, title=title, head=head_branch, base=base_branch, body=body
     )
     return pr.data.html_url
+
+
+def _is_first_rc_of_milestone(tag: str) -> bool:
+    """Whether `tag` is `X.Y.0-rc.1`, the first RC of a milestone.
+
+    That tag is created before the Agent release branch is cut, so its pin goes to the Agent
+    `main` instead.
+    """
+    version = Version(tag)
+    return version.micro == 0 and version.pre == ('rc', 1)
 
 
 def _bump_integrations_core_version(content: str, commit_sha: str) -> str:

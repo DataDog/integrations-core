@@ -1,1 +1,1 @@
-Open a datadog-agent PR pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit when tagging an Agent release branch, and make `ddev release branch tag` idempotent so it can be re-run to open that PR later.
+Open a datadog-agent PR pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit when tagging an Agent release branch, and make `ddev release branch tag` idempotent so it can be re-run to open that PR later. The PR targets the Agent `main` for the first RC of a milestone and the matching Agent release branch for every other tag.

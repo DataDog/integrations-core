@@ -613,7 +613,52 @@ def _mock_release_json(fake_async_github, release_json=AGENT_RELEASE_JSON):
     )
 
 
-def test_agent_pr_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, fake_async_github, config_file):
+def test_agent_pr_first_rc_of_milestone_targets_main(ddev, agent_pr_git, fake_async_github, config_file):
+    """`X.Y.0-rc.1` is tagged before the Agent release branch is cut, so the pin goes to `main`."""
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    agent_pr_git.tags.return_value = []
+    _mock_release_json(fake_async_github)
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--skip-open-pr-check', input='\ny\n')
+
+    assert result.exit_code == 0, result.output
+    agent_pr_git.tag.assert_called_once_with('7.56.0-rc.1', message='7.56.0-rc.1', ref=ORIGIN_REF)
+    assert fake_async_github.last_call('get_ref').kwargs['ref'] == 'heads/main'
+    assert fake_async_github.last_call('get_content').kwargs['ref'] == 'main'
+    assert fake_async_github.last_call('create_pull_request').kwargs['base'] == 'main'
+    assert 'against `main`' in result.output
+
+
+def test_agent_pr_later_rc_targets_release_branch(ddev, agent_pr_git, fake_async_github, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    _mock_release_json(fake_async_github)
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--skip-open-pr-check', input='\ny\n')
+
+    assert result.exit_code == 0, result.output
+    agent_pr_git.tag.assert_called_once_with('7.56.0-rc.12', message='7.56.0-rc.12', ref=ORIGIN_REF)
+    assert fake_async_github.last_call('get_content').kwargs['ref'] == '7.56.x'
+    assert fake_async_github.last_call('create_pull_request').kwargs['base'] == '7.56.x'
+
+
+def test_agent_pr_patch_rc1_targets_release_branch(ddev, agent_pr_git, fake_async_github, config_file):
+    """Only the first RC of a milestone targets `main`; a patch RC like `7.56.1-rc.1` does not."""
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    agent_pr_git.tags.return_value = ['7.56.0']
+    _mock_release_json(fake_async_github)
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--skip-open-pr-check', input='\ny\n')
+
+    assert result.exit_code == 0, result.output
+    agent_pr_git.tag.assert_called_once_with('7.56.1-rc.1', message='7.56.1-rc.1', ref=ORIGIN_REF)
+    assert fake_async_github.last_call('get_content').kwargs['ref'] == '7.56.x'
+    assert fake_async_github.last_call('create_pull_request').kwargs['base'] == '7.56.x'
+
+
+def test_agent_pr_final_tag_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, fake_async_github, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
     _mock_release_json(fake_async_github)
@@ -621,7 +666,6 @@ def test_agent_pr_targets_release_branch_and_bumps_pin(ddev, agent_pr_git, fake_
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 
     assert result.exit_code == 0, result.output
-    # The PR must target the matching Agent release branch, never `main`.
     assert fake_async_github.last_call('create_pull_request').kwargs['base'] == '7.56.x'
     # The committed release.json pins the integrations-core commit SHA the tag was placed on,
     # not the tag name.
@@ -700,7 +744,7 @@ def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr_gi
 
     assert result.exit_code == 0, result.output
     agent_pr_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
-    assert 'release branch does not exist on datadog-agent yet' in result.output
+    assert 'the `7.56.x` branch does not exist on datadog-agent yet' in result.output
 
 
 def test_bump_integrations_core_version_preserves_other_keys():
