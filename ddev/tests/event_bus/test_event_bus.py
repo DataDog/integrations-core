@@ -11,7 +11,7 @@ import signal
 import sys
 import threading
 import time
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from concurrent.futures import Executor, ThreadPoolExecutor
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
@@ -36,8 +36,11 @@ from ddev.event_bus.orchestrator import (
     AsyncProcessor,
     BaseMessage,
     EventBusOrchestrator,
+    MessageScope,
     SyncProcessor,
 )
+from ddev.monitoring import ComponentMonitor, MonitoringRuntime
+from tests.helpers.monitoring import RecordingSink
 
 # Test Structure Documentation
 # --------------------------
@@ -156,6 +159,7 @@ class MockOrchestrator(EventBusOrchestrator):
         grace_period: float = 10,
         fail_fast: bool = False,
         executor: Executor | None = None,
+        message_scope: MessageScope | None = None,
     ):
         super().__init__(
             logger=logger,
@@ -163,6 +167,7 @@ class MockOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             fail_fast=fail_fast,
             executor=executor,
+            message_scope=message_scope,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -1483,3 +1488,77 @@ def test_a_hook_waiting_on_io_does_not_hold_up_a_requested_stop(secretary: Secre
     assert "finalize" in orchestrator.events
     # Abandoned before dispatch, so the message it was about never reaches a processor.
     assert secretary.delivered_memos == []
+
+
+class ScopedProcessor(AsyncProcessor[Memo]):
+    def __init__(self, name: str, monitor: ComponentMonitor):
+        super().__init__(name)
+        self.monitor = monitor
+
+    async def process_message(self, message: Memo):
+        self.monitor.metrics.count("attempted", tags={"tag": message.id})
+        if message.content.startswith("fail_processing"):
+            raise ValueError("Processing failed intentionally")
+
+    async def on_success(self, message: Memo):
+        self.monitor.metrics.count("confirmed", tags={"tag": message.id})
+
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError):
+        self.monitor.metrics.count("handled", tags={"tag": error.message.id})
+
+
+def make_memo_scope(runtime: MonitoringRuntime) -> Callable[[BaseMessage], AbstractContextManager[None]]:
+    context = runtime.context
+
+    def scope(message: BaseMessage) -> AbstractContextManager[None]:
+        return context.scope({"memo_id": message.id})
+
+    return scope
+
+
+def test_a_message_scope_covers_processing_and_the_success_and_error_hooks():
+    sink = RecordingSink()
+    runtime = MonitoringRuntime(metrics_sink=sink)
+    orchestrator = MockOrchestrator(
+        logging.getLogger("test_scope"), grace_period=0.1, message_scope=make_memo_scope(runtime)
+    )
+    orchestrator.register_processor(ScopedProcessor("scoped", runtime.component("scoped")), [Memo])
+    orchestrator.submit_message(Memo("failing_memo", content="fail_processing"))
+    orchestrator.submit_message(Memo("ok_memo"))
+    orchestrator.run()
+
+    assert [record.name for record in sink.records] == ["attempted", "handled", "attempted", "confirmed"]
+    for record in sink.records:
+        assert record.fields["memo_id"] == record.tags["tag"]
+    assert runtime.context.fields == {}
+
+
+def test_concurrent_sync_processors_keep_their_message_scopes_apart():
+    sink = RecordingSink()
+    runtime = MonitoringRuntime(metrics_sink=sink)
+    overlap = threading.Barrier(2, timeout=5)
+
+    class OverlappingWorker(SyncProcessor[Memo]):
+        def __init__(self, name: str, monitor: ComponentMonitor):
+            super().__init__(name)
+            self.monitor = monitor
+
+        def process_message(self, message: Memo):
+            overlap.wait()
+            self.monitor.metrics.count("worked", tags={"tag": message.id})
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = MockOrchestrator(
+            logging.getLogger("test_scoped_sync"),
+            grace_period=0.1,
+            executor=lent,
+            message_scope=make_memo_scope(runtime),
+        )
+        orchestrator.register_processor(OverlappingWorker("worker", runtime.component("worker")), [Memo])
+        orchestrator.submit_message(Memo("memo1"))
+        orchestrator.submit_message(Memo("memo2"))
+        orchestrator.run()
+
+    observed = {(record.fields["memo_id"], record.tags["tag"]) for record in sink.records}
+    assert observed == {("memo1", "memo1"), ("memo2", "memo2")}
+    assert len(sink.records) == 2

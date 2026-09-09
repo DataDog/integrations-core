@@ -18,6 +18,7 @@ from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, 
 from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import conclusion_to_status
 from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
@@ -87,6 +88,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         options: TestRunnerOptions,
         *,
         artifact_client: AsyncGitHubClient,
+        monitor: ComponentMonitor | None = None,
     ):
         super().__init__(name)
         self._client = client
@@ -94,6 +96,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._options = options
         self._runs_in_flight: dict[str, int] = {}
         self._logger = logging.getLogger(f"{__name__}.{name}")
+        self.monitor = monitor
 
     async def process_message(self, message: TestBatch):
         log_extra: dict[str, Any] = {"batch_id": message.batch_id}

@@ -29,6 +29,7 @@ from ddev.cli.ci.tests.progress import (
 )
 from ddev.cli.ci.tests.status import Status, conclusion_to_status
 from ddev.event_bus.orchestrator import SyncProcessor
+from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 from ddev.utils.junit import parse_junit_dir
 
@@ -58,7 +59,9 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
     Registries are keyed by ``batch_id``: it is stable across workflow attempts, ``run_id`` is not.
     """
 
-    def __init__(self, name: str, output_base_path: Path, batches: list[TestBatch]) -> None:
+    def __init__(
+        self, name: str, output_base_path: Path, batches: list[TestBatch], *, monitor: ComponentMonitor | None = None
+    ) -> None:
         super().__init__(name)
         self._output_base_path = output_base_path
         self._revision = 0
@@ -71,6 +74,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         }
         self._lock = threading.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
+        self.monitor = monitor
 
     def process_message(self, message: BatchFinished | BatchProgressUpdate) -> None:
         if isinstance(message, BatchProgressUpdate):
