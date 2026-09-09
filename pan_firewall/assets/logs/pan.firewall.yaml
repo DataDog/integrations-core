@@ -262,9 +262,10 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Is Alert
+    name: Alert
     path: ocsf.is_alert
     source: log
+    type: boolean
   - groups:
       - OCSF
     name: Event Code
@@ -282,7 +283,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Product UID
+    name: Metadata Product Unique ID
     path: ocsf.metadata.product.uid
     source: log
   - groups:
@@ -290,9 +291,10 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
-    name: Source Port
+    name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
     type: integer
@@ -301,9 +303,10 @@ facets:
     name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
-    name: Destination Port
+    name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
     type: integer
@@ -314,12 +317,12 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Protocol Name
+    name: Connection Info Protocol Name
     path: ocsf.connection_info.protocol_name
     source: log
   - groups:
       - OCSF
-    name: Session ID
+    name: Connection Info Session Unique ID
     path: ocsf.connection_info.session.uid
     source: log
   - groups:
@@ -327,44 +330,50 @@ facets:
     name: Traffic Bytes
     path: ocsf.traffic.bytes
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Traffic Bytes In
     path: ocsf.traffic.bytes_in
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Traffic Bytes Out
     path: ocsf.traffic.bytes_out
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Traffic Packets
     path: ocsf.traffic.packets
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Traffic Packets In
     path: ocsf.traffic.packets_in
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Traffic Packets Out
     path: ocsf.traffic.packets_out
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Finding UID
+    name: Finding Info Unique ID
     path: ocsf.finding_info.uid
     source: log
   - groups:
       - OCSF
-    name: Analytic Name
+    name: Finding Information Analytic Name
     path: ocsf.finding_info.analytic.name
     source: log
   - groups:
       - OCSF
-    name: Analytic Category
+    name: Finding Information Analytic Category
     path: ocsf.finding_info.analytic.category
     source: log
   - groups:
@@ -372,6 +381,52 @@ facets:
     name: Evidences
     path: ocsf.evidences
     source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Metadata Sequence Number
+    path: ocsf.metadata.sequence
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Finding Information Product Name
+    path: ocsf.finding_info.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Product Vendor Name
+    path: ocsf.finding_info.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Analytic Unique ID
+    path: ocsf.finding_info.analytic.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Chunks
+    path: ocsf.traffic.chunks
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Chunks In
+    path: ocsf.traffic.chunks_in
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Chunks Out
+    path: ocsf.traffic.chunks_out
+    source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Palo Alto Networks Firewall
@@ -672,6 +727,13 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - subtype
             - type: schema-category-mapper
               name: ocsf.connection_info.direction_id
               categories:
@@ -724,7 +786,7 @@ pipeline:
           target: ocsf.evidence.file.type_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Cast `ocsf.evidence.file.type_id` to integer
+          name: Map `ocsf.evidence.file.type_id` to `ocsf.evidence.file.type_id`
           enabled: true
           sources:
             - ocsf.evidence.file.type_id
@@ -883,7 +945,7 @@ pipeline:
           target: ocsf.evidence.connection_info.direction_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Cast `ocsf.evidence.connection_info.direction_id` to integer
+          name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
           enabled: true
           sources:
             - ocsf.evidence.connection_info.direction_id
@@ -906,7 +968,7 @@ pipeline:
           target: ocsf.evidence.device.type_id
           replaceMissing: false
         - type: attribute-remapper
-          name: Cast `ocsf.evidence.device.type_id` to integer
+          name: Map `ocsf.evidence.device.type_id` to `ocsf.evidence.device.type_id`
           enabled: true
           sources:
             - ocsf.evidence.device.type_id
@@ -1107,12 +1169,23 @@ pipeline:
                   name: Critical
                   id: 5
                 - filter:
+                    query: "-@severity:*"
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "*"
-                  name: Informational
-                  id: 1
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - severity
           schema:
             schemaType: ocsf
             version: 1.5.0
@@ -1186,6 +1259,13 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - type
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
@@ -1210,12 +1290,23 @@ pipeline:
                   name: Critical
                   id: 5
                 - filter:
+                    query: "-@severity:*"
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "*"
-                  name: Informational
-                  id: 1
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - severity
           schema:
             schemaType: ocsf
             version: 1.5.0

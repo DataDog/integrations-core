@@ -119,7 +119,7 @@ tests:
           ip: "10.2.75.414"
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "AUTHENTICATION"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -131,8 +131,8 @@ tests:
             vendor_name: "Palo Alto Networks"
           sequence: 486021038
           version: "1.5.0"
-        severity: "Informational"
-        severity_id: 1
+        severity: "Unknown"
+        severity_id: 0
         time: 1557161033000
       repeatcnt: 1
       seqno: 486021038
@@ -146,7 +146,7 @@ tests:
       vsys: "testVM"
       vsys_id: 786
       vsys_name: "JVM"
-    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, 	clienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,	authproto=authproto"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
