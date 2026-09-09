@@ -35,6 +35,20 @@ def test_open_session(instance, side_effect, expected_session, tag):
         assert tag == check._additional_tags
 
 
+def test_open_session_fails_on_self_signed_cert_by_default(tls_xenserver):
+    # Regression test: the XML-RPC login used to ignore `tls_verify`, always using Python's
+    # default verifying SSL context regardless of instance config.
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': tls_xenserver}])
+
+    assert check.open_session() == {}
+
+
+def test_open_session_succeeds_with_tls_verify_false(tls_xenserver):
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': tls_xenserver, 'tls_verify': False}])
+
+    assert check.open_session() == SESSION_MASTER
+
+
 @pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
 def test_check(aggregator, dd_run_check, instance, server_type):

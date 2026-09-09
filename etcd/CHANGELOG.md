@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.5.0 / 2026-09-02
+
+***Added***:
+
+* Add support for more metrics. ([#24466](https://github.com/DataDog/integrations-core/pull/24466))
+
 ## 9.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

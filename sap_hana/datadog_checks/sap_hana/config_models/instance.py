@@ -35,6 +35,7 @@ class CollectSchemas(BaseModel):
     max_columns: Optional[int] = None
     max_tables: Optional[int] = None
     max_views: Optional[int] = None
+    run_sync: Optional[bool] = None
 
 
 class CustomQuery(BaseModel):

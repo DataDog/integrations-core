@@ -1,0 +1,23 @@
+# Runs to completion immediately, so the Finished transition is observed after the check's baseline poll.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: event-finish-workload
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: user-queue
+spec:
+  suspend: true
+  parallelism: 1
+  completions: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: workload
+        image: alpine:3.19.1
+        command: ['sh', '-c', 'true']
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi

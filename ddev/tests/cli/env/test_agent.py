@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import subprocess
+
 import pytest
 
+from ddev.cli.env.agent import _sync_restored_config
 from ddev.e2e.config import EnvDataStorage
 
 
@@ -171,3 +174,81 @@ def test_trigger_run_inject_integration(ddev, data_dir, mocker):
     assert not result.output
 
     invoke.assert_called_once_with(['check', integration, '-l', 'debug'], env_vars=None)
+
+
+def test_temporary_config_is_restored_and_synchronized(ddev, data_dir, temp_dir, mocker):
+    invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
+    sync_config = mocker.patch('ddev.e2e.agent.docker.DockerAgent.sync_config')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+    env_data.write_metadata({})
+    original_config = {'instances': [{'host': 'original'}]}
+    env_data.write_config(original_config)
+    temporary_config = temp_dir / 'temporary.json'
+    temporary_config.write_text('{"instances": []}')
+
+    result = ddev(
+        'env',
+        'agent',
+        integration,
+        environment,
+        '--config-file',
+        str(temporary_config),
+        'check',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert env_data.read_config() == original_config
+    invoke.assert_called_once_with(['check', integration], env_vars=None)
+    sync_config.assert_called_once_with()
+
+
+def test_sync_failure_does_not_mask_check_failure(mocker):
+    check_error = subprocess.CalledProcessError(7, ['agent', 'check'])
+    sync_error = subprocess.CalledProcessError(8, ['kubectl', 'cp'])
+    app = mocker.Mock()
+    agent = mocker.Mock()
+    agent.sync_config.side_effect = sync_error
+
+    with pytest.raises(subprocess.CalledProcessError) as exc_info:
+        try:
+            raise check_error
+        finally:
+            _sync_restored_config(app, agent)
+
+    assert exc_info.value is check_error
+    app.display_warning.assert_called_once()
+
+    with pytest.raises(subprocess.CalledProcessError) as exc_info:
+        _sync_restored_config(app, agent)
+
+    assert exc_info.value is sync_error
+
+
+def test_temporary_config_absence_is_restored_and_synchronized(ddev, data_dir, temp_dir, mocker):
+    invoke = mocker.patch('ddev.e2e.agent.docker.DockerAgent.invoke')
+    sync_config = mocker.patch('ddev.e2e.agent.docker.DockerAgent.sync_config')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+    env_data.write_metadata({})
+    temporary_config = temp_dir / 'temporary.json'
+    temporary_config.write_text('{"instances": []}')
+
+    result = ddev(
+        'env',
+        'agent',
+        integration,
+        environment,
+        '--config-file',
+        str(temporary_config),
+        'check',
+    )
+
+    assert result.exit_code == 0, result.output
+    assert not env_data.config_file.exists()
+    invoke.assert_called_once_with(['check', integration], env_vars=None)
+    sync_config.assert_called_once_with()

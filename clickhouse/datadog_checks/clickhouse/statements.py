@@ -12,11 +12,6 @@ from cachetools import TTLCache
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -82,7 +77,7 @@ def _row_key(row):
     :param row: a normalized row from system.query_log
     :return: a tuple uniquely identifying this row
     """
-    return row['query_signature'], row.get('user', ''), row.get('databases', '')
+    return row['query_signature'], row.get('user', ''), row.get('databases', ''), row.get('server_node', '')
 
 
 class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
@@ -145,7 +140,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._collection_interval,
                 'tags': self._tags_no_db,
-                'ddagentversion': datadog_agent.get_version(),
+                'ddagentversion': self._check.agent_version,
                 'clickhouse_version': self._check.dbms_version,
             }
 
@@ -275,6 +270,9 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
                 result_row = {
                     'normalized_query_hash': str(normalized_query_hash),
+                    # Per-node dimension. Emitted as a row field; the ingestion backend
+                    # materializes it into the clickhouse_node tag (like db from datname).
+                    'server_node': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(query_user) if query_user else '',
                     'query_type': str(query_type) if query_type else '',
@@ -299,9 +297,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
             self._set_checkpoint_from_event_time(global_max_event_time)
 
-            if result_rows:
-                result_rows = self._merge_rows_across_nodes(result_rows)
-
+            # Rows are kept per-(query, node): the node dimension is preserved on each
+            # row via server_node and the backend materializes it into clickhouse_node.
             return result_rows
 
         except Exception as e:
@@ -313,59 +310,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 raw=True,
             )
             raise
-
-    @staticmethod
-    def _merge_rows_across_nodes(node_rows):
-        """
-        Merge per-(query, node) rows into per-query rows.
-
-        Summable metrics (count, total_time, …) are summed.
-        peak_memory_usage takes the max.
-        Non-metric fields are taken from the node with the highest execution count.
-        """
-        groups = {}
-        for row in node_rows:
-            key = row['normalized_query_hash']
-            if key not in groups:
-                groups[key] = []
-            groups[key].append(row)
-
-        result = []
-        for rows in groups.values():
-            if len(rows) == 1:
-                result.append(rows[0])
-                continue
-
-            base = max(rows, key=lambda r: r.get('count', 0))
-            merged = dict(base)
-
-            sum_fields = [
-                'count',
-                'total_time',
-                'read_rows',
-                'read_bytes',
-                'written_rows',
-                'written_bytes',
-                'result_rows',
-                'result_bytes',
-                'memory_usage',
-                'cpu_us',
-                'cpu_wait_us',
-            ]
-            for field in sum_fields:
-                merged[field] = sum(r.get(field, 0) for r in rows)
-
-            merged['peak_memory_usage'] = max(r.get('peak_memory_usage', 0) for r in rows)
-
-            total_count = merged['count']
-            if total_count > 0:
-                merged['mean_time'] = merged['total_time'] / total_count
-            else:
-                merged['mean_time'] = 0.0
-
-            result.append(merged)
-
-        return result
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
@@ -453,7 +397,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "clickhouse",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

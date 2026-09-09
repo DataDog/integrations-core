@@ -172,11 +172,28 @@ class KafkaClient:
         )
 
         results = []
+        negative = []
         for tp, future in futures.items():
             try:
-                results.append((tp.topic, tp.partition, future.result().offset))
+                partition_offset = future.result().offset
             except Exception as e:
                 self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
+                continue
+            if partition_offset < 0:
+                negative.append((tp.topic, tp.partition, partition_offset))
+                continue
+            results.append((tp.topic, tp.partition, partition_offset))
+        if negative:
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
+            # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+            self.log.warning(
+                "Discarding %d/%d negative offset(s): broker_offset and consumer_lag will be "
+                "missing for those partitions (up to 5 shown): %s",
+                len(negative),
+                len(request),
+                negative[:5],
+            )
         return results
 
     def _list_topics(self):

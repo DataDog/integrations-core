@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
 from types import SimpleNamespace
@@ -13,7 +14,7 @@ from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fs import create_file, file_exists
+from .fs import create_file, ensure_dir_exists, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
@@ -301,6 +302,16 @@ def using_windows_containers():
     return os_type == 'windows'
 
 
+def shared_logs_base_dir():
+    # macOS runs the daemon in a VM; Colima shares only $HOME, so keep bind sources there.
+    if sys.platform != 'darwin':
+        return None
+
+    base = os.path.join(os.path.expanduser('~'), '.cache', 'datadog-checks-dev', 'shared-logs')
+    ensure_dir_exists(base)
+    return base
+
+
 @contextmanager
 def shared_logs(example_log_configs, mount_whitelist=None):
     log_source = example_log_configs[0].get('source', 'check')
@@ -311,6 +322,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 
     env_vars = {}
     docker_volumes = get_state('docker_volumes', [])
+    base_directory = shared_logs_base_dir()
 
     with ExitStack() as stack:
         for i, example_log_config in enumerate(example_log_configs, 1):
@@ -318,7 +330,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
                 continue
 
             log_name = 'dd_log_{}'.format(i)
-            d = stack.enter_context(TempDir(log_name))
+            d = stack.enter_context(TempDir(log_name, base_directory=base_directory))
 
             # Create the file that will ultimately be shared by containers
             shared_log_file = os.path.join(d, '{}_{}.log'.format(log_source, log_name))

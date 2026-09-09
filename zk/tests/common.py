@@ -27,22 +27,37 @@ Node count: 5
 """
 
 
-def assert_service_checks_ok(aggregator):
+def assert_service_checks_ok(aggregator, check_mode=True):
     aggregator.assert_service_check("zookeeper.ruok", status=ZookeeperCheck.OK)
-    aggregator.assert_service_check("zookeeper.mode", status=ZookeeperCheck.OK)
+    if check_mode:
+        aggregator.assert_service_check("zookeeper.mode", status=ZookeeperCheck.OK)
 
 
-def assert_stat_metrics(aggregator):
+def assert_stat_metrics(aggregator, tags=None, exact_tags=True):
+    if tags is None:
+        tags = ["mode:standalone", "mytag"]
     for mname in STAT_METRICS:
-        aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+        if exact_tags:
+            aggregator.assert_metric(mname, tags=tags)
+        else:
+            aggregator.assert_metric(mname)
+            for tag in tags:
+                aggregator.assert_metric_has_tag(mname, tag)
 
 
-def assert_latency_metrics(aggregator):
+def assert_latency_metrics(aggregator, tags=None, exact_tags=True):
+    if tags is None:
+        tags = ["mode:standalone", "mytag"]
     for mname in LATENCY_METRICS:
-        aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"], at_least=0)
+        if exact_tags:
+            aggregator.assert_metric(mname, tags=tags, at_least=0)
+        else:
+            aggregator.assert_metric(mname, at_least=0)
+            for tag in tags:
+                aggregator.assert_metric_has_tag(mname, tag)
 
 
-def assert_mntr_metrics_by_version(aggregator, skip=None):
+def assert_mntr_metrics_by_version(aggregator, skip=None, check_custom_tag=True):
     if skip is None:
         skip = []
     skip = set(skip)
@@ -59,7 +74,8 @@ def assert_mntr_metrics_by_version(aggregator, skip=None):
             continue
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mode')
-        aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mytag')
+        if check_custom_tag:
+            aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mytag')
 
     for metric in optional_metrics:
         aggregator.assert_metric(metric, at_least=0)

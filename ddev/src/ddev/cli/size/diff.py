@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.common_params import WheelsStorageTier, common_params
 
 from .utils.common_funcs import (
     CLIParameters,
@@ -25,8 +25,10 @@ from .utils.common_funcs import (
     get_files,
     get_valid_platforms,
     get_valid_versions,
+    initialize_dd_client,
     plot_treemap,
     print_table,
+    send_diff_metrics_to_dd,
 )
 
 console = Console(stderr=True)
@@ -34,10 +36,12 @@ MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
 MINIMUM_LENGTH_COMMIT = 7
 
 
-@click.command()
+@click.command(short_help='Compare sizes between two commits')
 @click.argument("first_commit")
 @click.argument("second_commit")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
@@ -49,7 +53,9 @@ def diff(
     compressed: bool,
     format: list[str],
     show_gui: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
+    to_dd_org: Optional[str],
+    to_dd_key: Optional[str],
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -81,6 +87,14 @@ def diff(
             for fmt in format:
                 if fmt not in ["png", "csv", "markdown", "json"]:
                     raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
+        if to_dd_org and to_dd_key:
+            raise click.BadParameter("Specify either --to-dd-org or --to-dd-key, not both")
+        if to_dd_org or to_dd_key:
+            try:
+                initialize_dd_client(app, to_dd_org, to_dd_key)
+            except RuntimeError as e:
+                progress.stop()
+                app.abort(str(e))
         repo_url = app.repo.path
 
         with GitRepo(repo_url) as gitRepo:
@@ -121,6 +135,8 @@ def diff(
                     )
                 if format:
                     export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
+                if (to_dd_org or to_dd_key) and modules_plat_ver:
+                    send_diff_metrics_to_dd(app, second_commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
             except Exception as e:
                 progress.stop()
                 app.abort(str(e))
@@ -135,6 +151,7 @@ def diff_mode(
     progress: Progress,
 ) -> list[FileDataEntryPlatformVersion]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
+        params["app"],
         gitRepo,
         params["platform"],
         params["version"],
@@ -181,13 +198,14 @@ def diff_mode(
 
 
 def get_repo_info(
+    app: Application,
     gitRepo: GitRepo,
     platform: str,
     version: str,
     first_commit: str,
     second_commit: str,
     compressed: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
     progress: Progress,
 ) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
     with progress:
@@ -215,13 +233,13 @@ def get_repo_info(
         task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
         gitRepo.checkout_commit(first_commit)
         files_b = get_files(repo, compressed, version)
-        dependencies_b = get_dependencies(repo, platform, version, compressed, wheels_storage)
+        dependencies_b = get_dependencies(app, repo, platform, version, compressed, wheels_storage)
         progress.remove_task(task)
 
         task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
         gitRepo.checkout_commit(second_commit)
         files_a = get_files(repo, compressed, version)
-        dependencies_a = get_dependencies(repo, platform, version, compressed, wheels_storage)
+        dependencies_a = get_dependencies(app, repo, platform, version, compressed, wheels_storage)
         progress.remove_task(task)
 
     return files_b, dependencies_b, files_a, dependencies_a

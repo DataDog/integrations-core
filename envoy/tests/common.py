@@ -774,6 +774,8 @@ MOCKED_PROMETHEUS_METRICS = [
     "vhost.vcluster.upstream_rq_timeout.count",
     "access_logs.grpc_access_log.logs_dropped.count",
     "access_logs.grpc_access_log.logs_written.count",
+    "access_logs.grpc_access_log.grpc_entries_flushed.count",
+    "access_logs.grpc_access_log.grpc_entries_flush_failed.count",
     "tcp.downstream_cx.count",
     "tcp.downstream_cx_no_route.count",
     "tcp.downstream_cx_rx_bytes.count",

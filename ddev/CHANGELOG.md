@@ -2,6 +2,43 @@
 
 <!-- towncrier release notes start -->
 
+## 18.0.0 / 2026-08-14
+
+***Changed***:
+
+* Drop the `[tool.black]` block from `ddev/pyproject.toml` and the matching code path in `ddev meta scripts update-python-config` (formatting is fully handled by ruff). ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+* `ddev release branch tag` now accepts `--release/-r`, `--ref`, `--rc N`, and `--yes/-y`, and prompts to confirm when run on a release branch without `--release`. Existing non-interactive callers that piped a single `y` need to pass `--yes` or one extra confirmation. ([#23860](https://github.com/DataDog/integrations-core/pull/23860))
+* Bump `datadog-checks-dev` pin to `>=39.0,<41` to track the v39 release. ([#24110](https://github.com/DataDog/integrations-core/pull/24110))
+* Bump `datadog-checks-dev` pin to `>=40.0,<42` to track the v40 release. ([#24842](https://github.com/DataDog/integrations-core/pull/24842))
+
+***Added***:
+
+* Add TaskTestRunner processor for the CI dispatcher. ([#23518](https://github.com/DataDog/integrations-core/pull/23518))
+* Legacy migration: `validate codeowners` is now implemented natively in ddev (was previously delegated to datadog_checks_dev). ([#23651](https://github.com/DataDog/integrations-core/pull/23651))
+* Add `ddev release test-agent` command that dispatches the Linux and Windows Agent test workflows against a release branch or tag. ([#23722](https://github.com/DataDog/integrations-core/pull/23722))
+* Add an AI configuration block for ddev. ([#23894](https://github.com/DataDog/integrations-core/pull/23894))
+* Add TaskTestGatherer processor and a JUnit parsing utility for the CI dispatcher. ([#23938](https://github.com/DataDog/integrations-core/pull/23938))
+* Add GitHub API rate limiting to the Dispatcher. ([#24179](https://github.com/DataDog/integrations-core/pull/24179))
+* Pass capabilities from e2e metadata to the Agent container. ([#24238](https://github.com/DataDog/integrations-core/pull/24238))
+* Add support for the `--env` option to `ddev env agent` to pass environment variables. ([#24289](https://github.com/DataDog/integrations-core/pull/24289))
+* Support running EventBusOrchestrator unbounded by passing `max_timeout=None`. ([#24314](https://github.com/DataDog/integrations-core/pull/24314))
+* `release port-commit` gains a `--from-pr <number>` mode that backports a merged PR to every `backport/<base>` label on it (deriving the commit and target branches from the PR and skipping bases already backported), and now resets `.deps/` alongside `.in-toto` so regenerated dependency lockfiles are taken from the target branch. ([#24470](https://github.com/DataDog/integrations-core/pull/24470))
+* Add a Kubernetes Agent interface for running the Agent in Kind-based E2E test clusters, alongside the existing Docker and Vagrant interfaces. ([#24639](https://github.com/DataDog/integrations-core/pull/24639))
+* Add ``investigation`` as a valid metric unit name. ([#24696](https://github.com/DataDog/integrations-core/pull/24696))
+* Adds the batch and job progress aggregate (`DispatcherProgress`) to the test gatherer. ([#24774](https://github.com/DataDog/integrations-core/pull/24774))
+
+***Fixed***:
+
+* Anchor in-core editable installs in the hatch environment collector to the project root so the post-install command works on hatch 1.10+ when invoked from a subdirectory of the integration. The generated install, lint, and typing commands now shell-quote those absolute paths so checkouts under a path containing whitespace work on both POSIX and Windows. ([#23765](https://github.com/DataDog/integrations-core/pull/23765))
+* Bundle per-job correlation into the CI dispatcher's BatchFinished via BatchJobResult. ([#24253](https://github.com/DataDog/integrations-core/pull/24253))
+* Fix the EventBusOrchestrator overwriting a task's timeout cancellation reason with a bare cancel during shutdown cleanup. ([#24315](https://github.com/DataDog/integrations-core/pull/24315))
+* Retype async GitHub client response-model enum fields (PR state, workflow-job and check-run status/conclusion) as StrEnums. ([#24316](https://github.com/DataDog/integrations-core/pull/24316))
+* Add an internal DispatcherConfig model for reading Dispatcher settings from the repo config. ([#24434](https://github.com/DataDog/integrations-core/pull/24434))
+* Show actionable guidance when GitHub rejects ddev's configured token. ([#24502](https://github.com/DataDog/integrations-core/pull/24502))
+* Bump requests to 2.34.2 to match datadog-checks-base. ([#24534](https://github.com/DataDog/integrations-core/pull/24534))
+* Read the repository worktrees once per lookup instead of once per checked path. ([#24809](https://github.com/DataDog/integrations-core/pull/24809))
+* Bump the pinned embedded Python version from 3.13.14 to 3.13.15. ([#24828](https://github.com/DataDog/integrations-core/pull/24828))
+
 ## 17.0.1 / 2026-06-19
 
 ***Fixed***:

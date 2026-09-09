@@ -57,8 +57,21 @@ runs:
       shell: bash
       run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
 
+    # setup-uv resolves the uv version and its download URL from a manifest on
+    # raw.githubusercontent.com. That fetch has a 5s timeout and no retries, so a single
+    # transient network error fails the job with "fetch failed". At ~288 test jobs per run,
+    # a per-job failure rate of well under 1% still breaks roughly one run in six, so the
+    # attempt is retried once. A persistent failure still fails the job on the retry.
     - name: Install uv
-      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      id: install-uv
+      continue-on-error: true
+      uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      with:
+        enable-cache: false
+
+    - name: Install uv (retry)
+      if: ${{ steps.install-uv.outcome == 'failure' }}
+      uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
       with:
         enable-cache: false
 

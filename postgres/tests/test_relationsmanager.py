@@ -107,10 +107,22 @@ def test_relation_filter_limit():
     assert 'LIMIT 300' in query_filter
 
 
-def test_relkind_does_not_apply_to_index_metrics():
-    query = IDX_METRICS['query'].replace('{metrics_columns}', 'foo')
-    relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r']}]
+def test_filters_are_not_shared_between_queries():
+    """
+    Filtering one query must not change what another query gets back from the same manager, since the
+    filter depends on both the query text (`relkind` only applies to pg_locks) and the schema field.
+    """
+    relations_config = [{'relation_regex': 'b.*', 'schemas': ['public'], 'relkind': ['r']}]
     relations = RelationsManager(relations_config, default_max_relations)
+    lock_query = LOCK_METRICS['query'].replace('{metrics_columns}', 'foo')
+    index_query = IDX_METRICS['query'].replace('{metrics_columns}', 'foo')
 
-    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert "relkind = ANY(array['r'])" not in query_filter
+    lock_filter = relations.filter_relation_query(lock_query, SCHEMA_NAME)
+    index_filter = relations.filter_relation_query(index_query, SCHEMA_NAME)
+    nspname_filter = relations.filter_relation_query(index_query, 'nspname')
+
+    assert "relkind = ANY(array['r'])" in lock_filter
+    assert "relkind = ANY(array['r'])" not in index_filter
+    assert "schemaname = ANY(array['public']::text[])" in index_filter
+    assert "nspname = ANY(array['public']::text[])" in nspname_filter
+    assert relations.filter_relation_query(lock_query, SCHEMA_NAME) == lock_filter

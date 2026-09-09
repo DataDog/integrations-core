@@ -16,6 +16,7 @@ from prometheus_client.parser import text_fd_to_metric_families as parse_prometh
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.checks.openmetrics import parser_optimizations
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
 from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
@@ -231,6 +232,8 @@ class OpenMetricsScraper:
             self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
+
+        parser_optimizations.init_from_agent_config()
 
         # Used for monotonic counts
         self.flush_first_value = None

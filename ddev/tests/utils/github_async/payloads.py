@@ -107,7 +107,33 @@ def pr_review_comment_payload(
     }
 
 
+def pull_request_file_payload(
+    filename: str = "datadog_checks_base/setup.py",
+    status: str = "modified",
+    **extra: Any,
+) -> dict[str, Any]:
+    """A `diff-entry` payload, including the diff statistics the model deliberately ignores."""
+    return {
+        "sha": "bbcd538c8e72b8c175046e27cc8f907076331401",
+        "filename": filename,
+        "status": status,
+        "additions": 3,
+        "deletions": 1,
+        "changes": 4,
+        "blob_url": f"https://github.com/owner/repo/blob/abc/{filename}",
+        "raw_url": f"https://github.com/owner/repo/raw/abc/{filename}",
+        "contents_url": f"https://api.github.com/repos/owner/repo/contents/{filename}",
+        "patch": "@@ -1 +1 @@",
+        **extra,
+    }
+
+
 def pull_request_payload(number: int = 1, html_url: str | None = None, **extra: Any) -> dict[str, Any]:
+    """A minimal `pull-request-simple` payload, which is what the list endpoints return.
+
+    It carries no diff totals, so it validates as `PullRequestSimple` but not as `PullRequest`.
+    Use `full_pull_request_payload` for an endpoint that returns the full schema.
+    """
     return {
         "number": number,
         "html_url": html_url if html_url is not None else f"https://github.com/owner/repo/pull/{number}",
@@ -135,9 +161,14 @@ def full_pull_request_payload(
     labels: list[dict[str, Any]] | None = None,
     head: dict[str, Any] | None = None,
     base: dict[str, Any] | None = None,
+    changed_files: int = 1,
     **extra: Any,
 ) -> dict[str, Any]:
-    """A richer PR payload exercising sub-models (user, labels, head/base)."""
+    """A `pull-request` payload exercising sub-models (user, labels, head/base).
+
+    This is the full schema the single-object endpoints return, so it carries the diff totals the
+    abbreviated form omits.
+    """
     return {
         "id": 9000 + number,
         "number": number,
@@ -174,6 +205,7 @@ def full_pull_request_payload(
         if head is not None
         else {"ref": "alice/fix", "sha": "1234567890abcdef00", "label": "alice:alice/fix"},
         "base": base if base is not None else {"ref": "master", "sha": "cafebabe00", "label": "owner:master"},
+        "changed_files": changed_files,
         **extra,
     }
 
