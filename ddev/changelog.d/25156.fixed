@@ -1,0 +1,1 @@
+Accept pending GitHub Actions step statuses and unify Dispatcher shutdown reporting and cleanup, preserving original failures and secondary diagnostics.
