@@ -78,17 +78,12 @@ passes only because it asserts nothing is **not** valid. Check that:
 
 ## 3 — Confirm the product requirements are pinned
 
-The team defined product requirements for this integration (verbatim below, and reflected in the
-worker summary). Where a requirement is observable from telemetry, the suite must pin it — a
-dropped metric asserted **absent**, a renamed label asserted present with the original absent. A
-stated, observable requirement with no corresponding assertion is a fail. If the block below
-states there are no requirements (e.g. "nothing to require"), there is nothing to check here.
-
-Requirements, verbatim:
-
-```
-${prd}
-```
+The team defined product requirements for this integration (in `${prd}`, and reflected in the
+worker summary). Read that file, in full, before reviewing. Where a requirement is observable from
+telemetry, the suite must pin it — a dropped metric asserted **absent**, a renamed label asserted
+present with the original absent. A stated, observable requirement with no corresponding assertion
+is a fail. If the file states there are no requirements (e.g. "nothing to require"), there is
+nothing to check here.
 
 ## Verdict
 
