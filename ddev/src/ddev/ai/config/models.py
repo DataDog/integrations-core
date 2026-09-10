@@ -70,6 +70,7 @@ class FlowInputBase(BaseModel):
     placeholder: str | None = None
     required: bool = True
     as_content: bool = False
+    snapshot: bool = False
 
 
 class FlowInputField(FlowInputBase):
@@ -85,13 +86,14 @@ class FlowInputField(FlowInputBase):
             default=self.default,
             placeholder=self.placeholder,
             as_content=self.as_content,
+            snapshot=self.snapshot,
         )
         return self
 
     def convert_runtime_value(self, value: object, *, error_path: str | None = None) -> str:
         """Convert one runtime value according to this input's declared type."""
         return _convert_scalar_runtime_value(
-            self.input_type, error_path or self.name, value, as_content=self.as_content
+            self.input_type, error_path or self.name, value, as_content=self.as_content, snapshot=self.snapshot
         )
 
 
@@ -122,6 +124,7 @@ class FlowInput(FlowInputBase):
                 defaults=defaults,
                 placeholder=self.placeholder,
                 as_content=self.as_content,
+                snapshot=self.snapshot,
                 multi=self.multi,
             )
         else:
@@ -136,6 +139,7 @@ class FlowInput(FlowInputBase):
                         default=default,
                         placeholder=self.placeholder,
                         as_content=self.as_content,
+                        snapshot=self.snapshot,
                     )
             else:
                 _validate_scalar_options(
@@ -144,7 +148,10 @@ class FlowInput(FlowInputBase):
                     default=None,
                     placeholder=self.placeholder,
                     as_content=self.as_content,
+                    snapshot=self.snapshot,
                 )
+        if self.snapshot and self.multi:
+            raise ValueError("'snapshot' may not be used with multi inputs")
         return self
 
     def convert_runtime_value(self, value: object) -> RuntimeInputValue:
@@ -174,7 +181,9 @@ class FlowInput(FlowInputBase):
         """Convert one runtime value according to this input's declared type."""
         input_error_path = error_path or self.name
         if self.input_type is not InputType.OBJECT:
-            return _convert_scalar_runtime_value(self.input_type, input_error_path, value, as_content=self.as_content)
+            return _convert_scalar_runtime_value(
+                self.input_type, input_error_path, value, as_content=self.as_content, snapshot=self.snapshot
+            )
         return {
             child.name: child.convert_runtime_value(child_value, error_path=qualified_name)
             for child, child_value, qualified_name in _resolve_object_field_values(input_error_path, self.fields, value)
@@ -188,6 +197,7 @@ def _validate_object_options(
     defaults: list[object],
     placeholder: str | None,
     as_content: bool,
+    snapshot: bool,
     multi: bool,
 ) -> None:
     if not fields:
@@ -195,8 +205,12 @@ def _validate_object_options(
     field_names = [field.name for field in fields]
     if len(field_names) != len(set(field_names)):
         raise ValueError("Object field names must be unique")
-    if as_content:
-        raise ValueError("'as_content' may only be used with path inputs")
+    _validate_path_flags(InputType.OBJECT, as_content=as_content, snapshot=snapshot)
+    # Snapshot capture walks top-level inputs only, so a nested field carrying the flag
+    # would silently keep pointing at the original file for the whole run.
+    for object_field in fields:
+        if object_field.snapshot:
+            raise ValueError(f"'snapshot' may not be used on object field {object_field.name!r}")
     if placeholder is not None:
         raise ValueError("'placeholder' may not be set on object inputs; set it on individual object fields instead")
     for index, default in enumerate(defaults):
@@ -232,6 +246,15 @@ def _resolve_object_field_values(
     return values
 
 
+def _validate_path_flags(input_type: InputType, *, as_content: bool, snapshot: bool) -> None:
+    """Enforce that the path-only delivery flags are exclusive and used on path inputs."""
+    if as_content and snapshot:
+        raise ValueError("'as_content' and 'snapshot' are mutually exclusive")
+    for flag, name in ((as_content, "as_content"), (snapshot, "snapshot")):
+        if flag and input_type is not InputType.PATH:
+            raise ValueError(f"{name!r} may only be used with path inputs")
+
+
 def _validate_scalar_options(
     input_type: ScalarInputType,
     error_path: str,
@@ -239,9 +262,9 @@ def _validate_scalar_options(
     default: object | None,
     placeholder: str | None,
     as_content: bool,
+    snapshot: bool,
 ) -> None:
-    if as_content and input_type is not InputType.PATH:
-        raise ValueError("'as_content' may only be used with path inputs")
+    _validate_path_flags(input_type, as_content=as_content, snapshot=snapshot)
     if placeholder is not None and input_type is InputType.BOOLEAN:
         raise ValueError("'placeholder' may not be used with boolean inputs")
     if default is None:
@@ -263,6 +286,7 @@ def _convert_scalar_runtime_value(
     value: object,
     *,
     as_content: bool,
+    snapshot: bool,
 ) -> str:
     match input_type:
         case InputType.STRING:
@@ -275,6 +299,8 @@ def _convert_scalar_runtime_value(
         case InputType.PATH:
             if as_content:
                 return _read_path_content(error_path, value)
+            if snapshot:
+                return _resolve_snapshot_path(error_path, value)
             return str(value)
         case unexpected:
             assert_never(unexpected)
@@ -496,8 +522,8 @@ def _validate_number(error_path: str, value: object, *, prefix: str = "Input") -
         raise ValueError(f"{prefix} {error_path!r} must be a number")
 
 
-def _read_path_content(error_path: str, value: object) -> str:
-    """Read an existing regular UTF-8 file supplied as a path input."""
+def _validate_path_input(error_path: str, value: object) -> Path:
+    """Ensure a path input names an existing regular file."""
     if not isinstance(value, (str, PathLike)) or not str(value):
         raise ValueError(f"Input {error_path!r} must be a valid path")
     path = Path(value)
@@ -505,10 +531,30 @@ def _read_path_content(error_path: str, value: object) -> str:
         raise ValueError(f"Input {error_path!r} path does not exist: {path}")
     if not path.is_file():
         raise ValueError(f"Input {error_path!r} path is not a file: {path}")
+    return path
+
+
+def _read_path_text(error_path: str, path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8")
-    except OSError as error:
+    except (OSError, UnicodeDecodeError) as error:
         raise ValueError(f"Input {error_path!r} path could not be read: {path}: {error}") from error
+
+
+def _read_path_content(error_path: str, value: object) -> str:
+    """Read an existing regular UTF-8 file supplied as a path input."""
+    return _read_path_text(error_path, _validate_path_input(error_path, value))
+
+
+def _resolve_snapshot_path(error_path: str, value: object) -> str:
+    """Validate a snapshot input is a readable UTF-8 file and return its canonical path.
+
+    The contents are checked but discarded: snapshot inputs reach agents as a path to a
+    per-run copy, so launch must still reject files that cannot be read.
+    """
+    path = _validate_path_input(error_path, value)
+    _read_path_text(error_path, path)
+    return str(path.resolve())
 
 
 class ConfigStatus(StrEnum):
