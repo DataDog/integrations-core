@@ -12,21 +12,16 @@ prefix** is stated in the worker summary.
 ## Product requirements (mandatory)
 
 The team defined product requirements for this integration; they were given to the check author
-and are **mandatory**. Read them below and verify the built integration honors **every one** of
-them — for example, a metric the requirements say to drop must be absent from **both**
-every affected endpoint mapping and `metadata.csv`; a forced config option must be present in `check.py`/`spec.yaml`.
+and are **mandatory**. They are in `${prd}` — read that file, in full, before reviewing — and
+verify the built integration honors **every one** of them: for example, a metric the requirements
+say to drop must be absent from **both** every affected endpoint mapping and `metadata.csv`; a
+forced config option must be present in `check.py`/`spec.yaml`.
 
-If the block below states there are no requirements (e.g. "nothing to require"), there is
+If the file states there are no requirements (e.g. "nothing to require"), there is
 nothing extra to enforce here — do not invent requirements.
 
 Fail (`valid: false`) if any stated requirement is unmet, naming the specific requirement and the
 file/line where it is violated.
-
-Requirements, verbatim:
-
-```
-${prd}
-```
 
 ## `check.py`
 

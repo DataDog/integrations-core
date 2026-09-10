@@ -94,6 +94,11 @@ class LaunchModalTestApp(TogoModalTestApp):
     def _populate_prd(self) -> None:
         self.screen.query_one("#input-prd", Input).value = str(self.prd_path)
 
+    @property
+    def expected_prd(self) -> str:
+        """The value the PRD input converts to: a path to the file, not its contents."""
+        return str(self.prd_path.resolve())
+
 
 @pytest.fixture
 def large_terminal() -> tuple[int, int]:
