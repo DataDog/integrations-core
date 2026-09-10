@@ -280,6 +280,25 @@ def test_flow_input_rejects_as_content_for_non_path():
         models.FlowInput(name="subject", label="Subject", input_type="string", as_content=True)
 
 
+def test_flow_input_rejects_snapshot_for_object():
+    with pytest.raises(ValidationError, match="'snapshot' may only be used with path inputs"):
+        object_input(snapshot=True)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"input_type": "string"}, "'snapshot' may only be used with path inputs"),
+        ({"input_type": "path", "as_content": True}, "'as_content' and 'snapshot' are mutually exclusive"),
+        ({"input_type": "path", "multi": True}, "'snapshot' may not be used with multi inputs"),
+    ],
+    ids=["non-path", "as-content", "multi"],
+)
+def test_flow_input_rejects_invalid_snapshot(kwargs, message):
+    with pytest.raises(ValidationError, match=message):
+        models.FlowInput(name="source", label="Source", snapshot=True, **kwargs)
+
+
 def test_flow_input_rejects_placeholder_for_boolean():
     with pytest.raises(ValidationError, match="'placeholder' may not be used with boolean inputs"):
         models.FlowInput(name="enabled", label="Enabled", input_type="boolean", placeholder="Enabled")
@@ -677,3 +696,29 @@ def test_flow_input_path_as_content_rejects_nonexistent_path(tmp_path):
 
     with pytest.raises(ValueError, match="Input 'source' path does not exist"):
         flow_input.convert_runtime_value(missing)
+
+
+def test_flow_input_snapshot_returns_canonical_path(tmp_path):
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "spec.md").write_text("requirements", encoding="utf-8")
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", snapshot=True)
+
+    assert flow_input.convert_runtime_value(tmp_path / "nested" / ".." / "spec.md") == str(
+        tmp_path.resolve() / "spec.md"
+    )
+
+
+def test_flow_input_snapshot_rejects_nonexistent_path(tmp_path):
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", snapshot=True)
+
+    with pytest.raises(ValueError, match="Input 'source' path does not exist"):
+        flow_input.convert_runtime_value(tmp_path / "missing.md")
+
+
+def test_flow_input_snapshot_rejects_unreadable_file(tmp_path):
+    source = tmp_path / "spec.md"
+    source.write_bytes(b"\xff\xfe not utf-8")
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", snapshot=True)
+
+    with pytest.raises(ValueError, match="Input 'source' path could not be read"):
+        flow_input.convert_runtime_value(source)
