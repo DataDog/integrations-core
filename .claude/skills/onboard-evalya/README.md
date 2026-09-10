@@ -69,13 +69,16 @@ The only cycle is step 5 (the coverage loop); everything else is linear.
    │        ▼                                   │
    │   diff  uncovered = target − emitted       │
    │        │                                   │
-   │        ├─ empty? ──────────── yes ─────────┼──►┐
+   │        ├─ empty? ─────────────── yes ──────┼──►┐
    │        │                                   │   │
-   │        └─ no: extend seed OR activity-gen  │   │
-   │              (one change) ──┐              │   │
-   │                             │              │   │
-   │        ▲────────────────────┘  re-run      │   │
-   │        (or: metric unreachable → document) │   │
+   │        └─ no, escalate per metric:         │   │
+   │             1. live: seed OR activity-gen  │   │
+   │             2. can't emit live? serve      │   │   reuse tests/fixtures/
+   │                tests/fixtures/ via          │   │   (frozen values,
+   │                proxy/static → fixture-backed│   │    mark as NOT live)
+   │             3. neither → unreachable        │   │
+   │                     │  (1 or 2) re-run      │   │
+   │        ▲────────────┘                      │   │
    └────────────────────────────────────────────┘   │
                                                      │
    ┌─────────────────────────────────────────────◄──┘
