@@ -1,18 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 import pytest
 
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -81,17 +76,39 @@ def setup_cert_manager():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_cert_manager]) as kubeconfig:
-        with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cert-manager', PORT, 'deployment', 'cert-manager'))
-            ]
+        pods = []
+        for selector in ('app.kubernetes.io/component=controller', 'app=cert-manager'):
+            result = run_command(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--namespace",
+                    "cert-manager",
+                    "--selector",
+                    selector,
+                    "--output",
+                    "json",
+                ],
+                capture='out',
+                check=True,
+            )
+            pods = json.loads(result.stdout)['items']
+            if pods:
+                break
+
+        if len(pods) != 1 or not pods[0].get('status', {}).get('podIP'):
+            raise RuntimeError(f'Expected exactly one ready cert-manager controller pod, found {len(pods)}')
+
+        controller_ip = pods[0]['status']['podIP']
         instances = {
             'instances': [
-                {'openmetrics_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
+                {'openmetrics_endpoint': f'http://{controller_ip}:{PORT}/metrics'},
             ]
         }
+        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
 
-        yield instances
+        yield instances, metadata
 
 
 @pytest.fixture
