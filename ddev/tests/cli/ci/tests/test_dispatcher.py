@@ -40,9 +40,9 @@ from ddev.cli.ci.tests.messages import (
     UpdatePRComment,
 )
 from ddev.cli.ci.tests.pr_comment import (
+    ALERT_RUNNING_NOTE,
     CANCELLED_HEADING,
     FAILED_HEADING,
-    FOOTER_RUNNING_NOTE,
     TIMED_OUT_HEADING,
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState
@@ -432,7 +432,7 @@ def test_a_timed_out_run_reports_itself_and_cancels_what_it_started(
     assert TIMED_OUT_HEADING in terminal_body
     assert "max_timeout" in terminal_body
     assert "Dispatcher tests · in progress" not in terminal_body
-    assert FOOTER_RUNNING_NOTE not in terminal_body
+    assert ALERT_RUNNING_NOTE not in terminal_body
     assert TIMED_OUT_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
 
 
@@ -505,7 +505,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
     terminal_body = client.last_call("update_issue_comment").kwargs["body"]
     assert FAILED_HEADING in terminal_body
     assert "Dispatcher tests · in progress" not in terminal_body
-    assert FOOTER_RUNNING_NOTE not in terminal_body
+    assert ALERT_RUNNING_NOTE not in terminal_body
     assert "listing workflow jobs (batch batch-02, run 456)" in terminal_body
     summary = step_summary.read_text(encoding="utf-8")
     assert FAILED_HEADING in summary
