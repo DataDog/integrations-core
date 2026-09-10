@@ -336,7 +336,7 @@ The information given by the  <code>Get-EventLog</code> PowerShell command or th
 The configuration option using the Event Log API includes the following filters:
 
   - `path`: `Application`, `System`, `Setup`, `Security`
-  - `type`: `Critical`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
+  - `type`: `Success`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
   - `source`: Any available source name
   - `id`: event_id: Windows EventLog ID
 

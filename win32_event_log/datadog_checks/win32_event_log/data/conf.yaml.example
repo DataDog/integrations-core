@@ -128,7 +128,8 @@ instances:
     ## The following properties are supported:
     ##
     ##   - source > a.k.a. provider name https://docs.microsoft.com/en-us/windows/win32/eventlog/event-sources
-    ##   - type > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
+    ##   - type > one of Success, Error, Warning, Information, Success Audit, Failure Audit
+    ##            (also accepted in lowercase) https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
     ##   - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
     ##
     ##   /\ WARNING /\
