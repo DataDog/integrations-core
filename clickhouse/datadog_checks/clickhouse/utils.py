@@ -108,5 +108,15 @@ def cluster_aware_query(base: dict) -> dict:
     }
 
 
+LEADING_DIGITS = re.compile(r'\d+')
+
+
 def parse_version(version: str) -> list[int]:
-    return [int(v) for v in version.split('.')]
+    parts = []
+    for segment in version.split('.'):
+        match = LEADING_DIGITS.match(segment)
+        # do not include non-numeric version segments (e.g. Altinity's `altinityfips` suffix)
+        if match is None:
+            break
+        parts.append(int(match.group()))
+    return parts
