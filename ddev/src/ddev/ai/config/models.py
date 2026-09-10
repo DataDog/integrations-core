@@ -206,6 +206,11 @@ def _validate_object_options(
     if len(field_names) != len(set(field_names)):
         raise ValueError("Object field names must be unique")
     _validate_path_flags(InputType.OBJECT, as_content=as_content, snapshot=snapshot)
+    # Snapshot capture walks top-level inputs only, so a nested field carrying the flag
+    # would silently keep pointing at the original file for the whole run.
+    for object_field in fields:
+        if object_field.snapshot:
+            raise ValueError(f"'snapshot' may not be used on object field {object_field.name!r}")
     if placeholder is not None:
         raise ValueError("'placeholder' may not be set on object inputs; set it on individual object fields instead")
     for index, default in enumerate(defaults):
