@@ -58,7 +58,9 @@ def validate_snapshot_readers(
     errors: list[FlowError] = []
     for phase_config in scheduled_phases:
         agent_name = phase_config.agent
-        agent = registry.agents.get(agent_name) if agent_name is not None else None
+        if agent_name is None:
+            continue
+        agent = registry.agents.get(agent_name)
         if agent is None or READ_FILE_TOOL in agent.tools:
             continue
         declared = {v.name for v in phase_config.variables} | {v.name for v in agent.variables}
@@ -73,7 +75,7 @@ def validate_snapshot_readers(
                 f"but does not declare the {READ_FILE_TOOL!r} tool",
                 subject=agent_name,
                 phase=phase_config.name,
-                sources=[registry.entry(ResourceKind.AGENT, agent_name).source_file],
+                sources=[registry.source_file_for(ResourceKind.AGENT, agent_name)],
             )
         )
     return errors
