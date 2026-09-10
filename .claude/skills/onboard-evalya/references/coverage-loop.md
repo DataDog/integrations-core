@@ -84,13 +84,41 @@ fixture can never reach 100% no matter the workload.
 1. Stand up the fixture (A or B).
 2. Run the oracle, extract emitted metric names.
 3. `uncovered = achievable_target - emitted`.
-4. If empty → done. Otherwise, for each uncovered metric:
-   - decide whether it is state-dependent (extend `seed`) or rate/counter (extend `activity-gen`)
-     or un-emittable by OSS (pause, consult user);
-   - make the one targeted workload change;
-   - re-run from step 2.
-5. Stop when `uncovered` is empty **or** every remaining metric is documented-unreachable with a
-   concrete reason (cross-integration `system.*`, requires a managed-service field, etc.).
+4. If empty → done. Otherwise, for each uncovered metric, escalate:
+   - state-dependent → extend `seed`; rate/counter → extend `activity-gen`; make one targeted
+     change and re-run from step 2;
+   - genuinely not producible live (OSS can't emit it, managed-service-only, version-gated) →
+     fixture-backed injection (below);
+   - neither path covers it → document as unreachable.
+5. Stop when every target metric is either covered (live or fixture-backed) **or**
+   documented-unreachable with a concrete reason (cross-integration `system.*`, no fixture data
+   exists, etc.).
+
+## Fixture-backed injection (fallback)
+
+When the live instance cannot produce a metric, reuse the integration's existing recorded payloads
+in `<integration>/tests/fixtures/` rather than hand-authoring canned data — they already contain the
+metric, are maintained with the check, and are representative. Serve them so the check parses them:
+
+- **OpenMetrics checks** — the fixtures are usually the raw endpoint text (e.g.
+  `rabbitmq/tests/fixtures/metrics.txt`, `detailed.txt`). Expose one as an extra scrape target: a
+  static file server (`nginx:alpine` or `python -m http.server` serving it at `/metrics`), added to
+  the compose and pointed at by a second check instance; or an injecting proxy that appends the
+  recorded lines to the live reply, as `references/redis-exemplar.md` does with `inject.conf`.
+- **HTTP-API checks** (management API, mongo commands) — replay the recorded responses (e.g.
+  `mongo/tests/fixtures/$collStats-foo`) from a small mock HTTP server the check is pointed at.
+
+This genuinely exercises the check's parsing and metric mapping, which is what dashboard/monitor
+coverage is about. Its limits, which is why it is a fallback and not the default:
+
+- values are **frozen** — no rate/counter movement, no live state;
+- a recording can **drift** from what the check emits as the check or the product evolves, so it can
+  mask a real regression;
+- it proves the mapping, not that a live deployment actually produces the metric.
+
+Prefer an injecting proxy over a bare static endpoint when the same scrape must also carry live
+metrics (so one instance sees both), and keep the served file the integration's own fixture, not a
+copy, so it stays in sync.
 
 Guard against thrash: change one thing per iteration and re-diff, so each workload line is
 justified by a metric it actually moved. Give rate/counter metrics one or two scrape intervals of
@@ -98,6 +126,8 @@ traffic before concluding they are uncovered.
 
 ## Reporting
 
-Report coverage as `<covered>/<achievable>` with the command that produced the emitted set, and
-list any documented-unreachable metrics with their reason. Example:
-`24/24 target metrics emitted (ddev env agent redisdb <env> check redisdb --json); 0 unreachable.`
+Report coverage as `<covered>/<achievable>` with the command that produced the emitted set, split
+live vs fixture-backed, and list any documented-unreachable metrics with their reason. Example:
+`24/24 target metrics emitted (ddev env agent redisdb <env> check redisdb --json); 24 live, 0
+fixture-backed, 0 unreachable.` Name the fixture-backed metrics explicitly so a reviewer knows which
+came from a recording rather than a live scrape.

@@ -80,7 +80,9 @@ their union. Group them:
 
 Read `<integration>/tests/`: compose files, `conftest.py`, `common.py`, config under
 `tests/config` or `tests/compose`, and how the pytest suite starts the service. Decide what to
-reuse. Check for an existing `tests/evalya.yaml` — extend it rather than overwrite.
+reuse. Check for an existing `tests/evalya.yaml` — extend it rather than overwrite. Also catalog
+`tests/fixtures/` (recorded endpoint payloads or API responses): these are the canned data the
+step-5 fixture-backed fallback serves for metrics the live instance cannot produce.
 
 ### 4. Author the fixture
 
@@ -114,10 +116,23 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 2. Run the check and capture emitted metric names:
    `ddev env agent <integration> <env> check <integration> --json` (verify the JSON shape at
    runtime; fall back to `references/coverage-loop.md`'s alternatives if the flag differs).
-3. Diff emitted names against the achievable target. For each uncovered metric, extend `seed`
-   (state) or `activity-gen` (traffic) and re-run.
+3. Diff emitted names against the achievable target. For each uncovered metric, escalate in this
+   order and re-run:
+   1. **Live workload** — extend `seed` (state) or `activity-gen` (traffic). Always prefer this;
+      a live-produced metric is the strongest evidence.
+   2. **Fixture-backed injection** — when a metric genuinely cannot be produced live (OSS build
+      can't emit it, a managed-service-only field, a version-gated metric), reuse the integration's
+      existing recorded payloads under `<integration>/tests/fixtures/` instead of hand-authoring
+      canned data. Serve or inject them so the check parses them and emits the metric: for
+      OpenMetrics checks, expose the recorded `.txt` as an extra endpoint (a static file server, or
+      an injecting proxy as in `references/redis-exemplar.md`); for HTTP-API checks, replay the
+      recorded responses from a small mock. This exercises the check's real parsing and mapping,
+      but the values are frozen, so it is a fallback, not the default.
 4. Repeat until the gap is empty or every remaining metric is documented as unreachable (with the
-   reason). Do not claim 100% without the diff showing it — back the claim with the command output.
+   reason — no live path and no fixture data covers it). Do not claim 100% without the diff showing
+   it. Mark which metrics are **fixture-backed** rather than live; that distinction is part of an
+   honest coverage report, since a served recording is weaker evidence than a live scrape and can
+   drift from the check across versions.
 
 ### 6. Document and finish
 
@@ -136,6 +151,8 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 
 - State each uncovered metric and the concrete workload change that will cover it before editing —
   no speculative traffic.
-- If coverage stalls because a metric needs un-emittable data, stop and present options; a bespoke
-  proxy is a deliberate, user-approved step, not a default.
+- If coverage stalls because a metric needs un-emittable data, prefer serving the integration's
+  existing `tests/fixtures/` recordings (see step 5) over hand-authoring canned data; a bespoke
+  proxy built from scratch is a deliberate, user-approved step, not a default. Either way, mark the
+  metric fixture-backed rather than reporting it as live coverage.
 - Keep the diff focused on the fixture. Do not refactor the check or unrelated tests.
