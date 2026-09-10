@@ -485,6 +485,15 @@ MarkdownH3 {
     margin: 0 0 1 0;
 }
 
+/* Low chrome on purpose: this shares a fixed-height body with the pipeline graph,
+   which loses a row for every row spent here. */
+#execution-notice {
+    display: none;
+    height: auto;
+    color: $warning;
+    margin: 0 0 1 0;
+}
+
 #pipeline {
     layers: connectors nodes;
     width: 1fr;

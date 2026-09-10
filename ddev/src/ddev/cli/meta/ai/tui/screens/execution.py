@@ -50,6 +50,7 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeGoalCheck,
     ContextCleared,
     ExecutionFailed,
+    InputDiverged,
     PhaseErrored,
     PhaseFinished,
     PhaseStarted,
@@ -70,6 +71,9 @@ if TYPE_CHECKING:
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
 
 BANNER_ERROR_MAX_CHARS = 200
+# Keep the notice to one line: it shares a fixed-height body with the pipeline graph,
+# which loses a row for every row the banner grows.
+NOTICE_MAX_NAMES = 3
 
 
 class ExecutionScreen(TogoScreen):
@@ -108,6 +112,7 @@ class ExecutionScreen(TogoScreen):
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
+        self._diverged_inputs: list[str] = []
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -117,6 +122,9 @@ class ExecutionScreen(TogoScreen):
         error = Static("", id="execution-error")
         error.display = False
         yield error
+        notice = Static("", id="execution-notice")
+        notice.display = False
+        yield notice
         pipeline = PipelineGraph(self.flow, self._phase_statuses, id="pipeline")
         pipeline.border_title = "Pipeline"
         yield pipeline
@@ -241,6 +249,14 @@ class ExecutionScreen(TogoScreen):
             detail = f"{detail[: BANNER_ERROR_MAX_CHARS - 1].rstrip()}…"
         return detail
 
+    def _show_notice_banner(self, message: str) -> None:
+        try:
+            widget = self.query_one("#execution-notice", Static)
+        except NoMatches:
+            return
+        widget.update(message)
+        widget.display = True
+
     def _show_error_banner(self, message: str) -> None:
         try:
             widget = self.query_one("#execution-error", Static)
@@ -363,6 +379,20 @@ class ExecutionScreen(TogoScreen):
             self._show_phase_error_summary()
         else:
             self._show_error_banner("Run failed.")
+
+    def on_input_diverged(self, msg: InputDiverged) -> None:
+        """Report that a resumed run is keeping the input it started with."""
+        if msg.name in self._diverged_inputs:
+            return
+        self._diverged_inputs.append(msg.name)
+        self._show_notice_banner(f"⚠ {self._diverged_summary()} changed since launch — using the captured copy.")
+
+    def _diverged_summary(self) -> str:
+        """Name the diverged inputs, summarizing the tail so the banner stays one line."""
+        shown = self._diverged_inputs[:NOTICE_MAX_NAMES]
+        remaining = len(self._diverged_inputs) - len(shown)
+        names = ", ".join(shown)
+        return f"{names} and {remaining} more" if remaining else names
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED
