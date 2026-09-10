@@ -38,12 +38,14 @@ class ProgressError(StrEnum):
 class ExecutionState(Enum):
     """Where an execution is in its lifecycle, orthogonal to its outcome (``Status``).
 
-    ``RUNNING`` and ``RETRYING`` become reachable with the retry work.
+    A finished job may still be waiting for its batch's artifact collection.
     """
 
     PLANNED = "planned"
+    QUEUED = "queued"
     RUNNING = "running"
     RETRYING = "retrying"
+    ARTIFACT_DOWNLOAD = "artifact_download"
     FINISHED = "finished"
 
 
@@ -51,26 +53,26 @@ class ExecutionState(Enum):
 class JobAttemptProgress:
     """One observed execution of one planned job.
 
-    An attempt exists only because the job ran, so ``status`` is always known: an undetermined job
-    has no attempt. ``attempt`` is its 1-based position in the job's history. ``job_id``,
-    ``conclusion`` and ``job_url`` are ``None`` when GitHub never reported the job.
+    ``status`` is unknown until execution finishes; ``reports`` is unknown until collection finishes.
+    ``attempt`` is its 1-based position in the job's history. Missing GitHub metadata stays ``None``.
     """
 
     attempt: int
     job_id: int | None
-    status: Status
+    status: Status | None
     conclusion: WorkflowJobConclusion | None
     failed_steps: tuple[str, ...]
     job_url: str | None
-    reports: tuple[JUnitReport, ...]
+    reports: tuple[JUnitReport, ...] | None
     error: ProgressError | None = None
+    state: ExecutionState = ExecutionState.FINISHED
 
     @property
     def failed_tests(self) -> list[JUnitTestCase]:
         """Every failed/errored test case across this execution's reports."""
         return [
             case
-            for report in self.reports
+            for report in self.reports or ()
             for suite in report.test_suites
             for case in suite.test_cases
             if case.status in (TestStatus.FAILED, TestStatus.ERROR)
@@ -93,6 +95,11 @@ class JobProgress:
         return self.attempts[-1] if self.attempts else None
 
     @property
+    def complete(self) -> bool:
+        """Whether the latest execution finished, independently of result collection."""
+        return self.latest is not None and self.latest.state is ExecutionState.FINISHED
+
+    @property
     def retry_count(self) -> int:
         """Executions minus one. Not ``run_attempt - 1``: histories can be sparse."""
         return max(0, len(self.attempts) - 1)
@@ -103,7 +110,7 @@ class BatchProgress:
     """One logical batch, from planning through its terminal outcome.
 
     ``status`` is the workflow's own, not a roll-up of ``jobs_progress``: a workflow can fail in a
-    step no tracked job covers. It stays ``None`` until ``FINISHED``.
+    step no tracked job covers. It becomes known before artifact collection starts.
     """
 
     batch_id: str
@@ -145,8 +152,8 @@ class DispatcherProgress:
 
     @property
     def complete(self) -> int:
-        """Planned jobs that have run."""
-        return sum(1 for job in self._jobs_progress if job.latest is not None)
+        """Planned jobs whose latest execution has finished."""
+        return sum(job.complete for job in self._jobs_progress)
 
     @property
     def total(self) -> int:
@@ -158,4 +165,6 @@ class DispatcherProgress:
         return (job for batch in self.batches for job in batch.jobs_progress)
 
     def _count(self, status: Status) -> int:
-        return sum(1 for job in self._jobs_progress if job.latest is not None and job.latest.status == status)
+        return sum(
+            1 for job in self._jobs_progress if job.complete and job.latest is not None and job.latest.status == status
+        )

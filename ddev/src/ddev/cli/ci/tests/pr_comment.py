@@ -56,6 +56,15 @@ CANCELLED_NOTE = "Anything below is what had been gathered by then, and batches 
 # Said instead when no batch ever reported, where the note above would point at results that are absent.
 CANCELLED_WITHOUT_RESULTS_NOTE = "The run was cancelled before any batch reported, so there are no results to show."
 
+# Said in every report while Dispatcher runs in shadow mode: it does not decide merges yet, so its
+# result must not be mistaken for the merge signal.
+SHADOW_NOTICE = (
+    "> **Dispatcher beta: informational only**\n"
+    ">\n"
+    "> Dispatcher is running alongside existing CI while we validate it. You can ignore this report "
+    "and its statuses. Existing CI remains the merge signal."
+)
+
 # Blocks are joined by a blank line, so each one costs two bytes beyond its own length. Newlines are
 # one byte in UTF-8, so this is the same number in either unit.
 SECTION_SEPARATOR = 2
@@ -79,7 +88,7 @@ RUN_SUMMARY_COMMENT_FAILED_NOTE = (
 )
 
 # Said in both the alert and the footer, so a reader who skips one still learns the comment is live.
-FOOTER_RUNNING_NOTE = "This comment updates automatically as each batch finishes."
+FOOTER_RUNNING_NOTE = "This comment updates automatically as jobs progress and results are collected."
 
 STATUS_CHIP = {
     Status.SUCCESS: "✅ passed",
@@ -157,7 +166,7 @@ def render_cancelled_notice() -> str:
     There is no snapshot to render, and the comment is the only place a reader learns the run existed.
     """
     footer = _footer(None, cancelled=True)
-    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
+    return f"{COMMENT_MARKER}\n\n{CANCELLED_HEADING}\n\n{SHADOW_NOTICE}\n\n{CANCELLED_WITHOUT_RESULTS_NOTE}\n\n{footer}"
 
 
 def render_run_summary(body: str, *, pr_comment_failed: bool) -> str:
@@ -189,8 +198,8 @@ def summary_line(progress: DispatcherProgress) -> str:
 
 
 def _header(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: bool = False) -> str:
-    """Marker, heading, in-progress alert and totals: the part that must never be truncated."""
-    blocks = [COMMENT_MARKER, _heading(progress, cancelled=cancelled)]
+    """Marker, heading, notice, in-progress alert and totals: the part that must never be truncated."""
+    blocks = [COMMENT_MARKER, _heading(progress, cancelled=cancelled), SHADOW_NOTICE]
     alert = _alert(progress, shows_unavailable=shows_unavailable, cancelled=cancelled)
     if alert is not None:
         blocks.append(alert)
@@ -222,7 +231,8 @@ def _alert(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: 
     if cancelled:
         return f"> [!CAUTION]\n> **The run was cancelled before it finished.** {CANCELLED_NOTE}"
     if not progress.done:
-        return f"> [!NOTE]\n> **Tests are still running.** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
+        phase = "Tests finished; collecting results." if _collecting_results(progress) else "Tests are still running."
+        return f"> [!NOTE]\n> **{phase}** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
 
     unavailable = _unavailable_count(progress)
     if _has_failure(progress):
@@ -237,6 +247,12 @@ def _alert(progress: DispatcherProgress, *, shows_unavailable: bool, cancelled: 
         alert = f"> [!WARNING]\n> **{_unavailable_phrase(unavailable)}.** Nothing failed, but this is not a clean pass."
         return f"{alert}\n> See the unavailable results below." if shows_unavailable else alert
     return None
+
+
+def _collecting_results(progress: DispatcherProgress) -> bool:
+    return any(batch.state is ExecutionState.ARTIFACT_DOWNLOAD for batch in progress.batches) and all(
+        batch.state in (ExecutionState.ARTIFACT_DOWNLOAD, ExecutionState.FINISHED) for batch in progress.batches
+    )
 
 
 def _unavailable_phrase(count: int) -> str:
@@ -281,7 +297,7 @@ def _progress_bar(progress: DispatcherProgress) -> str:
     pending = progress.total - progress.complete
     # Every job in a retrying batch has reported, so `complete == total` is reachable while the run is
     # unfinished, and a full bar there would contradict the heading next to it.
-    if not progress.done and not pending:
+    if not progress.done and not pending and not _collecting_results(progress):
         pending = 1
 
     counts = (progress.passed, progress.failed, progress.skipped, pending)
@@ -330,7 +346,7 @@ def _batch_table(progress: DispatcherProgress) -> str:
 
 
 def _batch_row(batch: BatchProgress) -> str:
-    done = sum(1 for job in batch.jobs_progress if job.latest is not None)
+    done = sum(job.complete for job in batch.jobs_progress)
     workflow = (
         f'<a href="{html.escape(batch.workflow_url, quote=True)}">run {batch.run_id}</a>'
         if batch.workflow_url
@@ -351,8 +367,10 @@ def _batch_chip(batch: BatchProgress) -> str:
     conclusion, so a batch can be failed while every tracked job passed (a setup or upload step).
     Rolling the jobs up here would render that batch as passed and hide a real failure.
     """
+    chip = STATUS_CHIP.get(batch.status) if batch.status is not None else None
+    if batch.state is ExecutionState.ARTIFACT_DOWNLOAD:
+        return f"{chip} · 📥 collecting artifacts" if chip else "📥 collecting artifacts"
     if batch.state is ExecutionState.FINISHED:
-        chip = STATUS_CHIP.get(batch.status) if batch.status is not None else None
         return chip if chip is not None else "❔ no status reported"
     # A rerun is Dispatcher's own business, so at the batch level it is simply unfinished work. Which
     # jobs were retried is reported per job, where it is actionable.
@@ -396,7 +414,9 @@ def _failures(progress: DispatcherProgress, budget: int, *, detail: bool = True)
     entries += [
         f"<code>{html.escape(batch.batch_id)}</code> — the workflow failed with no tracked job failure"
         for batch in progress.batches
-        if batch.status is Status.FAILURE and not any(_is_failed(job) for job in batch.jobs_progress)
+        if batch.status is Status.FAILURE
+        and all(job.complete for job in batch.jobs_progress)
+        and not any(_is_failed(job) for job in batch.jobs_progress)
     ]
     if not entries:
         return None
@@ -414,6 +434,8 @@ def _failures(progress: DispatcherProgress, budget: int, *, detail: bool = True)
 def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress, *, detail: bool = True) -> str:
     link = f' &nbsp; <a href="{html.escape(attempt.job_url, quote=True)}">view job</a>' if attempt.job_url else ""
     entry = f"<code> {html.escape(_job_label(job))} </code>{link}"
+    if attempt.reports is None:
+        entry += "\n<sub>Test details pending artifact collection.</sub>"
 
     # ``<code>`` rather than a Markdown code span: ``html.escape`` leaves backticks alone, and a
     # backtick in a test id would close a span early and let the rest render as markup.
@@ -425,7 +447,11 @@ def _failed_job_entry(job: JobProgress, attempt: JobAttemptProgress, *, detail: 
         items = "\n".join(f"- <code>{html.escape(step)}</code>" for step in attempt.failed_steps)
         summary = f"{len(attempt.failed_steps)} failed step{'s' if len(attempt.failed_steps) > 1 else ''}"
     else:
-        return f"{entry}\n<sub>No test-level failure was reported for this job.</sub>"
+        return (
+            entry
+            if attempt.reports is None
+            else f"{entry}\n<sub>No test-level failure was reported for this job.</sub>"
+        )
 
     if not detail:
         # The count without the names: enough to see the shape of the failure and open the job.
@@ -465,7 +491,7 @@ def _retried(progress: DispatcherProgress, budget: int) -> str | None:
         attempt = job.latest
         if job.retry_count == 0 or attempt is None:
             continue
-        outcome = STATUS_CHIP.get(attempt.status, "❔ unknown")
+        outcome = STATUS_CHIP[attempt.status] if attempt.status is not None else "🔄 in progress"
         plural = "retries" if job.retry_count > 1 else "retry"
         entries.append(f"- <code>{html.escape(_job_label(job))}</code> — {outcome} after {job.retry_count} {plural}")
     return _list_section("### 🔁 Retried jobs", entries, budget, "retried job")

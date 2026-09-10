@@ -11,6 +11,7 @@ of every job's result — not just failures.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import shutil
 import threading
@@ -20,6 +21,7 @@ from pathlib import Path
 
 import pytest
 
+from ddev.cli.ci.tests import messages
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
     BatchJob,
@@ -34,7 +36,7 @@ from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import INITIAL_UPDATE_MESSAGE_ID, TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
-from ddev.utils.github_async.models import JobStep, WorkflowJob
+from ddev.utils.github_async.models import JobStep, WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
 from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, jobs_reported, make_job
@@ -185,6 +187,104 @@ def _find_result(gatherer: TaskTestGatherer, integration: str) -> JobResult:
 # ---------------------------------------------------------------------------
 # process_message
 # ---------------------------------------------------------------------------
+
+
+def _progress_update(
+    *jobs: WorkflowJob,
+    sequence: int = 1,
+    state: ExecutionState = ExecutionState.RUNNING,
+    status: Status | None = None,
+) -> messages.BatchProgressUpdate:
+    return messages.BatchProgressUpdate(
+        id=f"progress-{sequence}",
+        batch_id="batch-1",
+        run_id=100,
+        workflow_url="https://github.com/o/r/actions/runs/100",
+        sequence=sequence,
+        state=state,
+        status=status,
+        jobs=tuple(jobs),
+    )
+
+
+def test_progress_observations_update_planned_jobs_and_suppress_equal_snapshots(tmp_path: Path):
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [_batch_job(name) for name in ("j1", "j2", "j3", "j4")]})
+    update = _progress_update(
+        _workflow_job("j1", "success"),
+        WorkflowJob(id=2, run_id=100, name="j2", status="in_progress"),
+        WorkflowJob(id=4, run_id=100, name="j4", status="queued"),
+        _workflow_job("setup", "failure"),
+    )
+    gatherer.process_message(update)
+    [published] = drain_queue(gatherer.bus.queue)
+    assert (published.progress.complete, published.progress.total) == (1, 4)
+    assert not published.progress.done
+    batch = published.progress.batches[0]
+    assert batch.workflow_url == "https://github.com/o/r/actions/runs/100"
+    assert batch.jobs_progress[1].latest.status is None
+    assert batch.jobs_progress[2].latest is None
+    assert batch.jobs_progress[3].latest.state is ExecutionState.QUEUED
+    assert batch.jobs_progress[3].latest.status is None
+    assert all(job.latest is None or job.latest.error is None for job in batch.jobs_progress)
+
+    gatherer.process_message(dataclasses.replace(update, sequence=3))
+    gatherer.process_message(_progress_update(sequence=4))
+    assert drain_queue(gatherer.bus.queue) == []
+
+    gatherer.process_message(_progress_update(_workflow_job("j1", "failure"), sequence=2))
+    assert gatherer.progress.passed == 1
+    assert drain_queue(gatherer.bus.queue) == []
+
+
+def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_path: Path):
+    job = _batch_job("j1")
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [job]})
+    observed = _workflow_job("j1", "failure", failed_step="Run unit tests")
+    update = _progress_update(observed, state=ExecutionState.ARTIFACT_DOWNLOAD, status=Status.FAILURE)
+    gatherer.process_message(update)
+    [collecting] = drain_queue(gatherer.bus.queue)
+    assert collecting.progress.failed == 1
+    assert not collecting.progress.done
+    assert collecting.progress.batches[0].jobs_progress[0].latest.error is None
+    assert collecting.progress.batches[0].jobs_progress[0].latest.failed_steps == ("Run unit tests",)
+
+    artifact_dir = _make_job_tree(tmp_path / "artifacts", "j1", junit=JUNIT_FAILING, e2e=False)
+    gatherer.process_message(
+        _batch_finished(
+            artifact_dir,
+            status=Status.FAILURE,
+            batch_jobs=[_batch_job_result(job, observed, artifact_dir)],
+        )
+    )
+    [finished] = drain_queue(gatherer.bus.queue)
+    assert finished.revision == collecting.revision + 1
+    assert finished.progress.done
+    result = finished.progress.batches[0].jobs_progress[0]
+    assert result.retry_count == 0
+    assert [case.identifier for case in result.latest.failed_tests] == [FAILING_TEST_ID]
+
+    gatherer.process_message(dataclasses.replace(update, sequence=10))
+    assert gatherer.progress == finished.progress
+    assert drain_queue(gatherer.bus.queue) == []
+
+
+def test_progress_does_not_regress_execution_or_collection(tmp_path: Path):
+    gatherer = _make_gatherer(tmp_path)
+    gatherer.process_message(_progress_update(_workflow_job("j1", "success"), sequence=2))
+    drain_queue(gatherer.bus.queue)
+    gatherer.process_message(
+        _progress_update(WorkflowJob(id=1, run_id=100, name="j1", status="in_progress"), sequence=3)
+    )
+    assert gatherer.progress.passed == 1
+    assert drain_queue(gatherer.bus.queue) == []
+
+    gatherer.process_message(
+        _progress_update(sequence=4, state=ExecutionState.ARTIFACT_DOWNLOAD, status=Status.SUCCESS)
+    )
+    [collecting] = drain_queue(gatherer.bus.queue)
+    gatherer.process_message(_progress_update(sequence=5))
+    assert gatherer.progress == collecting.progress
+    assert drain_queue(gatherer.bus.queue) == []
 
 
 def _stopping_before_gathering(gatherer: TaskTestGatherer, bus: RecordingBus) -> None:
@@ -586,20 +686,29 @@ def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
     assert _registry(gatherer) == []
 
 
-def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path) -> None:
-    # Terminal, unsuccessful, and carrying the reason — and still emitting a revision.
+@pytest.mark.parametrize("observed_status", [None, WorkflowJobStatus.IN_PROGRESS, WorkflowJobStatus.COMPLETED])
+def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path, observed_status: WorkflowJobStatus | None):
     gatherer = _make_gatherer(tmp_path)
-    gatherer.process_message(_batch_finished("", status="failure", run_id=100, batch_jobs=[]))
+    if observed_status is not None:
+        observed = WorkflowJob(
+            id=1,
+            run_id=100,
+            name="j1",
+            status=observed_status,
+            conclusion=WorkflowJobConclusion.FAILURE if observed_status is WorkflowJobStatus.COMPLETED else None,
+        )
+        gatherer.process_message(_progress_update(observed))
+        drain_queue(gatherer.bus.queue)
+    gatherer.process_message(_batch_finished("", status=Status.FAILURE, run_id=100, batch_jobs=[]))
 
-    update = drain_queue(gatherer.bus.queue)[0]
-    assert update.revision == 1
+    [update] = drain_queue(gatherer.bus.queue)
     batch = update.progress.batches[0]
-    assert batch.state == ExecutionState.FINISHED
-    assert batch.status == Status.FAILURE
+    assert batch.state is ExecutionState.FINISHED
+    assert batch.status is Status.FAILURE
     assert batch.run_id == 100
-    assert batch.error == ProgressError.NO_JOB_RESULTS
-    # Its planned jobs are still listed, with no execution: 1 planned, 0 complete.
-    assert (update.progress.total, update.progress.complete) == (1, 0)
+    assert batch.error is ProgressError.NO_JOB_RESULTS
+    # Execution can finish without any final results being gathered.
+    assert (update.progress.total, update.progress.complete) == (1, int(observed_status is WorkflowJobStatus.COMPLETED))
 
 
 def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:

@@ -1,0 +1,1 @@
+Stop passing hatch's verbosity to the ``uv pip install`` commands ddev injects, so CI environment creation no longer dumps uv's resolver DEBUG output.

@@ -36,9 +36,10 @@ Quick reference:
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
+from copy import copy
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 import httpx
 
@@ -64,7 +65,7 @@ from ddev.utils.github_async.models import (
 )
 from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
-from ddev.utils.rate_limiting import RelaxedRateLimits
+from ddev.utils.rate_limiting import InstrumentedAsyncLimiter, RelaxedRateLimits
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
@@ -821,6 +822,10 @@ class FakeAsyncGitHubClient:
             branch=branch,
             timeout=timeout,
         )
+
+    def with_rate_limit(self, rate_limiter: InstrumentedAsyncLimiter) -> Self:
+        self._record('with_rate_limit', rate_limiter=rate_limiter)
+        return copy(self)
 
     async def aclose(self) -> None:
         return None

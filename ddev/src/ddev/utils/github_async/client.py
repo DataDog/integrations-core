@@ -11,6 +11,7 @@ import re
 import zipfile
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager, suppress
+from copy import copy
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Literal, Self, overload
@@ -289,6 +290,7 @@ class AsyncGitHubClient:
             "X-GitHub-Api-Version": GITHUB_API_VERSION,
             "Accept": "application/vnd.github+json",
         }
+        self._owns_client = True
         self._client = httpx.AsyncClient(
             base_url=DEFAULT_BASE_URL,
             headers=self._headers,
@@ -296,9 +298,21 @@ class AsyncGitHubClient:
             transport=transport,
         )
 
+    def with_rate_limit(self, rate_limiter: InstrumentedAsyncLimiter) -> Self:
+        """Borrow this client's connection pool and configuration with a different limiter.
+
+        The original client owns the pool. Stop or cancel all views' requests before closing it.
+        Closing a view does nothing; later shutdown flags are not propagated to it.
+        """
+        view = copy(self)
+        view._rate_limiter = rate_limiter
+        view._owns_client = False
+        return view
+
     async def aclose(self) -> None:
-        """Close the underlying HTTP client and release connections."""
-        await self._client.aclose()
+        """Release owned connections; borrowed views leave the pool open."""
+        if self._owns_client:
+            await self._client.aclose()
 
     # ------------------------------------------------------------------
     # Internal helpers

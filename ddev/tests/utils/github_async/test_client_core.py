@@ -7,11 +7,13 @@ from typing import Any
 
 import httpx
 import pytest
+from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
 from ddev.utils.github_async.client import QUERY_MASK, SHUTDOWN_REQUEST_TIMEOUT, failure_reason, with_query_masked
-from ddev.utils.github_async.retry import NO_RETRY
-from tests.utils.github_async.helpers import TOKEN, json_response, make_client
+from ddev.utils.github_async.retry import NO_RETRY, RetryPolicies
+from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
+from tests.utils.github_async.helpers import TOKEN, json_response, make_client, recording_transport
 from tests.utils.github_async.payloads import artifact, workflow_run_payload
 
 BASE = "https://api.github.com"
@@ -78,6 +80,48 @@ async def test_context_manager_closes_on_exit() -> None:
         inner = client._client
     # After exit the underlying client is closed; a new request would fail
     assert inner.is_closed
+
+
+async def test_client_view_uses_its_limiter_and_preserves_request_configuration():
+    events: list[RateLimitEvent] = []
+    polling = InstrumentedAsyncLimiter(AsyncLimiter(10), on_event=events.append, name="polling")
+    artifacts = InstrumentedAsyncLimiter(AsyncLimiter(10), on_event=events.append, name="artifacts")
+    transport, calls = recording_transport(
+        [json_response(workflow_run_payload()), httpx.Response(503), json_response(workflow_run_payload())]
+    )
+    async with async_github_client(
+        token=TOKEN,
+        rate_limiter=polling,
+        default_timeout=7,
+        retry_policies=RetryPolicies(safe=NO_RETRY, mutating=NO_RETRY),
+        transport=transport,
+    ) as client:
+        view = client.with_rate_limit(artifacts)
+        await client.get_workflow_run("o", "r", 42)
+        with pytest.raises(httpx.HTTPStatusError):
+            await view.get_workflow_run("o", "r", 42)
+        assert len(calls) == 2
+        result = await view.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+    assert [event.name for event in events if isinstance(event, BucketEvent)] == ["polling", "artifacts", "artifacts"]
+    for request in calls:
+        assert request.headers["authorization"] == f"Bearer {TOKEN}"
+        assert request.headers["x-github-api-version"] == GITHUB_API_VERSION
+        assert request.extensions["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), 7)
+
+
+async def test_client_view_borrows_the_owners_connection_lifetime():
+    async with async_github_client(
+        token=TOKEN, transport=httpx.MockTransport(lambda _: json_response(workflow_run_payload()))
+    ) as client:
+        view = client.with_rate_limit(InstrumentedAsyncLimiter(AsyncLimiter(10)))
+        await view.aclose()
+        assert (await client.get_workflow_run("o", "r", 42)).data.id == 42
+        assert (await view.get_workflow_run("o", "r", 42)).data.id == 42
+
+    with pytest.raises(RuntimeError, match="client has been closed"):
+        await view.get_workflow_run("o", "r", 42)
 
 
 @pytest.mark.parametrize(

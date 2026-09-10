@@ -10,6 +10,7 @@ read as success, and nothing is dropped silently.
 
 from __future__ import annotations
 
+import dataclasses
 import re
 from collections.abc import Callable
 
@@ -124,6 +125,60 @@ def test_a_running_batch_and_a_retrying_batch_are_indistinguishable():
 
     assert chips[0] == chips[1]
     assert "🔄 in progress" in chips[0]
+
+
+def test_collection_shows_execution_outcomes_while_test_details_are_pending():
+    failed = dataclasses.replace(attempt(Status.FAILURE), reports=None)
+    passed = dataclasses.replace(attempt(), reports=None)
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(failed),
+                job_progress(passed, target="postgres"),
+                state=ExecutionState.ARTIFACT_DOWNLOAD,
+                status=Status.FAILURE,
+            ),
+        ),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "**Tests finished; collecting results.**" in body
+    assert "❌ failed · 📥 collecting artifacts" in body
+    assert "**2/2 jobs**" in body
+    assert 'href="https://github.com/o/r/actions/runs/1/job/9"' in body
+    assert "Test details pending artifact collection." in body
+    assert set(_progress_bar_of(body)) == {"passed", "failed"}
+
+
+@pytest.mark.parametrize("job_finished", [False, True], ids=["awaiting-job-status", "job-passed"])
+def test_workflow_only_failure_requires_observed_job_outcomes(job_finished: bool):
+    job = job_progress(attempt()) if job_finished else job_progress()
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job, state=ExecutionState.ARTIFACT_DOWNLOAD, status=Status.FAILURE),),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "❌ failed · 📥 collecting artifacts" in body
+    assert ("the workflow failed with no tracked job failure" in body) is job_finished
+
+
+def test_running_attempts_remain_pending_in_the_batch_table():
+    running = dataclasses.replace(attempt(), state=ExecutionState.RUNNING, status=None, conclusion=None, reports=None)
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(running), state=ExecutionState.RUNNING, status=None),),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "**0/1 jobs**" in body
+    assert "<td>0/1</td>" in body
+    assert "⏳ 1 pending" in body
 
 
 def test_final_snapshot_reads_as_complete_with_failures():
@@ -577,7 +632,8 @@ def test_large_run_stays_within_budget_and_says_what_was_dropped():
     # targets. The body is dense with three-byte emoji and block-drawing characters, so a character
     # count would understate it.
     assert len(body.encode("utf-8")) <= GITHUB_COMMENT_HARD_LIMIT
-    # The header survives intact: totals and every batch row are the highest-priority content.
+    # The header survives intact: the notice, totals and every batch row are the top content.
+    assert "Dispatcher beta: informational only" in body
     assert "**240/240 jobs**" in body
     assert body.count("<tr><td><code>batch-") == 10
     assert "not shown — the comment reached its size limit" in body
@@ -840,6 +896,25 @@ FALLBACK_TIERS = [
     pytest.param(render_minimal_comment, id="minimal"),
 ]
 
+NOTICE_TIERS = [
+    pytest.param(render_comment, id="full"),
+    *FALLBACK_TIERS,
+]
+
+
+@pytest.mark.parametrize("render", NOTICE_TIERS)
+def test_every_tier_reports_itself_as_informational(render: Callable[[DispatcherProgress], str]):
+    """The report runs alongside the CI that decides merges, so it must say it is advisory."""
+    progress = DispatcherProgress(batches=(batch_progress("batch-01", job_progress(attempt())),), done=True)
+
+    body = render(progress)
+
+    heading = body.index("## ")
+    notice = body.index("Dispatcher beta: informational only")
+    assert heading < notice < body.index("### Batches")
+    assert "You can ignore this report and its statuses" in body
+    assert "Existing CI remains the merge signal" in body
+
 
 @pytest.mark.parametrize("render", FALLBACK_TIERS)
 def test_a_fallback_tier_does_not_point_at_the_section_it_dropped(render: Callable[[DispatcherProgress], str]):
@@ -927,6 +1002,7 @@ def test_a_cancelled_run_with_nothing_gathered_still_says_it_ran(monkeypatch):
 
     assert body.startswith(COMMENT_MARKER)
     assert CANCELLED_HEADING in body
+    assert "Dispatcher beta: informational only" in body
     assert "https://github.com/DataDog/integrations-core/actions/runs/12345" in body
 
 
