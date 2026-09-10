@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -21,6 +20,7 @@ from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, MessageScope
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import ComponentMonitor
+from ddev.monitoring.adapter import ComponentLogAdapter
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.runtime import MonitoringRuntime
 from ddev.utils.github_actions import write_step_summary
@@ -32,8 +32,6 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async import AsyncGitHubClient
-
-logger = logging.getLogger(__name__)
 
 # A cancelled job gets SIGINT, SIGTERM about 7.5s later, then a hard kill about 2.5s after that, so a
 # cancelled run abandons its pacing: the budget it was rationing outlives the process.
@@ -120,14 +118,51 @@ def run_fields(context: DispatcherContext) -> dict[str, Any]:
 
 
 def message_fields(message: BaseMessage) -> dict[str, Any]:
-    """Run-wide reports must not inherit the identity of the batch that triggered them."""
+    """Identify a message without attributing aggregate reports to an unrelated batch."""
+    fields: dict[str, Any] = {'message_type': type(message).__name__, 'message_id': message.id}
     match message:
-        case TestBatch(batch_id=batch_id):
-            return {'batch_id': batch_id}
-        case BatchProgressUpdate(batch_id=batch_id, run_id=run_id) | BatchFinished(batch_id=batch_id, run_id=run_id):
-            return {'batch_id': batch_id, 'run_id': run_id}
-        case _:
-            return {}
+        case TestBatch(batch_id=batch_id, jobs_count=jobs_count, integrations=integrations):
+            fields.update(
+                batch_id=batch_id,
+                batch_job_count=jobs_count,
+                batch_integration_count=len(integrations),
+                batch_integrations=integrations,
+            )
+        case BatchProgressUpdate(
+            batch_id=batch_id,
+            run_id=run_id,
+            workflow_url=workflow_url,
+            state=state,
+            status=status,
+        ):
+            fields.update(
+                batch_id=batch_id,
+                run_id=run_id,
+                workflow_url=workflow_url,
+                batch_state=state.value,
+                workflow_conclusion=status.value if status is not None else None,
+            )
+        case BatchFinished(
+            batch_id=batch_id,
+            run_id=run_id,
+            workflow_url=workflow_url,
+            status=status,
+            timed_out=timed_out,
+            batch_jobs=batch_jobs,
+        ):
+            fields.update(
+                batch_id=batch_id,
+                run_id=run_id,
+                workflow_url=workflow_url,
+                batch_job_count=len(batch_jobs),
+                batch_state='finished',
+                workflow_status='completed',
+                workflow_conclusion=status.value,
+                timed_out=timed_out,
+            )
+        case UpdatePRComment(revision=revision, progress=progress):
+            fields.update(revision=revision, done=progress.done)
+    return fields
 
 
 def message_scope(context: MonitorContext) -> MessageScope:
@@ -154,12 +189,11 @@ class Dispatcher(EventBusOrchestrator):
         reporter: TaskRunReporter,
         max_timeout: float | None,
         grace_period: float,
-        run_logger: logging.Logger | None = None,
-        monitor: ComponentMonitor | None = None,
+        monitor: ComponentMonitor,
         message_scope: MessageScope | None = None,
     ):
         super().__init__(
-            run_logger or logger,
+            ComponentLogAdapter(monitor),
             max_timeout=max_timeout,
             grace_period=grace_period,
             message_scope=message_scope,
@@ -201,14 +235,11 @@ class Dispatcher(EventBusOrchestrator):
         self.submit_message(self._gatherer.build_initial_update())
         for batch in self._batches:
             self.submit_message(batch)
-        if self._monitor is None:
-            self._logger.info('Dispatched %s batches', len(self._batches))
-        else:
-            # Queued, not dispatched: the workflows start when the runner's messages are processed.
-            self._monitor.logger.info('Queued planned batches', batch_count=len(self._batches))
+        # Queued, not dispatched: the workflows start when the runner's messages are processed.
+        self._monitor.logger.info('Queued planned batches', plan_batch_count=len(self._batches))
 
     async def on_message_received(self, message: BaseMessage):
-        self._logger.debug("Message received: %s(%s)", type(message).__name__, message.id)
+        self._monitor.logger.debug('Message received', **message_fields(message))
 
     async def on_finalize(self, exception: Exception | None):
         request = self.shutdown_request
@@ -221,10 +252,7 @@ class Dispatcher(EventBusOrchestrator):
                 final_report_published=self._reporter.final_report_published,
                 shutdown=request,
             )
-            if self._monitor is None:
-                self._logger.info(summary_line(progress, shutdown=request))
-            else:
-                self._monitor.logger.info(summary_line(progress, shutdown=request))
+            self._monitor.logger.info(summary_line(progress, shutdown=request))
             if (body := self._reporter.latest_body) is not None:
                 write_step_summary(render_run_summary(body, pr_comment_failed=self._reporter.pr_comment_failed))
         finally:
@@ -256,25 +284,19 @@ def build_dispatcher(
     token: str,
     artifacts_path: Path,
     output_path: Path,
-    run_logger: logging.Logger | None = None,
-    monitoring: MonitoringRuntime | None = None,
+    monitoring: MonitoringRuntime,
 ) -> Dispatcher:
-    """Assemble the client, the three tasks and the Dispatcher from a plan and its run context.
+    """Assemble the client, monitored tasks and Dispatcher from a plan and its run context.
 
     One HTTP pool is shared by every task. Artifact collection uses its own local bucket;
-    all buckets share the provider's budget and pauses.
-
-    The caller owns ``monitoring``; omitting it retains stdlib logging.
+    all buckets share the provider's budget and pauses. The caller owns ``monitoring``.
     """
     from ddev.utils.github_async import AsyncGitHubClient
 
-    def view(name: str) -> ComponentMonitor | None:
-        return monitoring.component(name) if monitoring is not None else None
-
-    active_logger = run_logger or logger
+    client_logger = ComponentLogAdapter(monitoring.component('github-async'))
     integrations = frozenset(integration for batch in batches for integration in batch.integrations)
-    rate_limiters = RateLimiterFactory(config.github_rate_limits, active_logger)
-    client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations))
+    rate_limiters = RateLimiterFactory(config.github_rate_limits, client_logger)
+    client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations), logger=client_logger)
 
     runner = TaskTestRunner(
         "test-runner",
@@ -293,14 +315,14 @@ def build_dispatcher(
             pytest_args=context.pytest_args,
         ),
         artifact_client=client.with_rate_limit(rate_limiters.artifacts),
-        monitor=view('test-runner'),
+        monitor=monitoring.component('test-runner'),
     )
-    gatherer = TaskTestGatherer("test-gatherer", output_path, batches, monitor=view('test-gatherer'))
+    gatherer = TaskTestGatherer("test-gatherer", output_path, batches, monitor=monitoring.component('test-gatherer'))
     reporter = TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner=context.owner, repo=context.repo, pr_number=context.pr_number),
-        monitor=view('run-reporter'),
+        monitor=monitoring.component('run-reporter'),
     )
 
     return Dispatcher(
@@ -311,7 +333,6 @@ def build_dispatcher(
         reporter=reporter,
         max_timeout=config.global_timeout_seconds,
         grace_period=config.grace_period_seconds,
-        run_logger=active_logger,
-        monitor=view('dispatcher'),
-        message_scope=message_scope(monitoring.context) if monitoring is not None else None,
+        monitor=monitoring.component('dispatcher'),
+        message_scope=message_scope(monitoring.context),
     )

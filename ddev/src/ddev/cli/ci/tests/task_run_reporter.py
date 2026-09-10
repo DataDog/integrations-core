@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
@@ -72,7 +71,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         client: AsyncGitHubClient,
         options: RunReporterOptions,
         *,
-        monitor: ComponentMonitor | None = None,
+        monitor: ComponentMonitor,
     ):
         super().__init__(name)
         self._client = client
@@ -87,7 +86,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._pr_comment_failed = False
         self._final_report_published = False
         self._lock = asyncio.Lock()
-        self._logger = logging.getLogger(f"{__name__}.{name}")
+        self._logger = monitor.logger
         self.monitor = monitor
 
     @property
@@ -108,14 +107,11 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
     async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
         body = render_comment(message.progress)
-        log_extra: dict[str, object] = {"revision": message.revision, "done": message.progress.done}
 
         # Serialize revision checks and writes so older updates cannot overwrite newer ones.
         async with self._lock:
             if message.revision <= self._latest_revision:
-                self._logger.info(
-                    "Stale UpdatePRComment ignored (latest rendered is %s)", self._latest_revision, extra=log_extra
-                )
+                self._logger.info("Stale UpdatePRComment ignored (latest rendered is %s)", self._latest_revision)
                 return
 
             # Retain the report before any write that could fail or be interrupted.
@@ -125,11 +121,11 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
 
             pr_number = self._options.pr_number
             if pr_number is None:
-                self._logger.info("No pull request to update: %s", summary_line(message.progress), extra=log_extra)
+                self._logger.info("No pull request to update: %s", summary_line(message.progress), published=False)
                 published = True
             else:
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, message.progress, log_extra)
+                published = await self._write(pr_number, body, message.progress)
                 self._pr_comment_failed = not published
 
             if message.progress.done and published:
@@ -143,28 +139,28 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         async with asyncio.timeout(SHUTDOWN_WRITE_TIMEOUT), self._lock:
             progress = self._latest_progress
             body = render_shutdown_notice(request) if progress is None else render_comment(progress, shutdown=request)
-            log_extra: dict[str, object] = {"revision": self._latest_revision, "shutdown": request.kind.value}
-            self._latest_body = body
-            # Reject all subsequent progress revisions, even if this write fails.
-            self._latest_revision = sys.maxsize
+            # Shutdown runs outside message processing, so it carries its own revision and reason.
+            with self.monitor.scope(revision=self._latest_revision, shutdown=request.kind.value):
+                self._latest_body = body
+                # Reject all subsequent progress revisions, even if this write fails.
+                self._latest_revision = sys.maxsize
 
-            pr_number = self._options.pr_number
-            if pr_number is None:
-                self._logger.warning("Run %s; no pull request to report it on", request.kind.value, extra=log_extra)
-                return
+                pr_number = self._options.pr_number
+                if pr_number is None:
+                    self._logger.warning("Run %s; no pull request to report it on", request.kind.value, published=False)
+                    return
 
-            self._pr_comment_failed = True
-            published = await self._write(pr_number, body, progress, log_extra, shutdown=request)
-            self._pr_comment_failed = not published
-            if published:
-                self._logger.info("Run reported as %s", request.kind.value, extra=log_extra)
+                self._pr_comment_failed = True
+                published = await self._write(pr_number, body, progress, shutdown=request)
+                self._pr_comment_failed = not published
+                if published:
+                    self._logger.info("Run reported as %s", request.kind.value, published=True)
 
     async def _write(
         self,
         pr_number: int,
         body: str,
         progress: DispatcherProgress | None,
-        log_extra: dict[str, object],
         *,
         shutdown: ShutdownRequest | None = None,
     ) -> bool:
@@ -181,28 +177,30 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
             except GitHubBodyTooLongError as error:
                 smaller = next((candidate for candidate in tiers if candidate != rendered), None)
                 if smaller is None:
-                    self._logger.error("PR comment too long at every tier: %s", error, extra=log_extra)
+                    self._logger.error("PR comment too long at every tier: %s", error)
                     return False
                 rendered = smaller
                 self._logger.warning(
                     "PR comment body too long (%s); retrying with a smaller one (%s bytes)",
                     error,
                     len(rendered),
-                    extra=log_extra,
                 )
             except httpx.HTTPError as error:
-                if self._forget_unusable_comment(error, log_extra):
+                if self._forget_unusable_comment(error):
                     # The next pass creates a comment we own, rather than re-editing one we do not.
                     continue
-                self._logger.error("PR comment write failed: %s", error, extra=log_extra)
+                self._logger.error("PR comment write failed: %s", error)
                 return False
             else:
                 self._logger.info(
-                    "PR comment written", extra={**log_extra, "comment_id": self._comment_id, "bytes": len(rendered)}
+                    "PR comment written",
+                    comment_id=self._comment_id,
+                    bytes=len(rendered),
+                    published=True,
                 )
                 return True
 
-        self._logger.error("PR comment write found no comment it may edit", extra=log_extra)
+        self._logger.error("PR comment write found no comment it may edit")
         return False
 
     async def _submit(self, pr_number: int, body: str):
@@ -228,7 +226,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return comment.id
         return None
 
-    def _forget_unusable_comment(self, error: httpx.HTTPError, log_extra: dict[str, object]) -> bool:
+    def _forget_unusable_comment(self, error: httpx.HTTPError) -> bool:
         """Discard an inaccessible comment and return whether to try a replacement."""
         if self._comment_id is None or not isinstance(error, httpx.HTTPStatusError):
             return False
@@ -239,7 +237,6 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
             "Cannot edit comment %s (%s); creating a new one",
             self._comment_id,
             error.response.status_code,
-            extra=log_extra,
         )
         self._unusable_comment_ids.add(self._comment_id)
         self._comment_id = None

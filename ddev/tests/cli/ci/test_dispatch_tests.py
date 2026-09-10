@@ -5,16 +5,23 @@
 
 from __future__ import annotations
 
+import logging
 import subprocess
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from ddev.cli.application import Application
+from ddev.cli.ci.dispatch_tests import build_datadog_log_handler
+from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
 from ddev.monitoring import MonitoringRuntime
+from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest, PullRequestFile
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, listed_pull_request, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
+from tests.helpers.datadog import FakeLogSubmitter
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
 
 if TYPE_CHECKING:
@@ -23,7 +30,6 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
-    from ddev.cli.application import Application
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.config.file import ConfigFileWithOverrides
     from ddev.monitoring import ComponentMonitor
@@ -499,6 +505,85 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
 
 
 @pytest.mark.usefixtures('local_changes')
+@pytest.mark.parametrize(
+    ('level_options', 'visible', 'hidden'),
+    [
+        ((), ('planning batches', 'planning skipped a broken target'), ('planning detail',)),
+        (('--log-level', 'Warning'), ('planning skipped a broken target',), ('planning detail', 'planning batches')),
+    ],
+    ids=['default-info', 'mixed-case-warning'],
+)
+def test_log_level_gates_console_and_datadog_output_together(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    level_options: tuple[str, ...],
+    visible: tuple[str, ...],
+    hidden: tuple[str, ...],
+):
+    """The selected threshold filters both outputs and accepts mixed case."""
+    submitter = FakeLogSubmitter()
+
+    def make_datadog_handler(app: Application, monitoring: MonitoringRuntime, *, level: int) -> DatadogLogHandler:
+        datadog = DatadogLogHandler(api_key='test-api-key', submitter=submitter, level=level)
+        datadog.setFormatter(dispatcher_datadog_formatter(ci={}))
+        monitoring.add_log_handler(datadog)
+        return datadog
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.logger.debug('planning detail')
+        monitor.logger.info('planning batches')
+        monitor.logger.warning('planning skipped a broken target')
+        return []
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_datadog_log_handler', make_datadog_handler)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run', *level_options)
+
+    assert result.exit_code == 0, result.output
+    delivered = {log['message'] for log in submitter.logs}
+    for message in visible:
+        assert message in result.output
+        assert message in delivered
+    for message in hidden:
+        assert message not in result.output
+        assert message not in delivered
+
+
+def test_log_level_is_bounded_to_a_known_severity(ddev: CliRunner):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run', '--log-level', 'chatty')
+
+    assert result.exit_code == 2
+    assert "Invalid value for '--log-level'" in result.output
+
+
+def test_build_datadog_log_handler_delivers_at_the_requested_level(
+    config_file: ConfigFileWithOverrides, mocker: MockerFixture
+):
+    """The builder's level controls which records reach Datadog."""
+    config_file.model.orgs['default']['api_key'] = 'test-api-key'
+    config_file.save()
+    app = Application(lambda code: None, 0, False, False)
+    app.config_file.load()
+    submitter = FakeLogSubmitter()
+    # Replace only network construction: the real handler delivers through the recording submitter.
+    mocker.patch('ddev.monitoring.datadog.DatadogLogHandler', partial(DatadogLogHandler, submitter=submitter))
+
+    monitoring = MonitoringRuntime()
+    handler = build_datadog_log_handler(app, monitoring, level=logging.WARNING)
+    monitor = monitoring.component('dispatcher')
+    monitor.logger.info('Polling workflow')
+    monitor.logger.warning('Artifact download failed', run_id=123)
+
+    monitoring.close()
+    handler.close()
+
+    [log] = submitter.logs
+    assert log['message'] == 'Artifact download failed'
+    assert log['status'] == 'warning'
+
+
+@pytest.mark.usefixtures('local_changes')
 @pytest.mark.parametrize('global_options', [(), ('-qq',)], ids=['normal', 'quiet'])
 def test_console_visibility_does_not_change_structured_events(
     ddev: CliRunner, mocker: MockerFixture, global_options: tuple[str, ...]
@@ -533,9 +618,14 @@ def test_console_visibility_does_not_change_structured_events(
     assert 'repo=' not in result.output
     assert 'commit=' not in result.output
     assert 'team=' not in result.output
-    [event] = json_handler.events
+    planned = [event for event in json_handler.events if event['event'] == 'planning batches']
+    assert planned
+    [event] = planned
     assert event['repo'] == 'DataDog/integrations-core'
     assert event['commit'] == 'a-sha'
     assert event['team'] == 'platform'
     assert event['component'] == 'planner'
     assert event['event'] == 'planning batches'
+    [finished] = [event for event in json_handler.events if event['event'] == 'Dispatcher run finished']
+    assert finished['outcome'] == 'no-op'
+    assert finished['cancelled'] is False

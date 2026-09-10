@@ -41,6 +41,7 @@ from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, jobs_reported, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.monitoring import make_monitor
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -147,6 +148,7 @@ def _make_gatherer(tmp_path: Path, plan: dict[str, list[BatchJob]] | None = None
         "gatherer",
         output_base_path=tmp_path / "out",
         batches=[_test_batch(batch_id, jobs) for batch_id, jobs in plan.items()],
+        monitor=make_monitor('test-gatherer'),
     )
     gatherer.bus = RecordingBus()  # type: ignore[assignment]
     return gatherer
@@ -1273,12 +1275,18 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     initial plan, then edited once per finished batch, never regressing.
     """
     plan = _scenario_plan()
-    gatherer = TaskTestGatherer("gatherer", output_base_path=tmp_path / "out", batches=_scenario_batches(plan))
+    gatherer = TaskTestGatherer(
+        "gatherer",
+        output_base_path=tmp_path / "out",
+        batches=_scenario_batches(plan),
+        monitor=make_monitor('test-gatherer'),
+    )
     client = FakeAsyncGitHubClient()
     reporter = TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner="DataDog", repo="integrations-core", pr_number=42),
+        monitor=make_monitor('run-reporter'),
     )
 
     bus = _DispatcherBus(logging.getLogger("test-bus"), max_timeout=30, grace_period=0.2)
