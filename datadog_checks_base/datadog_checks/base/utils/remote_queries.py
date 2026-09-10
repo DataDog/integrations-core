@@ -68,6 +68,22 @@ PAGE_SUFFIX = b']}'
 RemoteQueryEmit = Callable[[str, str, bytes], None]
 
 
+def normalize_host(value: str | None) -> str | None:
+    """Normalize one host for endpoint identity: trimmed, lowercased, one trailing dot removed.
+
+    Shared by the target model and the integration adapters so a configured host and a
+    requested host normalize identically before any comparison.
+    """
+    if value is None:
+        return None
+    host = value.strip().lower()
+    if host.endswith('.'):
+        host = host[:-1]
+    if not host:
+        raise ValueError('host must be a non-empty string')
+    return host
+
+
 class RemoteQueryTarget(BaseModel):
     model_config = ConfigDict(extra='forbid', frozen=True)
 
@@ -78,15 +94,8 @@ class RemoteQueryTarget(BaseModel):
 
     @field_validator('host')
     @classmethod
-    def normalize_host(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        host = value.strip().lower()
-        if host.endswith('.'):
-            host = host[:-1]
-        if not host:
-            raise ValueError('host must be a non-empty string')
-        return host
+    def validate_host(cls, value: str | None) -> str | None:
+        return normalize_host(value)
 
     @field_validator('dbname')
     @classmethod
@@ -121,10 +130,11 @@ class RemoteQueryTarget(BaseModel):
             raise ValueError('{} must not be null'.format(', '.join(null_fields)))
 
         if self.database_instance is not None:
-            # database_instance selects a loaded check instance; an accompanying dbname
-            # requests a logical execution database on that instance's endpoint. Only the
-            # endpoint fields are a different selector mode.
-            if self.model_fields_set & {'host', 'port'}:
+            # database_instance selects one loaded check, whose materialized configured
+            # database is the execution database; host/port/dbname is the other selector
+            # mode. dbname must not override the selected check's monitored database, so
+            # it is rejected together with the endpoint fields.
+            if self.model_fields_set & {'host', 'port', 'dbname'}:
                 raise ValueError('target must use exactly one selector mode: database_instance or host/port/dbname')
             return self
 
