@@ -74,6 +74,8 @@ BANNER_ERROR_MAX_CHARS = 200
 # Keep the notice to one line: it shares a fixed-height body with the pipeline graph,
 # which loses a row for every row the banner grows.
 NOTICE_MAX_NAMES = 3
+# Long input names can still overflow a one-line banner on their own, so truncate each.
+NOTICE_MAX_NAME_CHARS = 24
 
 
 class ExecutionScreen(TogoScreen):
@@ -389,10 +391,17 @@ class ExecutionScreen(TogoScreen):
 
     def _diverged_summary(self) -> str:
         """Name the diverged inputs, summarizing the tail so the banner stays one line."""
-        shown = self._diverged_inputs[:NOTICE_MAX_NAMES]
+        shown = [self._truncate_name(name) for name in self._diverged_inputs[:NOTICE_MAX_NAMES]]
         remaining = len(self._diverged_inputs) - len(shown)
         names = ", ".join(shown)
         return f"{names} and {remaining} more" if remaining else names
+
+    @staticmethod
+    def _truncate_name(name: str) -> str:
+        """Shorten a single name so it can't overflow the one-line banner on its own."""
+        if len(name) <= NOTICE_MAX_NAME_CHARS:
+            return name
+        return name[: NOTICE_MAX_NAME_CHARS - 3] + "..."
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED
