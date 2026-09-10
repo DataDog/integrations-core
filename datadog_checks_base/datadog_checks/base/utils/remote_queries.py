@@ -163,9 +163,11 @@ class RemoteQueryResultDelivery(BaseModel):
     """Backend-injected upload instructions and artifact contract metadata.
 
     The Agent forwards the run-scoped intake session instructions (``uploadId``,
-    ``baseUrl``, ``token``), the effective server-owned limits, the artifact contract
-    version, and the authoritative run/task identity used in every page envelope. Every field
-    is server-owned: the integration validates what it receives and never invents values.
+    ``baseUrl``), the effective server-owned limits, the artifact contract version, and the
+    authoritative run/task identity used in every page envelope. The session is identified
+    by ``uploadId`` alone; the upload calls authorize with the org API/application keys from
+    Agent config. Every field is server-owned: the integration validates what it receives
+    and never invents values.
     """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
@@ -175,7 +177,6 @@ class RemoteQueryResultDelivery(BaseModel):
     artifact_version: Literal[REMOTE_QUERY_ARTIFACT_VERSION] = Field(alias='artifactVersion')
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
-    token: StrictStr = Field(alias='token', min_length=1)
     limits: RemoteQueryUploadLimits
 
 
@@ -517,7 +518,6 @@ class UploadCredentials:
     upload_id: str
     api_key: str
     app_key: str
-    token: str
     test_drive: str | None
     # The run-wide monotonic hard wall for this session's upload requests; None means the
     # request is not wall-scoped (best-effort abort, or a test double driving the client).
@@ -574,7 +574,6 @@ class RequestsUploadClient:
         headers = {
             'dd-api-key': creds.api_key,
             'dd-application-key': creds.app_key,
-            'Authorization': 'Bearer ' + creds.token,
         }
         if content_type is not None:
             headers['Content-Type'] = content_type
@@ -838,14 +837,13 @@ def resolve_upload_credentials(delivery: RemoteQueryResultDelivery, started_at: 
         upload_id=delivery.upload_id,
         api_key=get_agent_config('api_key'),
         app_key=get_agent_config('app_key'),
-        token=delivery.token,
         test_drive=test_drive,
         wall_deadline=started_at + delivery.limits.timeout_ms / 1000,
     )
 
 
 def safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
-    if not creds.base_url or not creds.upload_id or not creds.token:
+    if not creds.base_url or not creds.upload_id:
         return
     try:
         client.abort(creds)
@@ -864,6 +862,7 @@ def started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
             'runId': delivery.run_id,
             'taskId': delivery.task_id,
             'uploadId': delivery.upload_id,
+            'baseUrl': delivery.base_url,
             'artifactVersion': delivery.artifact_version,
             'limits': {
                 'maxFileBytes': limits.max_file_bytes,

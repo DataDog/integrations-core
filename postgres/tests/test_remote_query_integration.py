@@ -88,7 +88,6 @@ def remote_query_request(pg_instance, query, include_schema=False, **limits):
             'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
-            'token': 'scoped-upload-token',
             'limits': {
                 'maxFileBytes': limits.pop('maxFileBytes', 1024 * 1024),
                 'maxResultBytes': limits.pop('maxResultBytes', 16 * 1024 * 1024),

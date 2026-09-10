@@ -24,7 +24,6 @@ def delivery():
             'artifactVersion': 1,
             'uploadId': 'upload-1',
             'baseUrl': 'https://intake.example',
-            'token': 'test-token',
             'limits': {
                 'maxFileBytes': 1024,
                 'maxResultBytes': 8192,
@@ -40,9 +39,7 @@ def delivery():
 
 @pytest.fixture
 def creds(delivery):
-    return rq.UploadCredentials(
-        delivery.base_url, delivery.upload_id, 'test-api-key', 'test-app-key', delivery.token, None
-    )
+    return rq.UploadCredentials(delivery.base_url, delivery.upload_id, 'test-api-key', 'test-app-key', None)
 
 
 def receipt(page):
@@ -228,7 +225,6 @@ def test_http_page_retry_replays_exact_body_and_headers(monkeypatch, creds, trig
     assert headers == {
         'dd-api-key': 'test-api-key',
         'dd-application-key': 'test-app-key',
-        'Authorization': 'Bearer test-token',
         'Content-Type': 'application/json',
         'Content-Length': str(len(payload)),
         'X-DD-Page-Bytes': str(len(payload)),
@@ -277,7 +273,7 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
     clock = iter([0.0, 0.0, 56.0, 56.0, 56.0] + [56.0] * 10)
     monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
     wall_creds = rq.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=100.0
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=100.0
     )
     with io.BytesIO(payload) as body:
         assert rq.RequestsUploadClient().put_page(wall_creds, page, body) == receipt(page)
@@ -305,7 +301,7 @@ def test_http_page_attempt_bound_never_exceeds_the_run_wall(monkeypatch, creds):
     clock = iter([0.0, 0.0, 51.0, 51.5] + [51.5] * 10)
     monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
     wall_creds = rq.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=50.0
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=50.0
     )
     with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
         rq.RequestsUploadClient().put_page(wall_creds, page, body)
@@ -332,7 +328,7 @@ def test_http_retry_sequence_never_extends_the_run_wall(monkeypatch, creds):
     clock = iter([0.0, 0.0, 51.5] + [51.5] * 10)
     monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
     wall_creds = rq.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, None, wall_deadline=50.0
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=50.0
     )
     with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
         rq.RequestsUploadClient().put_page(wall_creds, page, body)
@@ -351,9 +347,7 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
         return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
 
     monkeypatch.setattr(requests, 'request', request)
-    creds = rq.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, creds.token, 'test-intake'
-    )
+    creds = rq.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, creds.app_key, 'test-intake')
     client = rq.RequestsUploadClient()
     assert client.finalize_run(creds)['upload_id'] == creds.upload_id
     client.abort(creds)
@@ -421,6 +415,7 @@ def test_database_instance_target_accepts_requested_dbname():
         (('includeSchema',), 'true'),
         (('target', 'port'), '5432'),
         (('resultDelivery',), None),
+        (('resultDelivery', 'token'), 'scoped-upload-token'),
         (('resultDelivery', 'artifactVersion'), 2),
         (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
         (('resultDelivery', 'limits', 'maxResultBytes'), rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
@@ -443,7 +438,6 @@ def test_request_validation_rejects_malformed_instructions_without_echoing_value
     message = rq.validation_message(failure.value)
     assert path[-1] in message
     assert 'SECRET_DO_NOT_LOG' not in message
-    assert delivery.token not in message
 
 
 def test_target_normalization():

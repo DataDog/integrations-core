@@ -24,7 +24,6 @@ RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
 UPLOAD_ID = 'upload-01k'
 BASE_URL = 'https://dd.datad0g.com/api/unstable/its-agent-intake'
-TOKEN = 'scoped-upload-token'
 # The Agent-reported hostname every fake check carries, stamped into every page envelope.
 AGENT_HOSTNAME = 'rq-proof-agent-a'
 
@@ -237,7 +236,6 @@ def valid_result_delivery(**extra):
         'artifactVersion': 1,
         'uploadId': UPLOAD_ID,
         'baseUrl': BASE_URL,
-        'token': TOKEN,
         'limits': valid_limits(),
     }
     result_delivery.update(extra)
@@ -824,6 +822,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['resultDelivery']['runId'] == RUN_ID
     assert started['resultDelivery']['taskId'] == TASK_ID
     assert started['resultDelivery']['artifactVersion'] == 1
+    assert started['resultDelivery']['baseUrl'] == BASE_URL
     assert 'partBytes' not in started['resultDelivery']
     assert started['resultDelivery']['limits'] == {
         'maxFileBytes': 104857600,
@@ -834,9 +833,6 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
         'maxPages': 128,
         'timeoutMs': 5000,
     }
-    # baseUrl/token are accepted request fields but never echoed back.
-    assert 'baseUrl' not in started['resultDelivery']
-    assert 'token' not in started['resultDelivery']
 
     final = assert_success(events)
     # Only the compact receipt crosses the callback: no schema, no bulk bytes.
@@ -1780,7 +1776,6 @@ def real_server_request(instance, query, include_schema=False):
             'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
-            'token': TOKEN,
             'limits': limits,
         },
     }
@@ -1822,7 +1817,6 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
             'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
-            'token': TOKEN,
             'limits': valid_limits(),
         },
     }
