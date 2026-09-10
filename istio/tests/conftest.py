@@ -1,17 +1,17 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 import platform
 import time
-from contextlib import ExitStack
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
@@ -59,6 +59,28 @@ def _download_istio():
     return "istio-{}".format(VERSION)
 
 
+def get_pod_ip(namespace, selector):
+    result = run_command(
+        [
+            "kubectl",
+            "get",
+            "pods",
+            "--namespace",
+            namespace,
+            "--selector",
+            selector,
+            "--output",
+            "json",
+        ],
+        capture='out',
+        check=True,
+    )
+    pods = json.loads(result.stdout)['items']
+    if len(pods) != 1 or not pods[0].get('status', {}).get('podIP'):
+        raise RuntimeError(f'Expected exactly one ready pod for {selector}, found {len(pods)}')
+    return pods[0]['status']['podIP']
+
+
 def setup_istio():
     istio = _download_istio()
     istioctl = opj(istio, "bin", "istioctl")
@@ -72,6 +94,7 @@ def setup_istio():
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
     os.remove("istio.tar.gz")
+    save_state('istio_istiod_ip', get_pod_ip('istio-system', 'app=istiod'))
 
 
 def setup_istio_ambient():
@@ -131,6 +154,8 @@ def setup_istio_ambient():
     # ztunnel has no shell/curl; poll its /stats/prometheus from traffic-gen via the ztunnel-metrics Service.
     _wait_for_ztunnel_traffic()
     os.remove("istio.tar.gz")
+    save_state('istio_waypoint_ip', get_pod_ip('default', 'app=waypoint'))
+    save_state('istio_istiod_ip', get_pod_ip('istio-system', 'app=istiod'))
 
 
 def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
@@ -182,31 +207,24 @@ def _ztunnel_has_traffic(metrics_text):
 def dd_environment(dd_save_state):
     setup = setup_istio_ambient if MODE == "ambient" else setup_istio
     with kind_run(conditions=[setup]) as kubeconfig:
-        with ExitStack() as stack:
-            if MODE == "ambient":
-                ztunnel_host, ztunnel_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', ZTUNNEL_METRICS_PORT, 'service', ZTUNNEL_METRICS_SERVICE)
-                )
-                waypoint_host, waypoint_port = stack.enter_context(
-                    port_forward(kubeconfig, 'default', WAYPOINT_METRICS_PORT, 'deployment', 'waypoint')
-                )
-                istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', ISTIOD_METRICS_PORT, 'deployment', 'istiod')
-                )
-                instance = {
-                    "istio_mode": "ambient",
-                    "ztunnel_endpoint": "http://{}:{}/stats/prometheus".format(ztunnel_host, ztunnel_port),
-                    "waypoint_endpoint": "http://{}:{}/stats/prometheus".format(waypoint_host, waypoint_port),
-                    "istiod_endpoint": "http://{}:{}/metrics".format(istiod_host, istiod_port),
-                    "use_openmetrics": "true",
-                }
-                dd_save_state("istio_instance", instance)
-                yield instance
-            else:
-                istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', ISTIOD_METRICS_PORT, 'deployment', 'istiod')
-                )
-                istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
-                instance = {'istiod_endpoint': istiod_endpoint, 'use_openmetrics': 'false'}
-                dd_save_state("istio_instance", instance)
-                yield instance
+        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+        istiod_ip = get_state('istio_istiod_ip')
+
+        if MODE == "ambient":
+            waypoint_ip = get_state('istio_waypoint_ip')
+            instance = {
+                "istio_mode": "ambient",
+                "ztunnel_endpoint": "http://{}.istio-system.svc.cluster.local:{}/stats/prometheus".format(
+                    ZTUNNEL_METRICS_SERVICE, ZTUNNEL_METRICS_PORT
+                ),
+                "waypoint_endpoint": "http://{}:{}/stats/prometheus".format(waypoint_ip, WAYPOINT_METRICS_PORT),
+                "istiod_endpoint": "http://{}:{}/metrics".format(istiod_ip, ISTIOD_METRICS_PORT),
+                "use_openmetrics": "true",
+            }
+            dd_save_state("istio_instance", instance)
+            yield instance, metadata
+        else:
+            istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_ip, ISTIOD_METRICS_PORT)
+            instance = {'istiod_endpoint': istiod_endpoint, 'use_openmetrics': 'false'}
+            dd_save_state("istio_instance", instance)
+            yield instance, metadata
