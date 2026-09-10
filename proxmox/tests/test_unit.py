@@ -28,6 +28,7 @@ from .common import (
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
     cluster_resources_with_offline_node,
+    cluster_resources_with_vm_maxcpu,
 )
 
 
@@ -462,6 +463,9 @@ def test_metering_metrics_skip_containers(dd_run_check, aggregator, instance):
     # (lxc/111 reports 72 on a 72-thread node), so metering containers would bill each one
     # at full host CPU.
     aggregator.assert_metric('proxmox.container.cpu.max', count=0)
+    # Containers are still collected — the assertion above is about the vCPU point, not the
+    # resource, and would also pass if containers stopped being collected altogether.
+    aggregator.assert_metric('proxmox.container.count', at_least=1)
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -508,6 +512,55 @@ def test_metering_metrics_skip_offline_node(dd_run_check, aggregator, instance):
     # The rest of the inventory still emits, so the assertion above fails if the node really
     # is skipped and not merely because the payload override stopped matching.
     aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_count', 'expected_value'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(None),
+                    )
+                }
+            },
+            0,
+            None,
+            id='maxcpu_absent',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(0),
+                    )
+                }
+            },
+            1,
+            0,
+            id='maxcpu_zero',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_distinguish_absent_maxcpu_from_zero(
+    dd_run_check, aggregator, instance, expected_count, expected_value
+):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # An absent `maxcpu` is skipped; a zero one is a real value and must still be emitted. A
+    # truthiness check instead of `is not None` would silently drop the zero.
+    if expected_value is None:
+        aggregator.assert_metric('proxmox.vm.cpu.max', count=expected_count)
+    else:
+        aggregator.assert_metric('proxmox.vm.cpu.max', expected_value, count=expected_count)
+    # The VM itself is still collected either way, so neither assertion above can pass merely
+    # because the payload override dropped the resource.
+    aggregator.assert_metric('proxmox.vm.count', at_least=1)
 
 
 @pytest.mark.usefixtures('mock_http_get')

@@ -256,6 +256,35 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_method = self.count if metric_type == 'derive' else self.gauge
             metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
+    def _submit_vcpu_metric(self, resource, resource_type, resource_id, tags, hostname):
+        """Submit the vCPU count for a VM or node, for usage metering.
+
+        Only VMs and nodes are metered. Container `maxcpu` falls back to the whole host's thread
+        count when no limit is configured, so metering it would bill every default container at
+        full host CPU.
+        """
+        if resource_type not in (VM_RESOURCE, NODE_RESOURCE):
+            return
+
+        maxcpu = resource.get('maxcpu')
+        if maxcpu is None:
+            # Proxmox strips a node's stats, `maxcpu` included, when the token lacks `Sys.Audit` on
+            # `/nodes/<node>` (`PVE/API2/Cluster.pm:622` -> `PVE/API2Tools.pm:63`). A VM the token
+            # lacks `VM.Audit` on is dropped from the payload entirely (`Cluster.pm:588`) rather
+            # than returned without the field, so this branch is the node case in practice. Log it:
+            # a silently absent billing input is harder to diagnose than an absent ordinary metric.
+            self.log.debug(
+                "Skipping vCPU metric for %s %s: `maxcpu` missing from the /cluster/resources payload",
+                resource_type,
+                resource_id,
+            )
+            return
+
+        # Usage metering requires `proxmox_type` on the point itself. For VMs and nodes the
+        # caller's `tags` is empty because their tags are routed to external host tags instead,
+        # and external tags never reach the metric payload at metering ingest.
+        self.gauge(f'{resource_type}.cpu.max', maxcpu, tags=tags, hostname=hostname)
+
     def _collect_resource_metrics(self):
         self.log.debug("Collecting resource metrics.")
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
@@ -341,26 +370,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 tags=full_tags,
             )
 
-            if resource_type_remapped in (VM_RESOURCE, NODE_RESOURCE):
-                maxcpu = resource.get('maxcpu')
-                if maxcpu is not None:
-                    # Usage metering requires `proxmox_type` on the point itself. For VMs and nodes
-                    # `tags` is empty because their tags are routed to external host tags instead,
-                    # and external tags never reach the metric payload at metering ingest.
-                    self.gauge(
-                        f'{resource_type_remapped}.cpu.max',
-                        maxcpu,
-                        tags=full_tags,
-                        hostname=hostname,
-                    )
-                else:
-                    # Proxmox omits `maxcpu` when the token lacks `Sys.Audit` on the resource. Log it:
-                    # a silently absent billing input is harder to diagnose than an absent ordinary metric.
-                    self.log.debug(
-                        "Skipping vCPU metric for %s %s: `maxcpu` missing from the /cluster/resources payload",
-                        resource_type_remapped,
-                        resource_id,
-                    )
+            self._submit_vcpu_metric(resource, resource_type_remapped, resource_id, full_tags, hostname)
 
             if resource_type_remapped != "pool":
                 # pools don't have a status attribute

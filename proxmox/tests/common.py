@@ -3,31 +3,56 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from pathlib import Path
+from typing import Any
 
 INSTANCE = {'proxmox_server': 'http://localhost:8006/api2/json', 'tags': ['testing']}
 
 # The tags every point carries: the server tag plus the instance-level `tags` from INSTANCE.
-BASE_TAGS = ['proxmox_server:http://localhost:8006/api2/json', 'testing']
+# Derived from INSTANCE so the two can't drift apart.
+BASE_TAGS = [f'proxmox_server:{INSTANCE["proxmox_server"]}'] + INSTANCE['tags']
 
 CLUSTER_RESOURCES_FIXTURE = (
     Path(__file__).parent / 'fixtures' / 'GET' / 'api2' / 'json' / 'cluster' / 'resources' / 'response.json'
 )
 
 
-def cluster_resources_with_offline_node():
-    """Return the shipped `/cluster/resources` payload with the node flipped to `offline`.
+def _cluster_resources_fixture() -> dict[str, Any]:
+    """Return a fresh copy of the shipped `/cluster/resources` payload.
 
     Mutating the real fixture rather than substituting a minimal one keeps the rest of the
-    inventory in play, so a test asserting the node's absence can still assert that other
+    inventory in play, so a test asserting one resource's absence can still assert that other
     resources were collected — otherwise the assertion would also pass if the override
     silently stopped matching.
     """
     with CLUSTER_RESOURCES_FIXTURE.open() as f:
-        payload = json.load(f)
+        return json.load(f)
+
+
+def cluster_resources_with_offline_node() -> dict[str, Any]:
+    """Return the shipped `/cluster/resources` payload with the node flipped to `offline`."""
+    payload = _cluster_resources_fixture()
     for resource in payload['data']:
         if resource.get('type') == 'node':
             resource['status'] = 'offline'
     return payload
+
+
+def cluster_resources_with_vm_maxcpu(maxcpu: int | None) -> dict[str, Any]:
+    """Return the shipped payload with VM `qemu/100`'s `maxcpu` set to `maxcpu`, or removed if None.
+
+    Proxmox omits `maxcpu` for a node the token lacks `Sys.Audit` on
+    (`PVE/API2/Cluster.pm:622` → `PVE/API2Tools.pm:63`), so the check has to tell an absent
+    field from a zero one.
+    """
+    payload = _cluster_resources_fixture()
+    for resource in payload['data']:
+        if resource.get('id') == 'qemu/100':
+            if maxcpu is None:
+                resource.pop('maxcpu', None)
+            else:
+                resource['maxcpu'] = maxcpu
+    return payload
+
 
 BASE_METRICS = [
     'proxmox.node.count',
