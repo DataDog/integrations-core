@@ -103,22 +103,44 @@ class TestNfsstat:
             mock.MagicMock(),
         )
 
-        assert device.nfs_server == 'nfs-server'
-        assert device.nfs_export == ''
+        gauge = mock.MagicMock()
+        device.send_metrics(gauge, [])
+
+        gauge.assert_any_call(
+            'system.nfs.ops', 0.0, tags=['nfs_server:nfs-server', 'nfs_export:nfs-server', 'nfs_mount:/test1']
+        )
 
     @pytest.mark.unit
-    def test_check_skips_incomplete_initial_sample(self, aggregator):
+    def test_check_keeps_complete_samples_after_incomplete_initial_samples(self, aggregator):
         instance = self.INSTANCES['main']
         check = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
+        check.log = mock.MagicMock()
 
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
             mock_output = ensure_unicode(f.read())
 
-        mock_output = 'nfs-server mounted on /test1:\n\n' + mock_output
+        mock_output = (
+            '192.168.34.1:/exports/nfs/datadog/one mounted on /mnt/datadog/one:\n\n'
+            '192.168.34.1:/exports/nfs/datadog/two mounted on /mnt/datadog/two:\n\n' + mock_output
+        )
         with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output', return_value=(mock_output, '', 0)):
             check.check(instance)
 
-        aggregator.assert_metric('system.nfs.ops')
+        aggregator.assert_metric(
+            'system.nfs.ops',
+            tags=[
+                'optional:tag1',
+                'nfs_server:192.168.34.1',
+                'nfs_export:/exports/nfs/datadog/one',
+                'nfs_mount:/mnt/datadog/one',
+            ],
+        )
+        check.log.warning.assert_has_calls(
+            [
+                mock.call('Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', 1),
+                mock.call('Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', 1),
+            ]
+        )
 
 
 @pytest.mark.unit
@@ -143,10 +165,10 @@ class TestNfsiostatPathResolution:
 
         self.assert_check_uses_command(check, [FLEET_PYTHON_PATH, FLEET_NFSIOSTAT_PATH, '1', '2'])
 
-    def test_bundled_path_without_embedded_python_runs_directly(self):
-        check = make_check({}, {FLEET_NFSIOSTAT_PATH})
+    def test_missing_omnibus_python_uses_fleet_path(self):
+        check = make_check({}, {OMNIBUS_NFSIOSTAT_PATH, FLEET_NFSIOSTAT_PATH, FLEET_PYTHON_PATH})
 
-        self.assert_check_uses_command(check, [FLEET_NFSIOSTAT_PATH, '1', '2'])
+        self.assert_check_uses_command(check, [FLEET_PYTHON_PATH, FLEET_NFSIOSTAT_PATH, '1', '2'])
 
     def test_omnibus_path_takes_precedence(self):
         check = make_check(
@@ -158,6 +180,11 @@ class TestNfsiostatPathResolution:
 
     def test_source_path_runs_directly(self):
         check = make_check({}, {SOURCE_NFSIOSTAT_PATH})
+
+        self.assert_check_uses_command(check, [SOURCE_NFSIOSTAT_PATH, '1', '2'])
+
+    def test_bundled_path_without_embedded_python_uses_source_path(self):
+        check = make_check({}, {FLEET_NFSIOSTAT_PATH, SOURCE_NFSIOSTAT_PATH})
 
         self.assert_check_uses_command(check, [SOURCE_NFSIOSTAT_PATH, '1', '2'])
 
