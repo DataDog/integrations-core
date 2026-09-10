@@ -48,6 +48,12 @@ PERF_METRICS = [
 
 HA_METIRCS = ['proxmox.ha.quorate', 'proxmox.ha.quorum']
 
+# Emitted only for VMs and nodes, with `proxmox_type` on the point, for usage metering.
+METERING_METRICS = [
+    'proxmox.vm.cpu.max',
+    'proxmox.node.cpu.max',
+]
+
 NODE_RESOURCE_METRICS = set(RESOURCE_METRICS) - {
     'proxmox.diskread',
     'proxmox.diskwrite',
@@ -79,7 +85,7 @@ CONTAINER_PERF_METRICS = set(PERF_METRICS) - {
 
 STORAGE_PERF_METRICS = {'proxmox.disk.total', 'proxmox.disk.used'}
 
-ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS + HA_METIRCS
+ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS + HA_METIRCS + METERING_METRICS
 
 ALL_EVENTS = [
     {

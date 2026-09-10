@@ -339,6 +339,19 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 tags=self.base_tags + list(resource_tags),
             )
 
+            if resource_type_remapped in (VM_RESOURCE, NODE_RESOURCE):
+                maxcpu = resource.get('maxcpu')
+                if maxcpu is not None:
+                    # Usage metering requires `proxmox_type` on the point itself. For VMs and nodes
+                    # `tags` is empty because their tags are routed to external host tags instead,
+                    # and external tags never reach the metric payload at metering ingest.
+                    self.gauge(
+                        f'{resource_type_remapped}.cpu.max',
+                        maxcpu,
+                        tags=self.base_tags + list(resource_tags),
+                        hostname=hostname,
+                    )
+
             if resource_type_remapped != "pool":
                 # pools don't have a status attribute
                 self.gauge(

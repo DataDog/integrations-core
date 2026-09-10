@@ -415,6 +415,120 @@ def test_resource_metrics(dd_run_check, aggregator, instance):
 
 
 @pytest.mark.usefixtures('mock_http_get')
+def test_vm_vcpu_metering_metric(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'proxmox.vm.cpu.max',
+        2,
+        hostname='debian',
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:vm',
+            'proxmox_name:VM 100',
+            'proxmox_id:qemu/100',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+    )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_node_vcpu_metering_metric(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'proxmox.node.cpu.max',
+        72,
+        hostname='ip-122-82-3-112',
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:node',
+            'proxmox_type:host',
+            'proxmox_name:ip-122-82-3-112',
+            'proxmox_id:node/ip-122-82-3-112',
+        ],
+    )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_skip_containers(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # A default-configured container reports its host's entire thread count as `maxcpu`
+    # (lxc/111 reports 72 on a 72-thread node), so metering containers would bill each one
+    # at full host CPU.
+    aggregator.assert_metric('proxmox.container.cpu.max', count=0)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_skip_powered_off_vm(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # qemu/101 is stopped but still carries maxcpu=2.
+    aggregator.assert_metric(
+        'proxmox.vm.cpu.max',
+        count=0,
+        tags=[
+            'proxmox_server:http://localhost:8006/api2/json',
+            'testing',
+            'proxmox_type:vm',
+            'proxmox_name:VM 101',
+            'proxmox_id:qemu/101',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+    )
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data={
+                            "data": [
+                                {
+                                    "id": "node/ip-122-82-3-112",
+                                    "node": "ip-122-82-3-112",
+                                    "type": "node",
+                                    "status": "offline",
+                                    "maxcpu": 72,
+                                }
+                            ]
+                        },
+                    )
+                }
+            },
+            id='offline_node',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_skip_offline_node(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=0)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_respect_resource_filters(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['resource_filters'] = [
+        {'type': 'exclude', 'resource': 'vm', 'property': 'resource_name', 'patterns': ['VM 100']},
+    ]
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
 def test_perf_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
