@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from ddev.ai.config.registry import ResourceRegistry
 
 
+READ_FILE_TOOL = "read_file"
+
+
 @dataclass(frozen=True)
 class DeclaredVar:
     name: str
@@ -38,6 +41,42 @@ def resolve_variables(
     errors.extend(_find_missing_variables(declared, supplied))
     resolved = {**defaults, **flow_config.variables}
     return resolved, errors
+
+
+def validate_snapshot_readers(
+    registry: ResourceRegistry, scheduled_phases: list[PhaseConfig], flow_config: FlowConfig
+) -> list[FlowError]:
+    """Ensure agents given a snapshot input can open the file it points at.
+
+    Snapshot inputs are delivered as a path, so an agent without a read tool would
+    silently receive a location it cannot open instead of failing outright.
+    """
+    snapshot_inputs = {flow_input.name for flow_input in flow_config.inputs if flow_input.snapshot}
+    if not snapshot_inputs:
+        return []
+
+    errors: list[FlowError] = []
+    for phase_config in scheduled_phases:
+        agent_name = phase_config.agent
+        agent = registry.agents.get(agent_name) if agent_name is not None else None
+        if agent is None or READ_FILE_TOOL in agent.tools:
+            continue
+        declared = {v.name for v in phase_config.variables} | {v.name for v in agent.variables}
+        consumed = sorted(snapshot_inputs & declared)
+        if not consumed:
+            continue
+        names = ", ".join(repr(name) for name in consumed)
+        errors.append(
+            FlowError(
+                ErrorKind.AGENT,
+                f"Agent {agent_name!r} uses snapshot input(s) {names}, which are supplied as a file path, "
+                f"but does not declare the {READ_FILE_TOOL!r} tool",
+                subject=agent_name,
+                phase=phase_config.name,
+                sources=[registry.entry(ResourceKind.AGENT, agent_name).source_file],
+            )
+        )
+    return errors
 
 
 def _gather_variable_declarations(registry: ResourceRegistry, scheduled_phases: list[PhaseConfig]) -> list[DeclaredVar]:
