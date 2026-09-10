@@ -29,7 +29,7 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
-from .helpers import MockAgent, make_agent_phase, make_goal_verdict, make_response
+from .helpers import MockAgent, StubBus, make_agent_phase, make_goal_verdict, make_response
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -400,7 +400,7 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         checkpoint_manager=checkpoint_manager,
         context=flow_context,
     )
-    phase.queue = message_queue
+    phase.bus = StubBus(message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
