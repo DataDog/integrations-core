@@ -19,9 +19,12 @@ from typing import TYPE_CHECKING, Any
 import yaml
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 
 INPUTS_DIR_NAME = "inputs"
+CAPTURES_DIR_NAME = "files"
 MANIFEST_NAME = "manifest.yaml"
 READ_ONLY_MODE = 0o444
 
@@ -36,8 +39,59 @@ class SnapshotInput:
     sha256: str
     size: int
     captured_at: str
-    diverged: bool = False
-    """The reused snapshot no longer matches the file the run was launched with."""
+    diverged: bool = False  # The reused snapshot no longer matches the file the run was launched with.
+
+
+@dataclass(frozen=True)
+class SnapshotRecord:
+    """One input's entry in ``inputs/manifest.yaml``."""
+
+    filename: str
+    sha256: str
+    size: int
+    captured_at: str
+    source: Path | None = None  # The path the run was launched with, or ``None`` when the entry omits it.
+
+    @classmethod
+    def of(cls, captured: SnapshotInput) -> SnapshotRecord:
+        return cls(
+            filename=captured.path.name,
+            sha256=captured.sha256,
+            size=captured.size,
+            captured_at=captured.captured_at,
+            source=captured.source,
+        )
+
+    @classmethod
+    def parse(cls, entry: Mapping[str, Any]) -> SnapshotRecord:
+        """Read one entry, tolerating the missing keys a truncated manifest can leave."""
+        source = entry.get("source")
+        return cls(
+            filename=str(entry.get("snapshot", "")),
+            sha256=str(entry.get("sha256", "")),
+            size=int(entry.get("size", 0)),
+            captured_at=str(entry.get("captured_at", "")),
+            source=Path(str(source)) if source else None,
+        )
+
+    def as_payload(self) -> dict[str, Any]:
+        return {
+            "source": str(self.source) if self.source is not None else "",
+            "snapshot": self.filename,
+            "sha256": self.sha256,
+            "size": self.size,
+            "captured_at": self.captured_at,
+        }
+
+
+@dataclass(frozen=True)
+class PinnedSnapshot:
+    """A snapshot an earlier attempt at a run captured and a resume can reuse."""
+
+    name: str
+    source: Path  # The path the run was originally launched with, which may no longer exist.
+    path: Path
+    captured_at: str
 
 
 def snapshot_path_inputs(
@@ -61,6 +115,7 @@ def snapshot_path_inputs(
         return runtime_variables, []
 
     inputs_dir = run_dir / INPUTS_DIR_NAME
+    captures_dir = inputs_dir / CAPTURES_DIR_NAME
     previous = _read_manifest(inputs_dir) if resume else {}
 
     captured: list[SnapshotInput] = []
@@ -68,8 +123,8 @@ def snapshot_path_inputs(
         value = runtime_variables.get(name)
         if not isinstance(value, str) or not value:
             continue
-        inputs_dir.mkdir(parents=True, exist_ok=True)
-        captured.append(_capture(name, Path(value), inputs_dir, previous.get(name)))
+        captures_dir.mkdir(parents=True, exist_ok=True)
+        captured.append(_capture(name, Path(value), captures_dir, previous.get(name)))
 
     if not captured:
         return runtime_variables, []
@@ -78,24 +133,27 @@ def snapshot_path_inputs(
     return {**runtime_variables, **{item.name: str(item.path) for item in captured}}, captured
 
 
-def _capture(name: str, source: Path, inputs_dir: Path, previous: dict[str, Any] | None) -> SnapshotInput:
+def _capture(name: str, source: Path, captures_dir: Path, previous: SnapshotRecord | None) -> SnapshotInput:
     """Reuse the recorded snapshot when one survives, otherwise copy the source in."""
     if previous is not None:
-        path = inputs_dir / str(previous.get("snapshot", ""))
+        path = captures_dir / previous.filename
         if path.is_file():
-            sha256 = str(previous.get("sha256", ""))
+            # Divergence is measured against the path the run was launched with, not the
+            # value supplied now: a resume is handed the surviving copy, whose digest
+            # trivially matches. A source that has since been deleted reads as diverged.
+            recorded_source = previous.source or source
             return SnapshotInput(
                 name=name,
-                source=Path(str(previous.get("source", source))),
+                source=recorded_source,
                 path=path,
-                sha256=sha256,
-                size=int(previous.get("size", 0)),
-                captured_at=str(previous.get("captured_at", "")),
-                diverged=_digest(source) != sha256,
+                sha256=previous.sha256,
+                size=previous.size,
+                captured_at=previous.captured_at,
+                diverged=_digest(recorded_source) != previous.sha256,
             )
 
     content = source.read_bytes()
-    path = inputs_dir / f"{name}{source.suffix}"
+    path = captures_dir / f"{name}{source.suffix}"
     path.unlink(missing_ok=True)
     path.write_bytes(content)
     path.chmod(READ_ONLY_MODE)
@@ -109,6 +167,28 @@ def _capture(name: str, source: Path, inputs_dir: Path, previous: dict[str, Any]
     )
 
 
+def pinned_snapshot_inputs(run_dir: Path) -> dict[str, PinnedSnapshot]:
+    """Return the snapshots an earlier attempt at *run_dir* captured, keyed by input name.
+
+    A resume reuses these instead of collecting the source path again, so a run can
+    restart even after the file it was launched with was edited, moved, or deleted.
+    Inputs whose copy no longer survives are omitted and must be supplied afresh.
+    """
+    inputs_dir = run_dir / INPUTS_DIR_NAME
+    pinned: dict[str, PinnedSnapshot] = {}
+    for name, record in _read_manifest(inputs_dir).items():
+        path = inputs_dir / CAPTURES_DIR_NAME / record.filename
+        if not path.is_file():
+            continue
+        pinned[name] = PinnedSnapshot(
+            name=name,
+            source=record.source or Path(),
+            path=path,
+            captured_at=record.captured_at,
+        )
+    return pinned
+
+
 def _digest(path: Path) -> str:
     """The source file's digest, or an empty string when it can no longer be read."""
     try:
@@ -117,7 +197,7 @@ def _digest(path: Path) -> str:
         return ""
 
 
-def _read_manifest(inputs_dir: Path) -> dict[str, dict[str, Any]]:
+def _read_manifest(inputs_dir: Path) -> dict[str, SnapshotRecord]:
     manifest = inputs_dir / MANIFEST_NAME
     if not manifest.is_file():
         return {}
@@ -127,19 +207,10 @@ def _read_manifest(inputs_dir: Path) -> dict[str, dict[str, Any]]:
         return {}
     if not isinstance(loaded, dict):
         return {}
-    return {name: entry for name, entry in loaded.items() if isinstance(entry, dict)}
+    return {name: SnapshotRecord.parse(entry) for name, entry in loaded.items() if isinstance(entry, dict)}
 
 
 def _write_manifest(inputs_dir: Path, captured: list[SnapshotInput]) -> None:
     """Record provenance so a run can be traced back to the file it was launched with."""
-    payload = {
-        item.name: {
-            "source": str(item.source),
-            "snapshot": item.path.name,
-            "sha256": item.sha256,
-            "size": item.size,
-            "captured_at": item.captured_at,
-        }
-        for item in captured
-    }
+    payload = {item.name: SnapshotRecord.of(item).as_payload() for item in captured}
     (inputs_dir / MANIFEST_NAME).write_text(yaml.dump(payload, sort_keys=False), encoding="utf-8")
