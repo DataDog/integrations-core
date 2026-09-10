@@ -6,7 +6,7 @@ Collect custom metrics from read-only PowerShell `Get-*` cmdlets on Windows host
 
 For security, the integration runs only cmdlets and parameters explicitly permitted in an administrator-owned allowlist.
 
-**Minimum Agent version:** 7.84.0
+**Minimum Agent version:** 7.85.0
 
 ## Setup
 
@@ -16,7 +16,7 @@ The PowerShell integration is included in the [Datadog Agent][1] package. No add
 
 ### Configuration
 
-1. Edit `powershell_allowlist.yaml` to permit the read-only cmdlets and parameters that the Agent may run. The allowlist must be owned by Administrators or SYSTEM. The check fails closed if the file is missing, invalid, or owned by another user.
+1. Create or edit the allowlist at `C:\ProgramData\Datadog\protected\powershell_allowlist.yaml` to permit the read-only cmdlets and parameters that the Agent may run. See the [sample PowerShell allowlist][9] for an example. The allowlist must be owned by Administrators or SYSTEM. The check fails closed if the file is missing, invalid, or owned by another user.
 
    The following example permits the check to query listening TCP connections and correlate them with running processes:
 
@@ -118,3 +118,4 @@ Need help? Contact [Datadog support][7] with an [Agent Flare][8].
 [6]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
+[9]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/protected/powershell_allowlist.yaml.example
