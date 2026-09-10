@@ -1,6 +1,6 @@
 # This dockerfile is used to build the devcontainer environment.
 # more info about vscode devcontainer: https://code.visualstudio.com/docs/devcontainers/containers
-FROM mcr.microsoft.com/devcontainers/python:1-3.13-bullseye
+FROM mcr.microsoft.com/devcontainers/python:1-3.13-bookworm
 RUN rm -f /etc/apt/sources.list.d/yarn.list && \
     apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y liblz4-dev libunwind-dev ca-certificates curl gnupg
 # Docker and docker-compose installation
