@@ -191,7 +191,7 @@ async def test_on_initialize_gives_phases_the_snapshot_path(core_dir, make_orche
 
     await orchestrator.on_initialize()
 
-    snapshot = tmp_path / "inputs" / "spec.md"
+    snapshot = tmp_path / "inputs" / "files" / "spec.md"
     assert snapshot.read_text(encoding="utf-8") == "requirements"
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
     assert [p._runtime_variables for p in processors] == [{"spec": str(snapshot)}] * len(processors)

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
@@ -12,8 +14,17 @@ from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import Button, Static
 
-from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
-from ddev.cli.meta.ai.tui.widgets.launch_flow_input import LaunchFlowInput
+from ddev.ai.config.models import FlowInput, ResolvedFlow, RuntimeVariables
+from ddev.cli.meta.ai.tui.widgets.launch_flow_input import (
+    AnyLaunchFlowInput,
+    LaunchFlowInput,
+    PinnedLaunchFlowInput,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from ddev.ai.runtime.input_snapshot import PinnedSnapshot
 
 type LaunchInputValues = RuntimeVariables
 
@@ -23,10 +34,23 @@ class LaunchModal(ModalScreen):
 
     BINDINGS = [Binding("escape", "cancel", "Cancel")]
 
-    def __init__(self, flow: ResolvedFlow) -> None:
+    def __init__(
+        self,
+        flow: ResolvedFlow,
+        *,
+        pinned_snapshots: Mapping[str, PinnedSnapshot] | None = None,
+    ) -> None:
         super().__init__()
         self.flow = flow
-        self.launch_inputs = [LaunchFlowInput.get(flow_input) for flow_input in flow.inputs]
+        self.pinned_snapshots = dict(pinned_snapshots or {})
+        self.launch_inputs = [self._launch_input(flow_input) for flow_input in flow.inputs]
+
+    def _launch_input(self, flow_input: FlowInput) -> AnyLaunchFlowInput:
+        """Show a pinned snapshot read-only; collect every other input as usual."""
+        pinned = self.pinned_snapshots.get(flow_input.name) if flow_input.snapshot else None
+        if pinned is not None:
+            return PinnedLaunchFlowInput(flow_input, pinned)
+        return LaunchFlowInput.get(flow_input)
 
     # ------------------------------------------------------------------
     # Compose
