@@ -101,8 +101,8 @@ RUN_SUMMARY_COMMENT_FAILED_NOTE = (
     "> See the workflow logs for why the comment write failed."
 )
 
-# Said in both the alert and the footer, so a reader who skips one still learns the comment is live.
-FOOTER_RUNNING_NOTE = "This comment updates automatically as jobs progress and results are collected."
+# The alert explains that unfinished results keep updating; the footer links to the run.
+ALERT_RUNNING_NOTE = "This comment updates automatically as jobs progress and results are collected."
 
 STATUS_CHIP = {
     Status.SUCCESS: "✅ passed",
@@ -250,7 +250,7 @@ def _alert(
         return _shutdown_alert(shutdown)
     if not progress.done:
         phase = "Tests finished; collecting results." if _collecting_results(progress) else "Tests are still running."
-        return f"> [!NOTE]\n> **{phase}** {_outstanding(progress)}\n> {FOOTER_RUNNING_NOTE}"
+        return f"> [!NOTE]\n> **{phase}** {_outstanding(progress)}\n> {ALERT_RUNNING_NOTE}"
 
     unavailable = _unavailable_count(progress)
     if _has_failure(progress):
@@ -558,7 +558,10 @@ def _footer(progress: DispatcherProgress | None, *, shutdown: ShutdownRequest | 
     commit was tested and where Dispatcher itself ran, so that is what this says.
     """
     if shutdown is None and (progress is None or not progress.done):
-        return f"<sub>\n⏳ {FOOTER_RUNNING_NOTE}\n</sub>"
+        note = "⏳ Dispatcher running"
+        if run_url := get_workflow_run_url():
+            note += f' — <a href="{html.escape(run_url, quote=True)}">GitHub Run</a>'
+        return f"<sub>\n{note}.\n</sub>"
 
     note = "Dispatcher finished" if shutdown is None else f"Dispatcher {shutdown.kind.value}"
     if sha := get_commit_sha():

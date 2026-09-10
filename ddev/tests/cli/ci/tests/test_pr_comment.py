@@ -18,12 +18,12 @@ import pytest
 from markdown_it import MarkdownIt
 
 from ddev.cli.ci.tests.pr_comment import (
+    ALERT_RUNNING_NOTE,
     CANCELLED_HEADING,
     CANCELLED_NOTE,
     CANCELLED_WITHOUT_RESULTS_NOTE,
     COMMENT_MARKER,
     FAILED_HEADING,
-    FOOTER_RUNNING_NOTE,
     PROGRESS_BAR_WIDTH,
     SHUTDOWN_HEADINGS,
     SHUTDOWN_REASON_LIMIT,
@@ -747,6 +747,33 @@ def test_the_footer_says_what_it_can_outside_github_actions(monkeypatch):
     assert "GitHub Run" not in footer
 
 
+@pytest.mark.parametrize(
+    ("run_id", "expected"),
+    [
+        pytest.param(
+            "12345",
+            '⏳ Dispatcher running — <a href="https://github.com/DataDog/integrations-core/actions/runs/12345">'
+            "GitHub Run</a>.",
+            id="linked",
+        ),
+        pytest.param(None, "⏳ Dispatcher running.", id="url-unavailable"),
+    ],
+)
+def test_the_footer_of_an_unfinished_run_identifies_the_dispatcher(
+    run_id: str | None, expected: str, monkeypatch: pytest.MonkeyPatch
+):
+    """The running footer links when possible and still renders when the URL is unavailable."""
+    if run_id is None:
+        monkeypatch.delenv("GITHUB_RUN_ID")
+    else:
+        monkeypatch.setenv("GITHUB_RUN_ID", run_id)
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
+    )
+
+    assert render_comment(progress).endswith(f"<sub>\n{expected}\n</sub>")
+
+
 def test_summary_line_reports_state_and_counts():
     progress = DispatcherProgress(
         batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
@@ -1051,7 +1078,7 @@ def test_a_stopped_run_keeps_what_it_gathered_without_still_reading_as_running(k
     assert SHUTDOWN_HEADINGS[kind] in body
     assert "Dispatcher tests · in progress" not in body
     assert "Tests are still running" not in body
-    assert FOOTER_RUNNING_NOTE not in body
+    assert ALERT_RUNNING_NOTE not in body
     # Per-batch rows keep their own last-known state, which the alert explains stopped with the run.
     assert "batch-01" in body
 
