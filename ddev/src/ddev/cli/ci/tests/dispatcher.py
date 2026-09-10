@@ -8,17 +8,21 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from ddev.cli.ci.tests.messages import BatchFinished, TestBatch, UpdatePRComment
+from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
-from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
+from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, MessageScope
+from ddev.monitoring import ComponentMonitor
+from ddev.monitoring.context import MonitorContext
+from ddev.monitoring.runtime import MonitoringRuntime
 from ddev.utils.github_actions import write_step_summary
 from ddev.utils.rate_limiting import RelaxedRateLimits
 
@@ -39,7 +43,7 @@ CANCELLED_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.
 @dataclass(frozen=True)
 class DispatcherContext:
     """The run being tested. `build_dispatcher` consumes part of it; the rest describes the run
-    for the plan header and, once metrics land, for their tags.
+    for the plan header and for the monitoring run context (see `run_fields`).
 
     `base_sha` and `checkout_sha` are deliberately separate: a pull request is tested at the merge
     commit (`refs/pull/<n>/merge`) but its checks belong to the head commit. Outside a pull request
@@ -86,11 +90,62 @@ class DispatcherOutcome:
         )
 
 
+def tag_fields(tags: tuple[str, ...]) -> dict[str, Any]:
+    fields: dict[str, Any] = {}
+    for tag in tags:
+        key, _, value = tag.partition(':')
+        if key:
+            fields[key] = value
+    return fields
+
+
+PROTECTED_RUN_FIELDS = frozenset({'repo', 'branch', 'commit', 'context', 'pr_number', 'target-branch'})
+
+
+def run_fields(context: DispatcherContext) -> dict[str, Any]:
+    """Resolved identity wins; non-PR context uses the caller's tag or defaults to master."""
+    fields = tag_fields(context.tags)
+    fields.update(
+        {
+            # The head revision the run reports on. `checkout_sha` is deliberately not used: for a
+            # pull request it is a merge ref, not a SHA.
+            'commit': context.base_sha,
+            'branch': context.branch,
+            'pr_number': context.pr_number,
+            'target-branch': context.target_branch,
+            'repo': f'{context.owner}/{context.repo}',
+        }
+    )
+    if context.pr_number is not None:
+        fields['context'] = 'pr'
+    elif 'context' not in fields:
+        fields['context'] = 'master'
+    return fields
+
+
+def message_fields(message: BaseMessage) -> dict[str, Any]:
+    """Run-wide reports must not inherit the identity of the batch that triggered them."""
+    match message:
+        case TestBatch(batch_id=batch_id):
+            return {'batch_id': batch_id}
+        case BatchProgressUpdate(batch_id=batch_id, run_id=run_id) | BatchFinished(batch_id=batch_id, run_id=run_id):
+            return {'batch_id': batch_id, 'run_id': run_id}
+        case _:
+            return {}
+
+
+def message_scope(context: MonitorContext) -> MessageScope:
+    def scope(message: BaseMessage) -> AbstractContextManager[None]:
+        return context.scope(message_fields(message))
+
+    return scope
+
+
 class Dispatcher(EventBusOrchestrator):
     """Runs a batching plan to completion and publishes its result.
 
     The whole plan is known before the bus starts, so `on_initialize` queues the initial update and
-    every batch: `TestBatch` -> runner -> `BatchFinished` -> gatherer -> `UpdatePRComment` -> reporter.
+    every batch: `TestBatch` -> runner -> progress/results -> gatherer -> `UpdatePRComment` -> reporter.
     """
 
     def __init__(
@@ -104,8 +159,15 @@ class Dispatcher(EventBusOrchestrator):
         max_timeout: float | None,
         grace_period: float,
         run_logger: logging.Logger | None = None,
+        monitor: ComponentMonitor | None = None,
+        message_scope: MessageScope | None = None,
     ):
-        super().__init__(run_logger or logger, max_timeout=max_timeout, grace_period=grace_period)
+        super().__init__(
+            run_logger or logger,
+            max_timeout=max_timeout,
+            grace_period=grace_period,
+            message_scope=message_scope,
+        )
         self._batches = batches
         self._client = client
         self._runner = runner
@@ -113,9 +175,10 @@ class Dispatcher(EventBusOrchestrator):
         self._reporter = reporter
         self._outcome: DispatcherOutcome | None = None
         self._cancelled = False
+        self._monitor = monitor
 
         self.register_processor(runner, [TestBatch])
-        self.register_processor(gatherer, [BatchFinished])
+        self.register_processor(gatherer, [BatchFinished, BatchProgressUpdate])
         self.register_processor(reporter, [UpdatePRComment])
 
     @property
@@ -132,7 +195,11 @@ class Dispatcher(EventBusOrchestrator):
         self.submit_message(self._gatherer.build_initial_update())
         for batch in self._batches:
             self.submit_message(batch)
-        self._logger.info("Dispatched %s batches", len(self._batches))
+        if self._monitor is None:
+            self._logger.info('Dispatched %s batches', len(self._batches))
+        else:
+            # Queued, not dispatched: the workflows start when the runner's messages are processed.
+            self._monitor.logger.info('Queued planned batches', batch_count=len(self._batches))
 
     def on_shutdown_signal(self, received: signal.Signals) -> None:
         """Record that the run was cancelled, then size what is left for the seconds it has.
@@ -162,7 +229,10 @@ class Dispatcher(EventBusOrchestrator):
                 progress=progress,
                 final_report_published=self._reporter.final_report_published,
             )
-            self._logger.info(summary_line(progress))
+            if self._monitor is None:
+                self._logger.info(summary_line(progress))
+            else:
+                self._monitor.logger.info(summary_line(progress))
             if (body := self._reporter.latest_body) is not None:
                 write_step_summary(render_run_summary(body, pr_comment_failed=self._reporter.pr_comment_failed))
         finally:
@@ -204,19 +274,24 @@ def build_dispatcher(
     artifacts_path: Path,
     output_path: Path,
     run_logger: logging.Logger | None = None,
+    monitoring: MonitoringRuntime | None = None,
 ) -> Dispatcher:
     """Assemble the client, the three tasks and the Dispatcher from a plan and its run context.
 
-    One client and one rate limiter are shared by every task, so the run's request rate is bounded
-    as a whole rather than per task. The limiter tier is chosen from every integration in the plan,
-    which is the slowest thing the run will wait on.
+    One HTTP pool is shared by every task. Artifact collection uses its own local bucket;
+    all buckets share the provider's budget and pauses.
+
+    The caller owns ``monitoring``; omitting it retains stdlib logging.
     """
     from ddev.utils.github_async import AsyncGitHubClient
 
+    def view(name: str) -> ComponentMonitor | None:
+        return monitoring.component(name) if monitoring is not None else None
+
     active_logger = run_logger or logger
     integrations = frozenset(integration for batch in batches for integration in batch.integrations)
-    rate_limiter = RateLimiterFactory(config.github_rate_limits, active_logger).get_limiter(integrations)
-    client = AsyncGitHubClient(token, rate_limiter=rate_limiter)
+    rate_limiters = RateLimiterFactory(config.github_rate_limits, active_logger)
+    client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations))
 
     runner = TaskTestRunner(
         "test-runner",
@@ -234,12 +309,15 @@ def build_dispatcher(
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
         ),
+        artifact_client=client.with_rate_limit(rate_limiters.artifacts),
+        monitor=view('test-runner'),
     )
-    gatherer = TaskTestGatherer("test-gatherer", output_path, batches)
+    gatherer = TaskTestGatherer("test-gatherer", output_path, batches, monitor=view('test-gatherer'))
     reporter = TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner=context.owner, repo=context.repo, pr_number=context.pr_number),
+        monitor=view('run-reporter'),
     )
 
     return Dispatcher(
@@ -251,4 +329,6 @@ def build_dispatcher(
         max_timeout=config.global_timeout_seconds,
         grace_period=config.grace_period_seconds,
         run_logger=active_logger,
+        monitor=view('dispatcher'),
+        message_scope=message_scope(monitoring.context) if monitoring is not None else None,
     )

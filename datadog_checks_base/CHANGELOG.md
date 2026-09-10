@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.3.2 / 2026-09-10
+
+***Fixed***:
+
+* Allow schema collectors to report object-specific count telemetry. ([#24947](https://github.com/DataDog/integrations-core/pull/24947))
+
 ## 38.3.1 / 2026-09-03
 
 ***Fixed***:
