@@ -85,7 +85,7 @@ def remote_query_request(pg_instance, query, include_schema=False, **limits):
         'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 1,
+            'artifactVersion': 2,
             'uploadId': UPLOAD_ID,
             'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
             'limits': {
@@ -134,17 +134,17 @@ def test_remote_query_produces_json_page_with_real_schema(integration_check, pg_
     pages = client.pages()
     assert list(pages) == [0]
     page = json.loads(pages[0])
-    assert page['version'] == 1
-    assert page['run_id'] == RUN_ID
+    assert page['contract_version'] == 2
+    assert page['crawl_id'] == RUN_ID
     assert page['task_id'] == TASK_ID
-    assert page['batch_index'] == 0
+    assert 'batch_index' not in page
     assert page['record_offset'] == 0
     # Real pg_catalog.format_type output, with the varchar typmod preserved.
     assert page['schema'] == [
         {'column_name': 'city', 'vendor_data_type': 'character varying(255)'},
         {'column_name': 'country', 'vendor_data_type': 'character varying(255)'},
     ]
-    assert page['data']['items'] == [
+    assert page['data'] == [
         {'city': 'Beautiful city of lights', 'country': 'France'},
         {'city': 'New York', 'country': 'USA'},
     ]
@@ -183,7 +183,7 @@ def test_remote_query_normalizes_real_postgres_values(integration_check, pg_inst
     parsed = json.loads(page)
     # bytea -> base64 string (the exact 3-byte payload, no padding), and the schema
     # identifies bytea.
-    assert parsed['data']['items'] == [{'payload': 'AP+A'}]
+    assert parsed['data'] == [{'payload': 'AP+A'}]
     assert parsed['schema'] == [{'column_name': 'payload', 'vendor_data_type': 'bytea'}]
 
 
@@ -200,7 +200,7 @@ def test_remote_query_select_one_and_zero_row_schema_page(integration_check, pg_
     (page,) = client.pages().values()
     parsed = json.loads(page)
     assert parsed['schema'] == [{'column_name': 'value', 'vendor_data_type': 'integer'}]
-    assert parsed['data']['items'] == [{'value': 1}]
+    assert parsed['data'] == [{'value': 1}]
 
     # The zero-row query is not allowlisted; the E2E producer path is under test here.
     monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
@@ -211,7 +211,7 @@ def test_remote_query_select_one_and_zero_row_schema_page(integration_check, pg_
     (zero_page,) = zero_client.pages().values()
     zero_parsed = json.loads(zero_page)
     # Zero-row query with schema requested: one schema-bearing empty page.
-    assert zero_parsed['data']['items'] == []
+    assert zero_parsed['data'] == []
     assert zero_parsed['schema'] == [{'column_name': 'value', 'vendor_data_type': 'integer'}]
     assert zero_final['upload_receipt']['pageCount'] == 1
     assert zero_final['upload_receipt']['totalRows'] == 0
@@ -242,5 +242,5 @@ def test_remote_query_splits_pages_and_reuses_pool_after_failure(integration_che
     ok_events, ok_client = run_producer(ok_request, check)
     ok_final = assert_success(ok_events)
     (ok_page,) = ok_client.pages().values()
-    assert json.loads(ok_page)['data']['items'] == [{'value': 1}]
+    assert json.loads(ok_page)['data'] == [{'value': 1}]
     assert ok_final['upload_receipt']['totalRows'] == 1

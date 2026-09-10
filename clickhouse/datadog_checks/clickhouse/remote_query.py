@@ -18,7 +18,7 @@ executor so the Agent bridge (``datadog_checks.clickhouse.remote_query`` ->
 ``execute_agent_rpc_stream_copy``) and its-agent-intake treat both integrations uniformly.
 The integration-specific parts are the internal source format, the read-only posture, and
 the value normalization documented below. The public result contract is unchanged: ITS and
-its consumers see the same v1 JSON page artifact and events as Postgres.
+its consumers see the same v2 JSON page artifact and events as Postgres.
 
 Wire format (internal to the check<->server hop, not a public result format): ``FORMAT
 JSONCompactEachRowWithNamesAndTypes``. The stream carries the column names, the ClickHouse
@@ -659,7 +659,6 @@ def build_schema_json(
         rq.page_prefix(
             run_id=delivery.run_id,
             task_id=delivery.task_id,
-            batch_index=0,
             record_offset=0,
             agent_hostname=agent_hostname,
             schema_json=schema_json,

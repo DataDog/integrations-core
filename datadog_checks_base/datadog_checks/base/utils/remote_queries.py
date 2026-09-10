@@ -55,10 +55,14 @@ REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 100 * 1024 * 1024 * 1024
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
 
 
-REMOTE_QUERY_ARTIFACT_VERSION = 1
+# The v2 page contract: a top-level numeric ``contract_version``, the run serialized under
+# the contract field name ``crawl_id``, no ``batch_index`` in the body (the page index lives in
+# the upload URL path and page metadata), and a bare ``data`` array of row objects.
+REMOTE_QUERY_ARTIFACT_VERSION = 2
 
 
-PAGE_SUFFIX = b']}}'
+# The bytes appended after the last row: close the bare ``data`` array and the document.
+PAGE_SUFFIX = b']}'
 
 
 RemoteQueryEmit = Callable[[str, str, bytes], None]
@@ -276,27 +280,36 @@ def page_prefix(
     *,
     run_id: str,
     task_id: str,
-    batch_index: int,
     record_offset: int,
     agent_hostname: str,
     schema_json: bytes | None,
 ) -> bytes:
-    """The envelope bytes through the opening of ``data.items``, with no trailing space.
+    """The envelope bytes through the opening of ``data``, with no trailing space.
 
-    ``agent_hostname`` is the executing host's Agent-reported identity, always stamped so the
-    console can attribute a run to the agent that produced its pages. It is host identity,
-    not job data, so it is threaded from the executing check instance, never the delivery.
+    The authoritative ITS ``run_id`` is serialized under the contract field name ``crawl_id``;
+    it is a field-name mapping only, never a second identifier. ``agent_hostname`` is the
+    executing host's Agent-reported identity, always stamped so the console can attribute
+    a run to the agent that produced its pages. It is host identity, not job data, so it is
+    threaded from the executing check instance, never the delivery. The page index is
+    metadata-only in v2: it reaches the upload URL path and ``PageUploadMetadata``, not
+    the serialized body.
     """
     head = (
-        '{"version":1,"run_id":%s,"task_id":%s,"batch_index":%d,"record_offset":%d,"agent_hostname":%s,'
-        % (json.dumps(run_id), json.dumps(task_id), batch_index, record_offset, json.dumps(agent_hostname))
+        '{"contract_version":%d,"crawl_id":%s,"task_id":%s,"record_offset":%d,"agent_hostname":%s,'
+        % (
+            REMOTE_QUERY_ARTIFACT_VERSION,
+            json.dumps(run_id),
+            json.dumps(task_id),
+            record_offset,
+            json.dumps(agent_hostname),
+        )
     ).encode('utf-8')
     parts = [head]
     if schema_json is not None:
         parts.append(b'"schema":')
         parts.append(schema_json)
         parts.append(b',')
-    parts.append(b'"data":{"items":[')
+    parts.append(b'"data":[')
     return b''.join(parts)
 
 
@@ -374,7 +387,6 @@ class PageWriter:
         prefix = page_prefix(
             run_id=self._delivery.run_id,
             task_id=self._delivery.task_id,
-            batch_index=self._stats.pages_emitted,
             record_offset=self._stats.rows_emitted,
             agent_hostname=self._agent_hostname,
             schema_json=self._schema_json,
