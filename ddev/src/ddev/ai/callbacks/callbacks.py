@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
 from typing import Any, Protocol
 
 from ddev.ai.agent.scope import AgentScope
@@ -100,6 +101,15 @@ class OnRunErrorCallback(Protocol):
     async def __call__(self) -> None: ...
 
 
+class OnInputDivergedCallback(Protocol):
+    """Called when a resumed run keeps a snapshot input whose source file has since changed.
+
+    ``snapshot_path`` is the copy the run continues to use; the file the run was
+    relaunched with is ignored."""
+
+    async def __call__(self, name: str, snapshot_path: Path) -> None: ...
+
+
 class OnBeforeGoalCheckCallback(Protocol):
     """Called immediately before each reviewer agent run for a task with a goal."""
 
@@ -147,6 +157,7 @@ class CallbackSet:
         self._on_phase_finish: list[OnPhaseFinishCallback] = []
         self._on_phase_error: list[OnPhaseErrorCallback] = []
         self._on_run_error: list[OnRunErrorCallback] = []
+        self._on_input_diverged: list[OnInputDivergedCallback] = []
         self._on_before_goal_check: list[OnBeforeGoalCheckCallback] = []
         self._on_after_goal_check: list[OnAfterGoalCheckCallback] = []
 
@@ -248,6 +259,13 @@ class CallbackSet:
     async def fire_run_error(self) -> None:
         await self._fire(self._on_run_error)
 
+    def on_input_diverged(self, func: OnInputDivergedCallback) -> OnInputDivergedCallback:
+        self._on_input_diverged.append(func)
+        return func
+
+    async def fire_input_diverged(self, name: str, snapshot_path: Path) -> None:
+        await self._fire(self._on_input_diverged, name, snapshot_path)
+
     def on_before_goal_check(self, func: OnBeforeGoalCheckCallback) -> OnBeforeGoalCheckCallback:
         self._on_before_goal_check.append(func)
         return func
@@ -326,6 +344,10 @@ class Callbacks:
     async def fire_run_error(self) -> None:
         for s in self._sets:
             await s.fire_run_error()
+
+    async def fire_input_diverged(self, name: str, snapshot_path: Path) -> None:
+        for s in self._sets:
+            await s.fire_input_diverged(name, snapshot_path)
 
     async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:
