@@ -2412,6 +2412,8 @@ jobs:
       target: kuma
       platform: linux
       runner: '["ubuntu-22.04"]'
+      e2e-image-cache-key: kuma-2.10.6
+      e2e-image-cache-images: "kumahq/kuma-cp:2.10.6 kumahq/kumactl:2.10.6"
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
