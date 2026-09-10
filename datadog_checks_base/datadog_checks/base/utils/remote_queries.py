@@ -206,6 +206,21 @@ class RemoteQueryRequest(BaseModel):
     result_delivery: RemoteQueryResultDelivery = Field(alias='resultDelivery')
 
 
+class RemoteQueryResolveRequest(BaseModel):
+    """A resolve_target request: one strict target-only operation, nothing else.
+
+    The Agent's resolve dispatch carries only the operation and the target. Strict validation
+    rejects every execution field — query, includeSchema, resultDelivery, credentials, a match
+    fingerprint, or anything else — so a resolve sweep can never carry SQL or upload
+    instructions.
+    """
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    operation: Literal['resolve_target'] = Field(alias='operation')
+    target: RemoteQueryTarget
+
+
 @dataclass
 class RemoteQueryRunStats:
     """Mutable run accounting shared with the page writer so failures can report partials."""
@@ -932,6 +947,34 @@ def failed_event(
     elif elapsed_ms is not None:
         metadata['stats'] = {'elapsedMs': elapsed_ms}
     return RemoteQueryEvent('error', metadata)
+
+
+def matched_resolve_event(
+    host: str | None,
+    port: int | None,
+    configured_dbname: str | None,
+    resolved_dbname: str,
+    database_instance: str | None,
+) -> RemoteQueryEvent:
+    """The per-check MATCHED resolve verdict: sanitized effective identity, no payload.
+
+    ``host``, ``port``, ``configured_dbname``, and ``database_instance`` identify the matched
+    check as the integration sees it; ``resolved_dbname`` is the database admitted for the
+    target. The keys are pinned by the cross-repo resolve contract and feed the Agent's
+    match fingerprint: never credentials or raw config. Only identity fields that genuinely
+    do not exist for the matched check are omitted.
+    """
+    match: dict[str, Any] = {}
+    if host is not None:
+        match['host'] = host
+    if port is not None:
+        match['port'] = port
+    if configured_dbname is not None:
+        match['configuredDbname'] = configured_dbname
+    match['resolvedDbname'] = resolved_dbname
+    if database_instance is not None:
+        match['databaseInstance'] = database_instance
+    return RemoteQueryEvent('final', {'status': 'MATCHED', 'match': match})
 
 
 def emit_event(emit: RemoteQueryEmit, event: RemoteQueryEvent) -> None:

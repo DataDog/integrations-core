@@ -455,6 +455,42 @@ def test_limits_reject_invalid_bounds(delivery, mutation):
         bounded_delivery(delivery, **mutation)
 
 
+def test_resolve_request_is_target_only():
+    request = rq.RemoteQueryResolveRequest.model_validate(
+        {'operation': 'resolve_target', 'target': {'host': 'db', 'port': 5432, 'dbname': 'db'}}
+    )
+    assert request.operation == 'resolve_target'
+    assert (request.target.host, request.target.port, request.target.dbname) == ('db', 5432, 'db')
+
+
+@pytest.mark.parametrize(
+    'field,value',
+    [
+        ('query', 'SELECT 1'),
+        ('includeSchema', True),
+        ('resultDelivery', {'runId': 'run-1'}),
+        ('matchFingerprint', 'deadbeef'),
+        ('apiKey', 'SECRET_DO_NOT_LOG'),
+    ],
+)
+def test_resolve_request_rejects_execution_fields_without_echoing_values(field, value):
+    request = {'operation': 'resolve_target', 'target': {'database_instance': 'Primary/DB'}, field: value}
+
+    with pytest.raises(ValidationError) as failure:
+        rq.RemoteQueryResolveRequest.model_validate(request)
+
+    assert field in rq.validation_message(failure.value)
+    assert 'SECRET_DO_NOT_LOG' not in rq.validation_message(failure.value)
+
+
+@pytest.mark.parametrize('operation', ['produce_json_pages', 'resolve', 'RESOLVE_TARGET', ''])
+def test_resolve_request_rejects_other_operations(operation):
+    request = {'operation': operation, 'target': {'database_instance': 'Primary/DB'}}
+
+    with pytest.raises(ValidationError):
+        rq.RemoteQueryResolveRequest.model_validate(request)
+
+
 def test_result_ceiling_is_the_pinned_server_contract(delivery):
     # The ceiling is 100 binary GiB (stricter than decimal 100 GB): exactly that validates and
     # one byte more is rejected, so the shared ceiling cannot drift from the server-owned

@@ -23,6 +23,7 @@ from datadog_checks.postgres.remote_query import (
     RawTextLoader,
     StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
+    iter_agent_resolve_events,
     iter_agent_rpc_stream_events,
 )
 
@@ -802,6 +803,196 @@ def test_stream_database_instance_without_configured_dbname_fails_target_unavail
     events = collect_events(request, check, client=FakeUploadClient())
 
     assert_failed_event(events, 'target_unavailable', 'configured database name')
+    assert pool.requested_dbnames == []
+
+
+# ---------------------------------------------------------------------------
+# Resolve operation (per-check verdict events for the Agent's sweep)
+# ---------------------------------------------------------------------------
+
+
+def resolve_request(**target):
+    """A strict resolve_target request: operation and target only."""
+    if 'database_instance' in target:
+        selector = {'database_instance': target['database_instance']}
+    else:
+        selector = {
+            'host': target.pop('host', 'LOCALHOST.'),
+            'port': target.pop('port', 5432),
+            'dbname': target.pop('dbname', 'datadog_test'),
+        }
+    return {'operation': 'resolve_target', 'target': selector}
+
+
+def collect_resolve_events(request, check=None, registry=None):
+    return list(
+        iter_agent_resolve_events(request, registry if registry is not None else StaticPostgresCheckRegistry([check]))
+    )
+
+
+def assert_matched_verdict(events):
+    """A verdict is exactly one MATCHED final event with no payload and no STARTED event."""
+    assert len(events) == 1
+    event = events[0]
+    assert event.event_type == 'final'
+    assert event.payload == b''
+    metadata = event_metadata(event)
+    assert metadata['status'] == 'MATCHED'
+    return metadata['match']
+
+
+def test_resolve_verdict_reports_sanitized_match_identity():
+    pool = FakePool(rows=[(1,)])
+    check = make_check(pool=pool, check_database_identifier='Postgres/Primary-A')
+
+    events = collect_resolve_events(resolve_request(), check)
+
+    match = assert_matched_verdict(events)
+    assert match == {
+        'host': 'localhost',
+        'port': 5432,
+        'configuredDbname': 'datadog_test',
+        'resolvedDbname': 'datadog_test',
+        'databaseInstance': 'Postgres/Primary-A',
+    }
+    # Resolve is side-effect free: no connection, no cursor, no upload session.
+    assert pool.requested_dbnames == []
+    assert not pool.cursors
+
+
+def test_resolve_verdict_reports_autodiscovered_database_with_configured_dbname():
+    """The verdict distinguishes the admitted database from the configured one: the Agent
+    binds both into its fingerprint."""
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(databases=['dogs_0', 'dogs_1'])
+    check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+
+    events = collect_resolve_events(resolve_request(dbname='dogs_1'), check)
+
+    match = assert_matched_verdict(events)
+    assert match['configuredDbname'] == 'postgres'
+    assert match['resolvedDbname'] == 'dogs_1'
+    assert pool.requested_dbnames == []
+
+
+def test_resolve_no_match_is_one_target_not_found_error():
+    """Out-of-scope and missing databases share the same verdict: target_not_found."""
+    pool = FakePool(rows=[(1,)])
+    check = make_check(dbname='production_ok', pool=pool)
+
+    events = collect_resolve_events(resolve_request(dbname='unconfigured_existing_or_missing'), check)
+
+    assert len(events) == 1
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == []
+    assert not pool.cursors
+
+
+def test_resolve_database_instance_verdict_reports_materialized_configured_dbname():
+    check = make_check(dbname='production_ok', check_database_identifier='Postgres/Primary-A')
+
+    events = collect_resolve_events(resolve_request(database_instance='Postgres/Primary-A'), check)
+
+    match = assert_matched_verdict(events)
+    assert match['configuredDbname'] == match['resolvedDbname'] == 'production_ok'
+    assert match['databaseInstance'] == 'Postgres/Primary-A'
+
+
+def test_resolve_database_instance_without_configured_dbname_fails_target_unavailable():
+    """A matched check that cannot name its database is an error other than target_not_found,
+    so the Agent fails its aggregate resolution instead of skipping the check."""
+    check = make_check(dbname=None, check_database_identifier='Postgres/Primary-A')
+
+    events = collect_resolve_events(resolve_request(database_instance='Postgres/Primary-A'), check)
+
+    assert len(events) == 1
+    assert_failed_event(events, 'target_unavailable', 'configured database name')
+
+
+@pytest.mark.parametrize(
+    'field,value',
+    [
+        ('query', 'SELECT 1'),
+        ('includeSchema', True),
+        ('resultDelivery', {'runId': RUN_ID}),
+        ('matchFingerprint', 'deadbeef'),
+    ],
+)
+def test_resolve_rejects_execution_fields_before_resolution(field, value):
+    """A resolve dispatch is target-only: SQL, upload instructions, and fingerprints are
+    rejected by strict validation before any check is evaluated."""
+    request = resolve_request()
+    request[field] = value
+
+    events = collect_resolve_events(request, registry=ExplodingRegistry())
+
+    assert len(events) == 1
+    assert_failed_event(events, 'invalid_request', field)
+
+
+def test_resolve_discovery_failure_is_visible_target_unavailable():
+    """An undeterminable eligible set is an error other than target_not_found: the check is
+    never silently skipped from the Agent's sweep."""
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke'))
+    check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+
+    events = collect_resolve_events(resolve_request(dbname='dogs_1'), check)
+
+    assert len(events) == 1
+    assert_failed_event(events, 'target_unavailable', 'autodiscovered database scope')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert autodiscovery.get_items_calls == 1
+    assert pool.requested_dbnames == []
+
+
+def test_resolve_and_execute_share_the_same_matching_authority(monkeypatch):
+    """The resolve verdict must predict execution: a target that resolves MATCHED on one
+    check executes on it, and one that resolves target_not_found never executes."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(databases=['dogs_0'])
+    check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+    registry = StaticPostgresCheckRegistry([check])
+
+    assert_matched_verdict(list(iter_agent_resolve_events(resolve_request(dbname='dogs_0'), registry)))
+    events = collect_events(valid_request(dbname='dogs_0'), check, client=FakeUploadClient())
+    assert_success(events)
+    assert pool.requested_dbnames == ['dogs_0']
+
+    assert_failed_event(list(iter_agent_resolve_events(resolve_request(dbname='dogs_9'), registry)), 'target_not_found')
+    events = collect_events(valid_request(dbname='dogs_9'), check, client=FakeUploadClient())
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == ['dogs_0']
+
+
+def test_entry_dispatches_resolve_target_by_operation():
+    check = make_check(check_database_identifier='Postgres/Primary-A')
+    events = []
+
+    execute_agent_rpc_stream_copy(json.dumps(resolve_request()), check, lambda *event: events.append(event))
+
+    assert len(events) == 1
+    event_type, metadata_json, payload = events[0]
+    assert event_type == 'final'
+    assert payload == b''
+    metadata = json.loads(metadata_json)
+    assert metadata['status'] == 'MATCHED'
+    assert metadata['match']['databaseInstance'] == 'Postgres/Primary-A'
+
+
+def test_entry_rejects_unknown_operation_without_pool_access():
+    pool = FakePool(rows=[(1,)])
+    request = valid_request()
+    request['operation'] = 'bogus_operation'
+    events = []
+
+    execute_agent_rpc_stream_copy(json.dumps(request), make_check(pool=pool), lambda *event: events.append(event))
+
+    metadata = json.loads(events[-1][1])
+    assert events[-1][0] == 'error'
+    assert metadata['error']['code'] == 'invalid_request'
     assert pool.requested_dbnames == []
 
 

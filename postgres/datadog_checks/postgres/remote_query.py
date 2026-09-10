@@ -11,6 +11,14 @@ The shared page writer retains one bounded page in memory through byte-identical
 Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP
 action output; the emit callback carries only ``metadata``/``final``/``error`` events, and
 the final event carries only the compact run receipt.
+
+Two operations dispatch through the single Agent entry point by their ``operation`` field:
+``produce_json_pages`` runs the producer, and ``resolve_target`` answers the Agent's
+side-effect-free per-check sweep with exactly one MATCHED verdict event (the sanitized
+match identity the Agent aggregates zero/one/many and binds into its match fingerprint) or
+one fail-closed error event. Both operations share one matching authority: a target may
+match only inside a loaded check's effective monitoring scope, never by endpoint
+reachability alone.
 """
 
 from __future__ import annotations
@@ -558,6 +566,49 @@ def _resolve_matches(target: rq.RemoteQueryTarget, checks: Iterable['PostgreSql'
     return [check for check in checks if _target_matches_scope(check, target)]
 
 
+def _resolve_unique_check(
+    target: rq.RemoteQueryTarget, checks: Iterable['PostgreSql'], started_at: float
+) -> tuple['PostgreSql | None', rq.RemoteQueryEvent | None]:
+    """The one selection shared by resolve and execute; exactly one side of the pair is set.
+
+    Zero matches answer target_not_found, more than one answer target_ambiguous, and a
+    scope that cannot be established answers its own error (never a silent no-match); the
+    caller emits the failure event verbatim, so both operations report identical verdicts
+    for the same target and check state.
+    """
+    try:
+        matches = _resolve_matches(target, checks)
+    except rq.RemoteQueryFailure as e:
+        return None, rq.failed_event(e.code, e.message, retryable=e.retryable, elapsed_ms=rq.elapsed_ms(started_at))
+    LOGGER.debug('Remote query target match count: %d', len(matches))
+    if not matches:
+        return None, rq.failed_event(
+            'target_not_found',
+            'No loaded Postgres integration instance matched target selector.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+        )
+    if len(matches) > 1:
+        return None, rq.failed_event(
+            'target_ambiguous',
+            'More than one loaded Postgres integration instance matched target selector.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+        )
+    return matches[0], None
+
+
+def _resolved_dbname(target: rq.RemoteQueryTarget, check: 'PostgreSql') -> str | None:
+    """The database a matched check admits for the target.
+
+    A tuple target's dbname is part of match identity and is the admitted database. A
+    database_instance selector identifies one loaded check and admits its materialized
+    configured database, never a request-named other one; None means the matched check
+    cannot name a database at all.
+    """
+    if target.database_instance is not None:
+        return _dbname_from_check(check)
+    return target.dbname
+
+
 def _target_matches_scope(check: 'PostgreSql', target: rq.RemoteQueryTarget) -> bool:
     """A tuple target matches only inside one check's effective monitoring scope.
 
@@ -643,11 +694,13 @@ def _is_query_allowed(query: str) -> bool:
 def execute_agent_rpc_stream_copy(
     request_json: str | bytes | bytearray, check: 'PostgreSql', emit: rq.RemoteQueryEmit
 ) -> None:
-    """Execute a remote query request and emit page producer events.
+    """Execute a remote query request and emit its events, dispatching by operation.
 
     The entry point name is kept for the Agent's rtloader bridge, which resolves this
-    function by name. Emits ``metadata`` (STARTED), then one ``final`` (SUCCEEDED with the
-    compact receipt) or ``error`` (FAILED) event; bulk page bytes never cross the callback.
+    function by name. ``produce_json_pages`` drives the page producer and emits ``metadata``
+    (STARTED), then one ``final`` (SUCCEEDED with the compact receipt) or ``error`` (FAILED)
+    event; bulk page bytes never cross the callback. ``resolve_target`` drives the
+    side-effect-free resolver and emits one ``final`` (MATCHED verdict) or ``error`` event.
     """
     try:
         request = json.loads(request_json)
@@ -667,6 +720,10 @@ def execute_agent_rpc_stream_copy(
         )
         return
 
+    if request.get('operation') == 'resolve_target':
+        _execute_resolve_stream(request, check, emit)
+        return
+
     _execute_upload_stream(request, check, emit)
 
 
@@ -684,6 +741,60 @@ def _execute_upload_stream(
     except BaseException:
         events.close()
         raise
+
+
+def _execute_resolve_stream(request: Mapping[str, Any], check: 'PostgreSql', emit: rq.RemoteQueryEmit) -> None:
+    """Drive the per-check resolver and emit its verdict events."""
+    events = iter_agent_resolve_events(request, StaticPostgresCheckRegistry([check]))
+    try:
+        for event in events:
+            rq.emit_event(emit, event)
+    except BaseException:
+        events.close()
+        raise
+
+
+def iter_agent_resolve_events(request: Any, registry: PostgresCheckRegistry) -> Iterator[rq.RemoteQueryEvent]:
+    """Yield the per-check resolve verdict: one MATCHED ``final`` event or one ``error`` event.
+
+    Resolve evaluates the target against the loaded checks' effective monitoring scope with
+    the same selection authority as execute, then reports the sanitized match identity the
+    Agent aggregates zero/one/many and binds into its match fingerprint. It is side-effect
+    free: no customer SQL, no result delivery, no upload, and no probe of the requested
+    database. An invalid request or an undeterminable eligible set is an error other than
+    target_not_found, so the Agent fails its aggregate resolution instead of skipping the
+    check.
+    """
+    started_at = time.monotonic()
+    try:
+        parsed_request = rq.RemoteQueryResolveRequest.model_validate(request)
+    except ValidationError as e:
+        yield rq.failed_event('invalid_request', rq.validation_message(e), elapsed_ms=rq.elapsed_ms(started_at))
+        return
+
+    target = parsed_request.target
+    check, failure = _resolve_unique_check(target, registry.iter_postgres_checks(), started_at)
+    if failure is not None:
+        yield failure
+        return
+
+    resolved_dbname = _resolved_dbname(target, check)
+    if resolved_dbname is None:
+        yield rq.failed_event(
+            'target_unavailable',
+            'Matched Postgres check does not expose a configured database name.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+        )
+        return
+
+    endpoint = _endpoint_from_check(check)
+    yield rq.matched_resolve_event(
+        host=endpoint[0] if endpoint is not None else None,
+        port=endpoint[1] if endpoint is not None else None,
+        configured_dbname=_dbname_from_check(check),
+        resolved_dbname=resolved_dbname,
+        database_instance=getattr(check, 'database_identifier', None),
+    )
 
 
 def iter_agent_rpc_stream_events(
@@ -706,43 +817,21 @@ def iter_agent_rpc_stream_events(
         return
 
     target = parsed_request.target
-    try:
-        matches = _resolve_matches(target, registry.iter_postgres_checks())
-    except rq.RemoteQueryFailure as e:
-        yield rq.failed_event(e.code, e.message, retryable=e.retryable, elapsed_ms=rq.elapsed_ms(started_at))
-        return
-    LOGGER.debug('Remote query target match count: %d', len(matches))
-    if not matches:
-        yield rq.failed_event(
-            'target_not_found',
-            'No loaded Postgres integration instance matched target selector.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-        )
-        return
-    if len(matches) > 1:
-        yield rq.failed_event(
-            'target_ambiguous',
-            'More than one loaded Postgres integration instance matched target selector.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-        )
+    check, failure = _resolve_unique_check(target, registry.iter_postgres_checks(), started_at)
+    if failure is not None:
+        yield failure
         return
 
-    check = matches[0]
-    if target.database_instance is not None:
-        # A database_instance selector identifies one loaded check; execution runs on that
-        # check's materialized configured database, never a request-named other database.
-        execution_dbname = _dbname_from_check(check)
-        if execution_dbname is None:
-            yield rq.failed_event(
-                'target_unavailable',
-                'Matched Postgres check does not expose a configured database name.',
-                elapsed_ms=rq.elapsed_ms(started_at),
-            )
-            return
-    else:
-        # A tuple target's dbname is part of match identity: it matched the selected check's
-        # effective monitoring scope, and execution runs exactly on that database.
-        execution_dbname = target.dbname
+    # The same selection authority as resolve: the resolved database is the database
+    # execution runs on, and the two operations can never disagree.
+    execution_dbname = _resolved_dbname(target, check)
+    if execution_dbname is None:
+        yield rq.failed_event(
+            'target_unavailable',
+            'Matched Postgres check does not expose a configured database name.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+        )
+        return
 
     creds = rq.resolve_upload_credentials(parsed_request.result_delivery, started_at)
     if not creds.api_key or not creds.app_key:
