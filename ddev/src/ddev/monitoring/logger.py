@@ -5,13 +5,61 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Collection
+import re
+from collections.abc import Callable, Collection, Mapping
 from typing import Any
 
 import structlog
 from structlog.typing import EventDict, Processor
 
 from ddev.monitoring.context import MonitorContext, enrich
+
+REDACTED = '[REDACTED]'
+UNSERIALIZABLE = '[UNSERIALIZABLE]'
+SECRET_FIELD_PATTERN = re.compile(r'token|secret|password|passwd|authorization|credential|api[-_]?key', re.IGNORECASE)
+URL_PATTERN = re.compile(r'https?://\S+')
+
+
+def is_secret_field(name: str) -> bool:
+    return SECRET_FIELD_PATTERN.search(name) is not None
+
+
+def _strip_url_query(value: str) -> str:
+    def strip(match: re.Match[str]) -> str:
+        return match.group(0).split('?', 1)[0].split('#', 1)[0]
+
+    return URL_PATTERN.sub(strip, value)
+
+
+def redact_value(value: Any, seen: set[int] | None = None) -> Any:
+    """Redact nested credentials and signed URL parameters without mutating the input."""
+    if isinstance(value, str):
+        return _strip_url_query(value)
+    if not isinstance(value, (Mapping, list, tuple, set, frozenset)):
+        return value
+
+    seen = set() if seen is None else seen
+    identity = id(value)
+    if identity in seen:
+        return UNSERIALIZABLE
+    seen.add(identity)
+    try:
+        if isinstance(value, Mapping):
+            return {
+                str(key): REDACTED if is_secret_field(str(key)) else redact_value(nested, seen)
+                for key, nested in value.items()
+            }
+        if isinstance(value, (set, frozenset)):
+            return sorted((redact_value(item, seen) for item in value), key=str)
+        return [redact_value(item, seen) for item in value]
+    finally:
+        seen.remove(identity)
+
+
+def redact_event(_logger: Any, _method_name: str, event_dict: EventDict) -> EventDict:
+    for key, value in tuple(event_dict.items()):
+        event_dict[key] = REDACTED if is_secret_field(key) else redact_value(value)
+    return event_dict
 
 
 def logger_processors(context: MonitorContext, is_closed: Callable[[], bool]) -> tuple[Processor, ...]:
@@ -27,6 +75,7 @@ def logger_processors(context: MonitorContext, is_closed: Callable[[], bool]) ->
         enrich_and_gate,
         structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.format_exc_info,
+        redact_event,
         structlog.stdlib.add_log_level,
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
     )
