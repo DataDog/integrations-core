@@ -197,6 +197,37 @@ async def test_on_initialize_gives_phases_the_snapshot_path(core_dir, make_orche
     assert [p._runtime_variables for p in processors] == [{"spec": str(snapshot)}] * len(processors)
 
 
+async def test_resume_reports_a_snapshot_input_that_changed(core_dir, make_orchestrator, tmp_path):
+    """Resuming past an edited source file tells the caller the run keeps its own copy."""
+    source = tmp_path / "requirements.md"
+    source.write_text("requirements", encoding="utf-8")
+    flow_input = FlowInput(name="spec", label="Spec", input_type="path", snapshot=True)
+
+    orchestrator, _, _ = make_orchestrator(core_dir, runtime_variables={"spec": str(source)})
+    orchestrator._resolved_flow = replace(orchestrator._resolved_flow, inputs=[flow_input])
+    await orchestrator.on_initialize()
+
+    source.write_text("edited after launch", encoding="utf-8")
+
+    callback_set = CallbackSet()
+    reported: list[tuple[str, Path]] = []
+
+    @callback_set.on_input_diverged
+    async def handler(name: str, snapshot_path: Path) -> None:
+        reported.append((name, snapshot_path))
+
+    resumed, _, _ = make_orchestrator(
+        core_dir,
+        runtime_variables={"spec": str(source)},
+        resume=True,
+        callbacks=Callbacks([callback_set]),
+    )
+    resumed._resolved_flow = replace(resumed._resolved_flow, inputs=[flow_input])
+    await resumed.on_initialize()
+
+    assert reported == [("spec", tmp_path / "inputs" / "spec.md")]
+
+
 async def test_on_initialize_wires_dependencies(core_dir, make_orchestrator):
     orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_initialize()

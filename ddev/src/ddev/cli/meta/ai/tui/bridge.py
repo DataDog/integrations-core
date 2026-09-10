@@ -8,6 +8,7 @@ No widget or screen imports — this module only depends on callbacks and messag
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Protocol
 
 from textual.message import Message
@@ -30,6 +31,7 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeCompact,
     BeforeGoalCheck,
     ContextCleared,
+    InputDiverged,
     PhaseErrored,
     PhaseFinished,
     PhaseStarted,
@@ -76,6 +78,10 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
     @cb.on_run_error
     async def _() -> None:
         _target().post_message(RunErrored())
+
+    @cb.on_input_diverged
+    async def _(name: str, snapshot_path: Path) -> None:
+        _target().post_message(InputDiverged(name, snapshot_path))
 
     @cb.on_before_agent_send
     async def _(scope: AgentScope, prompt: str, iteration: int) -> None:
