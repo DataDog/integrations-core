@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -107,8 +108,18 @@ def resolve_run(
 ) -> ResolvedRun | None:
     """Resolve what to test, reporting why a run has nothing left to test before returning None."""
     if pr_resolver is not None:
-        return resolve_pull_request_run(app, resolver=pr_resolver, token=token, all_targets=all_targets)
+        return resolve_pull_request_run(
+            app, resolver=pr_resolver, token=token, all_targets=all_targets, monitor=monitor
+        )
 
+    branch = app.repo.git.current_branch()
+    if monitor is not None:
+        monitor.logger.info(
+            'Resolving tested revision',
+            commit=commit,
+            branch=branch,
+            pr_number=None,
+        )
     tested_commit = commit or app.repo.git.latest_commit().sha
     changed_files = None
     if not all_targets:
@@ -117,12 +128,21 @@ def resolve_run(
         try:
             changed_files = changes_in_commit(app.repo.git, tested_commit)
         except ChangeResolutionError as error:
+            if monitor is not None:
+                monitor.logger.error('Revision resolution failed', error=str(error))
             app.abort(str(error))
 
+    if monitor is not None:
+        monitor.logger.info(
+            'Tested revision resolved',
+            commit=tested_commit,
+            branch=branch,
+            changed_file_count=len(changed_files) if changed_files is not None else None,
+        )
     return ResolvedRun(
         base_sha=tested_commit,
         checkout_sha=tested_commit,
-        branch=app.repo.git.current_branch(),
+        branch=branch,
         changed_files=changed_files,
     )
 
@@ -144,6 +164,7 @@ def resolve_pull_request_run(
     resolver: PullRequestResolver,
     token: str,
     all_targets: bool,
+    monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Read the pull request and its changed files from the API, in one client session."""
     import asyncio
@@ -155,10 +176,20 @@ def resolve_pull_request_run(
     from ddev.utils.github_async import async_github_client
     from ddev.utils.github_errors import GitHubAuthenticationError
 
+    if monitor is not None:
+        from ddev.monitoring.adapter import ComponentLogAdapter
+
+        client_logger: logging.Logger | None = ComponentLogAdapter(monitor)
+        monitor.logger.info('Resolving pull request', pr_number=resolver.number, all_targets=all_targets)
+    else:
+        client_logger = None
+
     async def resolve() -> ResolvedRun | None:
-        async with async_github_client(token=token) as client:
+        async with async_github_client(token=token, logger=client_logger) as client:
             pull = await resolver.resolve(client)
             if pull is None:
+                if monitor is not None:
+                    monitor.logger.info('Nothing to test', reason='no open pull request matches the revision')
                 app.display_info('No open pull request matches the requested revision, so there is nothing to test.')
                 return None
             assert pull.head is not None and pull.base is not None, 'Resolved PRs have branch references.'
@@ -166,12 +197,27 @@ def resolve_pull_request_run(
             changed_files = None
             if not all_targets:
                 if pull.changed_files == 0:
+                    if monitor is not None:
+                        monitor.logger.info(
+                            'Nothing to test', reason='the pull request changes no file', pr_number=pull.number
+                        )
                     app.display_info(f'Pull request {pull.number} changes no file, so there is nothing to test.')
                     return None
                 changed_files = await changes_in_pull_request(
                     client, resolver.owner, resolver.repo, pull.number, pull.changed_files
                 )
 
+            is_fork = head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo)
+            if monitor is not None:
+                monitor.logger.info(
+                    'Pull request resolved',
+                    pr_number=pull.number,
+                    branch=pull.head.ref,
+                    commit=pull.head.sha,
+                    target_branch=pull.base.ref,
+                    changed_file_count=pull.changed_files,
+                    is_fork=is_fork,
+                )
             return ResolvedRun(
                 base_sha=pull.head.sha,
                 checkout_sha=f'refs/pull/{pull.number}/merge',
@@ -179,14 +225,20 @@ def resolve_pull_request_run(
                 changed_files=changed_files,
                 pr_number=pull.number,
                 target_branch=pull.base.ref,
-                is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
+                is_fork=is_fork,
             )
 
     try:
         return asyncio.run(resolve())
     except GitHubAuthenticationError as error:
+        if monitor is not None:
+            monitor.logger.error('Pull request resolution failed', error=str(error))
         app.abort(str(error))
     except ChangeResolutionError as error:
+        if monitor is not None:
+            monitor.logger.error('Pull request resolution failed', error=str(error))
         app.abort(str(error))
     except (httpx.HTTPError, ValidationError) as error:
+        if monitor is not None:
+            monitor.logger.error('Pull request resolution failed', error=str(error))
         app.abort(f'Could not read the pull request to test: {error}')

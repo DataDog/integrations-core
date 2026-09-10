@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from typing import TYPE_CHECKING
 
 import click
@@ -15,13 +16,16 @@ from ddev.cli.ci.dispatch_run import PullRequestResolver, resolve_run
 if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext
+    from ddev.cli.ci.tests.dispatcher import Dispatcher, DispatcherContext
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.cli.ci.tests.messages import TestBatch
-    from ddev.monitoring import ComponentMonitor
+    from ddev.monitoring import ComponentMonitor, MonitoringRuntime
+    from ddev.monitoring.datadog import DatadogLogHandler
     from ddev.utils.git import ChangedFile
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
+
+EXPORT_DRAIN_TIMEOUT = 10.0
 
 
 @click.command(short_help='Run the Dispatcher to test a commit as parallel batches')
@@ -90,6 +94,13 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     help='Where the run writes what it produces: artifacts, coverage and test results.',
 )
 @click.option('--dry-run', is_flag=True, help='Show the plan without dispatching jobs. PR runs still read GitHub.')
+@click.option(
+    '--log-level',
+    type=click.Choice(('debug', 'info', 'warning', 'error'), case_sensitive=False),
+    default='info',
+    show_default=True,
+    help='Minimum severity emitted to console and Datadog.',
+)
 def dispatch_tests(
     app: Application,
     pull_request: str | None,
@@ -107,6 +118,7 @@ def dispatch_tests(
     workflow_ref: str | None,
     output_dir: str | None,
     dry_run: bool,
+    log_level: str,
 ) -> None:
     """Plan the tests a commit requires, run them as parallel batches of GitHub Actions jobs, and
     report the result to the pull request and to the run summary.
@@ -135,11 +147,25 @@ def dispatch_tests(
 
     caller_tags = tuple(tags.split()) if tags else ()
 
+    output_level = getattr(logging, log_level.upper())
+
     console_handler = AppLoggingHandler(app)
+    console_handler.setLevel(output_level)
     console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags))))
     monitoring = MonitoringRuntime(console_handler=console_handler, protected_fields=PROTECTED_RUN_FIELDS)
+    monitoring.set_run_fields(**{**tag_fields(caller_tags), 'repo': f'{owner}/{repo}'})
+    datadog_handler = build_datadog_log_handler(app, monitoring, level=output_level)
     try:
-        monitoring.set_run_fields(**{**tag_fields(caller_tags), 'repo': f'{owner}/{repo}'})
+        started = time.monotonic()
+        monitor = monitoring.component('dispatcher')
+        monitor.logger.info(
+            'Dispatcher invocation started',
+            context=tag_fields(caller_tags).get('context'),
+            all_targets=all_targets,
+            dry_run=dry_run,
+            minimum_base_package=minimum_base_package,
+            tags=list(caller_tags) if caller_tags else None,
+        )
 
         pr_resolver, token = validate_options(
             app,
@@ -168,6 +194,7 @@ def dispatch_tests(
             monitor=monitoring.component('resolution'),
         )
         if run is None:
+            run_summary(monitor, started, outcome='no-op')
             return
 
         context = DispatcherContext(
@@ -198,11 +225,21 @@ def dispatch_tests(
             monitor=monitoring.component('planner'),
         )
         if not batches:
+            monitor.logger.info('Nothing to test', reason='the plan covers no target')
+            run_summary(monitor, started, outcome='no-op')
             app.display_info('No affected target to test.')
             return
 
         display_plan(app, context, batches)
         if dry_run:
+            monitor.logger.info('Dry run: nothing was dispatched')
+            run_summary(
+                monitor,
+                started,
+                outcome='dry-run',
+                batch_count=len(batches),
+                job_count=sum(batch.jobs_count for batch in batches),
+            )
             app.display_info('Dry run: nothing was dispatched.')
             return
 
@@ -214,7 +251,6 @@ def dispatch_tests(
             token=token,
             artifacts_path=base_path / 'artifacts',
             output_path=base_path / 'results',
-            run_logger=app.logger,
             monitoring=monitoring,
         )
         # A fatal processor or hook failure leaves the bus by raising out of `run`. `on_finalize` has
@@ -222,15 +258,26 @@ def dispatch_tests(
         try:
             dispatcher.run()
         except Exception as error:
+            run_summary(monitor, started, outcome='failed', dispatcher=dispatcher, error=str(error))
             app.abort(f'Dispatcher execution failed: {error}')
 
         outcome = dispatcher.outcome
         if outcome is None or not outcome.successful:
+            run_summary(
+                monitor,
+                started,
+                outcome='cancelled' if dispatcher.cancelled else 'failed',
+                dispatcher=dispatcher,
+            )
             app.abort('Dispatcher tests failed.')
 
+        run_summary(monitor, started, outcome='passed', dispatcher=dispatcher)
         app.display_success('Dispatcher tests passed.')
     finally:
         monitoring.close()
+        if datadog_handler is not None:
+            # The runtime is closed first, so nothing is emitted while the handler drains.
+            datadog_handler.close(EXPORT_DRAIN_TIMEOUT)
 
 
 def validate_options(
@@ -303,7 +350,7 @@ def build_plan(
     all_targets: bool,
     minimum_base_package: bool,
     environment_provider: EnvironmentProvider,
-    monitor: ComponentMonitor | None = None,
+    monitor: ComponentMonitor,
 ) -> list[TestBatch]:
     """Build the batches this run must execute, aborting with a readable message on a bad plan.
 
@@ -314,6 +361,12 @@ def build_plan(
     from ddev.cli.ci.tests.batching.targets import all_target_rules
 
     rules = all_target_rules() if all_targets else None
+    monitor.logger.info(
+        'Planning started',
+        all_targets=all_targets,
+        changed_file_count=len(changed_files) if changed_files is not None else None,
+        minimum_base_package=minimum_base_package,
+    )
 
     try:
         batches = build_test_batches(
@@ -323,11 +376,87 @@ def build_plan(
             config=config.batching,
             rules=rules,
             minimum_base_package=minimum_base_package,
+            monitor=monitor,
         )
     except PlanningError as error:
+        monitor.logger.error('Planning failed', error=str(error))
         app.abort(f'Could not build a test plan: {error}')
 
+    monitor.logger.info(
+        'Planning completed',
+        plan_batch_count=len(batches),
+        plan_job_count=sum(batch.jobs_count for batch in batches),
+        plan_integration_count=len({integration for batch in batches for integration in batch.integrations}),
+    )
+    for batch in batches:
+        monitor.logger.info(
+            'Planned batch',
+            batch_id=batch.batch_id,
+            batch_job_count=batch.jobs_count,
+            batch_integration_count=len(batch.integrations),
+            batch_integrations=batch.integrations,
+        )
+
     return batches
+
+
+def build_datadog_log_handler(
+    app: Application, monitoring: MonitoringRuntime, *, level: int
+) -> DatadogLogHandler | None:
+    """Attach Dispatcher-formatted Datadog delivery when the organization has an API key."""
+    from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
+    from ddev.monitoring.datadog import DatadogLogHandler
+
+    api_key = app.config.org.config.get('api_key')
+    if not api_key:
+        return None
+    try:
+        handler = DatadogLogHandler(
+            api_key=api_key,
+            site=app.config.org.config.get('site', 'datadoghq.com'),
+            diagnostics=app.display_warning,
+            level=level,
+        )
+    except Exception as error:
+        app.display_warning(f'Datadog log delivery is unavailable: {type(error).__name__}: {error}')
+        return None
+    handler.setFormatter(dispatcher_datadog_formatter())
+    monitoring.add_log_handler(handler)
+    return handler
+
+
+def run_summary(
+    monitor: ComponentMonitor,
+    started: float,
+    *,
+    outcome: str,
+    dispatcher: Dispatcher | None = None,
+    batch_count: int = 0,
+    job_count: int = 0,
+    error: str | None = None,
+) -> None:
+    """Emit one terminal record for both executed and valid no-op runs."""
+    progress = dispatcher.outcome.progress if dispatcher is not None and dispatcher.outcome is not None else None
+    if progress is not None:
+        batch_count = len(progress.batches)
+        job_count = sum(len(batch.jobs_progress) for batch in progress.batches)
+    cancelled = dispatcher.cancelled if dispatcher is not None else False
+    final_report_published = (
+        dispatcher.outcome.final_report_published
+        if dispatcher is not None and dispatcher.outcome is not None
+        else False
+    )
+    log = monitor.logger.error if outcome == 'failed' else monitor.logger.warning if cancelled else monitor.logger.info
+    log(
+        'Dispatcher run finished',
+        outcome=outcome,
+        cancelled=cancelled,
+        batch_count=batch_count,
+        job_count=job_count,
+        final_report_published=final_report_published,
+        elapsed_seconds=round(time.monotonic() - started, 3),
+        error=error,
+    )
 
 
 def display_plan(app: Application, context: DispatcherContext, batches: list[TestBatch]) -> None:

@@ -9,14 +9,18 @@ environment provider, so neither Git nor Hatch is ever invoked.
 
 from __future__ import annotations
 
-import logging
+from functools import partial
 from typing import TYPE_CHECKING
 
 import pytest
 
 from ddev.cli.ci.tests.batching.build import (
-    build_test_batches,
-    build_test_units,
+    build_test_batches as _build_test_batches,
+)
+from ddev.cli.ci.tests.batching.build import (
+    build_test_units as _build_test_units,
+)
+from ddev.cli.ci.tests.batching.build import (
     create_test_batches,
     supports_minimum_base_package,
 )
@@ -30,6 +34,10 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.batching.units import ResolvedEnvironment
     from ddev.cli.ci.tests.messages import BatchJob
 from tests.cli.ci.tests.helpers import FakeIntegration, FakeRegistry, env, jobs, modified
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
+
+build_test_units = partial(_build_test_units, monitor=make_monitor('planner'))
+build_test_batches = partial(_build_test_batches, monitor=make_monitor('planner'))
 
 
 class FakeConfig:
@@ -96,33 +104,43 @@ def test_build_end_to_end_direct_and_broad_overlap():
     ]
 
 
-def test_build_warns_about_a_target_with_no_testable_environment(caplog: pytest.LogCaptureFixture):
+def test_build_warns_about_a_target_with_no_testable_environment():
     repo = FakeRepo([FakeIntegration("ddev")])
     provider = FakeEnvironmentProvider({})
     changed = [modified("ddev/src/ddev/foo.py")]
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.build"):
-        units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo,
+        changed,
+        environment_provider=provider,
+        monitor=make_monitor('planner', handler=handler),
+    )
 
     # The target is dropped rather than planned with an invented environment.
     assert units == []
-    assert "ddev has a hatch.toml but no testable environment" in caplog.text
+    [event] = handler.events
+    assert event['event'] == "ddev has a hatch.toml but no testable environment"
 
 
-def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere(
-    caplog: pytest.LogCaptureFixture,
-):
+def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere():
     # A target declaring a platform that every environment is constrained away from is a weaker
     # version of the same contradiction: odd configuration, worth surfacing, not worth failing.
     repo = FakeRepo([FakeIntegration("disk")], ci={"disk": {"platforms": ["linux", "windows"]}})
     provider = FakeEnvironmentProvider({"disk": [env("py3.13", platform=PlatformName.LINUX)]})
     changed = [modified("disk/tests/test_a.py")]
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
-        units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo,
+        changed,
+        environment_provider=provider,
+        monitor=make_monitor('planner', handler=handler),
+    )
 
     assert [unit.platform for unit in units] == [PlatformName.LINUX]
-    assert "disk runs on windows but no environment tests it" in caplog.text
+    [event] = handler.events
+    assert event['event'] == "disk runs on windows but no environment tests it"
 
 
 def test_build_excludes_target_via_ci_override():
