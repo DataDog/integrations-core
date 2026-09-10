@@ -285,6 +285,12 @@ def test_flow_input_rejects_snapshot_for_object():
         object_input(snapshot=True)
 
 
+def test_flow_input_rejects_snapshot_on_object_field():
+    """A nested snapshot field is never captured, so it must not be declarable."""
+    with pytest.raises(ValidationError, match="'snapshot' may not be used on object field 'spec'"):
+        object_input(fields=[{"name": "spec", "label": "Spec", "type": "path", "snapshot": True}])
+
+
 @pytest.mark.parametrize(
     ("kwargs", "message"),
     [

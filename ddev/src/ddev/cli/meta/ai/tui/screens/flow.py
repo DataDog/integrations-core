@@ -119,8 +119,13 @@ class FlowScreen(TogoScreen):
         self.app.push_screen(LaunchModal(self.flow), _on_dismiss)
 
     def _do_resume(self) -> None:
+        from ddev.ai.runtime.input_snapshot import pinned_snapshot_inputs
+        from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug
         from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
         from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+        runs_dir = self._runs_dir or ai_runs_dir(self.togo_app.ddev_app.repo.path)
+        pinned = pinned_snapshot_inputs(runs_dir / flow_slug(self.flow))
 
         def _on_dismiss(values: LaunchInputValues | None) -> None:
             if values is not None:
@@ -133,4 +138,4 @@ class FlowScreen(TogoScreen):
                     )
                 )
 
-        self.app.push_screen(LaunchModal(self.flow), _on_dismiss)
+        self.app.push_screen(LaunchModal(self.flow, pinned_snapshots=pinned), _on_dismiss)
