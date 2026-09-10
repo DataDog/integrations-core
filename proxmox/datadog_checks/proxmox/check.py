@@ -322,12 +322,14 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 self.log.debug("skipping resource %s: %s as it is not collected by filters")
                 continue
 
+            full_tags = self.base_tags + list(resource_tags)
+
             tags = []
             if hostname is None:
-                tags = self.base_tags + list(resource_tags)
+                tags = full_tags
             else:
                 self.log.debug("Adding external tags for resource %s", resource_name)
-                external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
+                external_tags.append((hostname, {self.__NAMESPACE__: full_tags}))
 
             resource_val['tags'] = tags
             self.log.debug("Created resource: %s", resource_val)
@@ -336,7 +338,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.gauge(
                 f'{resource_type_remapped}.count',
                 1,
-                tags=self.base_tags + list(resource_tags),
+                tags=full_tags,
             )
 
             if resource_type_remapped in (VM_RESOURCE, NODE_RESOURCE):
@@ -348,8 +350,16 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                     self.gauge(
                         f'{resource_type_remapped}.cpu.max',
                         maxcpu,
-                        tags=self.base_tags + list(resource_tags),
+                        tags=full_tags,
                         hostname=hostname,
+                    )
+                else:
+                    # Proxmox omits `maxcpu` when the token lacks `Sys.Audit` on the resource. Log it:
+                    # a silently absent billing input is harder to diagnose than an absent ordinary metric.
+                    self.log.debug(
+                        "Skipping vCPU metric for %s %s: `maxcpu` missing from the /cluster/resources payload",
+                        resource_type_remapped,
+                        resource_id,
                     )
 
             if resource_type_remapped != "pool":

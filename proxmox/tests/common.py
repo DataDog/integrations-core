@@ -1,7 +1,33 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from pathlib import Path
+
 INSTANCE = {'proxmox_server': 'http://localhost:8006/api2/json', 'tags': ['testing']}
+
+# The tags every point carries: the server tag plus the instance-level `tags` from INSTANCE.
+BASE_TAGS = ['proxmox_server:http://localhost:8006/api2/json', 'testing']
+
+CLUSTER_RESOURCES_FIXTURE = (
+    Path(__file__).parent / 'fixtures' / 'GET' / 'api2' / 'json' / 'cluster' / 'resources' / 'response.json'
+)
+
+
+def cluster_resources_with_offline_node():
+    """Return the shipped `/cluster/resources` payload with the node flipped to `offline`.
+
+    Mutating the real fixture rather than substituting a minimal one keeps the rest of the
+    inventory in play, so a test asserting the node's absence can still assert that other
+    resources were collected — otherwise the assertion would also pass if the override
+    silently stopped matching.
+    """
+    with CLUSTER_RESOURCES_FIXTURE.open() as f:
+        payload = json.load(f)
+    for resource in payload['data']:
+        if resource.get('type') == 'node':
+            resource['status'] = 'offline'
+    return payload
 
 BASE_METRICS = [
     'proxmox.node.count',
