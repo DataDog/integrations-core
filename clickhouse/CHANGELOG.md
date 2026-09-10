@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.1 / 2026-09-10
+
+***Fixed***:
+
+* Fix a crash on Altinity FIPS builds whose version string includes a non-numeric suffix (e.g. ``25.3.8.30001.altinityfips``). ([#24807](https://github.com/DataDog/integrations-core/pull/24807))
+
 ## 7.2.0 / 2026-08-05
 
 ***Added***:
