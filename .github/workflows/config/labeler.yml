@@ -45,6 +45,10 @@ documentation:
 downloader:
 - changed-files:
   - any-glob-to-any-file: datadog_checks_downloader/**/*
+integration/abnormal_security:
+- changed-files:
+  - any-glob-to-any-file:
+    - abnormal_security/**/*
 integration/active_directory:
 - changed-files:
   - any-glob-to-any-file:

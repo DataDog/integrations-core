@@ -828,6 +828,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /bluecat_integrity/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
 /bluecat_integrity/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/abnormal_security/                                                  @DataDog/saas-integrations
+/abnormal_security/*.md                                              @DataDog/saas-integrations @DataDog/documentation
+/abnormal_security/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
+/abnormal_security/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.

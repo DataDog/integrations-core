@@ -1,0 +1,971 @@
+{
+  "title": "Abnormal Security",
+  "description": "Use this dashboard to monitor your Abnormal Security threats, cases, and audit logs.\n\nAfter you’ve enabled the Abnormal Security integration in your Datadog account, you can easily search, filter, and alert on all Abnormal Security events in Datadog.\n\nFor further reading, see:\n- [Abnormal Security Documentation](https://abnormalsecurity.my.site.com/knowledgebase/s/)\n",
+  "widgets": [
+    {
+      "id": 1614960160837462,
+      "definition": {
+        "title": "New Group",
+        "banner_img": "/static/images/integration_dashboard/abnormal-security_hero_1.png",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 833564398868606,
+            "definition": {
+              "type": "note",
+              "content": "Use this dashboard to monitor your Abnormal Security threats, cases, and audit logs.\n\nAfter you’ve enabled the Abnormal Security integration in your Datadog account, you can easily search, filter, and alert on all Abnormal Security events in Datadog.\n\nFor further reading, see:\n- [Abnormal Security Documentation](https://abnormalsecurity.my.site.com/knowledgebase/s/)\n",
+              "background_color": "transparent",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 4 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 7 }
+    },
+    {
+      "id": 7770155979291152,
+      "definition": {
+        "title": "Abnormal Security Overview",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6728683731458200,
+            "definition": {
+              "title": "Log Count by Source \"source:abnormal-security\"",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": { "query": "source:abnormal-security " },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "source",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+          },
+          {
+            "id": 8313631358375778,
+            "definition": {
+              "title": "Total Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": { "query": "source:abnormal-security " },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@service",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count",
+                        "metric": "count",
+                        "interval": 1800000
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 7 }
+    },
+    {
+      "id": 3385892754022422,
+      "definition": {
+        "title": "Threat Events",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6910177438347580,
+            "definition": {
+              "title": "Log Stream",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:(abnormal-security) service:abnormal-security-threats ",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    { "field": "status_line", "width": "auto" },
+                    { "field": "timestamp", "width": "auto" },
+                    { "field": "host", "width": "auto" },
+                    { "field": "service", "width": "auto" },
+                    { "field": "content", "width": "full" }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
+          },
+          {
+            "id": 4371078068184340,
+            "definition": {
+              "title": "Breakdown by Attack Strategy",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@attackStrategy",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": { "palette": "semantic" },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" },
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type:(”Log Detection” OR “Signal Correlation”){{@workflow.rule.name}} {{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View Security Signals"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 4 }
+          },
+          {
+            "id": 7940415003374982,
+            "definition": {
+              "title": "Breakdown by Attack Vector",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@attackVector",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": { "palette": "datadog16" },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" },
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type:(”Log Detection” OR “Signal Correlation”){{@workflow.rule.name}} {{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View Security Signals"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 4 }
+          },
+          {
+            "id": 5485859608950664,
+            "definition": {
+              "title": "Breakdown by Attachment Count",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@attachmentCount",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": { "palette": "datadog16" },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" }
+            },
+            "layout": { "x": 0, "y": 7, "width": 4, "height": 4 }
+          },
+          {
+            "id": 3493487763525612,
+            "definition": {
+              "title": "Breakdown by Read Threats",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@isRead",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": { "palette": "datadog16" },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" }
+            },
+            "layout": { "x": 4, "y": 7, "width": 4, "height": 4 }
+          },
+          {
+            "id": 7941303575513234,
+            "definition": {
+              "title": "Breakdown by Remediation Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@remediationStatus",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": { "palette": "datadog16" },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" }
+            },
+            "layout": { "x": 8, "y": 7, "width": 4, "height": 4 }
+          },
+          {
+            "id": 8459107261679426,
+            "definition": {
+              "title": "Breakdown by Recipient Address",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@toAddresses",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" }
+              }
+            },
+            "layout": { "x": 0, "y": 11, "width": 5, "height": 4 }
+          },
+          {
+            "id": 4649266267343272,
+            "definition": {
+              "title": "Top Summary Insights",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-threats "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@summaryInsights",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" }
+              }
+            },
+            "layout": { "x": 5, "y": 11, "width": 7, "height": 4 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 7, "width": 12, "height": 16 }
+    },
+    {
+      "id": 2720727994261966,
+      "definition": {
+        "title": "Cases",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2929603145990856,
+            "definition": {
+              "title": "Log Stream",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:(abnormal-security) service:abnormal-security-cases ",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    { "field": "status_line", "width": "auto" },
+                    { "field": "timestamp", "width": "auto" },
+                    { "field": "host", "width": "auto" },
+                    { "field": "service", "width": "auto" },
+                    { "field": "content", "width": "compact" }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
+          },
+          {
+            "id": 1372618261528500,
+            "definition": {
+              "title": "Breakdown by Severity Level",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-cases "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@severity_level",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@severity",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  },
+                  "style": { "palette": "datadog16" }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" },
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type%3A(%E2%80%9DLog%20Detection%E2%80%9D%20OR%20%E2%80%9CSignal%20Correlation%E2%80%9D)%C2%A0{{@network.client.geoip.country.iso_code}}{{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 5 }
+          },
+          {
+            "id": 1542982763784032,
+            "definition": {
+              "title": "Breakdown by Analysis",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-cases "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@analysis",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type%3A(%E2%80%9DLog%20Detection%E2%80%9D%20OR%20%E2%80%9CSignal%20Correlation%E2%80%9D)%C2%A0{{@network.client.geoip.country.iso_code}}{{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" },
+                "palette": "datadog16"
+              }
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 5 }
+          },
+          {
+            "id": 5678044215344678,
+            "definition": {
+              "title": "Breakdown by Remediation Status",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-cases "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@remediation_status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type%3A(%E2%80%9DLog%20Detection%E2%80%9D%20OR%20%E2%80%9CSignal%20Correlation%E2%80%9D)%C2%A0{{@network.client.geoip.country.iso_code}}{{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" },
+                "palette": "datadog16"
+              }
+            },
+            "layout": { "x": 0, "y": 8, "width": 6, "height": 5 }
+          },
+          {
+            "id": 8212158394361094,
+            "definition": {
+              "title": "Breakdown by Case Status",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-cases "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@case_status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type%3A(%E2%80%9DLog%20Detection%E2%80%9D%20OR%20%E2%80%9CSignal%20Correlation%E2%80%9D)%C2%A0{{@network.client.geoip.country.iso_code}}{{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" },
+                "palette": "datadog16"
+              }
+            },
+            "layout": { "x": 6, "y": 8, "width": 6, "height": 5 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 23, "width": 12, "height": 14 }
+    },
+    {
+      "id": 8728283565049804,
+      "definition": {
+        "title": "Audit Logs",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2709696153268276,
+            "definition": {
+              "title": "Log Stream",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:(abnormal-security) service:abnormal-security-audit-logs ",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    { "field": "status_line", "width": "auto" },
+                    { "field": "timestamp", "width": "auto" },
+                    { "field": "host", "width": "auto" },
+                    { "field": "service", "width": "auto" },
+                    { "field": "content", "width": "compact" }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
+          },
+          {
+            "id": 3565935210580744,
+            "definition": {
+              "title": "Breakdown by Action and Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-audit-logs "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@action",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  },
+                  "style": { "palette": "datadog16" }
+                }
+              ],
+              "type": "sunburst",
+              "legend": { "type": "automatic" },
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type%3A(%E2%80%9DLog%20Detection%E2%80%9D%20OR%20%E2%80%9CSignal%20Correlation%E2%80%9D)%C2%A0{{@network.client.geoip.country.iso_code}}{{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 5 }
+          },
+          {
+            "id": 6774083274572926,
+            "definition": {
+              "title": "Top User Actions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:(abnormal-security) service:abnormal-security-audit-logs "
+                      },
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@action",
+                          "limit": 30,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@user.email",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": { "aggregation": "count", "metric": "count" },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [{ "formula": "query1" }],
+                  "sort": {
+                    "count": 300,
+                    "order_by": [
+                      { "type": "formula", "index": 0, "order": "desc" }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.type%3A(%E2%80%9DLog%20Detection%E2%80%9D%20OR%20%E2%80%9CSignal%20Correlation%E2%80%9D)%C2%A0{{@network.client.geoip.country.iso_code}}{{$network.client.ip}}{{$source}}{{$service}}{{$env}}&start={{timestamp_start}}&end={{timestamp_end}}&paused=true",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "style": {
+                "display": { "type": "stacked", "legend": "automatic" },
+                "palette": "datadog16"
+              }
+            },
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 5 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 37, "width": 12, "height": 9 }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
