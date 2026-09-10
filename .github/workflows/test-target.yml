@@ -99,6 +99,11 @@ on:
         required: false
         default: ""
         type: string
+      e2e-cache-kind-node:
+        description: "Cache the kind node image (kindest/node) between runs"
+        required: false
+        default: false
+        type: boolean
 
 defaults:
   run:
@@ -339,6 +344,22 @@ jobs:
           [ -e "$f" ] && docker load -i "$f"
         done
 
+    - name: Compute kind node cache key
+      if: runner.os == 'Linux' && inputs.e2e-cache-kind-node
+      run: echo "KIND_NODE_CACHE_KEY=kindest-node-$(kind version -q)" >> "$GITHUB_ENV"
+
+    - name: Restore cached kind node image
+      if: runner.os == 'Linux' && inputs.e2e-cache-kind-node
+      id: restore-kind-node
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ runner.temp }}/kind-node
+        key: ${{ env.KIND_NODE_CACHE_KEY }}
+
+    - name: Load cached kind node image into Docker
+      if: runner.os == 'Linux' && inputs.e2e-cache-kind-node && steps.restore-kind-node.outputs.cache-hit == 'true'
+      run: docker load -i "${RUNNER_TEMP}/kind-node/node.tar"
+
     - name: Run Unit & Integration tests
       if: inputs.latest != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
@@ -369,6 +390,28 @@ jobs:
       with:
         path: ${{ runner.temp }}/e2e-images
         key: e2e-images-${{ inputs.e2e-image-cache-key }}
+
+    - name: Save kind node image for cache
+      if: >-
+        runner.os == 'Linux' && inputs.e2e-cache-kind-node
+        && steps.restore-kind-node.outputs.cache-hit != 'true'
+        && ((inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core')
+      id: save-kind-node
+      run: |
+        # kind pins its node image by digest, so it shows up untagged; find it by repository.
+        node_image_id="$(docker images --format '{{.Repository}} {{.ID}}' | awk '$1 == "kindest/node" {print $2; exit}')"
+        if [ -n "$node_image_id" ]; then
+          mkdir -p "${RUNNER_TEMP}/kind-node"
+          docker save --platform linux/"$(docker version --format '{{.Server.Arch}}')" "$node_image_id" -o "${RUNNER_TEMP}/kind-node/node.tar"
+          echo "saved=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Cache kind node image
+      if: runner.os == 'Linux' && inputs.e2e-cache-kind-node && steps.save-kind-node.outputs.saved == 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ runner.temp }}/kind-node
+        key: ${{ env.KIND_NODE_CACHE_KEY }}
 
     - name: Run benchmarks
       if: inputs.benchmark
