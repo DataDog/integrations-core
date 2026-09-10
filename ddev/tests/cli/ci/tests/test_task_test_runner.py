@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from ddev.cli.ci.tests import messages
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
@@ -26,6 +27,7 @@ from ddev.cli.ci.tests.task_test_runner import (
     TaskTestRunner,
     TestRunnerOptions,
 )
+from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
@@ -36,7 +38,12 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
-from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, make_job
+from tests.cli.ci.tests.helpers import (
+    RecordingBus,
+    drain_queue,
+    invalid_response_error,
+    make_job,
+)
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
@@ -688,6 +695,133 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     submitted = finished_messages(runner)
     assert len(submitted) == 1
     assert submitted[0].status == "success"
+
+
+# ---------------------------------------------------------------------------
+# Unparsable responses
+# ---------------------------------------------------------------------------
+
+
+def running_run() -> WorkflowRun:
+    return WorkflowRun(
+        id=123,
+        name="test-batch",
+        status="in_progress",
+        conclusion=None,
+        html_url="https://github.com/o/r/actions/runs/123",
+    )
+
+
+@pytest.mark.parametrize(
+    ("failure_point", "operation", "workflow_running", "cancelled_runs"),
+    [
+        # The dispatch response could not be parsed, so a dispatched run's ID is unknown and
+        # nothing is tracked to cancel.
+        pytest.param("create_workflow_dispatch", "dispatching the batch", False, [], id="dispatch-response"),
+        pytest.param("get_workflow_run", "polling workflow status", True, [123], id="poll-response"),
+        # Jobs are refreshed on every poll, so the page can fail while the workflow is still going.
+        pytest.param("list_workflow_jobs", "listing workflow jobs", True, [123], id="jobs-page"),
+        # Artifacts are collected after completion, when the run is already released.
+        pytest.param("list_workflow_run_artifacts", "listing workflow artifacts", False, [], id="artifact-page"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_an_unparsable_response_stops_the_batch_and_keeps_its_run_cancellable(
+    tmp_path: Path,
+    failure_point: str,
+    operation: str,
+    workflow_running: bool,
+    cancelled_runs: list[int],
+):
+    """An invalid response stops the batch without losing a known unfinished run."""
+    fake = FakeAsyncGitHubClient()
+    if workflow_running:
+        fake.mock_response("get_workflow_run", running_run())
+    fake.mock_response(failure_point, invalid_response_error())
+    runner = make_runner(fake, tmp_path)
+
+    # Bound the test if an invalid response is retried indefinitely.
+    with pytest.raises(FatalProcessingError, match=f"Invalid GitHub response while {operation}"):
+        async with asyncio.timeout(5):
+            await runner.process_message(make_batch())
+
+    assert finished_messages(runner) == []
+
+    await runner.cancel_dispatched_runs()
+    cancelled = [call.kwargs["run_id"] for call in fake.calls_to("cancel_workflow_run")]
+    assert cancelled == cancelled_runs
+
+
+@pytest.mark.asyncio
+async def test_an_unparsable_response_reason_is_a_single_bounded_line(tmp_path: Path):
+    """The failure summary must identify the operation and run without including unbounded details."""
+    unparsable = ValidationError.from_exception_data(
+        title="WorkflowRun",
+        line_errors=[
+            {
+                "type": "value_error",
+                "loc": ("body", "html_url"),
+                "input": "not-a-url",
+                "ctx": {"error": ValueError("line one\nline two\n" + "x" * 500)},
+            }
+        ],
+    )
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", unparsable)
+    runner = make_runner(fake, tmp_path)
+
+    with pytest.raises(FatalProcessingError, match="batch-err") as exc_info:
+        await runner.process_message(make_batch())
+
+    reason = str(exc_info.value)
+    assert "\n" not in reason
+    assert len(reason) <= 300
+    assert "Invalid GitHub response while polling workflow status" in reason
+    assert "batch-err" in reason
+    assert "run 123" in reason
+    assert "WorkflowRun" in reason
+
+
+@pytest.mark.asyncio
+async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    """All invalid fields must be visible from a single response failure."""
+    unparsable = ValidationError.from_exception_data(
+        title="WorkflowJobsList",
+        line_errors=[
+            {
+                "type": "enum",
+                "loc": ("jobs", 0, "steps", 1, "status"),
+                "input": "paused",
+                "ctx": {"expected": "'queued', 'in_progress', 'completed' or 'pending'"},
+            },
+            {
+                "type": "missing",
+                "loc": ("jobs", 2, "id"),
+                "input": {"name": "a job without an id"},
+            },
+        ],
+    )
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", running_run())
+    fake.mock_response("list_workflow_jobs", unparsable)
+    runner = make_runner(fake, tmp_path)
+
+    with pytest.raises(FatalProcessingError, match="batch-err") as exc_info:
+        await runner.process_message(make_batch())
+
+    reason = str(exc_info.value)
+    assert "2 validation errors" in reason
+    assert "WorkflowJobsList" in reason
+    assert "See logs for details." in reason
+    assert exc_info.value.__cause__ is unparsable
+    assert "listing workflow jobs" in caplog.text
+    assert "batch-err" in caplog.text
+    assert "run 123" in caplog.text
+    assert caplog.text.count("jobs.0.steps.1.status") == 1
+    assert "paused" in caplog.text
+    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in caplog.text
+    assert caplog.text.count("jobs.2.id") == 1
+    assert "Field required" in caplog.text
 
 
 # ---------------------------------------------------------------------------

@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import signal
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -20,6 +19,7 @@ from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunRepor
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, MessageScope
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import ComponentMonitor
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.runtime import MonitoringRuntime
@@ -70,21 +70,17 @@ class DispatcherOutcome:
 
     progress: DispatcherProgress
     final_report_published: bool
+    shutdown: ShutdownRequest | None = None
 
     @property
     def successful(self) -> bool:
-        """Whether every batch finished without failing and the final report was not lost.
+        """Whether all batches finished without failure and the final report was published.
 
-        An unfinished plan is a failure: results nobody can see must not read as green. So is losing
-        the final snapshot to a pull-request comment that would not take it. An intermediate comment
-        failure is not, since the next snapshot supersedes it.
-
-        A run with no pull request has nothing to lose the report to, so it passes that condition on
-        arrival. `on_finalize` logs `summary_line` whatever happens, and the run summary is written
-        when GitHub Actions offers one, so such a run still reports somewhere.
+        Any shutdown request makes the outcome unsuccessful.
         """
         return (
-            self.final_report_published
+            self.shutdown is None
+            and self.final_report_published
             and self.progress.done
             and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
         )
@@ -174,7 +170,6 @@ class Dispatcher(EventBusOrchestrator):
         self._gatherer = gatherer
         self._reporter = reporter
         self._outcome: DispatcherOutcome | None = None
-        self._cancelled = False
         self._monitor = monitor
 
         self.register_processor(runner, [TestBatch])
@@ -188,8 +183,19 @@ class Dispatcher(EventBusOrchestrator):
 
     @property
     def cancelled(self) -> bool:
-        """Whether the run was cancelled from outside rather than finishing or timing out."""
-        return self._cancelled
+        """Whether the run was cancelled from outside rather than failing or timing out."""
+        request = self.shutdown_request
+        return request is not None and request.kind is ShutdownKind.CANCELLED
+
+    def request_shutdown(self, request: ShutdownRequest) -> bool:
+        """Prepare the client only when this shutdown request is accepted."""
+        if not super().request_shutdown(request):
+            return False
+        try:
+            self._client.enter_shutdown_mode(rate_limits=CANCELLED_RATE_LIMITS)
+        except Exception:
+            self._logger.exception("Failed to enter shutdown mode")
+        return True
 
     async def on_initialize(self):
         self.submit_message(self._gatherer.build_initial_update())
@@ -201,66 +207,43 @@ class Dispatcher(EventBusOrchestrator):
             # Queued, not dispatched: the workflows start when the runner's messages are processed.
             self._monitor.logger.info('Queued planned batches', batch_count=len(self._batches))
 
-    def on_shutdown_signal(self, received: signal.Signals) -> None:
-        """Record that the run was cancelled, then size what is left for the seconds it has.
-
-        Both signals arrive on a cancelled job, seconds apart, so the second must not restart what the
-        first began.
-        """
-        if self._cancelled:
-            self._logger.info("Already cancelling; ignoring %s", received.name)
-            return
-
-        self._cancelled = True
-        # Recorded and stopped before anything that can raise: this runs as a loop callback, so a
-        # failure here goes to the loop's exception handler and the second signal returns early.
-        super().on_shutdown_signal(received)
-        self._client.enter_shutdown_mode(rate_limits=CANCELLED_RATE_LIMITS)
-
     async def on_message_received(self, message: BaseMessage):
         self._logger.debug("Message received: %s(%s)", type(message).__name__, message.id)
 
     async def on_finalize(self, exception: Exception | None):
+        request = self.shutdown_request
         try:
-            if self._cancelled:
-                await self._report_cancellation()
+            if request is not None:
+                await self._shutdown_cleanup(request)
             progress = self._gatherer.progress
             self._outcome = DispatcherOutcome(
                 progress=progress,
                 final_report_published=self._reporter.final_report_published,
+                shutdown=request,
             )
             if self._monitor is None:
-                self._logger.info(summary_line(progress))
+                self._logger.info(summary_line(progress, shutdown=request))
             else:
-                self._monitor.logger.info(summary_line(progress))
+                self._monitor.logger.info(summary_line(progress, shutdown=request))
             if (body := self._reporter.latest_body) is not None:
                 write_step_summary(render_run_summary(body, pr_comment_failed=self._reporter.pr_comment_failed))
         finally:
             await self._client.aclose()
 
-    async def _report_cancellation(self) -> None:
-        """Say the run was cancelled, and stop the work it started.
-
-        Concurrent because both are independent calls competing for the same few seconds, and neither
-        is allowed to abandon the other: without `return_exceptions` the first failure would return
-        from here while the rest were still in flight, racing the kill.
-
-        Check runs are not closed here. Each batch closes its own on the way out, and that happens
-        before this hook runs, once the bus has awaited the tasks it cancelled.
-        """
+    async def _shutdown_cleanup(self, request: ShutdownRequest) -> None:
+        """Attempt terminal reporting and remote cancellation without either abandoning the other."""
         outcomes = await asyncio.gather(
-            self._reporter.publish_cancelled(),
+            self._reporter.publish_shutdown(request),
             self._runner.cancel_dispatched_runs(),
             return_exceptions=True,
         )
-        # A cancellation is not a failed step, and must not be reported as one or swallowed: it is
-        # returned as a value here rather than raised, so it needs picking out by hand.
+        # A cancelled cleanup task still propagates after both tasks settle.
         cancellation: asyncio.CancelledError | None = None
         for outcome in outcomes:
             if isinstance(outcome, asyncio.CancelledError):
                 cancellation = outcome
             elif isinstance(outcome, BaseException):
-                self._logger.error("Cancellation cleanup step failed: %s", outcome, exc_info=outcome)
+                self._logger.error("Shutdown cleanup step failed: %s", outcome, exc_info=outcome)
         if cancellation is not None:
             raise cancellation
 
