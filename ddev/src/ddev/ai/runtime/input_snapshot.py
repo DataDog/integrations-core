@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 INPUTS_DIR_NAME = "inputs"
 CAPTURES_DIR_NAME = "files"
 MANIFEST_NAME = "manifest.yaml"
-READ_ONLY_MODE = 0o444
 
 
 @dataclass(frozen=True)
@@ -156,7 +155,6 @@ def _capture(name: str, source: Path, captures_dir: Path, previous: SnapshotReco
     path = captures_dir / f"{name}{source.suffix}"
     path.unlink(missing_ok=True)
     path.write_bytes(content)
-    path.chmod(READ_ONLY_MODE)
     return SnapshotInput(
         name=name,
         source=source,
@@ -207,7 +205,17 @@ def _read_manifest(inputs_dir: Path) -> dict[str, SnapshotRecord]:
         return {}
     if not isinstance(loaded, dict):
         return {}
-    return {name: SnapshotRecord.parse(entry) for name, entry in loaded.items() if isinstance(entry, dict)}
+    records: dict[str, SnapshotRecord] = {}
+    for name, entry in loaded.items():
+        if not isinstance(entry, dict):
+            continue
+        try:
+            records[name] = SnapshotRecord.parse(entry)
+        except (TypeError, ValueError):
+            # A damaged entry (e.g. an interrupted write) is dropped rather than crashing
+            # resume; the input it describes is simply recollected as if never captured.
+            continue
+    return records
 
 
 def _write_manifest(inputs_dir: Path, captured: list[SnapshotInput]) -> None:
