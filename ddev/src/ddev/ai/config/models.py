@@ -324,7 +324,7 @@ BUILT_IN_FLOW_INPUTS = (
         label="Product requirements file",
         input_type=InputType.PATH,
         required=True,
-        as_content=True,
+        snapshot=True,
     ),
     FlowInput(
         name="max_timeout",
