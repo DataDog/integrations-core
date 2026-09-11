@@ -44,10 +44,12 @@ class Query(object):
                         the query will NOT BE RUN exactly at the collection interval.
                         The query will be run at the next check run after the collection interval has passed.
                 - (Optional) collection_phase_offset (int): Where in the collection interval this query sits, in
-                    seconds. This only applies when collection_interval is set. The first execution is NOT delayed;
-                    the offset takes effect afterwards, so the query settles onto a cadence of one execution per
-                    collection interval phase-shifted by the offset. Use it to spread many same-interval queries
-                    across the interval instead of having them all fire in the same burst.
+                    seconds. This only applies when collection_interval is set. Setting it switches the query onto
+                    an absolute schedule, due once per `[offset + k * interval, offset + (k + 1) * interval)`
+                    window, so the slot survives the query being rebuilt. The first execution is NOT delayed, which
+                    means a query built partway through its window runs twice within the first interval. Use it to
+                    spread many same-interval queries across the interval instead of having them all fire in the
+                    same burst.
                 - (Optional) metric_prefix (str): The prefix to add to the metric name.
                     Note: If the metric prefix is None, the default metric prefix `<INTEGRATION>.` will be used.
                 - (Optional) params (Sequence): Bound parameters to pass alongside the query at execution time.
@@ -71,8 +73,9 @@ class Query(object):
         # Where in the collection interval this query sits, in seconds. Applied after the first execution.
         self.collection_phase_offset = None  # type: int
         # The last time the query was executed. If None, the query has never been executed.
-        # This is only used when the collection_interval is not None.
+        # These are only used when the collection_interval is not None.
         self.__last_execution_time = None  # type: float
+        self.__last_execution_window = None  # type: int
         # whether to ignore any defined namespace prefix. True when `metric_prefix` is defined.
         self.metric_name_raw = False  # type: bool
 
@@ -293,20 +296,26 @@ class Query(object):
             return True
 
         now = get_timestamp()
-        if self.__last_execution_time is None:
-            # Never executed: collect immediately, so a single check run still covers every query. The phase
-            # offset is charged against this first execution by backdating it, which puts the *next* execution
-            # at `now + offset` and every one after that an interval apart. That is what spreads a large set of
-            # same-interval queries out, without any of them going uncollected for a whole interval at startup.
-            self.__last_execution_time = now
-            if self.collection_phase_offset:
-                self.__last_execution_time -= self.collection_interval - (
-                    self.collection_phase_offset % self.collection_interval
-                )
+
+        if self.collection_phase_offset is not None:
+            # A phased query follows an absolute schedule: it is due once per window
+            # `[offset + k * interval, offset + (k + 1) * interval)`. Anchoring to the clock rather than to the
+            # time of the first execution keeps each query in its own slot even when the query objects are
+            # rebuilt (an Agent restart, or autodiscovery noticing a database appear or disappear), which is
+            # what spreads a large set of same-interval queries out instead of letting them bunch back up into
+            # a single burst. Windowing also makes any offset meaningful, including one that is a multiple of
+            # the interval.
+            window = int((now - self.collection_phase_offset) // self.collection_interval)
+            if window == self.__last_execution_window:
+                return False
+
+            # The first execution is never delayed, so a single check run still covers every query. A query
+            # built partway through its window is therefore collected twice within the first interval.
+            self.__last_execution_window = window
             return True
 
-        if now - self.__last_execution_time >= self.collection_interval:
-            # If the collection interval has elapsed since the last execution, the query should be executed.
+        if self.__last_execution_time is None or now - self.__last_execution_time >= self.collection_interval:
+            # Never executed, or the collection interval has elapsed since the last execution.
             self.__last_execution_time = now
             return True
 

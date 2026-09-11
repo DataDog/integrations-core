@@ -140,42 +140,85 @@ def test_per_database_metrics_spread_across_the_collection_interval(
 
 @pytest.mark.unit
 @pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
-def test_per_database_metric_slots_are_stable(
+def test_per_database_slots_survive_rebuilds_and_autodiscovery(
     init_config, instance_docker_metrics, metrics_class, config_key, metric_config
 ):
+    """
+    A database keeps the same position within the collection interval when the collectors are rebuilt and
+    when autodiscovery changes the set of databases.
+
+    The bug this guards against is the burst coming back: the collectors are rebuilt on every Agent restart
+    and whenever a database is created or dropped, and a schedule anchored to the time of the rebuild would
+    put all N databases back on the same tick. Slots derived from the position in the database list would
+    reshuffle every database whenever one was added or removed, which has the same effect.
+    """
+    interval = 10
+    databases = ['master', 'msdb', 'database_1', 'database_2', 'database_3', 'database_4', 'delta']
     instance_docker_metrics['database_metrics'] = {config_key: metric_config}
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
-    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = 10
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = interval
 
-    def collect_offsets(databases: list[str]) -> dict[str, int | None]:
-        offsets = {}
+    def observed_slots(databases: list[str], start: int) -> dict[str, int]:
+        """Build the collectors at `start` and report where in the interval each database actually came due."""
+        executed_databases = []
 
-        def new_query_executor(queries: list[dict], **kwargs) -> mock.Mock:
-            database = kwargs['executor'].keywords['db']
-            offsets[database] = queries[0].get('collection_phase_offset')
-            return mock.Mock()
+        def execute_query_handler(_query, db=None, params=None):
+            executed_databases.append(db)
+            return []
 
-        metrics = metrics_class(
-            config=sqlserver_check._config,
-            new_query_executor=new_query_executor,
-            server_static_info=STATIC_SERVER_INFO,
-            execute_query_handler=mock.Mock(),
-            databases=databases,
-        )
+        now = start
+        slots = {}
+        with mock.patch('datadog_checks.base.utils.db.query.get_timestamp', side_effect=lambda: now):
+            metrics = metrics_class(
+                config=sqlserver_check._config,
+                new_query_executor=sqlserver_check._new_query_executor,
+                server_static_info=STATIC_SERVER_INFO,
+                execute_query_handler=execute_query_handler,
+                databases=databases,
+            )
+            metrics.execute()
+            for _ in range(interval):
+                now += 1
+                executed_databases.clear()
+                metrics.execute()
+                for database in executed_databases:
+                    slots[database] = now % interval
+        return slots
+
+    original_slots = observed_slots(databases, 100)
+    assert sorted(original_slots) == sorted(databases)
+
+    rebuilt_slots = observed_slots(databases, 137)
+    assert rebuilt_slots == original_slots, "a rebuild must not move a database onto a different tick"
+
+    expanded_slots = observed_slots([*databases, 'epsilon'], 100)
+    assert {database: expanded_slots[database] for database in databases} == original_slots, (
+        "autodiscovering a database must not reshuffle the others"
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('metrics_class, config_key, metric_config', PER_DATABASE_STAGGERED_METRICS)
+def test_per_database_metrics_reject_a_non_positive_collection_interval(
+    init_config, instance_docker_metrics, metrics_class, config_key, metric_config
+):
+    """
+    A misconfigured interval must still surface as the usual validation error rather than as a
+    ZeroDivisionError from the slot calculation.
+    """
+    instance_docker_metrics['database_metrics'] = {config_key: metric_config}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = 0
+
+    metrics = metrics_class(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=mock.Mock(),
+        databases=['alpha', 'beta'],
+    )
+    with pytest.raises(ValueError, match='must be a positive number'):
         metrics._build_query_executors()
-        return offsets
-
-    original_offsets = collect_offsets(['alpha', 'beta', 'gamma'])
-    reconstructed_offsets = collect_offsets(['alpha', 'beta', 'gamma'])
-    expanded_offsets = collect_offsets(['alpha', 'beta', 'gamma', 'delta'])
-
-    assert original_offsets == {'alpha': 4, 'beta': 5, 'gamma': 2}
-    assert reconstructed_offsets == original_offsets
-    assert {database: expanded_offsets[database] for database in original_offsets} == original_offsets
-    assert collect_offsets(['alpha']) == {'alpha': None}
-
-    sqlserver_check._config.database_metrics_config[config_key]['collection_interval'] = None
-    assert collect_offsets(['alpha', 'beta']) == {'alpha': None, 'beta': None}
 
 
 @pytest.mark.unit
