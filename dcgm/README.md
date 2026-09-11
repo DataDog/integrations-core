@@ -155,6 +155,8 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
          # Copy the content from the Installation section.
    ```
 3. Create your DCGM Exporter Helm chart `dcgm-values.yaml` with the following content : 
+   **Kubernetes annotations**
+
    ```yaml
    # Exposing more metrics than the default for additional monitoring - this requires the use of a dedicated ConfigMap for which the Kubernetes ServiceAccount used by the exporter has access thanks to step 1.
    # Ref: https://github.com/NVIDIA/dcgm-exporter/blob/e55ec750def325f9f1fdbd0a6f98c932672002e4/deployment/values.yaml#L38
@@ -176,6 +178,32 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
    serviceMonitor:
      enabled: false
    ```
+   **DatadogInstrumentation CRD**
+
+   Keep the other Helm values in this step, omit `podAnnotations`, and apply this resource after installing the chart:
+
+   ```yaml
+   apiVersion: datadoghq.com/v1alpha1
+   kind: DatadogInstrumentation
+   metadata:
+     name: <CR_NAME>
+     namespace: <WORKLOAD_NAMESPACE>
+   spec:
+     targetRef:
+       apiVersion: apps/v1
+       kind: DaemonSet
+       name: dcgm-datadog-dcgm-exporter
+     config:
+       checks:
+         - integration: dcgm
+           containerName: exporter
+           initConfig: {}
+           instances:
+             - openmetrics_endpoint: "http://%%host%%:9400/metrics"
+   ```
+
+   For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][20].
+
 4. Install the DCGM Exporter Helm chart in the `default` namespace with the following command, while being in the directory with your `dcgm-values.yaml` :
    ```shell
    helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-values.yaml
@@ -200,6 +228,8 @@ The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA G
     * Create a namespace `gpu-operator` if one is not already present: `kubectl create namespace gpu-operator`.
     * Create a ConfigMap using the file edited above: `kubectl create configmap metrics-config -n gpu-operator --from-file=dcgm-metrics.csv`
 3. Create your GPU Operator Helm chart `dcgm-values.yaml` with the following content: 
+   **Kubernetes annotations**
+
    ```yaml
    # Refer to NVIDIA documentation for the driver and toolkit for your GPU-enabled nodes - example below for Amazon Linux 2 g5.xlarge
    driver:
@@ -228,6 +258,32 @@ The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA G
            }
          }
    ```
+   **DatadogInstrumentation CRD**
+
+   Keep the other Helm values in this step, omit `daemonsets.annotations`, and apply this resource after installing the chart:
+
+   ```yaml
+   apiVersion: datadoghq.com/v1alpha1
+   kind: DatadogInstrumentation
+   metadata:
+     name: <CR_NAME>
+     namespace: <WORKLOAD_NAMESPACE>
+   spec:
+     targetRef:
+       apiVersion: apps/v1
+       kind: DaemonSet
+       name: nvidia-dcgm-exporter
+     config:
+       checks:
+         - integration: dcgm
+           containerName: nvidia-dcgm-exporter
+           initConfig: {}
+           instances:
+             - openmetrics_endpoint: "http://%%host%%:9400/metrics"
+   ```
+
+   For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][20].
+
 4. Install the DCGM Exporter Helm chart in the `default` namespace with the following command, while being in the directory with your `dcgm-values.yaml`:
    ```bash
    helm install datadog-dcgm-gpu-operator -n gpu-operator nvidia/gpu-operator -f dcgm-values.yaml
@@ -287,7 +343,9 @@ LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint": "http://%%host%%:9
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][11].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][11].
+
+###### Kubernetes annotations
 
 **Annotations v2** (for Datadog Agent v7.47+)
 
@@ -312,6 +370,31 @@ spec:
   containers:
     - name: dcgm
 ```
+###### DatadogInstrumentation CRD
+
+This example targets a DCGM exporter DaemonSet named `dcgm`:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: DaemonSet
+    name: dcgm
+  config:
+    checks:
+      - integration: dcgm
+        containerName: dcgm
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:9400/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][20].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -412,3 +495,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/integrations/nvml/#metrics
 [18]: https://docs.datadoghq.com/gpu_monitoring/
 [19]: https://docs.datadoghq.com/gpu_monitoring/setup/?tab=datadogoperator
+[20]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -27,9 +27,11 @@ reference this directly.
 
 class MetricsPredicate(Protocol):
     """
-    Protocol for predicates that control whether a metrics mapping should be loaded.
+    Protocol for conditional metrics loading.
 
-    Implement ``should_load`` to create custom loading conditions.
+    Any class with a ``should_load(self, config) -> bool`` method satisfies
+    this protocol and can be used as a predicate in ``MetricsMapping``. No
+    inheritance or registration is required.
     """
 
     def should_load(self, config: InstanceType) -> bool: ...
@@ -37,10 +39,15 @@ class MetricsPredicate(Protocol):
 
 class ConfigOptionTruthy:
     """
-    Load metrics only if a configuration option is truthy.
+    Load metrics when a config option is truthy; skip when it is falsy.
 
-    Uses ``is_affirmative`` to evaluate the value. Defaults to ``True``
-    (include metrics unless explicitly disabled).
+    Uses ``is_affirmative`` to evaluate the option value. When the option is
+    absent from the config, ``default`` is used (``True`` by default, so
+    metrics are included unless explicitly disabled).
+
+    Args:
+        option: The instance config key to evaluate.
+        default: Fallback value when the option is not present.
     """
 
     def __init__(self, option: str, default: bool = True) -> None:
@@ -53,10 +60,14 @@ class ConfigOptionTruthy:
 
 class ConfigOptionEquals:
     """
-    Load metrics only if a configuration option equals a specific value.
+    Load metrics when a config option equals a specific value; skip otherwise.
 
     A missing key compares equal to ``None``: ``ConfigOptionEquals("flag", None)``
     matches both ``{"flag": None}`` and instances that omit the key entirely.
+
+    Args:
+        option: The instance config key to evaluate.
+        value: The exact value the option must equal.
     """
 
     def __init__(self, option: str, value: Any) -> None:
@@ -69,9 +80,13 @@ class ConfigOptionEquals:
 
 class AllOf:
     """
-    Compose predicates: all must pass for the metrics to be loaded.
+    Conjunction of predicates; all must pass for the metrics to be loaded.
 
-    Follows Python's ``all()`` semantics: returns ``True`` when empty.
+    Follows Python's ``all()`` semantics: returns ``True`` when given no
+    predicates.
+
+    Args:
+        predicates: One or more ``MetricsPredicate`` instances to evaluate.
     """
 
     def __init__(self, *predicates: MetricsPredicate) -> None:
@@ -83,9 +98,13 @@ class AllOf:
 
 class AnyOf:
     """
-    Compose predicates: any passing is sufficient to load the metrics.
+    Disjunction of predicates; any one passing is sufficient to load the metrics.
 
-    Follows Python's ``any()`` semantics: returns ``False`` when empty.
+    Follows Python's ``any()`` semantics: returns ``False`` when given no
+    predicates.
+
+    Args:
+        predicates: One or more ``MetricsPredicate`` instances to evaluate.
     """
 
     def __init__(self, *predicates: MetricsPredicate) -> None:
@@ -98,16 +117,23 @@ class AnyOf:
 @dataclass(frozen=True)
 class MetricsMapping:
     """
-    Declares a YAML file with metric name mappings to load automatically.
+    Declares a single YAML file containing metric name mappings to load automatically.
 
     Use in the ``METRICS_MAP`` class variable of ``OpenMetricsBaseCheckV2``
-    subclasses. The YAML file should contain a flat mapping of Prometheus
-    metric names to Datadog metric names::
+    subclasses. The path is relative to the package directory. An optional
+    predicate controls whether the file is loaded for a given instance config;
+    when omitted, the file is always loaded.
+
+    Example::
 
         METRICS_MAP = (
             MetricsMapping(Path("metrics/default.yaml")),
             MetricsMapping(Path("metrics/go.yaml"), predicate=ConfigOptionTruthy("go_metrics")),
         )
+
+    Args:
+        path: Path to the YAML metrics file, relative to the package directory.
+        predicate: Optional condition that gates loading. Defaults to always load.
     """
 
     path: Path

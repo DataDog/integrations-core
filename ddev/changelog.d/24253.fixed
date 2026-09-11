@@ -1,1 +1,0 @@
-Bundle per-job correlation into the CI dispatcher's BatchFinished via BatchJobResult.

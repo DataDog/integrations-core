@@ -27,9 +27,7 @@ class Status(StrEnum):
 def conclusion_to_status(conclusion: str | None) -> Status:
     """Map a GitHub Actions conclusion to the internal :class:`Status`.
 
-    Note: ``None`` maps to ``Status.FAILURE`` here while a check run reports ``"neutral"``
-    for the same input. The asymmetry is intentional — status consumers want a binary
-    outcome, the check UI prefers an explicit ``"neutral"`` badge.
+    ``None`` maps to ``Status.FAILURE``: a run that finished without saying how did not succeed.
     """
     if conclusion == WorkflowJobConclusion.SUCCESS:
         return Status.SUCCESS

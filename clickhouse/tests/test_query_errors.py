@@ -150,9 +150,7 @@ def test_create_batched_payload_error_fields(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_errors._create_batched_payload(rows)
+    payload = query_errors._create_batched_payload(rows)
 
     assert payload is not None
     assert len(payload['clickhouse_query_errors']) == 1
@@ -183,9 +181,7 @@ def test_create_batched_payload_carries_clickhouse_node(check_with_dbm):
         },
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_errors._create_batched_payload(rows)
+    payload = query_errors._create_batched_payload(rows)
 
     query_details = payload['clickhouse_query_errors'][0]['query_details']
     assert query_details['clickhouse_node'] == 'ch-node-1'
@@ -208,9 +204,7 @@ def test_create_batched_payload_clickhouse_node_defaults_empty(check_with_dbm):
         },
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_errors._create_batched_payload(rows)
+    payload = query_errors._create_batched_payload(rows)
 
     query_details = payload['clickhouse_query_errors'][0]['query_details']
     assert query_details['clickhouse_node'] == ''
@@ -234,9 +228,7 @@ def test_create_batched_payload_structure(check_with_dbm):
         },
     ]
 
-    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = query_errors._create_batched_payload(rows)
+    payload = query_errors._create_batched_payload(rows)
 
     assert payload['ddsource'] == 'clickhouse'
     assert payload['dbm_type'] == 'query_error'
@@ -244,7 +236,7 @@ def test_create_batched_payload_structure(check_with_dbm):
     assert 'timestamp' in payload
     assert 'host' in payload
     assert 'database_instance' in payload
-    assert payload['ddagentversion'] == '7.64.0'
+    assert payload['ddagentversion'] == '0.0.0'
     assert payload['ddtags'] == ['test:clickhouse', 'server:localhost']
     assert payload['collection_interval'] == query_errors._collection_interval
     assert 'clickhouse_version' in payload

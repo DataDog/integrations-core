@@ -231,6 +231,9 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     aggregator.assert_metric(
         'dd.postgres._collect_relations_autodiscovery.time',
     )
+    aggregator.assert_metric(
+        'dd.postgres._collect_stat_autodiscovery.time',
+    )
     if float(POSTGRES_VERSION) >= 12:
         checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, with_db=False, enabled="true")
         aggregator.assert_metric('postgresql.checksums.enabled', value=1, tags=checksum_metrics_expected_tags)

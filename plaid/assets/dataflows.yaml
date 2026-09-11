@@ -1,0 +1,11 @@
+provides:
+  - id: plaid-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound
+  - id: plaid-metrics
+    always_on: true
+    granular: false
+    data_type: metrics
+    direction: inbound

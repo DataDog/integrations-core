@@ -871,5 +871,40 @@ class TestConsumeMessagesEarlyReturn:
         consumer.poll.assert_not_called()
 
 
+class TestUpdateTopicConfigClient:
+    """Test update_topic_config client-internal config value coercion."""
+
+    def test_coerces_non_string_config_values_to_str(self):
+        """Config values from local YAML may arrive as non-string types (e.g. int).
+        ConfigEntry must receive a string to avoid TypeError in the C extension."""
+        from confluent_kafka.admin import ConfigResource
+
+        mock_admin = MagicMock()
+        future = MagicMock()
+        future.result.return_value = None
+        mock_admin.incremental_alter_configs.return_value = {MagicMock(): future}
+
+        captured_entries = []
+        original_add = ConfigResource.add_incremental_config
+
+        def spy_add(self, config_entry):
+            captured_entries.append(config_entry)
+            return original_add(self, config_entry)
+
+        client = _client()
+        with (
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+            patch.object(ConfigResource, 'add_incremental_config', spy_add),
+        ):
+            client.update_topic_config('test-topic', {'retention.ms': 1209600000, 'compression.type': 'snappy'})
+
+        assert len(captured_entries) == 2
+        # All values must be strings, even if the caller passed ints
+        assert captured_entries[0].value == '1209600000'
+        assert isinstance(captured_entries[0].value, str)
+        assert captured_entries[1].value == 'snappy'
+        assert isinstance(captured_entries[1].value, str)
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])

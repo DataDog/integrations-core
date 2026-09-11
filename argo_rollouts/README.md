@@ -18,12 +18,15 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 ### Configuration
 
-The Argo Rollouts controller has Prometheus-formatted metrics readily available at `/metrics` on port `8090`. For the Agent to start collecting metrics, the Argo Rollouts pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_rollouts.d/conf.yaml][4].
+The Argo Rollouts controller has Prometheus-formatted metrics readily available at `/metrics` on port `8090`. Configure the check with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [sample argo_rollouts.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `argo_rollouts.info.replicas.updated` metric is exposed only after a replica is updated.
 
 The only parameter required for configuring the Argo Rollouts check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8090`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -49,6 +52,35 @@ spec:
     - name: 'argo-rollouts'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+This example targets the Argo Rollouts controller Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: argo-rollouts
+  config:
+    checks:
+      - integration: argo_rollouts
+        containerName: argo-rollouts
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8090/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Log collection
 
@@ -101,3 +133,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
+[12]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

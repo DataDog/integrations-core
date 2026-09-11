@@ -1,0 +1,1 @@
+Accept both lowercase and capitalized values for the ``filters.type`` config option.
