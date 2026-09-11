@@ -14,7 +14,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 
 from .connection import split_sqlserver_host_port
-from .connection_errors import EXPECTED_DB_EXCEPTIONS
+from .connection_errors import SQLConnectionError
 from .utils import raise_if_cancelled
 
 try:
@@ -77,6 +77,13 @@ class DueQuery:
         return self.scheduled_query.query
 
 
+_EXPECTED_DB_EXCEPTIONS: list[type[Exception]] = [SQLConnectionError]
+if pyodbc is not None:
+    _EXPECTED_DB_EXCEPTIONS.append(pyodbc.Error)
+if adodbapi is not None:
+    _EXPECTED_DB_EXCEPTIONS.append(adodbapi.DatabaseError)
+
+
 class SqlServerDataObservability(DBMAsyncJob):
     def __init__(self, check: SQLServer, config: InstanceConfig):
         self._check = check
@@ -91,7 +98,7 @@ class SqlServerDataObservability(DBMAsyncJob):
             enabled=config.data_observability.enabled,
             dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=EXPECTED_DB_EXCEPTIONS,
+            expected_db_exceptions=tuple(_EXPECTED_DB_EXCEPTIONS),
             job_name="data-observability",
         )
         # Filter bad queries on check construction.
@@ -207,7 +214,7 @@ class SqlServerDataObservability(DBMAsyncJob):
                 'error': None,
             }
         except Exception as e:
-            if not EXPECTED_DB_EXCEPTIONS or not isinstance(e, EXPECTED_DB_EXCEPTIONS):
+            if not _EXPECTED_DB_EXCEPTIONS or not isinstance(e, tuple(_EXPECTED_DB_EXCEPTIONS)):
                 raise
             duration = time.time() - start
             self._log.warning(
@@ -373,7 +380,7 @@ class SqlServerDataObservability(DBMAsyncJob):
                     for due in group:
                         try:
                             self._run_due_query(due, base_tags, conn_dbname)
-                        except EXPECTED_DB_EXCEPTIONS as e:
+                        except tuple(_EXPECTED_DB_EXCEPTIONS) as e:
                             self._log.warning(
                                 "Failed to execute monitor_id=%d on db_name=%s; will retry next poll: %s",
                                 due.query.monitor_id,
@@ -381,7 +388,7 @@ class SqlServerDataObservability(DBMAsyncJob):
                                 e,
                             )
                             self._queue_for_retry(due, base_tags)
-            except EXPECTED_DB_EXCEPTIONS as e:
+            except tuple(_EXPECTED_DB_EXCEPTIONS) as e:
                 # Opening the shared connection itself failed before any query in this
                 # group ran, so all of them are safe to retry next poll.
                 self._log.warning(
