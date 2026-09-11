@@ -1,0 +1,233 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+#
+# Kubernetes manifests for the Spark e2e test in driver mode.
+#
+# The manifest deploys:
+#   - A ``words-sender`` Deployment + Service that streams random words over a
+#     TCP socket on port 9999 (the data source for the Structured Streaming job).
+#   - A ``spark-driver`` Deployment + Service that runs a Spark Structured
+#     Streaming application via ``spark-submit``.  The Spark UI is exposed on
+#     port 4040 so the Datadog Agent (running in the ``ddev-agent`` namespace)
+#     can scrape driver-mode metrics via in-cluster Service DNS.
+#
+# The Agent pod reaches the Spark driver at:
+#   http://spark-driver.spark.svc.cluster.local:4040
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spark
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: words-sender-script
+  namespace: spark
+data:
+  script.py: |
+    import random
+    import socket
+    import time
+    from threading import Event, Thread
+
+    WORDS = (
+        'air', 'owl', 'way', 'hen', 'pan', 'owe', 'few', 'kid', 'see', 'beg',
+        'act', 'cow', 'bin', 'pit', 'ice', 'far',
+    )
+
+    def pick_words():
+        count = random.randint(1, 10)
+        words = random.choices(WORDS, k=count)
+        return " ".join(words).encode() + b'\n'
+
+    class ThreadListener(Thread):
+        def __init__(self, connection, addr):
+            super().__init__()
+            self.terminate_event = Event()
+            self.connection = connection
+            self.addr = addr
+
+        def run(self):
+            with self.connection:
+                print('Connected by', self.addr)
+                while not self.terminate_event.is_set():
+                    words = pick_words()
+                    self.connection.sendall(words)
+                    print("Sending {}".format(words))
+                    time.sleep(0.5)
+            print("Thread is over")
+
+    if __name__ == '__main__':
+        threads = set()
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(('0.0.0.0', 9999))
+                s.listen(100)
+                print("Listening for connections...")
+                while True:
+                    conn, addr = s.accept()
+                    print("Accepted connection from ", addr)
+                    thread = ThreadListener(conn, addr)
+                    thread.start()
+                    threads.add(thread)
+        except Exception as e:
+            print(e)
+            print("Terminating threads")
+            for thread in threads:
+                thread.terminate_event.set()
+            for thread in threads:
+                thread.join(5)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spark-app-code
+  namespace: spark
+data:
+  app.py: |
+    from pyspark.sql import SparkSession
+    from pyspark.sql.functions import explode, split, window
+
+    def main():
+        spark = (
+            SparkSession.builder.appName("StructuredStreamingK8s")
+            .config("spark.ui.port", "4040")
+            .config("spark.sql.streaming.metricsEnabled", "true")
+            .getOrCreate()
+        )
+        lines = (
+            spark.readStream.format("socket")
+            .option("host", "words-sender")
+            .option("port", 9999)
+            .option("includeTimestamp", "true")
+            .load()
+        )
+
+        # Split the lines into words
+        words = lines.select(
+            explode(split(lines.value, " ")).alias("word"),
+            lines.timestamp,
+        )
+
+        # Group the data by window and word and compute the count of each group
+        word_counts = (
+            words.withWatermark("timestamp", "30 seconds")
+            .groupBy(
+                window(words.timestamp, "30 seconds", "15 seconds", "3 seconds"),
+                words.word,
+            )
+            .count()
+        )
+
+        # Start running the query that prints the running counts to the console
+        query = (
+            word_counts.writeStream.queryName("my_named_query")
+            .outputMode("complete")
+            .format("console")
+            .option("truncate", "false")
+            .start()
+        )
+
+        query.awaitTermination()
+
+    if __name__ == "__main__":
+        main()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: words-sender
+  namespace: spark
+  labels:
+    app: words-sender
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: words-sender
+  template:
+    metadata:
+      labels:
+        app: words-sender
+    spec:
+      containers:
+        - name: words-sender
+          image: python:3.11-slim
+          command: ["python", "/app/script.py"]
+          ports:
+            - containerPort: 9999
+          volumeMounts:
+            - name: script
+              mountPath: /app
+      volumes:
+        - name: script
+          configMap:
+            name: words-sender-script
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: words-sender
+  namespace: spark
+spec:
+  selector:
+    app: words-sender
+  ports:
+    - port: 9999
+      targetPort: 9999
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-driver
+  namespace: spark
+  labels:
+    app: spark-driver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-driver
+  template:
+    metadata:
+      labels:
+        app: spark-driver
+    spec:
+      containers:
+        - name: spark-driver
+          image: apache/spark:3.5.1
+          command: ["/opt/spark/bin/spark-submit"]
+          args:
+            - --master
+            - local[2]
+            - --conf
+            - spark.ui.port=4040
+            - --conf
+            - spark.sql.streaming.metricsEnabled=true
+            - /app/app.py
+          ports:
+            - containerPort: 4040
+              name: spark-ui
+          volumeMounts:
+            - name: app-code
+              mountPath: /app
+      volumes:
+        - name: app-code
+          configMap:
+            name: spark-app-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-driver
+  namespace: spark
+spec:
+  selector:
+    app: spark-driver
+  ports:
+    - name: ui
+      port: 4040
+      targetPort: 4040
