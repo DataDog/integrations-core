@@ -50,6 +50,7 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeGoalCheck,
     ContextCleared,
     ExecutionFailed,
+    InputDiverged,
     PhaseErrored,
     PhaseFinished,
     PhaseStarted,
@@ -70,6 +71,17 @@ if TYPE_CHECKING:
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
 
 BANNER_ERROR_MAX_CHARS = 200
+# Keep the notice to one line: it shares a fixed-height body with the pipeline graph,
+# which loses a row for every row the banner grows.
+NOTICE_MAX_NAMES = 3
+# Long input names can still overflow a one-line banner on their own, so truncate each.
+NOTICE_MAX_NAME_CHARS = 24
+# Per-name and per-count caps alone don't bound the *joined* list: three 24-char names easily
+# overflow an 80-column line once the fixed "... changed since launch ..." text is added. Budget
+# the combined name list against an 80-column line, minus the fixed prefix/suffix text around it.
+WARNING_PREFIX = "⚠ "
+WARNING_SUFFIX = " changed since launch — using the captured copy."
+WARNING_MAX_CHARS = 80 - len(WARNING_PREFIX) - len(WARNING_SUFFIX)
 
 
 class ExecutionScreen(TogoScreen):
@@ -108,6 +120,7 @@ class ExecutionScreen(TogoScreen):
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
+        self._diverged_inputs: list[str] = []
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -117,6 +130,9 @@ class ExecutionScreen(TogoScreen):
         error = Static("", id="execution-error")
         error.display = False
         yield error
+        notice = Static("", id="execution-notice")
+        notice.display = False
+        yield notice
         pipeline = PipelineGraph(self.flow, self._phase_statuses, id="pipeline")
         pipeline.border_title = "Pipeline"
         yield pipeline
@@ -241,6 +257,14 @@ class ExecutionScreen(TogoScreen):
             detail = f"{detail[: BANNER_ERROR_MAX_CHARS - 1].rstrip()}…"
         return detail
 
+    def _show_notice_banner(self, message: str) -> None:
+        try:
+            widget = self.query_one("#execution-notice", Static)
+        except NoMatches:
+            return
+        widget.update(message)
+        widget.display = True
+
     def _show_error_banner(self, message: str) -> None:
         try:
             widget = self.query_one("#execution-error", Static)
@@ -363,6 +387,38 @@ class ExecutionScreen(TogoScreen):
             self._show_phase_error_summary()
         else:
             self._show_error_banner("Run failed.")
+
+    def on_input_diverged(self, msg: InputDiverged) -> None:
+        """Report that a resumed run is keeping the input it started with."""
+        if msg.name in self._diverged_inputs:
+            return
+        self._diverged_inputs.append(msg.name)
+        self._show_notice_banner(f"{WARNING_PREFIX}{self._diverged_summary()}{WARNING_SUFFIX}")
+
+    def _diverged_summary(self) -> str:
+        """Name the diverged inputs, budgeting the combined width so the banner stays one line."""
+        total = len(self._diverged_inputs)
+        for count in range(min(NOTICE_MAX_NAMES, total), 0, -1):
+            shown = [self._truncate_name(name) for name in self._diverged_inputs[:count]]
+            remaining = total - count
+            tail = f" and {remaining} more" if remaining else ""
+            summary = ", ".join(shown) + tail
+            if len(summary) <= WARNING_MAX_CHARS or count == 1:
+                if count == 1 and len(summary) > WARNING_MAX_CHARS:
+                    # Even a single truncated name plus the "and N more" tail overflows the
+                    # budget — shrink the name itself rather than let the line wrap.
+                    overflow = len(summary) - WARNING_MAX_CHARS
+                    shown[0] = shown[0][: max(len(shown[0]) - overflow - 1, 1)] + "…"
+                    summary = ", ".join(shown) + tail
+                return summary
+        return ""
+
+    @staticmethod
+    def _truncate_name(name: str) -> str:
+        """Shorten a single name so it can't overflow the one-line banner on its own."""
+        if len(name) <= NOTICE_MAX_NAME_CHARS:
+            return name
+        return name[: NOTICE_MAX_NAME_CHARS - 3] + "..."
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED

@@ -1819,6 +1819,148 @@ final_review:
         assert screen._phase_statuses["final_review"] is RunStatus.PENDING
 
 
+async def test_diverged_input_shows_a_notice(tmp_path: Path) -> None:
+    """A resumed run reports that it is keeping the input it started with."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import InputDiverged
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.on_input_diverged(InputDiverged("prd", tmp_path / "prd.md"))
+
+        notice = screen.query_one("#execution-notice", Static)
+        assert notice.display is True
+        assert "prd changed since launch" in str(notice.render())
+
+
+async def test_notice_is_hidden_until_an_input_diverges() -> None:
+    """Nothing is shown for a run whose inputs all match what it was launched with."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        assert screen.query_one("#execution-notice", Static).display is False
+
+
+async def test_repeated_divergence_for_one_input_is_reported_once(tmp_path: Path) -> None:
+    """Each diverged input is named once, however often the callback fires."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import InputDiverged
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.on_input_diverged(InputDiverged("prd", tmp_path / "prd.md"))
+        screen.on_input_diverged(InputDiverged("prd", tmp_path / "prd.md"))
+        screen.on_input_diverged(InputDiverged("spec", tmp_path / "spec.md"))
+
+        banner = str(screen.query_one("#execution-notice", Static).render())
+        assert banner.count("prd") == 1
+        assert "prd, spec changed since launch" in banner
+
+
+async def test_many_diverged_inputs_stay_on_one_line(tmp_path: Path) -> None:
+    """The notice summarizes its tail: it shares a fixed-height body with the pipeline."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import InputDiverged
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PipelineGraph
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+        pipeline_height = screen.query_one("#pipeline", PipelineGraph).size.height
+
+        for index in range(12):
+            screen.on_input_diverged(InputDiverged(f"input_{index}", tmp_path / "x.md"))
+        for _ in range(3):
+            await pilot.pause()
+
+        banner = str(screen.query_one("#execution-notice", Static).render())
+        assert "input_0" in banner
+        assert "more changed since launch" in banner
+        assert len(banner) <= 80
+        assert screen.query_one("#execution-notice", Static).size.height <= 2
+        assert screen.query_one("#pipeline", PipelineGraph).size.height >= pipeline_height - 3
+
+
+async def test_long_diverged_name_is_truncated_with_ellipsis(tmp_path: Path) -> None:
+    """A single long name can't overflow the one-line banner on its own."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import InputDiverged
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        long_name = "a" * 64
+        screen.on_input_diverged(InputDiverged(long_name, tmp_path / "x.md"))
+        await pilot.pause()
+
+        banner = str(screen.query_one("#execution-notice", Static).render())
+        assert long_name not in banner
+        assert "a" * 21 + "..." in banner
+        assert screen.query_one("#execution-notice", Static).size.height <= 2
+
+
+async def test_max_length_diverged_names_stay_on_one_line(tmp_path: Path) -> None:
+    """Three near-cap-length names must not overflow the one-line banner between them."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import InputDiverged
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        for index in range(3):
+            screen.on_input_diverged(InputDiverged(f"input_{index}" + "a" * 17, tmp_path / f"{index}.md"))
+        await pilot.pause()
+
+        banner = str(screen.query_one("#execution-notice", Static).render())
+        assert len(banner) <= 80
+        assert screen.query_one("#execution-notice", Static).size.height <= 2
+
+
 async def test_resume_transitions_to_finishing_after_remaining_phase(tmp_path: Path) -> None:
     """A resumed done phase participates in the all-green finishing check."""
     import asyncio
