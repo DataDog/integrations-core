@@ -117,7 +117,8 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
             object_name_filter = f" AND OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) IN ({placeholders})"
         else:
             object_name_filter = None
-        for database in self.databases:
+        databases = self.databases
+        for database in databases:
             queries = copy.deepcopy(self.queries)
             for query in queries:
                 params = [database]
@@ -125,6 +126,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
                     query['query'] += object_name_filter
                     params.extend(self.db_fragmentation_object_names)
                 query['params'] = tuple(params)
+            self._set_database_collection_phase_offset(queries, database, len(databases), self.collection_interval)
             executor = self.new_query_executor(
                 queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
