@@ -1,4 +1,5 @@
 name: Oracle Database
+fleet_configurable: true
 files:
 - name: oracle.yaml
   options:
