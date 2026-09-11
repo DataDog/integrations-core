@@ -88,6 +88,7 @@ def test_check_docker(
     dbm_enabled,
     run_database_metrics_synchronously,
 ):
+    run_database_metrics_synchronously(instance_docker)
     instance_docker['database_autodiscovery'] = database_autodiscovery
     # test that all default integration metrics are sent regardless of
     # if dbm is enabled or not.
@@ -643,6 +644,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 def test_index_fragmentation_metrics(
     aggregator, dd_run_check, instance_docker, database_autodiscovery, run_database_metrics_synchronously
 ):
+    run_database_metrics_synchronously(instance_docker)
     instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(sqlserver_check)
@@ -663,6 +665,7 @@ def test_index_fragmentation_metrics(
 def test_table_size_metrics(
     aggregator, dd_run_check, instance_docker, database_autodiscovery, run_database_metrics_synchronously
 ):
+    run_database_metrics_synchronously(instance_docker)
     instance_docker['database_autodiscovery'] = database_autodiscovery
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(sqlserver_check)
@@ -1028,6 +1031,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
 def test_index_usage_statistics(
     aggregator, dd_run_check, instance_docker, database_autodiscovery, run_database_metrics_synchronously
 ):
+    run_database_metrics_synchronously(instance_docker)
     instance_docker['database_autodiscovery'] = database_autodiscovery
     if not database_autodiscovery:
         instance_docker['database'] = "datadog_test-1"
@@ -1169,6 +1173,7 @@ def test_table_size_metrics_with_indexes(aggregator, dd_run_check, instance_dock
     expected_row_count = 2  # The setup inserts 2 rows
 
     # Configure instance to include the test database
+    run_database_metrics_synchronously(instance_docker)
     instance_docker['database_autodiscovery'] = True
     instance_docker['autodiscovery_include'] = [database_name]
 

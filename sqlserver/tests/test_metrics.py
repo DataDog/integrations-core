@@ -279,6 +279,7 @@ def test_check_index_usage_metrics(
     bob_conn,
     run_database_metrics_synchronously,
 ):
+    run_database_metrics_synchronously(instance_docker_metrics)
     instance_docker_metrics['database'] = 'datadog_test-1'
     instance_docker_metrics['include_index_usage_metrics'] = True
     instance_docker_metrics['ignore_missing_database'] = True
@@ -417,6 +418,7 @@ def test_check_db_fragmentation_metrics(
     database_autodiscovery,
     run_database_metrics_synchronously,
 ):
+    run_database_metrics_synchronously(instance_docker_metrics)
     instance_docker_metrics['include_db_fragmentation_metrics'] = True
     instance_docker_metrics['database_autodiscovery'] = database_autodiscovery
     if database_autodiscovery:

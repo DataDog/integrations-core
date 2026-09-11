@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import traceback
+from collections.abc import Callable
 from copy import deepcopy
 
 import pytest
@@ -49,8 +50,13 @@ def init_config_alt_tables():
 
 
 @pytest.fixture
-def run_database_metrics_synchronously() -> None:
-    """Opt a test into running the async database metrics job before the check returns."""
+def run_database_metrics_synchronously() -> Callable[[dict], None]:
+    """Enable async database metrics while making their job finish before the check returns."""
+
+    def enable(instance: dict) -> None:
+        instance.setdefault('database_metrics', {})['run_heavy_collectors_async'] = True
+
+    return enable
 
 
 @pytest.fixture(autouse=True)
