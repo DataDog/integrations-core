@@ -22,6 +22,7 @@ from tests.mocked_api import MockedPyMongoClient
 
 from . import common
 from .common import MONGODB_VERSION
+from .utils import wait_for_dbm_jobs
 
 HOSTNAME_TO_PORT_MAPPING = {
     "shard01a": (
@@ -131,7 +132,6 @@ def instance_integration(instance_custom_queries):
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
     instance["service"] = "my_service"
-    instance["query_metrics"] = {"run_sync": True}
     return instance
 
 
@@ -206,14 +206,23 @@ def instance_1valid_and_1invalid_custom_queries():
 
 @pytest.fixture
 def instance_arbiter():
-    instance = common.INSTANCE_ARBITER.copy()
-    instance["query_metrics"] = {"run_sync": True}
-    return instance
+    return common.INSTANCE_ARBITER.copy()
 
 
 @pytest.fixture
 def check():
-    return lambda instance: MongoDb('mongo', {}, [instance])
+    checks: list[MongoDb] = []
+
+    def create_check(instance: dict) -> MongoDb:
+        mongo_check = MongoDb('mongo', {}, [instance])
+        checks.append(mongo_check)
+        return mongo_check
+
+    yield create_check
+
+    for mongo_check in checks:
+        mongo_check.cancel()
+        wait_for_dbm_jobs(mongo_check)
 
 
 def setup_sharding(compose_file):

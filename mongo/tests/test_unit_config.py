@@ -208,7 +208,7 @@ def test_mongo_query_metrics_enabled(
 ):
     instance_integration_cluster['dbm'] = dbm_enabled
     if query_metrics_config is None:
-        instance_integration_cluster.pop('query_metrics')
+        instance_integration_cluster.pop('query_metrics', None)
     else:
         instance_integration_cluster['query_metrics'] = query_metrics_config
 
