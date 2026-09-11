@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
+from datadog_checks.base.utils.agent import memory
 from datadog_checks.base.utils.agent.memory import MemoryProfileMetric, profile_memory
 
 
@@ -38,6 +39,35 @@ def test_concurrent_profile_memory_calls_execute_without_interference():
     assert contender.result() == []
     assert calls.count('owner') == 1
     assert calls.count('contender') == 1
+
+
+def test_profile_memory_keeps_ownership_during_snapshot_processing(monkeypatch):
+    processing_started = threading.Event()
+    processing_can_finish = threading.Event()
+    contender_executed = threading.Event()
+    processing_calls = []
+
+    def gather_top(*args, **kwargs) -> None:
+        processing_calls.append(None)
+        if len(processing_calls) == 1:
+            processing_started.set()
+            assert processing_can_finish.wait(timeout=5)
+
+    monkeypatch.setattr(memory, 'gather_top', gather_top)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        owner = executor.submit(profile_memory, lambda: None, {})
+        assert processing_started.wait(timeout=5)
+
+        try:
+            contender = executor.submit(profile_memory, contender_executed.set, {})
+            assert contender.result(timeout=5) == []
+        finally:
+            processing_can_finish.set()
+
+    assert owner.result() == []
+    assert contender_executed.is_set()
+    assert len(processing_calls) == 1
 
 
 def test_nested_profile_memory_call_executes_without_interference():
