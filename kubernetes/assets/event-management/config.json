@@ -1,0 +1,9 @@
+{
+  "source": "kubernetes",
+  "default_interface": "kubernetes",
+  "legacy": {
+    "source_id": 173,
+    "source_type_name": "Kubernetes",
+    "v1_enabled": false
+  }
+}

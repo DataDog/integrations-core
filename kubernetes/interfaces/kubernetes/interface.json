@@ -1,0 +1,9 @@
+{
+  "interface_type": "api",
+  "source_type_id": 173,
+  "source_type_name": "Kubernetes",
+  "interface_title": "Kubernetes",
+  "is_primary": true,
+  "auto_install": false,
+  "creates_events": false
+}
