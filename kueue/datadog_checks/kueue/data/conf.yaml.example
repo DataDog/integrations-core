@@ -195,14 +195,14 @@ instances:
     #
     # non_cumulative_histogram_buckets: false
 
-    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: true
     ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
     ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
     ##
     ## Learn more about distribution metrics:
     ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
     #
-    # histogram_buckets_as_distributions: false
+    # histogram_buckets_as_distributions: true
 
     ## @param collect_counters_with_distributions - boolean - optional - default: false
     ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
@@ -537,8 +537,8 @@ instances:
     #   - TLSv1.3
 
     ## @param tls_ciphers - list of strings - optional
-    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
-    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified,
+    ## `ALL` ciphers are used. For list of ciphers see:
     ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
     #
     # tls_ciphers:
