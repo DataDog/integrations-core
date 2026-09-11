@@ -7,3 +7,7 @@ provides:
     always_on: false
     data_type: logs
     direction: inbound
+  - id: argocd-events
+    always_on: false
+    data_type: events
+    direction: inbound
