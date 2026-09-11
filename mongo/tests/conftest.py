@@ -131,7 +131,7 @@ def instance_integration(instance_custom_queries):
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
     instance["service"] = "my_service"
-    instance["query_metrics"] = {"enabled": False}
+    instance["query_metrics"] = {"run_sync": True}
     return instance
 
 
@@ -207,7 +207,7 @@ def instance_1valid_and_1invalid_custom_queries():
 @pytest.fixture
 def instance_arbiter():
     instance = common.INSTANCE_ARBITER.copy()
-    instance["query_metrics"] = {"enabled": False}
+    instance["query_metrics"] = {"run_sync": True}
     return instance
 
 
