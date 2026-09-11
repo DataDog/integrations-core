@@ -68,6 +68,7 @@ class ClusterMetadataCollector:
         # Cache size limits
         self.BROKER_CONFIG_CACHE_MAX_SIZE = 1_000
         self.TOPIC_CONFIG_CACHE_MAX_SIZE = 20_000
+        self.CONSUMER_MEMBERSHIP_EVENT_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
@@ -84,6 +85,7 @@ class ClusterMetadataCollector:
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
         self.CONSUMER_GROUP_MEMBERS_CACHE_KEY = 'kafka_consumer_group_members_cache'
+        self.CONSUMER_MEMBERSHIP_EVENT_CACHE_KEY = 'kafka_consumer_membership_event_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
@@ -800,6 +802,7 @@ class ClusterMetadataCollector:
 
         prev_member_hashes = self._load_member_hashes_cache()
         current_member_hashes = {}
+        membership_contents: dict[str, str] = {}
 
         for group_id, group_info in group_id_to_info.items():
             group_tags = self.config._get_tags(cluster_id) + [f'consumer_group:{group_id}']
@@ -825,7 +828,17 @@ class ClusterMetadataCollector:
             member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
 
-            self._emit_consumer_membership_event(cluster_id, group_id, member_ids, members)
+            membership_contents[group_id] = json.dumps(
+                {
+                    'kafka_cluster_id': cluster_id,
+                    **self.config._original_cluster_id_field(),
+                    'config_type': 'consumer_membership',
+                    'group_id': group_id,
+                    'member_ids': member_ids,
+                    'members': self._build_members_detail(members),
+                },
+                sort_keys=True,
+            )
 
             if prev_member_hashes is not None:
                 prev_hash = prev_member_hashes.get(group_id)
@@ -852,29 +865,31 @@ class ClusterMetadataCollector:
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
         self._save_member_hashes_cache(current_member_hashes)
+        self._emit_consumer_membership_events(membership_contents)
 
-    def _emit_consumer_membership_event(self, cluster_id, group_id, member_ids, members) -> None:
-        self.check.event_platform_event(
-            json.dumps(
-                {
-                    'collection_timestamp': int(time.time() * 1000),
-                    'kafka_cluster_id': cluster_id,
-                    **self.config._original_cluster_id_field(),
-                    'config_type': 'consumer_membership',
-                    'group_id': group_id,
-                    'member_ids': member_ids,
-                    'members': self._build_members_detail(members),
-                }
-            ),
-            "data-streams-message",
+    def _emit_consumer_membership_events(self, membership_contents: dict[str, str]) -> None:
+        """Send new or changed snapshots, refreshing unchanged groups on the event-cache TTL."""
+        groups_to_emit = self.cache.get_events_to_send(
+            self.CONSUMER_MEMBERSHIP_EVENT_CACHE_KEY,
+            membership_contents,
+            max_cache_size=self.CONSUMER_MEMBERSHIP_EVENT_CACHE_MAX_SIZE,
         )
+        # Add the timestamp after hashing so each check run does not invalidate the cache.
+        collection_timestamp = int(time.time() * 1000)
+        for group_id in groups_to_emit:
+            event = json.loads(membership_contents[group_id])
+            event['collection_timestamp'] = collection_timestamp
+            self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
     def _build_members_detail(self, members) -> list[dict[str, Any]]:
         members_detail = []
         for member in members:
             assignment = getattr(member, 'assignment', None)
             topic_partitions = (
-                [{'topic': tp.topic, 'partition': tp.partition} for tp in assignment.topic_partitions]
+                [
+                    {'topic': tp.topic, 'partition': tp.partition}
+                    for tp in sorted(assignment.topic_partitions, key=lambda tp: (tp.topic, tp.partition))
+                ]
                 if assignment
                 else []
             )

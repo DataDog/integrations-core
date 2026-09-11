@@ -1,0 +1,1 @@
+Deduplicate consumer membership snapshots while preserving payload changes and hourly refreshes.

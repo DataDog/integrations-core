@@ -67,6 +67,8 @@ When `enable_cluster_monitoring` is enabled, the integration collects cluster-wi
 - **Consumer groups**: Member details, group state, rebalance detection, membership-change counting, and metadata exposed as tags (`partition_assignor`, `consumer_group_type`, `is_simple_consumer_group`, and `group_instance_id`). Empty groups are visible through the `consumer_group_state:EMPTY` tag on `kafka.consumer_group.members`.
 - **Schema registry**: Schema metadata (requires `schema_registry_url`).
 
+Consumer membership snapshots are sent when a group is first observed, when its members or their details and partition assignments change, and hourly while unchanged. Consumer group metrics continue to be collected on every check run.
+
 #### Batched collection
 
 Broker configurations, topic configurations, and schema registry version checks are collected in batches across multiple agent runs rather than all at once. This reduces load on large Kafka clusters but means that not all metrics are emitted in every check run. On a cluster with many brokers, topics, or schema subjects, the integration spreads the work over successive runs so that each run stays fast and does not overload the cluster.
