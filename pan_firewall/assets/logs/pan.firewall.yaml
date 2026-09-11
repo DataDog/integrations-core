@@ -532,6 +532,18 @@ pipeline:
         query: "*"
       processors:
         - type: grok-parser
+          name: Parse the `timestamp` attribute into `ocsf.time`
+          enabled: true
+          source: timestamp
+          samples:
+            - "2025/09/03 19:44:00"
+            - "2025-09-03T19:44:00Z"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              slash_fmt %{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}
+              iso_fmt %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
+        - type: grok-parser
           name: Parse the PAN-OS event time into `ocsf.time`
           enabled: true
           source: message
@@ -543,17 +555,6 @@ pipeline:
             matchRules: |-
               event_time %{data}time_generated=%{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}%{data}
               receive_time %{data}timestamp=%{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}%{data}
-        - type: attribute-remapper
-          name: Map `time_generated`, `timestamp` to `ocsf.time`
-          enabled: true
-          sources:
-            - time_generated
-            - timestamp
-          sourceType: attribute
-          target: ocsf.time
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
         - type: string-builder-processor
           name: Add product name
           enabled: true
