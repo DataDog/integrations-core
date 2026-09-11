@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import random
+import sys
 from collections.abc import AsyncIterator
 from contextlib import ExitStack, asynccontextmanager
 from typing import Any, Generator
 
 import pytest
+import stamina
 import vcr
 from datadog_checks.dev.tooling.utils import set_root
 from pytest_mock import MockerFixture
@@ -256,6 +258,20 @@ def default_hostname():
     import socket
 
     return socket.gethostname().lower()
+
+
+# Only stamina's backoff waits should go, not anyone's retry policy. Test mode requires an
+# attempt count, and `cap=True` applies it as `min(this, the caller's own attempts)`, so a
+# ceiling no policy can reach leaves every one of them exactly as configured. Plain
+# `set_testing(True)` would instead force `attempts=1` and disable every retry under test.
+NEVER_CLAMP_ATTEMPTS = sys.maxsize
+
+
+@pytest.fixture(autouse=True)
+def instant_retry_backoff() -> Generator[None, None, None]:
+    """Run every `stamina.retry` in the suite without its real backoff waits."""
+    with stamina.set_testing(True, attempts=NEVER_CLAMP_ATTEMPTS, cap=True):
+        yield
 
 
 @pytest.fixture
