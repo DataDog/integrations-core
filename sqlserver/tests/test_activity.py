@@ -46,19 +46,6 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
-@pytest.mark.unit
-def test_activity_query_excludes_async_database_metrics_sessions(dbm_instance):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    cursor = mock.MagicMock()
-    cursor.description = []
-    cursor.fetchall.return_value = []
-
-    check.activity._get_activity(cursor, DM_EXEC_REQUESTS_COLS, '', '')
-
-    query = cursor.execute.call_args.args[0]
-    assert "ISNULL(req.context_info, 0x) != {}".format(DATABASE_METRICS_CONTEXT_INFO) in query
-
-
 @pytest.fixture
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -73,6 +60,41 @@ def dbm_instance(instance_docker):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_activity_excludes_async_database_metrics_sessions(aggregator, dd_run_check, dbm_instance, instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    aggregator.reset()
+    control_conn = _get_conn_for_user(instance_docker, 'bob')
+    database_metrics_conn = _get_conn_for_user(instance_docker, 'bob')
+
+    def run_wait_query(conn, context_info):
+        cursor = conn.cursor()
+        cursor.execute("SET CONTEXT_INFO {}".format(context_info))
+        cursor.execute("WAITFOR DELAY '00:00:10'")
+
+    try:
+        with ThreadPoolExecutor(2) as executor:
+            control_query = executor.submit(run_wait_query, control_conn, '0xaa')
+            database_metrics_query = executor.submit(
+                run_wait_query, database_metrics_conn, DATABASE_METRICS_CONTEXT_INFO
+            )
+            while not control_query.running() or not database_metrics_query.running():
+                time.sleep(0.1)
+            time.sleep(0.5)
+            check.activity.collect_activity()
+    finally:
+        control_conn.close()
+        database_metrics_conn.close()
+
+    events = aggregator.get_event_platform_events('dbm-activity')
+    activity = [row for event in events for row in event['sqlserver_activity']]
+
+    assert any(row.get('context_info') == 'aa' for row in activity)
+    assert all(row.get('context_info') != DATABASE_METRICS_CONTEXT_INFO[2:] for row in activity)
 
 
 @pytest.mark.flaky
