@@ -6,11 +6,18 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
 
-from ddev.cli.ci.dispatch_run import PullRequestResolver, resolve_run
+from ddev.cli.ci.dispatch_run import (
+    RUN_MANIFEST_NAME,
+    PullRequestResolver,
+    load_run_manifest,
+    resolve_run,
+    write_run_manifest,
+)
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -86,10 +93,25 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 @click.option('--workflow-ref', default=None, help='Ref the workflow definition is loaded from.')
 @click.option(
     '--output-dir',
-    default=None,
+    default=DEFAULT_OUTPUT_DIRECTORY,
+    show_default=True,
     help='Where the run writes what it produces: artifacts, coverage and test results.',
 )
 @click.option('--dry-run', is_flag=True, help='Show the plan without dispatching jobs. PR runs still read GitHub.')
+@click.option(
+    '--resolve-only',
+    'resolve_only',
+    is_flag=True,
+    help='Resolve the run, write its manifest, and stop before planning or dispatching anything.',
+)
+@click.option(
+    '--run-manifest',
+    'run_manifest',
+    metavar='FILE',
+    default=None,
+    type=click.Path(dir_okay=False),
+    help='Reuse the run a `--resolve-only` invocation resolved, reading its identity and changes from FILE.',
+)
 def dispatch_tests(
     app: Application,
     pull_request: str | None,
@@ -105,8 +127,10 @@ def dispatch_tests(
     minimum_base_package: bool,
     workflow: str | None,
     workflow_ref: str | None,
-    output_dir: str | None,
+    output_dir: str,
     dry_run: bool,
+    resolve_only: bool,
+    run_manifest: str | None,
 ) -> None:
     """Plan the tests a commit requires, run them as parallel batches of GitHub Actions jobs, and
     report the result to the pull request and to the run summary.
@@ -115,8 +139,34 @@ def dispatch_tests(
     Otherwise use the head SHA, repository and branch from `workflow_run` to resolve the PR.
     Its base and diff come from GitHub; `--commit` instead compares a default-branch commit
     with its first parent using local git.
+
+    Resolution and planning can also run as two invocations: `--resolve-only` writes the resolved
+    run to `<output-dir>/run.json`, and a later `--run-manifest FILE` plans and dispatches from
+    that file without resolving the run again.
     """
-    from pathlib import Path
+    if resolve_only and run_manifest is not None:
+        raise click.UsageError('`--resolve-only` and `--run-manifest` cannot be combined.')
+    if resolve_only and dry_run:
+        raise click.UsageError('`--resolve-only` stops before planning, so `--dry-run` has no effect.')
+    if run_manifest is not None:
+        conflicting = [
+            option
+            for option, present in {
+                '--pr': pull_request is not None,
+                '--pr-head-repo': pr_head_repo is not None,
+                '--pr-head-ref': pr_head_ref is not None,
+                '--pr-head-sha': pr_head_sha is not None,
+                '--pr-base-ref': pr_base_ref is not None,
+                '--commit': commit is not None,
+                '--all': all_targets,
+            }.items()
+            if present
+        ]
+        if conflicting:
+            raise click.UsageError(
+                f'`--run-manifest` supplies the resolved run, '
+                f'so it cannot be combined with `{"`, `".join(conflicting)}`.'
+            )
 
     from ddev.cli.application import AppLoggingHandler
     from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
@@ -132,6 +182,7 @@ def dispatch_tests(
     from ddev.utils.github import resolve_owner_repo
 
     owner, repo = resolve_owner_repo(app, repository)
+    tested_repository = f'{owner}/{repo}'
 
     caller_tags = tuple(tags.split()) if tags else ()
 
@@ -152,23 +203,41 @@ def dispatch_tests(
             pr_base_ref=pr_base_ref,
             commit=commit,
             dry_run=dry_run,
+            resolve_only=resolve_only,
         )
 
         # One INFO line per request would bury the Dispatcher's own progress.
         logging.getLogger('httpx').setLevel(logging.WARNING)
 
-        config = DispatcherConfig.from_repo_config(app.repo.config)
+        base_path = app.repo.path / output_dir
 
-        run = resolve_run(
-            app,
-            pr_resolver=pr_resolver,
-            commit=commit,
-            token=token,
-            all_targets=all_targets,
-            monitor=monitoring.component('resolution'),
-        )
-        if run is None:
-            return
+        if run_manifest is not None:
+            # The manifest is the whole run: its identity and changes are read, not recalculated,
+            # and a manifest the caller explicitly supplied is not rewritten either.
+            run = load_run_manifest(app, Path(run_manifest), repository=tested_repository)
+            # A null `changed_files` is how a manifest says the run covers every target.
+            all_targets = run.changed_files is None
+        else:
+            resolved = resolve_run(
+                app,
+                repository=tested_repository,
+                pr_resolver=pr_resolver,
+                commit=commit,
+                token=token,
+                all_targets=all_targets,
+                monitor=monitoring.component('resolution'),
+            )
+            if resolved is None:
+                return
+
+            run = resolved
+            write_run_manifest(base_path, run=run)
+            if resolve_only:
+                app.display_success(f'Resolved run written to {base_path / RUN_MANIFEST_NAME}.')
+                return
+
+        # Read after resolution: `--resolve-only` stops before the run needs planning configuration.
+        config = DispatcherConfig.from_repo_config(app.repo.config)
 
         context = DispatcherContext(
             owner=owner,
@@ -206,7 +275,6 @@ def dispatch_tests(
             app.display_info('Dry run: nothing was dispatched.')
             return
 
-        base_path = Path(output_dir) if output_dir else app.repo.path / DEFAULT_OUTPUT_DIRECTORY
         dispatcher = build_dispatcher(
             batches=batches,
             context=context,
@@ -245,6 +313,7 @@ def validate_options(
     pr_base_ref: str | None,
     commit: str | None,
     dry_run: bool,
+    resolve_only: bool,
 ) -> tuple[PullRequestResolver | None, str]:
     """Validate run selection and authentication, returning a PR resolver when needed."""
     from ddev.utils.github import parse_pull_request_reference
@@ -261,7 +330,8 @@ def validate_options(
         raise click.UsageError('`--commit` cannot be combined with PR options.')
 
     token = app.config.github.token
-    needs_token = is_pr_run or not dry_run
+    # A resolve-only run stops before dispatch, so only pull request resolution can need a token.
+    needs_token = is_pr_run or (not dry_run and not resolve_only)
     if needs_token and not token:
         app.abort('A GitHub token is required. Set `github.token` in your ddev config.')
     if not is_pr_run:

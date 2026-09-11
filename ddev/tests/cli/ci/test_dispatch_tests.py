@@ -5,12 +5,14 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from ddev.monitoring import MonitoringRuntime
+from ddev.utils.git import ChangedFile, ChangeType
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import PullRequest, PullRequestFile
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, listed_pull_request, pulls_page
@@ -143,15 +145,17 @@ def test_dispatch_tests_plans_from_hatch_toml(
     assert '\n    ntp\n' in result.output
 
 
-def test_a_head_belonging_to_no_open_pull_request_dispatches_nothing(ddev, github, planned):
+def test_a_head_belonging_to_no_open_pull_request_dispatches_nothing(ddev, github, planned, tmp_path):
+    """Nothing left to test resolves no run, so nothing identifies one on disk either."""
     github.mock_response('list_pull_requests', pulls_page())
 
-    result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS)
+    result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS, '--output-dir', str(tmp_path))
 
     assert result.exit_code == 0, result.output
     assert 'No open pull request matches the requested revision' in result.output
     planned.assert_not_called()
     github.assert_not_called('create_workflow_dispatch')
+    assert not (tmp_path / 'run.json').exists()
 
 
 @pytest.mark.parametrize(
@@ -466,7 +470,7 @@ def test_early_exit_disables_monitoring(
     assert [record.name for record in sink.records] == ['before-exit']
 
 
-def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev, local_changes, mocker):
+def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev, local_changes, mocker, tmp_path):
     sink = RecordingSink()
 
     def make_runtime(**kwargs: Any) -> MonitoringRuntime:
@@ -487,10 +491,14 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
         '--dry-run',
         '--tags',
         'repo:contributor/other commit:sneaky team:platform',
+        '--output-dir',
+        str(tmp_path),
     )
 
     assert result.exit_code == 0, result.output
     assert 'No affected target to test.' in result.output
+    # An empty plan is a valid outcome, so the run it belongs to is still identified on disk.
+    assert (tmp_path / 'run.json').exists()
     [record] = sink.records
     assert record.fields['repo'] == 'DataDog/integrations-core'
     assert record.fields['commit'] == 'a-sha'
@@ -539,3 +547,188 @@ def test_console_visibility_does_not_change_structured_events(
     assert event['team'] == 'platform'
     assert event['component'] == 'planner'
     assert event['event'] == 'planning batches'
+
+
+MODIFIED_FILE = {'change_type': 'M', 'path': 'ntp/datadog_checks/ntp/ntp.py', 'previous_path': None}
+
+PULL_REQUEST_RUN_MANIFEST = {
+    'schema_version': 1,
+    'repository': 'DataDog/integrations-core',
+    'checkout_ref': f'refs/pull/{PR_NUMBER}/merge',
+    'commit_sha': HEAD_SHA,
+    'branch': 'hs/a-branch',
+    'pr_number': PR_NUMBER,
+    'target_branch': 'a-target-branch',
+    'target_sha': 'base-sha-bbb',
+    'is_fork': False,
+    'changed_files': [MODIFIED_FILE],
+}
+
+COMMIT_RUN_MANIFEST = {
+    **PULL_REQUEST_RUN_MANIFEST,
+    'checkout_ref': 'a-sha',
+    'commit_sha': 'a-sha',
+    'branch': 'a-branch',
+    'pr_number': None,
+    'target_branch': None,
+    'target_sha': None,
+}
+
+
+@pytest.mark.parametrize(
+    ('options', 'pr_head_repo', 'expected'),
+    [
+        pytest.param(['--commit', 'a-sha'], None, COMMIT_RUN_MANIFEST, id='commit'),
+        pytest.param(
+            ['--pr', str(PR_NUMBER)],
+            'contributor/integrations-core',
+            {**PULL_REQUEST_RUN_MANIFEST, 'is_fork': True},
+            id='fork-pull-request',
+        ),
+    ],
+)
+def test_a_resolved_run_writes_its_manifest(
+    ddev, github, planned, local_changes, mocker, tmp_path, options, pr_head_repo, expected
+):
+    """The output directory records which run owns it, before any plan decides what to dispatch.
+
+    The ordinary pull-request shape is asserted by the round-trip test; the fork stays because the
+    manifest is what tells phase two to withhold same-repository credentials.
+    """
+    # A commit run reports whichever branch its repository has checked out, which no test controls.
+    mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='a-branch')
+    if pr_head_repo is not None:
+        github.mock_response('get_pull_request', pull_request(head_repo=pr_head_repo))
+
+    result = ddev('ci', 'dispatch-tests', *options, '--dry-run', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 0, result.output
+    content = (tmp_path / 'run.json').read_text(encoding='utf-8')
+    assert content.endswith('}\n')
+    assert json.loads(content) == expected
+
+
+def test_without_an_output_directory_the_manifest_uses_the_dispatcher_default(ddev, github, planned, local_repo):
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    manifest = json.loads((local_repo / '.dispatcher' / 'run.json').read_text(encoding='utf-8'))
+    assert manifest['pr_number'] == PR_NUMBER
+
+
+def test_a_pull_request_round_trips_through_its_manifest(ddev, github, planned, local_changes, mocker, tmp_path):
+    """Phase one resolves, records, and stops before planning; phase two plans the recorded changes
+    without resolving the pull request again.
+    """
+    github.mock_response('get_pull_request', pull_request(changed_files=2))
+    github.mock_response(
+        'list_pull_request_files',
+        files_page(
+            PullRequestFile(filename='ntp/datadog_checks/ntp/ntp.py', status='modified'),
+            PullRequestFile(filename='ntp/new_name.py', status='renamed', previous_filename='ntp/old_name.py'),
+        ),
+    )
+    planning_config = mocker.patch('ddev.cli.ci.tests.dispatcher_config.DispatcherConfig.from_repo_config')
+
+    first = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--resolve-only', '--output-dir', str(tmp_path))
+
+    assert first.exit_code == 0, first.output
+    assert str(tmp_path / 'run.json') in first.output
+    planned.assert_not_called()
+    planning_config.assert_not_called()
+    manifest = json.loads((tmp_path / 'run.json').read_text(encoding='utf-8'))
+    assert manifest == {
+        **PULL_REQUEST_RUN_MANIFEST,
+        'changed_files': [
+            MODIFIED_FILE,
+            {'change_type': 'R', 'path': 'ntp/new_name.py', 'previous_path': 'ntp/old_name.py'},
+        ],
+    }
+
+    github_calls = len(github.requests)
+    second = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
+
+    assert second.exit_code == 0, second.output
+    assert len(github.requests) == github_calls
+    local_changes.assert_not_called()
+    assert planned.call_args.kwargs['changed_files'] == [
+        ChangedFile(ChangeType.MODIFIED, 'ntp/datadog_checks/ntp/ntp.py'),
+        ChangedFile(ChangeType.RENAMED, 'ntp/new_name.py', 'ntp/old_name.py'),
+    ]
+    assert planned.call_args.kwargs['all_targets'] is False
+
+
+def test_an_all_target_run_round_trips_through_its_null_changed_files(ddev, github, planned, tmp_path):
+    """A run with no comparison records a null `changed_files`, and reuse plans every target from it."""
+    first = ddev(
+        'ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--all', '--resolve-only', '--output-dir', str(tmp_path)
+    )
+
+    assert first.exit_code == 0, first.output
+    github.assert_not_called('list_pull_request_files')
+    manifest = json.loads((tmp_path / 'run.json').read_text(encoding='utf-8'))
+    assert manifest == {**PULL_REQUEST_RUN_MANIFEST, 'changed_files': None}
+
+    second = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
+
+    assert second.exit_code == 0, second.output
+    assert planned.call_args.kwargs['all_targets'] is True
+    assert planned.call_args.kwargs['changed_files'] is None
+
+
+@pytest.mark.parametrize(
+    ('content', 'message'),
+    [
+        pytest.param(None, 'Could not read run manifest', id='missing-file'),
+        pytest.param('{not json', 'is not a valid run', id='malformed-json'),
+        pytest.param(
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 2}),
+            'is not a valid run',
+            id='newer-schema',
+        ),
+        pytest.param(
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'repository': 'DataDog/integrations-extras'}),
+            'describes repository',
+            id='other-repository',
+        ),
+    ],
+)
+def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str | None, message: str):
+    """Whatever is wrong with the file, planning never starts from a run that could not be read."""
+    if content is not None:
+        (tmp_path / 'run.json').write_text(content, encoding='utf-8')
+
+    result = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
+
+    assert result.exit_code == 1
+    assert message in result.output
+    planned.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'option', ['--pr', '--commit', '--all', '--pr-head-sha', '--pr-head-repo', '--pr-head-ref', '--pr-base-ref']
+)
+def test_a_manifest_cannot_also_select_the_run(ddev, github, planned, option: str):
+    """The manifest decides the run; also passing a selection option would leave the choice ambiguous."""
+    value = [] if option == '--all' else ['a-value']
+    result = ddev('ci', 'dispatch-tests', '--run-manifest', 'a-manifest.json', option, *value, '--dry-run')
+
+    assert result.exit_code == 2
+    assert f'`--run-manifest` supplies the resolved run, so it cannot be combined with `{option}`' in result.output
+    planned.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ('options', 'message'),
+    [
+        (['--run-manifest', 'a-manifest.json'], '`--resolve-only` and `--run-manifest` cannot be combined.'),
+        (['--dry-run'], '`--resolve-only` stops before planning, so `--dry-run` has no effect.'),
+    ],
+    ids=['with-manifest', 'with-dry-run'],
+)
+def test_resolve_only_refuses_meaningless_combinations(ddev, planned, options: list[str], message: str):
+    result = ddev('ci', 'dispatch-tests', '--resolve-only', *options)
+
+    assert result.exit_code == 2
+    assert message in result.output
+    planned.assert_not_called()
