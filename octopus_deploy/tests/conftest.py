@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import json
+import math
 import os
 from pathlib import Path
 from urllib.parse import urlparse
@@ -155,6 +156,21 @@ def mock_responses():
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
+        if params and 'ids' in params:
+            # Endpoints filtered by `ids` return the collection of the requested resources, so they
+            # are served here by gathering each resource's own fixture.
+            items = [
+                responses_map.get(method, {}).get(f'{request_path}/{resource_id}', {}).get('response')
+                for resource_id in params['ids']
+            ]
+            items = [item for item in items if item is not None]
+            take = params.get('take') or len(items) or 1
+            skip = params.get('skip', 0)
+            return {
+                'Items': items[skip : skip + take],
+                'TotalResults': len(items),
+                'NumberOfPages': max(1, math.ceil(len(items) / take)),
+            }
         if params:
             param_string = ""
             for key, val in params.items():
