@@ -54,6 +54,43 @@ def test_include_manifest_writes_manifest_and_skips_overrides(ddev, empty_repo):
     assert not config_toml.exists()
 
 
+@pytest.mark.parametrize(
+    'subcommand',
+    ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
+)
+def test_include_manifest_writes_valid_json(ddev, empty_repo, subcommand):
+    """Every `--include-manifest` template must render to parseable JSON, not just to a file that exists."""
+    result = ddev(
+        'create',
+        subcommand,
+        'my_integration',
+        '--include-manifest',
+    )
+    assert result.exit_code == 0, result.output
+
+    manifest_path = empty_repo.path / 'my_integration' / 'manifest.json'
+    json.loads(manifest_path.read_text())
+
+
+@pytest.mark.parametrize(
+    'subcommand',
+    ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
+)
+def test_include_manifest_includes_owner_placeholder(ddev, empty_repo, subcommand):
+    """Every `--include-manifest` template must include an owner key, matching every shipped manifest."""
+    result = ddev(
+        'create',
+        subcommand,
+        'my_integration',
+        '--include-manifest',
+    )
+    assert result.exit_code == 0, result.output
+
+    manifest_path = empty_repo.path / 'my_integration' / 'manifest.json'
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest['owner'] == '<FILL IN>'
+
+
 def test_skip_manifest_and_include_manifest_conflict(ddev, empty_repo):
     result = ddev(
         'create',
