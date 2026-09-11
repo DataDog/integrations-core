@@ -48,6 +48,11 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "total_spills",
 ]
 
+# The aggregate queries keep the representative plan handle and offsets as one
+# binary value so MAX cannot mix offsets from a different handle. They rebuild
+# the historical hexadecimal helper column after aggregation to preserve the
+# raw cursor schema. Stored-procedure rows reuse the database ID already exposed
+# by dm_exec_procedure_stats; other plan types fall back to plan attributes.
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select
@@ -55,13 +60,15 @@ with qstats as (
         qs.query_plan_hash,
         qs.last_execution_time,
         qs.last_elapsed_time,
-        CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
-           eps.object_id as sproc_object_id,
-           {query_metrics_columns}
+        CONVERT(binary(64), qs.plan_handle)
+            + CONVERT(binary(4), qs.statement_start_offset)
+            + CONVERT(binary(4), qs.statement_end_offset) as plan_handle_and_offsets,
+        CASE WHEN eps.database_id IS NOT NULL THEN eps.database_id
+            ELSE CAST((select value from sys.dm_exec_plan_attributes(qs.plan_handle)
+                where attribute = 'dbid') AS int)
+        END as dbid,
+        eps.object_id as sproc_object_id,
+        {query_metrics_columns}
     from sys.dm_exec_query_stats qs
     left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
 ),
@@ -82,10 +89,22 @@ qstats_aggr as (
 ),
 qstats_aggr_split as (
     select TOP {limit}
-        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-        *
+        convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
+        convert(int, substring(plan_handle_and_offsets, 64+1, 4)) as statement_start_offset,
+        convert(int, substring(plan_handle_and_offsets, 64+5, 4)) as statement_end_offset,
+        query_hash,
+        query_plan_hash,
+        dbid,
+        database_name,
+        CONCAT(
+            CONVERT(VARCHAR(64), SUBSTRING(plan_handle_and_offsets, 1, 64), 1),
+            CONVERT(VARCHAR(10), SUBSTRING(plan_handle_and_offsets, 64+1, 4), 1),
+            CONVERT(VARCHAR(10), SUBSTRING(plan_handle_and_offsets, 64+5, 4), 1)
+        ) as plan_handle_and_offsets,
+        last_execution_time,
+        last_elapsed_time,
+        sproc_object_id,
+        {query_metrics_column_names}
     from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
@@ -147,13 +166,15 @@ with qstats as (
         qs.query_plan_hash,
         qs.last_execution_time,
         qs.last_elapsed_time,
-        CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
-           eps.object_id as sproc_object_id,
-           {query_metrics_columns}
+        CONVERT(binary(64), qs.plan_handle)
+            + CONVERT(binary(4), qs.statement_start_offset)
+            + CONVERT(binary(4), qs.statement_end_offset) as plan_handle_and_offsets,
+        CASE WHEN eps.database_id IS NOT NULL THEN eps.database_id
+            ELSE CAST((select value from sys.dm_exec_plan_attributes(qs.plan_handle)
+                where attribute = 'dbid') AS int)
+        END as dbid,
+        eps.object_id as sproc_object_id,
+        {query_metrics_columns}
     from sys.dm_exec_query_stats qs
     left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
 ),
@@ -173,10 +194,22 @@ qstats_aggr as (
 ),
 qstats_aggr_split as (
     select TOP {limit}
-        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-        *
+        convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
+        convert(int, substring(plan_handle_and_offsets, 64+1, 4)) as statement_start_offset,
+        convert(int, substring(plan_handle_and_offsets, 64+5, 4)) as statement_end_offset,
+        query_hash,
+        query_plan_hash,
+        dbid,
+        database_name,
+        CONCAT(
+            CONVERT(VARCHAR(64), SUBSTRING(plan_handle_and_offsets, 1, 64), 1),
+            CONVERT(VARCHAR(10), SUBSTRING(plan_handle_and_offsets, 64+1, 4), 1),
+            CONVERT(VARCHAR(10), SUBSTRING(plan_handle_and_offsets, 64+5, 4), 1)
+        ) as plan_handle_and_offsets,
+        last_execution_time,
+        last_elapsed_time,
+        sproc_object_id,
+        {query_metrics_column_names}
     from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
@@ -348,6 +381,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(['qs.{} as {}'.format(col, col) for col in available_columns]),
             query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
+            query_metrics_column_names=', '.join(available_columns),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=self._config.stored_procedure_characters_limit,
             database_name_column=database_name_column,
