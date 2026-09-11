@@ -36,8 +36,6 @@ files:
       cel_selector.example:
         containers:
         # Narrow down matching containers since some controller names are generic
-        # and don't identify the container as being part of Kyverno. Anchoring to
-        # the complete path segment avoids matching similarly-named images like
-        # docker.io/notkyverno/background-controller.
+        # and don't identify the container as being part of Kyverno.
         - container.image.reference.startsWith("kyverno/") || container.image.reference.contains("/kyverno/")
   - template: auto_conf/discovery
