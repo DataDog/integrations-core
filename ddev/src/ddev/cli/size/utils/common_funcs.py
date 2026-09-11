@@ -525,21 +525,85 @@ def build_section_label(header: str, total: str | None) -> str:
     return f"{header} ({total})" if total is not None else header
 
 
+def _signed_human_size(size_bytes: int) -> str:
+    human = convert_to_human_readable_size(size_bytes)
+    if size_bytes > 0:
+        return f"\U0001f53a +{human}"
+    elif size_bytes < 0:
+        return f"\U0001f7e2 {human}"
+    return human
+
+
+def save_markdown_diff(
+    app: Application,
+    modules: list[FileDataEntryPlatformVersion],
+    file_path: str,
+    platforms: list[str],
+    compressed: bool,
+) -> None:
+    heading = "Compressed" if compressed else "Uncompressed"
+    sorted_platforms = sorted(set(platforms))
+
+    totals = dict.fromkeys(sorted_platforms, 0)
+    for module in modules:
+        platform = module.get("Platform", "")
+        if platform in totals:
+            totals[platform] += int(module.get("Size_Bytes", 0) or 0)
+
+    lines = [f"### {heading}", ""]
+    lines.append("| " + " | ".join(sorted_platforms) + " |")
+    lines.append("| " + " | ".join("---" for _ in sorted_platforms) + " |")
+    lines.append("| " + " | ".join(_signed_human_size(totals[platform]) for platform in sorted_platforms) + " |")
+    lines.append("")
+
+    pivoted: dict[tuple[str, str], dict[str, int]] = {}
+    versions: dict[tuple[str, str], str] = {}
+    for module in modules:
+        key = (module["Name"], module["Type"])
+        versions.setdefault(key, str(module.get("Version", "")))
+        pivoted.setdefault(key, {})[module.get("Platform", "")] = int(module.get("Size_Bytes", 0) or 0)
+
+    if not pivoted:
+        lines.append("<details>")
+        lines.append("<summary>Details — no dependency changed size</summary>")
+        lines.append("</details>")
+    else:
+        lines.append("<details>")
+        lines.append("<summary>Details</summary>")
+        lines.append("")
+        headers = ["Name", "Version", "Type", *sorted_platforms]
+        lines.append("| " + " | ".join(headers) + " |")
+        lines.append("| " + " | ".join("---" for _ in headers) + " |")
+        for (name, type_), sizes in sorted(pivoted.items(), key=lambda item: item[0][0]):
+            row = [name, versions[(name, type_)], type_]
+            row.extend(_signed_human_size(sizes.get(platform, 0)) for platform in sorted_platforms)
+            lines.append("| " + " | ".join(row) + " |")
+        lines.append("")
+        lines.append("</details>")
+
+    lines.append("")
+    markdown = "\n".join(lines)
+
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(markdown)
+    app.display(f"Markdown table saved to {file_path}")
+
+
 def save_markdown(
     app: Application,
     title: str,
     modules: list[FileDataEntryPlatformVersion] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
     file_path: str,
-    section_total: Literal["none", "absolute", "delta"] = "none",
+    section_total: Literal["none", "absolute"] = "none",
 ) -> None:
     """
     Writes the modules as one collapsible markdown section per platform and Python version.
 
     Args:
-        section_total: Whether to summarize each section with the sum of its Size_Bytes, and how.
-            `absolute` for plain sizes, `delta` to also sign a positive sum. Defaults to `none`
-            because summing is only meaningful when the rows partition a single total; timeline
-            rows, for instance, are the size at successive commits, so their sum means nothing.
+        section_total: Whether to summarize each section with the sum of its Size_Bytes. Defaults
+            to `none` because summing is only meaningful when the rows partition a single total;
+            timeline rows, for instance, are the size at successive commits, so their sum means
+            nothing.
     """
     if modules == []:
         return
@@ -579,8 +643,6 @@ def save_markdown(
         if section_total != "none":
             total = sum(int(row.get("Size_Bytes", 0) or 0) for row in group)
             readable_total = convert_to_human_readable_size(total)
-            if section_total == "delta" and total > 0:
-                readable_total = f"+{readable_total}"
         label = build_section_label(label, readable_total)
 
         lines.append("<details>")
@@ -626,6 +688,7 @@ def export_format(
     platform: Optional[str],
     version: Optional[str],
     compressed: bool,
+    platforms: Optional[list[str]] = None,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
     name = f"{mode}_{size_type}"
@@ -644,13 +707,16 @@ def export_format(
 
         elif output_format == "markdown":
             markdown_filename = f"{name}.md"
-            save_markdown(
-                app,
-                mode.capitalize(),
-                modules,
-                markdown_filename,
-                section_total="delta" if mode == "diff" else "absolute",
-            )
+            if mode == "diff":
+                save_markdown_diff(app, modules, markdown_filename, platforms or [], compressed)
+            else:
+                save_markdown(
+                    app,
+                    mode.capitalize(),
+                    modules,
+                    markdown_filename,
+                    section_total="absolute",
+                )
 
 
 def plot_treemap(
