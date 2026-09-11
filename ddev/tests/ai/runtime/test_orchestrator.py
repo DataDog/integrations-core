@@ -225,7 +225,7 @@ async def test_resume_reports_a_snapshot_input_that_changed(core_dir, make_orche
     resumed._resolved_flow = replace(resumed._resolved_flow, inputs=[flow_input])
     await resumed.on_initialize()
 
-    assert reported == [("spec", tmp_path / "inputs" / "spec.md")]
+    assert reported == [("spec", tmp_path / "inputs" / "files" / "spec.md")]
 
 
 async def test_on_initialize_wires_dependencies(core_dir, make_orchestrator):
