@@ -107,7 +107,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         scraper_config['_metric_tags'][:] = tags
 
-        self.process(scraper_config)
+        self.process(scraper_config, metric_transformers={'etcd_cluster_version': self.transform_cluster_version})
 
     def access_api(self, scraper_config, path, data='{}'):
         url = urlparse(scraper_config['prometheus_url'])
@@ -141,6 +141,12 @@ class Etcd(OpenMetricsBaseCheck):
 
         # Needed for backward compatibility, we continue to submit `etcd.server.version` metric
         self.submit_openmetric('server.version', metric, scraper_config)
+
+    def transform_cluster_version(self, metric, scraper_config):
+        labels = metric.samples[0][self.SAMPLE_LABELS]
+        cluster_version = labels.get('cluster_version')
+        if cluster_version:
+            self.set_metadata('version', cluster_version)
 
     def _perform_request(self, url, path):
         return self.http.get(url + path)

@@ -97,6 +97,8 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         ],
         ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
     )
+    if dbm:
+        aggregator.assert_metric('dd.mongo.operation.time', tags=['operation:collect_query_metrics'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(

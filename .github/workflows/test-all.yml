@@ -743,6 +743,7 @@ jobs:
         - py3.13-24.8
         - py3.13-25.3
         - py3.13-25.8
+        - py3.13-26.3
       fail-fast: false
   j4131274:
     uses: ./.github/workflows/test-target.yml
@@ -1109,6 +1110,26 @@ jobs:
     with:
       job-name: DuckDB
       target: duckdb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j7545925:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Dynamo
+      target: dynamo
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -1924,10 +1945,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf5f9072:
+  j0839eef:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: intersystems_iris
+      job-name: InterSystems IRIS
       target: intersystems_iris
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2818,12 +2839,15 @@ jobs:
         - py3.13-8.0.18
         - py3.13-8.0.36
         - py3.13-8.4.0
+        - py3.13-9.7.2
         - py3.13-8.0-group
         - py3.13-8.0-hybrid
         - py3.13-mariadb-10.5
         - py3.13-mariadb-10.6
         - py3.13-mariadb-10.11
         - py3.13-mariadb-11.4
+        - py3.13-mariadb-12.0
+        - py3.13-mariadb-13
         - py3.13-percona-8.0.42
         - py3.13-percona-8.4
       fail-fast: false

@@ -489,6 +489,10 @@ integration/duckdb:
 - changed-files:
   - any-glob-to-any-file:
     - duckdb/**/*
+integration/dynamo:
+- changed-files:
+  - any-glob-to-any-file:
+    - dynamo/**/*
 integration/ecs_fargate:
 - changed-files:
   - any-glob-to-any-file:

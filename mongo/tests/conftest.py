@@ -22,6 +22,7 @@ from tests.mocked_api import MockedPyMongoClient
 
 from . import common
 from .common import MONGODB_VERSION
+from .utils import wait_for_dbm_jobs
 
 HOSTNAME_TO_PORT_MAPPING = {
     "shard01a": (
@@ -210,7 +211,18 @@ def instance_arbiter():
 
 @pytest.fixture
 def check():
-    return lambda instance: MongoDb('mongo', {}, [instance])
+    checks: list[MongoDb] = []
+
+    def create_check(instance: dict) -> MongoDb:
+        mongo_check = MongoDb('mongo', {}, [instance])
+        checks.append(mongo_check)
+        return mongo_check
+
+    yield create_check
+
+    for mongo_check in checks:
+        mongo_check.cancel()
+        wait_for_dbm_jobs(mongo_check)
 
 
 def setup_sharding(compose_file):

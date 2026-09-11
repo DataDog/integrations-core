@@ -248,6 +248,9 @@ services:
 - id: duckdb
   paths:
   - duckdb/datadog_checks/duckdb/
+- id: dynamo
+  paths:
+  - dynamo/datadog_checks/dynamo/
 - id: ecs_fargate
   paths:
   - ecs_fargate/datadog_checks/ecs_fargate/

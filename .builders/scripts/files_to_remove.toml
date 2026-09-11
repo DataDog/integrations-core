@@ -1,4 +1,9 @@
 excluded_paths = [
+  # --- Generated build sources ---
+  # psycopg-c's sdist needs these files to build without Cython, but wheels
+  # contain the compiled extension modules instead.
+  "psycopg_c/**/*.c",
+
   # --- Type annotation ---
   "krb5/**/*.pyi",
   "krb5/**/py.typed",

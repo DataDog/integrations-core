@@ -6,11 +6,17 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import os
+import signal
+import sys
+import threading
 import time
-from collections.abc import Generator
+from collections.abc import Callable, Generator
+from concurrent.futures import Executor, ThreadPoolExecutor
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
+from types import FrameType
 
 import pytest
 from pytest_mock import MockerFixture
@@ -30,8 +36,12 @@ from ddev.event_bus.orchestrator import (
     AsyncProcessor,
     BaseMessage,
     EventBusOrchestrator,
+    MessageScope,
     SyncProcessor,
 )
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
+from ddev.monitoring import ComponentMonitor, MonitoringRuntime
+from tests.helpers.monitoring import RecordingSink
 
 # Test Structure Documentation
 # --------------------------
@@ -149,12 +159,16 @@ class MockOrchestrator(EventBusOrchestrator):
         max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         fail_fast: bool = False,
+        executor: Executor | None = None,
+        message_scope: MessageScope | None = None,
     ):
         super().__init__(
             logger=logger,
             max_timeout=max_timeout,
             grace_period=grace_period,
             fail_fast=fail_fast,
+            executor=executor,
+            message_scope=message_scope,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -246,6 +260,8 @@ def test_workflow_success(
 
     # Check Manager State
     assert len(manager.processed_memos) == 1
+
+    assert orchestrator.shutdown_request is None
 
 
 @pytest.mark.parametrize(
@@ -632,6 +648,11 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator):
 
     assert slow_processor.cancelled
 
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is ShutdownKind.TIMED_OUT
+    assert "max_timeout" in str(request.error)
+
 
 def test_max_timeout_interruption_preserves_cancellation_reason(orchestrator: MockOrchestrator):
     # A timed-out task's CancelledError should carry the timeout reason, not be
@@ -744,6 +765,229 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
     assert secretary.delivered_memos[0].id == "async_memo"
 
 
+class AsyncDelegator(AsyncProcessor[Memo]):
+    """Submits a follow-up from the loop thread."""
+
+    async def process_message(self, message: Memo):
+        self.submit_message(Announcement(id="delegated", announcement_type="Delegated"))
+
+
+class SyncDelegator(SyncProcessor[Memo]):
+    """Submits a follow-up from an executor thread."""
+
+    def process_message(self, message: Memo):
+        self.submit_message(Announcement(id="delegated", announcement_type="Delegated"))
+
+
+def test_a_worker_thread_submission_is_delivered(analyst: Analyst):
+    """A `SyncProcessor` submits from an executor thread, where `asyncio.Queue` can lose the put.
+
+    The real queue loses only the unlucky ones; this one loses every off-loop put, so delivery fails
+    deterministically rather than by winning a race.
+    """
+
+    class LoseOffLoopPuts(asyncio.Queue):
+        """Drops a put made anywhere but the loop thread, the worst case of the real race."""
+
+        def __init__(self, loop_thread: int):
+            super().__init__()
+            self._loop_thread = loop_thread
+
+        def put_nowait(self, item):
+            if threading.get_ident() != self._loop_thread:
+                return
+            super().put_nowait(item)
+
+    logger = logging.getLogger("test_thread_safe_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0.1)
+    # `asyncio.run` runs the loop on this thread, so this is the id the queue lets a put through on.
+    orchestrator._queue = LoseOffLoopPuts(threading.get_ident())
+    orchestrator.register_processor(SyncDelegator("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    orchestrator.run()
+
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+
+
+@pytest.mark.parametrize("delegator_class", [AsyncDelegator, SyncDelegator], ids=["async", "sync"])
+def test_a_processor_submission_survives_a_zero_grace_period(
+    analyst: Analyst, delegator_class: type[AsyncDelegator | SyncDelegator]
+):
+    """A follow-up is queued before the bus can decide it has nothing left to do.
+
+    Every put is now handed to the loop thread, so it happens after `submit_message` returns, and a
+    zero grace period stops the bus the moment the queue looks empty. Both kinds of processor are
+    covered because the callback that queues the message precedes the task completion that wakes the
+    bus by a different route for each.
+    """
+    logger = logging.getLogger("test_zero_grace_period")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0)
+    orchestrator.register_processor(delegator_class("delegator"), [Memo])
+    orchestrator.register_processor(analyst, [Announcement])
+
+    orchestrator.submit_message(Memo("delegate_me"))
+
+    orchestrator.run()
+
+    assert [message.id for message in analyst.completed_tasks] == ["delegated"]
+
+
+def test_an_on_initialize_submission_survives_a_zero_grace_period(secretary: Secretary):
+    """The bus reads what `on_initialize` submitted, with no grace period to fall back on.
+
+    Nothing awaits between the hook and the bus's first look at the queue, so a put deferred to a loop
+    callback would not have happened yet, and a zero grace period stops instead of waiting for it.
+    """
+    logger = logging.getLogger("test_initialize_submit")
+    orchestrator = MockOrchestrator(logger, max_timeout=2, grace_period=0)
+    orchestrator.register_processor(secretary, [Memo])
+
+    original_on_initialize = orchestrator.on_initialize
+
+    async def on_initialize_submitting():
+        await original_on_initialize()
+        orchestrator.submit_message(Memo("from_initialize"))
+
+    orchestrator.on_initialize = on_initialize_submitting  # type: ignore[method-assign]
+
+    orchestrator.run()
+
+    assert [message.id for message in secretary.delivered_memos] == ["from_initialize"]
+
+
+class SlowGatherer(SyncProcessor[Memo]):
+    """Outlives the bus, checking between units of work whether it should stop."""
+
+    def __init__(self, name: str, units: int = 40):
+        super().__init__(name)
+        self.units = units
+        self.units_done = 0
+        self.saw_stopping = False
+
+    def process_message(self, message: Memo):
+        for _ in range(self.units):
+            if self.stopping:
+                self.saw_stopping = True
+                return
+            time.sleep(0.05)
+            self.units_done += 1
+
+
+class UncooperativeGatherer(SyncProcessor[Memo]):
+    """Runs to completion whatever the bus is doing, as work that cannot be interrupted does."""
+
+    def __init__(self, name: str, units: int = 30):
+        super().__init__(name)
+        self.units = units
+        self.units_done = 0
+
+    def process_message(self, message: Memo):
+        for _ in range(self.units):
+            time.sleep(0.05)
+            self.units_done += 1
+
+
+class ShutdownObserver(AsyncProcessor[Memo]):
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.started = asyncio.Event()
+        self.notified = False
+        self.notified_when_cancelled: bool | None = None
+
+    def on_stop_requested(self) -> None:
+        self.notified = True
+
+    async def process_message(self, message: Memo) -> None:
+        self.started.set()
+        try:
+            await asyncio.Future[None]()
+        finally:
+            self.notified_when_cancelled = self.notified
+
+
+@pytest.mark.parametrize("lend_executor", [False, True], ids=["own_pool", "borrowed_pool"])
+def test_a_sync_processor_outliving_the_timeout_is_waited_for(lend_executor: bool):
+    """`on_finalize` must not report while a processor is still mutating what it reports.
+
+    Cancelling the task cannot interrupt a thread, so without waiting the hook publishes a partial
+    snapshot and the processor finishes afterwards, once the run has already said what it found.
+    A pool lent by the caller runs the same work, so it needs the same wait.
+    """
+    gatherer = UncooperativeGatherer("gatherer", units=30)
+    observed: dict[str, int] = {}
+
+    class Bus(MockOrchestrator):
+        async def on_finalize(self, exception: Exception | None):
+            await super().on_finalize(exception)
+            observed["units_done"] = gatherer.units_done
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = Bus(
+            logging.getLogger("test_drain"),
+            max_timeout=0.5,
+            grace_period=0.1,
+            executor=lent if lend_executor else None,
+        )
+        orchestrator.register_processor(gatherer, [Memo])
+        orchestrator.submit_message(Memo("gather_me"))
+
+        orchestrator.run()
+
+    assert observed["units_done"] == gatherer.units
+
+
+def test_a_lent_executor_outlives_the_run_that_borrowed_it():
+    """The caller may reuse the pool it lent, so the bus must not retire what it does not own.
+
+    Rules out satisfying the wait above by shutting the pool down regardless of ownership.
+    """
+    gatherer = UncooperativeGatherer("gatherer", units=5)
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = MockOrchestrator(
+            logging.getLogger("test_lent_pool"), max_timeout=0.5, grace_period=0.1, executor=lent
+        )
+        orchestrator.register_processor(gatherer, [Memo])
+        orchestrator.submit_message(Memo("gather_me"))
+
+        orchestrator.run()
+
+        assert lent.submit(str, "still usable").result() == "still usable"
+
+
+def test_a_sync_processor_can_abandon_work_once_the_bus_stops():
+    """The stop flag is what makes a timeout bound a sync processor at all.
+
+    Without it the processor runs all its units however long the bus has been gone, which is the
+    difference between a run that overshoots by one unit of work and one that overshoots by a batch.
+    """
+    gatherer = SlowGatherer("gatherer", units=200)
+    orchestrator = MockOrchestrator(logging.getLogger("test_stopping"), max_timeout=0.3, grace_period=0.1)
+    orchestrator.register_processor(gatherer, [Memo])
+    orchestrator.submit_message(Memo("gather_me"))
+
+    orchestrator.run()
+
+    assert gatherer.saw_stopping
+    assert gatherer.units_done < gatherer.units
+
+
+def test_a_caller_provided_executor_outlives_the_bus():
+    """A caller that supplies an executor may reuse it, so the bus must not retire it."""
+    executor = ThreadPoolExecutor(max_workers=1)
+    orchestrator = MockOrchestrator(logging.getLogger("test_borrowed"), executor=executor, grace_period=0.1)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+    orchestrator.submit_message(Memo("memo"))
+
+    orchestrator.run()
+
+    assert executor.submit(lambda: "still usable").result() == "still usable"
+    executor.shutdown(wait=True)
+
+
 def test_processor_submit_without_bus():
     processor = Secretary("orphan")
     with pytest.raises(ProcessorQueueError, match="This processor has not been added"):
@@ -775,6 +1019,428 @@ def test_fatal_processing_error_stops_orchestrator(orchestrator: MockOrchestrato
     # Only the first message was processed/received by the hook
     assert len(orchestrator.received_messages) == 1
     assert orchestrator.received_messages[0].id == "fatal_msg"
+
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is ShutdownKind.FAILED
+    assert request.error is orchestrator.finalized_exception
+
+
+class FatalRequester(AsyncProcessor[Memo]):
+    """Stops the bus with a failure directly, the way a processor that decides to can."""
+
+    async def process_message(self, message: Memo):
+        assert self.bus is not None
+        self.bus.request_shutdown(ShutdownRequest.failed(RuntimeError("the run is doomed")))
+
+
+def test_an_explicit_failed_request_propagates_its_error_through_finalization():
+    """An explicit failed request reaches both finalization and the caller."""
+    orchestrator = MockOrchestrator(logging.getLogger("test_failed_request"), grace_period=0.1)
+    orchestrator.register_processor(FatalRequester("requester"), [Memo])
+    orchestrator.submit_message(Memo("doomed"))
+
+    with pytest.raises(RuntimeError, match="the run is doomed"):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert isinstance(orchestrator.finalized_exception, RuntimeError)
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is ShutdownKind.FAILED
+    assert request.error is orchestrator.finalized_exception
+
+
+def test_a_failed_request_answers_the_run_even_when_another_error_escapes_after_it():
+    """A later exception cannot replace the failure reported to finalization and the caller."""
+    orchestrator = MockOrchestrator(logging.getLogger("test_first_failure"), grace_period=0.1)
+
+    original = ValueError("original failure")
+
+    async def on_initialize_records_then_fails() -> None:
+        orchestrator.request_shutdown(ShutdownRequest.failed(original))
+        raise FatalProcessingError("later failure")
+
+    orchestrator.on_initialize = on_initialize_records_then_fails  # type: ignore[method-assign]
+
+    with pytest.raises(ValueError, match="original failure"):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is original
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is ShutdownKind.FAILED
+    assert request.error is original
+
+
+class FailureRequester(AsyncProcessor[Memo]):
+    """Request failure from an active processor."""
+
+    def __init__(self, name: str, bus: FirstFailureBus) -> None:
+        super().__init__(name)
+        self.failure_bus = bus
+
+    async def process_message(self, message: Memo) -> None:
+        self.failure_bus.request_shutdown(ShutdownRequest.failed(self.failure_bus.original))
+        self.failure_bus.at_phase.set()
+        await asyncio.Future[None]()
+
+
+class FirstFailureBus(MockOrchestrator):
+    """Control when failure and interruption occur during a run."""
+
+    def __init__(self, phase: str, *, record_failure: bool = True, phase_error: Exception | None = None):
+        super().__init__(
+            logging.getLogger("test_first_failure_lifecycle"),
+            max_timeout=5,
+            grace_period=0.1,
+            fail_fast=phase == "finalizer error" or phase_error is not None,
+        )
+        self.phase = phase
+        self.record_failure = record_failure
+        self.phase_error = phase_error
+        self.original = ValueError("original failure")
+        self.at_phase = asyncio.Event()
+        self.proceed = asyncio.Event()
+        self.finalize_calls: list[Exception | None] = []
+
+    async def on_initialize(self) -> None:
+        if self.phase == "processing":
+            self.submit_message(Memo("doomed"))
+        elif self.record_failure:
+            self.request_shutdown(ShutdownRequest.failed(self.original))
+
+    async def _drain_executor(self) -> None:
+        if self.phase == "draining":
+            self.at_phase.set()
+            await self.proceed.wait()
+            if self.phase_error is not None:
+                raise self.phase_error
+        await super()._drain_executor()
+
+    async def on_finalize(self, exception: Exception | None) -> None:
+        self.finalize_calls.append(exception)
+        if self.phase == "finalization":
+            self.at_phase.set()
+            await self.proceed.wait()
+            if self.phase_error is not None:
+                raise self.phase_error
+        if self.phase == "finalizer error":
+            raise RuntimeError("secondary finalization failure")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("phase", "hook_reached", "expected_note"),
+    [
+        pytest.param("processing", True, "CancelledError", id="processing_cancellation"),
+        pytest.param("draining", False, "CancelledError", id="drain_cancellation"),
+        pytest.param("finalization", True, "CancelledError", id="finalization_cancellation"),
+        pytest.param("finalizer error", True, "secondary finalization failure", id="finalizer_error"),
+    ],
+)
+async def test_recorded_failure_survives_secondary_errors(
+    phase: str,
+    hook_reached: bool,
+    expected_note: str,
+    caplog: pytest.LogCaptureFixture,
+):
+    """The accepted failure reaches the caller unchanged, whatever goes wrong after it."""
+    bus = FirstFailureBus(phase)
+    if phase == "processing":
+        bus.register_processor(FailureRequester("requester", bus), [Memo])
+
+    run = asyncio.create_task(bus._entry_point())
+    try:
+        if phase != "finalizer error":
+            await asyncio.wait_for(bus.at_phase.wait(), timeout=2)
+            run.cancel("the owner stopped waiting")
+        done, _ = await asyncio.wait({run}, timeout=2)
+        assert done, "The interrupted run did not finish"
+        with pytest.raises(ValueError, match="original failure") as exc_info:
+            await run
+    finally:
+        bus.proceed.set()
+        run.cancel()
+        await asyncio.gather(run, return_exceptions=True)
+
+    assert exc_info.value is bus.original
+    assert bus.finalize_calls == ([bus.original] if hook_reached else [])
+    context = "message processing" if phase == "processing" else "finalization"
+    assert any(
+        note.startswith(f"Additional exception during {context}:") and expected_note in note
+        for note in getattr(exc_info.value, "__notes__", [])
+    )
+    assert f"Secondary exception during {context}:" in caplog.text
+    assert expected_note in caplog.text
+    assert "Traceback (most recent call last)" in caplog.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("phase", ["draining", "finalization"])
+@pytest.mark.parametrize("completion", ["return", "cancel", "error"])
+async def test_a_failed_request_accepted_during_finalization_is_preserved(phase: str, completion: str):
+    """A late failed request must survive both normal completion and further cleanup failures."""
+    secondary = RuntimeError("secondary phase failure") if completion == "error" else None
+    bus = FirstFailureBus(phase, record_failure=False, phase_error=secondary)
+    run = asyncio.create_task(bus._entry_point())
+    try:
+        await asyncio.wait_for(bus.at_phase.wait(), timeout=2)
+        bus.request_shutdown(ShutdownRequest.failed(bus.original))
+        if completion == "cancel":
+            run.cancel("cleanup interrupted")
+        else:
+            bus.proceed.set()
+        done, _ = await asyncio.wait({run}, timeout=2)
+        assert done, "The run did not finish after the failed request"
+        with pytest.raises(ValueError, match="original failure") as exc_info:
+            await run
+    finally:
+        bus.proceed.set()
+        run.cancel()
+        await asyncio.gather(run, return_exceptions=True)
+
+    assert exc_info.value is bus.original
+    if phase == "draining":
+        assert bus.finalize_calls == ([bus.original] if completion == "return" else [])
+    else:
+        assert bus.finalize_calls == [None]
+    if completion != "return":
+        diagnostic = "CancelledError" if completion == "cancel" else "secondary phase failure"
+        assert any(diagnostic in note for note in getattr(bus.original, "__notes__", []))
+
+
+@pytest.mark.parametrize("fail_fast", [False, True])
+def test_executor_drain_errors_propagate_without_running_the_finalization_hook(fail_fast: bool):
+    """Executor failures must not be swallowed or reclassified as hook failures."""
+    original = RuntimeError("executor shutdown failed")
+
+    class Bus(MockOrchestrator):
+        async def _drain_executor(self) -> None:
+            raise original
+
+    bus = Bus(logging.getLogger("test_drain_error"), grace_period=0, fail_fast=fail_fast)
+    with pytest.raises(RuntimeError) as exc_info:
+        bus.run()
+
+    assert exc_info.value is original
+    assert bus.events == ["initialize"]
+
+
+def test_reraising_the_primary_failure_does_not_add_a_secondary_failure():
+    """Reporting the same failure twice must not invent an additional failure."""
+    original = FatalProcessingError("original failure")
+
+    class Bus(MockOrchestrator):
+        async def on_initialize(self) -> None:
+            self.request_shutdown(ShutdownRequest.failed(original))
+
+        async def on_finalize(self, exception: Exception | None) -> None:
+            assert exception is original
+            raise original
+
+    bus = Bus(logging.getLogger("test_repeated_primary"), grace_period=0)
+    with pytest.raises(FatalProcessingError) as exc_info:
+        bus.run()
+
+    assert exc_info.value is original
+    assert getattr(original, "__notes__", []) == []
+
+
+@pytest.mark.asyncio
+async def test_cancelled_hook_cleanup_errors_are_retained_with_the_primary_failure(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+):
+    """An unexpected error during hook cancellation must remain available for diagnosis."""
+    monkeypatch.setattr("ddev.event_bus.orchestrator.STOP_CHECK_INTERVAL", 0.005)
+    original = ValueError("original failure")
+
+    class Bus(MockOrchestrator):
+        async def on_initialize(self) -> None:
+            self.request_shutdown(ShutdownRequest.failed(original))
+            try:
+                await asyncio.Future[None]()
+            finally:
+                raise RuntimeError("hook cleanup failed")
+
+    bus = Bus(logging.getLogger("test_hook_cleanup_error"), grace_period=0)
+    run = asyncio.create_task(bus._entry_point())
+    try:
+        done, _ = await asyncio.wait({run}, timeout=2)
+        assert done, "The cancelled hook did not finish"
+        with pytest.raises(ValueError) as exc_info:
+            await run
+        assert exc_info.value is original
+        assert any(
+            note.startswith("Additional exception during on_initialize cleanup:") and "hook cleanup failed" in note
+            for note in getattr(original, "__notes__", [])
+        )
+        assert "Secondary exception during on_initialize cleanup:" in caplog.text
+    finally:
+        run.cancel()
+        await asyncio.gather(run, return_exceptions=True)
+
+
+def test_finalization_failure_retains_an_earlier_cancellation(caplog: pytest.LogCaptureFixture):
+    """A fatal cleanup error must retain the cancellation that preceded it."""
+    cancellation = asyncio.CancelledError("owner interrupted")
+    failure = FatalProcessingError("cleanup failed")
+
+    class Bus(MockOrchestrator):
+        async def on_initialize(self) -> None:
+            raise cancellation
+
+        async def on_finalize(self, exception: Exception | None) -> None:
+            raise failure
+
+    bus = Bus(logging.getLogger("test_cancel_then_cleanup_error"), grace_period=0)
+    with pytest.raises(FatalProcessingError) as exc_info:
+        bus.run()
+
+    assert exc_info.value is failure
+    assert any(
+        note.startswith("Additional exception during initialization:") and "owner interrupted" in note
+        for note in getattr(failure, "__notes__", [])
+    )
+    assert "Secondary exception during initialization:" in caplog.text
+    assert "owner interrupted" in caplog.text
+    assert "Traceback (most recent call last)" in caplog.text
+
+
+def test_primary_failure_keeps_its_exception_chain(
+    caplog: pytest.LogCaptureFixture,
+):
+    """The caller sees the recorded failure with its cause and context intact, plus the later error."""
+    context_error = ValueError("what was being handled when it failed")
+    implicit_context = KeyError("the implicit context")
+    cause_error = ValueError("the explicit cause")
+
+    def raise_chained_failure() -> None:
+        try:
+            raise context_error
+        except ValueError:
+            try:
+                raise implicit_context
+            except KeyError:
+                raise RuntimeError("original failure") from cause_error
+
+    original: Exception
+    try:
+        raise_chained_failure()
+    except RuntimeError as caught:
+        original = caught
+
+    orchestrator = MockOrchestrator(logging.getLogger("test_first_failure_chains"), grace_period=0.1, fail_fast=True)
+
+    async def on_initialize_records_then_fails() -> None:
+        orchestrator.request_shutdown(ShutdownRequest.failed(original))
+        raise FatalProcessingError("later failure")
+
+    orchestrator.on_initialize = on_initialize_records_then_fails  # type: ignore[method-assign]
+
+    with pytest.raises(RuntimeError, match="original failure") as exc_info:
+        orchestrator.run()
+
+    assert exc_info.value is original
+    assert exc_info.value.__cause__ is cause_error
+    assert exc_info.value.__context__ is implicit_context
+    assert any(
+        note.startswith("Additional exception during initialization:") and "later failure" in note
+        for note in getattr(exc_info.value, "__notes__", [])
+    )
+    assert "Secondary exception during initialization:" in caplog.text
+    assert "later failure" in caplog.text
+    assert "Traceback (most recent call last)" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "hook_attr",
+    ["on_initialize", "on_message_received"],
+    ids=["from_initialize", "from_message_loop"],
+)
+def test_a_cancellation_escaping_the_bus_is_recorded_and_propagated(hook_attr: str):
+    """Escaping cancellation triggers stop notifications without changing its propagation."""
+    orchestrator = MockOrchestrator(logging.getLogger(f"test_cancelled_{hook_attr}"), grace_period=0.1)
+    watcher = StopWatcher("watcher")
+    orchestrator.register_processor(watcher, [TaskAssignment])
+
+    async def escape(*args: object) -> None:
+        raise asyncio.CancelledError("owner cancelled the bus")
+
+    setattr(orchestrator, hook_attr, escape)
+
+    if hook_attr == "on_message_received":
+        orchestrator.submit_message(Memo("cancel_me"))
+
+    with pytest.raises(asyncio.CancelledError, match="owner cancelled the bus"):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert watcher.stop_notifications == 1
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is ShutdownKind.CANCELLED
+
+
+@pytest.mark.parametrize("kind", [ShutdownKind.FAILED, ShutdownKind.TIMED_OUT], ids=["fatal", "timeout"])
+def test_a_terminal_exit_notifies_the_worker_before_cancelling_it(kind: ShutdownKind, monkeypatch: pytest.MonkeyPatch):
+    """Processors receive their stop notification before cancellation starts their cleanup."""
+    worker = ShutdownObserver("worker")
+    orchestrator = MockOrchestrator(logging.getLogger("test_terminal_notify"), max_timeout=30, grace_period=0)
+
+    async def on_message_received(message: BaseMessage) -> None:
+        if kind is ShutdownKind.TIMED_OUT:
+            loop = asyncio.get_running_loop()
+            real_time = loop.time
+
+            def deadline_clock() -> float:
+                return real_time() + (60 if worker.started.is_set() else 0)
+
+            # Expire the deadline only after the worker has started.
+            monkeypatch.setattr(loop, "time", deadline_clock)
+        elif message.id == "fatal_msg":
+            async with asyncio.timeout(2):
+                await worker.started.wait()
+            raise FatalProcessingError("fatal error triggered")
+
+    orchestrator.on_message_received = on_message_received  # type: ignore[method-assign]
+    orchestrator.register_processor(worker, [Memo])
+    orchestrator.submit_message(Memo("observe_shutdown"))
+    if kind is ShutdownKind.FAILED:
+        orchestrator.submit_message(Memo("fatal_msg"))
+
+    expectation = (
+        pytest.raises(FatalProcessingError, match="fatal error triggered")
+        if kind is ShutdownKind.FAILED
+        else does_not_raise()
+    )
+    with expectation:
+        orchestrator.run()
+
+    assert worker.notified_when_cancelled is True
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is kind
+
+
+def test_the_first_shutdown_request_wins_and_is_never_superseded():
+    """Later failures or cancellation requests cannot replace the cause or repeat notifications."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_shutdown_latch"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(watcher, [TaskAssignment])
+
+    original = RuntimeError("the original failure")
+    assert orchestrator.request_shutdown(ShutdownRequest.failed(original))
+    assert not orchestrator.request_shutdown(ShutdownRequest.failed(RuntimeError("a later failure")))
+    assert not orchestrator.request_shutdown(ShutdownRequest.cancelled())
+
+    request = orchestrator.shutdown_request
+    assert request is not None
+    assert request.kind is ShutdownKind.FAILED
+    assert request.error is original
+    # Only the winner notifies, so the losing requests cannot repeat the stop notification.
+    assert watcher.stop_notifications == 1
 
 
 def test_orchestrator_hook_failure_swallowed_under_default_policy(
@@ -839,15 +1505,27 @@ def test_finalize_failure_swallowed_under_default_policy(caplog: pytest.LogCaptu
     assert "finalize boom" in caplog.text
 
 
-def test_finalize_failure_takes_precedence_over_earlier_exception_under_fail_fast():
-    """When init and finalize both fail under fail_fast=True, the finalize failure surfaces."""
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("fail_fast", "waiting_recovery"),
+    [(False, False), (True, False), (False, True)],
+    ids=["default-policy", "fail-fast", "interrupted-recovery"],
+)
+async def test_recorded_failure_keeps_secondary_finalization_diagnostics(
+    caplog: pytest.LogCaptureFixture, fail_fast: bool, waiting_recovery: bool
+):
+    """An accepted failure retains cleanup errors after failed or interrupted recovery."""
     logger = logging.getLogger("test")
-    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=fail_fast)
 
     saw_exception: list[Exception | None] = []
 
-    async def on_init_fail():
-        raise RuntimeError("init failed")
+    original = RuntimeError("init failed")
+
+    async def on_init_fail() -> None:
+        if fail_fast:
+            raise original
+        orchestrator.request_shutdown(ShutdownRequest.failed(OrchestratorHookError(HookName.ON_INITIALIZE, original)))
 
     async def on_finalize_boom(exception: Exception | None):
         orchestrator.events.append("finalize")
@@ -856,19 +1534,34 @@ def test_finalize_failure_takes_precedence_over_earlier_exception_under_fail_fas
 
     orchestrator.on_initialize = on_init_fail  # type: ignore[method-assign]
     orchestrator.on_finalize = on_finalize_boom  # type: ignore[method-assign]
+    if waiting_recovery:
 
-    with pytest.raises(OrchestratorHookError) as exc_info:
-        orchestrator.run()
+        async def on_error(error: OrchestratorHookError) -> None:
+            await asyncio.Future[None]()
 
-    assert exc_info.value.hook_name is HookName.ON_FINALIZE
-    assert isinstance(exc_info.value.original_exception, RuntimeError)
-    assert str(exc_info.value.original_exception) == "finalize boom"
+        orchestrator.on_error = on_error  # type: ignore[method-assign]
 
-    # on_finalize received the wrapped initialization failure
-    assert len(saw_exception) == 1
-    init_err = saw_exception[0]
-    assert isinstance(init_err, OrchestratorHookError)
-    assert init_err.hook_name is HookName.ON_INITIALIZE
+    run = asyncio.create_task(orchestrator._entry_point())
+    try:
+        done, _ = await asyncio.wait({run}, timeout=2)
+        assert done, "Error recovery prevented shutdown"
+        with pytest.raises(OrchestratorHookError) as exc_info:
+            await run
+    finally:
+        run.cancel()
+        await asyncio.gather(run, return_exceptions=True)
+
+    assert exc_info.value.hook_name is HookName.ON_INITIALIZE
+    assert exc_info.value.original_exception is original
+    assert saw_exception == [exc_info.value]
+    context = "finalization" if fail_fast else "on_error handling on_finalize"
+    assert any(
+        note.startswith(f"Additional exception during {context}:") and "finalize boom" in note
+        for note in getattr(exc_info.value, "__notes__", [])
+    )
+    assert f"Secondary exception during {context}:" in caplog.text
+    assert "finalize boom" in caplog.text
+    assert "Traceback (most recent call last)" in caplog.text
 
 
 def test_skip_message_error_from_on_message_received(
@@ -970,3 +1663,538 @@ def test_should_process_message_is_independent_per_processor(bare_orchestrator: 
     assert len(secretary.delivered_memos) == 2
     assert len(urgent_proc.processed) == 1
     assert urgent_proc.processed[0].id == "memo2"
+
+
+def brief_work(message: BaseMessage) -> None:
+    time.sleep(0.001)
+
+
+async def test_pending_sync_work_can_be_read_while_workers_finish_underneath_it():
+    """Each future's done callback discards on the worker thread that ran it, racing this snapshot.
+
+    Read straight off the live set, CPython raises `Set changed size during iteration`. That lands in
+    `_drain_executor`, which runs before the `try` around `on_finalize`, so the hook and every
+    error-policy path with it would be skipped.
+    """
+    with ThreadPoolExecutor(max_workers=16) as lent:
+        orchestrator = MockOrchestrator(logging.getLogger("test_sync_work"), executor=lent)
+        running = [
+            asyncio.create_task(orchestrator._run_in_worker(brief_work, Memo(id=str(index)))) for index in range(200)
+        ]
+        await asyncio.sleep(0)
+
+        for _ in range(500):
+            orchestrator._pending_sync_work()
+
+        await asyncio.gather(*running)
+
+    assert orchestrator._pending_sync_work() == set()
+
+
+class StopRequester(AsyncProcessor[Memo]):
+    """Asks the bus to stop from inside a processor, then submits as the runner's `finally` does."""
+
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.processed: list[Memo] = []
+
+    async def process_message(self, message: Memo):
+        self.processed.append(message)
+        assert self.bus is not None
+        self.bus.request_shutdown(ShutdownRequest.cancelled())
+        self.submit_message(Memo("after_stop", subject="late"))
+
+
+class Signaller(AsyncProcessor[Memo]):
+    """Sends the process a real signal while the bus is running."""
+
+    def __init__(self, name: str, send: signal.Signals):
+        super().__init__(name)
+        self._send = send
+        self.stop_notifications = 0
+
+    async def process_message(self, message: Memo):
+        os.kill(os.getpid(), self._send)
+
+    def on_stop_requested(self):
+        self.stop_notifications += 1
+
+
+class StopWatcher(AsyncProcessor[TaskAssignment | Announcement]):
+    def __init__(self, name: str, *, fail: bool = False):
+        super().__init__(name)
+        self.stop_notifications = 0
+        self._fail = fail
+
+    async def process_message(self, message: TaskAssignment | Announcement):
+        pass
+
+    def on_stop_requested(self):
+        self.stop_notifications += 1
+        if self._fail:
+            raise RuntimeError("this processor cannot wind down")
+
+
+@pytest.mark.parametrize(
+    "registrations",
+    [
+        pytest.param([[TaskAssignment, Announcement]], id="one-call-two-types"),
+        pytest.param([[TaskAssignment], [Announcement]], id="two-calls"),
+    ],
+)
+def test_a_processor_is_told_once_however_often_it_subscribed(registrations: list[list[type[BaseMessage]]]):
+    """Subscriptions are per message type, so notifying per subscription would repeat the hook."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_once"), max_timeout=30, grace_period=1)
+    for message_types in registrations:
+        orchestrator.register_processor(watcher, message_types)
+
+    orchestrator.request_shutdown(ShutdownRequest.cancelled())
+
+    assert watcher.stop_notifications == 1
+
+
+def test_asking_to_stop_again_notifies_nobody_and_does_not_block():
+    """The claim is a latch that is never released, so a second call must test it rather than wait."""
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_repeat"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(watcher, [TaskAssignment])
+
+    orchestrator.request_shutdown(ShutdownRequest.cancelled())
+    orchestrator.request_shutdown(ShutdownRequest.cancelled())
+
+    assert watcher.stop_notifications == 1
+
+
+requires_signals = pytest.mark.skipif(sys.platform == "win32", reason="Windows loops cannot install these")
+
+
+@contextmanager
+def caught_rather_than_fatal(sent: signal.Signals) -> Generator[list[signal.Signals]]:
+    """Record *sent* instead of letting its default action end the process.
+
+    A bus that stopped installing handlers would otherwise kill the test session rather than fail a
+    test: SIGTERM's default is death, and nothing can catch that.
+    """
+    reached_the_process: list[signal.Signals] = []
+    previous = signal.signal(sent, lambda *_: reached_the_process.append(sent))
+    try:
+        yield reached_the_process
+    finally:
+        signal.signal(sent, previous)
+
+
+@requires_signals
+@pytest.mark.parametrize(
+    ("sent", "propagate", "expectation"),
+    [
+        pytest.param(signal.SIGINT, True, pytest.raises(KeyboardInterrupt), id="sigint-propagates"),
+        pytest.param(signal.SIGINT, False, does_not_raise(), id="sigint-suppressed"),
+        # Nothing in the interpreter raises for SIGTERM, so there is nothing to hand back.
+        pytest.param(signal.SIGTERM, True, does_not_raise(), id="sigterm-has-no-exception"),
+    ],
+)
+def test_an_interrupted_run_hands_the_interrupt_back_once_it_has_wound_down(
+    sent: signal.Signals, propagate: bool, expectation: AbstractContextManager
+):
+    """Handling SIGINT is what stops `KeyboardInterrupt` reaching the caller, and with it whatever the
+    caller does about one: Click turns it into `Aborted!` and exit 1, so a caller that wants that back
+    asks for it here.
+
+    Raised after the wind-down rather than instead of it, so the cleanup still happens first.
+    """
+    signaller = Signaller("signaller", sent)
+    orchestrator = MockOrchestrator(logging.getLogger("test_interrupt_propagation"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(signaller, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+
+    with caught_rather_than_fatal(sent), expectation:
+        orchestrator.run(propagate_keyboard_interrupt=propagate)
+
+    # Whatever the caller sees, the bus wound down first rather than being cut short.
+    assert orchestrator.stopping
+    assert signaller.stop_notifications == 1
+
+
+@pytest.mark.asyncio
+@requires_signals
+async def test_an_interrupted_drain_still_hands_the_signal_handlers_back():
+    """Draining can be interrupted, but the run still restores the handlers it displaced."""
+
+    def caller_handler(signum: int, frame: FrameType | None) -> None: ...
+
+    previous = signal.signal(signal.SIGTERM, caller_handler)
+    try:
+        bus = FirstFailureBus("draining")
+        run = asyncio.create_task(bus._entry_point())
+        try:
+            await asyncio.wait_for(bus.at_phase.wait(), timeout=2)
+            run.cancel("the owner stopped waiting")
+            done, _ = await asyncio.wait({run}, timeout=2)
+            assert done, "The interrupted drain did not finish"
+            with pytest.raises(ValueError, match="original failure"):
+                await run
+        finally:
+            bus.proceed.set()
+            run.cancel()
+            await asyncio.gather(run, return_exceptions=True)
+
+        assert signal.getsignal(signal.SIGTERM) is caller_handler
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
+@requires_signals
+@pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
+def test_a_run_gives_back_the_handler_it_displaced(sent: signal.Signals):
+    """Nothing says the bus owns the process: a caller may have its own handler and outlive the run.
+
+    `remove_signal_handler` restores the interpreter default rather than what was displaced, so without
+    putting it back the caller silently loses its handler to a run that ended normally.
+    """
+
+    def caller_handler(signum: int, frame: FrameType | None) -> None: ...
+
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_restore"), max_timeout=30, grace_period=0)
+    orchestrator.register_processor(Secretary("secretary"), [Memo])
+    previous = signal.signal(sent, caller_handler)
+    try:
+        orchestrator.run()
+
+        assert signal.getsignal(sent) is caller_handler
+    finally:
+        signal.signal(sent, previous)
+
+
+@requires_signals
+@pytest.mark.parametrize("sent", [signal.SIGINT, signal.SIGTERM], ids=lambda s: s.name)
+def test_a_signal_reaches_the_bus_rather_than_the_process(sent: signal.Signals):
+    """Both defaults end a run, differently: SIGINT raises `KeyboardInterrupt` where it lands and
+    SIGTERM kills outright, so the fallback keeps a regression reportable rather than fatal.
+
+    The bus having handled the signal is what leaves that fallback untouched.
+    """
+    signaller = Signaller("signaller", sent)
+    orchestrator = MockOrchestrator(logging.getLogger("test_signal_stop"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(signaller, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+
+    with caught_rather_than_fatal(sent) as reached_the_process:
+        orchestrator.run()
+
+    assert reached_the_process == []
+    assert orchestrator.stopping
+    assert signaller.stop_notifications == 1
+
+
+def test_a_stop_is_not_derailed_by_a_processor_that_fails_to_wind_down():
+    """A signal handler is a valid caller, and there an escaping exception loses the stop itself."""
+    failing = StopWatcher("failing", fail=True)
+    watcher = StopWatcher("watcher")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_hook_failure"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(failing, [TaskAssignment])
+    orchestrator.register_processor(watcher, [Announcement])
+
+    orchestrator.request_shutdown(ShutdownRequest.cancelled())
+
+    assert orchestrator.stopping
+    assert watcher.stop_notifications == 1
+
+
+def test_a_requested_stop_ends_an_idle_bus_without_waiting_out_the_grace_period(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
+    """A caller under a deadline it does not control cannot afford the grace period.
+
+    The dispatcher's default grace is 30s against the ~10s a cancelled CI job gets, so a stop that
+    lands while the bus sits idle has to interrupt that wait rather than be seen once it expires.
+    """
+    grace_period = 10.0
+    orchestrator = MockOrchestrator(
+        logging.getLogger("test_request_shutdown"), max_timeout=60, grace_period=grace_period
+    )
+    orchestrator.register_processor(secretary, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+    # From a thread, and only once the bus is already idle inside the grace wait.
+    threading.Timer(0.3, orchestrator.request_shutdown, args=(ShutdownRequest.cancelled(),)).start()
+
+    start = time.perf_counter()
+    with caplog.at_level(logging.INFO):
+        orchestrator.run()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < grace_period / 2
+    assert "finalize" in orchestrator.events
+    # Said at the exit, or this reads in the logs like the grace period expiring on its own.
+    assert "Stopping on request while idle." in caplog.text
+
+
+def test_work_submitted_after_a_stop_request_is_reported_rather_than_lost(
+    secretary: Secretary, caplog: pytest.LogCaptureFixture
+):
+    """A stopping bus exits before draining its queue, so a late put is never read by anyone.
+
+    Processors submit follow-up work from `finally` blocks, and without refusing it at the door that
+    work disappears with nothing in the log to say the run dropped it.
+    """
+    requester = StopRequester("requester")
+    orchestrator = MockOrchestrator(logging.getLogger("test_stop_guard"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(requester, [Memo])
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("memo1"))
+    with caplog.at_level(logging.WARNING):
+        orchestrator.run()
+
+    assert [message.id for message in requester.processed] == ["memo1"]
+    assert "Dropped Memo(after_stop)" in caplog.text
+
+
+def test_a_processor_is_not_dispatched_to_after_a_stop_request(secretary: Secretary):
+    """Both processors' tasks are created together, so the second is scheduled after the stop.
+
+    Refusing centrally is what makes that hold for every processor, including ones that never learn
+    to check the flag themselves.
+    """
+    requester = StopRequester("requester")
+    orchestrator = MockOrchestrator(logging.getLogger("test_dispatch_guard"), max_timeout=30, grace_period=1)
+    orchestrator.register_processor(requester, [Memo])
+    orchestrator.register_processor(secretary, [Memo])
+
+    orchestrator.submit_message(Memo("memo1"))
+    orchestrator.run()
+
+    assert [message.id for message in requester.processed] == ["memo1"]
+    assert secretary.delivered_memos == []
+
+
+def test_a_hook_waiting_on_io_does_not_hold_up_a_requested_stop(secretary: Secretary):
+    """The loop awaits this hook directly, so one waiting on I/O holds shutdown for as long as it takes.
+
+    A caller working to a deadline it does not control would never reach `finalize`, which is where the
+    run reports and cleans up.
+    """
+
+    class Bus(MockOrchestrator):
+        async def on_message_received(self, message: BaseMessage):
+            await super().on_message_received(message)
+            await asyncio.sleep(30)
+
+    orchestrator = Bus(logging.getLogger("test_hook_stop"), max_timeout=60, grace_period=1)
+    orchestrator.register_processor(secretary, [Memo])
+    orchestrator.submit_message(Memo("memo1"))
+    threading.Timer(0.3, orchestrator.request_shutdown, args=(ShutdownRequest.cancelled(),)).start()
+
+    start = time.perf_counter()
+    orchestrator.run()
+    elapsed = time.perf_counter() - start
+
+    assert elapsed < 5
+    assert "finalize" in orchestrator.events
+    # Abandoned before dispatch, so the message it was about never reaches a processor.
+    assert secretary.delivered_memos == []
+
+
+class ScopedProcessor(AsyncProcessor[Memo]):
+    def __init__(self, name: str, monitor: ComponentMonitor):
+        super().__init__(name)
+        self.monitor = monitor
+
+    async def process_message(self, message: Memo):
+        self.monitor.metrics.count("attempted", tags={"tag": message.id})
+        if message.content.startswith("fail_processing"):
+            raise ValueError("Processing failed intentionally")
+
+    async def on_success(self, message: Memo):
+        self.monitor.metrics.count("confirmed", tags={"tag": message.id})
+
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError):
+        self.monitor.metrics.count("handled", tags={"tag": error.message.id})
+
+
+def make_memo_scope(runtime: MonitoringRuntime) -> Callable[[BaseMessage], AbstractContextManager[None]]:
+    context = runtime.context
+
+    def scope(message: BaseMessage) -> AbstractContextManager[None]:
+        return context.scope({"memo_id": message.id})
+
+    return scope
+
+
+def test_a_message_scope_covers_processing_and_the_success_and_error_hooks():
+    sink = RecordingSink()
+    runtime = MonitoringRuntime(metrics_sink=sink)
+    orchestrator = MockOrchestrator(
+        logging.getLogger("test_scope"), grace_period=0.1, message_scope=make_memo_scope(runtime)
+    )
+    orchestrator.register_processor(ScopedProcessor("scoped", runtime.component("scoped")), [Memo])
+    orchestrator.submit_message(Memo("failing_memo", content="fail_processing"))
+    orchestrator.submit_message(Memo("ok_memo"))
+    orchestrator.run()
+
+    assert [record.name for record in sink.records] == ["attempted", "handled", "attempted", "confirmed"]
+    for record in sink.records:
+        assert record.fields["memo_id"] == record.tags["tag"]
+    assert runtime.context.fields == {}
+
+
+def test_concurrent_sync_processors_keep_their_message_scopes_apart():
+    sink = RecordingSink()
+    runtime = MonitoringRuntime(metrics_sink=sink)
+    overlap = threading.Barrier(2, timeout=5)
+
+    class OverlappingWorker(SyncProcessor[Memo]):
+        def __init__(self, name: str, monitor: ComponentMonitor):
+            super().__init__(name)
+            self.monitor = monitor
+
+        def process_message(self, message: Memo):
+            overlap.wait()
+            self.monitor.metrics.count("worked", tags={"tag": message.id})
+
+    with ThreadPoolExecutor(max_workers=2) as lent:
+        orchestrator = MockOrchestrator(
+            logging.getLogger("test_scoped_sync"),
+            grace_period=0.1,
+            executor=lent,
+            message_scope=make_memo_scope(runtime),
+        )
+        orchestrator.register_processor(OverlappingWorker("worker", runtime.component("worker")), [Memo])
+        orchestrator.submit_message(Memo("memo1"))
+        orchestrator.submit_message(Memo("memo2"))
+        orchestrator.run()
+
+    observed = {(record.fields["memo_id"], record.tags["tag"]) for record in sink.records}
+    assert observed == {("memo1", "memo1"), ("memo2", "memo2")}
+    assert len(sink.records) == 2
+
+
+@pytest.mark.parametrize("holding_hook", ["on_initialize", "on_message_received"], ids=["initialize", "message_loop"])
+@pytest.mark.asyncio
+async def test_a_cancelled_bus_drains_the_hook_it_awaits_before_finalizing(holding_hook: str):
+    """Cancellation must release the hook's resources before finalization uses them."""
+    lock = asyncio.Lock()
+    hook_started = asyncio.Event()
+    release_hook = asyncio.Event()
+    lifecycle: list[tuple[str, bool]] = []
+
+    class Bus(MockOrchestrator):
+        async def _hold_resource(self) -> None:
+            async with lock:
+                hook_started.set()
+                try:
+                    await release_hook.wait()
+                finally:
+                    lifecycle.append(("hook released", self.stopping))
+
+        async def on_initialize(self) -> None:
+            if holding_hook == "on_initialize":
+                await self._hold_resource()
+
+        async def on_message_received(self, message: BaseMessage) -> None:
+            if holding_hook == "on_message_received":
+                await self._hold_resource()
+
+        async def on_finalize(self, exception: Exception | None) -> None:
+            lifecycle.append(("finalize", self.stopping))
+            async with lock:
+                await super().on_finalize(exception)
+
+    bus = Bus(logging.getLogger("test_cancel_drains_hook"), max_timeout=10, grace_period=1)
+    if holding_hook == "on_message_received":
+        bus.register_processor(Secretary("memo-taker"), [Memo])
+        bus.submit_message(Memo("hold-the-lock"))
+
+    run = asyncio.create_task(bus._entry_point())
+    try:
+        await asyncio.wait_for(hook_started.wait(), timeout=2)
+        run.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await asyncio.wait_for(run, timeout=2)
+        assert lifecycle == [("hook released", True), ("finalize", True)]
+    finally:
+        release_hook.set()
+        if not run.done():
+            run.cancel()
+        await asyncio.gather(run, return_exceptions=True)
+
+
+@pytest.mark.parametrize("hook_name", [HookName.ON_INITIALIZE, HookName.ON_MESSAGE_RECEIVED, HookName.ON_FINALIZE])
+@pytest.mark.parametrize("fail_fast", [False, True])
+@pytest.mark.asyncio
+async def test_shutdown_interrupts_pending_error_recovery(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, hook_name: HookName, fail_fast: bool
+):
+    """Shutdown must drain pending recovery and apply the error policy to its original failure."""
+    monkeypatch.setattr("ddev.event_bus.orchestrator.STOP_CHECK_INTERVAL", 0.005)
+    handler_started = asyncio.Event()
+    handler_finished = asyncio.Event()
+    release_handler = asyncio.Event()
+    original_error = ValueError("hook failed")
+    errors: list[OrchestratorHookError] = []
+
+    class Bus(MockOrchestrator):
+        async def on_initialize(self) -> None:
+            if hook_name is HookName.ON_INITIALIZE:
+                raise original_error
+
+        async def on_message_received(self, message: BaseMessage) -> None:
+            if hook_name is HookName.ON_MESSAGE_RECEIVED:
+                raise original_error
+
+        async def on_finalize(self, exception: Exception | None) -> None:
+            await super().on_finalize(exception)
+            if hook_name is HookName.ON_FINALIZE:
+                raise original_error
+
+        async def on_error(self, error: OrchestratorHookError) -> None:
+            errors.append(error)
+            handler_started.set()
+            try:
+                await release_handler.wait()
+            finally:
+                handler_finished.set()
+
+    bus = Bus(logging.getLogger("test_shutdown_error_recovery"), grace_period=0.01, fail_fast=fail_fast)
+    if hook_name is HookName.ON_MESSAGE_RECEIVED:
+        bus.register_processor(Secretary("memo-taker"), [Memo])
+        bus.submit_message(Memo("failed-hook"))
+
+    run = asyncio.create_task(bus._entry_point())
+    try:
+        await asyncio.wait_for(handler_started.wait(), timeout=2)
+        bus.request_shutdown(ShutdownRequest.cancelled())
+        if fail_fast:
+            with pytest.raises(OrchestratorHookError) as exc_info:
+                await asyncio.wait_for(run, timeout=2)
+            assert exc_info.value is errors[0]
+        else:
+            await asyncio.wait_for(run, timeout=2)
+            assert "unhandled error:" in caplog.text
+        assert errors[0].original_exception is original_error
+        assert handler_finished.is_set()
+        assert "finalize" in bus.events
+    finally:
+        release_handler.set()
+        if not run.done():
+            run.cancel()
+        await asyncio.gather(run, return_exceptions=True)
+
+
+def test_an_async_recovery_handler_still_runs_during_ordinary_finalization():
+    """Normal finalization must allow asynchronous error recovery to finish."""
+    recovered: list[OrchestratorHookError] = []
+
+    class Bus(MockOrchestrator):
+        async def on_finalize(self, exception: Exception | None):
+            raise RuntimeError("finalize failed")
+
+        async def on_error(self, error: OrchestratorHookError):
+            await asyncio.sleep(0.05)
+            recovered.append(error)
+
+    bus = Bus(logging.getLogger("test_finalize_recovery"), grace_period=0.1)
+    bus.run()
+
+    assert [error.hook_name for error in recovered] == [HookName.ON_FINALIZE]
+    assert bus.shutdown_request is None

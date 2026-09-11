@@ -5,7 +5,7 @@
 #
 # IRIS exposes its built-in monitoring exposition (OpenMetrics text) at
 #   http://<host>:52773/api/monitor/metrics
-# unauthenticated by default. 1972 is the superserver port (not HTTP).
+# unauthenticated by default.
 #
 # Community Edition licenses expire ~13 months after the build's release date,
 # so pin IRIS_VERSION to a current tag and refresh periodically.
@@ -19,13 +19,11 @@
 services:
   iris:
     image: "intersystems/iris-community:${IRIS_VERSION:-2026.1}"
-    container_name: iris
     command: ["--after", "/opt/irisinit/iris-init.sh"]
     volumes:
       - "./init:/opt/irisinit:ro"
     ports:
       - "${IRIS_PORT}:52773"
-      - "1972:1972"
     healthcheck:
       # `curl` is not present in the iris-community image (only `wget`), so use that instead.
       test: ["CMD-SHELL", "wget -qO- http://localhost:52773/api/monitor/metrics > /dev/null || exit 1"]

@@ -72,9 +72,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @cached_property
     def mypy_args(self):
-        return (
-            ['--explicit-package-bases'] + self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
-        )
+        # Excluded for ddev: its `src` layout infers module names correctly, unlike the namespace
+        # packages the integrations use, and the flag would name every module `src.ddev.*`.
+        base_args = [] if self.is_dev_package else ['--explicit-package-bases']
+        return base_args + self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
 
     @cached_property
     def mypy_files(self):
@@ -117,7 +118,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @staticmethod
     def uv_install_command(*args):
-        return f'uv pip install {{verbosity:flag:-1}} {" ".join(args)}'
+        return f'uv pip install {" ".join(args)}'
 
     def finalize_config(self, config):
         for env_name, env_config in config.items():

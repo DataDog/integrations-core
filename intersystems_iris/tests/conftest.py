@@ -1,17 +1,22 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Iterator
+from typing import Any
 
 import pytest
 import requests
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.utils import find_free_port
+from datadog_checks.intersystems_iris import IrisCheck
+
+from .common import FIXTURE_PATH
 
 HERE = Path(__file__).parent
 COMPOSE_FILE = HERE / "docker" / "docker-compose.yaml"
@@ -30,14 +35,17 @@ def _interop_metrics_present(endpoint: str) -> None:
 
 
 @pytest.fixture(scope='session')
-def dd_environment() -> Iterator[dict]:
+def dd_environment() -> Iterator[dict[str, Any]]:
     host = get_docker_hostname()
     port = find_free_port(host)
     endpoint = f"http://{host}:{port}/api/monitor/metrics"
 
     conditions = [
         CheckEndpoints(endpoint, attempts=120, wait=2),
-        WaitFor(lambda: _interop_metrics_present(endpoint), attempts=60, wait=5),
+        # Pass the function and its argument through rather than closing over `endpoint` in a
+        # lambda: `WaitFor` formats its `RetryError` from `func.__name__`, `args` and `kwargs`,
+        # so a lambda reduces a CI timeout to `Function: <lambda>, Args: (), Kwargs: {}`.
+        WaitFor(_interop_metrics_present, args=(endpoint,), attempts=60, wait=5),
     ]
 
     with docker_run(
@@ -55,3 +63,20 @@ def instance() -> InstanceType:
     # here is never actually dialed. Integration/e2e tests use the dynamic, free-port endpoint
     # yielded by `dd_environment` instead (see `test_integration.py`).
     return {"openmetrics_endpoint": "http://localhost:52773/api/monitor/metrics"}
+
+
+@pytest.fixture
+def scraped_aggregator(
+    dd_run_check: Callable[..., None],
+    aggregator: AggregatorStub,
+    instance: InstanceType,
+    mock_http_response: Callable[..., None],
+) -> AggregatorStub:
+    # Aggregator populated from the offline exposition fixture. The check is run twice because
+    # the counter and rate transformers need a previous sample before they submit anything, so a
+    # single run would leave those families out of the aggregator entirely.
+    mock_http_response(file_path=FIXTURE_PATH)
+    check = IrisCheck('intersystems_iris', {}, [instance])
+    dd_run_check(check)
+    dd_run_check(check)
+    return aggregator

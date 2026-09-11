@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.1 / 2026-08-05
+
+***Fixed***:
+
+* Stop submitting forest reference fields (``master-forest``, ``current-master-forest``, ``current-foreign-master-forest``, ``current-foreign-master-database``) as metrics since their values are entity IDs, not measurements. ([#24383](https://github.com/DataDog/integrations-core/pull/24383))
+
 ## 6.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

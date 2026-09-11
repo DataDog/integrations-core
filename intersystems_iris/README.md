@@ -90,6 +90,17 @@ Several families only report when the corresponding subsystem is active, and are
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+### Tags
+
+Two labels from the IRIS metrics endpoint are submitted under a different tag key, because their original names collide with the special meaning Datadog attaches to `host` and `version`. The values are preserved. Only the key changes:
+
+| IRIS label | Datadog tag     | Metrics affected                | Description                                        |
+| ---------- | --------------- | ------------------------------- | -------------------------------------------------- |
+| `host`     | `interop_host`  | `intersystems_iris.interop.*`   | Business host name, not the reporting infrastructure host. |
+| `version`  | `iris_version`  | `intersystems_iris.system.info` | IRIS product version, not the Agent version.       |
+
+Scope your dashboards and monitors on the Datadog tag key. Every other endpoint label is submitted under its original name.
+
 ### Events
 
 The InterSystems IRIS integration does not include any events.

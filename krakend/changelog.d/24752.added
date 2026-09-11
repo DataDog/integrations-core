@@ -1,1 +1,0 @@
-Collect the `krakend.api.http_client.response_size` metric, which reports backend response sizes from the `Content-Length` header.

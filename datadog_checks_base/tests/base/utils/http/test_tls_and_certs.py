@@ -1,20 +1,79 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
 import logging
 import ssl
 
 import mock
 import pytest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = [pytest.mark.unit]
 
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
+
+
+def _generate_self_signed_der_cert(aia_uri=None):
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'test')])
+    builder = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.datetime.now(datetime.timezone.utc))
+        .not_valid_after(datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1))
+    )
+    if aia_uri:
+        builder = builder.add_extension(
+            x509.AuthorityInformationAccess(
+                [
+                    x509.AccessDescription(
+                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
+                    )
+                ]
+            ),
+            critical=False,
+        )
+    cert = builder.sign(key, hashes.SHA256())
+    return cert.public_bytes(serialization.Encoding.DER)
+
+
+def _generate_cert(subject_cn, issuer_cn, issuer_key, aia_uri=None):
+    """Generate a cert signed by a distinct issuer, returning (cert, key) so callers can chain signatures."""
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    builder = (
+        x509.CertificateBuilder()
+        .subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject_cn)]))
+        .issuer_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, issuer_cn)]))
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.datetime.now(datetime.timezone.utc))
+        .not_valid_after(datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1))
+    )
+    if aia_uri:
+        builder = builder.add_extension(
+            x509.AuthorityInformationAccess(
+                [
+                    x509.AccessDescription(
+                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
+                    )
+                ]
+            ),
+            critical=False,
+        )
+    cert = builder.sign(issuer_key, hashes.SHA256())
+    return cert, key
 
 
 class TestCert:
@@ -291,6 +350,22 @@ class TestAIAChasing:
 
         mock_create_socket_connection.assert_called_with('localhost', port)
 
+    def test_aia_chasing_retry_still_fails_logs_clearly(self, caplog):
+        """If AIA chasing recovers a cert but the chain is still incomplete, the failure should be obvious."""
+        http = RequestsWrapper({}, {})
+        with (
+            mock.patch.object(RequestsWrapper, 'fetch_intermediate_certs', return_value=['fake-pem-cert']),
+            mock.patch.object(RequestsWrapper, '_mount_https_adapter'),
+            mock.patch('requests.Session.get', side_effect=SSLError('cert verify failed')),
+            caplog.at_level(logging.DEBUG),
+        ):
+            with pytest.raises(SSLError):
+                http.get('https://localhost:8443/')
+
+        assert 'AIA chasing: request to `https://localhost:8443/` failed with an SSLError' in caplog.text
+        assert 'AIA chasing: recovered 1 intermediate certificate(s)' in caplog.text
+        assert 'AIA chasing: request to `https://localhost:8443/` still failed after mounting' in caplog.text
+
     def test_fetch_intermediate_certs_tls_ciphers(self):
         """Test that fetch_intermediate_certs uses the correct ciphers."""
         instance = {'tls_verify': True, 'tls_ciphers': TEST_CIPHERS[0]}
@@ -332,6 +407,86 @@ class TestAIAChasing:
                 all_calls = mock_load_verify_locations.mock_calls
                 # Assert that the last call contains the intermediate CA certs
                 assert all_calls[-1].kwargs["cadata"] == "\n".join(instance['tls_intermediate_ca_certs'])
+
+    def test_load_intermediate_certs_converts_der_to_pem(self):
+        """CA Issuers URIs serve DER-encoded certs; they must be converted to PEM before being stored."""
+        issuer_der = _generate_self_signed_der_cert()
+        leaf_der = _generate_self_signed_der_cert(aia_uri='http://ca.example.com/issuer.crt')
+
+        http = RequestsWrapper({}, {})
+        mock_response = mock.MagicMock(content=issuer_der)
+        with mock.patch('requests.Session.get', return_value=mock_response):
+            certs = []
+            http.load_intermediate_certs(leaf_der, certs)
+
+        assert len(certs) == 1
+        pem_cert = certs[0]
+        assert isinstance(pem_cert, str)
+        assert pem_cert.startswith('-----BEGIN CERTIFICATE-----')
+        roundtrip_der = x509.load_pem_x509_certificate(pem_cert.encode('ascii')).public_bytes(
+            serialization.Encoding.DER
+        )
+        assert roundtrip_der == issuer_der
+
+    def test_load_intermediate_certs_falls_back_to_pem(self):
+        """DER is the RFC 5280 convention for CA Issuers responses, but some issuers serve PEM directly."""
+        issuer_der = _generate_self_signed_der_cert()
+        issuer_pem = x509.load_der_x509_certificate(issuer_der).public_bytes(serialization.Encoding.PEM)
+        leaf_der = _generate_self_signed_der_cert(aia_uri='http://ca.example.com/issuer.crt')
+
+        http = RequestsWrapper({}, {})
+        mock_response = mock.MagicMock(content=issuer_pem)
+        with mock.patch('requests.Session.get', return_value=mock_response):
+            certs = []
+            http.load_intermediate_certs(leaf_der, certs)
+
+        assert len(certs) == 1
+        pem_cert = certs[0]
+        assert isinstance(pem_cert, str)
+        roundtrip_der = x509.load_pem_x509_certificate(pem_cert.encode('ascii')).public_bytes(
+            serialization.Encoding.DER
+        )
+        assert roundtrip_der == issuer_der
+
+    def test_load_intermediate_certs_handles_multi_cert_bundle(self):
+        """A CA Issuers URI may serve a PEM bundle (e.g. intermediate + its own root) in one response."""
+        root_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        root_cert, _ = _generate_cert('root', 'root', root_key)  # self-signed, no AIA extension
+        intermediate_cert, intermediate_key = _generate_cert('intermediate', 'root', root_key)
+        leaf_cert, _ = _generate_cert(
+            'localhost', 'intermediate', intermediate_key, aia_uri='http://ca.example.com/bundle.pem'
+        )
+
+        bundle_pem = intermediate_cert.public_bytes(serialization.Encoding.PEM) + root_cert.public_bytes(
+            serialization.Encoding.PEM
+        )
+
+        http = RequestsWrapper({}, {})
+        mock_response = mock.MagicMock(content=bundle_pem)
+        with mock.patch('requests.Session.get', return_value=mock_response) as mock_get:
+            certs = []
+            http.load_intermediate_certs(leaf_cert.public_bytes(serialization.Encoding.DER), certs)
+
+        # Both certs in the bundle are recorded...
+        assert len(certs) == 2
+        loaded_subjects = {x509.load_pem_x509_certificate(pem.encode('ascii')).subject for pem in certs}
+        assert loaded_subjects == {intermediate_cert.subject, root_cert.subject}
+
+        # ...but only one network fetch happened: the root is self-signed and its subject was already
+        # known once the bundle was parsed, so AIA chasing didn't need to look any further for it.
+        mock_get.assert_called_once()
+
+    def test_load_x509_certificates_reports_both_failure_reasons(self):
+        """If data is neither valid DER nor PEM, the error should say why each parse attempt failed."""
+        garbage = b'<html><body>404 not found</body></html>'
+
+        with pytest.raises(ValueError) as exc_info:
+            load_x509_certificates(garbage)
+
+        message = str(exc_info.value)
+        assert 'not valid DER' in message
+        assert 'PEM' in message
+        assert repr(garbage[:32]) in message
 
 
 class TestSSLContext:

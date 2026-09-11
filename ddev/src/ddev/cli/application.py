@@ -54,8 +54,10 @@ class AppLoggingHandler(logging.Handler):
             self._app.display_error(msg)
         elif record.levelno >= logging.WARNING:
             self._app.display_warning(msg)
-        else:
+        elif record.levelno >= logging.INFO:
             self._app.display_info(msg)
+        else:
+            self._app.display_debug(msg)
 
 
 class Application(Terminal):

@@ -14,7 +14,8 @@ cel_selector:
 
 ## Enables configuration discovery
 #
-discovery: {}
+discovery:
+  metrics_prefix: krakend.api
 
 ## Unused init configuration
 #

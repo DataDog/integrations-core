@@ -1,7 +1,8 @@
 # Trust policy for the backport workflow in DataDog/integrations-core
 #
-# This policy grants the tibdex/backport action permission to create
-# backport pull requests when a merged PR has a backport label.
+# This policy grants the backport-pr workflow (which runs `ddev release port-commit`)
+# permission to push backport branches and open backport pull requests when a merged
+# PR has a backport label.
 #
 # Naming convention:
 #   self:                 Only this repository (DataDog/integrations-core) can use this policy
@@ -13,7 +14,9 @@
 #   - Workflow file must be committed to master
 #
 # Permissions granted:
-#   - pull_requests: write  - Create and update pull requests
+#   - contents: write       - Push the backport branch
+#   - pull_requests: write   - Create and update the backport pull request
+#   - workflows: write       - Allow pushing commits that touch .github/workflows/
 #
 # Usage in workflows:
 #   - uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3

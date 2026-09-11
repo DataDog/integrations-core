@@ -13,15 +13,11 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 # default settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -92,6 +88,11 @@ class SqlserverMetadata(DBMAsyncJob):
         )
         self._last_schemas_collection_time = 0
 
+    def shutdown(self) -> None:
+        # The schema collector holds the check too, so dropping it here releases both.
+        self._schema_collector = None
+        self._check = None
+
     def _close_db_conn(self):
         pass
 
@@ -139,13 +140,15 @@ class SqlserverMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 settings_rows = self._load_settings_rows(cursor)
                 event = {
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,
-                    "agent_version": datadog_agent.get_version(),
+                    "agent_version": self._check.agent_version,
                     "dbms": self._check.dbms,
                     "kind": "sqlserver_configs",
                     "collection_interval": self.collection_interval,
@@ -166,5 +169,6 @@ class SqlserverMetadata(DBMAsyncJob):
             return
         if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
             return
+        raise_if_cancelled(self._cancel_event)
         self._last_schemas_collection_time = time.time()
         self._schema_collector.collect_schemas()

@@ -184,7 +184,11 @@ iris_ecps_lock_fail: ecps.lock_fail
 iris_ecps_lock_fail_per_sec: ecps.lock_fail_per_sec
 iris_ecps_lock_grant: ecps.lock_grant
 iris_ecps_lock_grant_per_sec: ecps.lock_grant_per_sec
-iris_ecps_lock_que: ecps.lock_que
+# IRIS declares this `# TYPE ... counter`, but its own HELP text calls it a current queue
+# depth, so the framework default would submit the delta of a gauge. Pin it.
+iris_ecps_lock_que:
+  name: ecps.lock_que
+  type: gauge
 iris_ecps_lock_que_per_sec: ecps.lock_que_per_sec
 iris_ecps_lock_que_fail: ecps.lock_que_fail
 iris_ecps_lock_que_fail_per_sec: ecps.lock_que_fail_per_sec
@@ -214,7 +218,11 @@ iris_interop_messages: interop.messages
 iris_interop_messages_aborted: interop.messages.aborted
 iris_interop_messages_discarded: interop.messages.discarded
 iris_interop_messages_errored: interop.messages.errored
-iris_interop_messages_per_sec: interop.messages.per_sec
+# Also declared `counter` upstream, but it is an average over the most recent sampling
+# interval rather than a since-start total, so the delta of it has no interpretation.
+iris_interop_messages_per_sec:
+  name: interop.messages.per_sec
+  type: gauge
 iris_interop_messages_suspended: interop.messages.suspended
 iris_interop_queued: interop.queued
 
