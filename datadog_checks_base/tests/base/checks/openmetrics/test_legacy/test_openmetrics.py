@@ -4,7 +4,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import io
 import logging
 import math
 import os
@@ -13,21 +12,22 @@ import time
 
 import mock
 import pytest
-import requests
 from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 
-from datadog_checks.base import ensure_bytes
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientError, HTTPClientStatusError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockResponse
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))
 TOKENS_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'bearer_tokens'))
 
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
+OPENMETRICS_REQUEST = RecordedRequest('GET', FAKE_ENDPOINT, {'stream': True})
 
 PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': FAKE_ENDPOINT,
@@ -43,6 +43,25 @@ OPENMETRICS_CHECK_INSTANCE = {
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'openmetrics',
 }
+
+
+def _text_response(text: str, *, content_type: str = text_content_type) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        headers={'Content-Type': content_type},
+        lines=text.splitlines(),
+    )
+
+
+def _register_openmetrics_text(fake_http: FakeHTTPClient, text: str, *, count: int = 1) -> None:
+    for _ in range(count):
+        fake_http.register_response(
+            'GET',
+            FAKE_ENDPOINT,
+            _text_response(text),
+            match_options={'stream': True},
+        )
 
 
 @pytest.fixture
@@ -95,10 +114,9 @@ def text_data():
 
 
 @pytest.fixture
-def mock_get(mock_http_response):
-    yield mock_http_response(
-        file_path=os.path.join(FIXTURE_PATH, 'ksm.txt'), headers={'Content-Type': text_content_type}
-    ).return_value.text
+def ksm_text() -> str:
+    with open(os.path.join(FIXTURE_PATH, 'ksm.txt')) as fixture:
+        return fixture.read()
 
 
 def test_config_instance(mocked_prometheus_check):
@@ -113,7 +131,7 @@ def test_config_instance(mocked_prometheus_check):
 
 def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
     check.process_metric = mock.MagicMock()
     check.process(mocked_prometheus_scraper_config)
     check.poll.assert_called_with(mocked_prometheus_scraper_config)
@@ -151,33 +169,42 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
     aggregator.assert_all_metrics_covered()
 
 
-def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
+def test_poll_text_plain(fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    fake_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        _text_response(text_data),
+        match_options={'stream': True},
     )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        response = check.poll(mocked_prometheus_scraper_config)
-        messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
-        messages.sort(key=lambda x: x.name)
-        assert len(messages) == 40
-        assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+
+    response = check.poll(mocked_prometheus_scraper_config)
+    messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
+
+    messages.sort(key=lambda x: x.name)
+    assert len(messages) == 40
+    assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
+def test_poll_octet_stream(fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
+    fake_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        _text_response(text_data, content_type='application/octet-stream'),
+        match_options={'stream': True},
+    )
 
-    mock_response = requests.Response()
-    mock_response.raw = io.BytesIO(ensure_bytes(text_data))
-    mock_response.status_code = 200
-    mock_response.headers = {'Content-Type': 'application/octet-stream'}
+    response = check.poll(mocked_prometheus_scraper_config)
+    messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        response = check.poll(mocked_prometheus_scraper_config)
-        messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
-        assert len(messages) == 40
+    assert len(messages) == 40
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -734,7 +761,7 @@ def test_filter_sample_on_gauge(p_check, mocked_prometheus_scraper_config):
     expected_metric.add_metric(['heapster-v1.4.3'], 1)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     mocked_prometheus_scraper_config['_text_filter_blacklist'] = ["deployment=\"kube-dns\""]
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
@@ -767,7 +794,7 @@ def test_parse_one_gauge(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.add_metric([], 1)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -799,7 +826,7 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.name = 'go_memstats_mallocs_total'
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -857,7 +884,7 @@ def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -991,7 +1018,7 @@ def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
     assert 1 == len(metrics)
@@ -1093,7 +1120,7 @@ def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1131,7 +1158,7 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1220,7 +1247,7 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1283,7 +1310,7 @@ def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_promethe
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="POST"} 150\n'
     )
 
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1351,7 +1378,7 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
         'random_histogram_count{url="http://127.0.0.1:8080/api",verb="GET"} 70\n'
     )
 
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1403,7 +1430,7 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1474,7 +1501,7 @@ def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.add_sample("http_response_size_bytes", {"handler": "prometheus", "quantile": "0.99"}, 25763.0)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1517,7 +1544,7 @@ def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_c
     expected_etcd_metric.add_metric(["prometheus"], 5.0, 120512.0)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1572,7 +1599,7 @@ def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
@@ -1613,7 +1640,7 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
+    response = _text_response(text_data)
     check = p_check
     metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
     assert 1 == len(metrics)
@@ -1660,7 +1687,11 @@ def test_ignore_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
 
 
 def test_ignore_metrics_multiple_wildcards(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+    aggregator,
+    fake_http,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    text_data,
 ):
     """
     Test that metrics that matched an ignored metrics pattern is properly discarded.
@@ -1691,25 +1722,24 @@ def test_ignore_metrics_multiple_wildcards(
     ]
 
     config = check.create_scraper_configuration(instance)
+    _register_openmetrics_text(fake_http, text_data)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(config)
+    check.process(config)
 
-        # Make sure metrics are ignored
-        aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=0)
-        aggregator.assert_metric('prometheus.go_memstats.mallocs.total', count=0)
-        aggregator.assert_metric('prometheus.go_memstats.mspan.sys_bytes', count=0)
-        aggregator.assert_metric('prometheus.go_memstats.alloc_bytes', count=0)
-        aggregator.assert_metric('prometheus.go_memstats.gc.sys_bytes', count=0)
-        aggregator.assert_metric('prometheus.go_memstats.buck_hash.sys_bytes', count=0)
+    # Make sure metrics are ignored
+    aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=0)
+    aggregator.assert_metric('prometheus.go_memstats.mallocs.total', count=0)
+    aggregator.assert_metric('prometheus.go_memstats.mspan.sys_bytes', count=0)
+    aggregator.assert_metric('prometheus.go_memstats.alloc_bytes', count=0)
+    aggregator.assert_metric('prometheus.go_memstats.gc.sys_bytes', count=0)
+    aggregator.assert_metric('prometheus.go_memstats.buck_hash.sys_bytes', count=0)
 
-        # Make sure we don't ignore other metrics
-        aggregator.assert_metric('prometheus.go_memstats.mcache.sys_bytes', count=1)
-        aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
-        aggregator.assert_all_metrics_covered()
+    # Make sure we don't ignore other metrics
+    aggregator.assert_metric('prometheus.go_memstats.mcache.sys_bytes', count=1)
+    aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
+    aggregator.assert_all_metrics_covered()
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -1780,7 +1810,11 @@ def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_che
 
 
 def test_metrics_with_ignore_label_values(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+    aggregator,
+    fake_http,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    text_data,
 ):
     """
     Test that metrics that matched an ignored label values is properly discarded.
@@ -1800,23 +1834,21 @@ def test_metrics_with_ignore_label_values(
     instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': ['*']}
     config = check.create_scraper_configuration(instance)
     expected_tags = ['cause:nxdomain']
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(config)
+    _register_openmetrics_text(fake_http, text_data)
 
-        # Make sure metrics are ignored
-        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:auth'])
-        aggregator.assert_metric(
-            'prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:recursive']
-        )
-        aggregator.assert_metric('prometheus.skydns.dns.cache_missed', count=0)
-        # Make sure we don't ignore other metrics
-        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=1, tags=expected_tags + ['system:reverse'])
-        aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=1)
+    check.process(config)
 
-        aggregator.assert_all_metrics_covered()
+    # Make sure metrics are ignored
+    aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:auth'])
+    aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:recursive'])
+    aggregator.assert_metric('prometheus.skydns.dns.cache_missed', count=0)
+    # Make sure we don't ignore other metrics
+    aggregator.assert_metric('prometheus.skydns.dns.error.count', count=1, tags=expected_tags + ['system:reverse'])
+    aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=1)
+
+    aggregator.assert_all_metrics_covered()
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
@@ -1835,7 +1867,11 @@ def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
 
 
 def test_match_metrics_multiple_wildcards(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+    aggregator,
+    fake_http,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    text_data,
 ):
     """
     Test that matched metric patterns are properly collected.
@@ -1850,25 +1886,25 @@ def test_match_metrics_multiple_wildcards(
     ]
 
     config = check.create_scraper_configuration(instance)
+    _register_openmetrics_text(fake_http, text_data)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(config)
+    check.process(config)
 
-        aggregator.assert_metric('prometheus.go_memstats_mcache_inuse_bytes', count=1)
-        aggregator.assert_metric('prometheus.go_memstats_mcache_sys_bytes', count=1)
-        aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
-        aggregator.assert_metric('prometheus.go_memstats_alloc_bytes', count=1)
-        aggregator.assert_metric('prometheus.go_memstats_alloc_bytes_total', count=1)
-        aggregator.assert_metric('prometheus.go_memstats_lookups_total', count=1)
-        aggregator.assert_all_metrics_covered()
+    aggregator.assert_metric('prometheus.go_memstats_mcache_inuse_bytes', count=1)
+    aggregator.assert_metric('prometheus.go_memstats_mcache_sys_bytes', count=1)
+    aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
+    aggregator.assert_metric('prometheus.go_memstats_alloc_bytes', count=1)
+    aggregator.assert_metric('prometheus.go_memstats_alloc_bytes_total', count=1)
+    aggregator.assert_metric('prometheus.go_memstats_lookups_total', count=1)
+    aggregator.assert_all_metrics_covered()
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_joins(aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, ksm_text):
     """Tests label join on text format"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_global_labels': {'label_to_match': '*', 'labels_to_get': ['*']},
@@ -2251,11 +2287,20 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         tags=['leader:true', 'foo:bar', 'namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
         count=1,
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_joins_gc(
+    aggregator,
+    fake_http,
+    ksm_text,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+):
     """Tests label join GC on text format"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
@@ -2297,23 +2342,25 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     )
 
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
-    text_data = mock_get.replace('dd-agent-62bgh', 'dd-agent-1337')
+    text_data = ksm_text.replace('dd-agent-62bgh', 'dd-agent-1337')
     pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
     text_data = pvc_replace.sub('', text_data)
+    _register_openmetrics_text(fake_http, text_data)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(mocked_prometheus_scraper_config)
-        assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
-        assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
-        assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+    check.process(mocked_prometheus_scraper_config)
+    assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
+    assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
+    assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 3)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_joins_missconfigured(
+    aggregator, fake_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests label join missconfigured label is ignored"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}
@@ -2348,11 +2395,16 @@ def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_
         ],
         count=1,
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_join_not_existing(
+    aggregator, fake_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests label join on non existing matching label is ignored"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}
@@ -2369,13 +2421,16 @@ def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_pro
     aggregator.assert_metric(
         'ksm.pod.ready', 1.0, tags=['pod:fluentd-gcp-v2.0.9-z348z', 'namespace:kube-system', 'condition:true'], count=1
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_http.assert_all_responses_consumed()
 
 
 def test_label_join_metric_not_existing(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get
+    aggregator, fake_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     """Tests label join on non existing metric is ignored"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}
@@ -2392,11 +2447,16 @@ def test_label_join_metric_not_existing(
     aggregator.assert_metric(
         'ksm.pod.ready', 1.0, tags=['pod:fluentd-gcp-v2.0.9-z348z', 'namespace:kube-system', 'condition:true'], count=1
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_join_with_hostname(
+    aggregator, fake_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}
@@ -2432,14 +2492,23 @@ def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_pr
         hostname='gke-foobar-test-kube-default-pool-9b4ff111-j75z',
         count=1,
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_join_state_change(
+    aggregator,
+    fake_http,
+    ksm_text,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+):
     """
     This test checks that the label join picks up changes for already watched labels.
     If a phase changes for example, the tag should change as well.
     """
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text, count=2)
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
@@ -2456,23 +2525,23 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
     for _, tags in mocked_prometheus_scraper_config['_label_mapping']['pod'].items():
         assert tags.get('phase') == 'Running'
 
-    text_data = mock_get.replace(
+    text_data = ksm_text.replace(
         'kube_pod_status_phase{namespace="default",phase="Running",pod="dd-agent-62bgh"} 1',
         'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
+    _register_openmetrics_text(fake_http, text_data)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(mocked_prometheus_scraper_config)
-        assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
-        assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
+    check.process(mocked_prometheus_scraper_config)
+    assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+    assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 3)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_to_match_single(benchmark, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
+    check.poll = mock.MagicMock(side_effect=lambda *_: _text_response(ksm_text))
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
@@ -2497,9 +2566,10 @@ def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_promet
         check.process(mocked_prometheus_scraper_config)
 
 
-def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_to_match_multiple(benchmark, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
+    check.poll = mock.MagicMock(side_effect=lambda *_: _text_response(ksm_text))
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
@@ -2524,9 +2594,12 @@ def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prom
         check.process(mocked_prometheus_scraper_config)
 
 
-def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+def test_health_service_check_ok(
+    aggregator, fake_http, ksm_text, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
     """Tests endpoint health service check OK"""
     check = mocked_prometheus_check
+    _register_openmetrics_text(fake_http, ksm_text)
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
@@ -2539,16 +2612,33 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+@pytest.mark.parametrize(
+    'error_type',
+    [
+        pytest.param(HTTPClientConnectionError, id='connection-error'),
+        pytest.param(HTTPClientError, id='root-error'),
+    ],
+)
+def test_health_service_check_failing(
+    aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, error_type
+):
     """Tests endpoint health service check failing"""
     check = mocked_prometheus_check
+    fake_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        error_type('Connection failed'),
+        match_options={'stream': True},
+    )
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
     mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(error_type):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
         'ksm.prometheus.health',
@@ -2556,6 +2646,49 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
+
+
+def test_possible_urls_fall_back_for_root_http_client_errors():
+    instance = {
+        **OPENMETRICS_CHECK_INSTANCE,
+        'possible_prometheus_urls': ['http://first.example/metrics', 'http://second.example/metrics'],
+    }
+
+    with mock.patch.object(
+        OpenMetricsBaseCheck, 'send_request', side_effect=HTTPClientError('transport failed')
+    ) as send_request:
+        with pytest.raises(CheckException, match='could not connect to any'):
+            OpenMetricsBaseCheck('openmetrics_check', {}, [instance])
+
+    assert send_request.call_count == 2
+
+
+def test_health_service_check_failing_on_status_error(
+    aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    check = mocked_prometheus_check
+    fake_http.register_response(
+        'GET',
+        FAKE_ENDPOINT,
+        HTTPClientStatusError('503 Server Error'),
+        match_options={'stream': True},
+    )
+
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
+    with pytest.raises(HTTPClientStatusError):
+        check.process(mocked_prometheus_scraper_config)
+
+    aggregator.assert_service_check(
+        'ksm.prometheus.health',
+        status=OpenMetricsBaseCheck.CRITICAL,
+        tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
+        count=1,
+    )
+    fake_http.assert_requests([OPENMETRICS_REQUEST])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -2576,20 +2709,9 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
 
 
 @pytest.fixture()
-def mock_filter_get():
-    text_data = None
-    f_name = os.path.join(FIXTURE_PATH, 'deprecated.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': text_content_type},
-        ),
-    ):
-        yield text_data
+def deprecated_text() -> str:
+    with open(os.path.join(FIXTURE_PATH, 'deprecated.txt')) as fixture:
+        return fixture.read()
 
 
 class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
@@ -2611,10 +2733,15 @@ def mocked_filter_openmetrics_check_scraper_config(mocked_filter_openmetrics_che
 
 
 def test_filter_metrics(
-    aggregator, mocked_filter_openmetrics_check, mocked_filter_openmetrics_check_scraper_config, mock_filter_get
+    aggregator,
+    deprecated_text,
+    fake_http,
+    mocked_filter_openmetrics_check,
+    mocked_filter_openmetrics_check_scraper_config,
 ):
     """Tests label join GC on text format"""
     check = mocked_filter_openmetrics_check
+    _register_openmetrics_text(fake_http, deprecated_text, count=2)
     mocked_filter_openmetrics_check_scraper_config['namespace'] = 'filter'
     mocked_filter_openmetrics_check_scraper_config['metrics_mapper'] = {
         'kube_pod_container_status_restarts': 'pod.restart',
@@ -2629,12 +2756,14 @@ def test_filter_metrics(
         'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
     )
     aggregator.assert_all_metrics_covered()
+    fake_http.assert_requests([OPENMETRICS_REQUEST] * 2)
+    fake_http.assert_all_responses_consumed()
 
 
 def test_metadata_default(mocked_openmetrics_check_factory, text_data, datadog_agent):
     instance = dict(OPENMETRICS_CHECK_INSTANCE)
     check = mocked_openmetrics_check_factory(instance)
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
 
     check.check(instance)
     datadog_agent.assert_metadata_count(0)
@@ -2645,7 +2774,7 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     instance['metadata_metric_name'] = 'kubernetes_build_info'
     instance['metadata_label_map'] = {'version': 'gitVersion'}
     check = mocked_openmetrics_check_factory(instance)
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
 
     version_metadata = {
         'version.major': '1',
@@ -2662,64 +2791,87 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, text_data):
+@pytest.mark.parametrize(
+    ('instance_overrides', 'expected_verify', 'expected_ignore_warning'),
+    [
+        pytest.param({'ssl_ca_cert': False}, False, True, id='ssl_ca_cert false disables verification'),
+        pytest.param({'ssl_verify': False}, False, True, id='ssl_verify false suppresses the warning'),
+        pytest.param({}, True, False, id='verification on by default'),
+    ],
+)
+def test_get_http_handler_applies_tls_deprecation_shims(
+    mocked_openmetrics_check_factory, instance_overrides, expected_verify, expected_ignore_warning
+):
     instance = {
-        'prometheus_url': 'https://www.example.com',
+        'prometheus_url': 'https://www.example.com/metrics',
         'metrics': [{'foo': 'bar'}],
         'namespace': 'openmetrics',
-        'ssl_verify': False,
-    }
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
-        resp = check.send_request('https://httpbin.org/get', scraper_config)
-
-    assert "httpbin.org" in resp.content.decode('utf-8')
-
-    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
-    for _, _, message in caplog.record_tuples:
-        assert message != expected_message
-
-
-def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_check_factory, text_data):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-        'ssl_verify': False,
-    }
-
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-
-    # `prometheus_url` changed just before calling `send_request`
-    scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
-
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
-        resp = check.send_request('https://httpbin.org/get', scraper_config)
-
-    assert "httpbin.org" in resp.content.decode('utf-8')
-
-    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
-    for _, _, message in caplog.record_tuples:
-        assert message != expected_message
-
-
-def test_http_handler(mocked_openmetrics_check_factory):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-        'ssl_verify': False,
+        **instance_overrides,
     }
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
     http_handler = check.get_http_handler(scraper_config)
 
-    assert http_handler.options['headers']['accept-encoding'] == 'gzip'
-    assert http_handler.options['headers']['accept'] == 'text/plain'
+    assert http_handler.options['verify'] == expected_verify
+    assert http_handler.ignore_tls_warning is expected_ignore_warning
+
+
+def test_http_handler(mocked_openmetrics_check_factory, mocker):
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+        'ssl_verify': False,
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+    fake_http = FakeHTTPClient()
+    mocker.patch.object(check, 'create_http_client', return_value=fake_http)
+
+    http_handler = check.get_http_handler(scraper_config)
+
+    assert http_handler is fake_http
+    assert fake_http.get_header('accept-encoding') == 'gzip'
+    assert fake_http.get_header('accept') == 'text/plain'
+
+
+def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_openmetrics_check_factory):
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    first = check.get_http_handler(scraper_config)
+    assert first.options['verify'] is True
+    assert check.get_http_handler(scraper_config) is first
+
+    scraper_config['ssl_ca_cert'] = False
+    assert check.get_http_handler(scraper_config) is first
+
+    check.reset_http_config()
+    rebuilt = check.get_http_handler(scraper_config)
+
+    assert rebuilt is not first
+    assert rebuilt.options['verify'] is False
+
+
+def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+    sentinel = mock.MagicMock()
+
+    with mock.patch.object(check, 'create_http_client', return_value=sentinel) as factory:
+        assert check.get_http_handler(scraper_config) is sentinel
+        factory.assert_called_once_with(scraper_config)
 
 
 def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
@@ -2736,7 +2888,7 @@ def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
     config = check.get_scraper_config(instance)
     config['_dry_run'] = False
 
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
     check.process(config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
@@ -2759,7 +2911,7 @@ def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data)
     config = check.get_scraper_config(instance)
     config['_dry_run'] = False
 
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(text_data))
     check.process(config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
@@ -2942,7 +3094,7 @@ def test_use_process_start_time(
 
     check = mocked_openmetrics_check_factory(instance)
     test_data = _make_test_use_process_start_time_data(process_start_time)
-    check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=_text_response(test_data))
 
     for _ in range(0, 5):
         aggregator.reset()
@@ -2995,7 +3147,7 @@ def test_refresh_bearer_token(text_data, mocked_openmetrics_check_factory):
 
     with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(TOKENS_PATH, 'default_token')):
         check = mocked_openmetrics_check_factory(instance)
-        check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+        check.poll = mock.MagicMock(return_value=_text_response(text_data))
         instance = check.get_scraper_config(instance)
         assert instance['_bearer_token'] == 'my default token'
         time.sleep(1.5)

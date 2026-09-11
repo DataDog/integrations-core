@@ -14,6 +14,7 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
+from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -126,6 +127,15 @@ class TestCert:
 
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
+
+    def test_missing_ca_cert_file_is_reported(self, tmp_path, caplog):
+        missing_ca_cert = str(tmp_path / 'unexisting.crt')
+        http = RequestsWrapper({'tls_ca_cert': missing_ca_cert}, {})
+
+        with mock.patch('requests.Session.get'), caplog.at_level(logging.WARNING):
+            http.get('https://example.com')
+
+        assert 'TLS CA certificate file not found: {}'.format(missing_ca_cert) in caplog.text
 
     @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
     def test_bad_default_verify_paths_and_fallback_to_certifi(self, monkeypatch, caplog):
@@ -344,7 +354,7 @@ class TestAIAChasing:
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
-                with pytest.raises(SSLError):
+                with pytest.raises(HTTPClientSSLError):
                     with mock.patch('requests.Session.get', side_effect=SSLError):
                         http.get('https://localhost:{}'.format(port))
 
@@ -507,10 +517,10 @@ class TestSSLContext:
 
 class TestSSLContextAdapter:
     def test_adapter_caching(self):
-        """_SSLContextAdapter should be recovered from cache when possible."""
+        """SSLContextAdapter should be recovered from cache when possible."""
 
         with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            with mock.patch('datadog_checks.base.utils.requests_adapter.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached
                 default_config_key = TlsConfig(**http.tls_config)
@@ -526,10 +536,10 @@ class TestSSLContextAdapter:
                 mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
     def test_adapter_caching_new_adapter(self):
-        """A new _SSLContextAdapter should be created when a new TLS config is requested."""
+        """A new SSLContextAdapter should be created when a new TLS config is requested."""
 
         with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            with mock.patch('datadog_checks.base.utils.requests_adapter.create_ssl_context') as mock_create_ssl_context:
                 http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
                 # Verify that the adapter is created and cached for the default TLS config
                 default_config_key = TlsConfig(**http.tls_config)
@@ -552,3 +562,35 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+
+    def test_close_releases_adapter_used_without_a_persistent_session(self):
+        """close() should release pooled connections when no persistent session was ever created."""
+
+        with mock.patch('requests.Session.get'):
+            http = RequestsWrapper({'tls_verify': True}, {})
+            http.get('https://example.com', persist=False)
+
+            (adapter,) = http._https_adapters.values()
+            adapter.poolmanager.connection_from_url('https://example.com')
+            assert len(adapter.poolmanager.pools) == 1
+
+            http.close()
+
+            assert len(adapter.poolmanager.pools) == 0
+
+    def test_close_releases_adapter_displaced_by_another_tls_config(self):
+        """close() should release pooled connections held by adapters no longer mounted on the session."""
+
+        with mock.patch('requests.Session.get'):
+            http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
+            http.get('https://example.com', verify=True)
+            http.get('https://example.com', verify=False)
+
+            adapters = list(http._https_adapters.values())
+            assert len(adapters) == 2
+            for adapter in adapters:
+                adapter.poolmanager.connection_from_url('https://example.com')
+
+            http.close()
+
+            assert [len(adapter.poolmanager.pools) for adapter in adapters] == [0, 0]

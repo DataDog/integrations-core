@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.openmetrics import OpenMetricsCheck
 
 from .common import CHECK_NAME
@@ -33,12 +35,9 @@ instance_unavailable = {
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
-
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
-    scraper = OpenMetricsScraper(check, instance_new)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -63,19 +62,30 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     )
     aggregator.assert_all_metrics_covered()
 
-    assert check.http.options['headers']['Accept'] == '*/*'
-    assert scraper.http.options['headers']['Accept'] == 'text/plain'
+    scraper = check.scrapers[instance_new['openmetrics_endpoint']]
+    assert check.http.get_header('Accept') == '*/*'
+    assert scraper.http.get_header('Accept') == 'text/plain'
+    assert scraper.http is not check.http
 
 
-def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
-
+def test_openmetrics_use_latest_spec(aggregator, dd_run_check, fake_http, openmetrics_payload, caplog):
     # We want to make sure that when `use_latest_spec` is enabled, we use the OpenMetrics parser
     # even when the response's `Content-Type` doesn't declare the appropriate media type.
-    mock_http_response(openmetrics_payload, normalize_content=False)
+    content = openmetrics_payload.encode('utf-8')
+    fake_http.register_response(
+        'GET',
+        instance_new_strict['openmetrics_endpoint'],
+        FakeHTTPResponse(
+            content=content,
+            text=openmetrics_payload,
+            headers={'Content-Type': 'text/plain'},
+            content_chunks=(content,),
+            lines=openmetrics_payload.splitlines(),
+        ),
+        match_options={'stream': True},
+    )
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new_strict])
-    scraper = OpenMetricsScraper(check, instance_new_strict)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -95,25 +105,44 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_respons
     )
     aggregator.assert_all_metrics_covered()
 
-    assert check.http.options['headers']['Accept'] == '*/*'
+    scraper = check.scrapers[instance_new_strict['openmetrics_endpoint']]
+    assert check.http.get_header('Accept') == '*/*'
     assert caplog.text == ''
-    assert scraper.http.options['headers']['Accept'] == (
+    assert scraper.http.get_header('accept') == (
         'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
     )
+    assert scraper.http is not check.http
+    fake_http.assert_requests([RecordedRequest('GET', instance_new_strict['openmetrics_endpoint'], {'stream': True})])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_openmetrics_empty_response(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
-    mock_http_response("")
+def test_openmetrics_empty_response(aggregator, dd_run_check, fake_http):
+    fake_http.register_response(
+        'GET',
+        instance_new['openmetrics_endpoint'],
+        FakeHTTPResponse(content=b'', lines=()),
+        match_options={'stream': True},
+    )
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
     dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
+    fake_http.assert_requests([RecordedRequest('GET', instance_new['openmetrics_endpoint'], {'stream': True})])
+    fake_http.assert_all_responses_consumed()
 
 
-def test_openmetrics_endpoint_unavailable(aggregator, dd_run_check):
+def test_openmetrics_endpoint_unavailable(aggregator, dd_run_check, fake_http):
+    fake_http.register_response(
+        'GET',
+        instance_unavailable['openmetrics_endpoint'],
+        HTTPClientConnectionError('Connection refused'),
+        match_options={'stream': True},
+    )
     check = OpenMetricsCheck('openmetrics', {}, [instance_unavailable])
     dd_run_check(check)
 
     # Collects no metrics without error.
     aggregator.assert_all_metrics_covered()
+    fake_http.assert_requests([RecordedRequest('GET', instance_unavailable['openmetrics_endpoint'], {'stream': True})])
+    fake_http.assert_all_responses_consumed()

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import MutableMapping
+
 from datadog_checks.base.agent import datadog_agent
 
 
@@ -22,6 +24,18 @@ def get_default_headers():
     headers = {'User-Agent': 'Datadog Agent/{}'.format(datadog_agent.get_version() or '0.0.0')}
     headers.update(_get_common_headers())
     return headers
+
+
+def set_header(headers: MutableMapping[str, str], name: str, value: str) -> None:
+    matching_names = [header_name for header_name in headers if header_name.lower() == name.lower()]
+    if not matching_names:
+        headers[name] = value
+        return
+
+    retained_name = matching_names[0]
+    headers[retained_name] = value
+    for duplicate_name in matching_names[1:]:
+        del headers[duplicate_name]
 
 
 def update_headers(headers, extra_headers):

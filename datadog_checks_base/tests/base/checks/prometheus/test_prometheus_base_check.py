@@ -36,6 +36,33 @@ def test_timeout_override():
     assert check.get_scraper(instance).prometheus_timeout == 5
 
 
+def test_composed_scraper_applies_legacy_http_options():
+    endpoint = 'https://example.test/metrics'
+    instance = {
+        'prometheus_url': endpoint,
+        'namespace': 'test',
+        'metrics': ['test_metric'],
+        'prometheus_timeout': 37,
+        'ssl_verify': False,
+    }
+    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance])
+
+    handler = check.get_scraper(instance).get_http_handler(endpoint, instance)
+
+    assert handler.options['timeout'] == (37.0, 37.0)
+    assert handler.options['verify'] is False
+
+
+def test_composed_scraper_accepts_missing_init_config():
+    endpoint = 'https://example.test/metrics'
+    instance = {'prometheus_url': endpoint, 'namespace': 'test', 'metrics': ['test_metric']}
+    check = GenericPrometheusCheck('prometheus_check', None, {}, [instance])
+
+    handler = check.get_scraper(instance).get_http_handler(endpoint, instance)
+
+    assert handler.options['timeout'] == (10.0, 10.0)
+
+
 def test_label_to_hostname_override():
     endpoint = "none"
     default_instance = {

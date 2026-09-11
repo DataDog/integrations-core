@@ -1,0 +1,1 @@
+Catch backend-agnostic HTTP errors instead of ``requests`` exceptions.

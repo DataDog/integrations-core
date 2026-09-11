@@ -8,8 +8,6 @@ import numbers
 from fnmatch import fnmatch
 from urllib.parse import urlparse
 
-import requests
-
 from datadog_checks.base.utils.tagging import tagger
 
 from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix, tags_for_docker, tags_for_pod
@@ -36,8 +34,10 @@ class CadvisorScraper(object):
         # The scraper needs its own logger
         self.log = logging.getLogger(__name__)
 
-    @staticmethod
-    def detect_cadvisor(kubelet_url, cadvisor_port):
+        # Legacy cAdvisor uses a separate node-local endpoint, so give it an isolated HTTP client.
+        self._cadvisor_http = self.create_http_client({'skip_proxy': True})
+
+    def detect_cadvisor(self, kubelet_url, cadvisor_port):
         """
         Tries to connect to the cadvisor endpoint, with given params
         :return: url if OK, raises exception if NOK
@@ -49,8 +49,8 @@ class CadvisorScraper(object):
             raise ValueError("kubelet hostname empty")
         url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
-        # Test the endpoint is present
-        r = requests.head(url, timeout=1)  # SKIP_HTTP_VALIDATION
+        # A 3xx means the legacy endpoint exists; its redirect target may still return 4xx.
+        r = self._cadvisor_http.head(url, timeout=1, allow_redirects=False)
         r.raise_for_status()
 
         return url
@@ -66,9 +66,8 @@ class CadvisorScraper(object):
 
         self._update_metrics(instance, cadvisor_url, pod_list, pod_list_utils)
 
-    @staticmethod
-    def _retrieve_cadvisor_metrics(cadvisor_url, timeout=10):
-        return requests.get(cadvisor_url, timeout=timeout).json()
+    def _retrieve_cadvisor_metrics(self, cadvisor_url, timeout=10):
+        return self._cadvisor_http.get(cadvisor_url, timeout=timeout).json()
 
     def _update_metrics(self, instance, cadvisor_url, pod_list, pod_list_utils):
         metrics = self._retrieve_cadvisor_metrics(cadvisor_url)

@@ -4,19 +4,38 @@
 
 import json
 import os
-from pathlib import Path
-from urllib.parse import urlparse
+from collections.abc import Iterator
 
-import mock
 import pytest
-import requests
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
-from datadog_checks.dev.http import MockResponse
 
 from .common import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_FLY_LAB
+
+API_ROUTES = (
+    ('/v1/apps', 'v1/apps/org_slug=test/response.json', {'params': {'org_slug': 'test'}}),
+    ('/v1/apps/example-app-1', 'v1/apps/example-app-1/response.json', None),
+    ('/v1/apps/example-app-1/machines', 'v1/apps/example-app-1/machines/response.json', None),
+    ('/v1/apps/example-app-1/volumes', 'v1/apps/example-app-1/volumes/response.json', None),
+    ('/v1/apps/example-app-2', 'v1/apps/example-app-2/response.json', None),
+    ('/v1/apps/example-app-2/machines', None, None),
+    ('/v1/apps/example-app-2/volumes', None, None),
+    ('/v1/apps/example-app-3', 'v1/apps/example-app-3/response.json', None),
+    ('/v1/apps/example-app-3/machines', 'v1/apps/example-app-3/machines/response.json', None),
+    ('/v1/apps/example-app-3/volumes', None, None),
+    ('/v1/apps/example-app-4', 'v1/apps/example-app-4/response.json', None),
+    ('/v1/apps/example-app-4/machines', None, None),
+    ('/v1/apps/example-app-4/volumes', None, None),
+)
+API_REQUEST_SETS = {
+    'full': API_ROUTES,
+    'apps_only': API_ROUTES[:1],
+    'none': (),
+}
 
 
 @pytest.fixture(scope='session')
@@ -40,92 +59,62 @@ def instance():
     return INSTANCE
 
 
-def get_json_value_from_file(file_path):
+def _json_response(file_path: str) -> FakeHTTPResponse:
     with open(file_path, 'r') as file:
-        return json.load(file)
+        return FakeHTTPResponse(json_result=json.load(file))
 
 
-def get_url_path(url):
-    parsed_url = urlparse(url)
-    return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
+    with open(file_path, 'rb') as response_file:
+        content = response_file.read()
+    text = content.decode('utf-8')
+    return FakeHTTPResponse(content=content, text=text, lines=text.splitlines())
 
 
-@pytest.fixture
-def mock_responses():
-    responses_map = {}
-
-    def process_files(dir, response_parent):
-        for file in dir.rglob('*'):
-            if file.is_file() and file.stem != ".slash":
-                relative_dir_path = (
-                    "/"
-                    + (str(file.parent.relative_to(dir)) if str(file.parent.relative_to(dir)) != "." else "")
-                    + ("/" if (file.parent / ".slash").is_file() else "")
-                )
-                if relative_dir_path not in response_parent:
-                    response_parent[relative_dir_path] = {}
-                json_data = get_json_value_from_file(file)
-                response_parent[relative_dir_path][file.stem] = json_data
-
-    def process_dir(dir, response_parent):
-        response_parent[dir.name] = {}
-        process_files(dir, response_parent[dir.name])
-
-    def create_responses_tree():
-        root_dir_path = os.path.join(get_here(), 'fixtures', 'machines-api')
-        method_subdirs = [d for d in Path(root_dir_path).iterdir() if d.is_dir() and d.name == 'GET']
-        for method_subdir in method_subdirs:
-            process_dir(method_subdir, responses_map)
-
-    def method(method, url, file='response', headers=None, params=None):
-        filename = file
-        request_path = url
-        request_path = request_path.replace('?', '/')
-        if params:
-            param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
-            request_path = f'{url}/{param_string}'
-
-        response = responses_map.get(method, {}).get(request_path, {}).get(filename)
-        return response
-
-    create_responses_tree()
-    yield method
+def _not_found_response(url: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        status_code=404,
+        status_error=HTTPClientStatusError('404 Client Error'),
+        url=url,
+    )
 
 
 @pytest.fixture
-def mock_http_call(mock_responses):
-    def call(method, url, file='response', headers=None, params=None):
-        response = mock_responses(method, url, file=file, headers=headers, params=params)
-        if response is not None:
-            return response
-        http_response = requests.models.Response()
-        http_response.status_code = 404
-        http_response.reason = "Not Found"
-        http_response.url = url
-        raise requests.exceptions.HTTPError(response=http_response)
-
-    yield call
-
-
-@pytest.fixture
-def mock_http_get(request, monkeypatch, mock_http_call):
+def mock_http_get(request, fake_http: FakeHTTPClient) -> Iterator[FakeHTTPClient]:
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
-    http_error = param.pop('http_error', {})
+    response_overrides = param.get('response_overrides', {})
+    request_set = param.get('request_set', 'full')
+    fixtures_dir = os.path.join(get_here(), 'fixtures')
+    intended_requests: list[RecordedRequest] = []
 
-    def get(url, *args, **kwargs):
-        method = 'GET'
-        url = get_url_path(url)
-        if http_error and url in http_error:
-            return http_error[url]
-        mock_status_code = mock.MagicMock(return_value=200)
-        if "/metrics" in url:
-            filepath = os.path.join(get_here(), 'fixtures', 'output.txt')
-            return MockResponse(file_path=filepath)
-        headers = kwargs.get('headers')
-        params = kwargs.get('params')
-        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
-        return mock.MagicMock(json=mock_json, status_code=mock_status_code)
+    def register_response(
+        url: str,
+        response: FakeHTTPResponse | Exception,
+        *,
+        options: dict[str, object] | None = None,
+    ) -> None:
+        fake_http.register_response('GET', url, response, match_options=options)
+        intended_requests.append(RecordedRequest('GET', url, options or {}))
 
-    mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
-    return mock_get
+    register_response(
+        INSTANCE['openmetrics_endpoint'],
+        _openmetrics_response(os.path.join(fixtures_dir, 'output.txt')),
+        options={'stream': True},
+    )
+
+    api_endpoint = INSTANCE['machines_api_endpoint']
+    for path, fixture_path, match_options in API_REQUEST_SETS[request_set]:
+        url = f'{api_endpoint}{path}'
+        response = response_overrides.get(path)
+        if response is None:
+            response = (
+                _not_found_response(url)
+                if fixture_path is None
+                else _json_response(os.path.join(fixtures_dir, 'machines-api', 'GET', fixture_path))
+            )
+        register_response(url, response, options=match_options)
+
+    yield fake_http
+
+    fake_http.assert_requests(intended_requests)
+    fake_http.assert_all_responses_consumed()

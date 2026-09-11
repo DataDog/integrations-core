@@ -1,0 +1,1 @@
+Catch backend-agnostic HTTP errors instead of ``requests`` exceptions, so connection failures and timeouts still report a critical service check.

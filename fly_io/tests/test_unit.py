@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import json
 import logging
 
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
@@ -23,6 +25,22 @@ from .metrics import (
     PROMETHEUS_METRICS_ONE_HOST,
     VOLUME_METRICS,
 )
+
+
+def _status_response(status_code: int) -> FakeHTTPResponse:
+    error_kind = 'Client Error' if status_code < 500 else 'Server Error'
+    return FakeHTTPResponse(
+        status_code=status_code,
+        status_error=HTTPClientStatusError(f'{status_code} {error_kind}'),
+    )
+
+
+def _invalid_json_response(text: str) -> FakeHTTPResponse:
+    return FakeHTTPResponse(
+        content=text.encode('utf-8'),
+        text=text,
+        json_error=json.JSONDecodeError('Expecting value', text, 0),
+    )
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -51,6 +69,11 @@ def test_check(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [pytest.param({'request_set': 'none'}, id='openmetrics only')],
+    indirect=True,
+)
 @pytest.mark.usefixtures('mock_http_get')
 def test_no_machines_endpoint(dd_run_check, aggregator, instance):
     no_rest_api = copy.deepcopy(instance)
@@ -94,11 +117,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps': MockResponse(status_code=500)}},
+            {'request_set': 'apps_only', 'response_overrides': {'/v1/apps': _status_response(500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/v1/apps': MockResponse(status_code=404)}},
+            {'request_set': 'apps_only', 'response_overrides': {'/v1/apps': _status_response(404)}},
             id='404',
         ),
     ],
@@ -107,7 +130,7 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_exception(dd_run_check, instance, aggregator):
     check = FlyIoCheck('fly_io', {}, [instance])
-    with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match=r'HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_metric("fly_io.machines_api.up", value=0)
@@ -123,8 +146,10 @@ def test_rest_api_exception(dd_run_check, instance, aggregator):
     [
         pytest.param(
             {
-                'http_error': {
-                    '/v1/apps/example-app-1/machines': MockResponse(json_data=[{'state': 'started', 'config': None}])
+                'response_overrides': {
+                    '/v1/apps/example-app-1/machines': FakeHTTPResponse(
+                        json_result=[{'state': 'started', 'config': None}]
+                    )
                 }
             },
             id='malformed response',
@@ -153,25 +178,31 @@ def test_bad_response_exception(dd_run_check, instance, aggregator, caplog):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get'),
+    ('mock_http_get', 'log_line'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-1/volumes': MockResponse(status_code=404)}},
-            id='http error',
+            {'response_overrides': {'/v1/apps/example-app-1/volumes': _status_response(404)}},
+            "Encountered an HTTP error in '_collect_volumes_for_app'"
+            " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]: "
+            "404 Client Error",
+            id='status error',
+        ),
+        pytest.param(
+            {'response_overrides': {'/v1/apps/example-app-1/volumes': HTTPClientError('transport failed')}},
+            "Encountered an HTTP error in '_collect_volumes_for_app'"
+            " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientError'>]: transport failed",
+            id='root error',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
+def test_http_error_logged_at_debug(dd_run_check, instance, aggregator, caplog, log_line):
     caplog.set_level(logging.DEBUG)
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
 
-    assert (
-        "Encountered a RequestException in '_collect_volumes_for_app' [<class 'requests.exceptions.HTTPError'>]: "
-        "404 Client Error: None for url: None" in caplog.text
-    )
+    assert log_line in caplog.text
 
     for metric in MOCKED_PROMETHEUS_METRICS:
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
@@ -180,6 +211,26 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
 
     for metric in MACHINE_INIT_METRICS:
         aggregator.assert_metric(metric['name'], metric['value'], count=metric['count'], tags=metric['tags'])
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {'response_overrides': {'/v1/apps/example-app-1/volumes': _invalid_json_response('<html>gateway</html>')}},
+            id='non-json body',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_non_json_body_logged_at_debug(dd_run_check, instance, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+
+    assert "Encountered an HTTP error in '_collect_volumes_for_app'" in caplog.text
+    assert "Encountered an Exception in '_collect_volumes_for_app'" not in caplog.text
 
 
 @pytest.mark.usefixtures("mock_http_get")
@@ -218,20 +269,28 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
     ('mock_http_get, log_lines'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-2': MockResponse(status_code=404)}},
-            ['RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404'],
+            {'response_overrides': {'/v1/apps/example-app-2': _status_response(404)}},
+            [
+                "Encountered an HTTP error in '_get_app_status'"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
+                " 404 Client Error"
+            ],
             id='one app',
         ),
         pytest.param(
             {
-                'http_error': {
-                    '/v1/apps/example-app-1': MockResponse(status_code=404),
-                    '/v1/apps/example-app-2': MockResponse(status_code=500),
+                'response_overrides': {
+                    '/v1/apps/example-app-1': _status_response(404),
+                    '/v1/apps/example-app-2': _status_response(500),
                 }
             },
             [
-                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404',
-                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 500',
+                "Encountered an HTTP error in '_get_app_status'"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
+                " 404 Client Error",
+                "Encountered an HTTP error in '_get_app_status'"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPClientStatusError'>]:"
+                " 500 Server Error",
             ],
             id='two apps',
         ),

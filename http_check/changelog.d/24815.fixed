@@ -1,0 +1,1 @@
+Fix peer certificate retrieval when ``use_cert_from_response`` is enabled.
