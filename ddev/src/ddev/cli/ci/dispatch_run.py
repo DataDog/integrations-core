@@ -6,14 +6,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+from ddev.utils.git import ChangedFile
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from ddev.cli.application import Application
     from ddev.monitoring import ComponentMonitor
-    from ddev.utils.git import ChangedFile
     from ddev.utils.github_async import AsyncGitHubClient
     from ddev.utils.github_async.models import PullRequest, PullRequestRef, PullRequestSimple
+
+RUN_MANIFEST_NAME = 'run.json'
 
 
 @dataclass(frozen=True)
@@ -80,25 +87,65 @@ class PullRequestResolver:
         return self.base_ref is None or pull.base.ref == self.base_ref
 
 
-@dataclass(frozen=True)
-class ResolvedRun:
+class ResolvedRun(BaseModel):
     """What the run is testing, and the changes it is responsible for.
 
-    ``changed_files`` is None when the plan does not come from a comparison, which is `--all`.
+    ``changed_files`` is None when the plan does not come from a comparison, which is `--all`,
+    so a null list is also how a manifest says the run covers every target. The model doubles as
+    the run manifest's schema: it is written as JSON for a later invocation to load instead of
+    resolving again, and `schema_version` gates files this ddev cannot interpret. Bump it
+    whenever a field changes meaning.
     """
 
-    base_sha: str
-    checkout_sha: str
+    model_config = ConfigDict(frozen=True, extra='forbid', populate_by_name=True)
+
+    schema_version: Literal[1] = 1
+    repository: str
+    base_sha: str = Field(alias='commit_sha')
+    checkout_sha: str = Field(alias='checkout_ref')
     branch: str
     changed_files: list[ChangedFile] | None
     pr_number: int | None = None
     target_branch: str | None = None
+    target_sha: str | None = None
     is_fork: bool = False
+
+
+def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
+    """Write the resolved run's manifest as machine-readable JSON under its output directory.
+
+    Written before planning, so the manifest exists for `--resolve-only` runs, dry runs, and runs
+    whose plan turns out empty. A stale or missing pull request resolves no run and so produces
+    no manifest.
+    """
+    base_path.mkdir(parents=True, exist_ok=True)
+    (base_path / RUN_MANIFEST_NAME).write_text(f'{run.model_dump_json(by_alias=True, indent=2)}\n', encoding='utf-8')
+
+
+def load_run_manifest(app: Application, path: Path, *, repository: str) -> ResolvedRun:
+    """Read a run resolved by an earlier invocation, refusing a manifest that cannot be trusted.
+
+    The manifest is the run: nothing is looked up again, so a file that does not describe a usable
+    run stops the invocation here rather than planning from something unreadable. The repository
+    check sits outside the model because only this caller knows which repository was asked for.
+    """
+    try:
+        run = ResolvedRun.model_validate_json(path.read_text(encoding='utf-8'))
+    except OSError as error:
+        app.abort(f'Could not read run manifest {path}: {error}')
+    except ValidationError as error:
+        app.abort(f'Run manifest {path} is not a valid run: {error}')
+
+    if run.repository.casefold() != repository.casefold():
+        app.abort(f'Run manifest {path} describes repository {run.repository}, not {repository}.')
+
+    return run
 
 
 def resolve_run(
     app: Application,
     *,
+    repository: str,
     pr_resolver: PullRequestResolver | None,
     commit: str | None,
     token: str,
@@ -107,7 +154,9 @@ def resolve_run(
 ) -> ResolvedRun | None:
     """Resolve what to test, reporting why a run has nothing left to test before returning None."""
     if pr_resolver is not None:
-        return resolve_pull_request_run(app, resolver=pr_resolver, token=token, all_targets=all_targets)
+        return resolve_pull_request_run(
+            app, repository=repository, resolver=pr_resolver, token=token, all_targets=all_targets
+        )
 
     tested_commit = commit or app.repo.git.latest_commit().sha
     changed_files = None
@@ -120,6 +169,7 @@ def resolve_run(
             app.abort(str(error))
 
     return ResolvedRun(
+        repository=repository,
         base_sha=tested_commit,
         checkout_sha=tested_commit,
         branch=app.repo.git.current_branch(),
@@ -141,6 +191,7 @@ def head_is_fork(head: PullRequestRef, *, owner: str, repo: str) -> bool:
 def resolve_pull_request_run(
     app: Application,
     *,
+    repository: str,
     resolver: PullRequestResolver,
     token: str,
     all_targets: bool,
@@ -149,7 +200,6 @@ def resolve_pull_request_run(
     import asyncio
 
     import httpx
-    from pydantic import ValidationError
 
     from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_pull_request
     from ddev.utils.github_async import async_github_client
@@ -173,12 +223,14 @@ def resolve_pull_request_run(
                 )
 
             return ResolvedRun(
+                repository=repository,
                 base_sha=pull.head.sha,
                 checkout_sha=f'refs/pull/{pull.number}/merge',
                 branch=pull.head.ref,
                 changed_files=changed_files,
                 pr_number=pull.number,
                 target_branch=pull.base.ref,
+                target_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
             )
 
