@@ -88,7 +88,8 @@ class SqlserverDatabaseMetricsBase:
         its slot across Agent restarts and does not get reshuffled when autodiscovery adds or removes another
         database. Python's built-in hash() is randomized per process by PYTHONHASHSEED and cannot be used here.
         '''
-        if database_count <= 1 or collection_interval is None:
+        if database_count <= 1 or not collection_interval or collection_interval <= 0:
+            # A non-positive interval is rejected later, by Query; do not turn that into a ZeroDivisionError here.
             return None
 
         database_hash = hashlib.sha256(database.encode()).digest()

@@ -265,6 +265,31 @@ class TestQueryExecutor:
             # Each query fires exactly once in the interval, and at its own second -- not all together.
             assert fired == {0: [interval], 3: [3], 7: [7]}
 
+    def test_collection_phase_offset_equal_to_interval_uses_phase_zero(self, aggregator):
+        """An offset that is a multiple of the interval must not trigger twice in the same window."""
+        interval = 10
+        queries = [
+            {
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'test.metric_with_offset', 'type': 'gauge'}],
+                'collection_interval': interval,
+                'collection_phase_offset': interval,
+            }
+        ]
+        now = 100
+        with mock.patch('datadog_checks.base.utils.db.query.get_timestamp', side_effect=lambda: now):
+            qe = QueryExecutor(mock_executor([[1]]), AgentCheck('test', {}, [{}]), queries)
+            qe.compile_queries()
+
+            qe.execute()
+            qe.execute()
+            aggregator.assert_metric('test.metric_with_offset', count=1)
+
+            now += interval
+            qe.execute()
+            aggregator.assert_metric('test.metric_with_offset', count=2)
+
     @pytest.mark.parametrize(
         'collection_interval, expected_exception',
         [
