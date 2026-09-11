@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from typing import Any
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
@@ -256,7 +257,14 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_method = self.count if metric_type == 'derive' else self.gauge
             metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
-    def _submit_vcpu_metric(self, resource, resource_type, resource_id, tags, hostname):
+    def _submit_vcpu_metric(
+        self,
+        resource: dict[str, Any],
+        resource_type: str,
+        resource_id: str,
+        point_tags: list[str],
+        hostname: str | None,
+    ) -> None:
         """Submit the vCPU count for a VM or node, for usage metering.
 
         Only VMs and nodes are metered. Container `maxcpu` falls back to the whole host's thread
@@ -280,10 +288,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             )
             return
 
-        # Usage metering requires `proxmox_type` on the point itself. For VMs and nodes the
-        # caller's `tags` is empty because their tags are routed to external host tags instead,
-        # and external tags never reach the metric payload at metering ingest.
-        self.gauge(f'{resource_type}.cpu.max', maxcpu, tags=tags, hostname=hostname)
+        # Usage metering requires `proxmox_type` on the point itself. In
+        # `_collect_resource_metrics` a VM's or node's per-resource `tags` is deliberately empty
+        # (its tags go on external host tags instead), so metering has to be handed the full tag
+        # list directly — external tags never reach the metric payload at metering ingest.
+        self.gauge(f'{resource_type}.cpu.max', maxcpu, tags=point_tags, hostname=hostname)
 
     def _collect_resource_metrics(self):
         self.log.debug("Collecting resource metrics.")
@@ -330,7 +339,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
             hostname = None
 
-            if (resource_type_remapped == VM_RESOURCE or resource_type_remapped == NODE_RESOURCE) and status == 0:
+            if resource_type_remapped in (VM_RESOURCE, NODE_RESOURCE) and status == 0:
                 # don't collect information about powered off VMs and nodes
                 self.log.debug("Skipping resource %s as it is powered off.", resource_name)
                 continue
