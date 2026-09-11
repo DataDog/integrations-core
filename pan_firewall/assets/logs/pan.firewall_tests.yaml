@@ -125,16 +125,11 @@ tests:
           geoip: {}
           ip: "10.2.75.41"
       ocsf:
-        activity_id: 1
-        activity_name: "Logon"
-        auth_protocol: "alert"
-        category_name: "Identity & Access Management"
-        category_uid: 3
-        class_name: "Authentication"
-        class_uid: 3002
-        dst_endpoint:
-          hostname: "tab"
-        logon_type: "securityApp"
+        activity_id: 99
+        activity_name: "AUTHENTICATION"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
         metadata:
           event_code: "AUTHENTICATION"
           product:
@@ -143,17 +138,9 @@ tests:
             vendor_name: "Palo Alto Networks"
           sequence: 486021038
           version: "1.5.0"
-        service:
-          name: "serverprofile"
         severity: "Unknown"
         severity_id: 0
-        src_endpoint:
-          ip: "10.2.75.41"
-        status: "Unknown"
-        status_id: 0
         time: 1557161033000
-        user:
-          name: "Jaydeep"
       repeatcnt: 1
       seqno: 486021038
       serial: "001801010877"
@@ -916,4 +903,5 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
+
 
