@@ -15,7 +15,7 @@ ad_identifiers:
 #
 cel_selector:
   containers:
-  - container.image.reference.contains("fluxcd/")
+  - container.image.reference.startsWith("fluxcd/") || container.image.reference.contains("/fluxcd/")
 
 ## Enables configuration discovery
 #

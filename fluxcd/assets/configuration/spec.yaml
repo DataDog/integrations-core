@@ -38,5 +38,5 @@ files:
         containers:
         # Narrow down matching containers since the controller names are generic
         # and don't identify the container as being part of FluxCD.
-        - container.image.reference.contains("fluxcd/")
+        - container.image.reference.startsWith("fluxcd/") || container.image.reference.contains("/fluxcd/")
   - template: auto_conf/discovery
