@@ -40,14 +40,17 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverDatabaseMetricsAsyncJob,
     SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
+    SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
+    SqlserverIndexUsageMetrics,
     SqlserverMasterFilesMetrics,
     SqlserverOsSchedulersMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+    SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
     SQLServerXESessionMetrics,
 )
@@ -966,10 +969,18 @@ class SQLServer(DatabaseCheck):
     @property
     def _database_level_database_metrics(self):
         # return the list of database metrics that are collected for each database
-        return [
-            SqlserverTempDBFileSpaceUsageMetrics,
-            SqlserverDatabaseFilesMetrics,
-        ]
+        database_metrics = [SqlserverTempDBFileSpaceUsageMetrics]
+        if not self._config.run_heavy_collectors_async:
+            database_metrics.extend(
+                [
+                    SqlserverIndexUsageMetrics,
+                    SqlserverDBFragmentationMetrics,
+                ]
+            )
+        database_metrics.append(SqlserverDatabaseFilesMetrics)
+        if not self._config.run_heavy_collectors_async:
+            database_metrics.append(SqlserverTableSizeMetrics)
+        return database_metrics
 
     @property
     def database_metrics(self):

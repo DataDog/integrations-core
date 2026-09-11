@@ -60,7 +60,12 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
             config.database_metrics_config['table_size_metrics'],
         )
         enabled_metric_configs = tuple(metric_config for metric_config in metric_configs if metric_config['enabled'])
-        enabled = not config.only_custom_queries and not config.proc and bool(enabled_metric_configs)
+        enabled = (
+            config.run_heavy_collectors_async
+            and not config.only_custom_queries
+            and not config.proc
+            and bool(enabled_metric_configs)
+        )
         collection_interval = max(
             float(config.min_collection_interval),
             min(

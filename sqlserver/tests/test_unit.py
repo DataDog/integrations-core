@@ -1256,6 +1256,7 @@ def test_set_default_driver_conf_linux():
 
 @windows_ci
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker, run_database_metrics_synchronously):
+    run_database_metrics_synchronously(instance_docker)
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     check_tags = sqlserver_check._config.tags + [

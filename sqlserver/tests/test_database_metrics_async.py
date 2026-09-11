@@ -28,10 +28,9 @@ HEAVY_DATABASE_METRIC_TYPES = (
 
 
 @pytest.mark.unit
-def test_stored_procedure_does_not_run_async_database_metrics(
+def test_async_database_metrics_job_requires_opt_in(
     init_config, instance_docker_metrics, run_database_metrics_synchronously
 ):
-    instance_docker_metrics['stored_procedure'] = 'pyStoredProc'
     check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     check.database_metrics_job.run_job = mock.MagicMock()
 
@@ -41,14 +40,30 @@ def test_stored_procedure_does_not_run_async_database_metrics(
 
 
 @pytest.mark.unit
-def test_heavy_database_metrics_are_owned_by_async_job(init_config, instance_docker_metrics):
+def test_stored_procedure_does_not_run_async_database_metrics(
+    init_config, instance_docker_metrics, run_database_metrics_synchronously
+):
+    instance_docker_metrics['stored_procedure'] = 'pyStoredProc'
+    run_database_metrics_synchronously(instance_docker_metrics)
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.database_metrics_job.run_job = mock.MagicMock()
+
+    check.run_async_jobs([])
+
+    check.database_metrics_job.run_job.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('run_async', [False, True])
+def test_heavy_database_metrics_follow_async_configuration(init_config, instance_docker_metrics, run_async):
+    instance_docker_metrics['database_metrics'] = {'run_heavy_collectors_async': run_async}
     check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     check.databases = {Database('database1')}
 
     synchronous_metrics = check.database_metrics
     async_metrics = check.database_metrics_job.database_metrics
 
-    assert not any(isinstance(metric, HEAVY_DATABASE_METRIC_TYPES) for metric in synchronous_metrics)
+    assert any(isinstance(metric, HEAVY_DATABASE_METRIC_TYPES) for metric in synchronous_metrics) is not run_async
     assert any(isinstance(metric, SqlserverTempDBFileSpaceUsageMetrics) for metric in synchronous_metrics)
     assert any(isinstance(metric, SqlserverDatabaseFilesMetrics) for metric in synchronous_metrics)
     assert {type(metric) for metric in async_metrics} == set(HEAVY_DATABASE_METRIC_TYPES)
@@ -79,6 +94,7 @@ def test_async_database_metrics_job_waits_until_an_enabled_collector_is_due(
         'index_usage_metrics': {'enabled': True, 'collection_interval': 60},
         'db_fragmentation_metrics': {'enabled': True, 'collection_interval': 120},
     }
+    run_database_metrics_synchronously(instance_docker_metrics)
     check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     job = check.database_metrics_job
     job.run_job = mock.MagicMock()
