@@ -16,6 +16,7 @@ from datadog_checks.proxmox import ProxmoxCheck
 from .common import (
     ALL_EVENTS,
     ALL_METRICS,
+    BASE_TAGS,
     CONTAINER_PERF_METRICS,
     NO_CONTAINER_EVENTS,
     NODE_PERF_METRICS,
@@ -26,6 +27,8 @@ from .common import (
     STORAGE_PERF_METRICS,
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
+    cluster_resources_with_offline_node,
+    cluster_resources_with_vm_maxcpu,
 )
 
 
@@ -40,7 +43,7 @@ def test_api_up(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -412,6 +415,164 @@ def test_resource_metrics(dd_run_check, aggregator, instance):
     for metric in RESOURCE_METRICS:
         aggregator.assert_metric(metric, count=0, tags=sdn_tags)
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
+
+
+@pytest.mark.parametrize(
+    ('metric', 'value', 'hostname', 'resource_tags'),
+    [
+        pytest.param(
+            'proxmox.vm.cpu.max',
+            2,
+            'debian',
+            [
+                'proxmox_type:vm',
+                'proxmox_name:VM 100',
+                'proxmox_id:qemu/100',
+                'proxmox_node:ip-122-82-3-112',
+            ],
+            id='vm',
+        ),
+        pytest.param(
+            'proxmox.node.cpu.max',
+            72,
+            'ip-122-82-3-112',
+            [
+                'proxmox_type:node',
+                'proxmox_type:host',
+                'proxmox_name:ip-122-82-3-112',
+                'proxmox_id:node/ip-122-82-3-112',
+            ],
+            id='node',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_vcpu_metering_metric(dd_run_check, aggregator, instance, metric, value, hostname, resource_tags):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # `proxmox_type` has to be on the point itself: for VMs and nodes the check routes the
+    # resource tags to external host tags, which never reach the payload at metering ingest.
+    aggregator.assert_metric(metric, value, hostname=hostname, tags=BASE_TAGS + resource_tags)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_skip_containers(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # A default-configured container reports its host's entire thread count as `maxcpu`
+    # (lxc/111 reports 72 on a 72-thread node), so metering containers would bill each one
+    # at full host CPU.
+    aggregator.assert_metric('proxmox.container.cpu.max', count=0)
+    # Containers are still collected — the assertion above is about the vCPU point, not the
+    # resource, and would also pass if containers stopped being collected altogether.
+    aggregator.assert_metric('proxmox.container.count', at_least=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_skip_powered_off_vm(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # qemu/101 is stopped but still carries maxcpu=2.
+    aggregator.assert_metric(
+        'proxmox.vm.cpu.max',
+        count=0,
+        tags=BASE_TAGS
+        + [
+            'proxmox_type:vm',
+            'proxmox_name:VM 101',
+            'proxmox_id:qemu/101',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+    )
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_offline_node(),
+                    )
+                }
+            },
+            id='offline_node',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_skip_offline_node(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=0)
+    # The rest of the inventory still emits, so the assertion above fails if the node really
+    # is skipped and not merely because the payload override stopped matching.
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_count', 'expected_value'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(None),
+                    )
+                }
+            },
+            0,
+            None,
+            id='maxcpu_absent',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(0),
+                    )
+                }
+            },
+            1,
+            0,
+            id='maxcpu_zero',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_distinguish_absent_maxcpu_from_zero(
+    dd_run_check, aggregator, instance, expected_count, expected_value
+):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # An absent `maxcpu` is skipped; a zero one is a real value and must still be emitted. A
+    # truthiness check instead of `is not None` would silently drop the zero.
+    if expected_value is None:
+        aggregator.assert_metric('proxmox.vm.cpu.max', count=expected_count)
+    else:
+        aggregator.assert_metric('proxmox.vm.cpu.max', expected_value, count=expected_count)
+    # The VM itself is still collected either way, so neither assertion above can pass merely
+    # because the payload override dropped the resource.
+    aggregator.assert_metric('proxmox.vm.count', at_least=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_metering_metrics_respect_resource_filters(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['resource_filters'] = [
+        {'type': 'exclude', 'resource': 'vm', 'property': 'resource_name', 'patterns': ['VM 100']},
+    ]
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=1)
 
 
 @pytest.mark.usefixtures('mock_http_get')
