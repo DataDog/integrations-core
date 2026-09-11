@@ -79,7 +79,15 @@ def test_check_dbm_enabled_config(aggregator, dd_run_check, init_config, instanc
 @pytest.mark.parametrize(
     'database_autodiscovery,dbm_enabled', [(True, True), (True, False), (False, True), (False, False)]
 )
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery, dbm_enabled):
+def test_check_docker(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker,
+    database_autodiscovery,
+    dbm_enabled,
+    run_database_metrics_synchronously,
+):
     instance_docker['database_autodiscovery'] = database_autodiscovery
     # test that all default integration metrics are sent regardless of
     # if dbm is enabled or not.
