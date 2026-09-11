@@ -527,7 +527,11 @@ def build_section_label(header: str, total: str | None) -> str:
 
 def _signed_human_size(size_bytes: int) -> str:
     human = convert_to_human_readable_size(size_bytes)
-    return f"+{human}" if size_bytes > 0 else human
+    if size_bytes > 0:
+        return f"\U0001f53a +{human}"
+    elif size_bytes < 0:
+        return f"\U0001f7e2 {human}"
+    return human
 
 
 def save_markdown_diff(

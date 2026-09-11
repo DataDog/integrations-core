@@ -459,10 +459,10 @@ def test_save_markdown_diff_always_shows_totals_table():
     written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
     assert "### Uncompressed" in written_content
     assert "| linux-x86_64 | macos-x86_64 | windows-x86_64 |" in written_content
-    assert "| +1000 B | -400 B | 0 B |" in written_content
+    assert "| \U0001f53a +1000 B | \U0001f7e2 -400 B | 0 B |" in written_content
     assert "<summary>Details</summary>" in written_content
-    assert "| module1 |  | Dependency | +1000 B | 0 B | 0 B |" in written_content
-    assert "| module2 |  | Dependency | 0 B | -400 B | 0 B |" in written_content
+    assert "| module1 |  | Dependency | \U0001f53a +1000 B | 0 B | 0 B |" in written_content
+    assert "| module2 |  | Dependency | 0 B | \U0001f7e2 -400 B | 0 B |" in written_content
 
 
 def test_save_markdown_diff_no_changes_collapses_details():
