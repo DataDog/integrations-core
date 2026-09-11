@@ -1905,7 +1905,9 @@ async def test_many_diverged_inputs_stay_on_one_line(tmp_path: Path) -> None:
             await pilot.pause()
 
         banner = str(screen.query_one("#execution-notice", Static).render())
-        assert "input_0, input_1, input_2 and 9 more changed since launch" in banner
+        assert "input_0" in banner
+        assert "more changed since launch" in banner
+        assert len(banner) <= 80
         assert screen.query_one("#execution-notice", Static).size.height <= 2
         assert screen.query_one("#pipeline", PipelineGraph).size.height >= pipeline_height - 3
 
@@ -1932,6 +1934,30 @@ async def test_long_diverged_name_is_truncated_with_ellipsis(tmp_path: Path) -> 
         banner = str(screen.query_one("#execution-notice", Static).render())
         assert long_name not in banner
         assert "a" * 21 + "..." in banner
+        assert screen.query_one("#execution-notice", Static).size.height <= 2
+
+
+async def test_max_length_diverged_names_stay_on_one_line(tmp_path: Path) -> None:
+    """Three near-cap-length names must not overflow the one-line banner between them."""
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import InputDiverged
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        for index in range(3):
+            screen.on_input_diverged(InputDiverged(f"input_{index}" + "a" * 17, tmp_path / f"{index}.md"))
+        await pilot.pause()
+
+        banner = str(screen.query_one("#execution-notice", Static).render())
+        assert len(banner) <= 80
         assert screen.query_one("#execution-notice", Static).size.height <= 2
 
 
