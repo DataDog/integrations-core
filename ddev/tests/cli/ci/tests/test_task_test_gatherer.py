@@ -482,7 +482,7 @@ def test_minimum_base_package_replica_organizes_beside_its_original(tmp_path: Pa
 
     original = _batch_job("ntp (py3.13)")
     replica = make_job(
-        "minimum-base-package-ntp (py3.13)",
+        "ntp (MBP) (py3.13)",
         target="ntp",
         minimum_base_package=True,
         coverage=False,

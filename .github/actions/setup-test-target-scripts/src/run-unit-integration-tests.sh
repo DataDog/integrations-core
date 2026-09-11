@@ -26,6 +26,9 @@ else
   EXTRA_FLAGS=""
   COV_FLAG="--cov"
   VERBOSE_FLAG="-v"
+  # ddev -v sets HATCH_VERBOSE=2, which makes Hatch pass -v to its native uv commands;
+  # HATCH_QUIET=1 offsets that to net verbosity 1, so uv stays quiet but ddev/pytest verbosity is kept.
+  export HATCH_QUIET=1
 fi
 
 # Parse INPUT_PYTEST_ARGS with proper quote handling using eval

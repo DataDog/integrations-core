@@ -14,9 +14,12 @@ from itertools import count
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import conclusion_to_status
+from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
@@ -59,6 +62,10 @@ def encode_job_list(jobs: list[dict[str, Any]]) -> str:
     return base64.b64encode(gzip.compress(raw, mtime=0)).decode()
 
 
+# Limit the exception summary, not the detailed validation log.
+RESPONSE_REASON_LIMIT = 240
+
+
 @dataclass(frozen=True)
 class TestRunnerOptions:
     """Configuration for a ``TaskTestRunner``."""
@@ -98,6 +105,31 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._logger = logging.getLogger(f"{__name__}.{name}")
         self.monitor = monitor
 
+    def _response_failure(
+        self, operation: str, log_extra: dict[str, Any], error: ValidationError
+    ) -> FatalProcessingError:
+        """Log every validation error and return a bounded, contextual failure."""
+        batch_id = log_extra.get("batch_id", "unknown batch")
+        run = f", run {log_extra['run_id']}" if "run_id" in log_extra else ""
+        self._logger.error(
+            "Invalid GitHub response while %s (batch %s%s):\n%s",
+            operation,
+            batch_id,
+            run,
+            error,
+            extra=log_extra,
+        )
+        count = error.error_count()
+        reason = " ".join(
+            (
+                f"Invalid GitHub response while {operation} (batch {batch_id}{run}): "
+                f"{count} validation error{'s' if count != 1 else ''} in {error.title}. See logs for details."
+            ).split()
+        )
+        if len(reason) > RESPONSE_REASON_LIMIT:
+            reason = reason[: RESPONSE_REASON_LIMIT - 3].rstrip() + "..."
+        return FatalProcessingError(reason)
+
     async def process_message(self, message: TestBatch):
         log_extra: dict[str, Any] = {"batch_id": message.batch_id}
         run_id = await self._dispatch_batch(message, log_extra)
@@ -105,14 +137,17 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         await self._collect_results(message, run_id, run.data, jobs, log_extra)
 
     async def _dispatch_batch(self, message: TestBatch, log_extra: dict[str, Any]) -> int:
-        dispatch = await self._client.create_workflow_dispatch(
-            self._options.owner,
-            self._options.repo,
-            self._options.workflow_id,
-            ref=self._options.ref,
-            inputs=self._build_inputs(message),
-            return_run_details=True,
-        )
+        try:
+            dispatch = await self._client.create_workflow_dispatch(
+                self._options.owner,
+                self._options.repo,
+                self._options.workflow_id,
+                ref=self._options.ref,
+                inputs=self._build_inputs(message),
+                return_run_details=True,
+            )
+        except ValidationError as error:
+            raise self._response_failure("dispatching the batch", log_extra, error) from error
         run_id = dispatch.data.workflow_run_id
         log_extra["run_id"] = run_id
         self._runs_in_flight[message.batch_id] = run_id
@@ -159,14 +194,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._logger.info("BatchFinished emitted", extra=log_extra)
 
     async def cancel_dispatched_runs(self) -> None:
-        """Cancel the runs this runner dispatched that have not finished.
-
-        The batch workflow's concurrency group already cancels a superseded revision's batches. This
-        covers what the group cannot see: a cancellation or a closed pull request with no follow-up
-        push, a plan that shrank, and the minutes between this process being killed and the next
-        batches being dispatched. Concurrent, because whatever budget the caller has is shared by
-        all of them.
-        """
+        """Concurrently cancel all tracked unfinished runs."""
         if not self._runs_in_flight:
             return
 
@@ -194,7 +222,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         sequences = count(1)
         known_jobs: dict[str, WorkflowJob] = {}
         while True:
-            run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
+            try:
+                run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
+            except ValidationError as error:
+                raise self._response_failure("polling workflow status", log_extra, error) from error
             completed = run.data.is_completed
             # Shutdown must not try to cancel a completed run while its artifacts are still being collected.
             if completed:
@@ -203,7 +234,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
             # Report workflow progress first. The jobs request may be delayed by the API rate limit.
             progress = self._publish_workflow_progress(message, run_id, run.data, known_jobs, next(sequences))
-            await self._refresh_jobs(run_id, known_jobs, log_extra)
+            await self._refresh_jobs(run_id, known_jobs, log_extra, "listing workflow jobs")
             self._publish_job_progress(message.id, progress, known_jobs, next(sequences))
 
             if completed:
@@ -238,9 +269,11 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self.submit_message(progress)
         return progress
 
-    async def _refresh_jobs(self, run_id: int, known_jobs: dict[str, WorkflowJob], log_extra: dict[str, Any]) -> None:
+    async def _refresh_jobs(
+        self, run_id: int, known_jobs: dict[str, WorkflowJob], log_extra: dict[str, Any], operation: str
+    ) -> None:
         # A failed or incomplete listing must not remove jobs we already know about.
-        for job in await self._list_jobs(run_id, log_extra):
+        for job in await self._list_jobs(run_id, log_extra, operation):
             previous = known_jobs.get(job.name)
             # A rerun has a new job ID. An older state for the same job must not erase its completed result.
             if (
@@ -273,11 +306,11 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     ) -> list[WorkflowJob]:
         known_jobs = {job.name: job for job in observed_jobs}
         # The jobs response may lag behind the workflow status. Refresh it after downloading artifacts.
-        await self._refresh_jobs(run_id, known_jobs, log_extra)
+        await self._refresh_jobs(run_id, known_jobs, log_extra, "reconciling final workflow jobs")
         # An unfinished job has no result yet. Do not mistake that for a test failure.
         return [job for job in known_jobs.values() if job.status is WorkflowJobStatus.COMPLETED]
 
-    async def _list_jobs(self, run_id: int, log_extra: dict[str, Any]) -> list[WorkflowJob]:
+    async def _list_jobs(self, run_id: int, log_extra: dict[str, Any], operation: str) -> list[WorkflowJob]:
         """Fetch the run's jobs. If a later page fails, keep the jobs already fetched."""
         jobs: list[WorkflowJob] = []
         try:
@@ -285,6 +318,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 self._options.owner, self._options.repo, run_id, per_page=100
             ):
                 jobs.extend(page.data.jobs)
+        except ValidationError as error:
+            raise self._response_failure(operation, log_extra, error) from error
         except Exception:
             self._logger.warning("Failed to list workflow jobs", extra=log_extra, exc_info=True)
         return jobs
@@ -339,6 +374,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                         failures.append((artifact.id, artifact.name))
                     else:
                         artifact_dirs[artifact.name] = target
+        except ValidationError as error:
+            raise self._response_failure("listing workflow artifacts", log_extra, error) from error
         except Exception:
             self._logger.warning("Failed to list workflow run artifacts", extra=log_extra, exc_info=True)
         if failures:
