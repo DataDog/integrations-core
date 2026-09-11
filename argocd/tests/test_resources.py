@@ -12,6 +12,7 @@ from datadog_checks.argocd.resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
+    PROJECT_INCLUDE,
     REPOSITORY_INCLUDE,
 )
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -25,6 +26,7 @@ ARGOCD_ENDPOINT = "https://argocd.example.com"
 APPLICATIONS_URL = f"{ARGOCD_ENDPOINT}/api/v1/applications"
 CLUSTERS_URL = f"{ARGOCD_ENDPOINT}/api/v1/clusters"
 REPOSITORIES_URL = f"{ARGOCD_ENDPOINT}/api/v1/repositories"
+PROJECTS_URL = f"{ARGOCD_ENDPOINT}/api/v1/projects"
 
 
 def _application(
@@ -51,6 +53,17 @@ def _cluster(server: str, *, name: str = "prod", username: str = "", password: s
 
 def _repository(repo: str, *, username: str = "", password: str = "", ssh_key: str = "") -> dict:
     return {"repo": repo, "username": username, "password": password, "sshPrivateKey": ssh_key, "type": "git"}
+
+
+def _project(name: str, *, namespace: str = "argocd") -> dict:
+    return {
+        "metadata": {"name": name, "namespace": namespace},
+        "spec": {
+            "description": "team project",
+            "sourceRepos": ["https://github.com/org/*"],
+            "destinations": [{"server": "https://kubernetes.default.svc", "namespace": namespace}],
+        },
+    }
 
 
 def _items_response(items: list[dict], status_code: int = 200) -> MockResponse:
@@ -82,6 +95,72 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
     assert by_type["argocd_repository"]["key"] == "argocd.example.com|https://github.com/team/repo"
     for spec_type in ("argocd_application", "argocd_cluster", "argocd_repository"):
         aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=[f"resource_type:{spec_type}"])
+
+
+def test_collect_emits_projects_when_enabled(aggregator, mock_http_response_per_endpoint):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+            PROJECTS_URL: [_items_response([_project("team-a")])],
+        }
+    )
+    check = build_check(genresources_collect_projects=True)
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    by_type = {call.kwargs["type"]: call.kwargs for call in submit.call_args_list}
+    assert by_type["argocd_project"]["key"] == "argocd.example.com|argocd|team-a"
+    aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=["resource_type:argocd_project"])
+
+
+def test_collect_skips_projects_when_disabled(mock_http_response_per_endpoint):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = build_check(genresources_collect_projects=False)
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    emitted_types = {call.kwargs["type"] for call in submit.call_args_list}
+    assert "argocd_project" not in emitted_types
+
+
+def test_project_include_contains_policy_restriction_fields():
+    assert {
+        "spec.namespaceResourceWhitelist[*].kind",
+        "spec.namespaceResourceBlacklist[*].kind",
+        "spec.clusterResourceWhitelist[*].kind",
+        "spec.clusterResourceBlacklist[*].kind",
+        "spec.permitOnlyProjectScopedClusters",
+    } <= set(PROJECT_INCLUDE["paths"])
+
+
+def test_collect_scrubs_credentials_from_project_source_repos(mock_http_response_per_endpoint):
+    project = _project("team-a")
+    project["spec"]["sourceRepos"] = ["https://user:tok@github.com/org/private"]
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+            PROJECTS_URL: [_items_response([project])],
+        }
+    )
+    check = build_check(genresources_collect_projects=True)
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    project_call = next(c for c in submit.call_args_list if c.kwargs["type"] == "argocd_project")
+    assert project_call.kwargs["fields"]["spec"]["sourceRepos"] == ["https://github.com/org/private"]
 
 
 def test_application_include_contains_prd_fields_required_for_idp_catalog():

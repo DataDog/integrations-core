@@ -128,4 +128,40 @@ REPOSITORY_INCLUDE: dict[str, tuple[str, ...]] = {
     "annotation_keys": (),
 }
 
+PROJECT_INCLUDE: dict[str, tuple[str, ...]] = {
+    "paths": (
+        "metadata.name",
+        "metadata.namespace",
+        "metadata.uid",
+        "metadata.creationTimestamp",
+        "spec.description",
+        "spec.sourceRepos[*]",
+        "spec.destinations[*].server",
+        "spec.destinations[*].namespace",
+        "spec.destinations[*].name",
+        "spec.namespaceResourceWhitelist[*].group",
+        "spec.namespaceResourceWhitelist[*].kind",
+        "spec.namespaceResourceBlacklist[*].group",
+        "spec.namespaceResourceBlacklist[*].kind",
+        "spec.clusterResourceWhitelist[*].group",
+        "spec.clusterResourceWhitelist[*].kind",
+        "spec.clusterResourceBlacklist[*].group",
+        "spec.clusterResourceBlacklist[*].kind",
+        "spec.permitOnlyProjectScopedClusters",
+        "spec.roles[*].name",
+        "spec.roles[*].description",
+        "spec.roles[*].policies[*]",
+        "spec.syncWindows[*].kind",
+        "spec.syncWindows[*].schedule",
+        "spec.syncWindows[*].duration",
+        "spec.syncWindows[*].manualSync",
+        "spec.syncWindows[*].timeZone",
+        "spec.syncWindows[*].applications[*]",
+        "spec.syncWindows[*].namespaces[*]",
+        "spec.syncWindows[*].clusters[*]",
+    ),
+    "map_paths": ("metadata.labels", "metadata.annotations"),
+    "annotation_keys": (),
+}
+
 URL_CREDENTIALS_PATTERN = re.compile(r"([a-zA-Z][a-zA-Z0-9+.\-]*://)[^/\s@]+@")
