@@ -102,6 +102,7 @@ def instance_ignore_databases():
         'template1',
         'rdsadmin',
         'azure_maintenance',
+        'azure_sys',
         'cloudsqladmin',
         'alloydbadmin',
         'alloydbmetadata',
