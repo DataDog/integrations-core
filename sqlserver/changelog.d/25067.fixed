@@ -1,0 +1,1 @@
+Fix activity collection diagnostics when expected request DMV columns are unavailable.
