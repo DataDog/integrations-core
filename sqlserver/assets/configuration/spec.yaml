@@ -189,6 +189,16 @@ files:
       description: |
         Configure the collection of database metrics
       options:
+        - name: run_heavy_collectors_async
+          description: |
+            Run the index usage, database fragmentation, and table size metric collectors asynchronously.
+            This prevents these resource-intensive, per-database queries from blocking the check runner, but uses
+            a dedicated SQL Server connection while they run. Disabled by default.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+          fleet_configurable: false
         - name: ao_metrics
           description: |
             Configure collection of AlwaysOn availability group metrics.

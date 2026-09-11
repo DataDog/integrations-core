@@ -37,6 +37,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseMetricsAsyncJob,
     SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
@@ -185,6 +186,7 @@ class SQLServer(DatabaseCheck):
         self.agent_history = None
         self.deadlocks = None
         self.data_observability = None
+        self.database_metrics_job = self.register_async_job(SqlserverDatabaseMetricsAsyncJob(self, self._config))
         self._register_async_jobs()
 
         # XE Session Handlers, registered by initialize_xe_session_handlers()
@@ -235,6 +237,7 @@ class SQLServer(DatabaseCheck):
         """Release the resources this check holds for its whole lifetime."""
         self._query_manager = None
         self._database_metrics = None
+        self.database_metrics_job = None
         self.health = None
         self._connection = None
         self.tag_manager = None
@@ -966,13 +969,18 @@ class SQLServer(DatabaseCheck):
     @property
     def _database_level_database_metrics(self):
         # return the list of database metrics that are collected for each database
-        return [
-            SqlserverTempDBFileSpaceUsageMetrics,
-            SqlserverIndexUsageMetrics,
-            SqlserverDBFragmentationMetrics,
-            SqlserverDatabaseFilesMetrics,
-            SqlserverTableSizeMetrics,
-        ]
+        database_metrics = [SqlserverTempDBFileSpaceUsageMetrics]
+        if not self._config.run_heavy_collectors_async:
+            database_metrics.extend(
+                [
+                    SqlserverIndexUsageMetrics,
+                    SqlserverDBFragmentationMetrics,
+                ]
+            )
+        database_metrics.append(SqlserverDatabaseFilesMetrics)
+        if not self._config.run_heavy_collectors_async:
+            database_metrics.append(SqlserverTableSizeMetrics)
+        return database_metrics
 
     @property
     def database_metrics(self):
