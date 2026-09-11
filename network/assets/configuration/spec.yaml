@@ -170,6 +170,7 @@ files:
               - virtio_net
               - hv_netvsc
               - gve
+              - mlx5_core
             fleet_configurable: true
             value:
               display_default: false
