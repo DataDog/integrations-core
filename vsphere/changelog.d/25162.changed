@@ -1,0 +1,1 @@
+Collect `vsphere.vm.summary.config.numCpu` on every check run rather than only when `collect_property_metrics` is enabled. It is now submitted once per `min_collection_interval` instead of once per `refresh_infrastructure_cache_interval`, and can no longer be excluded with `metric_filters`.

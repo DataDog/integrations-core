@@ -1,0 +1,1 @@
+Collect the CPU core count of each monitored ESXi host as `vsphere.host.summary.hardware.numCpuCores`.

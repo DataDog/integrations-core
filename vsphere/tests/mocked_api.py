@@ -11,6 +11,7 @@ from pyVmomi import vim
 from requests import Response
 
 from datadog_checks.vsphere.api import VersionInfo
+from datadog_checks.vsphere.constants import METERING_PROPERTY_BY_RESOURCE_TYPE
 from tests.common import HERE, VSPHERE_VERSION
 
 
@@ -56,6 +57,10 @@ class MockedAPI(object):
             self.infrastructure_data[current_mor]['runtime.host_moid'] = subtree['runtime.host']
         if 'guest.hostName' in subtree:
             self.infrastructure_data[current_mor]['guest.hostName'] = subtree['guest.hostName']
+        # Mirror `get_infrastructure`: metering properties stay in the flat dict in every config.
+        for metering_property in METERING_PROPERTY_BY_RESOURCE_TYPE.values():
+            if metering_property in subtree:
+                self.infrastructure_data[current_mor][metering_property] = subtree[metering_property]
         if self.config.should_collect_attributes and 'customValue' in subtree:
             mor_attr = []
             for key_name, value in subtree['customValue'].items():

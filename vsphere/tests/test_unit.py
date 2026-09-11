@@ -16,6 +16,7 @@ from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS, PROPERTY
 from .common import (
     EVENTS,
     HISTORICAL_INSTANCE,
+    PROPERTIES_EX_VM_OFF,
     REALTIME_INSTANCE,
     VSPHERE_VERSION,
 )
@@ -2971,6 +2972,10 @@ def test_property_metrics_metric_filters(
     aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags_vm1)
     aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags_vm3)
 
+    # Submitted despite not being in the `metric_filters` allow list.
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, tags=base_tags_vm1, hostname='vm1')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=1, tags=base_tags_vm3, hostname='vm3')
+
     aggregator.assert_metric(
         'vsphere.vm.summary.config.memorySizeMB', count=1, value=2048, tags=base_tags_vm1, hostname='vm1'
     )
@@ -3008,6 +3013,13 @@ def test_property_metrics_metric_filters(
 
     # hosts
     aggregator.assert_metric('vsphere.host.count', value=2, count=2, tags=base_tags_host)
+    # host2 is notResponding and in maintenance mode, and is still metered — not gated on state.
+    aggregator.assert_metric(
+        'vsphere.host.summary.hardware.numCpuCores', count=1, value=16, tags=base_tags_host, hostname='host1'
+    )
+    aggregator.assert_metric(
+        'vsphere.host.summary.hardware.numCpuCores', count=1, value=8, tags=base_tags_host, hostname='host2'
+    )
     aggregator.assert_metric(
         'vsphere.host.summary.runtime.connectionState',
         count=1,
@@ -3111,6 +3123,21 @@ def test_property_metrics_expired_cache(
         dd_run_check(check)
         aggregator.assert_metric('vsphere.vm.count')
         aggregator.assert_metric('vsphere.host.count')
+        # Submitted from the per-run loop, so unlike the property metrics above these still appear
+        # on a run that does not refresh the cache.
+        aggregator.assert_metric(
+            'vsphere.vm.summary.config.numCpu', count=1, value=2, tags=base_tags_vm1, hostname='vm1'
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.summary.config.numCpu', count=1, value=1, tags=base_tags_vm3, hostname='vm3'
+        )
+        aggregator.assert_metric(
+            'vsphere.host.summary.hardware.numCpuCores', count=1, value=16, tags=base_tags_host, hostname='host1'
+        )
+        aggregator.assert_metric(
+            'vsphere.host.summary.hardware.numCpuCores', count=1, value=8, tags=base_tags_host, hostname='host2'
+        )
+
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.query_metrics.time')
         aggregator.assert_metric('vsphere.cpu.costop.sum')
@@ -3241,6 +3268,155 @@ def test_property_metrics_excluded_host_tags(
         'host1',
         {'vsphere': ['vcenter_server:FAKE', 'vsphere_type:host']},
     )
+    # Shares tag-building with the property metrics, so `excluded_host_tags` applies identically.
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numCpu',
+        count=1,
+        value=2,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:host1'],
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.host.summary.hardware.numCpuCores',
+        count=1,
+        value=16,
+        tags=['vcenter_server:FAKE'],
+        hostname='host1',
+    )
+
+
+def test_usage_metering_metrics_default_config(aggregator, realtime_instance, dd_run_check, service_instance):
+    """Both metering metrics are collected with `collect_property_metrics` at its default of false."""
+    assert 'collect_property_metrics' not in realtime_instance
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    base_tags_vm = ['vcenter_server:FAKE', 'vsphere_host:unknown', 'vsphere_type:vm']
+    base_tags_host = ['vcenter_server:FAKE', 'vsphere_type:host']
+
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, tags=base_tags_vm, hostname='vm1')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=4, tags=base_tags_vm, hostname='vm2')
+    aggregator.assert_metric(
+        'vsphere.host.summary.hardware.numCpuCores', count=1, value=16, tags=base_tags_host, hostname='host1'
+    )
+
+    # The opt-in property metric path stays off.
+    aggregator.assert_metric('vsphere.vm.summary.config.memorySizeMB', count=0)
+    aggregator.assert_metric('vsphere.host.summary.runtime.connectionState', count=0)
+
+
+def test_usage_metering_metrics_powered_off_vm(aggregator, realtime_instance, dd_run_check, service_instance):
+    """A powered-off VM consumes no vCPU, and the check skips it before it reaches the cache."""
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(return_value=PROPERTIES_EX_VM_OFF)
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm2')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=0, hostname='vm1')
+    # Unscoped, so a regression submitting vm1 under a different hostname fails here too.
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1)
+
+
+def test_usage_metering_metrics_resource_filter(aggregator, realtime_instance, dd_run_check, service_instance):
+    """A VM excluded by `resource_filters` is not metered, so a filtered-out resource is never billed.
+
+    The guarantee is positional rather than explicit: `refresh_infrastructure_cache` rejects filtered
+    resources with a `continue` that precedes the metering block, so they never reach the cache at all.
+    Hoisting that block any higher would silently start metering them.
+    """
+    realtime_instance['resource_filters'] = [
+        {
+            'type': 'blacklist',
+            'resource': 'vm',
+            'property': 'name',
+            'patterns': [
+                'vm1',
+            ],
+        }
+    ]
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=4, hostname='vm2')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1)
+    # Only VMs were filtered, so the host marker still reports.
+    aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=1, value=16, hostname='host1')
+
+
+def test_usage_metering_metrics_missing_property(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
+):
+    """A resource whose metering property is absent is skipped, and the other resources still report."""
+    caplog.set_level(logging.WARNING)
+    stripped = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=content.obj,
+                propSet=[prop for prop in content.propSet if prop.name != 'summary.hardware.numCpuCores'],
+            )
+            for content in properties_ex.objects
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(return_value=stripped)
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=0)
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=4, hostname='vm2')
+    # Unscoped, so nothing extra leaked in alongside those two points.
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=2)
+    assert 'host host1 (no summary.hardware.numCpuCores)' in caplog.text
+
+
+def test_usage_metering_metrics_no_resolved_hostname(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
+):
+    """A resource with no hostname is not metered: the count would land on the Agent's own host."""
+    caplog.set_level(logging.WARNING)
+    realtime_instance['use_guest_hostname'] = True
+    # vCenter reports an empty guest.hostName for a VM that is not running VMware Tools.
+    blank_guest_hostname = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            (
+                vim.ObjectContent(
+                    obj=content.obj,
+                    propSet=list(content.propSet) + [vmodl.DynamicProperty(name='guest.hostName', val='')],
+                )
+                if isinstance(content.obj, vim.VirtualMachine)
+                else content
+            )
+            for content in properties_ex.objects
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(return_value=blank_guest_hostname)
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=0)
+    aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=1, value=16, hostname='host1')
+    assert 'vm vm1 (no hostname)' in caplog.text
+
+
+def test_usage_metering_metrics_metric_filters_warning(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance
+):
+    """`metric_filters` cannot exclude a metering metric, so warn rather than silently overriding it."""
+    caplog.set_level(logging.WARNING)
+    realtime_instance['metric_filters'] = {'vm': [r'vm\.cpu\..*']}
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    assert "Metric 'vm.summary.config.numCpu' is always collected for usage metering" in caplog.text
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
+    # No `host` filters were configured, so the host marker is unaffected and must not warn.
+    assert 'summary.hardware.numCpuCores' not in caplog.text
 
 
 @pytest.mark.parametrize(
