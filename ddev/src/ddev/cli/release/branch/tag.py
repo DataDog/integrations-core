@@ -526,7 +526,7 @@ async def _create_agent_bump_pr(
     content = base64.b64decode(current.data.content).decode('utf-8')
     try:
         new_content = _bump_integrations_core_version(content, commit_sha)
-    except (json.JSONDecodeError, KeyError) as e:
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
         raise _AgentBumpPrError(
             f'`{RELEASE_JSON_PATH}` on `{base_branch}` is not the expected JSON shape: {e}\n'
             f'To recover, open one manually against `{base_branch}` pinning '

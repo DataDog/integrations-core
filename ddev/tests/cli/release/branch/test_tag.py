@@ -715,6 +715,7 @@ def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr, f
     [
         pytest.param('This is not JSON', id='malformed'),
         pytest.param('{"current_milestone": "7.85.0"}', id='missing-dependencies'),
+        pytest.param('{"dependencies": null}', id='non-object-dependencies'),
     ],
 )
 def test_agent_pr_malformed_release_json_degrades_gracefully(ddev, agent_pr, fake_async_github, release_json):
