@@ -1,4 +1,19 @@
 {
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "help": "The API key of your Proofpoint On-Demand instance.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
   "additional_config_fields": [
     {
       "key": "cluster_id",
@@ -7,14 +22,6 @@
       "editable": true,
       "required": true,
       "text": {}
-    },
-    {
-      "key": "api_key",
-      "label": "API Key",
-      "help": "The API key of your Proofpoint On-Demand instance.",
-      "editable": true,
-      "required": true,
-      "password": {}
     }
   ]
 }
