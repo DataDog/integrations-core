@@ -54,28 +54,23 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         self._conn_key_prefix = "dbm-database-metrics-"
         self._database_metrics: list[SqlserverDatabaseMetricsBase] | None = None
         self._database_signature: tuple[str, ...] | None = None
-        enabled = (
-            not config.only_custom_queries
-            and not config.proc
-            and any(
-                metric_config['enabled']
-                for metric_config in (
-                    config.database_metrics_config['index_usage_metrics'],
-                    config.database_metrics_config['db_fragmentation_metrics'],
-                    config.database_metrics_config['table_size_metrics'],
-                )
-            )
+        metric_configs = (
+            config.database_metrics_config['index_usage_metrics'],
+            config.database_metrics_config['db_fragmentation_metrics'],
+            config.database_metrics_config['table_size_metrics'],
+        )
+        enabled_metric_configs = tuple(metric_config for metric_config in metric_configs if metric_config['enabled'])
+        enabled = not config.only_custom_queries and not config.proc and bool(enabled_metric_configs)
+        collection_interval = max(
+            float(config.min_collection_interval),
+            min(
+                (float(metric_config['collection_interval']) for metric_config in enabled_metric_configs),
+                default=float(config.min_collection_interval),
+            ),
         )
         # `run_sync` matches the other DBM jobs: tests set it so a returned check implies the
         # collection already happened, instead of racing a background thread.
-        run_sync = any(
-            metric_config.get('run_sync', False)
-            for metric_config in (
-                config.database_metrics_config['index_usage_metrics'],
-                config.database_metrics_config['db_fragmentation_metrics'],
-                config.database_metrics_config['table_size_metrics'],
-            )
-        )
+        run_sync = any(metric_config.get('run_sync', False) for metric_config in metric_configs)
         super().__init__(
             check,
             run_sync=run_sync,
@@ -83,7 +78,7 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
             expected_db_exceptions=tuple(EXPECTED_DB_EXCEPTIONS),
             min_collection_interval=config.min_collection_interval,
             dbms=check.dbms,
-            rate_limit=1 / float(config.min_collection_interval),
+            rate_limit=1 / collection_interval,
             job_name="database-metrics",
         )
 

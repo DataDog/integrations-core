@@ -71,6 +71,31 @@ def test_heavy_database_metrics_are_owned_by_async_job(init_config, instance_doc
 
 
 @pytest.mark.unit
+def test_async_database_metrics_job_waits_until_an_enabled_collector_is_due(
+    init_config, instance_docker_metrics, run_database_metrics_synchronously
+):
+    instance_docker_metrics['min_collection_interval'] = 15
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {'enabled': True, 'collection_interval': 60},
+        'db_fragmentation_metrics': {'enabled': True, 'collection_interval': 120},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    job = check.database_metrics_job
+    job.run_job = mock.MagicMock()
+
+    check.run_async_jobs([])
+    job._rate_limiter.last_event -= 15
+    check.run_async_jobs([])
+
+    job.run_job.assert_called_once_with()
+
+    job._rate_limiter.last_event -= 45
+    check.run_async_jobs([])
+
+    assert job.run_job.call_count == 2
+
+
+@pytest.mark.unit
 def test_async_database_metrics_job_uses_dedicated_connection_and_continues_after_database_error(
     init_config, instance_docker_metrics, caplog
 ):
