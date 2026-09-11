@@ -5,6 +5,7 @@ import re
 
 import mock
 import pytest
+from cryptography.x509.oid import AuthorityInformationAccessOID
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.tls.const import (
@@ -222,6 +223,31 @@ def test_cert_expired(aggregator, instance_remote_cert_expired):
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote_ok):
+    c = TLSCheck('tls', {}, [instance_remote_ok])
+    c.get_tls_context = MagicMock(return_value=MagicMock())
+    c._http = MagicMock(
+        tls_config={'tls_ca_cert': '/path/to/ca.pem'}, options={'proxies': {'https': 'http://proxy:3128'}}
+    )
+    uri = 'http://issuer.test/ca.der'
+    access_description = MagicMock(
+        access_method=AuthorityInformationAccessOID.CA_ISSUERS,
+        access_location=MagicMock(value=uri),
+    )
+    cert = MagicMock()
+    cert.extensions.get_extension_for_oid.return_value = MagicMock(value=[access_description])
+
+    with patch('datadog_checks.tls.tls_remote.load_der_x509_certificate', return_value=cert):
+        with patch('datadog_checks.tls.tls_remote.fetch_intermediate_cert', return_value=b'intermediate') as fetch:
+            c.checker.load_intermediate_certs(b'leaf')
+            c.checker.load_intermediate_certs(b'leaf')
+
+    fetch.assert_called_once_with(
+        uri, c.checker.log, {'tls_ca_cert': '/path/to/ca.pem'}, {'proxies': {'https': 'http://proxy:3128'}}
+    )
+    c.get_tls_context.return_value.load_verify_locations.assert_called_once_with(cadata=b'intermediate')
 
 
 @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
