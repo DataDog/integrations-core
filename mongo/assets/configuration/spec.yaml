@@ -465,7 +465,7 @@ files:
       value:
         type: boolean
         example: false
-      fleet_configurable: false
+      fleet_configurable: true
     - name: tls_certificate_key_file
       description: A file containing the client certificate and private key. Implies tls=True.
       value:
