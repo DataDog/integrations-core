@@ -16,6 +16,7 @@ from datadog_checks.sqlserver.connection import (
     Connection,
     SQLConnectionError,
     parse_connection_string_properties,
+    sanitize_connection_string,
 )
 from datadog_checks.sqlserver.connection_errors import (
     ConnectionErrorCode,
@@ -49,8 +50,14 @@ SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss}"word123!'
         pytest.param('A=B C;', {"A": "B C"}, id="spaces allowed inside a value"),
         pytest.param('A=C ;', {"A": "C "}, id="spaces allowed after a value"),
         pytest.param('A=B ;C=D', {"A": "B ", "C": 'D'}, id="spaces allowed after a value, they become part of it"),
+        pytest.param(
+            'User ID=datadog;Password="Pa;ss""word";',
+            {'User ID': 'datadog', 'Password': 'Pa;ss"word'},
+            id='quoted value with escaped quote',
+        ),
         pytest.param('host=foo;password={pass";{}word}', None, id="escape too early then invalid character"),
         pytest.param('host=foo;password={incomplete_escape;', None, id="incomplete escape"),
+        pytest.param('host=foo;password="incomplete_quote;', None, id="incomplete quote"),
         pytest.param('host=foo;password=;', None, id="empty value"),
         pytest.param('host=foo;=hello;', None, id="empty key"),
         pytest.param('host=foo;;', None, id="empty both"),
@@ -63,6 +70,58 @@ def test_parse_connection_string_properties(cs, parsed):
         return
     with pytest.raises(ConfigurationError):
         parse_connection_string_properties(cs)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connection_string, expected',
+    [
+        pytest.param(
+            'ApplicationIntent=ReadOnly;TrustServerCertificate=yes',
+            'ApplicationIntent=ReadOnly;TrustServerCertificate=yes',
+            id='safe-properties-unchanged',
+        ),
+        pytest.param(
+            'UID=datadog;PWD=connection-secret;TrustServerCertificate=yes',
+            'UID=datadog;PWD=***;TrustServerCertificate=yes',
+            id='odbc-password',
+        ),
+        pytest.param(
+            'User ID=datadog;Password={pa;ss}}word};Application Name={dbm;check};',
+            'User ID=datadog;Password=***;Application Name={dbm;check};',
+            id='braced-password-and-safe-value',
+        ),
+        pytest.param(
+            'Access Token=access-secret;Server=database.example.com',
+            'Access Token=***;Server=database.example.com',
+            id='access-token',
+        ),
+        pytest.param(
+            'User ID=datadog;Password="Pa;ss""word";Encrypt=yes',
+            'User ID=datadog;Password=***;Encrypt=yes',
+            id='ado-quoted-password',
+        ),
+        pytest.param(
+            'KeystorePrincipalId=client-id;KeystoreSecret=client-secret',
+            'KeystorePrincipalId=client-id;KeystoreSecret=***',
+            id='keystore-secret',
+        ),
+        pytest.param(
+            'ClientCertificate=/etc/sqlserver/client.pem;ClientKey=/etc/sqlserver/client-key.pem',
+            'ClientCertificate=/etc/sqlserver/client.pem;ClientKey=***',
+            id='client-key',
+        ),
+        pytest.param(
+            'Provider String={Server=database.example.com;Password=nested-secret};Encrypt=yes',
+            'Provider String=***;Encrypt=yes',
+            id='nested-provider-string',
+        ),
+        pytest.param('PWD={incomplete;', '***', id='invalid-connection-string'),
+        pytest.param('not-a-property', '***', id='missing-key-value-separator'),
+    ],
+)
+def test_sanitize_connection_string(connection_string, expected):
+    assert sanitize_connection_string(connection_string) == expected
 
 
 @pytest.mark.unit
