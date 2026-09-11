@@ -136,6 +136,19 @@ def assert_extend_generic_bgp4(aggregator, common_tags):
     )
 
 
+def assert_extend_cisco_bgp4_peer3(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.9.9.187.1.2.9.1.6.1.1.4.10.0.0.1|2|2
+    """
+    # fmt: on
+    aggregator.assert_metric(
+        "snmp.cbgpPeer3AdminStatus",
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ["admin_status:start"],
+    )
+
+
 def assert_extend_cisco_cpu_memory(aggregator, common_tags):
     aggregator.assert_metric("snmp.memory.used", metric_type=aggregator.GAUGE, tags=common_tags + ["mem:18"])
     aggregator.assert_metric("snmp.ciscoMemoryPoolUsed", metric_type=aggregator.GAUGE, tags=common_tags)
