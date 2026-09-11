@@ -25,8 +25,13 @@ pytestmark = [pytest.mark.unit]
 
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
 
-# Non-credential request options forwarded to AIA fetches (defaults for a bare RequestsWrapper).
-AIA_GET_KWARGS = {'proxies': None, 'timeout': (10.0, 10.0), 'allow_redirects': True}
+# Request options used for AIA fetches from a bare RequestsWrapper.
+AIA_GET_KWARGS = {
+    'proxies': None,
+    'timeout': (10.0, 10.0),
+    'allow_redirects': False,
+    'stream': True,
+}
 
 
 def private_key():
@@ -122,6 +127,8 @@ def write_cert(path, cert):
 
 def aia_response(content):
     response = mock.MagicMock()
+    response.is_redirect = False
+    response.headers = {}
     response.iter_content.return_value = iter([content])
     return response
 
@@ -550,6 +557,43 @@ class TestAIAChasing:
         session.get.assert_not_called()
         assert certs == []
 
+    def test_load_intermediate_certs_rejects_non_http_redirect(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        response = aia_response(b'')
+        response.is_redirect = True
+        response.headers = {'location': 'unix://%2Fvar%2Frun%2Fdocker.sock/info'}
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
+
+        session.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
+        response.close.assert_called_once_with()
+        assert certs == []
+
+    def test_load_intermediate_certs_follows_safe_redirect(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        redirect = aia_response(b'')
+        redirect.is_redirect = True
+        redirect.headers = {'location': '/intermediate.der'}
+        certificate = aia_response(build_cert())
+        session = mock.MagicMock()
+        session.get.side_effect = [redirect, certificate]
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
+
+        assert session.get.call_args_list == [
+            mock.call('https://issuer.test/ca.der', **AIA_GET_KWARGS),
+            mock.call('https://issuer.test/intermediate.der', **AIA_GET_KWARGS),
+        ]
+        redirect.close.assert_called_once_with()
+        certificate.close.assert_called_once_with()
+        assert len(certs) == 1
+
     def test_load_intermediate_certs_forwards_request_options(self):
         http = RequestsWrapper({'proxy': {'https': 'http://proxy:3128'}}, {})
         session = mock.MagicMock()
@@ -574,15 +618,27 @@ class TestAIAChasing:
         session.get.assert_called_once_with('http://10.0.0.5/ca.der', **AIA_GET_KWARGS)
         assert len(certs) == 1
 
-    def test_load_intermediate_certs_rejects_oversized_body(self):
+    def test_load_intermediate_certs_stops_and_closes_oversized_stream(self):
         http = RequestsWrapper({}, {})
         certs = []
+        chunks_read = []
+
+        def content_chunks():
+            for chunk_number in range(100):
+                chunks_read.append(chunk_number)
+                yield b'x' * 8192
+
+        response = aia_response(b'')
+        response.iter_content.return_value = content_chunks()
         session = mock.MagicMock()
-        session.get.return_value = aia_response(b'x' * (64 * 1024 + 1))
+        session.get.return_value = response
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
 
+        session.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
+        assert len(chunks_read) == 9
+        response.close.assert_called_once_with()
         assert certs == []
 
     def test_fetched_intermediate_pem_loads_into_ssl_context(self):

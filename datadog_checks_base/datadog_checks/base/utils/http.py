@@ -14,7 +14,7 @@ from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from hashlib import sha256
 from typing import TYPE_CHECKING
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
 import requests
@@ -303,6 +303,37 @@ def _get_aia_request_options(request_options: Mapping[str, object] | None) -> di
     return {key: request_options[key] for key in AIA_REQUEST_OPTIONS if key in request_options}
 
 
+def _fetch_aia_content(
+    session: RequestsWrapper,
+    uri: str,
+    request_options: dict[str, object],
+    logger: logging.Logger | logging.LoggerAdapter,
+) -> bytes | None:
+    request_options = request_options.copy()
+    follow_redirects = is_affirmative(request_options.pop('allow_redirects', True))
+    request_options.update({'allow_redirects': False, 'stream': True})
+    redirect_count = 0
+
+    while _is_safe_aia_url(uri, logger):
+        response = session.get(uri, **request_options)
+        try:
+            if follow_redirects and response.is_redirect:
+                if redirect_count >= requests.models.DEFAULT_REDIRECT_LIMIT:
+                    raise requests.exceptions.TooManyRedirects(
+                        f'Exceeded {requests.models.DEFAULT_REDIRECT_LIMIT} redirects.', response=response
+                    )
+                uri = urljoin(uri, response.headers['location'])
+                redirect_count += 1
+                continue
+
+            response.raise_for_status()
+            return _read_capped_content(response, uri, logger)
+        finally:
+            response.close()
+
+    return None
+
+
 def fetch_intermediate_cert(
     uri: str,
     logger: logging.Logger | logging.LoggerAdapter,
@@ -316,24 +347,18 @@ def fetch_intermediate_cert(
 
     # Verified attempt first; only retry without verification on TLS failures.
     try:
-        response = _aia_fetch_session(tls_config, True, logger).get(uri, **options)
-        response.raise_for_status()
+        return _fetch_aia_content(_aia_fetch_session(tls_config, True, logger), uri, options, logger)
     except SSLError as e:
         logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=True): %s', uri, e)
     except Exception as e:
         logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
         return None
-    else:
-        return _read_capped_content(response, uri, logger)
 
     try:
-        response = _aia_fetch_session(tls_config, False, logger).get(uri, **options)
-        response.raise_for_status()
+        return _fetch_aia_content(_aia_fetch_session(tls_config, False, logger), uri, options, logger)
     except Exception as e:
         logger.error('Error fetching intermediate certificate from `%s` after TLS fallback: %s', uri, e)
         return None
-    else:
-        return _read_capped_content(response, uri, logger)
 
 
 def _aia_fetch_session(
