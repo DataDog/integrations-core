@@ -58,13 +58,57 @@ Several families only report when the corresponding subsystem is active, and are
 
 ### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+IRIS can expose its log in two forms. [Structured logging][10] is recommended: the IRIS log daemon writes one JSON object per line, which Datadog parses without a multi-line rule, and it carries audit events and discrete named fields that `messages.log` only renders as prose. Collecting `messages.log` directly is still supported and is covered below.
 
-   ```yaml
-   logs_enabled: true
+Either way, collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+```yaml
+logs_enabled: true
+```
+
+#### Structured logging
+
+1. Configure the IRIS log daemon. In the Management Portal, go to **System Administration** > **Configuration** > **System Configuration** > **Log Daemon Configuration**, or run the `^LOGDMN` routine in the `%SYS` namespace. Three settings matter to Datadog:
+
+   - Set **Format** to `JSON`. The default, `NVP`, is not parsed by this integration's log pipeline.
+   - Set **Level** to the lowest severity you want to collect. The default, `WARN`, discards informational events.
+   - Set the **child process launch command** to `irislogd -f <PATH>`, which chooses the file the Agent tails.
+
+   From the `%SYS` namespace, the equivalent API calls are:
+
+   ```objectscript
+   do ##class(Config.Logging).Get(.props)
+   set props("Format") = "JSON"
+   set props("Level") = "INFO"
+   set props("Enabled") = 1
+   set props("ChildProcessLaunchCommand") = "irislogd -f /usr/irissys/mgr/structured.log"
+   do ##class(Config.Logging).Modify(.props)
+   do ##class(SYS.LogDmn).Start()
    ```
 
-2. Add the InterSystems IRIS `messages.log` file to your log collection by editing the `logs` block in `intersystems_iris.d/conf.yaml`:
+   Enabling the daemon does not start it. Start it from the Management Portal, or by calling `##class(SYS.LogDmn).Start()` as shown.
+
+2. Add the structured log file to your log collection by editing the `logs` block in `intersystems_iris.d/conf.yaml`:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /usr/irissys/mgr/structured.log
+       source: intersystems_iris
+       service: <SERVICE>
+   ```
+
+   Set `path` to the file you passed to `irislogd -f`.
+
+3. Restart the Agent.
+
+**Note**: At `INFO` and below, the structured log includes every audit event, and audit data can carry PII or PHI. The `%DirectMode` and `%SQL` event types are the most likely to do so. To keep that data out of Datadog, leave **Level** at `WARN` or higher, or restrict event types with the **Event Filter** setting.
+
+**Note**: Messages that span several lines in `messages.log`, such as the journaling notices, appear in the structured log as their first line only. Collect `messages.log` instead if you need the continuation lines.
+
+#### Collecting messages.log
+
+1. Add the `messages.log` file to your log collection by editing the `logs` block in `intersystems_iris.d/conf.yaml`:
 
    ```yaml
    logs:
@@ -80,9 +124,9 @@ Several families only report when the corresponding subsystem is active, and are
 
    Change the `path` value to match your instance's installation directory. For example, IRIS for Health typically uses `/opt/irishealth/mgr/messages.log`.
 
-3. Restart the Agent.
+2. Restart the Agent.
 
-**Note**: InterSystems IRIS writes `messages.log` timestamps in the instance's local time with no timezone offset. The log pipeline interprets these timestamps as UTC. If your IRIS instance does not run in UTC, collected log timestamps are shifted by the instance's UTC offset. Run your IRIS instance in UTC to keep log timestamps accurate.
+**Note**: InterSystems IRIS writes timestamps in the instance's local time with no timezone offset, in both `messages.log` and the structured log. The log pipeline interprets them as UTC. If your IRIS instance does not run in UTC, collected log timestamps are shifted by the instance's UTC offset. Run your IRIS instance in UTC to keep log timestamps accurate.
 
 ## Data collected
 
@@ -122,3 +166,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.intersystems.com/irislatest/csp/docbook/DocBook.UI.Page.cls?KEY=GCM_structuredlog

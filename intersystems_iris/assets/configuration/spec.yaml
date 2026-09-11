@@ -22,10 +22,6 @@ files:
   - template: logs
     example:
     - type: file
-      path: /usr/irissys/mgr/messages.log
+      path: /usr/irissys/mgr/structured.log
       source: intersystems_iris
       service: <SERVICE>
-      log_processing_rules:
-        - type: multi_line
-          name: new_log_start_with_date
-          pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
