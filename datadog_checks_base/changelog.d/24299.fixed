@@ -1,0 +1,1 @@
+Fix the OpenMetrics V2 default (``native``) transformer submitting the wrong value when a metric name collides between a gauge and its ``_total`` counter counterpart, such as ``go_memstats_alloc_bytes``.
