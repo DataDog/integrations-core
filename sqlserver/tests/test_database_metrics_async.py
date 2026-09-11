@@ -28,6 +28,19 @@ HEAVY_DATABASE_METRIC_TYPES = (
 
 
 @pytest.mark.unit
+def test_stored_procedure_does_not_run_async_database_metrics(
+    init_config, instance_docker_metrics, run_database_metrics_synchronously
+):
+    instance_docker_metrics['stored_procedure'] = 'pyStoredProc'
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.database_metrics_job.run_job = mock.MagicMock()
+
+    check.run_async_jobs([])
+
+    check.database_metrics_job.run_job.assert_not_called()
+
+
+@pytest.mark.unit
 def test_heavy_database_metrics_are_owned_by_async_job(init_config, instance_docker_metrics):
     check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     check.databases = {Database('database1')}
