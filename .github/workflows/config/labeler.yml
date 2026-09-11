@@ -753,6 +753,10 @@ integration/intercom:
 - changed-files:
   - any-glob-to-any-file:
     - intercom/**/*
+integration/intersystems_iris:
+- changed-files:
+  - any-glob-to-any-file:
+    - intersystems_iris/**/*
 integration/istio:
 - changed-files:
   - any-glob-to-any-file:
