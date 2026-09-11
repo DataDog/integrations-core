@@ -1,0 +1,1 @@
+Handle missing SQL Server deadlock XE sessions without failing collection.
