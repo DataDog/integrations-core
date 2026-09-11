@@ -270,7 +270,7 @@ Entity collection sends Argo CD Applications, Clusters, and Repositories to Data
 | Path                  | Mechanism                                                                        | Coverage                                                                                                       |
 | --------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Agent collector       | The Agent's `argocd` check polls the Argo CD API on a fixed interval.            | Baseline inventory of Applications, Clusters, and Repositories.                                                 |
-| Notifications webhook | The Argo CD [notifications controller][19] posts Application changes to Datadog. | Application sync, health, and operation changes between polls. These are also submitted as Datadog events.      |
+| Notifications webhook | The Argo CD [notifications controller][20] posts Application changes to Datadog. | Application sync, health, and operation changes between polls. These are also submitted as Datadog events.      |
 
 Configure both paths. The Agent collector establishes and refreshes the full inventory, and the webhook carries the Application changes that happen between polls. Clusters and Repositories are collected only by the Agent, because Argo CD stores them as Kubernetes Secrets rather than custom resources and offers no notification trigger for them.
 
@@ -303,7 +303,7 @@ Configure both paths. The Agent collector establishes and refreshes the full inv
   argocd account generate-token --account datadog
   ```
 
-  Patch these ConfigMaps rather than applying a partial manifest over them. Argo CD's installation manifest owns both, and applying a partial file replaces their entire `data` map. For more details, see [Argo CD user management][17] and [Argo CD RBAC configuration][18].
+  Patch these ConfigMaps rather than applying a partial manifest over them. Argo CD's installation manifest owns both, and applying a partial file replaces their entire `data` map. For more details, see [Argo CD user management][18] and [Argo CD RBAC configuration][19].
 
 - The Argo CD notifications controller, which is bundled with Argo CD v2.6 and later. Earlier versions require the standalone `argocd-notifications` component.
 
@@ -443,7 +443,7 @@ The Argo CD notifications controller renders a template and posts it to a webhoo
 
    A line containing `TRIGGERED` means the trigger fired and the notification was sent.
 
-3. Search the Datadog [Event Explorer][20] for `@evt.integration_id:argocd` to confirm that the webhook notifications arrived. A `202` response from Datadog means the notification was accepted rather than searchable, so allow a short delay before searching.
+3. Search the Datadog [Event Explorer][21] for `@evt.integration_id:argocd` to confirm that the webhook notifications arrived. A `202` response from Datadog means the notification was accepted rather than searchable, so allow a short delay before searching.
 4. Confirm that each Application appears once in Datadog. Two resources for the same Application mean the cluster name or the environment differs between the Agent configuration and the notifications ConfigMap.
 
 ### Validation
@@ -458,7 +458,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Argo CD integration submits Application sync and health status events to Datadog when the Argo CD [notifications controller][19] is configured to forward them through the webhook described in [Entity collection](#entity-collection).
+The Argo CD integration submits Application sync and health status events to Datadog when the Argo CD [notifications controller][20] is configured to forward them through the webhook described in [Entity collection](#entity-collection).
 
 ### Service Checks
 
@@ -492,3 +492,7 @@ Additional helpful documentation, links, and articles:
 [15]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example#L45-L72
 [16]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
 [17]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
+[18]: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/
+[19]: https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/
+[20]: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/
+[21]: https://docs.datadoghq.com/service_management/events/explorer/
