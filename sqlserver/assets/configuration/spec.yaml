@@ -1047,7 +1047,6 @@ files:
         Enabling this option will allow the collection and ingestion of raw query statements 
         into Datadog, which can then become viewable in query samples.
         This option is disabled by default.
-        Note: Collection of raw query statements is currently in preview.
         This option only applies when dbm is enabled.
       options:
         - name: enabled
