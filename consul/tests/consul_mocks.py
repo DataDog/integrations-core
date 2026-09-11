@@ -93,6 +93,14 @@ def mock_get_services_in_cluster():
     }
 
 
+def mock_get_n_custom_tagged_services_in_cluster(n, tags):
+    svcs = {}
+    for i in range(n):
+        k = "service-{}".format(i)
+        svcs[k] = tags
+    return svcs
+
+
 def mock_get_n_services_in_cluster(n):
     dct = {}
     for i in range(n):

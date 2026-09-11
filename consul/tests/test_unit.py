@@ -54,6 +54,42 @@ def test_get_nodes_with_service(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
+def test_cull_services_tags_keys(aggregator):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+
+    all_tags = {
+        "active",
+        "standby",
+        "unwanted.tag=unwantedvalue",
+        "unwanted.tag.but.actually.wanted=wantedvalue",
+        "wanted.tag",
+        "unwanted.tag.noequals",
+    }
+
+    include_tags = {'active', 'standby', 'unwanted.tag.but.actually.wanted', 'wanted.tag'}
+
+    expected_tags = {
+        "active",
+        "standby",
+        "unwanted.tag.but.actually.wanted=wantedvalue",
+        "wanted.tag",
+    }
+
+    unwanted_tags = {
+        "unwanted.tag=unwantedvalue",
+        "unwanted.tag.noequals",
+    }
+
+    consul_check.allowed_service_tags = include_tags
+    services = consul_mocks.mock_get_n_custom_tagged_services_in_cluster(6, all_tags)
+
+    services = consul_check._cull_services_tags_list(services)
+    for service in services:
+        assert unwanted_tags.isdisjoint(set(services[service]))
+        assert expected_tags == set(services[service])
+
+
 def test_get_peers_in_cluster(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
