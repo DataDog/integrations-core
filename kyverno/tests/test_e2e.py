@@ -24,7 +24,6 @@ def test_kyverno_e2e(dd_agent_check):
 
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
-    # All four Kyverno controllers are discovered via their named metrics ports.
     aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=4)
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.OK, count=8)
     assert_service_checks(aggregator)
