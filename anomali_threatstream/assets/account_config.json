@@ -3,7 +3,8 @@
   "additional_config_fields": [
     {
       "key": "api_domain",
-      "label": "Domain",
+      "label": "API Domain",
+      "help": "Use api.threatstream.com for US Cloud or api-eu.threatstream.com for EU Cloud.",
       "editable": true,
       "required": true,
       "domain": {
