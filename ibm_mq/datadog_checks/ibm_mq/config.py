@@ -84,7 +84,10 @@ class IBMMQConfig:
         self.collect_statistics_metrics = is_affirmative(instance.get('collect_statistics_metrics', False))  # type: bool
         self.filter_queue_statistics_metrics = is_affirmative(instance.get('filter_queue_statistics_metrics', False))  # type: bool
         self.collect_reset_queue_metrics = is_affirmative(instance.get('collect_reset_queue_metrics', True))
-        self.collect_connection_metrics = is_affirmative(instance.get('collect_connection_metrics', True))
+        # Default False to match the documented default (spec.yaml, conf.yaml.example) and the
+        # generated config model; the metric ibm_mq.channel.conn_status adds a high-cardinality
+        # `connection` tag, so it should be opt-in as the docs state (AGENT-16599, issue 6).
+        self.collect_connection_metrics = is_affirmative(instance.get('collect_connection_metrics', False))
         self.add_description_tags = is_affirmative(instance.get('add_description_tags', False))  # type: bool
         self.normalize_description_tags = is_affirmative(instance.get('normalize_description_tags', True))  # type: bool
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:

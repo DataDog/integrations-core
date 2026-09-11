@@ -1,0 +1,1 @@
+`collect_connection_metrics` now defaults to `false`, matching the documented default in `conf.yaml.example`. The `ibm_mq.channel.conn_status` metric, which adds a high-cardinality `connection` tag, is now opt-in; set `collect_connection_metrics: true` to keep collecting it.
