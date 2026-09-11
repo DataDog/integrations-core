@@ -39,6 +39,8 @@ tests:
           ip: "35.184.126.116"
           port: 443
       ocsf:
+        action: "Allowed"
+        action_id: 1
         activity_id: 2
         activity_name: "Close"
         category_name: "Network Activity"
@@ -51,15 +53,21 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "92244"
+        disposition: "Allowed"
+        disposition_id: 1
         dst_endpoint:
           ip: "35.184.126.116"
           port: 443
+        firewall_rule:
+          name: "Permit all outbound"
         metadata:
           event_code: "TRAFFIC"
           product:
             name: "Palo Alto Networks Firewall"
             uid: "012001018742"
             vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
           sequence: 977161987
           version: "1.5.0"
         severity: "Informational"
@@ -98,7 +106,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1
  -
-  sample: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+  sample: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.41, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
   result:
     custom:
       actionflags: "0xa0000 00000000000"
@@ -114,15 +122,19 @@ tests:
       message: "thisIsSampleMessage"
       network:
         client:
-          geoip:
-            invalidAddress: "10.2.75.414"
-          ip: "10.2.75.414"
+          geoip: {}
+          ip: "10.2.75.41"
       ocsf:
-        activity_id: 99
-        activity_name: "AUTHENTICATION"
-        category_uid: 0
-        class_name: "Base Event"
-        class_uid: 0
+        activity_id: 1
+        activity_name: "Logon"
+        auth_protocol: "alert"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        dst_endpoint:
+          hostname: "tab"
+        logon_type: "securityApp"
         metadata:
           event_code: "AUTHENTICATION"
           product:
@@ -131,9 +143,17 @@ tests:
             vendor_name: "Palo Alto Networks"
           sequence: 486021038
           version: "1.5.0"
+        service:
+          name: "serverprofile"
         severity: "Unknown"
         severity_id: 0
+        src_endpoint:
+          ip: "10.2.75.41"
+        status: "Unknown"
+        status_id: 0
         time: 1557161033000
+        user:
+          name: "Jaydeep"
       repeatcnt: 1
       seqno: 486021038
       serial: "001801010877"
@@ -146,7 +166,7 @@ tests:
       vsys: "testVM"
       vsys_id: 786
       vsys_name: "JVM"
-    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, 	clienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,	authproto=authproto"
+    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.41, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, 	clienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,	authproto=authproto"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -185,6 +205,8 @@ tests:
         class_uid: 2004
         confidence: "Unknown"
         confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
         evidences:
           - actor:
               app_name: "web-browsing"
@@ -221,7 +243,10 @@ tests:
           product:
             name: "Palo Alto Networks Firewall"
             vendor_name: "Palo Alto Networks"
+          title: "Eicar Test File"
           uid: "7489817491394537149"
+        firewall_rule:
+          name: "L3_Orca to L3_Untrust"
         is_alert: true
         metadata:
           event_code: "THREAT"
@@ -229,6 +254,8 @@ tests:
             name: "Palo Alto Networks Firewall"
             uid: "16201026426"
             vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
           sequence: 7489817491394537149
           version: "1.5.0"
         severity: "Medium"
@@ -286,6 +313,8 @@ tests:
         class_uid: 2004
         confidence: "Unknown"
         confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
         evidences:
           - actor:
               app_name: "web-browsing"
@@ -309,6 +338,8 @@ tests:
               ip: "172.16.28.191"
               port: 51099
               zone: "L3_Orca"
+            url:
+              url_string: "http://malware.example.com/payload.bin"
         finding_info:
           analytic:
             category: "url"
@@ -318,7 +349,10 @@ tests:
           product:
             name: "Palo Alto Networks Firewall"
             vendor_name: "Palo Alto Networks"
+          title: "Suspicious URL"
           uid: "7489817491394537150"
+        firewall_rule:
+          name: "L3_Orca to L3_Untrust"
         is_alert: true
         metadata:
           event_code: "THREAT"
@@ -326,6 +360,8 @@ tests:
             name: "Palo Alto Networks Firewall"
             uid: "716201026426"
             vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
           sequence: 7489817491394537150
           version: "1.5.0"
         severity: "High"
@@ -382,6 +418,8 @@ tests:
         class_uid: 2004
         confidence: "Unknown"
         confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
         evidences:
           - actor:
               app_name: "dns"
@@ -415,7 +453,11 @@ tests:
           product:
             name: "Palo Alto Networks Firewall"
             vendor_name: "Palo Alto Networks"
+          title: "Suspicious DNS Query"
           uid: "7489817491394537151"
+        firewall_rule:
+          name: "L3_Orca to L3_Untrust"
+          uid: "d6e5f4a3-3333-4444-5555-666677778888"
         is_alert: true
         metadata:
           event_code: "THREAT"
@@ -423,6 +465,8 @@ tests:
             name: "Palo Alto Networks Firewall"
             uid: "816201026426"
             vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
           sequence: 7489817491394537151
           version: "1.5.0"
         severity: "Critical"
@@ -447,6 +491,43 @@ tests:
         id: "bchen"
       vsys: "vsys1"
     message: "<14>Sep  3 19:42:05 PA-3220 timestamp=2025/09/03 19:42:05, serial=816201026426, type=THREAT, subtype=spyware, time_generated=2025/09/03 19:42:05, network.client.ip=172.16.28.192, network.destination.ip=93.184.216.36, rule=L3_Orca to L3_Untrust, usr.id=bchen, dstuser=, app=dns, vsys=vsys1, from=L3_Orca, to=L3_Untrust, logset=datadog-forwarder, sessionid=393902, repeatcnt=1, network.client.port=53001, network.destination.port=53, flags=0x40407a, proto=udp, evt.name=sinkhole, threatid=Suspicious DNS Query, category=command-and-control, severity=critical, seqno=7489817491394537151, actionflags=0x0, device_name=PA-3220, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<14>Sep  3 19:43:20 PA-3220 timestamp=2025/09/03 19:43:20, serial=916201026426, type=SYSTEM, subtype=general, vsys=vsys1, evt.name=general, object=, module=general, severity=informational, opaque=Config installed successfully, seqno=7489817491394537152, actionflags=0x0, vsys_name=, device_name=PA-3220"
+  result:
+    custom:
+      actionflags: "0x0"
+      device_name: "PA-3220"
+      evt:
+        name: "general"
+      module: "general"
+      ocsf:
+        activity_id: 99
+        activity_name: "SYSTEM"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "SYSTEM"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "916201026426"
+            vendor_name: "Palo Alto Networks"
+          sequence: 7489817491394537152
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1756928600000
+      opaque: "Config installed successfully"
+      seqno: 7489817491394537152
+      serial: 916201026426
+      severity: "informational"
+      subtype: "general"
+      type: "SYSTEM"
+      vsys: "vsys1"
+    message: "<14>Sep  3 19:43:20 PA-3220 timestamp=2025/09/03 19:43:20, serial=916201026426, type=SYSTEM, subtype=general, vsys=vsys1, evt.name=general, object=, module=general, severity=informational, opaque=Config installed successfully, seqno=7489817491394537152, actionflags=0x0, vsys_name=, device_name=PA-3220"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
