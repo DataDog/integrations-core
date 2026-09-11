@@ -40,12 +40,10 @@ def test_check(dd_agent_check):
 
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
-    aggregator = dd_agent_check_discovery(check_rate=True)
+    aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=2)
 
-    # Discovery only probes the Pipelines Controller's own container port since
-    # the Triggers Controller doesn't have a declared port in its container
-    # metadata.
     assert_pipeline_metrics(aggregator)
+    assert_triggers_metrics(aggregator)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -53,10 +51,11 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check, tekton_kubeconfig):
-    assert_all_discovery_candidates_stable_kubernetes(
-        dd_agent_check,
-        TektonCheck,
-        tekton_kubeconfig,
-        namespace='tekton-pipelines',
-        pod_selector='app=tekton-pipelines-controller',
-    )
+    for pod_selector in ('app=tekton-pipelines-controller', 'app=tekton-triggers-controller'):
+        assert_all_discovery_candidates_stable_kubernetes(
+            dd_agent_check,
+            TektonCheck,
+            tekton_kubeconfig,
+            namespace='tekton-pipelines',
+            pod_selector=pod_selector,
+        )

@@ -10,6 +10,14 @@ files:
         - metrics
         candidates:
         - pipelines_controller_endpoint: "http://{service.host}:{port.number}/metrics"
+    - strategy: local:from_default_metrics_port
+      provides:
+      - port
+      inputs:
+        port: integer
+      port: 9000
+      candidates:
+      - triggers_controller_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:
@@ -41,5 +49,8 @@ files:
   - template: ad_identifiers
     overrides:
       value.example:
+      # tektoncd/pipeline/
       - controller-10a3e32792f33651396d02b6855a6e36
+      # tektoncd/triggers/
+      - controller-f656ca31de179ab913fa76abc255c315
   - template: auto_conf/discovery

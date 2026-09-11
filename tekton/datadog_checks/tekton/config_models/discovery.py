@@ -14,6 +14,7 @@ from typing import Any
 
 from datadog_checks.base.utils.discovery import Service, candidate_ports_by_name
 from datadog_checks.tekton.config_models import discovery_overrides
+from datadog_checks.tekton.config_models.discovery_strategies import from_default_metrics_port
 from datadog_checks.tekton.config_models.instance import InstanceConfig
 from datadog_checks.tekton.config_models.shared import SharedConfig
 
@@ -27,6 +28,17 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         ctx = {'port': port}
         instance_data = {
             'pipelines_controller_endpoint': 'http://{service.host}:{port.number}/metrics'.format(
+                service=service, **ctx
+            ),
+        }
+        instance = InstanceConfig.model_validate(
+            instance_data, context={'configured_fields': frozenset(instance_data)}
+        ).model_dump(by_alias=True, mode='json', exclude_none=True)
+        yield {'init_config': shared, 'instances': [instance]}
+    # discovery[1]: local:from_default_metrics_port
+    for ctx in from_default_metrics_port(service, port=9000):
+        instance_data = {
+            'triggers_controller_endpoint': 'http://{service.host}:{port.number}/metrics'.format(
                 service=service, **ctx
             ),
         }
