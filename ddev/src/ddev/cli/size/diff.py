@@ -134,7 +134,16 @@ def diff(
                         )
                     )
                 if format:
-                    export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
+                    export_format(
+                        app,
+                        format,
+                        modules_plat_ver,
+                        "diff",
+                        platform,
+                        version,
+                        compressed,
+                        platforms=list(platforms),
+                    )
                 if (to_dd_org or to_dd_key) and modules_plat_ver:
                     send_diff_metrics_to_dd(app, second_commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
             except Exception as e:

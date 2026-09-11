@@ -29,6 +29,7 @@ from ddev.cli.size.utils.common_funcs import (
     save_csv,
     save_json,
     save_markdown,
+    save_markdown_diff,
     send_diff_metrics_to_dd,
     wheel_url_candidates,
 )
@@ -398,56 +399,84 @@ def test_save_markdown():
     assert written_content == expected_writes
 
 
-@pytest.mark.parametrize(
-    ("mode", "expected_title", "expected_total"),
-    [
-        pytest.param("status", "Status", "absolute", id="status"),
-        pytest.param("diff", "Diff", "delta", id="diff"),
-    ],
-)
-def test_export_format_titles_markdown_by_mode(mode, expected_title, expected_total):
+def test_export_format_status_uses_save_markdown():
     modules = [
         {"Name": "module1", "Size_Bytes": 123, "Size": "2 B", "Type": "Integration", "Platform": "linux-x86_64"},
     ]
 
     with patch("ddev.cli.size.utils.common_funcs.save_markdown") as mock_save:
-        export_format(MagicMock(), ["markdown"], modules, mode, None, None, False)
+        export_format(MagicMock(), ["markdown"], modules, "status", None, None, False)
 
     _, title, _, filename = mock_save.call_args.args
-    assert title == expected_title
-    assert filename == f"{mode}_uncompressed.md"
-    assert mock_save.call_args.kwargs["section_total"] == expected_total
+    assert title == "Status"
+    assert filename == "status_uncompressed.md"
+    assert mock_save.call_args.kwargs["section_total"] == "absolute"
 
 
-def test_save_markdown_signs_positive_totals_for_deltas():
+@pytest.mark.parametrize(
+    "compressed, expected_filename",
+    [
+        pytest.param(False, "diff_uncompressed.md", id="uncompressed"),
+        pytest.param(True, "diff_compressed.md", id="compressed"),
+    ],
+)
+def test_export_format_diff_uses_save_markdown_diff(compressed, expected_filename):
+    modules = [
+        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B", "Type": "Integration", "Platform": "linux-x86_64"},
+    ]
+
+    with patch("ddev.cli.size.utils.common_funcs.save_markdown_diff") as mock_save:
+        export_format(
+            MagicMock(),
+            ["markdown"],
+            modules,
+            "diff",
+            None,
+            None,
+            compressed,
+            platforms=["linux-x86_64", "macos-x86_64"],
+        )
+
+    app, saved_modules, filename, platforms, saved_compressed = mock_save.call_args.args
+    assert saved_modules == modules
+    assert filename == expected_filename
+    assert platforms == ["linux-x86_64", "macos-x86_64"]
+    assert saved_compressed is compressed
+
+
+def test_save_markdown_diff_always_shows_totals_table():
     mock_app = MagicMock()
     mock_file = mock_open()
 
     modules = [
         {"Name": "module1", "Size_Bytes": 1000, "Size": "+1000 B", "Type": "Dependency", "Platform": "linux-x86_64"},
-        {"Name": "module2", "Size_Bytes": -400, "Size": "-400 B", "Type": "Dependency", "Platform": "linux-x86_64"},
+        {"Name": "module2", "Size_Bytes": -400, "Size": "-400 B", "Type": "Dependency", "Platform": "macos-x86_64"},
     ]
 
     with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_markdown(mock_app, "Diff", modules, "output.md", section_total="delta")
+        save_markdown_diff(mock_app, modules, "output.md", ["linux-x86_64", "macos-x86_64", "windows-x86_64"], False)
 
     written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
-    assert "<summary>linux-x86_64 (+600 B)</summary>" in written_content
+    assert "### Uncompressed" in written_content
+    assert "| linux-x86_64 | macos-x86_64 | windows-x86_64 |" in written_content
+    assert "| +1000 B | -400 B | 0 B |" in written_content
+    assert "<summary>Details</summary>" in written_content
+    assert "| module1 |  | Dependency | +1000 B | 0 B | 0 B |" in written_content
+    assert "| module2 |  | Dependency | 0 B | -400 B | 0 B |" in written_content
 
 
-def test_save_markdown_leaves_negative_totals_unsigned():
+def test_save_markdown_diff_no_changes_collapses_details():
     mock_app = MagicMock()
     mock_file = mock_open()
 
-    modules = [
-        {"Name": "module1", "Size_Bytes": -1000, "Size": "-1000 B", "Type": "Dependency", "Platform": "linux-x86_64"},
-    ]
-
     with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_markdown(mock_app, "Diff", modules, "output.md", section_total="delta")
+        save_markdown_diff(mock_app, [], "output.md", ["linux-x86_64", "macos-x86_64"], True)
 
     written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
-    assert "<summary>linux-x86_64 (-1000 B)</summary>" in written_content
+    assert "### Compressed" in written_content
+    assert "| 0 B | 0 B |" in written_content
+    assert "<summary>Details — no dependency changed size</summary>" in written_content
+    assert "| Name | Version | Type |" not in written_content
 
 
 def test_save_markdown_one_section_per_platform_and_version():
@@ -499,7 +528,7 @@ def test_save_markdown_orders_sections_deterministically():
 
     mock_file = mock_open()
     with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_markdown(MagicMock(), "Diff", modules, "output.md", section_total="delta")
+        save_markdown(MagicMock(), "Status", modules, "output.md", section_total="absolute")
 
     written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
     assert re.findall(r"<summary>(\S+), Python", written_content) == sorted(platforms)
