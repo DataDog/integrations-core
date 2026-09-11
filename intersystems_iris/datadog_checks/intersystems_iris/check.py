@@ -2,14 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from collections import ChainMap
-from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.metrics_mapping import MetricsMapping
-from datadog_checks.base.types import InstanceType
 
 from .config_models import ConfigMixin
 
@@ -51,10 +47,8 @@ class IrisCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     METRICS_MAP = (MetricsMapping(Path('metrics/default.yaml')),)
 
-    def get_config_with_defaults(self, config: InstanceType) -> Mapping[str, Any]:
-        # Merge per label rather than letting the instance replace the whole mapping, so an
-        # instance that renames one label does not silently lose the collision-avoiding renames
-        # it did not mention. The copy also keeps the shared module-level map immutable.
-        rename_labels = dict(RENAME_LABELS_MAP)
-        rename_labels.update(config.get('rename_labels') or {})
-        return ChainMap({'rename_labels': rename_labels}, super().get_config_with_defaults(config))
+    def get_default_config(self) -> dict:
+        # A fresh copy each call, since the framework may mutate what this returns. The base class
+        # merges this default entry by entry with any instance-level `rename_labels`, so an instance
+        # that renames one label keeps the collision-avoiding renames it did not mention.
+        return {'rename_labels': dict(RENAME_LABELS_MAP)}
