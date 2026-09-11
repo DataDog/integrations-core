@@ -48,27 +48,24 @@ def init_config_alt_tables():
     return deepcopy(INIT_CONFIG_ALT_TABLES)
 
 
+@pytest.fixture
+def run_database_metrics_synchronously() -> None:
+    """Opt a test into running the async database metrics job before the check returns."""
+
+
 @pytest.fixture(autouse=True)
-def run_database_metrics_synchronously(monkeypatch):
-    """
-    Collect the heavy database metrics on the calling thread so a returned check implies collection.
+def isolate_database_metrics_job(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> None:
+    """Keep the async job from leaking work into tests that do not exercise it."""
+    run_job_loop_original = SqlserverDatabaseMetricsAsyncJob.run_job_loop
+    should_run = 'run_database_metrics_synchronously' in request.fixturenames
 
-    Moving these collectors to an async job means `dd_run_check` no longer waits for them, which
-    makes every existing assertion about their metrics racy. The other DBM jobs solve this with a
-    `run_sync` instance option, so this forces that option on rather than reaching into the job.
+    def run_job_loop(job: SqlserverDatabaseMetricsAsyncJob, tags: list[str]) -> None:
+        if not should_run:
+            return
+        job._run_sync = True
+        run_job_loop_original(job, tags)
 
-    FIXME: this is autouse, so nothing in the suite exercises the threaded path except the tests in
-    test_database_metrics_async.py that opt out. Narrowing it to the tests that actually assert these
-    metrics needs a live SQL Server to verify and is tracked on the PR.
-    """
-    config_init_original = SqlserverDatabaseMetricsAsyncJob.__init__
-
-    def config_init(job, check, config, *args, **kwargs):
-        for key in ('index_usage_metrics', 'db_fragmentation_metrics', 'table_size_metrics'):
-            config.database_metrics_config[key]['run_sync'] = True
-        config_init_original(job, check, config, *args, **kwargs)
-
-    monkeypatch.setattr(SqlserverDatabaseMetricsAsyncJob, '__init__', config_init)
+    monkeypatch.setattr(SqlserverDatabaseMetricsAsyncJob, 'run_job_loop', run_job_loop)
 
 
 @pytest.fixture(scope="session")
