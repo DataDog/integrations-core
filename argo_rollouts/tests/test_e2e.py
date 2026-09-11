@@ -15,7 +15,7 @@ def test_e2e_openmetrics_v2(dd_agent_check):
 
 
 def test_e2e_discovery(dd_agent_check_discovery):
-    aggregator = dd_agent_check_discovery(check_rate=True)
+    aggregator = dd_agent_check_discovery()
 
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.OK)
     assert_service_checks(aggregator)
