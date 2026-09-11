@@ -83,5 +83,14 @@ files:
       value:
         type: string
       fleet_configurable: false
+    - name: dbm
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable Database Monitoring.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - template: instances/db
     - template: instances/default
