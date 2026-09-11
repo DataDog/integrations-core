@@ -206,7 +206,9 @@ def instance_1valid_and_1invalid_custom_queries():
 
 @pytest.fixture
 def instance_arbiter():
-    return common.INSTANCE_ARBITER.copy()
+    instance = common.INSTANCE_ARBITER.copy()
+    instance["query_metrics"] = {"enabled": False}
+    return instance
 
 
 @pytest.fixture
