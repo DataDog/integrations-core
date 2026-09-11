@@ -365,6 +365,10 @@ class VagrantAgent(AgentInterface):
         exported_env_vars[AgentEnvVars.APM_ENABLED] = self.metadata.get("dd_apm_enabled", "false")
         exported_env_vars[AgentEnvVars.TELEMETRY_ENABLED] = self.metadata.get("dd_telemetry_enabled", "true")
         exported_env_vars[AgentEnvVars.EXPVAR_PORT] = self.metadata.get("dd_expvar_port", "5000")
+        # Disable Agent telemetry by default so E2E Agents do not pollute COAT stats
+        exported_env_vars[AgentEnvVars.AGENT_TELEMETRY_ENABLED] = self.metadata.get(
+            "dd_agent_telemetry_enabled", "false"
+        )
 
         if (proxy_data := self.metadata.get("proxy")) is not None:
             if (http_proxy := proxy_data.get("http")) is not None:
