@@ -64,7 +64,7 @@ files:
     options:
       - name: gitlab_url
         fleet_configurable: true
-        formats: ["url"]
+        formats: ["secret"]
         required: true
         description: |
           Master URL to probe for service health status.
