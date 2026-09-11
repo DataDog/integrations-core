@@ -4,11 +4,11 @@
 from __future__ import division
 
 import functools
-import time
 from collections import defaultdict
 from contextlib import closing
 from datetime import datetime
 from itertools import chain
+from string import Template
 
 import certifi
 
@@ -31,7 +31,7 @@ from .config_models.instance import CollectSchemas, DataObservability
 from .data_observability import SapHanaDataObservability
 from .diagnose import run_diagnostics
 from .exceptions import OperationalError, QueryExecutionError
-from .schemas import HanaSchemaCollector
+from .schemas import HanaSchemaCollectionJob
 from .utils import compute_percent, positive
 
 
@@ -53,6 +53,7 @@ class SapHanaCheck(AgentCheck):
         self._use_tls = self.instance.get('use_tls', False)
         self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
         self._schema = self.instance.get('schema', "SYS_DATABASES")
+        self._database_identifier = None
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -91,11 +92,9 @@ class SapHanaCheck(AgentCheck):
         # Save master database hostname to act as the default if `use_hana_hostnames` is true
         self._master_hostname = None
 
-        # Schema collection (DBM)
+        # Schema collection async job (DBM)
         collect_schemas = CollectSchemas(**(self.instance.get('collect_schemas') or {}))
-        self._schema_collector = HanaSchemaCollector(self, collect_schemas) if collect_schemas.enabled else None
-        self._schema_collection_interval = int(collect_schemas.collection_interval or 600)
-        self._last_schema_collection_time = 0
+        self._schema_collection_job = HanaSchemaCollectionJob(self, collect_schemas)
         self._dbms_version = None
 
         # Data Observability async job (RC-delivered queries)
@@ -129,7 +128,7 @@ class SapHanaCheck(AgentCheck):
                 except Exception as e:
                     self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
-            self._maybe_collect_schemas()
+            self._schema_collection_job.run_job_loop(self._tags)
             if self._do_config.enabled:
                 self.data_observability.run_job_loop(self._tags)
         finally:
@@ -160,9 +159,11 @@ class SapHanaCheck(AgentCheck):
                 self._connection_flaked = False
 
     def cancel(self):
-        # Signal the Data Observability async job to stop so its executor thread is
-        # released when the check is unscheduled (e.g. cluster-agent flavor or one-off
-        # check invocations), instead of leaking the DBMAsyncJob thread pool.
+        # Signal both async jobs to stop so their executor threads are released when the
+        # check is unscheduled (e.g. cluster-agent flavor or one-off check invocations),
+        # instead of leaking the shared DBMAsyncJob thread pool. This only sets each job's
+        # cancel event; it does not itself close the schema job's dedicated HANA connection.
+        self._schema_collection_job.cancel()
         self.data_observability.cancel()
 
     def set_default_methods(self):
@@ -194,7 +195,23 @@ class SapHanaCheck(AgentCheck):
 
     @property
     def database_identifier(self):
-        return '{}:{}'.format(self._server, self._port)
+        if self._database_identifier is None:
+            db_id_config = self.instance.get('database_identifier') or {}
+            template = Template(db_id_config.get('template') or '$host:$port')
+            tag_dict = {}
+            tags = self._tags.copy()
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['host'] = str(self._server)
+            tag_dict['port'] = str(self._port)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     @property
     def dbms(self):
@@ -202,15 +219,29 @@ class SapHanaCheck(AgentCheck):
 
     @property
     def dbms_version(self):
-        if self._dbms_version is None and self._conn is not None:
-            try:
-                with closing(self._conn.cursor()) as cursor:
-                    cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
-                    row = cursor.fetchone()
-                    self._dbms_version = str(row[0]).split()[0] if row else 'unknown'
-            except Exception:
-                self._dbms_version = 'unknown'
+        # Only returns the cached value; resolution happens via _resolve_dbms_version on the
+        # schema job's dedicated connection. The version is read from base_event on the job
+        # thread, and querying self._conn here would race with the main check loop's concurrent
+        # use of that same connection (there is no thread-safe pool, unlike DBM integrations).
         return self._dbms_version or 'unknown'
+
+    def _resolve_dbms_version(self, conn):
+        """Resolve and cache the HANA version using the given connection.
+
+        Called from the schema-collection job thread on its dedicated connection so the main
+        check connection is never touched off-thread. Caches on first success; a transient
+        failure leaves the value unresolved so the next cycle retries instead of caching
+        'unknown' permanently.
+        """
+        if self._dbms_version is not None:
+            return
+        try:
+            with closing(conn.cursor()) as cursor:
+                cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
+                row = cursor.fetchone()
+                self._dbms_version = str(row[0]).split()[0] if row else 'unknown'
+        except Exception:
+            pass
 
     @property
     def tags(self):
@@ -219,17 +250,6 @@ class SapHanaCheck(AgentCheck):
     @property
     def cloud_metadata(self):
         return {}
-
-    def _maybe_collect_schemas(self):
-        if not self._schema_collector or not self._conn:
-            return
-        if time.time() - self._last_schema_collection_time < self._schema_collection_interval:
-            return
-        try:
-            self._schema_collector.collect_schemas()
-            self._last_schema_collection_time = time.time()
-        except Exception as e:
-            self.log.error('Error collecting HANA schemas: %s', e)
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html

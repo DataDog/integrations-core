@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 7.0.0 / 2026-09-02
+
+***Changed***:
+
+* Align the emitted metrics with Cilium 1.17-1.20:
+  - Add agent metrics for node health connectivity, hive jobs, identity cache timers and garbage collection, ClusterMesh remote endpoints, IPsec, service implementation delay, BPF ratelimit, MTU and fragment drops, endpoint restoration, NAT, and workqueue work duration.
+  - Add operator metrics for doublewrite identities, unmanaged pods, ClusterMesh, MCS-API, the CID controller, the Kubernetes workqueue, and IPAM.
+  - Remove the value-less ``cilium.version`` gauge. The Cilium version is now reported only as Agent version metadata (``version.major``, ``version.minor``, ``version.patch``, and ``version.raw``).
+  - Document the OpenMetrics V1 (``.total``) and OpenMetrics V2 (``.count``) names separately for counters previously listed under a single entry, and mark the ``cilium.operator.lbipam.*`` names emitted only with Cilium 1.15-1.16 as deprecated. ([#22765](https://github.com/DataDog/integrations-core/pull/22765))
+
 ## 6.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

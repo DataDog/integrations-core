@@ -1,0 +1,1 @@
+Reject a `per_page` outside GitHub's accepted range of 1..100 in the async GitHub client.

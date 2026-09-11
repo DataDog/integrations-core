@@ -484,6 +484,7 @@ spec:
             - "--api.dashboard=false"
             - "--api.insecure"
             - "--ping"
+            - "--ping.entrypoint=readiness"
             - "--metrics.prometheus=true"
           ports:
             - name: readiness

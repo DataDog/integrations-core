@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import time
 from unittest.mock import patch
 
@@ -13,7 +14,10 @@ from datadog_checks.slurm.constants import SACCT_PARAMS
 from .common import (
     DEFAULT_SINFO_PATH,
     SACCT_MAP,
+    SCONTROL_IDLE_STDERR,
     SCONTROL_MAP,
+    SCONTROL_MISSING_SPOOLDIR_STDERR,
+    SCONTROL_UNREADABLE_SPOOLDIR_STDERR,
     SDIAG_MAP,
     SINFO_1_F,
     SINFO_1_T,
@@ -21,6 +25,7 @@ from .common import (
     SINFO_2_T,
     SINFO_3_F,
     SINFO_3_T,
+    SINFO_CONTROLLER_DOWN_STDERR,
     SINFO_LEVEL_2_MAP,
     SINFO_MAP,
     SLURM_VERSION,
@@ -453,3 +458,139 @@ def test_process_seff_metric_submission(mock_get_subprocess_output, instance, ag
     aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.0, tags=tags)
     aggregator.assert_metric('slurm.seff.memory_efficiency', value=0.0, tags=tags)
     aggregator.assert_all_metrics_covered()
+
+
+def test_sinfo_gpu_gres_slurm_2505(instance, aggregator):
+    # Slurm 25.05 sinfo appends a socket-affinity suffix, e.g. 'gpu:<type>:8(S:0-1)', to GRES.
+    # The count parser must ignore the suffix so gpu_total is still emitted (regression).
+    check = SlurmCheck('slurm', {}, [instance])
+    check.process_sinfo_node(mock_output('sinfo_gres_2505.txt'))
+
+    gpu_type = 'slurm_node_gpu_type:nvidia_rtx_pro_6000_blackwell_server_edition'
+    node1 = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-rtx-pro-129-015',
+        'slurm_cluster_name:N/A',
+        gpu_type,
+    ]
+    node2 = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-rtx-pro-134-237',
+        'slurm_cluster_name:N/A',
+        gpu_type,
+    ]
+    aggregator.assert_metric('slurm.node.gpu_total', value=8, tags=node1)
+    aggregator.assert_metric('slurm.node.gpu_used', value=3, tags=node1)
+    aggregator.assert_metric('slurm.node.gpu_total', value=8, tags=node2)
+    aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=node2)
+
+
+def test_sinfo_gpu_gres_multi_type(instance, aggregator):
+    # A node advertising multiple GPU models renders a comma-separated GRES list, e.g.
+    # 'gpu:tesla:2,gpu:kepler:2'. Every type must be counted, not just the first entry.
+    check = SlurmCheck('slurm', {}, [instance])
+    check.process_sinfo_node(mock_output('sinfo_gres_multi_2505.txt'))
+
+    base = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-mixed-gpu-001',
+        'slurm_cluster_name:N/A',
+    ]
+    tesla = base + ['slurm_node_gpu_type:tesla']
+    kepler = base + ['slurm_node_gpu_type:kepler']
+    aggregator.assert_metric('slurm.node.gpu_total', value=2, tags=tesla)
+    aggregator.assert_metric('slurm.node.gpu_used', value=1, tags=tesla)
+    aggregator.assert_metric('slurm.node.gpu_total', value=2, tags=kepler)
+    aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=kepler)
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_process_seff_normalizes_kilobytes(mock_get_subprocess_output, instance, aggregator):
+    # Slurm 25.05 seff reports small jobs in KB (and large ones in GB); memory must still
+    # normalize to MB rather than being dropped (regression for the hardcoded 'MB').
+    mock_get_subprocess_output.return_value = (mock_output('seff_2505.txt'), '', 0)
+    instance['collect_seff_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    tags = ["slurm_job_id:317"]
+    check.process_seff("317", tags)
+
+    aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.7578125, tags=tags)
+    aggregator.assert_metric('slurm.seff.cpu_utilized', value=0.0, tags=tags)
+
+
+def test_sacct_running_job_skips_none_avgcpu(instance, aggregator):
+    # RUNNING jobs report an empty AveCPU; avgcpu must be skipped rather than submitted as
+    # None (regression: previously only duration had a None guard).
+    check = SlurmCheck('slurm', {}, [instance])
+    running_job = (
+        "315|dd-fix-run|rtx-pro|cw-sup|12|billing=12,cpu=12,gres/gpu=1,mem=93585408K,node=1|"
+        "00:00:12|144|||||RUNNING|0:0|2026-07-10T18:45:32|Unknown|slurm-rtx-pro-129-015|||"
+    )
+    check.process_sacct(running_job)
+
+    aggregator.assert_metric('slurm.sacct.slurm_job_avgcpu', count=0)
+    aggregator.assert_metric('slurm.sacct.job.duration', value=12, count=1)
+    aggregator.assert_metric('slurm.sacct.job.info', value=1, count=1)
+
+
+def command_records(caplog, level, command):
+    """Log records emitted at `level` that name the given slurm command."""
+    return [r for r in caplog.records if r.levelno == level and command in r.getMessage()]
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_given_idle_node_logs_debug_instead_of_error(mock_get_subprocess_output, instance, caplog):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [("", SCONTROL_IDLE_STDERR, 1)]
+
+    check.check(None)
+
+    assert not command_records(caplog, logging.ERROR, 'scontrol')
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_given_missing_spool_dir_warns_once_across_runs(mock_get_subprocess_output, instance, caplog):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [
+        ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
+        ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
+    ]
+
+    check.check(None)
+    check.check(None)
+
+    assert len(command_records(caplog, logging.WARNING, 'scontrol')) == 1
+    assert not command_records(caplog, logging.ERROR, 'scontrol')
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_given_unreadable_spool_dir_still_logs_error(mock_get_subprocess_output, instance, caplog):
+    # EACCES prints the same "no job steps" line as an idle node, so it must not be
+    # mistaken for one. The check would otherwise collect nothing and say nothing.
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [("", SCONTROL_UNREADABLE_SPOOLDIR_STDERR, 1)]
+
+    check.check(None)
+
+    assert command_records(caplog, logging.ERROR, 'scontrol')
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_sinfo_given_unreachable_controller_still_logs_error(mock_get_subprocess_output, instance, caplog):
+    # Commands with no benign-failure classifier must keep reporting every non-zero exit.
+    instance['collect_sinfo_stats'] = True
+    instance['sinfo_collection_level'] = 1
+    instance['collect_gpu_stats'] = False
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [
+        ("", "", 0),
+        ("", SINFO_CONTROLLER_DOWN_STDERR, 1),
+        ("", SINFO_CONTROLLER_DOWN_STDERR, 1),
+    ]
+
+    check.check(None)
+
+    assert command_records(caplog, logging.ERROR, 'sinfo')

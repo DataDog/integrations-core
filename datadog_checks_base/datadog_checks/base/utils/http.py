@@ -11,6 +11,7 @@ import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from typing import TYPE_CHECKING
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
@@ -30,6 +31,9 @@ from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
+
+if TYPE_CHECKING:
+    from cryptography.x509 import Certificate
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -103,6 +107,24 @@ PROXY_SETTINGS_DISABLED = {
 KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
+
+
+def load_x509_certificates(data: bytes) -> list[Certificate]:
+    """Load one or more certificates from data that may be DER or PEM encoded.
+
+    A CA Issuers URI conventionally serves a single DER-encoded certificate (the RFC 5280 convention),
+    tried first here, but some issuers serve a PEM bundle containing multiple certificates instead (e.g.
+    a cross-signed cert alongside its own issuer), so all certificates in the bundle are returned.
+    """
+    try:
+        return [_http_utils.cryptography_x509_load_certificate(data)]
+    except ValueError as der_error:
+        try:
+            return list(_http_utils.cryptography_x509_load_pem_certificates(data))
+        except ValueError as pem_error:
+            raise ValueError(
+                f'not valid DER ({der_error}) or PEM ({pem_error}); first 32 bytes: {data[:32]!r}'
+            ) from pem_error
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):
@@ -508,18 +530,41 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
+            self.logger.debug(
+                'AIA chasing: request to `%s` failed with an SSLError (%s); attempting to recover missing '
+                'intermediate certificate(s)',
+                url,
+                e,
+            )
             # fetch the intermediate certs
             parsed_url = urlparse(url)
             hostname = parsed_url.hostname
             port = parsed_url.port
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
+                self.logger.error(
+                    'AIA chasing: no intermediate certificate(s) could be recovered for `%s`; raising the '
+                    'original SSLError',
+                    url,
+                )
                 raise e
+            self.logger.debug(
+                'AIA chasing: recovered %d intermediate certificate(s) for `%s`; retrying the request', len(certs), url
+            )
             session = self.session if persist else self._create_session()
             if parsed_url.scheme == "https":
                 self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
             request_method = getattr(session, method)
-            response = request_method(url, **new_options)
+            try:
+                response = request_method(url, **new_options)
+            except SSLError:
+                self.logger.error(
+                    'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
+                    'certificate(s); the certificate chain is still incomplete',
+                    url,
+                    len(certs),
+                )
+                raise
         return response
 
     def fetch_intermediate_certs(self, hostname, port=443):
@@ -529,7 +574,12 @@ class RequestsWrapper(object):
         try:
             sock = create_socket_connection(hostname, port)
         except Exception as e:
-            self.logger.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            self.logger.error(
+                'AIA chasing: error occurred while connecting to `%s:%s` to discover intermediate certificates: %s',
+                hostname,
+                port,
+                e,
+            )
             return certs
 
         with sock:
@@ -546,20 +596,45 @@ class RequestsWrapper(object):
                             )
                         )
             except Exception as e:
-                self.logger.error('Error occurred while getting cert to discover intermediate certificates: %s', e)
+                self.logger.error(
+                    'AIA chasing: error occurred while getting cert from `%s:%s` to discover intermediate '
+                    'certificates: %s',
+                    hostname,
+                    port,
+                    e,
+                )
                 return certs
 
         self.load_intermediate_certs(der_cert, certs)
         return certs
 
     def load_intermediate_certs(self, der_cert, certs):
-        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
-        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        """
+        Fetch missing intermediate certs via Authority Information Access (AIA) chasing.
+
+        https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        https://tools.ietf.org/html/rfc5280#section-5.2.7
+
+        A CA Issuers URI conventionally serves a single DER-encoded certificate, but some issuers serve a
+        PEM bundle containing multiple certificates (e.g. a cross-signed cert alongside its own issuer).
+        All certificates discovered are appended to `certs` (as PEM strings), but AIA chasing continues
+        for a given certificate only if its issuer isn't already among the certs collected so far, to
+        avoid redundant network fetches.
+        """
         try:
-            cert = _http_utils.cryptography_x509_load_certificate(der_cert)
+            cert_objects = load_x509_certificates(der_cert)
         except Exception as e:
-            self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
-            return
+            self.logger.error('AIA chasing: error while deserializing the peer certificate: %s', e)
+            return certs
+
+        known_subjects = {load_x509_certificates(pem_cert.encode('ascii'))[0].subject for pem_cert in certs}
+        for cert in cert_objects:
+            self._chase_certificate_issuer(cert, certs, known_subjects)
+        return certs
+
+    def _chase_certificate_issuer(self, cert, certs, known_subjects):
+        if cert.issuer in known_subjects:
+            return  # issuer already available; no need to fetch it again
 
         try:
             authority_information_access = cert.extensions.get_extension_for_oid(
@@ -567,7 +642,8 @@ class RequestsWrapper(object):
             )
         except _http_utils.cryptography_x509_ExtensionNotFound:
             self.logger.debug(
-                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
+                'AIA chasing: no Authority Information Access extension found on `%s`; its issuer cannot be discovered',
+                cert.subject.rfc4514_string(),
             )
             return
 
@@ -584,14 +660,36 @@ class RequestsWrapper(object):
             try:
                 response = self.get(uri)  # SKIP_HTTP_VALIDATION
             except Exception as e:
-                self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                self.logger.error(
+                    'AIA chasing: error fetching the issuer of `%s` from `%s`: %s',
+                    cert.subject.rfc4514_string(),
+                    uri,
+                    e,
+                )
                 continue
-            else:
-                intermediate_cert = response.content
 
-            certs.append(intermediate_cert)
-            self.load_intermediate_certs(intermediate_cert, certs)
-        return certs
+            try:
+                fetched_certs = load_x509_certificates(response.content)
+            except Exception as e:
+                # Best-effort: skip this issuer and keep trying the rest rather than aborting the whole
+                # chase. A partial chain may still be enough to complete verification; if it isn't, the
+                # retry in `make_request_aia_chasing` fails with a fresh SSLError raised by that retry.
+                self.logger.error(
+                    'AIA chasing: error while deserializing the certificate fetched from `%s`: %s', uri, e
+                )
+                continue
+
+            for fetched_cert in fetched_certs:
+                if fetched_cert.subject in known_subjects:
+                    continue  # already have this certificate
+                pem_cert = fetched_cert.public_bytes(_http_utils.cryptography_serialization.Encoding.PEM).decode(
+                    'ascii'
+                )
+                certs.append(pem_cert)
+                known_subjects.add(fetched_cert.subject)
+
+            for fetched_cert in fetched_certs:
+                self._chase_certificate_issuer(fetched_cert, certs, known_subjects)
 
     def _create_session(self):
         """

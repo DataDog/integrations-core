@@ -92,6 +92,7 @@ class InstanceConfig(BaseModel):
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     hostname_transform: Optional[Literal['upper', 'lower', 'default']] = None
+    infrastructure_mode: Optional[Literal['full', 'basic']] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None

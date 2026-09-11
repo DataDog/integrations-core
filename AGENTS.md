@@ -9,6 +9,8 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Maintaining This File](#maintaining-this-file)
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
+- [Service Checks](#service-checks)
+- [Manifest Files](#manifest-files)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -34,6 +36,8 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 Add type hints to new functions and methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
 
 Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
+
+Omit `-> None` on test functions — the return type of a test carries no information. A method that returns `None` in a `Protocol` or an abstract base class must still annotate it, because `mypy` treats an unannotated method as returning `Any`. Elsewhere either form is fine. Existing code is not being retrofitted, so expect to see both.
 
 #### Refactoring Existing Code
 
@@ -86,9 +90,27 @@ Extract duplicated logic when it represents the same concept and a shared helper
 Don't modify files in `**/config_models/*.py` directly. To change those files, edit `assets/configuration/spec.yaml` and then run:
 
 ```shell
-ddev -x validate config -s <INTEGRATION_NAME>
-ddev -x validate models -s <INTEGRATION_NAME>
+ddev validate config -s <INTEGRATION_NAME>
+ddev validate models -s <INTEGRATION_NAME>
 ```
+
+## Service Checks
+
+**Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
+
+New integrations should not add their own service checks. Use metrics and metric-based monitors instead.
+
+The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
+## Manifest Files
+
+**Applicable to:** newly created integrations. Existing integrations that already have a `manifest.json` are exempt.
+
+New integrations must not include a `manifest.json`. Instead, add the following to `.ddev/config.toml`, keyed by the integration's directory name:
+
+- Display name under `[overrides.display-name]`.
+- Metrics prefix (matching the prefix used in `metadata.csv`) under `[overrides.metrics-prefix]`.
+- Supported platforms under `[overrides.manifest.platforms]`.
 
 ## Development Workflow
 
@@ -165,6 +187,23 @@ ddev env test --dev --recreate <INTEGRATION> <ENV>
 
 For E2E tests, `--recreate` performs `docker compose down --volumes` followed by `docker compose up -d --force-recreate`.
 
+### Writing Tests
+
+These rules cover what to test. For how test code itself is organized in `ddev`, see `ddev/tests/AGENTS.md`.
+
+A test must be justified by the code as it stands now. Someone reading the test with no knowledge of how the code got there should be able to see why the assertion matters. This rules out two patterns that keep showing up:
+
+- Tests that only exist because of the development history, such as asserting the code no longer does what an earlier iteration did. There are infinitely many things the code does not do, so picking one is arbitrary. The exception is a regression test for a bug that actually shipped; it asserts the correct observable behavior and references the issue or PR.
+- Tests of language or framework mechanics: that a constructor assigned the attributes passed to it, that a dataclass compares equal, that an enum has the values it was declared with, that a property returns what was just set, that a mock returns what it was configured to return.
+
+What to do instead:
+
+- Test observable behavior at the unit's boundary: given this input or state, what does it return, produce, or change? A test that would still pass after a reimplementation with the same contract is testing behavior; one that breaks is usually testing implementation details.
+- Before adding a test, state in one sentence the bug it would catch and why that bug matters. If that sentence cannot be written, do not add the test.
+- Do not repeat coverage across layers. Edge cases belong at the lowest layer that owns the logic; layers above it cover wiring and integration, so they should have fewer tests, not more.
+- Parameterize variants of the same behavior with `pytest.mark.parametrize` instead of copying near-identical test functions.
+- Prefer a small number of meaningful tests over a high count. Do not pad a suite to look thorough.
+
 ### Linting and Formatting
 
 Always run linting and formatting through `ddev`; never invoke `ruff`, `black`, or `mypy` directly. CI runs them inside `ddev`'s pinned hatch lint environment, and a different locally installed version can report different results — passing locally while failing CI, or the other way around.
@@ -221,6 +260,7 @@ echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics
 These guidelines apply to automated code review (the Codex review bot). They do not relax any requirement above for code you author.
 
 - Do not raise findings for a missing changelog entry. Changelog files are named `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>`, so they can only be created after the PR number is assigned; their absence when a PR is first opened is expected rather than a defect. The requirement is already enforced by the `check_changelog` job in `.github/workflows/pr-quick-check.yml`.
+- Flag tests that violate [Writing Tests](#writing-tests). For each finding, say which behavior the test fails to verify rather than only naming the pattern.
 - When a PR changes the `metric_type` column in `metadata.csv`, verify that the new type uses the correct in-app (backend) type, not the submission type. The submission-to-backend mapping is defined in `datadog_checks_base/datadog_checks/base/stubs/aggregator.py` (`METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP`). The valid in-app types for `metadata.csv` are `gauge`, `count`, and `rate`. The full mapping is: `gauge` → `gauge`, `rate` → `gauge`, `count` → `count`, `monotonic_count` → `count`, `counter` → `rate`, `histogram` → `rate`, `historate` → `rate`. For example, a metric submitted as a `rate` should appear as `gauge` in `metadata.csv`, and a metric submitted as a `monotonic_count` should appear as `count`.
 
 ## Pull Requests

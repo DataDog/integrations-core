@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 13.1.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+## 13.0.0 / 2026-07-29 / Agent 7.82.0
+
+***Changed***:
+
+* The `http_status_code` tag that 12.7.0 added unconditionally to `network.http.can_connect`, `network.http.cant_connect` and `network.http.response_time`, first shipped in Agent 7.81.0, is no longer emitted by default: it split each metric into one context per status code, which changed how existing monitors evaluate. A single `http_outcome` tag is available behind the new `enable_http_outcome_tag` option instead, carrying the HTTP status code of the response, or, on `network.http.can_connect` and `network.http.cant_connect` when no response was received, one of `ssl_error`, `timeout`, `connection_error` or `socket_error`. ([#24650](https://github.com/DataDog/integrations-core/pull/24650))
+
 ## 12.7.1 / 2026-06-18 / Agent 7.81.0
 
 ***Fixed***:

@@ -1,0 +1,1 @@
+Add ``--pytest-args`` to ``ddev ci dispatch-tests``, forwarded to each batch workflow.

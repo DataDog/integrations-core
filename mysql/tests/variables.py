@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 STATUS_VARS = [
+    # Server Metrics
+    'mysql.uptime',
     # Command Metrics
     'mysql.performance.prepared_stmt_count',
     'mysql.performance.slow_queries',
