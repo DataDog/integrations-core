@@ -1,0 +1,1 @@
+Warn in `agent status` when a monitored committed offset holds an unexpected negative value, naming up to five affected `(consumer_group, topic, partition, offset)` tuples, and keep reporting `kafka.broker_offset` for those partitions.
