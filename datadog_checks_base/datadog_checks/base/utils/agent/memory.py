@@ -6,6 +6,7 @@ import linecache
 import os
 import threading
 from datetime import datetime, timezone
+from typing import Any, Callable, Mapping, Sequence
 
 from binary import BinaryUnits, convert_units
 
@@ -219,6 +220,20 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
         f(*args, **kwargs)
         return []
 
+    try:
+        return _profile_memory_owner(f, config, namespaces, args, kwargs)
+    finally:
+        _profile_memory_lock.release()
+
+
+def _profile_memory_owner(
+    f: Callable[..., Any],
+    config: Mapping[str, Any],
+    namespaces: Sequence[str] | None,
+    args: Sequence[Any],
+    kwargs: Mapping[str, Any],
+) -> list[MemoryProfileMetric]:
+    """Run profiling and snapshot processing while the caller owns the global lock."""
     gc_disabled = False
     tracemalloc_started = False
 
@@ -245,7 +260,6 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
             tracemalloc.stop()
         if gc_disabled:
             gc.enable()
-        _profile_memory_lock.release()
 
     verbose = bool(int(config.get('profile_memory_verbose', DEFAULT_VERBOSITY)))
     if not verbose:
