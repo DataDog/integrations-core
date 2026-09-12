@@ -1,0 +1,201 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from contextlib import nullcontext
+from unittest import mock
+
+import pytest
+
+from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import DATABASE_METRICS_CONTEXT_INFO
+from datadog_checks.sqlserver.database_metrics import (
+    SqlserverDatabaseFilesMetrics,
+    SqlserverDBFragmentationMetrics,
+    SqlserverIndexUsageMetrics,
+    SqlserverTableSizeMetrics,
+    SqlserverTempDBFileSpaceUsageMetrics,
+)
+from datadog_checks.sqlserver.utils import Database
+
+from .common import CHECK_NAME
+
+HEAVY_DATABASE_METRIC_TYPES = (
+    SqlserverIndexUsageMetrics,
+    SqlserverDBFragmentationMetrics,
+    SqlserverTableSizeMetrics,
+)
+
+
+@pytest.mark.unit
+def test_async_database_metrics_job_requires_opt_in(
+    init_config, instance_docker_metrics, run_database_metrics_synchronously
+):
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.database_metrics_job.run_job = mock.MagicMock()
+
+    check.run_async_jobs([])
+
+    check.database_metrics_job.run_job.assert_not_called()
+
+
+@pytest.mark.unit
+def test_stored_procedure_does_not_run_async_database_metrics(
+    init_config, instance_docker_metrics, run_database_metrics_synchronously
+):
+    instance_docker_metrics['stored_procedure'] = 'pyStoredProc'
+    run_database_metrics_synchronously(instance_docker_metrics)
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.database_metrics_job.run_job = mock.MagicMock()
+
+    check.run_async_jobs([])
+
+    check.database_metrics_job.run_job.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('run_async', [False, True])
+def test_heavy_database_metrics_follow_async_configuration(init_config, instance_docker_metrics, run_async):
+    instance_docker_metrics['database_metrics'] = {'run_heavy_collectors_async': run_async}
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.databases = {Database('database1')}
+
+    synchronous_metrics = check.database_metrics
+    async_metrics = check.database_metrics_job.database_metrics
+
+    assert any(isinstance(metric, HEAVY_DATABASE_METRIC_TYPES) for metric in synchronous_metrics) is not run_async
+    assert any(isinstance(metric, SqlserverTempDBFileSpaceUsageMetrics) for metric in synchronous_metrics)
+    assert any(isinstance(metric, SqlserverDatabaseFilesMetrics) for metric in synchronous_metrics)
+    assert {type(metric) for metric in async_metrics} == set(HEAVY_DATABASE_METRIC_TYPES)
+    assert check._async_job_registry['database-metrics'] is check.database_metrics_job
+
+    for metric in synchronous_metrics + async_metrics:
+        metric.execute = mock.MagicMock()
+    check.load_basic_metrics = mock.MagicMock()
+    check._query_manager = mock.MagicMock()
+    check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(mock.MagicMock()))
+    check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
+
+    check.collect_metrics()
+
+    for metric in synchronous_metrics:
+        metric.execute.assert_called_once_with()
+    for metric in async_metrics:
+        metric.execute.assert_not_called()
+
+
+@pytest.mark.unit
+def test_async_database_metrics_job_waits_until_an_enabled_collector_is_due(
+    init_config, instance_docker_metrics, run_database_metrics_synchronously
+):
+    instance_docker_metrics['min_collection_interval'] = 15
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {'enabled': True, 'collection_interval': 60},
+        'db_fragmentation_metrics': {'enabled': True, 'collection_interval': 120},
+    }
+    run_database_metrics_synchronously(instance_docker_metrics)
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    job = check.database_metrics_job
+    job.run_job = mock.MagicMock()
+
+    check.run_async_jobs([])
+    job._rate_limiter.last_event -= 15
+    check.run_async_jobs([])
+
+    job.run_job.assert_called_once_with()
+
+    job._rate_limiter.last_event -= 45
+    check.run_async_jobs([])
+
+    assert job.run_job.call_count == 2
+
+
+@pytest.mark.unit
+def test_async_database_metrics_job_uses_dedicated_connection_and_continues_after_database_error(
+    init_config, instance_docker_metrics, caplog
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {'enabled': True, 'enabled_tempdb': False},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.databases = {Database('database1'), Database('database2')}
+    check.count = mock.MagicMock()
+    job = check.database_metrics_job
+    query_databases = []
+
+    def execute_query(_query, db=None, **_kwargs):
+        query_databases.append(db)
+        if db == 'database1':
+            raise TimeoutError('database query timed out')
+        return []
+
+    job._execute_query_raw = execute_query
+    check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    cursor = mock.MagicMock()
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(cursor))
+    check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
+
+    job.run_job()
+
+    assert query_databases == ['database1', 'database2']
+    check.connection.open_managed_default_connection.assert_called_once_with('dbm-database-metrics-')
+    check.connection.restore_current_database_context.assert_called_once_with('dbm-database-metrics-')
+    check.count.assert_called_once()
+    assert check.count.call_args.args[:2] == ('dd.sqlserver.async_job.error', 1)
+    assert 'database=database1' in caplog.text
+
+
+@pytest.mark.unit
+def test_async_database_metrics_marks_every_cursor_for_activity_exclusion(init_config, instance_docker_metrics):
+    """
+    Each cursor is marked before its query runs.
+
+    The marker is what keeps this job's own heavy queries out of query-activity samples. Setting it
+    once per sweep would be enough only if the connection never dropped; a sweep can run for tens of
+    minutes, and a reconnect would come back unmarked and start polluting the customer's activity
+    data. So the bug being guarded against is a marker that covers the first query but not the rest.
+    """
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    job = check.database_metrics_job
+    cursor = mock.MagicMock()
+    cursor.description = None
+    cursor.fetchall.return_value = []
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(cursor))
+
+    for _ in range(2):
+        job._execute_query_raw('select 1', db='database1')
+
+    marker = mock.call("SET CONTEXT_INFO {}".format(DATABASE_METRICS_CONTEXT_INFO))
+    assert cursor.execute.call_args_list.count(marker) == 2
+    # ...and it precedes the USE and the query itself on each pass.
+    assert cursor.execute.call_args_list[0] == marker
+    assert cursor.execute.call_args_list.index(marker, 1) < len(cursor.execute.call_args_list) - 1
+
+
+@pytest.mark.unit
+def test_async_database_metrics_job_stops_between_databases_when_cancelled(init_config, instance_docker_metrics):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'index_usage_metrics': {'enabled': True, 'enabled_tempdb': False},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.databases = {Database('database1'), Database('database2')}
+    job = check.database_metrics_job
+    query_databases = []
+
+    def execute_query(_query, db=None, **_kwargs):
+        query_databases.append(db)
+        job.cancel()
+        return []
+
+    job._execute_query_raw = execute_query
+    check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    check.connection.get_managed_cursor = mock.MagicMock(return_value=nullcontext(mock.MagicMock()))
+    check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
+
+    with pytest.raises(Exception, match='Job loop cancelled'):
+        job.run_job()
+
+    assert query_databases == ['database1']

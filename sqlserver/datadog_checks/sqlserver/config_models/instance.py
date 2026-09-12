@@ -355,6 +355,7 @@ class DatabaseMetrics(BaseModel):
     instance_metrics: Optional[InstanceMetrics] = None
     master_files_metrics: Optional[MasterFilesMetrics] = None
     primary_log_shipping_metrics: Optional[PrimaryLogShippingMetrics] = None
+    run_heavy_collectors_async: Optional[bool] = None
     secondary_log_shipping_metrics: Optional[SecondaryLogShippingMetrics] = None
     server_state_metrics: Optional[ServerStateMetrics] = None
     table_size_metrics: Optional[TableSizeMetrics] = None
