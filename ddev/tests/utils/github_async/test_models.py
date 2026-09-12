@@ -3,15 +3,25 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from ddev.utils.github_async.models import (
+    ContentType,
+    FileCommit,
+    FileContent,
     GitHubUser,
+    GitReference,
     Label,
     PullRequest,
     PullRequestRef,
     PullRequestState,
 )
-from tests.utils.github_async.payloads import full_pull_request_payload
+from tests.utils.github_async.payloads import (
+    file_commit_payload,
+    file_content_payload,
+    full_pull_request_payload,
+    git_ref_payload,
+)
 
 
 def test_pull_request_parses_full_response() -> None:
@@ -45,6 +55,26 @@ def test_pull_request_ignores_extra_fields() -> None:
     payload = full_pull_request_payload(mergeable_state="clean", additions=42, unknown_future_field={"nested": True})
     pr = PullRequest.model_validate(payload)
     assert pr.number == 42
+
+
+def test_git_reference_exposes_the_object_sha() -> None:
+    """Callers read `object.sha` to branch from a ref, so the nested object must parse."""
+    ref = GitReference.model_validate(git_ref_payload(ref="refs/heads/7.56.x", sha="d" * 40))
+    assert ref.ref == "refs/heads/7.56.x"
+    assert ref.object.sha == "d" * 40
+
+
+def test_file_content_rejects_a_non_file_type() -> None:
+    """`get_content` is only used for files; a directory/symlink response must not parse as a file."""
+    assert FileContent.model_validate(file_content_payload()).type is ContentType.FILE
+    with pytest.raises(ValidationError):
+        FileContent.model_validate(file_content_payload(type="dir"))
+
+
+def test_file_commit_parses_with_null_content() -> None:
+    """`file-commit.content` is nullable; the commit is what callers need and must still parse."""
+    commit = FileCommit.model_validate(file_commit_payload(commit_sha="e" * 40))
+    assert commit.commit.sha == "e" * 40
 
 
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:

@@ -1,0 +1,1 @@
+Open a datadog-agent PR pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit when tagging an Agent release branch. The PR targets the Agent `main` for the first RC of a milestone and the matching Agent release branch for every other tag; PR creation retries on transient HTTP errors and, if it keeps failing, prints the `gh pr create` command to open it manually.

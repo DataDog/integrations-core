@@ -362,6 +362,7 @@ def test_create_pull_request_step(app_mock: MagicMock, fake_async_github: FakeAs
         body='body',
         draft=False,
         timeout=None,
+        retry=None,
     )
     fake_async_github.assert_called_once_with(
         'add_labels_to_issue',
@@ -402,6 +403,7 @@ def test_create_pull_request_step_skips_label_call_when_no_labels(
         body='body',
         draft=True,
         timeout=None,
+        retry=None,
     )
     fake_async_github.assert_not_called('add_labels_to_issue')
 
@@ -804,6 +806,7 @@ def test_command_fetches_commit_when_not_local(
         body=mocker.ANY,
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
