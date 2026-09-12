@@ -59,6 +59,7 @@ tests:
         src_endpoint:
           ip: "10.145.105.176"
           port: 36008
+          uid: "10.145.105.176"
         status: "Failure"
         status_code: "NXDOMAIN"
         status_id: 2
@@ -127,6 +128,7 @@ tests:
         src_endpoint:
           ip: "127.0.0.1"
           port: 50759
+          uid: "127.0.0.1"
         status: "Success"
         status_code: "NOERROR"
         status_id: 1

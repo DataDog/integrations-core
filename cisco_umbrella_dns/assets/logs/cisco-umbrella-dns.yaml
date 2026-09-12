@@ -752,6 +752,15 @@ pipeline:
       filter:
         query: service:dns
       processors:
+        - type: array-processor
+          name: Extract roaming computer `id` from `identities` array
+          enabled: true
+          operation:
+            source: identities
+            target: ocsf.src_endpoint.uid
+            filter: "type.type:roaming"
+            valueToExtract: id
+            type: select
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -872,6 +881,16 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.src_endpoint.uid`, `internalip` to `ocsf.src_endpoint.uid`
+              sources:
+                - ocsf.src_endpoint.uid
+                - internalip
+              sourceType: attribute
+              target: ocsf.src_endpoint.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
               type: schema-remapper
             - name: Map `externalip` to `ocsf.proxy_endpoint.ip`
               sources:
