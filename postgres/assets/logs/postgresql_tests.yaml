@@ -7,7 +7,13 @@ tests:
       db:
         date: 1510075839000
         severity: "LOG"
+      error_severity: "LOG"
+      postgres:
+        service_name: "postgresql"
+        severity_category: "info"
+      timestamp: "2017-11-07 17:30:39 UTC"
     message: "incomplete startup packet"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -16,6 +22,7 @@ tests:
   sample: "2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;"
   result:
     custom:
+      application_name: "psql"
       db:
         date: 1510164695727
         instance: "postgres"
@@ -23,14 +30,24 @@ tests:
         severity: "LOG"
         statement: "SELECT * FROM playground;"
         user: "postgres"
+      dbname: "postgres"
+      error_severity: "LOG"
       network:
         client:
-          ip: "[local]"
+          hostname: "[local]"
+      pid: 5237
       postgres:
         appname: "psql"
         proc_id: "5237"
+        service_name: "postgresql"
         session_id: "5a0348cd.1475"
-    message: "2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;"
+        severity_category: "info"
+      remote_host: "[local]"
+      session_id: "5a0348cd.1475"
+      timestamp: "2017-11-08 18:11:35.727 UTC"
+      user: "postgres"
+    message: "statement: SELECT * FROM playground;"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -40,6 +57,7 @@ tests:
   sample: "2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
   result:
     custom:
+      application_name: "datadog-agent"
       db:
         date: 1576002465389
         instance: "datadog_test"
@@ -47,15 +65,25 @@ tests:
         severity: "LOG"
         statement: "select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
         user: "datadog"
+      dbname: "datadog_test"
       duration: 140000.0
+      error_severity: "LOG"
       network:
         client:
           ip: "172.28.0.1"
+      pid: 114
       postgres:
         appname: "datadog-agent"
         proc_id: "114"
+        service_name: "postgresql"
         session_id: "5defc7c5.72"
-    message: "2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
+        severity_category: "info"
+      remote_host: "172.28.0.1"
+      session_id: "5defc7c5.72"
+      timestamp: "2019-12-10 18:27:45.389 UTC"
+      user: "datadog"
+    message: "duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -71,19 +99,32 @@ tests:
         instance: "dbmorders_1"
         severity: "LOCATION"
         user: "shopper_1"
+      dbname: "dbmorders_1"
+      error_severity: "LOCATION"
+      line_num: 395
       network:
         client:
           ip: "10.0.216.218"
           port: 36378
+      pid: 20337
       postgres:
-        appname: "[unknown]"
         proc_id: "20337"
+        service_name: "postgresql"
         session_id: "68c862e1.4f71"
+        severity_category: "info"
         vxid: "384/39221"
         xid: "0"
+      remote_host: "10.0.216.218"
+      remote_port: 36378
+      session_id: "68c862e1.4f71"
       session_lineno: 395
-      sql_state: "00000"
+      session_start: "2025-09-15 19:02:57 UTC"
+      timestamp: "2025-09-15 19:05:58.892 UTC"
+      txid: 0
+      user: "shopper_1"
+      vxid: "384/39221"
     message: "exec_simple_query, postgres.c:1075"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -93,26 +134,41 @@ tests:
   sample: "2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:00000:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
   result:
     custom:
+      application_name: "pgbench"
       db:
         backend_start: 1758047158000
         date: 1758047205429
         instance: "postgres"
         severity: "LOG"
         user: "postgres"
+      dbname: "postgres"
       duration: 3000.0
+      error_severity: "LOG"
+      line_num: 34853
       network:
         client:
           ip: "192.168.65.1"
           port: 31674
+      pid: 87
       postgres:
         appname: "pgbench"
         proc_id: "87"
+        service_name: "postgresql"
         session_id: "68c9abb6.57"
+        severity_category: "info"
         vxid: "5/2050"
         xid: "2823"
+      remote_host: "192.168.65.1"
+      remote_port: 31674
+      session_id: "68c9abb6.57"
       session_lineno: 34853
-      sql_state: "00000"
-    message: "execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
+      session_start: "2025-09-16 18:25:58 UTC"
+      timestamp: "2025-09-16 18:26:45.429 UTC"
+      txid: 2823
+      user: "postgres"
+      vxid: "5/2050"
+    message: "duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -122,26 +178,41 @@ tests:
   sample: "2025-11-19 18:27:10.640 UTC:10.198.137.95(54414):service_catalog_rw@service_catalog:[194370]:4:00000:2025-11-19 18:21:43 UTC:15/174689:276953619:691e0ab7.2f742:PostgreSQL JDBC Driver:LOG:  duration: 1626.107 ms  plan: {}"
   result:
     custom:
+      application_name: "PostgreSQL JDBC Driver"
       db:
         backend_start: 1763576503000
         date: 1763576830640
         instance: "service_catalog"
         severity: "LOG"
         user: "service_catalog_rw"
+      dbname: "service_catalog"
       duration: 1.626107E9
+      error_severity: "LOG"
+      line_num: 4
       network:
         client:
           ip: "10.198.137.95"
           port: 54414
+      pid: 194370
       postgres:
         appname: "PostgreSQL JDBC Driver"
         proc_id: "194370"
+        service_name: "postgresql"
         session_id: "691e0ab7.2f742"
+        severity_category: "info"
         vxid: "15/174689"
         xid: "276953619"
+      remote_host: "10.198.137.95"
+      remote_port: 54414
+      session_id: "691e0ab7.2f742"
       session_lineno: 4
-      sql_state: "00000"
-    message: "plan: {}"
+      session_start: "2025-11-19 18:21:43 UTC"
+      timestamp: "2025-11-19 18:27:10.640 UTC"
+      txid: 276953619
+      user: "service_catalog_rw"
+      vxid: "15/174689"
+    message: "duration: 1626.107 ms  plan: {}"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -155,15 +226,26 @@ tests:
         backend_start: 1764791966000
         date: 1764791980415
         severity: "LOG"
+      error_severity: "LOG"
+      line_num: 1
+      pid: 1670514
       postgres:
         proc_id: "1670514"
+        service_name: "postgresql"
         session_id: "6930969e.197d72"
+        severity_category: "info"
         vxid: "20/120887"
         xid: "0"
+      session_id: "6930969e.197d72"
       session_lineno: 1
-      sql_state: "00000"
+      session_start: "2025-12-03 19:59:26 UTC"
+      timestamp: "2025-12-03 19:59:40.415 UTC"
+      txid: 0
+      vxid: "20/120887"
     message: "automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
+    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1764791980415
+
