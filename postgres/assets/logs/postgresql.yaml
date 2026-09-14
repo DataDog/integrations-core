@@ -181,14 +181,19 @@ pipeline:
       grok:
         supportRules: |
         matchRules: |
-          # `%{data}` is lazy; a greedy `.*` anchors on the LAST `duration: N ms`,
-          # which query text can supply. Captures nothing into `message`.
-          pg_duration %{data}duration:\s+%{number:duration}\s+ms%{data}
+          # Anchored at the start of the body. PostgreSQL emits the timing field as
+          # the leading token for log_min_duration_statement and auto_explain, so a
+          # leading `%{data}` only adds the ability to mine `duration:` out of query
+          # text and fabricate a value. Captures nothing into `message`.
+          pg_duration duration:\s+%{number:duration}\s+ms%{data}
       samples:
+        # Values of `message`, not raw log lines: this reads Stage 1's parsed body.
         - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
-        - '2025-09-16 18:26:45.429 UTC:1.2.3.4(31674):p@p:[87]:1:00000:2025-09-16 18:25:58 UTC:5/2050:0:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
+        - 'duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
         - 'duration: 12.345 ms'
         - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
+        # Must NOT match: `duration:` appears only inside the query text.
+        - "statement: SELECT 'duration: 99 ms'"
     # Promote Stage 1's parsed body over the raw prefix line. The remapper consumes
     # its source, matching intake preprocessing for jsonlog records.
     - type: message-remapper
@@ -223,13 +228,21 @@ pipeline:
       grok:
         supportRules: |
         matchRules: |
-          # Lazy: a greedy `.*` would take a `statement:` inside the query text.
-          pg_statement %{data}statement:\s+%{data:db.statement}
+          # Anchored at the start of the body, allowing only the timing field ahead of
+          # it. `statement:` is a body header PostgreSQL emits in exactly those two
+          # positions; an unanchored search also matches the token inside logged SQL,
+          # which lets query text dictate `db.statement` and, through it, `db.operation`.
+          pg_statement (?:duration:\s+%{number}\s+ms\s+)?statement:\s+%{data:db.statement}
       samples:
+        # Values of `message`, not raw log lines: this reads Stage 1's parsed body.
         - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
         - 'statement: SELECT 2 AS c02;'
+        # A real statement whose SQL happens to contain the timing token.
+        - "statement: SELECT 'duration: 99 ms'"
         - 'duration: 12.345 ms'
         - 'checkpoint starting: shutdown immediate'
+        # Must NOT match: `statement:` appears only inside the executed SQL.
+        - "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
     # Preserve socket and hostname values in remote_host; promote only valid IPs.
     - type: grok-parser
       name: Parse `remote_host` as `network.client.ip`
