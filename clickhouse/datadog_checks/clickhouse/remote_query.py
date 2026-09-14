@@ -189,6 +189,26 @@ class StreamSource(Protocol):
     def close(self) -> None: ...
 
 
+class TimedStreamSource:
+    """A ``StreamSource`` view that accounts each raw stream read as a database fetch.
+
+    The wrapped stream's reads are this producer's only result-fetch calls, so every
+    read — header or data — enters the fetch phase, suspending whatever phase encloses
+    it (setup during the header rows, the encode loop during data rows).
+    """
+
+    def __init__(self, stream: StreamSource, timings: rq.RemoteQueryProducerTimings):
+        self._stream = stream
+        self._timings = timings
+
+    def read(self, amount: int) -> bytes:
+        with self._timings.phase('database_fetch'):
+            return self._stream.read(amount)
+
+    def close(self) -> None:
+        self._stream.close()
+
+
 # ---------------------------------------------------------------------------
 # Statement gate: one read-only statement, verified client-side before any server access
 # ---------------------------------------------------------------------------
@@ -814,53 +834,64 @@ def _run_streamed_query(
     guard: Callable[[], None],
     stats: rq.RemoteQueryRunStats,
     deadline: float,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> dict[str, Any]:
     """Stream the query result into bounded JSON pages and return the run receipt."""
+    timings = timings if timings is not None else rq.NULL_PRODUCER_TIMINGS
     delivery = request.result_delivery
     limits = delivery.limits
-    settings = resolve_readonly_settings(clickhouse_client, rq.remaining_wall_ms(deadline))
-    # The user query is passed verbatim; the client appends the FORMAT clause.
-    stream = clickhouse_client.raw_stream(request.query, settings=settings, fmt=REMOTE_QUERY_STREAM_FORMAT)
+    stream = None
     try:
-        bounds = LineBoundTracker(limits)
-        lines = iter_stream_lines(stream, guard, bounds)
-        try:
-            names_line = next(lines)
-            types_line = next(lines)
-        except StopIteration:
-            raise rq.RemoteQueryFailure(
-                'query_failed', 'The result stream did not carry the column name and type header rows.'
-            ) from None
-        columns = build_columns(
-            _parse_header_row(names_line, 'column names'), _parse_header_row(types_line, 'column types')
-        )
-        validate_columns(columns, limits.max_columns)
-        # Now that the column names are known, data-row lines are bounded by the row budget.
-        bounds.bind_columns(columns)
-        schema_json = None
-        if request.include_schema:
-            schema_json = build_schema_json(columns, delivery, agent_hostname)
+        with timings.phase('database_setup'):
+            # The second setup segment (client creation was the first, in the caller):
+            # settings resolution, stream open, header/column building, schema build.
+            # Every raw stream read inside — header or data — is the fetch phase.
+            settings = resolve_readonly_settings(clickhouse_client, rq.remaining_wall_ms(deadline))
+            # The user query is passed verbatim; the client appends the FORMAT clause.
+            stream = TimedStreamSource(
+                clickhouse_client.raw_stream(request.query, settings=settings, fmt=REMOTE_QUERY_STREAM_FORMAT),
+                timings,
+            )
+            bounds = LineBoundTracker(limits)
+            lines = iter_stream_lines(stream, guard, bounds)
+            try:
+                names_line = next(lines)
+                types_line = next(lines)
+            except StopIteration:
+                raise rq.RemoteQueryFailure(
+                    'query_failed', 'The result stream did not carry the column name and type header rows.'
+                ) from None
+            columns = build_columns(
+                _parse_header_row(names_line, 'column names'), _parse_header_row(types_line, 'column types')
+            )
+            validate_columns(columns, limits.max_columns)
+            # Now that the column names are known, data-row lines are bounded by the row budget.
+            bounds.bind_columns(columns)
+            schema_json = None
+            if request.include_schema:
+                schema_json = build_schema_json(columns, delivery, agent_hostname)
 
-        # The executing check's Agent-reported hostname: the stamp must match the
-        # agent node identity Fleet reports, never socket.gethostname().
-        writer = rq.PageWriter(delivery, creds, client, agent_hostname, schema_json, guard, stats)
+            # The executing check's Agent-reported hostname: the stamp must match the
+            # agent node identity Fleet reports, never socket.gethostname().
+            writer = rq.PageWriter(delivery, creds, client, agent_hostname, schema_json, guard, stats, timings)
         try:
             guard()
-            for line in lines:
-                guard()
-                values = _parse_json_line(line)
-                if not isinstance(values, list):
-                    raise rq.RemoteQueryFailure('query_failed', 'A result row was not a JSON array.')
-                row_buffer = bytearray()
-                encode_row(values, columns, row_buffer)
-                if len(row_buffer) > limits.max_row_bytes:
-                    raise rq.RemoteQueryFailure(
-                        'row_too_large',
-                        'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
-                            len(row_buffer), limits.max_row_bytes
-                        ),
-                    )
-                writer.add_row(bytes(row_buffer))
+            with timings.phase('encode_and_page_build'):
+                for line in lines:
+                    guard()
+                    values = _parse_json_line(line)
+                    if not isinstance(values, list):
+                        raise rq.RemoteQueryFailure('query_failed', 'A result row was not a JSON array.')
+                    row_buffer = bytearray()
+                    encode_row(values, columns, row_buffer)
+                    if len(row_buffer) > limits.max_row_bytes:
+                        raise rq.RemoteQueryFailure(
+                            'row_too_large',
+                            'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
+                                len(row_buffer), limits.max_row_bytes
+                            ),
+                        )
+                    writer.add_row(bytes(row_buffer))
             return writer.finish()
         finally:
             # Release the page even if the response stream or row conversion fails.
@@ -868,10 +899,11 @@ def _run_streamed_query(
     finally:
         # Always close (never drain) the response: closing the socket is what lets the server
         # cancel an abandoned read-only query (see the module docstring).
-        try:
-            stream.close()
-        except Exception:
-            LOGGER.debug('Unable to close the remote query response stream', exc_info=True)
+        if stream is not None:
+            try:
+                stream.close()
+            except Exception:
+                LOGGER.debug('Unable to close the remote query response stream', exc_info=True)
 
 
 def produce_remote_query(
@@ -882,16 +914,23 @@ def produce_remote_query(
     started_at: float,
     stats: rq.RemoteQueryRunStats,
     clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> dict[str, Any]:
     """Execute the validated query once and return the compact run receipt.
 
     The query runs exactly once, through a dedicated client whose query retries are
     disabled; it is never wrapped in a probe and never executed twice. Row lines are read
     from the streamed response incrementally and encoded one row at a time.
+
+    Producer phases: client creation, stream open, header/column building, and schema
+    build are database setup; every raw stream read is a database fetch; the row loop is
+    encode and page build (with any upload ``add_row`` triggers nested inside it); page
+    uploads and finalize are accounted by the shared page writer.
     """
     delivery = request.result_delivery
     limits = delivery.limits
     deadline = started_at + limits.timeout_ms / 1000
+    timings = timings if timings is not None else rq.NULL_PRODUCER_TIMINGS
 
     def guard() -> None:
         rq.raise_if_timed_out(deadline)
@@ -901,9 +940,11 @@ def produce_remote_query(
     try:
         factory = clickhouse_client_factory if clickhouse_client_factory is not None else _default_client_factory
         try:
-            # The send/receive timeout derives from the remaining wall, not the full delivered
-            # budget, so a client created late cannot wait past the run-wide deadline.
-            clickhouse_client = factory(check, max(1, math.ceil(deadline - time.monotonic())))
+            # The first database-setup segment: client creation. The send/receive timeout
+            # derives from the remaining wall, not the full delivered budget, so a client
+            # created late cannot wait past the run-wide deadline.
+            with timings.phase('database_setup'):
+                clickhouse_client = factory(check, max(1, math.ceil(deadline - time.monotonic())))
         except rq.RemoteQueryFailure:
             raise
         except Exception:
@@ -916,7 +957,7 @@ def produce_remote_query(
             ) from None
         try:
             receipt = _run_streamed_query(
-                request, clickhouse_client, creds, client, check.hostname, guard, stats, deadline
+                request, clickhouse_client, creds, client, check.hostname, guard, stats, deadline, timings
             )
         except rq.RemoteQueryFailure:
             raise
@@ -1022,14 +1063,20 @@ def execute_agent_rpc_stream_copy(
     The entry point name is kept for the Agent's rtloader bridge, which resolves this
     function by name. Emits ``metadata`` (STARTED), then one ``final`` (SUCCEEDED with the
     compact receipt) or ``error`` (FAILED) event; bulk page bytes never cross the callback.
+    Diagnostics collection starts before the request JSON is parsed, so even a malformed
+    request reports its measured wall.
     """
+    started_at = time.monotonic()
+    timings = rq.RemoteQueryProducerTimings(started_at)
     try:
         request = json.loads(request_json)
     except (TypeError, ValueError):
         rq.emit_event(
             emit,
             rq.failed_event(
-                'invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'
+                'invalid_request',
+                'Invalid remote query request: request_json must be a valid JSON object.',
+                execution_diagnostics=timings.metadata(),
             ),
         )
         return
@@ -1037,11 +1084,15 @@ def execute_agent_rpc_stream_copy(
     if not isinstance(request, Mapping):
         rq.emit_event(
             emit,
-            rq.failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.'),
+            rq.failed_event(
+                'invalid_request',
+                'Invalid remote query request: request_json must be a JSON object.',
+                execution_diagnostics=timings.metadata(),
+            ),
         )
         return
 
-    _execute_upload_stream(request, check, emit)
+    _execute_upload_stream(request, check, emit, timings=timings)
 
 
 def _execute_upload_stream(
@@ -1050,10 +1101,11 @@ def _execute_upload_stream(
     emit: rq.RemoteQueryEmit,
     http_client: rq.UploadClient | None = None,
     clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
     events = iter_agent_rpc_stream_events(
-        request, StaticClickhouseCheckRegistry([check]), http_client, clickhouse_client_factory
+        request, StaticClickhouseCheckRegistry([check]), http_client, clickhouse_client_factory, timings
     )
     try:
         for event in events:
@@ -1068,19 +1120,34 @@ def iter_agent_rpc_stream_events(
     registry: ClickhouseCheckRegistry,
     http_client: rq.UploadClient | None = None,
     clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> Iterator[rq.RemoteQueryEvent]:
-    """Yield producer events for unit tests and callback adaptation."""
-    started_at = time.monotonic()
+    """Yield producer events for unit tests and callback adaptation.
+
+    ``timings`` collects the producer execution diagnostics; when absent a fresh
+    accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
+    so both report one wall.
+    """
+    started_at = time.monotonic() if timings is None else timings.started_at
+    if timings is None:
+        timings = rq.RemoteQueryProducerTimings(started_at)
     try:
         parsed_request = rq.RemoteQueryRequest.model_validate(request)
     except ValidationError as e:
-        yield rq.failed_event('invalid_request', rq.validation_message(e), elapsed_ms=rq.elapsed_ms(started_at))
+        yield rq.failed_event(
+            'invalid_request',
+            rq.validation_message(e),
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
         return
 
     try:
         validate_read_only_statement(parsed_request.query)
     except rq.RemoteQueryFailure as e:
-        yield rq.failed_event(e.code, e.message, elapsed_ms=rq.elapsed_ms(started_at))
+        yield rq.failed_event(
+            e.code, e.message, elapsed_ms=rq.elapsed_ms(started_at), execution_diagnostics=timings.metadata()
+        )
         return
 
     if not _is_query_allowed(parsed_request.query):
@@ -1088,6 +1155,7 @@ def iter_agent_rpc_stream_events(
             'invalid_request',
             'Invalid remote query request: query is not allowlisted.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -1099,6 +1167,7 @@ def iter_agent_rpc_stream_events(
             'target_not_found',
             'No loaded ClickHouse integration instance matched target selector.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
     if len(matches) > 1:
@@ -1106,6 +1175,7 @@ def iter_agent_rpc_stream_events(
             'target_ambiguous',
             'More than one loaded ClickHouse integration instance matched target selector.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -1116,6 +1186,7 @@ def iter_agent_rpc_stream_events(
             'credentials_unavailable',
             'Remote query upload requires api_key and app_key to be configured on the Agent.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -1124,10 +1195,11 @@ def iter_agent_rpc_stream_events(
             'target_unavailable',
             'Matched ClickHouse check HTTP connection pool is unavailable.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
-    client = http_client if http_client is not None else rq.RequestsUploadClient()
+    client = http_client if http_client is not None else rq.RequestsUploadClient(timings=timings)
     stats = rq.RemoteQueryRunStats()
     yield rq.RemoteQueryEvent('metadata', rq.started_metadata(parsed_request))
 
@@ -1140,10 +1212,17 @@ def iter_agent_rpc_stream_events(
             started_at,
             stats,
             clickhouse_client_factory=clickhouse_client_factory,
+            timings=timings,
         )
     except rq.RemoteQueryFailure as e:
         rq.safe_abort(client, creds)
-        yield rq.failed_event(e.code, e.message, retryable=e.retryable, stats=rq.stats_metadata(stats, started_at))
+        yield rq.failed_event(
+            e.code,
+            e.message,
+            retryable=e.retryable,
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
         return
     except BaseException as e:
         rq.safe_abort(client, creds)
@@ -1151,8 +1230,11 @@ def iter_agent_rpc_stream_events(
             raise
         LOGGER.exception('Remote query execution failed')
         yield rq.failed_event(
-            'query_failed', 'Remote query execution failed.', stats=rq.stats_metadata(stats, started_at)
+            'query_failed',
+            'Remote query execution failed.',
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
         )
         return
 
-    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at))
+    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at, timings))

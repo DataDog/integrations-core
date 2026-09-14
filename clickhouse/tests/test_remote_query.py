@@ -285,6 +285,80 @@ def patch_allowlist_disabled(monkeypatch):
     monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
 
 
+class MutableClock:
+    """A monotonic clock the fakes advance at deterministic phase boundaries.
+
+    Every advance below is a whole-millisecond dyadic fraction of a second, so the
+    accumulated float arithmetic stays exact and the expected buckets are integers.
+    """
+
+    def __init__(self):
+        self.now = 0.0
+
+    def monotonic(self):
+        return self.now
+
+    def advance_seconds(self, seconds):
+        self.now += seconds
+
+
+def instrument_clickhouse_fakes(monkeypatch, clock):
+    """Advance the mutable clock inside each fake at its phase's boundary.
+
+    Each advance lands wholly inside the producer phase that brackets it: client creation
+    and the stream open are database setup, every raw stream read is database fetch,
+    put_page is page upload, finalize_run is finalize, and the stream/client teardown
+    (outside every phase) is the otherMs remainder.
+    """
+    original_raw_stream = FakeClickhouseClient.raw_stream
+
+    def timed_raw_stream(self, query, settings=None, fmt=None):
+        clock.advance_seconds(0.25)
+        return original_raw_stream(self, query, settings, fmt)
+
+    monkeypatch.setattr(FakeClickhouseClient, 'raw_stream', timed_raw_stream)
+
+    original_read = FakeStream.read
+
+    def timed_read(self, amount):
+        clock.advance_seconds(0.375)
+        return original_read(self, amount)
+
+    monkeypatch.setattr(FakeStream, 'read', timed_read)
+
+    original_stream_close = FakeStream.close
+
+    def timed_stream_close(self):
+        clock.advance_seconds(0.125)
+        return original_stream_close(self)
+
+    monkeypatch.setattr(FakeStream, 'close', timed_stream_close)
+
+    original_client_close = FakeClickhouseClient.close
+
+    def timed_client_close(self):
+        clock.advance_seconds(0.125)
+        return original_client_close(self)
+
+    monkeypatch.setattr(FakeClickhouseClient, 'close', timed_client_close)
+
+    original_put_page = FakeUploadClient.put_page
+
+    def timed_put_page(self, creds, page, body):
+        clock.advance_seconds(0.5)
+        return original_put_page(self, creds, page, body)
+
+    monkeypatch.setattr(FakeUploadClient, 'put_page', timed_put_page)
+
+    original_finalize_run = FakeUploadClient.finalize_run
+
+    def timed_finalize_run(self, creds):
+        clock.advance_seconds(0.25)
+        return original_finalize_run(self, creds)
+
+    monkeypatch.setattr(FakeUploadClient, 'finalize_run', timed_finalize_run)
+
+
 class ExplodingRegistry:
     def iter_clickhouse_checks(self):
         pytest.fail('registry must not be iterated')
@@ -995,6 +1069,128 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(m
     assert fake.run_finalize_calls == 1
 
 
+def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    clock = MutableClock()
+    monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
+    instrument_clickhouse_fakes(monkeypatch, clock)
+    clickhouse_client = make_client(rows=[[1], [2]])
+    fake = FakeUploadClient()
+
+    def client_factory(_check, _timeout_seconds):
+        clock.advance_seconds(0.125)
+        return clickhouse_client
+
+    events = list(
+        iter_agent_rpc_stream_events(
+            valid_request(), StaticClickhouseCheckRegistry([make_check()]), fake, client_factory
+        )
+    )
+
+    final = assert_success(events)
+    # The final metadata gained exactly one key: the optional execution diagnostics.
+    assert set(final) == {'status', 'upload_receipt', 'stats', 'executionDiagnostics'}
+    producer = final['executionDiagnostics']['producer']
+    assert final['executionDiagnostics']['contractVersion'] == 1
+    # Two raw stream reads serve the whole result: the first chunk carries the header rows
+    # and both data rows; the second read returns the empty tail.
+    assert clickhouse_client.stream.read_count == 2
+    assert producer == {
+        'totalMs': 2125,
+        # Client creation (in the factory) plus the stream open are setup.
+        'databaseSetupMs': 375,
+        # Every raw stream read is a fetch: two reads here.
+        'databaseFetchMs': 750,
+        # Real parse/encode work with this clock runs in well under a millisecond.
+        'encodeAndPageBuildMs': 0,
+        'pageUploadMs': 500,
+        'finalizeMs': 250,
+        # The stream and client teardown run outside every phase and land in the remainder.
+        'otherMs': 250,
+        'timeToFirstPageMs': 1625,
+        'pageCount': 1,
+        'rowCount': 2,
+        'byteCount': len(assembled_pages(fake)[0]),
+        'pageUploadMinMs': 500,
+        'pageUploadP50Ms': 500,
+        'pageUploadP95Ms': 500,
+        'pageUploadMaxMs': 500,
+    }
+    # The diagnostics total and stats.elapsedMs are the same wall.
+    assert final['stats']['elapsedMs'] == producer['totalMs']
+    # The injected upload client makes no HTTP attempts, so the attempt counters stay
+    # unmeasured (absent, never zero).
+    assert 'uploadAttemptCount' not in producer
+    assert 'uploadRetryCount' not in producer
+
+
+def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
+    clock = MutableClock()
+    monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
+    instrument_clickhouse_fakes(monkeypatch, clock)
+    # A two-page boundary whose second page upload fails: the first page is acknowledged
+    # and counted, the second attempt's wall is measured but never promoted.
+    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
+    clickhouse_client = two_row_client()
+
+    def fail_second_page(page):
+        if page.batch_index == 1:
+            raise rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
+        return {
+            'batch_index': page.batch_index,
+            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
+            'record_offset': page.record_offset,
+            'bytes': page.page_bytes,
+            'rows': page.rows,
+            'sha256': page.sha256_hex,
+        }
+
+    fake = FakeUploadClient(put_page_response=fail_second_page)
+
+    def client_factory(_check, _timeout_seconds):
+        clock.advance_seconds(0.125)
+        return clickhouse_client
+
+    events = list(
+        iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([make_check()]), fake, client_factory)
+    )
+
+    error = event_metadata(events[-1])
+    assert_failed_event(events, 'upload_failed')
+    # The error metadata gained exactly one key: the optional execution diagnostics.
+    assert set(error) == {'status', 'error', 'stats', 'executionDiagnostics'}
+    assert fake.run_finalize_calls == 0
+    assert fake.abort_calls == 1
+    assert clickhouse_client.stream.closed
+    assert clickhouse_client.closed
+    first_page_bytes = len(assembled_pages(fake)[0])
+    assert error['stats']['elapsedMs'] == 2375
+    assert error['executionDiagnostics'] == {
+        'contractVersion': 1,
+        'producer': {
+            'totalMs': 2375,
+            'databaseSetupMs': 375,
+            'databaseFetchMs': 750,
+            'encodeAndPageBuildMs': 0,
+            # Both upload walls are kept: the acknowledged page and the failed attempt's.
+            'pageUploadMs': 1000,
+            # finalizeMs is absent: finalize never ran. uploadAttemptCount/RetryCount are
+            # absent too: the injected client makes no HTTP attempts.
+            'otherMs': 250,
+            'timeToFirstPageMs': 1250,
+            'pageCount': 1,
+            'rowCount': 2,
+            'byteCount': first_page_bytes,
+            # The distribution holds only the acknowledged page's wall.
+            'pageUploadMinMs': 500,
+            'pageUploadP50Ms': 500,
+            'pageUploadP95Ms': 500,
+            'pageUploadMaxMs': 500,
+        },
+    }
+
+
 def test_producer_rejects_header_missing_type_row(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = FakeClickhouseClient(raw_stream_body('["value"]'))
@@ -1580,9 +1776,10 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The leading zeros cover every earlier clock read (started_at, the client factory's and
-    # settings' remaining-time derivations, and the per-row guards) so the wall still expires
-    # at the page-close guard, after rows were produced.
-    values = iter([0.0] * 7 + [10.0] * 50)
+    # settings' remaining-time derivations, both stream-read phase brackets, and the
+    # per-row guards) so the wall still expires at the page-close guard, after rows were
+    # produced.
+    values = iter([0.0] * 18 + [10.0] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
 
     events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)

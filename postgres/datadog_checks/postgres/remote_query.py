@@ -443,6 +443,7 @@ def produce_remote_query(
     execution_dbname: str,
     started_at: float,
     stats: rq.RemoteQueryRunStats,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> dict[str, Any]:
     """Execute the validated query once and return the compact run receipt.
 
@@ -452,6 +453,12 @@ def produce_remote_query(
     run-wide wall, where the wall is the delivered ``limits.timeout_ms`` that no instance
     setting may lengthen; it is never wrapped in a probe and never executed twice. Bounded
     row batches are fetched from the same cursor and encoded one row at a time.
+
+    Producer phases: connection acquisition through schema construction is database
+    setup, each ``fetchmany`` call is a database fetch, the row loop is encode and page
+    build (with any upload ``add_row`` triggers nested inside it), and page uploads and
+    finalize are accounted by the shared page writer. Everything else — timeout
+    resolution, the pre-fetch guards, transaction teardown — lands in ``otherMs``.
     """
     delivery = request.result_delivery
     limits = delivery.limits
@@ -463,62 +470,78 @@ def produce_remote_query(
     # Keep a batch of permitted-size rows within a page-sized encoded budget.
     # Driver allocations still need headroom; row size is checked after decoding.
     fetch_rows = max(1, min(REMOTE_QUERY_FETCH_BATCH_ROWS, limits.max_file_bytes // limits.max_row_bytes))
+    timings = timings if timings is not None else rq.NULL_PRODUCER_TIMINGS
 
     def guard() -> None:
         rq.raise_if_timed_out(deadline)
         rq.raise_if_cancelled(check)
 
     cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
-    with check.db_pool.get_connection(execution_dbname) as conn:
-        with conn.cursor() as control:
-            in_transaction = False
-            try:
-                control.execute('BEGIN READ ONLY')
-                in_transaction = True
-                # SET statements do not accept bind parameters, so the timeout is inlined; it
-                # is a validated positive int resolved from the instance override and the
-                # remaining wall, never raw text.
-                control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
-                with conn.cursor(name=cursor_name) as server_cursor:
-                    register_exact_loaders(server_cursor)
-                    server_cursor.execute(request.query)
-                    columns = described_columns(server_cursor)
-                    validate_columns(columns, limits.max_columns)
-                    schema_json = None
-                    if request.include_schema:
-                        schema_json = build_schema_json(control, columns, delivery, check.hostname)
+    # The setup phase spans pool connection acquisition through schema construction and
+    # ends at the first fetch; the connection and cursor contexts outlive the phase, so
+    # it is entered and exited explicitly. The inline exit marks the boundary before the
+    # row loop; the spanning ``finally`` re-exits it (idempotently) so a setup interrupted
+    # mid-flight still reports its partial wall.
+    setup_phase = timings.enter_phase('database_setup')
+    try:
+        with check.db_pool.get_connection(execution_dbname) as conn:
+            with conn.cursor() as control:
+                in_transaction = False
+                try:
+                    control.execute('BEGIN READ ONLY')
+                    in_transaction = True
+                    # SET statements do not accept bind parameters, so the timeout is inlined; it
+                    # is a validated positive int resolved from the instance override and the
+                    # remaining wall, never raw text.
+                    control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
+                    with conn.cursor(name=cursor_name) as server_cursor:
+                        register_exact_loaders(server_cursor)
+                        server_cursor.execute(request.query)
+                        columns = described_columns(server_cursor)
+                        validate_columns(columns, limits.max_columns)
+                        schema_json = None
+                        if request.include_schema:
+                            schema_json = build_schema_json(control, columns, delivery, check.hostname)
 
-                    # The executing check's Agent-reported hostname: the stamp must match the
-                    # agent node identity Fleet reports, never socket.gethostname().
-                    writer = rq.PageWriter(delivery, creds, client, check.hostname, schema_json, guard, stats)
-                    guard()
-                    try:
-                        while True:
-                            rows = server_cursor.fetchmany(fetch_rows)
-                            if not rows:
-                                break
-                            for row in rows:
-                                guard()
-                                row_buffer = bytearray()
-                                encode_row(row, columns, row_buffer)
-                                if len(row_buffer) > limits.max_row_bytes:
-                                    raise rq.RemoteQueryFailure(
-                                        'row_too_large',
-                                        'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
-                                            len(row_buffer), limits.max_row_bytes
-                                        ),
-                                    )
-                                writer.add_row(bytes(row_buffer))
-                        return writer.finish()
-                    finally:
-                        # Release the page even if encoding or cursor iteration fails.
-                        writer.discard()
-            finally:
-                if in_transaction:
-                    try:
-                        control.execute('ROLLBACK')
-                    except Exception:
-                        LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
+                        # The executing check's Agent-reported hostname: the stamp must match the
+                        # agent node identity Fleet reports, never socket.gethostname().
+                        writer = rq.PageWriter(
+                            delivery, creds, client, check.hostname, schema_json, guard, stats, timings
+                        )
+                        guard()
+                        # Setup ends here: the first fetch below is its own phase.
+                        timings.exit_phase(setup_phase)
+                        try:
+                            with timings.phase('encode_and_page_build'):
+                                while True:
+                                    with timings.phase('database_fetch'):
+                                        rows = server_cursor.fetchmany(fetch_rows)
+                                    if not rows:
+                                        break
+                                    for row in rows:
+                                        guard()
+                                        row_buffer = bytearray()
+                                        encode_row(row, columns, row_buffer)
+                                        if len(row_buffer) > limits.max_row_bytes:
+                                            raise rq.RemoteQueryFailure(
+                                                'row_too_large',
+                                                'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
+                                                    len(row_buffer), limits.max_row_bytes
+                                                ),
+                                            )
+                                        writer.add_row(bytes(row_buffer))
+                            return writer.finish()
+                        finally:
+                            # Release the page even if encoding or cursor iteration fails.
+                            writer.discard()
+                finally:
+                    if in_transaction:
+                        try:
+                            control.execute('ROLLBACK')
+                        except Exception:
+                            LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
+    finally:
+        timings.exit_phase(setup_phase)
 
 
 def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
@@ -709,14 +732,20 @@ def execute_agent_rpc_stream_copy(
     The entry point name is kept for the Agent's rtloader bridge, which resolves this
     function by name. Emits ``metadata`` (STARTED), then one ``final`` (SUCCEEDED with the
     compact receipt) or ``error`` (FAILED) event; bulk page bytes never cross the callback.
+    Diagnostics collection starts before the request JSON is parsed, so even a malformed
+    request reports its measured wall.
     """
+    started_at = time.monotonic()
+    timings = rq.RemoteQueryProducerTimings(started_at)
     try:
         request = json.loads(request_json)
     except (TypeError, ValueError):
         rq.emit_event(
             emit,
             rq.failed_event(
-                'invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'
+                'invalid_request',
+                'Invalid remote query request: request_json must be a valid JSON object.',
+                execution_diagnostics=timings.metadata(),
             ),
         )
         return
@@ -724,11 +753,15 @@ def execute_agent_rpc_stream_copy(
     if not isinstance(request, Mapping):
         rq.emit_event(
             emit,
-            rq.failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.'),
+            rq.failed_event(
+                'invalid_request',
+                'Invalid remote query request: request_json must be a JSON object.',
+                execution_diagnostics=timings.metadata(),
+            ),
         )
         return
 
-    _execute_upload_stream(request, check, emit)
+    _execute_upload_stream(request, check, emit, timings=timings)
 
 
 def _execute_upload_stream(
@@ -736,9 +769,10 @@ def _execute_upload_stream(
     check: 'PostgreSql',
     emit: rq.RemoteQueryEmit,
     http_client: rq.UploadClient | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
-    events = iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), http_client)
+    events = iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), http_client, timings)
     try:
         for event in events:
             rq.emit_event(emit, event)
@@ -748,14 +782,29 @@ def _execute_upload_stream(
 
 
 def iter_agent_rpc_stream_events(
-    request: Any, registry: PostgresCheckRegistry, http_client: rq.UploadClient | None = None
+    request: Any,
+    registry: PostgresCheckRegistry,
+    http_client: rq.UploadClient | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> Iterator[rq.RemoteQueryEvent]:
-    """Yield producer events for unit tests and callback adaptation."""
-    started_at = time.monotonic()
+    """Yield producer events for unit tests and callback adaptation.
+
+    ``timings`` collects the producer execution diagnostics; when absent a fresh
+    accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
+    so both report one wall.
+    """
+    started_at = time.monotonic() if timings is None else timings.started_at
+    if timings is None:
+        timings = rq.RemoteQueryProducerTimings(started_at)
     try:
         parsed_request = rq.RemoteQueryRequest.model_validate(request)
     except ValidationError as e:
-        yield rq.failed_event('invalid_request', rq.validation_message(e), elapsed_ms=rq.elapsed_ms(started_at))
+        yield rq.failed_event(
+            'invalid_request',
+            rq.validation_message(e),
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
         return
 
     if not _is_query_allowed(parsed_request.query):
@@ -763,6 +812,7 @@ def iter_agent_rpc_stream_events(
             'invalid_request',
             'Invalid remote query request: query is not allowlisted.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -774,6 +824,7 @@ def iter_agent_rpc_stream_events(
             'target_not_found',
             'No loaded Postgres integration instance matched target selector.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
     if len(matches) > 1:
@@ -781,6 +832,7 @@ def iter_agent_rpc_stream_events(
             'target_ambiguous',
             'More than one loaded Postgres integration instance matched target selector.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -794,6 +846,7 @@ def iter_agent_rpc_stream_events(
             'target_unavailable',
             'Matched Postgres check does not expose a configured database name.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -803,6 +856,7 @@ def iter_agent_rpc_stream_events(
             'credentials_unavailable',
             'Remote query upload requires api_key and app_key to be configured on the Agent.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -812,6 +866,7 @@ def iter_agent_rpc_stream_events(
             'credentials_unavailable',
             'Matched Postgres check does not expose a connection pool.',
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
     if getattr(db_pool, 'is_closed', lambda: False)():
@@ -820,6 +875,7 @@ def iter_agent_rpc_stream_events(
             'Matched Postgres check connection pool is closed.',
             retryable=False,
             elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
         )
         return
 
@@ -827,18 +883,32 @@ def iter_agent_rpc_stream_events(
         try:
             _gate_dynamic_database(check, db_pool, target.dbname, configured_dbname)
         except rq.RemoteQueryFailure as e:
-            yield rq.failed_event(e.code, e.message, retryable=e.retryable, elapsed_ms=rq.elapsed_ms(started_at))
+            yield rq.failed_event(
+                e.code,
+                e.message,
+                retryable=e.retryable,
+                elapsed_ms=rq.elapsed_ms(started_at),
+                execution_diagnostics=timings.metadata(),
+            )
             return
 
-    client = http_client if http_client is not None else rq.RequestsUploadClient()
+    client = http_client if http_client is not None else rq.RequestsUploadClient(timings=timings)
     stats = rq.RemoteQueryRunStats()
     yield rq.RemoteQueryEvent('metadata', rq.started_metadata(parsed_request))
 
     try:
-        receipt = produce_remote_query(parsed_request, check, creds, client, execution_dbname, started_at, stats)
+        receipt = produce_remote_query(
+            parsed_request, check, creds, client, execution_dbname, started_at, stats, timings
+        )
     except rq.RemoteQueryFailure as e:
         rq.safe_abort(client, creds)
-        yield rq.failed_event(e.code, e.message, retryable=e.retryable, stats=rq.stats_metadata(stats, started_at))
+        yield rq.failed_event(
+            e.code,
+            e.message,
+            retryable=e.retryable,
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
         return
     except psycopg_errors.QueryCanceled:
         # SQLSTATE class 57014: the server canceled the statement (statement timeout or an
@@ -849,6 +919,7 @@ def iter_agent_rpc_stream_events(
             'Remote query was canceled by the server (statement timeout or cancellation).',
             retryable=True,
             stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
         )
         return
     except RuntimeError:
@@ -858,6 +929,7 @@ def iter_agent_rpc_stream_events(
             'Matched Postgres check connection pool is unavailable.',
             retryable=False,
             stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
         )
         return
     except BaseException as e:
@@ -866,8 +938,11 @@ def iter_agent_rpc_stream_events(
             raise
         LOGGER.exception('Remote query execution failed')
         yield rq.failed_event(
-            'query_failed', 'Remote query execution failed.', stats=rq.stats_metadata(stats, started_at)
+            'query_failed',
+            'Remote query execution failed.',
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
         )
         return
 
-    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at))
+    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at, timings))

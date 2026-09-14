@@ -344,6 +344,83 @@ def patch_allowlist_disabled(monkeypatch):
     monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
 
 
+class MutableClock:
+    """A monotonic clock the fakes advance at deterministic phase boundaries.
+
+    Every advance below is a whole-millisecond dyadic fraction of a second, so the
+    accumulated float arithmetic stays exact and the expected buckets are integers.
+    """
+
+    def __init__(self):
+        self.now = 0.0
+
+    def monotonic(self):
+        return self.now
+
+    def advance_seconds(self, seconds):
+        self.now += seconds
+
+
+def instrument_postgres_fakes(monkeypatch, clock):
+    """Advance the mutable clock inside each fake at its phase's boundary.
+
+    Each advance lands wholly inside the producer phase that brackets it, so the emitted
+    buckets pin the brackets: connection acquisition, BEGIN, and SET LOCAL are database
+    setup, fetchmany is database fetch, put_page is page upload, finalize_run is finalize,
+    and the ROLLBACK teardown (outside every phase) is the otherMs remainder.
+    """
+
+    original_get_connection = FakePool.get_connection
+
+    @contextmanager
+    def timed_get_connection(self, dbname):
+        clock.advance_seconds(0.125)
+        with original_get_connection(self, dbname) as connection:
+            yield connection
+
+    monkeypatch.setattr(FakePool, 'get_connection', timed_get_connection)
+
+    original_control_execute = FakeControlCursor.execute
+
+    def timed_control_execute(self, query, params=None):
+        clock.advance_seconds(0.25)
+        return original_control_execute(self, query, params)
+
+    monkeypatch.setattr(FakeControlCursor, 'execute', timed_control_execute)
+
+    original_server_execute = FakeServerCursor.execute
+
+    def timed_server_execute(self, query, params=None):
+        clock.advance_seconds(0.5)
+        return original_server_execute(self, query, params)
+
+    monkeypatch.setattr(FakeServerCursor, 'execute', timed_server_execute)
+
+    original_fetchmany = FakeServerCursor.fetchmany
+
+    def timed_fetchmany(self, size):
+        clock.advance_seconds(0.375)
+        return original_fetchmany(self, size)
+
+    monkeypatch.setattr(FakeServerCursor, 'fetchmany', timed_fetchmany)
+
+    original_put_page = FakeUploadClient.put_page
+
+    def timed_put_page(self, creds, page, body):
+        clock.advance_seconds(0.625)
+        return original_put_page(self, creds, page, body)
+
+    monkeypatch.setattr(FakeUploadClient, 'put_page', timed_put_page)
+
+    original_finalize_run = FakeUploadClient.finalize_run
+
+    def timed_finalize_run(self, creds):
+        clock.advance_seconds(0.25)
+        return original_finalize_run(self, creds)
+
+    monkeypatch.setattr(FakeUploadClient, 'finalize_run', timed_finalize_run)
+
+
 class ExplodingRegistry:
     def iter_postgres_checks(self):
         pytest.fail('registry must not be iterated')
@@ -409,6 +486,23 @@ def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
     assert_failed_event(events, 'invalid_request', field)
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+def test_entry_reports_the_measured_wall_for_malformed_json_request():
+    events = []
+
+    execute_agent_rpc_stream_copy('{"password": "SECRET_DO_NOT_LOG"', make_check(), lambda *event: events.append(event))
+
+    metadata = json.loads(events[-1][1])
+    # The malformed-request event gains only the diagnostics object: no stats (as today), and
+    # a producer section holding exactly what was measured before the parse failed.
+    assert set(metadata) == {'status', 'error', 'executionDiagnostics'}
+    diagnostics = metadata['executionDiagnostics']
+    assert set(diagnostics) == {'contractVersion', 'producer'}
+    assert diagnostics['contractVersion'] == 1
+    assert set(diagnostics['producer']) == {'totalMs', 'otherMs'}
+    assert diagnostics['producer']['totalMs'] >= 0
+    assert diagnostics['producer']['otherMs'] >= 0
 
 
 @pytest.mark.parametrize('request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff'])
@@ -1056,8 +1150,11 @@ def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypa
     request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The wall is the delivered 1 s even though the instance override is 300 s: the run must
     # expire at the delivered wall, which is exactly the case the old replacement semantics
-    # silently allowed to run past its parent budget.
-    clock = iter([100.0] * 4 + [101.5] * 50)
+    # silently allowed to run past its parent budget. The leading constant values cover every
+    # clock read before the page-close guard (started_at, statement-timeout resolution, the
+    # setup/fetch/encode phase brackets, and the per-row guards) so the wall still expires at
+    # the page-close guard, after the row was produced and the page assembled.
+    clock = iter([100.0] * 12 + [101.5] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(clock))
 
     events = collect_events(request, check, client=fake)
@@ -1124,6 +1221,51 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
         'totalRows': 0,
         'totalBytes': 0,
     }
+
+
+def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    clock = MutableClock()
+    monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
+    instrument_postgres_fakes(monkeypatch, clock)
+    pool = FakePool(rows=[(1,), (2,)])
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    final = assert_success(events)
+    # The final metadata gained exactly one key: the optional execution diagnostics.
+    assert set(final) == {'status', 'upload_receipt', 'stats', 'executionDiagnostics'}
+    producer = final['executionDiagnostics']['producer']
+    assert final['executionDiagnostics']['contractVersion'] == 1
+    assert producer == {
+        'totalMs': 3000,
+        # Connection acquisition, BEGIN, SET LOCAL, and the cursor execute are setup.
+        'databaseSetupMs': 1125,
+        # Two bounded fetchmany calls (the row batch and the empty one).
+        'databaseFetchMs': 750,
+        # Real encode work with this clock runs in well under a millisecond.
+        'encodeAndPageBuildMs': 0,
+        'pageUploadMs': 625,
+        'finalizeMs': 250,
+        # The ROLLBACK teardown runs outside every phase and lands in the remainder.
+        'otherMs': 250,
+        'timeToFirstPageMs': 2500,
+        'pageCount': 1,
+        'rowCount': 2,
+        'byteCount': len(assembled_pages(fake)[0]),
+        'pageUploadMinMs': 625,
+        'pageUploadP50Ms': 625,
+        'pageUploadP95Ms': 625,
+        'pageUploadMaxMs': 625,
+    }
+    # The diagnostics total and stats.elapsedMs are the same wall.
+    assert final['stats']['elapsedMs'] == producer['totalMs']
+    # The injected upload client makes no HTTP attempts, so the attempt counters stay
+    # unmeasured (absent, never zero).
+    assert 'uploadAttemptCount' not in producer
+    assert 'uploadRetryCount' not in producer
 
 
 def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(monkeypatch):
@@ -1736,6 +1878,71 @@ def test_stream_fails_closed_on_page_receipt_mismatch(monkeypatch):
     assert 'upload_receipt' not in event_metadata(events[-1])
 
 
+def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    clock = MutableClock()
+    monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
+    instrument_postgres_fakes(monkeypatch, clock)
+    # A two-page boundary whose second page upload fails: the first page is acknowledged
+    # and counted, the second attempt's wall is measured but never promoted.
+    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
+    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
+
+    def fail_second_page(page):
+        if page.batch_index == 1:
+            raise rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
+        return {
+            'batch_index': page.batch_index,
+            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
+            'record_offset': page.record_offset,
+            'bytes': page.page_bytes,
+            'rows': page.rows,
+            'sha256': page.sha256_hex,
+        }
+
+    fake = FakeUploadClient(put_page_response=fail_second_page)
+
+    events = collect_events(request, make_check(pool=pool), client=fake)
+
+    error = event_metadata(events[-1])
+    assert_failed_event(events, 'upload_failed')
+    # The error metadata gained exactly one key: the optional execution diagnostics.
+    assert set(error) == {'status', 'error', 'stats', 'executionDiagnostics'}
+    assert fake.abort_calls == 1
+    assert fake.run_finalize_calls == 0
+    first_page_bytes = len(assembled_pages(fake)[0])
+    assert error['stats'] == {
+        'rowsEmitted': 2,
+        'pagesEmitted': 1,
+        'bytesEmitted': first_page_bytes,
+        'elapsedMs': 3375,
+    }
+    assert error['executionDiagnostics'] == {
+        'contractVersion': 1,
+        'producer': {
+            'totalMs': 3375,
+            'databaseSetupMs': 1125,
+            'databaseFetchMs': 750,
+            'encodeAndPageBuildMs': 0,
+            # Both upload walls are kept: the acknowledged page and the failed attempt's.
+            'pageUploadMs': 1250,
+            # finalizeMs is absent: finalize never ran. uploadAttemptCount/RetryCount are
+            # absent too: the injected client makes no HTTP attempts.
+            'otherMs': 250,
+            'timeToFirstPageMs': 2125,
+            'pageCount': 1,
+            'rowCount': 2,
+            'byteCount': first_page_bytes,
+            # The distribution holds only the acknowledged page's wall.
+            'pageUploadMinMs': 625,
+            'pageUploadP50Ms': 625,
+            'pageUploadP95Ms': 625,
+            'pageUploadMaxMs': 625,
+        },
+    }
+
+
 def test_stream_fails_closed_on_run_finalize_failure(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -1770,7 +1977,10 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     pool = FakePool(rows=[(1,)])
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
-    values = iter([0.0, 0.0] + [10.0] * 50)
+    # The leading zeros cover every clock read before the page-close guard (started_at,
+    # statement-timeout resolution, the setup/fetch/encode phase brackets, and the per-row
+    # guards) so the wall still expires at the page-close guard, after the row was produced.
+    values = iter([0.0] * 12 + [10.0] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
 
     events = collect_events(request, make_check(pool=pool), client=FakeUploadClient())
