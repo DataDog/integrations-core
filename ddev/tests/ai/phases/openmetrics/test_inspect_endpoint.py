@@ -30,6 +30,8 @@ from ddev.ai.phases.openmetrics.inspect_endpoint import (
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointTokenInfo, FailedCheckpoint, SuccessCheckpoint
 from ddev.event_bus.exceptions import MessageProcessingError
 
+from ..helpers import StubBus
+
 ENDPOINT_URL = "http://example.test:9100/metrics"
 ENDPOINT_NAME = "main"
 PHASE_ID = "inspect_endpoint"
@@ -137,7 +139,7 @@ def _make_phase(
         checkpoint_manager=checkpoint_mgr,
         context=context,
     )
-    phase.queue = message_queue
+    phase.bus = StubBus(message_queue)
     return phase, checkpoint_mgr
 
 

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import json
 from collections.abc import Callable
 from typing import Any
@@ -17,7 +18,18 @@ from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.registry import ToolRegistry
+from ddev.event_bus.orchestrator import BaseMessage
 from tests.ai.config.utils import make_agent_config
+
+
+class StubBus:
+    """Stands in for the event bus, forwarding what a phase submits to *queue*."""
+
+    def __init__(self, queue: asyncio.Queue[BaseMessage]) -> None:
+        self.queue = queue
+
+    def submit_message(self, message: BaseMessage) -> None:
+        self.queue.put_nowait(message)
 
 
 def make_response(
@@ -178,7 +190,7 @@ def make_agent_phase(
         agent_config=effective_agent_config,
         process_factory=process_factory,
     )
-    phase.queue = message_queue
+    phase.bus = StubBus(message_queue)
     return phase, checkpoint_manager
 
 

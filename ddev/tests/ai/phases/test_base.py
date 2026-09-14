@@ -17,6 +17,8 @@ from ddev.ai.runtime.checkpoints import (
 )
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
+from .helpers import StubBus
+
 
 class _StubPhase(Phase):
     """Concrete Phase for lifecycle tests; execute() returns a deterministic PhaseOutcome."""
@@ -47,7 +49,7 @@ def _make_stub_phase(
         context=flow_context,
         outcome=outcome,
     )
-    phase.queue = message_queue
+    phase.bus = StubBus(message_queue)
     return phase, checkpoint_manager
 
 
