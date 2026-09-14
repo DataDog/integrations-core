@@ -83,9 +83,7 @@ PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17 = frozenset(
     }
 )
 
-# Summary statistics over a statement's whole lifetime rather than running totals. A single fast
-# execution lowers min_plan_time and shifts the mean, so these move in both directions and cannot be
-# diffed between snapshots the way the counters below can.
+# Summary statistics over a statement's whole lifetime rather than running totals
 PG_STAT_STATEMENTS_SUMMARY_COLUMNS = frozenset(
     {
         'min_plan_time',
@@ -152,17 +150,15 @@ def _row_key(row):
 
 
 def _merge_summary_stats(acc, row, acc_weight, row_weight):
-    """Fold the summary statistics of ``row`` into ``acc``, in place.
-
-    Extremes combine exactly. The mean and standard deviation are averaged in proportion to how much
-    each statement ran, which approximates the true combined figures closely enough for reporting:
-    pg_stat_statements gives no way to recover the per-execution values these were computed from.
-    """
+    """Fold the summary statistics of ``row`` into ``acc``, in place."""
     if 'min_plan_time' in row:
         acc['min_plan_time'] = min(acc.get('min_plan_time', row['min_plan_time']), row['min_plan_time'])
     if 'max_plan_time' in row:
         acc['max_plan_time'] = max(acc.get('max_plan_time', row['max_plan_time']), row['max_plan_time'])
 
+    # The mean and standard deviation are averaged in proportion to how much
+    # each statement ran, which approximates the true combined figures closely enough for reporting:
+    # pg_stat_statements gives no way to recover the per-execution values these were computed from.
     total_weight = acc_weight + row_weight
     if total_weight <= 0:
         return
