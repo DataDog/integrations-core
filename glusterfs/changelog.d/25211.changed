@@ -1,0 +1,1 @@
+Replace the bundled `gstatus` binary with direct `gluster --xml` calls. The `gstatus_path` init_config option is removed (a warning is logged if still set); use the new `gluster_command` instance option and update sudoers to allow `gluster`.
