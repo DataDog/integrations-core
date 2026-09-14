@@ -140,19 +140,20 @@ VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
 ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
 
-# Fetched regardless of `collect_property_metrics`, since usage metering must not be opt-in.
+# Always fetched, regardless of `collect_property_metrics`: downstream consumers depend on these
+# two counts being reported continuously, so their collection must not be opt-in.
 # Keep out of the *_SIMPLE_PROPERTIES lists above: `get_infrastructure` moves ALL_PROPERTIES paths
 # into a nested `properties` dict, which would break the flat lookup only when the option is on.
-VM_METERING_PROPERTY = "summary.config.numCpu"
-HOST_METERING_PROPERTY = "summary.hardware.numCpuCores"
+VM_CPU_COUNT_PROPERTY = "summary.config.numCpu"
+HOST_CPU_COUNT_PROPERTY = "summary.hardware.numCpuCores"
 
-METERING_PROPERTY_BY_RESOURCE_TYPE = {
-    'vm': VM_METERING_PROPERTY,
-    'host': HOST_METERING_PROPERTY,
+CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE = {
+    'vm': VM_CPU_COUNT_PROPERTY,
+    'host': HOST_CPU_COUNT_PROPERTY,
 }
 
-# How many unmetered resources to name in the summarized warning. The full list still goes to debug.
-UNMETERED_LOG_SAMPLE_SIZE = 10
+# How many uncollected resources to name in the summarized warning. The full list still goes to debug.
+UNCOLLECTED_LOG_SAMPLE_SIZE = 10
 
 
 OBJECT_PROPERTIES_TO_METRIC_NAME = {

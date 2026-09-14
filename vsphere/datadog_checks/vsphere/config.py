@@ -15,6 +15,7 @@ from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
     BOTH,
+    CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_EVENT_RESOURCES,
     DEFAULT_INFRASTRUCTURE_MODE,
@@ -30,7 +31,6 @@ from datadog_checks.vsphere.constants import (
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL,
     HOSTNAME_CASE_OPTIONS,
-    METERING_PROPERTY_BY_RESOURCE_TYPE,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
@@ -133,7 +133,7 @@ class VSphereConfig(object):
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
         self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
-        self._warn_unfilterable_metering_metrics()
+        self._warn_unfilterable_cpu_count_metrics()
         self.event_resource_filters = self._normalize_event_resource_filters(
             instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
         )
@@ -310,14 +310,14 @@ class VSphereConfig(object):
 
         return {k: [re.compile(r) for r in v] for k, v in metric_filters.items()}
 
-    def _warn_unfilterable_metering_metrics(self):
+    def _warn_unfilterable_cpu_count_metrics(self):
         # type: () -> None
-        for resource_type, metering_property in METERING_PROPERTY_BY_RESOURCE_TYPE.items():
+        for resource_type, cpu_count_property in CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE.items():
             filters = self.metric_filters.get(resource_type)
-            metric_name = '{}.{}'.format(resource_type, metering_property)
+            metric_name = '{}.{}'.format(resource_type, cpu_count_property)
             if filters and not match_any_regex(metric_name, filters):
                 self.log.warning(
-                    "Metric '%s' is always collected for usage metering, even though the metric_filters "
+                    "Metric '%s' is always collected and cannot be excluded, even though the metric_filters "
                     "configured for '%s' exclude it.",
                     metric_name,
                     resource_type,

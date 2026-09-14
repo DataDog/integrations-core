@@ -3285,8 +3285,8 @@ def test_property_metrics_excluded_host_tags(
     )
 
 
-def test_usage_metering_metrics_default_config(aggregator, realtime_instance, dd_run_check, service_instance):
-    """Both metering metrics are collected with `collect_property_metrics` at its default of false."""
+def test_cpu_count_metrics_default_config(aggregator, realtime_instance, dd_run_check, service_instance):
+    """Both CPU count metrics are collected with `collect_property_metrics` at its default of false."""
     assert 'collect_property_metrics' not in realtime_instance
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
@@ -3306,7 +3306,7 @@ def test_usage_metering_metrics_default_config(aggregator, realtime_instance, dd
     aggregator.assert_metric('vsphere.host.summary.runtime.connectionState', count=0)
 
 
-def test_usage_metering_metrics_powered_off_vm(aggregator, realtime_instance, dd_run_check, service_instance):
+def test_cpu_count_metrics_powered_off_vm(aggregator, realtime_instance, dd_run_check, service_instance):
     """A powered-off VM consumes no vCPU, and the check skips it before it reaches the cache."""
     service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(return_value=PROPERTIES_EX_VM_OFF)
 
@@ -3319,12 +3319,12 @@ def test_usage_metering_metrics_powered_off_vm(aggregator, realtime_instance, dd
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1)
 
 
-def test_usage_metering_metrics_resource_filter(aggregator, realtime_instance, dd_run_check, service_instance):
+def test_cpu_count_metrics_resource_filter(aggregator, realtime_instance, dd_run_check, service_instance):
     """A VM excluded by `resource_filters` is not metered, so a filtered-out resource is never billed.
 
     The guarantee is positional rather than explicit: `refresh_infrastructure_cache` rejects filtered
-    resources with a `continue` that precedes the metering block, so they never reach the cache at all.
-    Hoisting that block any higher would silently start metering them.
+    resources with a `continue` that precedes the CPU count block, so they never reach the cache at all.
+    Hoisting that block any higher would silently start collecting them.
     """
     realtime_instance['resource_filters'] = [
         {
@@ -3346,10 +3346,10 @@ def test_usage_metering_metrics_resource_filter(aggregator, realtime_instance, d
     aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=1, value=16, hostname='host1')
 
 
-def test_usage_metering_metrics_missing_property(
+def test_cpu_count_metrics_missing_property(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
 ):
-    """A resource whose metering property is absent is skipped, and the other resources still report."""
+    """A resource whose CPU count property is absent is skipped, and the other resources still report."""
     caplog.set_level(logging.WARNING)
     stripped = vim.PropertyCollector.RetrieveResult(
         objects=[
@@ -3373,7 +3373,7 @@ def test_usage_metering_metrics_missing_property(
     assert 'host host1 (no summary.hardware.numCpuCores)' in caplog.text
 
 
-def test_usage_metering_metrics_no_resolved_hostname(
+def test_cpu_count_metrics_no_resolved_hostname(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
 ):
     """A resource with no hostname is not metered: the count would land on the Agent's own host."""
@@ -3403,17 +3403,17 @@ def test_usage_metering_metrics_no_resolved_hostname(
     assert 'vm vm1 (no hostname)' in caplog.text
 
 
-def test_usage_metering_metrics_metric_filters_warning(
+def test_cpu_count_metrics_metric_filters_warning(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance
 ):
-    """`metric_filters` cannot exclude a metering metric, so warn rather than silently overriding it."""
+    """`metric_filters` cannot exclude these metrics, so warn rather than silently overriding it."""
     caplog.set_level(logging.WARNING)
     realtime_instance['metric_filters'] = {'vm': [r'vm\.cpu\..*']}
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)
 
-    assert "Metric 'vm.summary.config.numCpu' is always collected for usage metering" in caplog.text
+    assert "Metric 'vm.summary.config.numCpu' is always collected and cannot be excluded" in caplog.text
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
     # No `host` filters were configured, so the host marker is unaffected and must not warn.
     assert 'summary.hardware.numCpuCores' not in caplog.text
