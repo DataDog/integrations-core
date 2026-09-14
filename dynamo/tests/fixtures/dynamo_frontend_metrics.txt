@@ -461,3 +461,52 @@ dynamo_router_overhead_total_ms_bucket{router_id="12345",le="430467.21"} 51
 dynamo_router_overhead_total_ms_bucket{router_id="12345",le="+Inf"} 54
 dynamo_router_overhead_total_ms_count{router_id="12345"} 54
 dynamo_router_overhead_total_ms_sum{router_id="12345"} 42.0
+# HELP dynamo_frontend_tokenizer_cache_hits_total L1 tokenizer cache hits
+# TYPE dynamo_frontend_tokenizer_cache_hits_total counter
+dynamo_frontend_tokenizer_cache_hits_total 42
+# HELP dynamo_frontend_tokenizer_cache_misses_total L1 tokenizer cache misses
+# TYPE dynamo_frontend_tokenizer_cache_misses_total counter
+dynamo_frontend_tokenizer_cache_misses_total 7
+# HELP dynamo_frontend_event_loop_delay_seconds Event loop scheduling delay
+# TYPE dynamo_frontend_event_loop_delay_seconds histogram
+dynamo_frontend_event_loop_delay_seconds_bucket{le="0.001"} 2
+dynamo_frontend_event_loop_delay_seconds_bucket{le="0.01"} 4
+dynamo_frontend_event_loop_delay_seconds_bucket{le="+Inf"} 5
+dynamo_frontend_event_loop_delay_seconds_count 5
+dynamo_frontend_event_loop_delay_seconds_sum 0.012
+# HELP dynamo_frontend_event_loop_stall_total Event loop stalls
+# TYPE dynamo_frontend_event_loop_stall_total counter
+dynamo_frontend_event_loop_stall_total 3
+# HELP dynamo_request_plane_queue_seconds Time before sending a request
+# TYPE dynamo_request_plane_queue_seconds histogram
+dynamo_request_plane_queue_seconds_bucket{le="0.001"} 2
+dynamo_request_plane_queue_seconds_bucket{le="0.01"} 4
+dynamo_request_plane_queue_seconds_bucket{le="+Inf"} 5
+dynamo_request_plane_queue_seconds_count 5
+dynamo_request_plane_queue_seconds_sum 0.012
+# HELP dynamo_request_plane_roundtrip_ttft_seconds Transport roundtrip time to first token
+# TYPE dynamo_request_plane_roundtrip_ttft_seconds histogram
+dynamo_request_plane_roundtrip_ttft_seconds_bucket{le="0.1"} 2
+dynamo_request_plane_roundtrip_ttft_seconds_bucket{le="1"} 4
+dynamo_request_plane_roundtrip_ttft_seconds_bucket{le="+Inf"} 5
+dynamo_request_plane_roundtrip_ttft_seconds_count 5
+dynamo_request_plane_roundtrip_ttft_seconds_sum 1.2
+# HELP dynamo_request_plane_send_seconds Time to send a request
+# TYPE dynamo_request_plane_send_seconds histogram
+dynamo_request_plane_send_seconds_bucket{le="0.001"} 2
+dynamo_request_plane_send_seconds_bucket{le="0.01"} 4
+dynamo_request_plane_send_seconds_bucket{le="+Inf"} 5
+dynamo_request_plane_send_seconds_count 5
+dynamo_request_plane_send_seconds_sum 0.012
+# HELP dynamo_tokio_worker_busy_ratio Fraction of time the Tokio worker is busy
+# TYPE dynamo_tokio_worker_busy_ratio gauge
+dynamo_tokio_worker_busy_ratio{worker="0"} 0.75
+# HELP dynamo_transport_tcp_bytes_received_total TCP bytes received
+# TYPE dynamo_transport_tcp_bytes_received_total counter
+dynamo_transport_tcp_bytes_received_total 4096
+# HELP dynamo_transport_tcp_bytes_sent_total TCP bytes sent
+# TYPE dynamo_transport_tcp_bytes_sent_total counter
+dynamo_transport_tcp_bytes_sent_total 2048
+# HELP dynamo_transport_tcp_errors_total TCP transport errors
+# TYPE dynamo_transport_tcp_errors_total counter
+dynamo_transport_tcp_errors_total 2
