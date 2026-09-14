@@ -94,12 +94,11 @@ def _app() -> TogoApp:
 
 
 def _provide_prd(screen, tmp_path: Path) -> str:
-    """Populate the required built-in PRD input and return its content."""
-    content = "Required product behavior.\n"
+    """Populate the required built-in PRD input and return the path it converts to."""
     prd_path = tmp_path / "prd.md"
-    prd_path.write_text(content, encoding="utf-8")
+    prd_path.write_text("Required product behavior.\n", encoding="utf-8")
     screen.query_one("#input-prd", Input).value = str(prd_path)
-    return content
+    return str(prd_path.resolve())
 
 
 def _incomplete_checkpoints_yaml(flow: ResolvedFlow) -> str:
