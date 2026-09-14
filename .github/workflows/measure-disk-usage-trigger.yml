@@ -10,6 +10,10 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - '*/datadog_checks/**'
+      - '*/pyproject.toml'
+      - '.deps/resolved/**'
 
 jobs:
   trigger:
