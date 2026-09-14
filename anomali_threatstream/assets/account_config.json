@@ -4,7 +4,7 @@
     {
       "key": "api_domain",
       "label": "API Domain",
-      "help": "Use api.threatstream.com for US Cloud or api-eu.threatstream.com for EU Cloud.",
+      "help": "Enter the API domain assigned to your Anomali ThreatStream instance, for example, api.threatstream.com. The domain must end in threatstream.com.",
       "editable": true,
       "required": true,
       "domain": {
