@@ -92,7 +92,6 @@ instances:
 
 **Consumer group** (`*`)
 - DESCRIBE
-- READ
 
 ### Validation
 

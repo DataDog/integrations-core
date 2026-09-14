@@ -80,7 +80,7 @@ pytestmark = pytest.mark.usefixtures("step_summary")
 CONTEXT = DispatcherContext(
     owner="DataDog",
     repo="integrations-core",
-    checkout_sha="refs/pull/42/merge",
+    checkout_sha="merge-sha-mmm",
     base_sha="head-sha",
     branch="a-branch",
     workflow="test-batch.yml",
@@ -109,6 +109,7 @@ def build_bus(
             ref=CONTEXT.workflow_ref,
             base_sha=CONTEXT.base_sha,
             checkout_sha=CONTEXT.checkout_sha,
+            concurrency_key=CONTEXT.concurrency_key,
             artifacts_base_path=tmp_path / "artifacts",
             poll_interval_seconds=0.0,
         ),
@@ -177,7 +178,9 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
     assert dispatches[0].kwargs["workflow_id"] == "test-batch.yml"
     assert dispatches[0].kwargs["ref"] == "master"
     assert dispatches[0].kwargs["inputs"]["batch_id"] == "batch-01"
-    assert dispatches[0].kwargs["inputs"]["checkout_sha"] == "refs/pull/42/merge"
+    assert dispatches[0].kwargs["inputs"]["checkout_sha"] == "merge-sha-mmm"
+    # Keyed on the PR rather than the immutable merge SHA, so a new revision cancels the old batches.
+    assert dispatches[0].kwargs["inputs"]["concurrency_key"] == "pr-42"
 
     # The initial plan and the final collected result both reach the same comment.
     created = client.calls_to("create_issue_comment")

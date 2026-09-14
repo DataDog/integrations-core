@@ -45,9 +45,9 @@ class DispatcherContext:
     """The run being tested. `build_dispatcher` consumes part of it; the rest describes the run
     for the plan header and for the monitoring run context (see `run_fields`).
 
-    `base_sha` and `checkout_sha` are deliberately separate: a pull request is tested at the merge
-    commit (`refs/pull/<n>/merge`) but its checks belong to the head commit. Outside a pull request
-    the two are the same.
+    `base_sha` and `checkout_sha` are deliberately separate: a pull request is tested at its
+    immutable merge commit, but its checks belong to the head commit. Outside a pull request the
+    two are the same.
     """
 
     owner: str
@@ -62,6 +62,11 @@ class DispatcherContext:
     tags: tuple[str, ...] = ()
     pytest_args: str = ''
     is_fork: bool = False
+
+    @property
+    def concurrency_key(self) -> str:
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
+        return f'pr-{self.pr_number}' if self.pr_number is not None else self.base_sha
 
 
 @dataclass(frozen=True)
@@ -104,7 +109,7 @@ def run_fields(context: DispatcherContext) -> dict[str, Any]:
     fields.update(
         {
             # The head revision the run reports on. `checkout_sha` is deliberately not used: for a
-            # pull request it is a merge ref, not a SHA.
+            # pull request it is the merge commit, whose results belong to the head revision.
             'commit': context.base_sha,
             'branch': context.branch,
             'pr_number': context.pr_number,
@@ -286,6 +291,7 @@ def build_dispatcher(
             ref=context.workflow_ref,
             base_sha=context.base_sha,
             checkout_sha=context.checkout_sha,
+            concurrency_key=context.concurrency_key,
             artifacts_base_path=artifacts_path,
             branch=context.branch,
             is_fork=context.is_fork,
