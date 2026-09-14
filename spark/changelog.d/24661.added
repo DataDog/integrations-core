@@ -1,0 +1,1 @@
+Add container-based config discovery support, including a new `spark.master.worker_count` metric so an idle standalone master can still be discovered.
