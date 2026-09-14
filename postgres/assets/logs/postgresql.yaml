@@ -106,13 +106,27 @@ pipeline:
           _pg_remote_host %{regex("\\S*"):remote_host}
           _pg_backend_type %{data:backend_type}
           _pg_ps %{data:ps}
-          # Consume the trailing position but publish nothing. Text renders both
-          # cursorpos and internalpos as " at character N" (elog.c), so the number
-          # is ambiguous: cursorpos indexes the client's `statement`, internalpos
-          # indexes a server-generated `internal_query`. The discriminator is the
-          # following QUERY: line, which a line-oriented parser cannot see. Keep the
-          # group -- deleting it returns the suffix to `message`, which jsonlog strips.
-          _pg_body %{word:error_severity}:  %{data:message}(?: at character \d+)?
+          # `message` must end up as the message alone, matching what jsonlog reports
+          # and what pganalyze's parse.go leaves in LogLine.Content -- dbm-logs-processor
+          # hands this value straight to AnalyzeLogLines, whose classifiers anchor on
+          # the start of the body.
+          #
+          # `log_error_verbosity = verbose` inserts the SQLSTATE between severity and
+          # message (elog.c: severity takes two spaces, the code one). Lift it into
+          # `state_code` rather than leave it in front of the body: Stage 2's duration
+          # and statement rules are anchored to the body start and match nothing with a
+          # code ahead of them. pganalyze strips the same token for the same reason,
+          # gated on log_error_verbosity, which a grok rule cannot read -- so this is a
+          # false positive for a message genuinely starting with five [0-9A-Z] and ": ",
+          # e.g. RAISE LOG 'FATAL: ...'. No line in a 20,318-message corpus does.
+          #
+          # The trailing position is consumed but not published. Text renders both
+          # cursorpos and internalpos as " at character N", so the number is ambiguous:
+          # cursorpos indexes the client's `statement`, internalpos a server-generated
+          # `internal_query`. The discriminator is the following QUERY: line, which a
+          # line-oriented parser cannot see. Keep the group -- deleting it returns the
+          # suffix to `message`, which jsonlog strips; analyze.go accepts either form.
+          _pg_body %{word:error_severity}:  (?:%{regex("[0-9A-Z]{5}"):state_code:nullIf("00000")}: )?%{data:message}(?: at character \d+)?
         matchRules: |
           # The prefix the Datadog Postgres integration docs recommend. Most
           # specific shape, so first.
