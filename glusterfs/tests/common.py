@@ -6,9 +6,16 @@ import os
 GLUSTER_VERSION = os.getenv('GLUSTER_VERSION')
 
 CHECK = 'glusterfs'
-INSTANCE = {'use_sudo': False}
-E2E_INIT_CONFIG = {'gstatus_path': 'docker exec gluster-node-1 gstatus'}
-CONFIG = {'init_config': E2E_INIT_CONFIG, 'instances': [INSTANCE]}
+
+# The integration and E2E tests run ``gluster`` inside the gluster-node-1
+# container via ``docker exec``. Unit tests mock ``_run_gluster`` so this
+# command is never actually invoked there.
+INSTANCE = {
+    'use_sudo': False,
+    'gluster_command': ['docker', 'exec', 'gluster-node-1', 'gluster'],
+}
+INIT_CONFIG = {}
+CONFIG = {'init_config': INIT_CONFIG, 'instances': [INSTANCE]}
 
 EXPECTED_METRICS = [
     "glusterfs.brick.block_size",

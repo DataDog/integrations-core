@@ -1,0 +1,6 @@
+glusterfs 7.1
+Repository content: v7.1
+Copyright (c) 2012-2024 Red Hat, Inc. <https://www.gluster.org/>
+glusterfs comes with ABSOLUTELY NO WARRANTY.
+It is licensed to you under your choice of the GNU GPLv2 or GNU GPLv3 licenses.
+You are welcome to redistribute it under certain conditions in either license.

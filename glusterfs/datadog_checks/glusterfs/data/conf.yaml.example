@@ -3,10 +3,9 @@
 init_config:
 
     ## @param gstatus_path - string - optional - default: <datadog-agent>/embedded/sbin/gstatus
-    ## Path to the gstatus command.
-    ##
-    ## A version of the gstatus is shipped with the Agent binary.
-    ## If you are using a source install, specify the location of gstatus.
+    ## Deprecated and ignored. The glusterfs check now calls the `gluster` CLI
+    ## directly and no longer ships or uses the `gstatus` binary. This option
+    ## is retained only so a warning can be logged if it is still set.
     #
     # gstatus_path: <datadog-agent>/embedded/sbin/gstatus
 
@@ -22,12 +21,25 @@ init_config:
 instances:
 
   -
+    ## @param gluster_command - list of strings - optional
+    ## Command used to invoke the `gluster` CLI, as a list of arguments. The
+    ## default `["gluster"]` assumes `gluster` is on PATH. To run `gluster`
+    ## inside a container, in a non-default location, or through a wrapper
+    ## script, set this to the full command prefix, e.g.
+    ## `["docker", "exec", "<container>", "gluster"]`.
+    ##
+    ## The `gluster` CLI is provided by the `glusterfs-server` package, which
+    ## must be installed on the GlusterFS server node running this check.
+    #
+    # gluster_command:
+    #   - gluster
+
     ## @param use_sudo - boolean - optional - default: true
-    ## GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
+    ## The `gluster` CLI requires root for status collection. Enable this
+    ## option to run `gluster` with `sudo`. If enabled, add a line like the
+    ## following to your sudoers file, adjusted to match `gluster_command`:
     ##
-    ## dd-agent ALL=(ALL) NOPASSWD:<datadog-agent>/embedded/sbin/gstatus
-    ##
-    ## Enable the option for the check to run with sudo.
+    ## dd-agent ALL=(ALL) NOPASSWD:/usr/sbin/gluster
     #
     # use_sudo: true
 

@@ -1,0 +1,15 @@
+<cliOutput>
+  <opRet>0</opRet>
+  <peerStatus>
+    <peer>
+      <uuid>8012e8ac-7cf5-4b3d-baa1-267bb3e295cc</uuid>
+      <hostname>gluster-node-1</hostname>
+      <connected>1</connected>
+    </peer>
+    <peer>
+      <uuid>0e6d296e-eee1-4d9f-9c94-cc8492eb41a6</uuid>
+      <hostname>gluster-node-2</hostname>
+      <connected>1</connected>
+    </peer>
+  </peerStatus>
+</cliOutput>

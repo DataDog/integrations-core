@@ -16,40 +16,42 @@ Follow the instructions below to install and configure this check for an Agent r
 The GlusterFS check is included in the [Datadog Agent][3] package.
 No additional installation is needed on your server.
 
+The check calls the `gluster` CLI directly, which is provided by the
+`glusterfs-server` package. Ensure `glusterfs-server` is installed on the
+GlusterFS server node running the Agent.
+
 ### Configuration
 
 1. Edit the `glusterfs.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GlusterFS performance data. See the [sample glusterfs.d/conf.yaml][4] for all available configuration options.
    
    ```yaml
-   init_config:
+   instances:
+     -
+       ## @param gluster_command - list of strings - optional - default: ["gluster"]
+       ## Command used to invoke the `gluster` CLI. Set this to a full command
+       ## prefix to run `gluster` in a non-default location, inside a container,
+       ## or through a wrapper script.
+       #
+       # gluster_command:
+       #   - gluster
 
-    ## @param gstatus_path - string - optional - default: /opt/datadog-agent/embedded/sbin/gstatus
-    ## Path to the gstatus command.
-    ##
-    ## A version of the gstatus is shipped with the Agent binary.
-    ## If you are using a source install, specify the location of gstatus.
-    #
-    # gstatus_path: /opt/datadog-agent/embedded/sbin/gstatus
-
-    instances:
-      -
-        ## @param min_collection_interval - number - optional - default: 60
-        ## The GlusterFS integration collects cluster-wide metrics which can put additional workload on the server.
-        ## Increase the collection interval to reduce the frequency.
-        ##
-        ## This changes the collection interval of the check. For more information, see:
-        ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-        #
-        min_collection_interval: 60
+       ## @param min_collection_interval - number - optional - default: 60
+       ## The GlusterFS integration collects cluster-wide metrics which can put additional workload on the server.
+       ## Increase the collection interval to reduce the frequency.
+       ##
+       ## This changes the collection interval of the check. For more information, see:
+       ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+       #
+       min_collection_interval: 60
    ```
     
-   **NOTE**: By default, [`gstatus`][5] internally calls the `gluster` command which requires running as superuser. Add a line like the following to your `sudoers` file:
+   **NOTE**: The `gluster` CLI requires running as superuser. Add a line like the following to your `sudoers` file, adjusted to match your `gluster_command`:
  
    ```text
-    dd-agent ALL=(ALL) NOPASSWD:/path/to/your/gstatus
+    dd-agent ALL=(ALL) NOPASSWD:/usr/sbin/gluster
    ```
 
-   If your GlusterFS environment does not require root, set `use_sudo` configuration option to `false`.
+   If your GlusterFS environment does not require root, set the `use_sudo` configuration option to `false`.
 
 2. [Restart the Agent][6].
 
@@ -107,7 +109,6 @@ Need help? Contact [Datadog support][11].
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/datadog_checks/glusterfs/data/conf.yaml.example
-[5]: https://github.com/gluster/gstatus#install
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

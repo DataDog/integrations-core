@@ -1,0 +1,17 @@
+<cliOutput>
+  <opRet>0</opRet>
+  <healInfo>
+    <bricks>
+      <brick hostUuid="8012e8ac-7cf5-4b3d-baa1-267bb3e295cc">
+        <name>gluster-node-1:/export-test</name>
+        <status>Connected</status>
+        <numberOfEntries>0</numberOfEntries>
+      </brick>
+      <brick hostUuid="0e6d296e-eee1-4d9f-9c94-cc8492eb41a6">
+        <name>gluster-node-2:/export-test</name>
+        <status>Connected</status>
+        <numberOfEntries>0</numberOfEntries>
+      </brick>
+    </bricks>
+  </healInfo>
+</cliOutput>

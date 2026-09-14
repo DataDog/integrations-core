@@ -11,8 +11,3 @@ RUN sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo && \
 
 # Install Python 3
 RUN yum install -y python3 && yum clean all
-
-# Download the gstatus binary
-RUN curl -LO https://github.com/gluster/gstatus/releases/download/v1.0.5/gstatus \
-    && chmod +x ./gstatus \
-    && mv ./gstatus /usr/local/bin/gstatus

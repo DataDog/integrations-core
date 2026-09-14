@@ -1,31 +1,25 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
-try:
-    from json.decoder import JSONDecodeError
-except ImportError:
-    from simplejson import JSONDecodeError
-
-import os
 import subprocess
-from typing import Dict, List  # noqa: F401
+from typing import Any
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from .metrics import BRICK_STATS, CLUSTER_STATS, HEAL_INFO_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
+from .gluster_xml import (
+    GlusterXMLError,
+    build_cluster_data,
+    parse_gluster_version,
+    parse_heal_info,
+    parse_pool_list,
+    parse_volume_info,
+    parse_volume_status,
+)
+from .metrics import BRICK_STATS, CLUSTER_STATS, HEAL_INFO_STATS, VOL_SUBVOL_STATS, VOLUME_STATS
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
-
-GSTATUS_PATH_SUFFIX = '/embedded/sbin/gstatus'
 
 
 class GlusterfsCheck(AgentCheck):
@@ -36,84 +30,95 @@ class GlusterfsCheck(AgentCheck):
     BRICK_SC = "brick.health"
 
     def __init__(self, name, init_config, instances):
-        # type: (str, Dict, List[Dict]) -> None
         super(GlusterfsCheck, self).__init__(name, init_config, instances)
         self._tags = self.instance.get('tags', [])
 
-        # Check if customer set gstatus path
-        if init_config.get('gstatus_path'):
-            self.gstatus_cmd = init_config.get('gstatus_path')
-        else:
-            path = datadog_agent.get_config('run_path')
-            if path.endswith('/run'):
-                path = path[:-4]
-            path = path + GSTATUS_PATH_SUFFIX
-            if os.path.exists(path):
-                self.gstatus_cmd = path
-            else:
-                raise ConfigurationError(
-                    'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
-                )
-        self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
+        gluster_command = self.instance.get('gluster_command') or ['gluster']
+        if isinstance(gluster_command, str):
+            gluster_command = [gluster_command]
+        self.gluster_command = list(gluster_command)
+
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
-    def get_gstatus_output(self, cmd):
-        res = subprocess.run(cmd.split(), capture_output=True, text=True)
-        return res.stdout, res.stderr, res.returncode
+        # gstatus_path is no longer used; the check calls the ``gluster`` CLI
+        # directly. Warn if a user is still setting it so they can clean up.
+        if init_config.get('gstatus_path'):
+            self.log.warning(
+                "`gstatus_path` is no longer supported; the glusterfs check now calls the `gluster` "
+                "CLI directly. Use the `gluster_command` instance option to point at a custom "
+                "`gluster` path or wrapper."
+            )
 
     def check(self, _):
         if self.use_sudo:
-            cmd = f'sudo -ln {self.gstatus_cmd}'
-            stdout, stderr, returncode = self.get_gstatus_output(cmd)
-            if returncode != 0 or not stdout:
-                raise Exception('The dd-agent user does not have sudo access: {!r}'.format(stderr or stdout))
-            gluster_cmd = f'sudo {self.gstatus_cmd}'
-        else:
-            gluster_cmd = self.gstatus_cmd
-        # Ensures units are universally the same by specifying the --units flag
-        gluster_cmd += ' -a -o json -u g'
-        self.log.debug("gstatus command: %s", gluster_cmd)
+            self._verify_sudo()
+
         try:
-            # In testing I saw that even though we request the json, sometimes there's a line that appears at the top
-            # and thus will break the json loading. A line like:
-            # 'Note: Unable to get self-heal status for one or more volumes \n'
-            stdout, stderr, returncode = self.get_gstatus_output(gluster_cmd)
-            if stdout.lstrip().startswith('{'):
-                json_data = stdout
-            else:
-                json_data = stdout.split('\n', 1)[-1]
-            gstatus = json.loads(json_data)
-        except JSONDecodeError as e:
-            self.log.warning("Unable to decode gstatus output: %s", str(e))
-            raise
-        except Exception as e:
+            data = self._collect()
+        except (GlusterXMLError, subprocess.CalledProcessError, FileNotFoundError) as e:
             self.log.warning("Encountered error trying to collect gluster status: %s", str(e))
             raise
 
-        if 'data' in gstatus:
-            data = gstatus['data']
-            self.submit_metrics(data, 'cluster', CLUSTER_STATS, self._tags)
+        self.submit_metrics(data, 'cluster', CLUSTER_STATS, self._tags)
+        self.submit_version_metadata(data)
 
-            self.submit_version_metadata(data)
+        volume_info = data.get('volume_summary', [])
+        self.parse_volume_summary(volume_info)
 
-            volume_info = data.get('volume_summary', [])
-            self.parse_volume_summary(volume_info)
+        if CLUSTER_STATUS in data:
+            status = data[CLUSTER_STATUS].lower()
+            if status == 'healthy':
+                self.service_check(self.CLUSTER_SC, AgentCheck.OK, tags=self._tags)
+            elif status == 'degraded':
+                self.service_check(
+                    self.CLUSTER_SC, AgentCheck.CRITICAL, tags=self._tags, message="Cluster status is %s" % status
+                )
+            else:
+                self.service_check(
+                    self.CLUSTER_SC, AgentCheck.WARNING, tags=self._tags, message="Cluster status is %s" % status
+                )
 
-            if CLUSTER_STATUS in data:
-                status = data[CLUSTER_STATUS].lower()
-                if status == 'healthy':
-                    self.service_check(self.CLUSTER_SC, AgentCheck.OK, tags=self._tags)
-                elif status == 'degraded':
-                    self.service_check(
-                        self.CLUSTER_SC, AgentCheck.CRITICAL, tags=self._tags, message="Cluster status is %s" % status
-                    )
-                else:
-                    self.service_check(
-                        self.CLUSTER_SC, AgentCheck.WARNING, tags=self._tags, message="Cluster status is %s" % status
-                    )
+    def _verify_sudo(self):
+        # ``gluster`` requires root for status collection. Confirm the dd-agent
+        # user has passwordless sudo for it before relying on it in check().
+        cmd = ['sudo', '-ln', *self.gluster_command]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0 or not result.stdout:
+            raise Exception('The dd-agent user does not have sudo access: {!r}'.format(result.stderr or result.stdout))
 
-        else:
-            self.log.warning("No data from gstatus: %s", gstatus)
+    def _run_gluster(self, *args: str, xml: bool = True) -> str:
+        cmd = ['sudo'] if self.use_sudo else []
+        cmd += self.gluster_command
+        if xml:
+            cmd += ['--xml', '--mode=script']
+        cmd += list(args)
+        self.log.debug("gluster command: %s", ' '.join(cmd))
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(
+                result.returncode, ' '.join(cmd), output=result.stdout, stderr=result.stderr
+            )
+        return result.stdout
+
+    def _collect(self) -> dict[str, Any]:
+        volume_info_xml = self._run_gluster('volume', 'info')
+        volume_status_xml = self._run_gluster('volume', 'status', 'all', 'detail')
+        pool_list_xml = self._run_gluster('pool', 'list')
+        version_text = self._run_gluster('--version', xml=False)
+
+        volumes = parse_volume_info(volume_info_xml)
+        volumes = parse_volume_status(volume_status_xml, volumes)
+
+        for vol in volumes:
+            if vol['status'].lower() == 'started':
+                heal_xml = self._run_gluster('volume', 'heal', vol['name'], 'info')
+                vol['healinfo'] = parse_heal_info(heal_xml)
+            else:
+                vol['healinfo'] = []
+
+        peers = parse_pool_list(pool_list_xml)
+        glusterfs_version = parse_gluster_version(version_text)
+        return build_cluster_data(volumes, peers, glusterfs_version)
 
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
@@ -205,7 +210,6 @@ class GlusterfsCheck(AgentCheck):
     def submit_metrics(self, payload, prefix, metric_mapping, tags):
         """
         Parse a payload with a given metric_mapping and submit metric for valid values.
-        Some values contain measurements like `GiB` which should be removed and only submitted if consistent
         """
         for key, metric in metric_mapping.items():
             if key in payload:
@@ -214,14 +218,7 @@ class GlusterfsCheck(AgentCheck):
                 if isinstance(value, str) and value.lower() == 'n/a':
                     continue
 
-                if key in PARSE_METRICS:
-                    try:
-                        value_parsed = value.split(" ")
-                        value = float(value_parsed[0])
-                    except ValueError as e:
-                        self.log.debug("Unable to parse value for %s: %s", key, str(e))
-                        continue
-                self.gauge('{}.'.format(prefix) + metric, value, tags)
+                self.gauge('{}.{}'.format(prefix, metric), value, tags)
             else:
                 self.log.debug("Field not found in %s data: %s", prefix, key)
 

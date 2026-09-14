@@ -27,11 +27,9 @@ VOL_SUBVOL_STATS = {
 }
 
 VOLUME_STATS = {
-    'v_used_percent': 'used.percent',
+    'used_percent': 'used.percent',
     'num_bricks': 'bricks.count',
     'distribute': 'distribute',
-    'v_size_used': 'size.used',
-    'v_size': 'size.total',
     'snapshot_count': 'snapshot.count',
 }
 
@@ -42,6 +40,3 @@ BRICK_STATS = {'block_size': 'block_size'}
 BRICK_STATS.update(GENERAL_STATS)
 
 HEAL_INFO_STATS = {'nr_entries': 'entries.count'}
-
-# Parse metric values that contain measurements, e.g "2.00 GiB"
-PARSE_METRICS = ['v_size_used', 'v_size']

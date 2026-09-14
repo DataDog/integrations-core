@@ -1,0 +1,40 @@
+<cliOutput>
+  <opRet>0</opRet>
+  <volInfo>
+    <volumes>
+      <volume>
+        <name>gv0</name>
+        <id>07d66a0b-a91a-40d6-bf9f-61929d580469</id>
+        <status>1</status>
+        <statusStr>Started</statusStr>
+        <type>2</type>
+        <typeStr>Replicate</typeStr>
+        <brickCount>2</brickCount>
+        <distCount>2</distCount>
+        <replicaCount>2</replicaCount>
+        <disperseCount>0</disperseCount>
+        <redundancyCount>0</redundancyCount>
+        <transport>0</transport>
+        <snapshotCount>0</snapshotCount>
+        <bricks>
+          <brick uuid="8012e8ac-7cf5-4b3d-baa1-267bb3e295cc">
+            <name>gluster-node-1:/export-test</name>
+            <hostUuid>8012e8ac-7cf5-4b3d-baa1-267bb3e295cc</hostUuid>
+            <isArbiter>0</isArbiter>
+          </brick>
+          <brick uuid="0e6d296e-eee1-4d9f-9c94-cc8492eb41a6">
+            <name>gluster-node-2:/export-test</name>
+            <hostUuid>0e6d296e-eee1-4d9f-9c94-cc8492eb41a6</hostUuid>
+            <isArbiter>0</isArbiter>
+          </brick>
+        </bricks>
+        <options>
+          <option>
+            <name>nfs.disable</name>
+            <value>on</value>
+          </option>
+        </options>
+      </volume>
+    </volumes>
+  </volInfo>
+</cliOutput>

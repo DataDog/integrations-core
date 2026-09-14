@@ -7,13 +7,13 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.glusterfs import GlusterfsCheck
 
-from .common import CHECK, E2E_INIT_CONFIG, EXPECTED_METRICS
+from .common import CHECK, EXPECTED_METRICS, INIT_CONFIG
 
 pytestmark = pytest.mark.unit
 
 
-def test_check(aggregator, instance, mock_gstatus_data):
-    check = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
+def test_check(aggregator, instance, mock_gluster_xml):
+    check = GlusterfsCheck(CHECK, INIT_CONFIG, [instance])
     check.check(instance)
 
     for metric in EXPECTED_METRICS:
@@ -23,7 +23,7 @@ def test_check(aggregator, instance, mock_gstatus_data):
 
 
 def test_parse_version(instance):
-    c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
+    c = GlusterfsCheck(CHECK, INIT_CONFIG, [instance])
     major, minor, patch = c.parse_version('3.13.2')
     assert major == '3'
     assert minor == '13'
