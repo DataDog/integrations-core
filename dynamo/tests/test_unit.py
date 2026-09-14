@@ -8,6 +8,8 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import datadog_agent
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.dynamo import DynamoCheck
@@ -69,18 +71,27 @@ def test_check_collects_mapped_metrics(
 
 
 def test_emits_critical_openmetrics_service_check_when_service_is_down(
-    dd_run_check, aggregator, frontend_instance, mock_http_response
+    dd_run_check, aggregator, frontend_instance, fake_http
 ):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http_response(status_code=404)
+    fake_http.register_response(
+        'GET',
+        frontend_instance['openmetrics_endpoint'],
+        FakeHTTPResponse(
+            status_code=404,
+            status_error=HTTPClientStatusError('404 Client Error'),
+        ),
+        match_options={'stream': True},
+    )
     check = DynamoCheck("dynamo", {}, [frontend_instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check("dynamo.openmetrics.health", ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
 
 
 def test_check_skipped_when_gpu_monitoring_disabled(frontend_instance):
