@@ -119,9 +119,8 @@ pipeline:
           # log_line_prefix = '%m [%p] %d %a %u %h %c '
           suggested_format %{_prefix} %{_pg_body}
 
-          # The pid is absent from some startup and fatal lines.
           # log_line_prefix = '%m [%p] ' (PostgreSQL's built-in default)
-          default_format %{_pg_timestamp}\s+(?:\[%{_pg_pid}\]\s+)?%{_pg_body}
+          default_format %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_body}
 
           # log_line_prefix = '%t-%c-' (Azure Database for PostgreSQL default)
           pgprefix_azure %{_pg_timestamp}-%{_pg_session_id}-%{_pg_body}
@@ -158,9 +157,6 @@ pipeline:
 
           # log_line_prefix = '%m [%p] %q%u@%d '
           pgprefix_atdb %{_pg_timestamp} \[%{_pg_pid}\] (?:%{_pg_user}@%{_pg_dbname} )?%{_pg_body}
-
-          # log_line_prefix = '%m [%p] ' (identical form to default_format; kept as a distinct named rule for the pid-present case)
-          pgprefix_default %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_body}
 
           # log_line_prefix = '%m [%p] %q[user=%u,db=%d,app=%a] ' (pganalyze recommended prefix)
           pgprefix_pganalyze %{_pg_timestamp} \[%{_pg_pid}\] (?:\[user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name}\] )?%{_pg_body}
