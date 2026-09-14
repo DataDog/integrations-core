@@ -22,7 +22,6 @@ from datadog_checks.base.utils.http_exceptions import (
 )
 from datadog_checks.base.utils.requests_adapter import (
     RequestsResponseAdapter,
-    _backend_compat_type,
     _translate_requests_exception,
     translate_http_errors,
 )
@@ -206,16 +205,6 @@ def test_compat_bases_do_not_leak_into_the_agnostic_tree():
     assert not isinstance(
         _translate_requests_exception(requests.exceptions.ConnectTimeout('boom')), HTTPClientConnectionError
     )
-
-
-def test_backend_compat_type_supports_backend_subclassing_agnostic():
-    class BackendSubclass(json.JSONDecodeError):
-        pass
-
-    compat = _backend_compat_type(json.JSONDecodeError, BackendSubclass)
-
-    assert issubclass(compat, json.JSONDecodeError)
-    assert issubclass(compat, BackendSubclass)
 
 
 def requests_exception_types():

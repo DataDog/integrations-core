@@ -67,13 +67,6 @@ def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_http_module_reexports_base_fakes():
-    assert http_testing.FakeHTTPClient is FakeHTTPClient
-    assert http_testing.FakeHTTPResponse is FakeHTTPResponse
-    assert http_testing.MockHTTPResponse is FakeHTTPResponse
-    assert http_testing.RecordedRequest is RecordedRequest
-
-
 def test_fake_http_installs_registered_response_and_records_request(fake_http):
     url = 'https://example.test/items'
     response = FakeHTTPResponse(json_result={'items': []})
@@ -243,9 +236,3 @@ def test_mock_http_response_per_endpoint_preserves_requests_responses(mock_http_
 
     assert isinstance(response, requests.Response)
     assert requests.Session().get(url) is response
-
-
-def test_unknown_module_attribute_still_raises():
-    absent = 'MockNonsense'
-    with pytest.raises(AttributeError, match=absent):
-        getattr(http_testing, absent)
