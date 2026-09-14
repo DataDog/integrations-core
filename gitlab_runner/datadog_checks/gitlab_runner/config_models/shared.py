@@ -35,7 +35,7 @@ class SharedConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    allowed_metrics: tuple[str, ...]
+    allowed_metrics: Optional[tuple[str, ...]] = None
     proxy: Optional[Proxy] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
