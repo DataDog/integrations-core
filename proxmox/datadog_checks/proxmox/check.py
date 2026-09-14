@@ -265,11 +265,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         point_tags: list[str],
         hostname: str | None,
     ) -> None:
-        """Submit the vCPU count for a VM or node, for usage metering.
+        """Submit the vCPU count for a VM or node.
 
-        Only VMs and nodes are metered. Container `maxcpu` falls back to the whole host's thread
-        count when no limit is configured, so metering it would bill every default container at
-        full host CPU.
+        Only VMs and nodes report a meaningful count. Container `maxcpu` falls back to the whole
+        host's thread count when no limit is configured, so reporting it would overstate every
+        default container at full host CPU.
         """
         if resource_type not in (VM_RESOURCE, NODE_RESOURCE):
             return
@@ -280,7 +280,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             # `/nodes/<node>` (`PVE/API2/Cluster.pm:622` -> `PVE/API2Tools.pm:63`). A VM the token
             # lacks `VM.Audit` on is dropped from the payload entirely (`Cluster.pm:588`) rather
             # than returned without the field, so this branch is the node case in practice. Log it:
-            # a silently absent billing input is harder to diagnose than an absent ordinary metric.
+            # a silently absent count is harder to diagnose downstream than an ordinary metric.
             self.log.debug(
                 "Skipping vCPU metric for %s %s: `maxcpu` missing from the /cluster/resources payload",
                 resource_type,
@@ -288,10 +288,10 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             )
             return
 
-        # Usage metering requires `proxmox_type` on the point itself. In
+        # Downstream consumers require `proxmox_type` on the point itself. In
         # `_collect_resource_metrics` a VM's or node's per-resource `tags` is deliberately empty
-        # (its tags go on external host tags instead), so metering has to be handed the full tag
-        # list directly — external tags never reach the metric payload at metering ingest.
+        # (its tags go on external host tags instead), so this call has to be handed the full tag
+        # list directly — external tags never reach the metric payload at ingest.
         self.gauge(f'{resource_type}.cpu.max', maxcpu, tags=point_tags, hostname=hostname)
 
     def _collect_resource_metrics(self):
