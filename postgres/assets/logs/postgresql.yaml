@@ -161,6 +161,11 @@ pipeline:
           # log_line_prefix = '%m [%p] %q[user=%u,db=%d,app=%a] ' (pganalyze recommended prefix)
           pgprefix_pganalyze %{_pg_timestamp} \[%{_pg_pid}\] (?:\[user=%{_pg_user},db=%{_pg_dbname},app=%{_pg_app_name}\] )?%{_pg_body}
 
+          # log_line_prefix = '%t ' (timestamp only, no pid). Placed last among the
+          # format rules: it is the most general shape, so anything more specific
+          # must win first.
+          pgprefix_timestamp_only %{_pg_timestamp} %{_pg_body}
+
           # Keep the fallback last because matchRules are first-match-wins. It
           # preserves the raw line for best-effort extraction from unknown prefixes.
           # Matches any log_line_prefix not covered above.
@@ -170,26 +175,6 @@ pipeline:
     # is copied to an attribute and left in `message`, so the body stays byte-for-byte
     # what Postgres emitted and downstream log parsers see the shape they expect.
     # Scaling happens only in the arithmetic processor at the end of this stage.
-    - type: grok-parser
-      name: Extract `duration` from `message`
-      enabled: true
-      source: message
-      grok:
-        supportRules: |
-        matchRules: |
-          # Anchored at the start of the body. PostgreSQL emits the timing field as
-          # the leading token for log_min_duration_statement and auto_explain, so a
-          # leading `%{data}` only adds the ability to mine `duration:` out of query
-          # text and fabricate a value. Captures nothing into `message`.
-          pg_duration duration:\s+%{number:duration}\s+ms%{data}
-      samples:
-        # Values of `message`, not raw log lines: this reads Stage 1's parsed body.
-        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
-        - 'duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
-        - 'duration: 12.345 ms'
-        - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
-        # Must NOT match: `duration:` appears only inside the query text.
-        - "statement: SELECT 'duration: 99 ms'"
     # Promote Stage 1's parsed body over the raw prefix line. The remapper consumes
     # its source, matching intake preprocessing for jsonlog records.
     - type: message-remapper
@@ -217,6 +202,28 @@ pipeline:
         - '2026-08-28 12:19:21.018 '
         - '2026-08-28 12:19:21 '
     # date() creates an attribute; the date remapper below sets the official date.
+    - type: grok-parser
+      name: Extract `duration` from `message`
+      enabled: true
+      source: message
+      grok:
+        supportRules: |
+        matchRules: |
+          # Runs AFTER the message-remapper: before it, `message` is still the raw
+          # prefixed line and nothing anchored to the body start could match.
+          # Anchored at the start of the body. PostgreSQL emits the timing field as
+          # the leading token for log_min_duration_statement and auto_explain, so a
+          # leading `%{data}` only adds the ability to mine `duration:` out of query
+          # text and fabricate a value. Captures nothing into `message`.
+          pg_duration duration:\s+%{number:duration}\s+ms%{data}
+      samples:
+        # Values of `message`, not raw log lines: this reads Stage 1's parsed body.
+        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
+        - 'duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
+        - 'duration: 12.345 ms'
+        - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
+        # Must NOT match: `duration:` appears only inside the query text.
+        - "statement: SELECT 'duration: 99 ms'"
     - type: grok-parser
       name: Extract `db.statement` from `message`
       enabled: true
