@@ -114,7 +114,7 @@ class HTTPRequestOptions(TypedDict, total=False):
     params: Mapping[str, Any] | None
     """Query parameters appended to the request URL."""
     headers: Mapping[str, str] | None
-    """Replaces the configured client headers for this request; use extra_headers to merge."""
+    """Headers for this request. Values override configured client headers with matching names."""
     data: Any
     """Request body encoded according to the value's type."""
     json: Any
