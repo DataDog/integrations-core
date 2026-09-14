@@ -8,8 +8,9 @@ from __future__ import annotations
 from abc import ABC, ABCMeta, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import assert_never
+from typing import TYPE_CHECKING, assert_never
 
 from textual import events
 from textual.app import ComposeResult
@@ -23,6 +24,9 @@ from textual.widgets import Button, Input, Static, Switch
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from ddev.ai.config.models import FlowInput, FlowInputField, InputType
+
+if TYPE_CHECKING:
+    from ddev.ai.runtime.input_snapshot import PinnedSnapshot
 
 
 @dataclass(frozen=True)
@@ -290,6 +294,16 @@ def get_value_editor(
     return get_scalar_value_editor(spec)
 
 
+type AnyLaunchFlowInput = (
+    LaunchFlowInput[str]
+    | LaunchFlowInput[bool]
+    | LaunchFlowInput[dict[str, str | bool]]
+    | LaunchFlowInput[list[str]]
+    | LaunchFlowInput[list[bool]]
+    | LaunchFlowInput[list[dict[str, str | bool]]]
+)
+
+
 class LaunchFlowInput[T](Widget, ABC, metaclass=WidgetABCMeta):
     """Common framed interface for one declared launch input."""
 
@@ -299,17 +313,7 @@ class LaunchFlowInput[T](Widget, ABC, metaclass=WidgetABCMeta):
         self.border_title = f"{flow_input.label.upper()} ({flow_input.input_type.value})"
 
     @classmethod
-    def get(
-        cls,
-        flow_input: FlowInput,
-    ) -> (
-        LaunchFlowInput[str]
-        | LaunchFlowInput[bool]
-        | LaunchFlowInput[dict[str, str | bool]]
-        | LaunchFlowInput[list[str]]
-        | LaunchFlowInput[list[bool]]
-        | LaunchFlowInput[list[dict[str, str | bool]]]
-    ):
+    def get(cls, flow_input: FlowInput) -> AnyLaunchFlowInput:
         """Create the launch widget declared by a flow input."""
         if flow_input.multi:
             return MultiLaunchFlowInput(flow_input)
@@ -318,6 +322,37 @@ class LaunchFlowInput[T](Widget, ABC, metaclass=WidgetABCMeta):
     @abstractmethod
     def get_value(self) -> T | None:
         """Return the validated raw input value."""
+
+
+class PinnedLaunchFlowInput(LaunchFlowInput[str]):
+    """Show a snapshot input a resumed run reuses instead of collecting again.
+
+    The run already owns an immutable copy of the file, so the original is never
+    consulted: a resume works even once that file has been edited, moved, or deleted.
+    """
+
+    def __init__(self, flow_input: FlowInput, pinned: PinnedSnapshot) -> None:
+        super().__init__(flow_input)
+        self.pinned = pinned
+        self.border_title = f"{flow_input.label.upper()} (pinned)"
+
+    def compose(self) -> ComposeResult:
+        yield Static(f"Captured from {self.pinned.source}", classes="pinned-input-source")
+        captured_at = self._format_captured_at(self.pinned.captured_at) or "launch"
+        yield Static(f"Reusing the copy taken at {captured_at}.", classes="pinned-input-note")
+
+    def get_value(self) -> str:
+        return str(self.pinned.path)
+
+    @staticmethod
+    def _format_captured_at(captured_at: str | None) -> str | None:
+        """Render an ISO timestamp as a human-friendly date and time, to the minute."""
+        if captured_at is None:
+            return None
+        try:
+            return datetime.fromisoformat(captured_at).strftime('%Y-%m-%d | %H:%M')
+        except ValueError:
+            return captured_at
 
 
 class SingleLaunchFlowInput[T](LaunchFlowInput[T]):

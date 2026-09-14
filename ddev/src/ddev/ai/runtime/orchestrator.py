@@ -13,6 +13,7 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
+from ddev.ai.runtime.input_snapshot import snapshot_path_inputs
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
@@ -83,6 +84,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
             )
 
+        self._runtime_variables = self._capture_snapshot_inputs(checkpoint_manager.root)
+
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
@@ -119,6 +122,20 @@ class PhaseOrchestrator(EventBusOrchestrator):
         for entry in self._resolved_flow.flow:
             if entry.phase in completed:
                 self.submit_message(PhaseTrigger(id=f"{entry.phase}_resumed", phase_id=entry.phase))
+
+    def _capture_snapshot_inputs(self, run_dir: Path) -> RuntimeVariables:
+        """Pin every snapshot input to a per-run copy and repoint its variable at it."""
+        variables, captured = snapshot_path_inputs(
+            self._resolved_flow, self._runtime_variables, run_dir, resume=self._resume
+        )
+        for item in captured:
+            if item.diverged:
+                self._logger.warning(
+                    "Input %r changed since this run was launched; reusing the snapshot at %s",
+                    item.name,
+                    item.path,
+                )
+        return variables
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
