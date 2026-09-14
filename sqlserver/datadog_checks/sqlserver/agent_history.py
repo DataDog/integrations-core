@@ -135,6 +135,8 @@ class SqlserverAgentHistory(DBMAsyncJob):
             history_row_limit = DEFAULT_ROW_LIMIT
         self.history_row_limit = history_row_limit
         self._last_history_id = None
+        # Preserve the first baseline across a failed initial submission so a retry cannot skip completions.
+        self._initial_history_id = None
         super(SqlserverAgentHistory, self).__init__(
             check,
             run_sync=is_affirmative(self._config.agent_jobs_config.get('run_sync', False)),
@@ -161,10 +163,18 @@ class SqlserverAgentHistory(DBMAsyncJob):
     def _get_new_agent_job_history(self, cursor):
         cursor.execute(AGENT_HISTORY_MAX_INSTANCE_QUERY)
         upper_bound = int(cursor.fetchone()[0])
-        if self._last_history_id is None or upper_bound <= self._last_history_id:
+        if self._last_history_id is None:
+            if self._initial_history_id is None:
+                self._initial_history_id = upper_bound
+                return [], upper_bound
+            last_history_id = self._initial_history_id
+        else:
+            last_history_id = self._last_history_id
+
+        if upper_bound <= last_history_id:
             return [], upper_bound
 
-        params = (self.history_row_limit, self._last_history_id, upper_bound, self.history_row_limit)
+        params = (self.history_row_limit, last_history_id, upper_bound, self.history_row_limit)
         self.log.debug("collecting sql server agent jobs history")
         self.log.debug("Running query [%s] %s", AGENT_HISTORY_QUERY, params)
         cursor.execute(AGENT_HISTORY_QUERY, params)
@@ -200,6 +210,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self.log.debug(payload)
         self._check.database_monitoring_query_activity(payload)
         self._last_history_id = next_history_id
+        self._initial_history_id = None
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_agent_history(self):

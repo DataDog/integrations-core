@@ -290,6 +290,7 @@ def create_agent_history_collector(
     agent_history.log = Mock()
     agent_history.history_row_limit = history_row_limit
     agent_history._last_history_id = last_history_id
+    agent_history._initial_history_id = None
     return agent_history
 
 
@@ -345,8 +346,9 @@ def test_connection_with_agent_history(instance_docker):
 class AgentHistoryCursor:
     description = [('completion_instance_id',)]
 
-    def __init__(self, upper_bound: int = 20000) -> None:
+    def __init__(self, upper_bound: int = 20000, completion_ids: list[int] | None = None) -> None:
         self.upper_bound = upper_bound
+        self.completion_ids = completion_ids or []
         self.executions: list[tuple[str, tuple[int, ...]]] = []
 
     def execute(self, query: str, params: tuple[int, ...] = ()) -> None:
@@ -356,7 +358,7 @@ class AgentHistoryCursor:
         return (self.upper_bound,)
 
     def fetchall(self) -> list[tuple[int]]:
-        return []
+        return [(completion_id,) for completion_id in self.completion_ids]
 
 
 class AgentHistoryCheck:
@@ -369,13 +371,14 @@ class AgentHistoryCheck:
         self.histogram = Mock()
 
 
-def test_agent_history_query_parameterizes_watermark_and_upper_bound() -> None:
+def test_agent_history_query_parameterizes_watermark_and_upper_bound():
     check = AgentHistoryCheck()
     agent_history = object.__new__(SqlserverAgentHistory)
     agent_history._check = check
     agent_history.log = check.log
     agent_history.history_row_limit = 10000
     agent_history._last_history_id = 10000
+    agent_history._initial_history_id = None
     cursor = AgentHistoryCursor()
 
     rows, next_history_id = agent_history._get_new_agent_job_history(cursor)
@@ -392,11 +395,12 @@ def test_agent_history_query_parameterizes_watermark_and_upper_bound() -> None:
     assert params == (10000, 10000, 20000, 10000)
 
 
-def test_agent_history_watermark_commits_after_submission() -> None:
+def test_agent_history_watermark_commits_after_submission():
     agent_history = object.__new__(SqlserverAgentHistory)
     agent_history._check = Mock()
     agent_history.log = Mock()
     agent_history._last_history_id = 10000
+    agent_history._initial_history_id = None
     agent_history._create_agent_jobs_history_event = Mock(return_value={})
     agent_history._check.database_monitoring_query_activity.side_effect = RuntimeError("submit failed")
 
@@ -407,6 +411,30 @@ def test_agent_history_watermark_commits_after_submission() -> None:
     agent_history._check.database_monitoring_query_activity.side_effect = None
     agent_history._submit_agent_jobs_history([], 20000)
     assert agent_history._last_history_id == 20000
+
+
+def test_agent_history_initial_watermark_survives_submission_failure():
+    agent_history = create_agent_history_collector(last_history_id=None)
+    agent_history._check = AgentHistoryCheck()
+    agent_history._check.database_monitoring_query_activity = Mock()
+    agent_history._create_agent_jobs_history_event = Mock(return_value={})
+
+    rows, initial_history_id = agent_history._get_new_agent_job_history(AgentHistoryCursor(upper_bound=10000))
+    agent_history._check.database_monitoring_query_activity.side_effect = RuntimeError("submit failed")
+    with pytest.raises(RuntimeError, match="submit failed"):
+        agent_history._submit_agent_jobs_history(rows, initial_history_id)
+
+    assert agent_history._initial_history_id == 10000
+    retry_cursor = AgentHistoryCursor(upper_bound=20000, completion_ids=[15000])
+    rows, next_history_id = agent_history._get_new_agent_job_history(retry_cursor)
+
+    assert retry_cursor.executions[1][1] == (10000, 10000, 20000, 10000)
+    assert rows == [{'completion_instance_id': 15000}]
+    assert next_history_id == 15000
+    agent_history._check.database_monitoring_query_activity.side_effect = None
+    agent_history._submit_agent_jobs_history(rows, next_history_id)
+    assert agent_history._last_history_id == 15000
+    assert agent_history._initial_history_id is None
 
 
 @pytest.mark.usefixtures('dd_environment')
