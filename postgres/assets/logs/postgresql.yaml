@@ -106,7 +106,13 @@ pipeline:
           _pg_remote_host %{regex("\\S*"):remote_host}
           _pg_backend_type %{data:backend_type}
           _pg_ps %{data:ps}
-          _pg_body %{word:error_severity}:  %{data:message}(?: at character %{integer:cursor_position})?
+          # Consume the trailing position but publish nothing. Text renders both
+          # cursorpos and internalpos as " at character N" (elog.c), so the number
+          # is ambiguous: cursorpos indexes the client's `statement`, internalpos
+          # indexes a server-generated `internal_query`. The discriminator is the
+          # following QUERY: line, which a line-oriented parser cannot see. Keep the
+          # group -- deleting it returns the suffix to `message`, which jsonlog strips.
+          _pg_body %{word:error_severity}:  %{data:message}(?: at character \d+)?
           # This duplicates pgprefix_datadog and stays first for compatibility.
           _prefix %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id}
         matchRules: |
