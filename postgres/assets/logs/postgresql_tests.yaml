@@ -248,4 +248,354 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1764791980415
+ -
+  sample: "2026-08-17 20:46:39.837 UTC [63] LOG:  checkpoint starting: shutdown immediate"
+  result:
+    custom:
+      db:
+        date: 1786999599837
+        severity: "LOG"
+      error_severity: "LOG"
+      pid: 63
+      postgres:
+        proc_id: "63"
+        service_name: "postgresql"
+        severity_category: "info"
+      timestamp: "2026-08-17 20:46:39.837 UTC"
+    message: "checkpoint starting: shutdown immediate"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786999599837
+ -
+  sample: "2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      db:
+        date: 1786999545000
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+      error_severity: "LOG"
+      postgres:
+        service_name: "postgresql"
+        session_id: "6a8372f9.6b"
+        severity_category: "info"
+      session_id: "6a8372f9.6b"
+      timestamp: "2026-08-17 20:45:45 UTC"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786999545000
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      application_name: "pgllp_app"
+      db:
+        date: 1786999622000
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 45772
+      pid: 107
+      postgres:
+        appname: "pgllp_app"
+        proc_id: "107"
+        service_name: "postgresql"
+        session_id: "6a837346.6b"
+        severity_category: "info"
+      ps: "idle"
+      remote_host: "172.17.0.1"
+      remote_port: 45772
+      session_id: "6a837346.6b"
+      timestamp: "2026-08-17 20:47:02 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999622000
+ -
+  sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      application_name: "pgllp_app"
+      db:
+        backend_start: 1786999633000
+        date: 1786999633749
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      line_num: 10
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 42336
+      pid: 108
+      postgres:
+        appname: "pgllp_app"
+        proc_id: "108"
+        service_name: "postgresql"
+        session_id: "6a837351.6c"
+        severity_category: "info"
+        vxid: "4/5"
+        xid: "0"
+      remote_host: "172.17.0.1"
+      remote_port: 42336
+      session_id: "6a837351.6c"
+      session_lineno: 10
+      session_start: "2026-08-17 20:47:13 UTC"
+      timestamp: "2026-08-17 20:47:13.749 UTC"
+      txid: 0
+      user: "pgllp_user"
+      vxid: "4/5"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999633749
+ -
+  sample: "pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=172.17.0.1 LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      application_name: "pgllp_app"
+      db:
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      network:
+        client:
+          ip: "172.17.0.1"
+      pid: 107
+      postgres:
+        appname: "pgllp_app"
+        proc_id: "107"
+        service_name: "postgresql"
+        severity_category: "info"
+      remote_host: "172.17.0.1"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      db:
+        date: 1786999512000
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 37472
+      pid: 107
+      postgres:
+        proc_id: "107"
+        service_name: "postgresql"
+        severity_category: "info"
+      remote_host: "172.17.0.1"
+      remote_port: 37472
+      timestamp: "2026-08-17 20:45:12 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999512000
+ -
+  sample: "2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      backend_type: "client backend"
+      db:
+        date: 1786999589997
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      line_num: 10
+      pid: 106
+      postgres:
+        proc_id: "106"
+        service_name: "postgresql"
+        severity_category: "info"
+      session_lineno: 10
+      timestamp: "2026-08-17 20:46:29.997 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999589997
+ -
+  sample: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=172.17.0.1 LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      db:
+        date: 1786999579015
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      line_num: 10
+      network:
+        client:
+          ip: "172.17.0.1"
+      pid: 119
+      postgres:
+        proc_id: "119"
+        service_name: "postgresql"
+        severity_category: "info"
+      remote_host: "172.17.0.1"
+      session_lineno: 10
+      timestamp: "2026-08-17 20:46:19.015 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999579015
+ -
+  sample: "2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      db:
+        date: 1786999568111
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      line_num: 10
+      pid: 118
+      postgres:
+        proc_id: "118"
+        service_name: "postgresql"
+        severity_category: "info"
+      session_lineno: 10
+      timestamp: "2026-08-17 20:46:08.111 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999568111
+ -
+  sample: "2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      db:
+        date: 1786999601019
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      pid: 118
+      postgres:
+        proc_id: "118"
+        service_name: "postgresql"
+        severity_category: "info"
+      timestamp: "2026-08-17 20:46:41.019 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999601019
+ -
+  sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      application_name: "pgllp_app"
+      db:
+        date: 1786999534801
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      dbname: "pgllp_db"
+      error_severity: "LOG"
+      pid: 105
+      postgres:
+        appname: "pgllp_app"
+        proc_id: "105"
+        service_name: "postgresql"
+        severity_category: "info"
+      timestamp: "2026-08-17 20:45:34.801 UTC"
+      user: "pgllp_user"
+    message: "statement: SELECT 2 AS c02;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:pgllp_db"
+    timestamp: 1786999534801
+ -
+  sample: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
+  result:
+    custom:
+      postgres:
+        service_name: "postgresql"
+        severity_category: "info_default"
+    message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
+    service: "postgresql"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
 
