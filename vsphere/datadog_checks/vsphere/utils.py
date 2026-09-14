@@ -8,6 +8,7 @@ from pyVmomi import vim
 from datadog_checks.base import to_string
 from datadog_checks.vsphere.constants import (
     BOTH,
+    CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE,
     HISTORICAL,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
@@ -132,6 +133,16 @@ def properties_to_collect(mor_type, metric_filters):
     resource_object_properties = object_properties_to_collect(mor_type, metric_filters)
 
     return resource_simple_properties + resource_object_properties
+
+
+def cpu_count_metric_name(resource_type):
+    # type: (str) -> str
+    """Return the CPU count metric name for a resource type, e.g. `vm.summary.config.numCpu`.
+
+    Namespace-less, which is both the shape `metric_filters` are matched against and the shape
+    `AgentCheck.gauge` expects. Prefix with `vsphere.` only for human-readable output.
+    """
+    return "{}.{}".format(resource_type, CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE[resource_type])
 
 
 def simple_properties_to_collect(mor_string, resource_filters):

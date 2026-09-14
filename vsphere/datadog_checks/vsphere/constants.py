@@ -152,7 +152,8 @@ CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE = {
     'host': HOST_CPU_COUNT_PROPERTY,
 }
 
-# How many uncollected resources to name in the summarized warning. The full list still goes to debug.
+# How many uncollected resources to name in the summarized warning. Each one is also logged
+# individually at debug, so this cap bounds memory without hiding detail.
 UNCOLLECTED_LOG_SAMPLE_SIZE = 10
 
 

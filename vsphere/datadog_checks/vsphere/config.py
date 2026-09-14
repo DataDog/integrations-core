@@ -50,6 +50,7 @@ from datadog_checks.vsphere.types import (  # noqa: F401
     ResourceFilterConfig,
 )
 from datadog_checks.vsphere.utils import (
+    cpu_count_metric_name,
     object_properties_to_collect,
     property_metrics_to_collect,
     simple_properties_to_collect,
@@ -312,9 +313,14 @@ class VSphereConfig(object):
 
     def _warn_unfilterable_cpu_count_metrics(self):
         # type: () -> None
-        for resource_type, cpu_count_property in CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE.items():
+        if not self.collect_property_metrics:
+            # These metrics were not collected at all with property metrics off, so a filter
+            # that does not name them was never excluding anything. Only the configurations
+            # where the filter genuinely used to suppress the metric have changed behavior.
+            return
+        for resource_type in CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE:
             filters = self.metric_filters.get(resource_type)
-            metric_name = '{}.{}'.format(resource_type, cpu_count_property)
+            metric_name = cpu_count_metric_name(resource_type)
             if filters and not match_any_regex(metric_name, filters):
                 self.log.warning(
                     "Metric '%s' is always collected and cannot be excluded, even though the metric_filters "

@@ -3408,6 +3408,7 @@ def test_cpu_count_metrics_metric_filters_warning(
 ):
     """`metric_filters` cannot exclude these metrics, so warn rather than silently overriding it."""
     caplog.set_level(logging.WARNING)
+    realtime_instance['collect_property_metrics'] = True
     realtime_instance['metric_filters'] = {'vm': [r'vm\.cpu\..*']}
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
@@ -3417,6 +3418,26 @@ def test_cpu_count_metrics_metric_filters_warning(
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
     # No `host` filters were configured, so the host marker is unaffected and must not warn.
     assert 'summary.hardware.numCpuCores' not in caplog.text
+
+
+def test_cpu_count_metrics_metric_filters_no_warning_by_default(
+    aggregator, caplog, realtime_instance, dd_run_check, service_instance
+):
+    """A perf-counter `metric_filters` entry must not warn under the default configuration.
+
+    With `collect_property_metrics` off these properties were never collected, so such a filter
+    was not excluding them and nothing about it has changed. Warning anyway would fire on every
+    restart for the many instances that filter perf counters and never touched property metrics.
+    """
+    caplog.set_level(logging.WARNING)
+    realtime_instance['metric_filters'] = {'vm': [r'cpu\..*', r'mem\..*']}
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    assert 'always collected and cannot be excluded' not in caplog.text
+    # Still collected -- the warning is suppressed, not the metric.
+    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
 
 
 @pytest.mark.parametrize(

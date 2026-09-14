@@ -54,6 +54,7 @@ from datadog_checks.vsphere.types import (
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     add_additional_tags,
+    cpu_count_metric_name,
     format_metric_name,
     get_mapped_instance_tag,
     get_tags_recursively,
@@ -243,10 +244,10 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
+        # A bounded sample for the warning, plus the totals and resource types it summarizes.
         uncollected = []  # type: List[str]
+        uncollected_types = set()  # type: Set[str]
         uncollected_total = 0
-        # Only the debug dump needs every entry; the warning names at most UNCOLLECTED_LOG_SAMPLE_SIZE.
-        log_all_uncollected = self.log.isEnabledFor(logging.DEBUG)
         for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
@@ -377,8 +378,13 @@ class VSphereCheck(AgentCheck):
 
                 if reason is not None:
                     uncollected_total += 1
-                    if log_all_uncollected or len(uncollected) < UNCOLLECTED_LOG_SAMPLE_SIZE:
+                    uncollected_types.add(mor_type_str)
+                    if len(uncollected) < UNCOLLECTED_LOG_SAMPLE_SIZE:
                         uncollected.append('{} {} ({})'.format(mor_type_str, mor_name, reason))
+                    # Per resource rather than accumulated: the sample above stays bounded on a
+                    # large inventory, and one line per resource is greppable where a single
+                    # list of thousands would be truncated by most log pipelines.
+                    self.log.debug("Not collecting a CPU count for %s %s: %s", mor_type_str, mor_name, reason)
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
@@ -391,15 +397,13 @@ class VSphereCheck(AgentCheck):
                 "Not collecting %s for %d resource(s)%s: %s. A missing property usually means the vCenter "
                 "user cannot read it; a missing hostname means none could be resolved for the resource.",
                 " or ".join(
-                    'vsphere.{}.{}'.format(resource_type, cpu_count_property)
-                    for resource_type, cpu_count_property in CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE.items()
+                    'vsphere.{}'.format(cpu_count_metric_name(resource_type))
+                    for resource_type in sorted(uncollected_types)
                 ),
                 uncollected_total,
                 " (showing {})".format(UNCOLLECTED_LOG_SAMPLE_SIZE) if truncated else "",
-                ", ".join(uncollected[:UNCOLLECTED_LOG_SAMPLE_SIZE]),
+                ", ".join(uncollected),
             )
-            if log_all_uncollected:
-                self.log.debug("Resources with no CPU count metric: %s", uncollected)
 
     def submit_metrics_callback(self, query_results):
         # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None
@@ -1154,7 +1158,7 @@ class VSphereCheck(AgentCheck):
 
         mor_type_str = MOR_TYPE_AS_STRING[resource_type]
         self.gauge(
-            '{}.{}'.format(mor_type_str, CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE[mor_type_str]),
+            cpu_count_metric_name(mor_type_str),
             value,
             tags=self._resource_metric_tags(resource_tags),
             hostname=mor_props.get('hostname'),

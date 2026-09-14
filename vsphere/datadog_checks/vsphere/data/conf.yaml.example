@@ -384,7 +384,7 @@ instances:
     ##
     ## Note2: `vsphere.vm.summary.config.numCpu` and `vsphere.host.summary.hardware.numCpuCores` are
     ##         collected on every run whether or not this option is enabled, and cannot be excluded
-    ##         with `metric_filters`. They still honor `resource_filters` and `collection_type`: an
+    ##         with `metric_filters`. They still honor `resource_filters` and `collection_type`: An
     ##         instance using "collection_type: historical" does not collect the host metric.
     ##         Neither metric is collected for a resource whose hostname cannot be resolved, and the
     ##         vCPU count is not collected for a powered-off virtual machine.
