@@ -40,9 +40,8 @@ def cluster_resources_with_offline_node() -> dict[str, Any]:
 def cluster_resources_with_vm_maxcpu(maxcpu: int | None) -> dict[str, Any]:
     """Return the shipped payload with VM `qemu/100`'s `maxcpu` set to `maxcpu`, or removed if None.
 
-    Proxmox omits `maxcpu` for a node the token lacks `Sys.Audit` on
-    (`PVE/API2/Cluster.pm:622` → `PVE/API2Tools.pm:63`), so the check has to tell an absent
-    field from a zero one.
+    Covers the check's `maxcpu is None` guard: an absent field and a zero have to be told
+    apart, and a truthiness check would silently drop the zero.
     """
     payload = _cluster_resources_fixture()
     for resource in payload['data']:
