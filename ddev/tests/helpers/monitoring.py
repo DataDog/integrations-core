@@ -11,7 +11,12 @@ from typing import Any
 
 import structlog
 
+from ddev.monitoring import ComponentMonitor, MonitoringRuntime
 from ddev.monitoring.metrics import MetricRecord
+
+
+def make_monitor(name: str, *, handler: logging.Handler | None = None) -> ComponentMonitor:
+    return MonitoringRuntime(console_handler=handler).component(name)
 
 
 class RecordingSink:

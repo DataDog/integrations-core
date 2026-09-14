@@ -329,3 +329,29 @@ def test_closing_the_runtime_leaves_the_callers_stream_open(stream):
 
     stream.write('still usable\n')
     assert stream.getvalue().endswith('still usable\n')
+
+
+def test_stdlib_records_route_through_the_runtime_as_structured_events(handler: RecordingJsonHandler):
+    from ddev.monitoring.adapter import ComponentLogAdapter
+
+    runtime = MonitoringRuntime()
+    runtime.add_log_handler(handler)
+    adapter = ComponentLogAdapter(runtime.component('github-async'))
+
+    adapter.debug('Rate limit event', extra={'remaining': 12})
+    adapter.warning('Retrying %s after %r', 'dispatch', RuntimeError('boom'), extra={'attempt': 2})
+    try:
+        raise ValueError('nope')
+    except ValueError:
+        adapter.exception('Retries exhausted')
+
+    [rate_limit, retrying, exhausted] = handler.events
+    assert rate_limit['event'] == 'Rate limit event'
+    assert rate_limit['level'] == 'debug'
+    assert rate_limit['remaining'] == 12
+    assert rate_limit['component'] == 'github-async'
+    assert retrying['event'] == "Retrying dispatch after RuntimeError('boom')"
+    assert retrying['level'] == 'warning'
+    assert retrying['attempt'] == 2
+    assert exhausted['event'] == 'Retries exhausted'
+    assert 'ValueError: nope' in exhausted['exception']

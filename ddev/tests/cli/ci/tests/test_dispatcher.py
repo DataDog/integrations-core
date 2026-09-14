@@ -64,14 +64,9 @@ from ddev.utils.github_async.models import (
     WorkflowRun,
 )
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
-from tests.cli.ci.tests.helpers import (
-    invalid_response_error,
-    jobs_reported,
-    make_batch,
-    make_job,
-)
-from tests.helpers.github_async import FakeAsyncGitHubClient
-from tests.helpers.monitoring import RecordingSink
+from tests.cli.ci.tests.helpers import invalid_response_error, jobs_reported, make_batch, make_job
+from tests.helpers.github_async import DEFAULT_COMMENT_ID, DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
 
 # Every test here runs a Dispatcher to completion, and `on_finalize` writes the run summary. Without
 # this the reports land in the real job summary whenever the suite runs inside a workflow.
@@ -99,6 +94,7 @@ def build_bus(
     max_timeout: float = 30,
 ) -> Dispatcher:
     """A Dispatcher over the three real tasks, so the subscriptions under test are production's."""
+    monitoring = MonitoringRuntime()
     runner = TaskTestRunner(
         "test-runner",
         client,  # type: ignore[arg-type]
@@ -113,12 +109,16 @@ def build_bus(
             poll_interval_seconds=0.0,
         ),
         artifact_client=client,  # type: ignore[arg-type]
+        monitor=monitoring.component('test-runner'),
     )
-    gatherer = TaskTestGatherer("test-gatherer", tmp_path / "results", batches)
+    gatherer = TaskTestGatherer(
+        "test-gatherer", tmp_path / "results", batches, monitor=monitoring.component('test-gatherer')
+    )
     reporter = TaskRunReporter(
         "run-reporter",
         client,  # type: ignore[arg-type]
         RunReporterOptions(owner=CONTEXT.owner, repo=CONTEXT.repo, pr_number=pr_number),
+        monitor=monitoring.component('run-reporter'),
     )
     return Dispatcher(
         batches=batches,
@@ -128,6 +128,7 @@ def build_bus(
         reporter=reporter,
         max_timeout=max_timeout,
         grace_period=0.2,
+        monitor=monitoring.component('dispatcher'),
     )
 
 
@@ -225,8 +226,10 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
             200, json={"id": 123, "status": "completed", "conclusion": "success", "html_url": run_url}
         )
 
-    def make_client(token: str, *, rate_limiter: InstrumentedAsyncLimiter) -> AsyncGitHubClient:
-        return AsyncGitHubClient(token, rate_limiter=rate_limiter, transport=httpx.MockTransport(handle))
+    def make_client(
+        token: str, *, rate_limiter: InstrumentedAsyncLimiter, logger: logging.Logger | None = None
+    ) -> AsyncGitHubClient:
+        return AsyncGitHubClient(token, rate_limiter=rate_limiter, logger=logger, transport=httpx.MockTransport(handle))
 
     monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
     monkeypatch.setattr(rate_limiting, "event_logger", lambda _: events.append)
@@ -237,6 +240,7 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
         token="test-token",
         artifacts_path=tmp_path / "artifacts",
         output_path=tmp_path / "results",
+        monitoring=MonitoringRuntime(),
     )
 
     dispatcher.run()
@@ -632,7 +636,7 @@ def test_run_fields(context, fields):
     assert run_fields(context) == fields
 
 
-def test_message_fields_carry_batch_identity_only_where_a_message_has_one():
+def test_message_fields_scope_the_context_of_each_message():
     batch = make_batch()
     progress = BatchProgressUpdate(
         id="progress",
@@ -652,10 +656,42 @@ def test_message_fields_carry_batch_identity_only_where_a_message_has_one():
     )
     report = UpdatePRComment(id="report", revision=0, progress=DispatcherProgress(batches=(), done=True))
 
-    assert message_fields(batch) == {"batch_id": "batch-01"}
-    assert message_fields(progress) == {"batch_id": "batch-01", "run_id": 123}
-    assert message_fields(finished) == {"batch_id": "batch-01", "run_id": 123}
-    assert message_fields(report) == {}
+    assert message_fields(batch) == {
+        "message_type": "TestBatch",
+        "message_id": batch.id,
+        "batch_id": "batch-01",
+        "batch_job_count": 1,
+        "batch_integration_count": 1,
+        "batch_integrations": ["ntp"],
+    }
+    assert message_fields(progress) == {
+        "message_type": "BatchProgressUpdate",
+        "message_id": "progress",
+        "batch_id": "batch-01",
+        "run_id": 123,
+        "workflow_url": "https://example.com/run/123",
+        "batch_state": "running",
+        "workflow_conclusion": None,
+    }
+    assert message_fields(finished) == {
+        "message_type": "BatchFinished",
+        "message_id": "finished",
+        "batch_id": "batch-01",
+        "run_id": 123,
+        "workflow_url": "https://example.com/run/123",
+        "batch_job_count": 0,
+        "batch_state": "finished",
+        "workflow_status": "completed",
+        "workflow_conclusion": "success",
+        "timed_out": False,
+    }
+    # The aggregate report carries its own revision context, never a batch's identity.
+    assert message_fields(report) == {
+        "message_type": "UpdatePRComment",
+        "message_id": "report",
+        "revision": 0,
+        "done": True,
+    }
 
 
 def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, monkeypatch):
@@ -689,4 +725,66 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
     queued = [line for line in stream.getvalue().splitlines() if "Queued planned batches" in line]
     assert len(queued) == 1
     assert "component=dispatcher" in queued[0]
-    assert "batch_count=1" in queued[0]
+    assert "plan_batch_count=1" in queued[0]
+
+
+def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client, tmp_path, monkeypatch):
+    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", lambda token, rate_limiter=None, **kwargs: client)
+    job = make_job()
+    mock_job_result(client, job, "success")
+    handler = RecordingJsonHandler()
+    monitoring = MonitoringRuntime(console_handler=handler)
+    monitoring.set_run_fields(**run_fields(CONTEXT))
+
+    dispatcher = build_dispatcher(
+        batches=[make_batch(job)],
+        context=CONTEXT,
+        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
+        token="test-token",
+        artifacts_path=tmp_path / "artifacts",
+        output_path=tmp_path / "results",
+        monitoring=monitoring,
+    )
+
+    dispatcher.run()
+    monitoring.close()
+
+    received = [event for event in handler.events if event["event"] == "Message received"]
+    assert {event["message_type"] for event in received} >= {
+        "TestBatch",
+        "BatchProgressUpdate",
+        "UpdatePRComment",
+    }
+    assert all(event["message_id"] for event in received)
+    progress = next(event for event in received if event["message_type"] == "BatchProgressUpdate")
+    assert progress["batch_id"] == "batch-01"
+    assert progress["run_id"] == 123
+    assert progress["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
+    assert progress["batch_state"] in {"queued", "artifact_download"}
+
+    by_event = {event["event"]: event for event in handler.events}
+    dispatched = by_event["Dispatched batch"]
+    assert dispatched["batch_id"] == "batch-01"
+    assert dispatched["run_id"] == 123
+    assert dispatched["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
+
+    completed = by_event["Workflow completed"]
+    assert completed["batch_id"] == "batch-01"
+    assert completed["run_id"] == 123
+    assert completed["workflow_status"] == "completed"
+    assert completed["workflow_conclusion"] == "success"
+
+    # The gatherer runs in a worker thread: its logs still carry the batch the message described.
+    gathered = by_event["Gathering batch results"]
+    assert gathered["batch_id"] == "batch-01"
+    assert gathered["run_id"] == 123
+    assert gathered["batch_job_count"] == 1
+
+    comment = by_event["PR comment written"]
+    assert comment["message_type"] == "UpdatePRComment"
+    assert comment["message_id"]
+    assert comment["revision"] > 0
+    assert comment["done"] is True
+    assert comment["comment_id"] == DEFAULT_COMMENT_ID
+    assert comment["published"] is True
+    assert "batch_id" not in comment

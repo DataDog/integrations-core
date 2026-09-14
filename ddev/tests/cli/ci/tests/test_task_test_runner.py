@@ -9,6 +9,7 @@ import asyncio
 import base64
 import gzip
 import json
+import logging
 import secrets
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
 )
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -112,6 +114,7 @@ def make_runner(
     pytest_args: str = "",
     is_fork: bool = False,
     artifact_client: FakeAsyncGitHubClient | None = None,
+    handler: logging.Handler | None = None,
 ) -> TaskTestRunner:
     options = TestRunnerOptions(
         owner="DataDog",
@@ -130,6 +133,7 @@ def make_runner(
         client=client,  # type: ignore[arg-type]
         options=options,
         artifact_client=artifact_client or client,  # type: ignore[arg-type]
+        monitor=make_monitor('test-runner', handler=handler),
     )
     runner.bus = RecordingBus()  # type: ignore[assignment]
     return runner
@@ -783,7 +787,7 @@ async def test_an_unparsable_response_reason_is_a_single_bounded_line(tmp_path: 
 
 
 @pytest.mark.asyncio
-async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Path):
     """All invalid fields must be visible from a single response failure."""
     unparsable = ValidationError.from_exception_data(
         title="WorkflowJobsList",
@@ -804,7 +808,8 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", running_run())
     fake.mock_response("list_workflow_jobs", unparsable)
-    runner = make_runner(fake, tmp_path)
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
 
     with pytest.raises(FatalProcessingError, match="batch-err") as exc_info:
         await runner.process_message(make_batch())
@@ -814,14 +819,15 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     assert "WorkflowJobsList" in reason
     assert "See logs for details." in reason
     assert exc_info.value.__cause__ is unparsable
-    assert "listing workflow jobs" in caplog.text
-    assert "batch-err" in caplog.text
-    assert "run 123" in caplog.text
-    assert caplog.text.count("jobs.0.steps.1.status") == 1
-    assert "paused" in caplog.text
-    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in caplog.text
-    assert caplog.text.count("jobs.2.id") == 1
-    assert "Field required" in caplog.text
+    log_text = '\n'.join(event['event'] for event in handler.events)
+    assert "listing workflow jobs" in log_text
+    assert "batch-err" in log_text
+    assert "run 123" in log_text
+    assert log_text.count("jobs.0.steps.1.status") == 1
+    assert "paused" in log_text
+    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in log_text
+    assert log_text.count("jobs.2.id") == 1
+    assert "Field required" in log_text
 
 
 # ---------------------------------------------------------------------------
@@ -865,6 +871,23 @@ async def test_a_batch_that_failed_mid_poll_stays_cancellable(tmp_path: Path):
 
     await runner.cancel_dispatched_runs()
     assert [call.kwargs["run_id"] for call in fake.calls_to("cancel_workflow_run")] == [123]
+
+
+async def test_cancellation_reporting_identifies_the_batch_and_run_it_stops(tmp_path: Path):
+    """Cancellation logs identify the batch and workflow run being stopped."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("queued"), once=True)
+    fake.mock_response("get_workflow_run", RuntimeError("boom-mid-poll"), once=True)
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+
+    with pytest.raises(RuntimeError, match="boom-mid-poll"):
+        await runner.process_message(make_batch())
+
+    await runner.cancel_dispatched_runs()
+
+    cancelled = [event for event in handler.events if event["event"] == "Dispatched run cancelled"]
+    assert [(event["batch_id"], event["run_id"]) for event in cancelled] == [("batch-err", 123)]
 
 
 async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):
