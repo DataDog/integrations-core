@@ -3013,7 +3013,7 @@ def test_property_metrics_metric_filters(
 
     # hosts
     aggregator.assert_metric('vsphere.host.count', value=2, count=2, tags=base_tags_host)
-    # host2 is notResponding and in maintenance mode, and is still metered — not gated on state.
+    # host2 is notResponding and in maintenance mode, and still reports its count — not gated on state.
     aggregator.assert_metric(
         'vsphere.host.summary.hardware.numCpuCores', count=1, value=16, tags=base_tags_host, hostname='host1'
     )
@@ -3320,7 +3320,7 @@ def test_cpu_count_metrics_powered_off_vm(aggregator, realtime_instance, dd_run_
 
 
 def test_cpu_count_metrics_resource_filter(aggregator, realtime_instance, dd_run_check, service_instance):
-    """A VM excluded by `resource_filters` is not metered, so a filtered-out resource is never billed.
+    """A VM excluded by `resource_filters` never reports a CPU count.
 
     The guarantee is positional rather than explicit: `refresh_infrastructure_cache` rejects filtered
     resources with a `continue` that precedes the CPU count block, so they never reach the cache at all.
@@ -3376,7 +3376,7 @@ def test_cpu_count_metrics_missing_property(
 def test_cpu_count_metrics_no_resolved_hostname(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
 ):
-    """A resource with no hostname is not metered: the count would land on the Agent's own host."""
+    """A resource with no hostname reports no count: it would land on the Agent's own host."""
     caplog.set_level(logging.WARNING)
     realtime_instance['use_guest_hostname'] = True
     # vCenter reports an empty guest.hostName for a VM that is not running VMware Tools.
