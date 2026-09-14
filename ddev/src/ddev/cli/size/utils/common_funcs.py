@@ -575,7 +575,8 @@ def save_markdown_diff(
         lines.append("| " + " | ".join(headers) + " |")
         lines.append("| " + " | ".join("---" for _ in headers) + " |")
         for (name, type_), sizes in sorted(
-            pivoted.items(), key=lambda item: sum(abs(size) for size in item[1].values()), reverse=True
+            pivoted.items(),
+            key=lambda item: (-sum(abs(size) for size in item[1].values()), item[0][0], item[0][1]),
         ):
             row = [name, versions[(name, type_)], type_]
             row.extend(_signed_human_size(sizes.get(platform, 0)) for platform in sorted_platforms)

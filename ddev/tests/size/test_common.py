@@ -486,6 +486,27 @@ def test_save_markdown_diff_orders_details_by_largest_change():
     )
 
 
+def test_save_markdown_diff_breaks_ties_by_name_and_type():
+    mock_app = MagicMock()
+    mock_file = mock_open()
+
+    modules = [
+        {"Name": "module_b", "Size_Bytes": 500, "Size": "+500 B", "Type": "Dependency", "Platform": "linux-x86_64"},
+        {"Name": "module_a", "Size_Bytes": -500, "Size": "-500 B", "Type": "Integration", "Platform": "linux-x86_64"},
+        {"Name": "module_a", "Size_Bytes": 500, "Size": "+500 B", "Type": "Dependency", "Platform": "linux-x86_64"},
+    ]
+
+    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
+        save_markdown_diff(mock_app, modules, "output.md", ["linux-x86_64"], False)
+
+    written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
+    assert (
+        written_content.index("| module_a |  | Dependency |")
+        < written_content.index("| module_a |  | Integration |")
+        < written_content.index("| module_b |")
+    )
+
+
 def test_save_markdown_diff_no_changes_collapses_details():
     mock_app = MagicMock()
     mock_file = mock_open()
