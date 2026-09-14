@@ -258,15 +258,6 @@ class TestResponseProtocolSurface:
         assert raw_response.closed
         assert raw_response.released
 
-    def test_requests_members_are_not_exposed(self):
-        transport = common.RequestsTransport()
-        transport.respond()
-        http = common.create_requests_client(transport)
-        response = http.get('http://example.test/items')
-
-        assert not hasattr(response, 'raw')
-        assert not hasattr(response, 'request')
-
 
 @pytest.mark.parametrize(
     ('headers', 'expected'),

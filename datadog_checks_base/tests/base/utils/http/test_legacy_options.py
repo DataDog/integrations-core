@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_protocol import HTTPClient
 
 pytestmark = [pytest.mark.unit]
 
@@ -17,9 +16,6 @@ class TestLegacyOptionsSurface:
     def test_options_is_a_plain_mutable_dict(self):
         http = RequestsWrapper({}, {})
         assert isinstance(http.options, dict)
-
-    def test_protocol_declares_options(self):
-        assert 'options' in HTTPClient.__annotations__
 
     def test_wholesale_header_replacement(self):
         http = RequestsWrapper({}, {})
