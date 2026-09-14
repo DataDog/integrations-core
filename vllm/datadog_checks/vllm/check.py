@@ -13,6 +13,10 @@ from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmati
 from .metrics import GPU_METRIC_MAP, METRIC_MAP, RAY_GPU_METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
+def is_gpu_monitoring_enabled():
+    return is_affirmative(datadog_agent.get_config('gpu.enabled'))
+
+
 class vLLMCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
@@ -20,7 +24,7 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
 
     def get_default_config(self):
         metrics = [METRIC_MAP, RAY_METRIC_MAP]
-        if is_affirmative(datadog_agent.get_config('gpu.enabled')):
+        if is_gpu_monitoring_enabled():
             metrics.extend([GPU_METRIC_MAP, RAY_GPU_METRIC_MAP])
 
         return {
