@@ -500,7 +500,7 @@ dynamo_request_plane_send_seconds_count 5
 dynamo_request_plane_send_seconds_sum 0.012
 # HELP dynamo_tokio_worker_busy_ratio Fraction of time the Tokio worker is busy
 # TYPE dynamo_tokio_worker_busy_ratio gauge
-dynamo_tokio_worker_busy_ratio{worker="0"} 0.75
+dynamo_tokio_worker_busy_ratio{worker="0"} 750
 # HELP dynamo_transport_tcp_bytes_received_total TCP bytes received
 # TYPE dynamo_transport_tcp_bytes_received_total counter
 dynamo_transport_tcp_bytes_received_total 4096

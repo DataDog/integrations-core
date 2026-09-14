@@ -26,3 +26,15 @@ class DynamoCheck(OpenMetricsBaseCheckV2):
             'histogram_buckets_as_distributions': True,
             'collect_counters_with_distributions': True,
         }
+
+    def configure_scrapers(self):
+        super().configure_scrapers()
+
+        # Dynamo exposes this ratio as per-mille (0-1000); submit a fraction so its metadata unit is accurate.
+        self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.transformer_data[
+            'dynamo_tokio_worker_busy_ratio'
+        ] = (None, self._transform_worker_busy_ratio)
+
+    def _transform_worker_busy_ratio(self, _metric, sample_data, _runtime_data):
+        for sample, tags, hostname in sample_data:
+            self.gauge('tokio.worker_busy_ratio', sample.value / 1000, tags=tags, hostname=hostname)
