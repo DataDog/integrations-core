@@ -42,7 +42,7 @@ def event_logger(logger: logging.Logger) -> Callable[[RateLimitEvent], None]:
 
 
 class RateLimiterConfig(BaseModel):
-    """Rate limit configuration for a single limiter tier."""
+    """A local bucket with an initial ``max_rate`` burst, refilled over ``time_period``."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -51,26 +51,27 @@ class RateLimiterConfig(BaseModel):
 
     @property
     def hourly_rate(self) -> float:
-        """Effective rate expressed in requests per hour."""
+        """Sustained refill rate expressed in requests per hour, excluding the initial burst."""
         return self.max_rate / self.time_period * SECONDS_PER_HOUR
 
 
 class RateLimiterFactoryConfig(BaseModel):
-    """Configuration for the Dispatcher's two-tier rate limiter factory.
+    """Configuration for the Dispatcher's shared rate limiter tiers.
 
-    Each tier defines its own max_rate and time_period. The combined hourly rate of
-    both tiers must not exceed total_hourly_max_rate.
+    The sum of sustained refill rates must not exceed ``total_hourly_max_rate``.
+    Initially full buckets allow additional bursts, so this is not a hard request
+    count in a rolling hour. The shared governor honors GitHub's actual budget and pauses.
 
-    Default values:
-    - default: 360 req/hr — typical integrations
-    - slow: 120 req/hr — integrations with long-running tests
-    - total_hourly_max_rate: 1,500 req/hr — = 15k octo-sts budget / 10 max concurrent runs
+    Default refill rates are 360/hour for polling, 120/hour for slow integrations,
+    and 1,000/hour for artifacts. The 1,500/hour ceiling is a per-run sharing guideline
+    based on a 15,000/hour installation budget and ten concurrent runs.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     default: RateLimiterConfig = RateLimiterConfig(max_rate=360.0)
     slow: RateLimiterConfig = RateLimiterConfig(max_rate=120.0)
+    artifacts: RateLimiterConfig = RateLimiterConfig(max_rate=1000.0)
     total_hourly_max_rate: float = Field(default=1500.0, gt=0)
     slow_integrations: frozenset[str] = frozenset()
     reserve_fraction: float = Field(default=0.15, gt=0, le=1)
@@ -78,10 +79,11 @@ class RateLimiterFactoryConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_combined_rate(self) -> RateLimiterFactoryConfig:
-        combined = self.default.hourly_rate + self.slow.hourly_rate
+        combined = self.default.hourly_rate + self.slow.hourly_rate + self.artifacts.hourly_rate
         if combined > self.total_hourly_max_rate:
             raise ValueError(
-                f"default ({self.default.hourly_rate} req/hr) + slow ({self.slow.hourly_rate} req/hr) = "
+                f"default ({self.default.hourly_rate} req/hr) + slow ({self.slow.hourly_rate} req/hr) + "
+                f"artifacts ({self.artifacts.hourly_rate} req/hr) = "
                 f"{combined} exceeds total_hourly_max_rate ({self.total_hourly_max_rate} req/hr)"
             )
         return self
@@ -90,10 +92,8 @@ class RateLimiterFactoryConfig(BaseModel):
 class RateLimiterFactory:
     """Creates and vends rate limiters for the Dispatcher.
 
-    Holds exactly two shared InstrumentedAsyncLimiter instances — one for
-    the default tier and one for the slow tier. All processors in a dispatcher
-    run share the same factory, so they compete for the same token buckets and
-    the per-run combined rate stays bounded.
+    One bucket per tier, shared across the run. All tiers share the same governor
+    so a provider pause or exhausted budget constrains every kind of request.
     """
 
     def __init__(
@@ -120,6 +120,12 @@ class RateLimiterFactory:
             on_event=on_event,
             budget_governor=budget_governor,
             name="slow",
+        )
+        self.artifacts = InstrumentedAsyncLimiter(
+            AsyncLimiter(cfg.artifacts.max_rate, cfg.artifacts.time_period),
+            on_event=on_event,
+            budget_governor=budget_governor,
+            name="artifacts",
         )
 
     def get_limiter(self, integrations: frozenset[str]) -> InstrumentedAsyncLimiter:

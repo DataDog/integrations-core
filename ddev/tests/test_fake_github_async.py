@@ -13,10 +13,11 @@ from typing import Any
 
 import httpx
 import pytest
+from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
-from ddev.utils.rate_limiting import RelaxedRateLimits
+from ddev.utils.rate_limiting import InstrumentedAsyncLimiter, RelaxedRateLimits
 from tests.cli.ci.tests.helpers import comment_page
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.utils.github_async.helpers import first_page
@@ -311,6 +312,7 @@ async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubCl
 # here: `test_every_mirror_is_in_the_call_table` fails when one is added without being registered,
 # which is the case a hand-written test per method cannot catch.
 SHUTDOWN_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
+VIEW_RATE_LIMITER = InstrumentedAsyncLimiter(AsyncLimiter(10))
 
 MIRROR_CALLS = [
     ('get_pull_request', lambda f, _: f.get_pull_request('o', 'r', 5), {'pull_number': 5}),
@@ -340,6 +342,7 @@ MIRROR_CALLS = [
         {'workflow_id': 'wf.yml'},
     ),
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    ('with_rate_limit', lambda f, _: f.with_rate_limit(VIEW_RATE_LIMITER), {'rate_limiter': VIEW_RATE_LIMITER}),
     ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
     (
         'create_pr_review_comment',

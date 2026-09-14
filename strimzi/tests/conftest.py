@@ -16,6 +16,8 @@ from datadog_checks.strimzi import StrimziCheck
 
 from .common import HERE, KUBERNETES_VERSION, STRIMZI_VERSION
 
+CHECK_ROOT = os.path.dirname(HERE)
+
 NAMESPACE = "kafka"
 CLUSTER_OPERATOR_DEPLOYMENT = "strimzi-cluster-operator"
 ENTITY_OPERATOR_DEPLOYMENT = "my-cluster-entity-operator"
@@ -153,8 +155,13 @@ def dd_environment():
 
             metadata = {
                 "agent_type": "kubernetes",
-                "kubernetes": {"kubeconfig": kubeconfig},
+                "kubernetes": {
+                    "kubeconfig": kubeconfig,
+                    "auto_conf": os.path.join(CHECK_ROOT, "datadog_checks", "strimzi", "data", "auto_conf.yaml"),
+                },
             }
+
+            save_state("strimzi_kubeconfig", kubeconfig)
 
             yield instance, metadata
 
@@ -162,6 +169,11 @@ def dd_environment():
 @pytest.fixture()
 def check():
     return lambda instance: StrimziCheck("strimzi", {}, [instance])
+
+
+@pytest.fixture(scope="session")
+def strimzi_kubeconfig():
+    return get_state("strimzi_kubeconfig")
 
 
 def mock_http_responses(url, **_params):

@@ -1,0 +1,1 @@
+Add a buffered Datadog log handler to the monitoring runtime.

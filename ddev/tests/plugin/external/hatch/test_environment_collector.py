@@ -12,7 +12,7 @@ from ddev.plugin.external.hatch.environment_collector import DatadogChecksEnviro
 
 def tokenize(command):
     """Tokenize a generated command the way a POSIX shell does (Hatch runs scripts with ``shell=True``)."""
-    return shlex.split(command.replace('{verbosity:flag:-1}', '-q'))
+    return shlex.split(command)
 
 
 @pytest.fixture

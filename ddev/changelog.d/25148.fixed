@@ -1,0 +1,1 @@
+Give Dispatcher artifact requests a configurable API allowance separate from polling while sharing GitHub backpressure.
