@@ -55,10 +55,12 @@ REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 100 * 1024 * 1024 * 1024
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
 
 
-# The v2 page contract: a top-level numeric ``contract_version``, the run serialized under
-# the contract field name ``crawl_id``, no ``batch_index`` in the body (the page index lives in
-# the upload URL path and page metadata), and a bare ``data`` array of row objects.
-REMOTE_QUERY_ARTIFACT_VERSION = 2
+# The RFC-format page contract, labeled contract_version 1: a top-level numeric
+# ``contract_version``, the run serialized under the contract field name ``crawl_id``, no
+# ``batch_index`` in the body (the page index lives in the upload URL path and page metadata),
+# and a bare ``data`` array of row objects. The number is RFC-owner-assigned, not ours to shift:
+# the POC emits the RFC format everywhere and claims no v2; the shape is unchanged.
+REMOTE_QUERY_ARTIFACT_VERSION = 1
 
 
 # The bytes appended after the last row: close the bare ``data`` array and the document.
@@ -316,8 +318,8 @@ def page_prefix(
     executing host's Agent-reported identity, always stamped so the console can attribute
     a run to the agent that produced its pages. It is host identity, not job data, so it is
     threaded from the executing check instance, never the delivery. The page index is
-    metadata-only in v2: it reaches the upload URL path and ``PageUploadMetadata``, not
-    the serialized body.
+    metadata-only in the RFC format labeled contract_version 1: it reaches the upload URL path
+    and ``PageUploadMetadata``, not the serialized body.
     """
     head = (
         '{"contract_version":%d,"crawl_id":%s,"task_id":%s,"record_offset":%d,"agent_hostname":%s,'

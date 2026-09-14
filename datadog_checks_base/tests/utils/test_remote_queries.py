@@ -21,7 +21,7 @@ def delivery():
         {
             'runId': 'run-1',
             'taskId': 'task-1',
-            'artifactVersion': 2,
+            'artifactVersion': 1,
             'uploadId': 'upload-1',
             'baseUrl': 'https://intake.example',
             'limits': {
@@ -103,7 +103,7 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
         if include_schema:
             expected_keys.append('schema')
         assert list(envelope) == expected_keys + ['data']
-        assert envelope['contract_version'] == rq.REMOTE_QUERY_ARTIFACT_VERSION == 2
+        assert envelope['contract_version'] == rq.REMOTE_QUERY_ARTIFACT_VERSION == 1
         assert envelope['crawl_id'] == delivery.run_id
         assert envelope['task_id'] == delivery.task_id
         assert envelope['agent_hostname'] == AGENT_HOSTNAME
@@ -416,7 +416,7 @@ def test_target_requires_one_complete_selector(target):
         (('target', 'port'), '5432'),
         (('resultDelivery',), None),
         (('resultDelivery', 'token'), 'scoped-upload-token'),
-        (('resultDelivery', 'artifactVersion'), 1),
+        (('resultDelivery', 'artifactVersion'), 2),
         (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
         (('resultDelivery', 'limits', 'maxResultBytes'), rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
         (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
