@@ -76,6 +76,7 @@ class TestRunnerOptions:
     ref: str
     base_sha: str
     checkout_sha: str
+    concurrency_key: str
     artifacts_base_path: Path
     branch: str = ''
     is_fork: bool = False
@@ -328,6 +329,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         inputs = {
             "batch_id": message.batch_id,
             "checkout_sha": self._options.checkout_sha,
+            # Keys the workflow's cancellation group; see `DispatcherContext.concurrency_key`.
+            "concurrency_key": self._options.concurrency_key,
             # The batch is dispatched at the default branch, so its own context describes master.
             # These two say which commit the results belong to, for CI Visibility and the check run.
             "head_sha": self._options.base_sha,
