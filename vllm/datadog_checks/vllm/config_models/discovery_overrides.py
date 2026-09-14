@@ -8,5 +8,14 @@
 # candidate generation. `default` is the generated generator; call it to reuse
 # the spec-driven candidates, or ignore it to replace them entirely.
 #
-# def candidates(service, default):
-#     yield from default(service)
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+from datadog_checks.base import is_affirmative
+
+
+def candidates(service, default):
+    if is_affirmative(datadog_agent.get_config('gpu.enabled')):
+        yield from default(service)

@@ -32,6 +32,9 @@ METRIC_MAP = {
     'vllm:request_success': 'request.success',
     'vllm:avg_prompt_throughput_toks_per_s': 'avg.prompt.throughput.toks_per_s',
     'vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
+}
+
+GPU_METRIC_MAP = {
     'vllm:estimated_flops_per_gpu': 'estimated_flops_per_gpu',
     'vllm:external_prefix_cache_hits': 'external_prefix_cache.hits',
     'vllm:external_prefix_cache_queries': 'external_prefix_cache.queries',
@@ -66,6 +69,9 @@ RAY_METRIC_MAP = {
     'ray_vllm:request_success': 'request.success',
     'ray_vllm:avg_prompt_throughput_toks_per_s': 'avg.prompt.throughput.toks_per_s',
     'ray_vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
+}
+
+RAY_GPU_METRIC_MAP = {
     'ray_vllm:estimated_flops_per_gpu': 'estimated_flops_per_gpu',
     'ray_vllm:external_prefix_cache_hits': 'external_prefix_cache.hits',
     'ray_vllm:external_prefix_cache_queries': 'external_prefix_cache.queries',
