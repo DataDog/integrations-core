@@ -84,7 +84,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
             )
 
-        self._runtime_variables = self._capture_snapshot_inputs(checkpoint_manager.root)
+        self._runtime_variables = await self._capture_snapshot_inputs(checkpoint_manager.root)
 
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
@@ -123,7 +123,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             if entry.phase in completed:
                 self.submit_message(PhaseTrigger(id=f"{entry.phase}_resumed", phase_id=entry.phase))
 
-    def _capture_snapshot_inputs(self, run_dir: Path) -> RuntimeVariables:
+    async def _capture_snapshot_inputs(self, run_dir: Path) -> RuntimeVariables:
         """Pin every snapshot input to a per-run copy and repoint its variable at it."""
         variables, captured = snapshot_path_inputs(
             self._resolved_flow, self._runtime_variables, run_dir, resume=self._resume
@@ -135,6 +135,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                     item.name,
                     item.path,
                 )
+                await self._callbacks.fire_input_diverged(item.name, item.path)
         return variables
 
     async def on_message_received(self, message: BaseMessage) -> None:
