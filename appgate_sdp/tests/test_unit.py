@@ -39,8 +39,6 @@ def test_check_appgate_sdp(dd_run_check, aggregator, instance, fake_http):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('appgate_sdp.openmetrics.health', ServiceCheck.OK)
 
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     fake_http.assert_all_responses_consumed()
 
 

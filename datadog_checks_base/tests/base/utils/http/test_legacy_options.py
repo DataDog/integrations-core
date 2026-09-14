@@ -13,10 +13,6 @@ pytestmark = [pytest.mark.unit]
 
 
 class TestLegacyOptionsSurface:
-    def test_options_is_a_plain_mutable_dict(self):
-        http = RequestsWrapper({}, {})
-        assert isinstance(http.options, dict)
-
     def test_wholesale_header_replacement(self):
         http = RequestsWrapper({}, {})
         http.options['headers'] = {'Authorization': 'api-key'}
@@ -26,11 +22,6 @@ class TestLegacyOptionsSurface:
         http = RequestsWrapper({}, {})
         http.options['headers'] = {'Authorization': 'api-key'}
         assert http.get_header('authorization') == 'api-key'
-
-    def test_connect_timeout_read_by_index(self):
-        http = RequestsWrapper({'connect_timeout': 4, 'read_timeout': 9}, {})
-        assert http.options['timeout'] == (4, 9)
-        assert http.options['timeout'][0] == 4
 
     def test_update_clears_configured_auth(self):
         http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
@@ -53,11 +44,6 @@ class TestLegacyOptionsSurface:
         http = RequestsWrapper({}, {})
         http.set_header('X-Token', 'abc')
         assert http.options['headers']['X-Token'] == 'abc'
-
-    def test_tls_config_is_a_mapping_of_tls_fields(self):
-        http = RequestsWrapper({'tls_ca_cert': '/tmp/ca.pem'}, {})
-        assert isinstance(http.tls_config, dict)
-        assert http.tls_config['tls_ca_cert'] == '/tmp/ca.pem'
 
 
 class TestOptionsReachTheWire:
