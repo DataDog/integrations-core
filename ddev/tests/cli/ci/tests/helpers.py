@@ -9,6 +9,8 @@ import asyncio
 import re
 from collections.abc import Iterable, Sequence
 
+from pydantic import ValidationError
+
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import (
@@ -105,6 +107,21 @@ def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
         job_list=job_list,
         jobs_count=len(job_list),
         integrations=sorted({job.target for job in job_list}),
+    )
+
+
+def invalid_response_error() -> ValidationError:
+    """A jobs-response validation error for an unsupported step status."""
+    return ValidationError.from_exception_data(
+        title="WorkflowJobsList",
+        line_errors=[
+            {
+                "type": "enum",
+                "loc": ("jobs", 0, "steps", 1, "status"),
+                "input": "paused",
+                "ctx": {"expected": "'queued', 'in_progress', 'completed' or 'pending'"},
+            }
+        ],
     )
 
 

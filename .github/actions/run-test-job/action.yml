@@ -55,6 +55,10 @@ inputs:
     description: "Test context, reported to CI Visibility and used to pick the E2E flags"
     required: false
     default: "standard"
+  additional_tags:
+    description: "Additional comma-separated CI Visibility job tags"
+    required: false
+    default: ""
   is_fork:
     description: "Whether the code under test comes from a fork. Turns off anything needing a credential"
     required: false
@@ -112,6 +116,7 @@ runs:
         INPUT_JOB_NAME: ${{ inputs.job_name }}
         INPUT_PYTEST_ARGS: ${{ inputs.pytest_args }}
         INPUT_CONTEXT: ${{ inputs.context }}
+        INPUT_ADDITIONAL_TAGS: ${{ inputs.additional_tags }}
         # The caller resolved the image, so the script's platform branch is given the same value on
         # both sides and cannot pick a different one.
         INPUT_AGENT_IMAGE: ${{ inputs.agent_image }}

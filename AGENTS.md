@@ -9,6 +9,8 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Maintaining This File](#maintaining-this-file)
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
+- [Service Checks](#service-checks)
+- [Manifest Files](#manifest-files)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -91,6 +93,24 @@ Don't modify files in `**/config_models/*.py` directly. To change those files, e
 ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
+
+## Service Checks
+
+**Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
+
+New integrations should not add their own service checks. Use metrics and metric-based monitors instead.
+
+The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
+## Manifest Files
+
+**Applicable to:** newly created integrations. Existing integrations that already have a `manifest.json` are exempt.
+
+New integrations must not include a `manifest.json`. Instead, add the following to `.ddev/config.toml`, keyed by the integration's directory name:
+
+- Display name under `[overrides.display-name]`.
+- Metrics prefix (matching the prefix used in `metadata.csv`) under `[overrides.metrics-prefix]`.
+- Supported platforms under `[overrides.manifest.platforms]`.
 
 ## Development Workflow
 

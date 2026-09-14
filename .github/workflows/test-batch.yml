@@ -38,8 +38,13 @@ on:
         required: true
         type: string
       checkout_sha:
-        description: "Ref the batch tests, refs/pull/<n>/merge for a pull request"
+        description: "Immutable commit the batch tests: the pull request's merge commit, or the commit itself"
         required: true
+        type: string
+      concurrency_key:
+        description: "What the batch cancels against: pr-<number> for a pull request, the commit SHA for a branch run"
+        required: false
+        default: ""
         type: string
       head_sha:
         description: "Commit the results belong to. The pull request's head"
@@ -76,14 +81,10 @@ on:
 
 permissions: {}
 
-# A new revision of a pull request dispatches the same batch ids against the same
-# refs/pull/<n>/merge, so its batches land in the previous revision's groups and cancel them.
-# `head_sha` would give every revision a group of its own and cancel nothing; a commit run keys on
-# its own SHA, so master never cancels itself. What the group cannot see, the Dispatcher's
-# `cancel_dispatched_runs` reaps: a cancellation or a closed pull request with no follow-up push,
-# and a plan that shrank, whose old higher-numbered batches have no successor here.
+# PR revisions have different checkout SHAs, so `concurrency_key` keeps their batch groups stable.
+# Older callers fall back to checkout identity; Dispatcher cleanup covers runs the groups cannot.
 concurrency:
-  group: test-batch-${{ inputs.checkout_sha }}-${{ inputs.batch_id }}
+  group: test-batch-${{ inputs.concurrency_key || inputs.checkout_sha }}-${{ inputs.batch_id }}
   cancel-in-progress: true
 
 defaults:
@@ -147,7 +148,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=test-batch/${BATCH_ID}" \
+            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
             -f "state=pending" \
             -f "description=Running ${JOB_COUNT} job(s)" \
             -f "target_url=${RUN_URL}" \
@@ -187,8 +188,8 @@ jobs:
           persist-credentials: false
 
       # Datadog's git variables take precedence over the CI provider's, which is the only way to stop
-      # this run being attributed to master. `head_sha` and not `checkout_sha`: the latter is
-      # refs/pull/<n>/merge, which is not a SHA.
+      # this run being attributed to master. `head_sha` and not `checkout_sha`: the latter is the
+      # pull request's merge commit, whose results belong to the head revision.
       - name: Attribute results to the tested commit
         env:
           HEAD_SHA: ${{ inputs.head_sha }}
@@ -213,7 +214,7 @@ jobs:
         id: dd-sts
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
-          policy: integrations-test-target-api-key
+          policy: integrations-dispatcher-api-key
 
       - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -248,6 +249,7 @@ jobs:
           minimum_base_package: ${{ matrix.minimum_base_package }}
           pytest_args: ${{ inputs.pytest_args }}
           context: ${{ inputs.context }}
+          additional_tags: "dispatcher.branch:${{ inputs.branch }},dispatcher.context:${{ inputs.context }},dispatcher.commit:${{ inputs.head_sha }}"
           is_fork: "false"
           dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
           # A rate-limit lift for the ~70 api.github.com calls `ddev validate licenses` makes, not an
@@ -418,7 +420,7 @@ jobs:
           esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=test-batch/${BATCH_ID}" \
+            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
             -f "state=${state}" \
             -f "description=${description}" \
             -f "target_url=${RUN_URL}" \

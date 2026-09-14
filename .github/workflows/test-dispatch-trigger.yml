@@ -1,0 +1,25 @@
+name: Test Dispatch Trigger
+
+# Completion signal for the Test Dispatch receiver, which watches for successful completed
+# runs of this workflow by name and then plans and runs the pull request's tests. Reruns
+# start another attempt. This workflow carries no privileges and runs nothing from the PR.
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions: {}
+
+jobs:
+  trigger:
+    name: Trigger the test dispatch
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Trigger only
+        run: echo "The Test Dispatch receiver runs from this workflow's completion."
