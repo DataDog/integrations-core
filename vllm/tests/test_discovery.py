@@ -28,6 +28,8 @@ def test_openmetrics_endpoint_candidates_prioritize_vllm_and_dynamo_ports() -> N
         'http://127.0.0.1:8081/metrics',
         'http://127.0.0.1:7000/metrics',
     ]
+    assert all(instance['histogram_buckets_as_distributions'] for instance in instances)
+    assert all(instance['collect_counters_with_distributions'] for instance in instances)
 
 
 def test_discovery_is_disabled_without_gpu_monitoring() -> None:

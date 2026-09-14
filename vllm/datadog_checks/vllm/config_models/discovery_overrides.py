@@ -18,4 +18,8 @@ from datadog_checks.base import is_affirmative
 
 def candidates(service, default):
     if is_affirmative(datadog_agent.get_config('gpu.enabled')):
-        yield from default(service)
+        for config in default(service):
+            instance = config['instances'][0]
+            instance['histogram_buckets_as_distributions'] = True
+            instance['collect_counters_with_distributions'] = True
+            yield config
