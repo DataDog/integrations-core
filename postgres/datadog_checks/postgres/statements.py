@@ -149,7 +149,7 @@ def _row_key(row):
     return row['query_signature'], row['datname'], row['rolname']
 
 
-def _merge_summary_stats(acc, row, acc_weight, row_weight):
+def _merge_summary_stats(acc: dict, row: dict, acc_weight: float, row_weight: float) -> None:
     """Fold the summary statistics of ``row`` into ``acc``, in place."""
     if 'min_plan_time' in row:
         acc['min_plan_time'] = min(acc.get('min_plan_time', row['min_plan_time']), row['min_plan_time'])
@@ -167,14 +167,14 @@ def _merge_summary_stats(acc, row, acc_weight, row_weight):
             acc[col] = (acc.get(col, row[col]) * acc_weight + row[col] * row_weight) / total_weight
 
 
-def _merge_rows_by_signature(rows):
+def _merge_rows_by_signature(rows: list[dict]) -> list[dict]:
     """Merge rows sharing a signature, consuming ``rows``.
 
     compute_derivative_rows collapses duplicates too, but only by summing, and a sum of minimums or
     of averages describes nothing. Rows therefore reach it already merged, each summary statistic
     combined with the operator that matches what it measures.
     """
-    merged = {}
+    merged: dict[tuple, dict] = {}
     for row in rows:
         key = _row_key(row)
         existing = merged.get(key)

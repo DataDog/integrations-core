@@ -89,7 +89,7 @@ def pgss_key(row: dict) -> PgssKey:
     return row['queryid'], row['dbid'], row['userid']
 
 
-def merge_summary_stats(acc: dict, row: dict, acc_weight: float, row_weight: float) -> None:
+def _merge_summary_stats(acc: dict, row: dict, acc_weight: float, row_weight: float) -> None:
     """Fold *row*'s summary statistics into *acc*, in place.
 
     Extremes combine exactly. The mean and standard deviation are averaged in proportion to how much
@@ -441,7 +441,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
             # Weights are read before the counters are summed, so they are the two rows' own
             # interval call counts rather than a running total.
-            merge_summary_stats(existing, row, existing.get('calls', 0), row.get('calls', 0))
+            _merge_summary_stats(existing, row, existing.get('calls', 0), row.get('calls', 0))
             for col in PG_STAT_STATEMENTS_COUNTER_COLUMNS:
                 if col in row:
                     existing[col] = existing.get(col, 0) + row[col]
