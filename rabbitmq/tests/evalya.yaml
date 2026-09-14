@@ -1,0 +1,47 @@
+version: "1"
+
+# RabbitMQ fixtures for the rabbitmq check and the OTel rabbitmqreceiver. Both
+# scrape the management HTTP API (:15672) of a real broker.
+tasks:
+  # Plain management-enabled broker (mirrors the existing docker-compose.yaml).
+  - id: rabbitmq-standalone
+    task: ./compose/docker-compose.yaml@rabbitmq
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "15672"
+      evalya.io/provides.RABBITMQ_USER: guest
+      evalya.io/provides.RABBITMQ_PASSWORD: guest
+    env:
+      - name: RABBITMQ_VERSION
+        value: "4.0"
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+
+  # Full metric-coverage fixture: a real management-enabled broker driven by a
+  # continuous PerfTest workload (publish/consume/ack) plus a churn sidecar
+  # (durable queue/exchange declare+delete, connection/channel churn, unroutable
+  # messages), so every node.* and message.* metric the OTel<->DD mappings need
+  # reports a non-trivial value. Presents on 15672 like the standalone broker.
+  # See ./compose/full-coverage.compose and ./activity-gen.py.
+  - id: rabbitmq-full
+    task: ./compose/full-coverage.compose@rabbitmq
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "15672"
+      evalya.io/provides.RABBITMQ_USER: guest
+      evalya.io/provides.RABBITMQ_PASSWORD: guest
+    env:
+      - name: RABBITMQ_VERSION
+        value: "4.0"
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
