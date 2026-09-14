@@ -85,7 +85,7 @@ def remote_query_request(pg_instance, query, include_schema=False, **limits):
         'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 2,
+            'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
             'limits': {
@@ -134,7 +134,7 @@ def test_remote_query_produces_json_page_with_real_schema(integration_check, pg_
     pages = client.pages()
     assert list(pages) == [0]
     page = json.loads(pages[0])
-    assert page['contract_version'] == 2
+    assert page['contract_version'] == 1
     assert page['crawl_id'] == RUN_ID
     assert page['task_id'] == TASK_ID
     assert 'batch_index' not in page
