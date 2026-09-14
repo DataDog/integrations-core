@@ -14,9 +14,16 @@ from datadog_checks.vllm import vLLMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
+ORIGINAL_GET_CONFIG = vllm_check.datadog_agent.get_config
+
 
 def get_agent_config(gpu_enabled):
-    return lambda key: gpu_enabled if key == 'gpu.enabled' else None
+    def get_config(key):
+        if key == 'gpu.enabled':
+            return gpu_enabled
+        return ORIGINAL_GET_CONFIG(key)
+
+    return get_config
 
 
 @pytest.fixture(autouse=True)
