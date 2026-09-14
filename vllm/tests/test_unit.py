@@ -9,8 +9,8 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.vllm import vLLMCheck
 from datadog_checks.vllm import check as vllm_check
+from datadog_checks.vllm import vLLMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
