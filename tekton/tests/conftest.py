@@ -2,17 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from contextlib import ExitStack
-from urllib.request import urlopen
 
 import pytest
 
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
+
+TEKTON_STARTUP_TIMEOUT = 600
 
 
 def _wait_for_resource(*, kind, name, condition, namespace=None, timeout="300s"):
@@ -23,11 +22,18 @@ def _wait_for_resource(*, kind, name, condition, namespace=None, timeout="300s")
     run_command(command)
 
 
-def wait_for_metric_families(endpoint: str, families: list[str]) -> None:
-    with urlopen(endpoint, timeout=5) as response:
-        metrics = response.read().decode("utf-8")
+def _wait_for_deployment(*, name, namespace, timeout=TEKTON_STARTUP_TIMEOUT):
+    """Wait for a deployment rollout to complete; its readiness probe must pass."""
+    run_command(
+        ["kubectl", "rollout", "status", f"deployment/{name}", "-n", namespace, f"--timeout={timeout}s"],
+        check=True,
+    )
 
-    missing = [family for family in families if family not in metrics]
+
+def wait_for_metric_families(service_proxy_path: str, families: list[str]) -> None:
+    result = run_command(["kubectl", "get", "--raw", service_proxy_path], capture="out", check=True)
+
+    missing = [family for family in families if family not in result.stdout]
     if missing:
         raise AssertionError("Tekton metric families are not available yet: {}".format(", ".join(missing)))
 
@@ -48,6 +54,12 @@ def setup_tekton():
 
     print("Waiting for Tekton Triggers to be ready...")
     _wait_for_resource(kind="tektontrigger", name="trigger", condition="Ready")
+
+    print("Waiting for Tekton Pipelines controller deployment to be ready...")
+    _wait_for_deployment(name="tekton-pipelines-controller", namespace="tekton-pipelines")
+
+    print("Waiting for Tekton Triggers controller deployment to be ready...")
+    _wait_for_deployment(name="tekton-triggers-controller", namespace="tekton-pipelines")
 
     resource_definitions = ["pipeline", "task"]
     actions = ["hello", "bye"]
@@ -72,39 +84,39 @@ def setup_tekton():
             name = f"{action}-{definition}-run"
             _wait_for_resource(kind=kind, name=name, condition="Succeeded", namespace="tekton-pipelines")
 
+    WaitFor(
+        wait_for_metric_families,
+        attempts=60,
+        wait=2,
+        args=(
+            ('/api/v1/namespaces/tekton-pipelines/services/http:tekton-triggers-controller:9000/proxy/metrics'),
+            [
+                'controller_clusterinterceptor_count',
+                'controller_clustertriggerbinding_count',
+                'controller_eventlistener_count',
+                'controller_triggerbinding_count',
+                'controller_triggertemplate_count',
+            ],
+        ),
+    )()
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_tekton], sleep=10) as kubeconfig, ExitStack() as stack:
-        instances = {}
-
-        pipeline_host, pipeline_port = stack.enter_context(
-            port_forward(kubeconfig, 'tekton-pipelines', 9090, 'service', 'tekton-pipelines-controller')
-        )
-        instances['pipelines_controller_endpoint'] = f'http://{pipeline_host}:{pipeline_port}/metrics'
-
-        trigger_host, trigger_port = stack.enter_context(
-            port_forward(kubeconfig, 'tekton-pipelines', 9000, 'service', 'tekton-triggers-controller')
-        )
-        instances['triggers_controller_endpoint'] = f'http://{trigger_host}:{trigger_port}/metrics'
-
-        WaitFor(
-            wait_for_metric_families,
-            attempts=60,
-            wait=2,
-            args=(
-                instances['triggers_controller_endpoint'],
-                [
-                    'controller_clusterinterceptor_count',
-                    'controller_clustertriggerbinding_count',
-                    'controller_eventlistener_count',
-                    'controller_triggerbinding_count',
-                    'controller_triggertemplate_count',
-                ],
+    with kind_run(conditions=[setup_tekton]) as kubeconfig:
+        instances = {
+            'pipelines_controller_endpoint': (
+                'http://tekton-pipelines-controller.tekton-pipelines.svc.cluster.local:9090/metrics'
             ),
-        )()
+            'triggers_controller_endpoint': (
+                'http://tekton-triggers-controller.tekton-pipelines.svc.cluster.local:9000/metrics'
+            ),
+        }
 
-        yield {'instances': [instances]}
+        yield (
+            {'instances': [instances]},
+            {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}},
+        )
 
 
 @pytest.fixture

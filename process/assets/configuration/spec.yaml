@@ -133,6 +133,17 @@ files:
                          use `.inf` for the upper bound.
         value:
           type: object
+          properties:
+          - name: warning
+            type: array
+            items:
+              type: number
+            minItems: 2
+          - name: critical
+            type: array
+            items:
+              type: number
+            minItems: 2
           compact_example: true
           example:
             warning: [<BELOW_VALUE> , <TOP_VALUE>]

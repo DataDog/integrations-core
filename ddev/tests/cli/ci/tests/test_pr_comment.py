@@ -10,25 +10,35 @@ read as success, and nothing is dropped silently.
 
 from __future__ import annotations
 
+import dataclasses
 import re
 from collections.abc import Callable
 
 import pytest
+from markdown_it import MarkdownIt
 
 from ddev.cli.ci.tests.pr_comment import (
+    ALERT_RUNNING_NOTE,
     CANCELLED_HEADING,
+    CANCELLED_NOTE,
+    CANCELLED_WITHOUT_RESULTS_NOTE,
     COMMENT_MARKER,
-    FOOTER_RUNNING_NOTE,
+    FAILED_HEADING,
     PROGRESS_BAR_WIDTH,
-    render_cancelled_notice,
+    SHUTDOWN_HEADINGS,
+    SHUTDOWN_REASON_LIMIT,
+    STOPPED_NOTE,
+    STOPPED_WITHOUT_RESULTS_NOTE,
     render_comment,
     render_compact_comment,
     render_minimal_comment,
     render_run_summary,
+    render_shutdown_notice,
     summary_line,
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from tests.cli.ci.tests.helpers import (
     attempt,
     batch_progress,
@@ -47,6 +57,15 @@ GITHUB_COMMENT_HARD_LIMIT = 65_536
 def _progress_bar_of(body: str) -> dict[str, int]:
     """The rendered progress bar, as the pixel width of each segment it drew."""
     return {segment: int(width) for segment, width in re.findall(r'progress-(\w+)\.png" width="(\d+)"', body)}
+
+
+def shutdown_request(kind: ShutdownKind) -> ShutdownRequest:
+    """A representative request for *kind*, for the tests that render a stopped run."""
+    if kind is ShutdownKind.CANCELLED:
+        return ShutdownRequest.cancelled()
+    if kind is ShutdownKind.FAILED:
+        return ShutdownRequest.failed(RuntimeError("a fatal error"))
+    return ShutdownRequest.timed_out(RuntimeError("a fatal error"))
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +143,60 @@ def test_a_running_batch_and_a_retrying_batch_are_indistinguishable():
 
     assert chips[0] == chips[1]
     assert "🔄 in progress" in chips[0]
+
+
+def test_collection_shows_execution_outcomes_while_test_details_are_pending():
+    failed = dataclasses.replace(attempt(Status.FAILURE), reports=None)
+    passed = dataclasses.replace(attempt(), reports=None)
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(failed),
+                job_progress(passed, target="postgres"),
+                state=ExecutionState.ARTIFACT_DOWNLOAD,
+                status=Status.FAILURE,
+            ),
+        ),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "**Tests finished; collecting results.**" in body
+    assert "❌ failed · 📥 collecting artifacts" in body
+    assert "**2/2 jobs**" in body
+    assert 'href="https://github.com/o/r/actions/runs/1/job/9"' in body
+    assert "Test details pending artifact collection." in body
+    assert set(_progress_bar_of(body)) == {"passed", "failed"}
+
+
+@pytest.mark.parametrize("job_finished", [False, True], ids=["awaiting-job-status", "job-passed"])
+def test_workflow_only_failure_requires_observed_job_outcomes(job_finished: bool):
+    job = job_progress(attempt()) if job_finished else job_progress()
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job, state=ExecutionState.ARTIFACT_DOWNLOAD, status=Status.FAILURE),),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "❌ failed · 📥 collecting artifacts" in body
+    assert ("the workflow failed with no tracked job failure" in body) is job_finished
+
+
+def test_running_attempts_remain_pending_in_the_batch_table():
+    running = dataclasses.replace(attempt(), state=ExecutionState.RUNNING, status=None, conclusion=None, reports=None)
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(running), state=ExecutionState.RUNNING, status=None),),
+        done=False,
+    )
+
+    body = render_comment(progress)
+
+    assert "**0/1 jobs**" in body
+    assert "<td>0/1</td>" in body
+    assert "⏳ 1 pending" in body
 
 
 def test_final_snapshot_reads_as_complete_with_failures():
@@ -674,12 +747,51 @@ def test_the_footer_says_what_it_can_outside_github_actions(monkeypatch):
     assert "GitHub Run" not in footer
 
 
+@pytest.mark.parametrize(
+    ("run_id", "expected"),
+    [
+        pytest.param(
+            "12345",
+            '⏳ Dispatcher running — <a href="https://github.com/DataDog/integrations-core/actions/runs/12345">'
+            "GitHub Run</a>.",
+            id="linked",
+        ),
+        pytest.param(None, "⏳ Dispatcher running.", id="url-unavailable"),
+    ],
+)
+def test_the_footer_of_an_unfinished_run_identifies_the_dispatcher(
+    run_id: str | None, expected: str, monkeypatch: pytest.MonkeyPatch
+):
+    """The running footer links when possible and still renders when the URL is unavailable."""
+    if run_id is None:
+        monkeypatch.delenv("GITHUB_RUN_ID")
+    else:
+        monkeypatch.setenv("GITHUB_RUN_ID", run_id)
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
+    )
+
+    assert render_comment(progress).endswith(f"<sub>\n{expected}\n</sub>")
+
+
 def test_summary_line_reports_state_and_counts():
     progress = DispatcherProgress(
         batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
     )
 
     assert summary_line(progress) == "Dispatcher tests in progress: 1/2 jobs, 1 passed, 0 failed, 0 skipped"
+
+
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+def test_summary_line_reports_a_stopped_run_as_stopped(kind: ShutdownKind):
+    """A run that never finished is logged as stopped and why, not as still in progress."""
+    progress = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
+    )
+
+    assert summary_line(progress, shutdown=shutdown_request(kind)) == (
+        f"Dispatcher tests stopped ({kind.value}): 1/2 jobs, 1 passed, 0 failed, 0 skipped"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -932,39 +1044,93 @@ def test_the_budget_is_measured_in_bytes_not_characters():
     assert len(body) < len(body.encode("utf-8"))
 
 
-def test_a_cancelled_run_with_nothing_gathered_still_says_it_ran(monkeypatch):
-    """The comment is the only place a reader learns the run existed.
-
-    No comment at all is indistinguishable from a job that hung, and the marker has to be there or
-    the next run creates a second comment instead of editing this one. With no results to go on, the
-    footer's link is all a reader has to find out what happened.
-    """
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+def test_a_stopped_run_with_nothing_gathered_still_says_it_ran(monkeypatch: pytest.MonkeyPatch, kind: ShutdownKind):
+    """A stop before any snapshot still identifies the run and its terminal state."""
     monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "DataDog/integrations-core")
     monkeypatch.setenv("GITHUB_RUN_ID", "12345")
 
-    body = render_cancelled_notice()
+    body = render_shutdown_notice(shutdown_request(kind))
 
     assert body.startswith(COMMENT_MARKER)
-    assert CANCELLED_HEADING in body
+    assert SHUTDOWN_HEADINGS[kind] in body
     assert "Dispatcher beta: informational only" in body
     assert "https://github.com/DataDog/integrations-core/actions/runs/12345" in body
+    without_results_note = (
+        CANCELLED_WITHOUT_RESULTS_NOTE if kind is ShutdownKind.CANCELLED else STOPPED_WITHOUT_RESULTS_NOTE
+    )
+    gathered_note = CANCELLED_NOTE if kind is ShutdownKind.CANCELLED else STOPPED_NOTE
+    assert without_results_note in body
+    assert gathered_note not in body
+    if kind is not ShutdownKind.CANCELLED:
+        assert "a fatal error" in body
 
 
-def test_a_cancelled_run_keeps_what_it_gathered_without_still_reading_as_running():
-    """A partial report is worth keeping, but every part of it claims the run is still going.
-
-    The heading, the alert and the footer all derive from `done`, so a cancelled report that keeps
-    any of them invites waiting for results that will never arrive.
-    """
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+def test_a_stopped_run_keeps_what_it_gathered_without_still_reading_as_running(kind: ShutdownKind):
+    """A terminal report keeps the snapshot without inviting further waiting."""
     progress = uniform_progress(done=False, complete=6)
     assert "Tests are still running" in render_comment(progress)
 
-    body = render_comment(progress, cancelled=True)
+    body = render_comment(progress, shutdown=shutdown_request(kind))
 
-    assert CANCELLED_HEADING in body
+    assert SHUTDOWN_HEADINGS[kind] in body
     assert "Dispatcher tests · in progress" not in body
     assert "Tests are still running" not in body
-    assert FOOTER_RUNNING_NOTE not in body
-    # Per-batch rows keep their own last-known state, which the alert explains was cancelled with it.
+    assert ALERT_RUNNING_NOTE not in body
+    # Per-batch rows keep their own last-known state, which the alert explains stopped with the run.
     assert "batch-01" in body
+
+
+def test_a_stopped_run_reports_its_reason_without_reading_as_a_cancellation():
+    """A failure report identifies its cause without claiming cancellation."""
+    progress = uniform_progress(done=False, complete=6)
+    request = ShutdownRequest.failed(RuntimeError("The GitHub API is having a moment <img on 'pause'>"))
+
+    body = render_comment(progress, shutdown=request)
+
+    assert FAILED_HEADING in body
+    assert "` The GitHub API is having a moment <img on 'pause'> `" in body
+    assert CANCELLED_HEADING not in body
+
+
+def test_a_terminal_reason_is_one_bounded_line():
+    """Long, multiline exceptions cannot consume the terminal report's body budget."""
+    error = RuntimeError("boom\nsecond line\n" + "x" * (SHUTDOWN_REASON_LIMIT * 4))
+    request = ShutdownRequest.failed(error)
+
+    body = render_shutdown_notice(request)
+
+    reason_line = next(line for line in body.splitlines() if line.startswith("> Reason: "))
+    assert reason_line.startswith("> Reason: ` boom second line ")
+    assert reason_line.endswith("... `")
+    assert len(reason_line) - len("> Reason: ") <= SHUTDOWN_REASON_LIMIT + 4
+
+
+def test_a_terminal_reason_renders_as_literal_text_rather_than_markup():
+    """Exception text cannot introduce images, links or formatting into the report."""
+    hostile = "`![image](https://example.invalid/pixel) <b>bold</b> **passed**`"
+    request = ShutdownRequest.failed(RuntimeError(hostile))
+
+    body = render_shutdown_notice(request)
+
+    reason_line = next(line for line in body.splitlines() if line.startswith("> Reason: "))
+    tokens = MarkdownIt().parse(reason_line.removeprefix("> "))
+    inline = next(token for token in tokens if token.type == "inline")
+    types = [child.type for child in inline.children]
+
+    assert "code_inline" in types
+    assert not {"image", "link_open", "strong_open", "html_inline"} & set(types)
+    span = next(child for child in inline.children if child.type == "code_inline")
+    assert span.content == hostile
+
+
+def test_the_cancellation_alert_keeps_its_own_wording_under_a_fallback_tier():
+    """Cancellation wording is distinct from failure wording in every tier, not just the first."""
+    progress = uniform_progress(done=False, complete=6)
+    request = ShutdownRequest.cancelled()
+
+    assert CANCELLED_HEADING in render_compact_comment(progress, shutdown=request)
+    assert CANCELLED_HEADING in render_minimal_comment(progress, shutdown=request)
+    assert FAILED_HEADING not in render_compact_comment(progress, shutdown=request)

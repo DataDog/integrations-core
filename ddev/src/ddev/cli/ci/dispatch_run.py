@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.monitoring import ComponentMonitor
     from ddev.utils.git import ChangedFile
     from ddev.utils.github_async import AsyncGitHubClient
     from ddev.utils.github_async.models import PullRequest, PullRequestRef, PullRequestSimple
@@ -102,6 +103,7 @@ def resolve_run(
     commit: str | None,
     token: str,
     all_targets: bool,
+    monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Resolve what to test, reporting why a run has nothing left to test before returning None."""
     if pr_resolver is not None:

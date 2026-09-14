@@ -210,7 +210,7 @@ def test_build_batches_plans_minimum_base_package_replicas():
     assert [(j.name, j.minimum_base_package) for j in batch.job_list] == [
         ("ddev (py3.11)", False),
         ("postgres (py3.11)", False),
-        ("minimum-base-package-postgres (py3.11)", True),
+        ("postgres (MBP) (py3.11)", True),
     ]
     assert batch.jobs_count == 3
 

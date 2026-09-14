@@ -418,11 +418,11 @@ files:
         - name: enabled
           description: |
             Enable collection of query metrics. Requires `dbm: true` and MongoDB 7.0+ (Atlas) or 8.0+ (self-hosted).
-            Unlike other DBM features, query_metrics must be explicitly enabled.
+            Query metrics are enabled by default when Database Monitoring is enabled.
           value:
             type: boolean
-            example: false
-            display_default: false
+            example: true
+            display_default: true
         - name: collection_interval
           description: |
             Set the query metrics collection interval in seconds.

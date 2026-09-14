@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import click
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.dispatcher import DispatcherContext
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.cli.ci.tests.messages import TestBatch
+    from ddev.monitoring import ComponentMonitor
     from ddev.utils.git import ChangedFile
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
@@ -114,91 +116,121 @@ def dispatch_tests(
     Its base and diff come from GitHub; `--commit` instead compares a default-branch commit
     with its first parent using local git.
     """
-    import logging
     from pathlib import Path
 
+    from ddev.cli.application import AppLoggingHandler
     from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
+    from ddev.cli.ci.tests.dispatcher import (
+        PROTECTED_RUN_FIELDS,
+        DispatcherContext,
+        build_dispatcher,
+        run_fields,
+        tag_fields,
+    )
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
+    from ddev.monitoring import MonitoringRuntime, console_formatter
     from ddev.utils.github import resolve_owner_repo
 
     owner, repo = resolve_owner_repo(app, repository)
-    pr_resolver, token = validate_options(
-        app,
-        owner=owner,
-        repo=repo,
-        pull_request=pull_request,
-        pr_head_sha=pr_head_sha,
-        pr_head_repo=pr_head_repo,
-        pr_head_ref=pr_head_ref,
-        pr_base_ref=pr_base_ref,
-        commit=commit,
-        dry_run=dry_run,
-    )
 
-    # One INFO line per request would bury the Dispatcher's own progress.
-    logging.getLogger('httpx').setLevel(logging.WARNING)
+    caller_tags = tuple(tags.split()) if tags else ()
 
-    config = DispatcherConfig.from_repo_config(app.repo.config)
-
-    run = resolve_run(app, pr_resolver=pr_resolver, commit=commit, token=token, all_targets=all_targets)
-    if run is None:
-        return
-
-    batches = build_plan(
-        app,
-        config=config,
-        changed_files=run.changed_files,
-        all_targets=all_targets,
-        minimum_base_package=minimum_base_package,
-        environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
-    )
-    if not batches:
-        app.display_info('No affected target to test.')
-        return
-
-    context = DispatcherContext(
-        owner=owner,
-        repo=repo,
-        tags=tuple(tags.split()) if tags else (),
-        pytest_args=pytest_args or '',
-        checkout_sha=run.checkout_sha,
-        base_sha=run.base_sha,
-        branch=run.branch,
-        is_fork=run.is_fork,
-        workflow=workflow or config.workflow,
-        workflow_ref=workflow_ref or config.workflow_ref,
-        target_branch=run.target_branch,
-        pr_number=run.pr_number,
-    )
-
-    display_plan(app, context, batches)
-    if dry_run:
-        app.display_info('Dry run: nothing was dispatched.')
-        return
-
-    base_path = Path(output_dir) if output_dir else app.repo.path / DEFAULT_OUTPUT_DIRECTORY
-    dispatcher = build_dispatcher(
-        batches=batches,
-        context=context,
-        config=config,
-        token=token,
-        artifacts_path=base_path / 'artifacts',
-        output_path=base_path / 'results',
-        run_logger=app.logger,
-    )
-    # A fatal processor or hook failure leaves the bus by raising out of `run`. `on_finalize` has
-    # already published whatever it knew by then, so a message is more use here than a traceback.
+    console_handler = AppLoggingHandler(app)
+    console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags))))
+    monitoring = MonitoringRuntime(console_handler=console_handler, protected_fields=PROTECTED_RUN_FIELDS)
     try:
-        dispatcher.run()
-    except Exception as error:
-        app.abort(f'Dispatcher execution failed: {error}')
+        monitoring.set_run_fields(**{**tag_fields(caller_tags), 'repo': f'{owner}/{repo}'})
 
-    outcome = dispatcher.outcome
-    if outcome is None or not outcome.successful:
-        app.abort('Dispatcher tests failed.')
+        pr_resolver, token = validate_options(
+            app,
+            owner=owner,
+            repo=repo,
+            pull_request=pull_request,
+            pr_head_sha=pr_head_sha,
+            pr_head_repo=pr_head_repo,
+            pr_head_ref=pr_head_ref,
+            pr_base_ref=pr_base_ref,
+            commit=commit,
+            dry_run=dry_run,
+        )
 
-    app.display_success('Dispatcher tests passed.')
+        # One INFO line per request would bury the Dispatcher's own progress.
+        logging.getLogger('httpx').setLevel(logging.WARNING)
+
+        config = DispatcherConfig.from_repo_config(app.repo.config)
+
+        run = resolve_run(
+            app,
+            pr_resolver=pr_resolver,
+            commit=commit,
+            token=token,
+            all_targets=all_targets,
+            monitor=monitoring.component('resolution'),
+        )
+        if run is None:
+            return
+
+        context = DispatcherContext(
+            owner=owner,
+            repo=repo,
+            tags=caller_tags,
+            pytest_args=pytest_args or '',
+            checkout_sha=run.checkout_sha,
+            base_sha=run.base_sha,
+            branch=run.branch,
+            is_fork=run.is_fork,
+            workflow=workflow or config.workflow,
+            workflow_ref=workflow_ref or config.workflow_ref,
+            target_branch=run.target_branch,
+            pr_number=run.pr_number,
+        )
+
+        # Resolved identity binds before planning, so a bad plan is still reported on its own run.
+        monitoring.set_run_fields(**run_fields(context))
+
+        batches = build_plan(
+            app,
+            config=config,
+            changed_files=run.changed_files,
+            all_targets=all_targets,
+            minimum_base_package=minimum_base_package,
+            environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
+            monitor=monitoring.component('planner'),
+        )
+        if not batches:
+            app.display_info('No affected target to test.')
+            return
+
+        display_plan(app, context, batches)
+        if dry_run:
+            app.display_info('Dry run: nothing was dispatched.')
+            return
+
+        base_path = Path(output_dir) if output_dir else app.repo.path / DEFAULT_OUTPUT_DIRECTORY
+        dispatcher = build_dispatcher(
+            batches=batches,
+            context=context,
+            config=config,
+            token=token,
+            artifacts_path=base_path / 'artifacts',
+            output_path=base_path / 'results',
+            run_logger=app.logger,
+            monitoring=monitoring,
+        )
+        # A fatal processor or hook failure leaves the bus by raising out of `run`. `on_finalize` has
+        # already published whatever it knew by then, so a message is more use here than a traceback.
+        try:
+            dispatcher.run()
+        except Exception as error:
+            app.abort(f'Dispatcher execution failed: {error}')
+
+        outcome = dispatcher.outcome
+        if outcome is None or not outcome.successful:
+            app.abort('Dispatcher tests failed.')
+
+        app.display_success('Dispatcher tests passed.')
+    finally:
+        monitoring.close()
 
 
 def validate_options(
@@ -271,6 +303,7 @@ def build_plan(
     all_targets: bool,
     minimum_base_package: bool,
     environment_provider: EnvironmentProvider,
+    monitor: ComponentMonitor | None = None,
 ) -> list[TestBatch]:
     """Build the batches this run must execute, aborting with a readable message on a bad plan.
 

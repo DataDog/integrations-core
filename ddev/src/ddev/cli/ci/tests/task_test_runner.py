@@ -10,14 +10,21 @@ import gzip
 import json
 import logging
 from dataclasses import dataclass
+from itertools import count
 from pathlib import Path
 from typing import Any
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
+from pydantic import ValidationError
+
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
+from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import conclusion_to_status
+from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
-from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
+from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
+from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
@@ -55,6 +62,10 @@ def encode_job_list(jobs: list[dict[str, Any]]) -> str:
     return base64.b64encode(gzip.compress(raw, mtime=0)).decode()
 
 
+# Limit the exception summary, not the detailed validation log.
+RESPONSE_REASON_LIMIT = 240
+
+
 @dataclass(frozen=True)
 class TestRunnerOptions:
     """Configuration for a ``TaskTestRunner``."""
@@ -74,63 +85,106 @@ class TestRunnerOptions:
 
 class TaskTestRunner(AsyncProcessor[TestBatch]):
     """
-    Runs one ``test-batch.yaml`` workflow for a ``TestBatch``: dispatches the run,
-    opens a check run, polls until the workflow completes, downloads its artifacts,
-    and emits a ``BatchFinished``.
+    Dispatches and reports execution progress, then downloads artifacts and emits ``BatchFinished``.
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: TestRunnerOptions):
+    def __init__(
+        self,
+        name: str,
+        client: AsyncGitHubClient,
+        options: TestRunnerOptions,
+        *,
+        artifact_client: AsyncGitHubClient,
+        monitor: ComponentMonitor | None = None,
+    ):
         super().__init__(name)
         self._client = client
+        self._artifact_client = artifact_client
         self._options = options
         self._runs_in_flight: dict[str, int] = {}
         self._logger = logging.getLogger(f"{__name__}.{name}")
+        self.monitor = monitor
+
+    def _response_failure(
+        self, operation: str, log_extra: dict[str, Any], error: ValidationError
+    ) -> FatalProcessingError:
+        """Log every validation error and return a bounded, contextual failure."""
+        batch_id = log_extra.get("batch_id", "unknown batch")
+        run = f", run {log_extra['run_id']}" if "run_id" in log_extra else ""
+        self._logger.error(
+            "Invalid GitHub response while %s (batch %s%s):\n%s",
+            operation,
+            batch_id,
+            run,
+            error,
+            extra=log_extra,
+        )
+        count = error.error_count()
+        reason = " ".join(
+            (
+                f"Invalid GitHub response while {operation} (batch {batch_id}{run}): "
+                f"{count} validation error{'s' if count != 1 else ''} in {error.title}. See logs for details."
+            ).split()
+        )
+        if len(reason) > RESPONSE_REASON_LIMIT:
+            reason = reason[: RESPONSE_REASON_LIMIT - 3].rstrip() + "..."
+        return FatalProcessingError(reason)
 
     async def process_message(self, message: TestBatch):
-        inputs = self._build_inputs(message)
         log_extra: dict[str, Any] = {"batch_id": message.batch_id}
+        run_id = await self._dispatch_batch(message, log_extra)
+        run, jobs = await self._poll_until_complete(message, run_id, log_extra)
+        await self._collect_results(message, run_id, run.data, jobs, log_extra)
 
-        dispatch = await self._client.create_workflow_dispatch(
-            self._options.owner,
-            self._options.repo,
-            self._options.workflow_id,
-            ref=self._options.ref,
-            inputs=inputs,
-            return_run_details=True,
-        )
+    async def _dispatch_batch(self, message: TestBatch, log_extra: dict[str, Any]) -> int:
+        try:
+            dispatch = await self._client.create_workflow_dispatch(
+                self._options.owner,
+                self._options.repo,
+                self._options.workflow_id,
+                ref=self._options.ref,
+                inputs=self._build_inputs(message),
+                return_run_details=True,
+            )
+        except ValidationError as error:
+            raise self._response_failure("dispatching the batch", log_extra, error) from error
         run_id = dispatch.data.workflow_run_id
         log_extra["run_id"] = run_id
         self._runs_in_flight[message.batch_id] = run_id
         self._logger.info("Dispatched batch", extra=log_extra)
+        self.submit_message(
+            BatchProgressUpdate(
+                id=f"{message.id}-progress-0",
+                batch_id=message.batch_id,
+                run_id=run_id,
+                workflow_url=dispatch.data.html_url,
+                state=ExecutionState.QUEUED,
+                sequence=0,
+            )
+        )
+        return run_id
 
-        run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
-        workflow_url = run.data.html_url
-        log_extra["workflow_url"] = workflow_url
-
-        if run.data.status != "completed":
-            run = await self._poll_until_complete(run_id, log_extra)
-        else:
-            self._logger.info("Workflow completed", extra=log_extra)
-
-        # Popped only once the run is known to be over: while it is in flight it is what
-        # `cancel_dispatched_runs` has to reap.
-        self._runs_in_flight.pop(message.batch_id, None)
-
-        raw = run.data.conclusion
-        if raw is None:
+    async def _collect_results(
+        self,
+        message: TestBatch,
+        run_id: int,
+        run: WorkflowRun,
+        jobs: list[WorkflowJob],
+        log_extra: dict[str, Any],
+    ) -> None:
+        conclusion = run.conclusion
+        workflow_url = run.html_url
+        if conclusion is None:
             self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
-
         artifact_dirs = await self._download_artifacts(run_id, log_extra)
         self._logger.info("Artifacts downloaded", extra=log_extra)
-
-        jobs = await self._list_jobs(run_id, log_extra)
+        jobs = await self._reconcile_final_jobs(run_id, jobs, log_extra)
         batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
-
         self.submit_message(
             BatchFinished(
                 id=message.id,
                 batch_id=message.batch_id,
-                status=conclusion_to_status(raw),
+                status=conclusion_to_status(conclusion),
                 run_id=run_id,
                 workflow_url=workflow_url,
                 artifacts_path=str(self._options.artifacts_base_path),
@@ -140,14 +194,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._logger.info("BatchFinished emitted", extra=log_extra)
 
     async def cancel_dispatched_runs(self) -> None:
-        """Cancel the runs this runner dispatched that have not finished.
-
-        The batch workflow's concurrency group already cancels a superseded revision's batches. This
-        covers what the group cannot see: a cancellation or a closed pull request with no follow-up
-        push, a plan that shrank, and the minutes between this process being killed and the next
-        batches being dispatched. Concurrent, because whatever budget the caller has is shared by
-        all of them.
-        """
+        """Concurrently cancel all tracked unfinished runs."""
         if not self._runs_in_flight:
             return
 
@@ -169,20 +216,110 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             self._runs_in_flight.pop(batch_id, None)
             self._logger.info("Dispatched run cancelled", extra=log_extra)
 
-    async def _poll_until_complete(self, run_id: int, log_extra: dict[str, Any]) -> GitHubResponse[WorkflowRun]:
+    async def _poll_until_complete(
+        self, message: TestBatch, run_id: int, log_extra: dict[str, Any]
+    ) -> tuple[GitHubResponse[WorkflowRun], list[WorkflowJob]]:
+        sequences = count(1)
+        known_jobs: dict[str, WorkflowJob] = {}
         while True:
-            await asyncio.sleep(self._options.poll_interval_seconds)
-            run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
-            if run.data.status == "completed":
-                self._logger.info("Workflow completed", extra=log_extra)
-                return run
+            try:
+                run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
+            except ValidationError as error:
+                raise self._response_failure("polling workflow status", log_extra, error) from error
+            completed = run.data.is_completed
+            # Shutdown must not try to cancel a completed run while its artifacts are still being collected.
+            if completed:
+                self._runs_in_flight.pop(message.batch_id, None)
+            log_extra["workflow_url"] = run.data.html_url
 
-    async def _list_jobs(self, run_id: int, log_extra: dict[str, Any]) -> list[WorkflowJob]:
-        """Fetch the workflow run's jobs; on failure log a warning and return an empty list."""
+            # Report workflow progress first. The jobs request may be delayed by the API rate limit.
+            progress = self._publish_workflow_progress(message, run_id, run.data, known_jobs, next(sequences))
+            await self._refresh_jobs(run_id, known_jobs, log_extra, "listing workflow jobs")
+            self._publish_job_progress(message.id, progress, known_jobs, next(sequences))
+
+            if completed:
+                self._logger.info("Workflow completed", extra=log_extra)
+                return run, list(known_jobs.values())
+            await asyncio.sleep(self._options.poll_interval_seconds)
+
+    def _publish_workflow_progress(
+        self,
+        message: TestBatch,
+        run_id: int,
+        run: WorkflowRun,
+        known_jobs: dict[str, WorkflowJob],
+        sequence: int,
+    ) -> BatchProgressUpdate:
+        if run.is_completed:
+            state = ExecutionState.ARTIFACT_DOWNLOAD
+        elif run.status == "in_progress":
+            state = ExecutionState.RUNNING
+        else:
+            state = ExecutionState.QUEUED
+        progress = BatchProgressUpdate(
+            id=f"{message.id}-progress-{sequence}",
+            batch_id=message.batch_id,
+            run_id=run_id,
+            workflow_url=run.html_url,
+            state=state,
+            status=conclusion_to_status(run.conclusion) if run.is_completed else None,
+            sequence=sequence,
+            jobs=tuple(known_jobs.values()),
+        )
+        self.submit_message(progress)
+        return progress
+
+    async def _refresh_jobs(
+        self, run_id: int, known_jobs: dict[str, WorkflowJob], log_extra: dict[str, Any], operation: str
+    ) -> None:
+        # A failed or incomplete listing must not remove jobs we already know about.
+        for job in await self._list_jobs(run_id, log_extra, operation):
+            previous = known_jobs.get(job.name)
+            # A rerun has a new job ID. An older state for the same job must not erase its completed result.
+            if (
+                previous is not None
+                and previous.id == job.id
+                and previous.status is WorkflowJobStatus.COMPLETED
+                and job.status is not WorkflowJobStatus.COMPLETED
+            ):
+                continue
+            known_jobs[job.name] = job
+
+    def _publish_job_progress(
+        self,
+        message_id: str,
+        progress: BatchProgressUpdate,
+        known_jobs: dict[str, WorkflowJob],
+        sequence: int,
+    ) -> None:
+        self.submit_message(
+            dataclasses.replace(
+                progress,
+                id=f"{message_id}-progress-{sequence}",
+                sequence=sequence,
+                jobs=tuple(known_jobs.values()),
+            )
+        )
+
+    async def _reconcile_final_jobs(
+        self, run_id: int, observed_jobs: list[WorkflowJob], log_extra: dict[str, Any]
+    ) -> list[WorkflowJob]:
+        known_jobs = {job.name: job for job in observed_jobs}
+        # The jobs response may lag behind the workflow status. Refresh it after downloading artifacts.
+        await self._refresh_jobs(run_id, known_jobs, log_extra, "reconciling final workflow jobs")
+        # An unfinished job has no result yet. Do not mistake that for a test failure.
+        return [job for job in known_jobs.values() if job.status is WorkflowJobStatus.COMPLETED]
+
+    async def _list_jobs(self, run_id: int, log_extra: dict[str, Any], operation: str) -> list[WorkflowJob]:
+        """Fetch the run's jobs. If a later page fails, keep the jobs already fetched."""
         jobs: list[WorkflowJob] = []
         try:
-            async for page in self._client.list_workflow_jobs(self._options.owner, self._options.repo, run_id):
+            async for page in self._client.list_workflow_jobs(
+                self._options.owner, self._options.repo, run_id, per_page=100
+            ):
                 jobs.extend(page.data.jobs)
+        except ValidationError as error:
+            raise self._response_failure(operation, log_extra, error) from error
         except Exception:
             self._logger.warning("Failed to list workflow jobs", extra=log_extra, exc_info=True)
         return jobs
@@ -222,42 +359,23 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         The map keys on the GitHub artifact name (the contract a ``BatchJob`` reproduces via
         ``artifact_name``), letting the producer resolve each job's directory deterministically.
         """
-        base_path = self._options.artifacts_base_path
         artifact_dirs: dict[str, Path] = {}
         failures: list[tuple[int, str]] = []
         try:
-            async for page in self._client.list_workflow_run_artifacts(self._options.owner, self._options.repo, run_id):
+            async for page in self._artifact_client.list_workflow_run_artifacts(
+                self._options.owner, self._options.repo, run_id, per_page=100
+            ):
                 for artifact in page.data.artifacts:
-                    if artifact.expired:
-                        self._logger.info(
-                            "Skipping expired artifact %s (%s)",
-                            artifact.id,
-                            artifact.name,
-                            extra=log_extra,
-                        )
+                    url = self._artifact_download_url(artifact, log_extra)
+                    if url is None:
                         continue
-                    if not artifact.archive_download_url:
-                        self._logger.info(
-                            "Skipping artifact %s (%s) without download URL",
-                            artifact.id,
-                            artifact.name,
-                            extra=log_extra,
-                        )
-                        continue
-                    target = base_path / artifact.name
-                    try:
-                        await self._client.download_artifact(artifact.archive_download_url, target)
-                        artifact_dirs[artifact.name] = target
-                        self._logger.info("Downloaded artifact %s -> %s", artifact.id, target, extra=log_extra)
-                    except Exception as exc:
-                        self._logger.warning(
-                            "Failed to download artifact %s (%s): %s",
-                            artifact.id,
-                            artifact.name,
-                            exc,
-                            extra=log_extra,
-                        )
+                    target = await self._download_artifact(artifact, url, log_extra)
+                    if target is None:
                         failures.append((artifact.id, artifact.name))
+                    else:
+                        artifact_dirs[artifact.name] = target
+        except ValidationError as error:
+            raise self._response_failure("listing workflow artifacts", log_extra, error) from error
         except Exception:
             self._logger.warning("Failed to list workflow run artifacts", extra=log_extra, exc_info=True)
         if failures:
@@ -268,3 +386,26 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 extra=log_extra,
             )
         return artifact_dirs
+
+    def _artifact_download_url(self, artifact: Artifact, log_extra: dict[str, Any]) -> str | None:
+        if artifact.expired:
+            self._logger.info("Skipping expired artifact %s (%s)", artifact.id, artifact.name, extra=log_extra)
+            return None
+        if not artifact.archive_download_url:
+            self._logger.info(
+                "Skipping artifact %s (%s) without download URL", artifact.id, artifact.name, extra=log_extra
+            )
+            return None
+        return artifact.archive_download_url
+
+    async def _download_artifact(self, artifact: Artifact, url: str, log_extra: dict[str, Any]) -> Path | None:
+        target = self._options.artifacts_base_path / artifact.name
+        try:
+            await self._artifact_client.download_artifact(url, target)
+            self._logger.info("Downloaded artifact %s -> %s", artifact.id, target, extra=log_extra)
+            return target
+        except Exception as exc:
+            self._logger.warning(
+                "Failed to download artifact %s (%s): %s", artifact.id, artifact.name, exc, extra=log_extra
+            )
+            return None

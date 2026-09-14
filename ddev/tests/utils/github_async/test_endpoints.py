@@ -158,8 +158,19 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
         pass
 
 
-async def test_list_workflow_jobs_single_page() -> None:
-    jobs = [workflow_job(1), workflow_job(2, status="in_progress", conclusion=None)]
+async def test_list_workflow_jobs_single_page():
+    jobs = [
+        workflow_job(1),
+        workflow_job(
+            2,
+            status="in_progress",
+            conclusion=None,
+            steps=[
+                {"name": "Run the tests", "status": "completed", "conclusion": "success", "number": 1},
+                {"name": "Post Run the tests", "status": "pending", "conclusion": None, "number": 18},
+            ],
+        ),
+    ]
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"

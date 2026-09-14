@@ -194,6 +194,17 @@ def test_planned_jobs_count_toward_total_but_not_complete() -> None:
     assert progress.total == 3
 
 
+def test_running_executions_remain_pending_in_the_totals():
+    running = dataclasses.replace(_attempt(), state=ExecutionState.RUNNING, status=None, conclusion=None)
+    progress = DispatcherProgress(
+        batches=(_batch(_job(_attempt(), name="done"), _job(running, name="running"), _job(name="queued")),),
+        done=False,
+    )
+
+    assert (progress.complete, progress.total) == (1, 3)
+    assert (progress.passed, progress.failed, progress.skipped) == (1, 0, 0)
+
+
 def test_an_execution_missing_its_artifacts_still_counts() -> None:
     # Only the artifacts are missing: the error qualifies the execution, it does not erase it.
     attempt = _attempt(status=Status.SUCCESS, error=ProgressError.NO_ARTIFACTS)
