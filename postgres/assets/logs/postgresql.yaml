@@ -126,7 +126,7 @@ pipeline:
           # `internal_query`. The discriminator is the following QUERY: line, which a
           # line-oriented parser cannot see. Keep the group -- deleting it returns the
           # suffix to `message`, which jsonlog strips; analyze.go accepts either form.
-          _pg_body %{word:error_severity}:  (?:%{regex("[0-9A-Z]{5}"):state_code:nullIf("00000")}: )?%{data:message}(?: at character \d+)?
+          _pg_body %{word:error_severity}:  (?:%{regex("[A-Z0-9]{5}"):state_code:nullIf("00000")}: )?%{data:message}(?: at character \d+)?
         matchRules: |
           # The prefix the Datadog Postgres integration docs recommend. Most
           # specific shape, so first.
