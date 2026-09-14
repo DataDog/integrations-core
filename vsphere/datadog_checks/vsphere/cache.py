@@ -150,6 +150,8 @@ class InfrastructureCache(VSphereCache):
 
     def clear_properties(self):
         # type: () -> None
+        # Only the nested `properties` dict. Top-level keys such as `cpu_count` are deliberately
+        # kept so they survive to the next refresh -- see `refresh_infrastructure_cache`.
         for _, mors in self._mors.items():
             for _, mor_props in mors.items():
                 mor_props.pop('properties', None)

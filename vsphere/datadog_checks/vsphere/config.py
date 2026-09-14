@@ -314,9 +314,8 @@ class VSphereConfig(object):
     def _warn_unfilterable_cpu_count_metrics(self):
         # type: () -> None
         if not self.collect_property_metrics:
-            # These metrics were not collected at all with property metrics off, so a filter
-            # that does not name them was never excluding anything. Only the configurations
-            # where the filter genuinely used to suppress the metric have changed behavior.
+            # These were never collected with the option off, so such a filter excluded nothing.
+            # Warn only where the filter genuinely used to suppress the metric.
             return
         for resource_type in CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE:
             filters = self.metric_filters.get(resource_type)

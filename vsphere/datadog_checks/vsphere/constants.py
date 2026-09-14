@@ -140,10 +140,9 @@ VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
 ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
 
-# Always fetched, regardless of `collect_property_metrics`: downstream consumers depend on these
-# two counts being reported continuously, so their collection must not be opt-in.
-# Keep out of the *_SIMPLE_PROPERTIES lists above: `get_infrastructure` moves ALL_PROPERTIES paths
-# into a nested `properties` dict, which would break the flat lookup only when the option is on.
+# Always fetched, regardless of `collect_property_metrics` -- downstream consumers need these
+# counts continuously, so collection must not be opt-in. Keep them out of *_SIMPLE_PROPERTIES:
+# `get_infrastructure` nests those under `properties`, breaking the flat lookup when the option is on.
 VM_CPU_COUNT_PROPERTY = "summary.config.numCpu"
 HOST_CPU_COUNT_PROPERTY = "summary.hardware.numCpuCores"
 
@@ -152,8 +151,7 @@ CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE = {
     'host': HOST_CPU_COUNT_PROPERTY,
 }
 
-# How many uncollected resources to name in the summarized warning. Each one is also logged
-# individually at debug, so this cap bounds memory without hiding detail.
+# Cap on resources named in the summarized warning; each is also logged individually at debug.
 UNCOLLECTED_LOG_SAMPLE_SIZE = 10
 
 

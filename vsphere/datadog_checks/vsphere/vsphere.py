@@ -362,15 +362,14 @@ class VSphereCheck(AgentCheck):
                 mor_payload['hostname'] = hostname
 
             # Top-level, not under `properties`: `clear_properties()` empties only that sub-dict,
-            # so this survives between refreshes for `check()` to re-submit on every run.
+            # so this survives refreshes for `check()` to re-submit on every run.
             cpu_count_property = CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
             if cpu_count_property is not None:
                 cpu_count_value = properties.get(cpu_count_property)
                 if cpu_count_value is None:
                     reason = 'no {}'.format(cpu_count_property)
                 elif not mor_payload.get('hostname'):
-                    # Submitting without a hostname would attribute the count to the Agent's own
-                    # host, inflating it. A missing point is preferable to a misattributed one.
+                    # Without a hostname the count lands on the Agent's own host. Better missing.
                     reason = 'no hostname'
                 else:
                     mor_payload["cpu_count"] = cpu_count_value
@@ -381,17 +380,15 @@ class VSphereCheck(AgentCheck):
                     uncollected_types.add(mor_type_str)
                     if len(uncollected) < UNCOLLECTED_LOG_SAMPLE_SIZE:
                         uncollected.append('{} {} ({})'.format(mor_type_str, mor_name, reason))
-                    # Per resource rather than accumulated: the sample above stays bounded on a
-                    # large inventory, and one line per resource is greppable where a single
-                    # list of thousands would be truncated by most log pipelines.
+                    # One line per resource: greppable, and unlike a single list of thousands it
+                    # survives log-pipeline truncation. The warning's sample stays bounded.
                     self.log.debug("Not collecting a CPU count for %s %s: %s", mor_type_str, mor_name, reason)
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
         if uncollected_total:
-            # Summarized rather than logged per resource: the causes are systemic (a restricted
-            # vCenter role, VMware Tools missing fleet-wide), so a large environment would
-            # otherwise warn thousands of times on every refresh.
+            # Summarized: the causes are systemic (restricted vCenter role, VMware Tools missing
+            # fleet-wide), so per-resource warnings would run to thousands on every refresh.
             truncated = uncollected_total > UNCOLLECTED_LOG_SAMPLE_SIZE
             self.log.warning(
                 "Not collecting %s for %d resource(s)%s: %s. A missing property usually means the vCenter "
