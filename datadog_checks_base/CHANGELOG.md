@@ -45,6 +45,12 @@
 * Fix AIA chasing crashing when the CA Issuers response is DER-encoded. ([#24683](https://github.com/DataDog/integrations-core/pull/24683))
 * Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
 
+## 38.0.3 / 2026-09-10
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
 ## 38.0.2 / 2026-08-26
 
 ***Fixed***:
