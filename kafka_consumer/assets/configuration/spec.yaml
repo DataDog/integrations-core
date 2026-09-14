@@ -304,7 +304,7 @@ files:
       - name: data_streams_enabled
         description: |
           Collects consumer lag metric in seconds. It may result in additional billing charges.
-          Note: This is automatically enabled when enable_cluster_monitoring is set to true.
+          Note: This is automatically enabled when enable_kafka_console is set to true.
         fleet_configurable: true
         value:
           type: boolean
@@ -318,9 +318,9 @@ files:
         value:
           type: string
         fleet_configurable: false
-      - name: enable_cluster_monitoring
+      - name: enable_kafka_console
         description: |
-          (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
+          (PREVIEW) Enable Kafka Console to collect cluster-wide metrics for Data Streams
           Monitoring. Collects broker, topic, partition, consumer group,
           and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
           May increase resource consumption on large clusters.
@@ -329,6 +329,18 @@ files:
             - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
             - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
             - Enables Data Streams monitoring (same as data_streams_enabled)
+
+          The legacy enable_cluster_monitoring option is supported as a synonym. Do not set both options.
+        fleet_configurable: true
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: enable_cluster_monitoring
+        hidden: true
+        legacy: true
+        description: |
+          Legacy synonym for enable_kafka_console. Do not set both options.
         fleet_configurable: true
         value:
           type: boolean
@@ -348,7 +360,7 @@ files:
           display_default: 180
       - name: schema_registry_url
         description: |
-          Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
+          Schema Registry URL. When set with enable_kafka_console, collects schema information.
         fleet_configurable: true
         formats:
           - url
@@ -471,7 +483,7 @@ files:
           fleet_configurable: false
       - name: kafka_connect_url
         description: |
-          Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
+          Kafka Connect REST API URL or list of URLs. When set with enable_kafka_console,
           collects connector metrics and configuration events from the Kafka Connect REST API.
           Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
           For Confluent Cloud, set this to
