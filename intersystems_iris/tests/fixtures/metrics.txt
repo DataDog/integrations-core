@@ -114,6 +114,36 @@ iris_ecp_conn 0
 # HELP iris_ecp_conn_max Maximum active ECP connections from this system as an ECP application server
 # TYPE iris_ecp_conn_max gauge
 iris_ecp_conn_max 2
+# HELP iris_ecp_latency Latency (in milliseconds) between the ECP application server and the ECP data server.
+# TYPE iris_ecp_latency gauge
+# UNIT iris_ecp_latency milliseconds
+iris_ecp_latency{id="PRIMARY"} .081
+# HELP iris_ecp_clients Incoming ECP connections
+# TYPE iris_ecp_clients gauge
+iris_ecp_clients{id="PRIMARY:IP-10-1-57-176:IRISAPP",status="Normal",ip="127.0.0.1",port="60480"} 1
+# HELP iris_ecp_servers Outgoing ECP connections
+# TYPE iris_ecp_servers gauge
+iris_ecp_servers{id="PRIMARY",status="Normal",ip="127.0.0.1",port="1972"} 1
+# HELP iris_ecp_block_add_per_sec Database blocks added to cache (per second) on this system as an ECP application server
+# TYPE iris_ecp_block_add_per_sec gauge
+iris_ecp_block_add_per_sec 0
+# HELP iris_ecp_block_purge_buff_per_sec Database blocks purged by buffer allocation (per second) on this system as an ECP application server
+# TYPE iris_ecp_block_purge_buff_per_sec gauge
+iris_ecp_block_purge_buff_per_sec 0
+# HELP iris_ecp_block_purge_svr_per_sec Database blocks purged as requested  (per second) on this system as an ECP application server
+# TYPE iris_ecp_block_purge_svr_per_sec gauge
+iris_ecp_block_purge_svr_per_sec 0
+# HELP iris_ecp_byte_rcvd_per_sec Bytes received (per second) by this system as an ECP application server
+# TYPE iris_ecp_byte_rcvd_per_sec gauge
+# UNIT iris_ecp_byte_rcvd_per_sec bytes
+iris_ecp_byte_rcvd_per_sec 0
+# HELP iris_ecp_byte_sent_per_sec Bytes sent (per second) by this system as an ECP application server
+# TYPE iris_ecp_byte_sent_per_sec gauge
+# UNIT iris_ecp_byte_sent_per_sec bytes
+iris_ecp_byte_sent_per_sec 0
+# HELP iris_ecp_glo_ref_per_sec Database blocks added to cache (per second) on this system as an ECP application server
+# TYPE iris_ecp_glo_ref_per_sec gauge
+iris_ecp_glo_ref_per_sec 0
 # HELP iris_ecps_big_kill Big string kills (per connection) on this system as an ECP data server
 # TYPE iris_ecps_big_kill counter
 iris_ecps_big_kill{id="IRISAPP:IRIS-APP-01:IRIS"} 0

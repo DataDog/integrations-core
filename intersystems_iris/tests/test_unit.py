@@ -15,11 +15,12 @@ from .common import FIXTURE_PATH, assert_healthy_scrape
 
 pytestmark = pytest.mark.unit
 
-# The fixture was captured from a busy ECP data server with a live client attached and a
-# running interoperability production, so the always-on `iris_interop_*` interface family, the
-# per-connection `iris_ecps_*` family and the work queue family are all present alongside the
+# The fixture was captured from a busy ECP node acting as both application server and data
+# server, with a live peer attached and a running interoperability production, so the always-on
+# `iris_interop_*` interface family, both the client-side `iris_ecp_*` and per-connection
+# data-server `iris_ecps_*` families, and the work queue family are all present alongside the
 # base families.
-FIXTURE_EMITTED_PREFIXES = ('intersystems_iris.ecps.', 'intersystems_iris.wqm.')
+FIXTURE_EMITTED_PREFIXES = ('intersystems_iris.ecp.', 'intersystems_iris.ecps.', 'intersystems_iris.wqm.')
 
 
 def test_check(scraped_aggregator: AggregatorStub) -> None:
