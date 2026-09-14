@@ -15,9 +15,13 @@ from datadog_checks.vllm import vLLMCheck
 from .common import METRICS_MOCK, get_fixture_path
 
 
+def get_agent_config(gpu_enabled):
+    return lambda key: gpu_enabled if key == 'gpu.enabled' else None
+
+
 @pytest.fixture(autouse=True)
 def enable_gpu_monitoring():
-    with mock.patch.object(vllm_check.datadog_agent, 'get_config', return_value=True):
+    with mock.patch.object(vllm_check.datadog_agent, 'get_config', side_effect=get_agent_config(True)):
         yield
 
 
@@ -90,7 +94,7 @@ def test_new_metrics_are_not_collected_without_gpu_monitoring(dd_run_check, aggr
     ]
 
     with (
-        mock.patch.object(vllm_check.datadog_agent, 'get_config', return_value=False),
+        mock.patch.object(vllm_check.datadog_agent, 'get_config', side_effect=get_agent_config(False)),
         mock.patch('requests.Session.get', side_effect=mock_responses),
     ):
         check = vLLMCheck("vLLM", {}, [instance])
