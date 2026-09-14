@@ -19,7 +19,7 @@
 * Manage the DBM async jobs through the ``DatabaseCheck`` registry. ([#24934](https://github.com/DataDog/integrations-core/pull/24934))
 * Cache the Agent version instead of resolving it for every payload. ([#25024](https://github.com/DataDog/integrations-core/pull/25024))
 
-## 7.2.0 / 2026-08-05
+## 7.2.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 
