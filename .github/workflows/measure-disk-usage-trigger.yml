@@ -12,7 +12,6 @@ on:
       - master
     paths:
       - '*/datadog_checks/**'
-      - '*/pyproject.toml'
       - '.deps/resolved/**'
 
 jobs:
