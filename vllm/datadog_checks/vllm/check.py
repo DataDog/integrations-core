@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from requests import RequestException
+
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
 
 from .metrics import METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
@@ -23,10 +25,16 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
         endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/version")
-        response = self.http.get(endpoint)
-        response.raise_for_status()
+        try:
+            response = self.http.get(endpoint)
+            response.raise_for_status()
+            data = response.json()
+        except (RequestException, ValueError) as e:
+            # Some vLLM-compatible metric endpoints, including Dynamo's system status server,
+            # expose /metrics without exposing vLLM's optional /version route.
+            self.log.debug("Unable to collect vLLM version metadata from %s: %s", endpoint, e)
+            return
 
-        data = response.json()
         version = data.get("version", "")
         version_split = version.split(".")
         if len(version_split) >= 3:

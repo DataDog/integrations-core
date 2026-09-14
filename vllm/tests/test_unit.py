@@ -62,6 +62,20 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
     datadog_agent.assert_metadata("test:123", version_metadata)
 
 
+def test_check_succeeds_without_version_endpoint(dd_run_check, aggregator, instance):
+    check = vLLMCheck("vLLM", {}, [instance])
+    mock_responses = [
+        MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
+        MockResponse(status_code=404),
+    ]
+
+    with mock.patch('requests.Session.get', side_effect=mock_responses):
+        dd_run_check(check)
+
+    aggregator.assert_metric('vllm.num_requests.running')
+    aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.OK)
+
+
 def _get_version_metadata(raw_version):
     major, minor, patch = raw_version.split(".")
     return {
