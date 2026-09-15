@@ -2,14 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""JSON-page contracts, bounded page buffering, and direct intake uploads.
+"""Source-page contracts, bounded page buffering, and direct intake uploads.
 
-Database execution and value normalization belong to integration adapters. Only
-metadata and the compact receipt return through the Agent's native callback.
+Database execution and value normalization belong to integration adapters. The producer
+registers one immutable source-page descriptor per upload and sends record-complete CSV
+source pages; intake decodes, redacts, and writes the final JSON pages, so the producer never
+constructs a final JSON envelope and never claims its source bytes or checksums are final
+artifact metadata. Only metadata and the compact receipt return through the Agent's native
+callback.
 """
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import io
 import json
@@ -17,7 +22,7 @@ import logging
 import math
 import re
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, BinaryIO, Literal, Protocol
@@ -64,7 +69,112 @@ REMOTE_QUERY_ARTIFACT_VERSION = 1
 
 
 # The bytes appended after the last row: close the bare ``data`` array and the document.
+# The producer no longer writes final pages; page_prefix/PAGE_SUFFIX model the envelope intake
+# generates so the producer can bound the final page it asks intake to build.
 PAGE_SUFFIX = b']}'
+
+
+# The provisional private row wire, selected by the descriptor's format version: CSV records
+# whose fields are canonical JSON value tokens. Intake pins the same version; the producer
+# cannot invent encoding rules.
+REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION = 'csv-json-cell-v1'
+
+# The source page's private media type: one record-complete CSV body per page index.
+REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE = 'application/vnd.datadog.remote-query.rows+csv;version=1'
+
+# Intake's defensive rejection when the final JSON page it would write exceeds maxFileBytes
+# despite the producer's conservative bound. The producer answers by splitting the buffered
+# records and retrying the same page index.
+REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE = 'final_page_too_large'
+
+# The closed descriptor logical-type set: the stable cross-database families intake accepts.
+# ``vendor`` marks supported values without a narrower stable family; it is never a stringify
+# escape hatch, because every value still has to pass the fail-closed value contract.
+REMOTE_QUERY_LOGICAL_TYPES = (
+    'boolean',
+    'integer',
+    'decimal',
+    'float',
+    'string',
+    'temporal',
+    'json',
+    'binary',
+    'vendor',
+)
+
+RemoteQueryLogicalType = Literal[
+    'boolean', 'integer', 'decimal', 'float', 'string', 'temporal', 'json', 'binary', 'vendor'
+]
+
+# The fixed, bounded replacement marker intake substitutes for any matched scalar string
+# leaf. The producer never emits it; the page bound accounts for intake emitting it in place
+# of a shorter string, the only way redaction can grow a final page.
+REMOTE_QUERY_REDACTED_MARKER = '[REDACTED]'
+REMOTE_QUERY_REDACTED_MARKER_TOKEN = b'"[REDACTED]"'
+
+
+def string_leaf_final_bound(token: bytes) -> int:
+    """A scalar string leaf's final bytes: its own token or the redaction marker, whichever is larger."""
+    return max(len(token), len(REMOTE_QUERY_REDACTED_MARKER_TOKEN))
+
+
+class RemoteQueryDescriptorColumn(BaseModel):
+    """One ordered descriptor column: result name, vendor type, and logical type."""
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    column_name: StrictStr = Field(min_length=1, max_length=255)
+    vendor_data_type: StrictStr = Field(min_length=1, max_length=1024)
+    logical_type: RemoteQueryLogicalType
+
+
+class RemoteQueryUploadDescriptor(BaseModel):
+    """The immutable per-upload source-page descriptor, registered once before result rows.
+
+    Intake persists the descriptor and stamps the schema (when requested) into every final
+    page from it. ``agent_hostname`` is the executing check's Agent-reported identity, threaded
+    from the check instance, never the delivery or the machine's socket name.
+    """
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    format_version: Literal['csv-json-cell-v1']
+    include_schema: StrictBool
+    agent_hostname: StrictStr = Field(min_length=1, max_length=255)
+    columns: tuple[RemoteQueryDescriptorColumn, ...] = Field(min_length=1)
+
+    @model_validator(mode='after')
+    def validate_unique_columns(self) -> 'RemoteQueryUploadDescriptor':
+        names = [column.column_name for column in self.columns]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError('Duplicate descriptor column name(s): {}'.format(', '.join(duplicates)))
+        return self
+
+
+def descriptor_request_bytes(descriptor: RemoteQueryUploadDescriptor) -> bytes:
+    """Canonical compact JSON for the descriptor registration request.
+
+    Field order is the model's declaration order and the escaping is deterministic, so the
+    body is a pure function of the descriptor and every registration retry for one upload is
+    byte-identical.
+    """
+    return json.dumps(descriptor.model_dump(), separators=(',', ':')).encode('utf-8')
+
+
+def descriptor_schema_bytes(descriptor: RemoteQueryUploadDescriptor) -> bytes | None:
+    """The schema JSON intake stamps into every final page, or None when schema emission is off.
+
+    Intake derives the per-page schema from the registered descriptor; the producer computes
+    the same bytes only to bound and validate the final pages it asks intake to build.
+    """
+    if not descriptor.include_schema:
+        return None
+    entries = [
+        {'column_name': column.column_name, 'vendor_data_type': column.vendor_data_type}
+        for column in descriptor.columns
+    ]
+    return json.dumps(entries, separators=(',', ':')).encode('utf-8')
 
 
 RemoteQueryEmit = Callable[[str, str, bytes], None]
@@ -233,17 +343,31 @@ class RemoteQueryRunStats:
 
 
 @dataclass(frozen=True)
-class PageUploadMetadata:
-    """The complete identity of one produced page, declared in the page PUT headers.
+class EncodedCell:
+    """One canonical JSON value token plus the conservative bound on its final JSON bytes.
 
-    Every field is computed while the page is buffered, so the page request and any whole-page
-    retry carry stable metadata, and intake's authoritative page receipt is compared against
-    these exact values before the run may advance to the next page.
+    ``token`` is the pinned value-contract encoding of the cell. ``final_bound`` bounds the
+    bytes intake can emit for the cell after redaction: every scalar string leaf either keeps
+    its token or is replaced by the fixed ``[REDACTED]`` marker, whichever is longer.
+    """
+
+    token: bytes
+    final_bound: int
+
+
+@dataclass(frozen=True)
+class SourcePageUploadMetadata:
+    """The complete identity of one buffered source page, declared in the page PUT headers.
+
+    Every field is computed while the page's complete CSV records are buffered, so the page
+    request and any whole-page retry carry stable source metadata. Intake derives the final
+    page's own key, bytes, and checksum; these source values identify the retry and are never
+    claims about the final artifact.
     """
 
     batch_index: int
     record_offset: int
-    page_bytes: int
+    source_bytes: int
     rows: int
     sha256_hex: str
 
@@ -319,7 +443,7 @@ def page_prefix(
     a run to the agent that produced its pages. It is host identity, not job data, so it is
     threaded from the executing check instance, never the delivery. The page index is
     metadata-only in the RFC format labeled contract_version 1: it reaches the upload URL path
-    and ``PageUploadMetadata``, not the serialized body.
+    and ``SourcePageUploadMetadata``, not the serialized body.
     """
     head = (
         '{"contract_version":%d,"crawl_id":%s,"task_id":%s,"record_offset":%d,"agent_hostname":%s,'
@@ -340,11 +464,53 @@ def page_prefix(
     return b''.join(parts)
 
 
-class PageWriter:
-    """Keep one page in RAM through its retries; never accumulate the full result.
+# A framed CSV record is at most twice its final-JSON row bound minus a positive constant:
+# a cell field at worst doubles the token's quotes and adds two framing quotes, while every
+# column contributes at least a three-byte key token to the row bound. A page whose final
+# bound fits maxFileBytes therefore holds source bytes strictly below twice maxFileBytes, so
+# the cap below is a defensive split trigger that valid operation can never reach; it keeps
+# retry memory bounded even if that proof ever breaks.
+REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR = 2
 
-    The Agent admits one execution at a time. Each adapter must call discard in
-    its finally block so query/encoding failures also release the active page.
+
+class _StringSink:
+    """A ``csv.writer`` target that collects the written string pieces."""
+
+    __slots__ = ('pieces',)
+
+    def __init__(self) -> None:
+        self.pieces: list[str] = []
+
+    def write(self, value: str) -> int:
+        self.pieces.append(value)
+        return len(value)
+
+
+def frame_csv_record(tokens: Sequence[bytes]) -> bytes:
+    """Frame canonical cell tokens as one source-page CSV record.
+
+    The pinned private dialect: Python ``csv`` with the default comma delimiter, ``"`` doubled
+    by minimal quoting, LF record endings, UTF-8, and no header row. Canonical tokens are pure
+    ASCII JSON, so the text round-trip is byte-exact and only CSV framing is added; a raw
+    carriage return inside a token would corrupt the record, so it fails closed instead.
+    """
+    for token in tokens:
+        if b'\r' in token:
+            raise RemoteQueryFailure('unsupported_value', 'A canonical cell token carried a raw carriage return.')
+    sink = _StringSink()
+    csv.writer(sink, lineterminator='\n').writerow([token.decode('utf-8') for token in tokens])
+    return ''.join(sink.pieces).encode('utf-8')
+
+
+class SourcePageWriter:
+    """Keep one record-complete source page in RAM through its retries; never the full result.
+
+    The writer registers the upload descriptor once before any row is read, frames complete
+    CSV records, splits pages before the conservative final-JSON bound reaches
+    ``maxFileBytes``, and retries a whole source page byte-identically. Stats and the compact
+    receipt accumulate from intake's returned final metadata, never from local source sizes.
+    The Agent admits one execution at a time; each adapter must call discard in its finally
+    block so query/encoding failures also release the active page.
     """
 
     def __init__(
@@ -352,61 +518,122 @@ class PageWriter:
         delivery: RemoteQueryResultDelivery,
         creds: UploadCredentials,
         client: UploadClient,
-        agent_hostname: str,
-        schema_json: bytes | None,
+        descriptor: RemoteQueryUploadDescriptor,
         guard: Callable[[], None],
         stats: RemoteQueryRunStats,
     ):
         self._delivery = delivery
         self._creds = creds
         self._client = client
-        self._agent_hostname = agent_hostname
-        self._schema_json = schema_json
+        self._descriptor = descriptor
         self._guard = guard
         self._stats = stats
-        self._buffer: io.BytesIO | None = None
-        self._page_bytes = 0
+        limits = delivery.limits
+        if len(descriptor.columns) > limits.max_columns:
+            raise RemoteQueryFailure(
+                'max_columns_exceeded',
+                'Descriptor carries {} columns; the limit is {}.'.format(len(descriptor.columns), limits.max_columns),
+            )
+        self._schema_json = descriptor_schema_bytes(descriptor)
+        if self._schema_json is not None and len(self._schema_json) > limits.max_schema_bytes:
+            raise RemoteQueryFailure(
+                'max_schema_bytes_exceeded',
+                'Encoded schema is {} bytes; the limit is {}.'.format(len(self._schema_json), limits.max_schema_bytes),
+            )
+        if (
+            len(
+                page_prefix(
+                    run_id=delivery.run_id,
+                    task_id=delivery.task_id,
+                    record_offset=0,
+                    agent_hostname=descriptor.agent_hostname,
+                    schema_json=self._schema_json,
+                )
+            )
+            + len(PAGE_SUFFIX)
+            > limits.max_file_bytes
+        ):
+            raise RemoteQueryFailure(
+                'max_file_bytes_exceeded',
+                'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
+            )
+        # Each row object repeats every descriptor key, so the keys are part of the bound.
+        self._key_bound = sum(len(json.dumps(column.column_name)) for column in descriptor.columns)
+        self._source_page_cap = REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR * limits.max_file_bytes
+        self._records: list[bytes] | None = None
+        self._record_bounds: list[int] = []
+        self._page_bound = 0
+        self._page_source_bytes = 0
         self._page_rows = 0
         self._page_record_offset = 0
-        self._page_sha = hashlib.sha256()
+        # Registration precedes any result row: one byte-identical body per upload, and
+        # intake's response identity is verified before rows flow.
+        response = client.register_descriptor(creds, descriptor_request_bytes(descriptor))
+        verify_descriptor_response(response, creds.upload_id)
 
-    def add_row(self, row_bytes: bytes) -> None:
-        if self._buffer is None:
-            self._begin_page()
+    def add_row(self, cells: Sequence[EncodedCell]) -> None:
+        """Frame and buffer one row's cells; split the page before the final bound overflows."""
+        if len(cells) != len(self._descriptor.columns):
+            raise RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
+        record = frame_csv_record([cell.token for cell in cells])
         limits = self._delivery.limits
-        page_needed = self._page_bytes + bool(self._page_rows) + len(row_bytes) + len(PAGE_SUFFIX)
-        if page_needed > limits.max_file_bytes and self._page_rows:
-            self._close_page()
+        if len(record) > limits.max_row_bytes:
+            raise RemoteQueryFailure(
+                'row_too_large',
+                'A single record exceeds maxRowBytes ({} > {} bytes).'.format(len(record), limits.max_row_bytes),
+            )
+        row_bound = 1 + self._key_bound + 2 * len(cells) + sum(cell.final_bound for cell in cells)
+        if self._records is None:
             self._begin_page()
-            page_needed = self._page_bytes + len(row_bytes) + len(PAGE_SUFFIX)
-        if page_needed > limits.max_file_bytes:
-            raise RemoteQueryFailure('row_too_large', 'A single row plus the page envelope exceeds maxFileBytes.')
-        if self._stats.bytes_emitted + page_needed > limits.max_result_bytes:
-            raise RemoteQueryFailure('max_result_bytes_exceeded', 'Result pages exceed maxResultBytes.')
+        while True:
+            page_needed = self._page_bound + (1 if self._page_rows else 0) + row_bound
+            if page_needed > limits.max_file_bytes and self._page_rows:
+                self._close_page()
+                if self._records is None:
+                    self._begin_page()
+                continue
+            if page_needed > limits.max_file_bytes:
+                raise RemoteQueryFailure('row_too_large', 'A single row plus the page envelope exceeds maxFileBytes.')
+            if self._stats.bytes_emitted + page_needed > limits.max_result_bytes:
+                raise RemoteQueryFailure('max_result_bytes_exceeded', 'Result pages exceed maxResultBytes.')
+            if self._page_source_bytes + len(record) > self._source_page_cap and self._page_rows:
+                self._close_page()
+                if self._records is None:
+                    self._begin_page()
+                continue
+            if self._page_source_bytes + len(record) > self._source_page_cap:
+                raise RemoteQueryFailure('row_too_large', 'A single record exceeds the source page cap.')
+            break
         if self._page_rows:
-            self._append(b',')
-        self._append(row_bytes)
+            self._page_bound += 1
+        self._page_bound += row_bound
+        self._records.append(record)
+        self._record_bounds.append(row_bound)
+        self._page_source_bytes += len(record)
         self._page_rows += 1
-        self._stats.rows_emitted += 1
 
     def finish(self) -> dict[str, Any]:
-        if self._buffer is None and self._schema_json is not None and self._stats.pages_emitted == 0:
-            self._begin_page()  # Preserve schema discovery for an empty result.
-        if self._buffer is not None:
+        """Close any open page and return the compact receipt from intake's authoritative totals."""
+        if self._records is None and self._descriptor.include_schema and self._stats.pages_emitted == 0:
+            # Preserve schema discovery for an empty result: one zero-record source page makes
+            # intake create the schema-bearing final page with empty ``data``.
+            self._begin_page()
+        while self._records is not None:
             self._close_page()
         response = self._client.finalize_run(self._creds)
         verify_run_finalize_response(response, self._creds.upload_id)
+        page_count, total_rows, total_bytes = finalize_totals(response)
         return {
             'uploadId': self._creds.upload_id,
-            'pageCount': self._stats.pages_emitted,
-            'totalRows': self._stats.rows_emitted,
-            'totalBytes': self._stats.bytes_emitted,
+            'pageCount': page_count,
+            'totalRows': total_rows,
+            'totalBytes': total_bytes,
         }
 
     def discard(self) -> None:
-        if self._buffer is not None:
-            self._buffer.close()
-            self._buffer = None
+        """Release the buffered page; safe when no page is open."""
+        self._records = None
+        self._record_bounds = []
 
     def _begin_page(self) -> None:
         if self._stats.pages_emitted >= self._delivery.limits.max_pages:
@@ -415,41 +642,83 @@ class PageWriter:
             run_id=self._delivery.run_id,
             task_id=self._delivery.task_id,
             record_offset=self._stats.rows_emitted,
-            agent_hostname=self._agent_hostname,
+            agent_hostname=self._descriptor.agent_hostname,
             schema_json=self._schema_json,
         )
+        # The envelope's record_offset digits grow with the run, so the fit is re-checked for
+        # every page, not only once at construction.
         if len(prefix) + len(PAGE_SUFFIX) > self._delivery.limits.max_file_bytes:
             raise RemoteQueryFailure('row_too_large', 'Page envelope exceeds maxFileBytes.')
-        self._buffer = io.BytesIO()
-        self._page_record_offset = self._stats.rows_emitted
-        self._page_sha = hashlib.sha256()
-        self._page_bytes = 0
+        self._records = []
+        self._record_bounds = []
+        self._page_bound = len(prefix) + len(PAGE_SUFFIX)
+        self._page_source_bytes = 0
         self._page_rows = 0
-        self._append(prefix)
+        self._page_record_offset = self._stats.rows_emitted
 
     def _close_page(self) -> None:
-        self._guard()
-        self._append(PAGE_SUFFIX)
-        metadata = PageUploadMetadata(
-            batch_index=self._stats.pages_emitted,
-            record_offset=self._page_record_offset,
-            page_bytes=self._page_bytes,
-            rows=self._page_rows,
-            sha256_hex=self._page_sha.hexdigest(),
-        )
-        try:
-            self._buffer.seek(0)
-            receipt = self._client.put_page(self._creds, metadata, self._buffer)
-            verify_page_response(receipt, metadata)
-        finally:
-            self.discard()
-        self._stats.pages_emitted += 1
-        self._stats.bytes_emitted += self._page_bytes
+        """Commit the buffered records as one source page at the next sequential index.
 
-    def _append(self, data: bytes) -> None:
-        self._buffer.write(data)
-        self._page_sha.update(data)
-        self._page_bytes += len(data)
+        One source page maps to one final page at the same index. When intake defensively
+        rejects a page as ``final_page_too_large``, the buffered records are split in half and
+        the same index is retried with fewer records — without requerying or reordering rows —
+        and the uncommitted tail stays buffered as the active page.
+        """
+        if self._stats.pages_emitted >= self._delivery.limits.max_pages:
+            raise RemoteQueryFailure('max_pages_exceeded', 'Page count reached maxPages.')
+        records = self._records
+        bounds = self._record_bounds
+        offset = self._page_record_offset
+        count = len(records)
+        receipt: Mapping[str, Any]
+        while True:
+            body = b''.join(records[:count])
+            metadata = SourcePageUploadMetadata(
+                batch_index=self._stats.pages_emitted,
+                record_offset=offset,
+                source_bytes=len(body),
+                rows=count,
+                sha256_hex=hashlib.sha256(body).hexdigest(),
+            )
+            try:
+                self._guard()
+                receipt = self._client.put_source_page(self._creds, metadata, io.BytesIO(body))
+                verify_source_page_receipt(receipt, metadata)
+            except RemoteQueryFailure as failure:
+                if failure.code != REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE or count <= 1:
+                    raise
+                count //= 2
+                continue
+            break
+        # Intake is authoritative for the final page's bytes; stats never use source sizes.
+        self._stats.pages_emitted += 1
+        self._stats.rows_emitted += receipt['rows']
+        self._stats.bytes_emitted += receipt['bytes']
+        if count == len(records):
+            self._records = None
+            self._record_bounds = []
+            return
+        # The rejected page was split: the uncommitted tail is the active page now.
+        self._records = records[count:]
+        self._record_bounds = bounds[count:]
+        self._page_record_offset = offset + count
+        self._recompute_page_accounting()
+
+    def _recompute_page_accounting(self) -> None:
+        prefix_len = len(
+            page_prefix(
+                run_id=self._delivery.run_id,
+                task_id=self._delivery.task_id,
+                record_offset=self._page_record_offset,
+                agent_hostname=self._descriptor.agent_hostname,
+                schema_json=self._schema_json,
+            )
+        )
+        self._page_bound = (
+            prefix_len + len(PAGE_SUFFIX) + sum(self._record_bounds) + max(0, len(self._record_bounds) - 1)
+        )
+        self._page_source_bytes = sum(len(record) for record in self._records or ())
+        self._page_rows = len(self._record_bounds)
 
 
 def raise_if_timed_out(deadline: float) -> None:
@@ -526,9 +795,6 @@ REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
 REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
 
 
-REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE = 'page_upload_in_progress'
-
-
 REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
 
 
@@ -564,7 +830,11 @@ class UploadCredentials:
 
 
 class UploadClient(Protocol):
-    def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, body: BinaryIO) -> Mapping[str, Any]: ...
+    def register_descriptor(self, creds: UploadCredentials, body: bytes) -> Mapping[str, Any]: ...
+
+    def put_source_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO
+    ) -> Mapping[str, Any]: ...
 
     def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]: ...
 
@@ -604,7 +874,7 @@ class DeadlinedPageBody:
 
 
 class RequestsUploadClient:
-    """Direct-page HTTP upload client for its-agent-intake. Imports requests lazily."""
+    """Direct HTTP upload client for its-agent-intake. Imports requests lazily."""
 
     def __init__(self, timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT) -> None:
         self._timeout = timeout
@@ -621,21 +891,34 @@ class RequestsUploadClient:
             headers[test_drive_header] = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE
         return headers
 
-    def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, buffer: BinaryIO) -> Mapping[str, Any]:
-        """Upload one complete page as a single PUT and return the parsed page receipt.
-
-        The buffered page is streamed as the request body with stable declared metadata;
-        every bounded retry rewinds the buffer and resends byte-identical content for the
-        same page index.
-        """
+    def register_descriptor(self, creds: UploadCredentials, body: bytes) -> Mapping[str, Any]:
+        """Register the immutable source-page descriptor; retries send byte-identical bodies."""
         headers = self._headers(creds, 'application/json')
-        headers['X-DD-Page-Bytes'] = str(page.page_bytes)
-        headers['X-DD-Page-Rows'] = str(page.rows)
+        url = '{}/uploads/{}/descriptor'.format(creds.base_url.rstrip('/'), creds.upload_id)
+        _status, response_body = upload_with_retry(
+            'POST', url, headers, body, self._timeout, deadline=creds.wall_deadline
+        )
+        return parse_json_object_response(response_body, 'descriptor registration')
+
+    def put_source_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, buffer: BinaryIO
+    ) -> Mapping[str, Any]:
+        """Upload one record-complete source page and return the parsed final page receipt.
+
+        The buffered page is streamed as the request body with stable declared source
+        metadata; every bounded retry rewinds the buffer and resends byte-identical content
+        for the same page index. Intake's defensive ``final_page_too_large`` rejection surfaces
+        as its own failure code so the writer can split the buffered records and retry the
+        same index.
+        """
+        headers = self._headers(creds, REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE)
+        headers['X-DD-Source-Page-Bytes'] = str(page.source_bytes)
+        headers['X-DD-Source-Page-Rows'] = str(page.rows)
         headers['X-DD-Record-Offset'] = str(page.record_offset)
-        headers['X-DD-Page-SHA256'] = page.sha256_hex
-        # The buffer is complete and rewound before the request, so the exact page size is
+        headers['X-DD-Source-Page-SHA256'] = page.sha256_hex
+        # The buffer is complete and rewound before the request, so the exact source size is
         # declared as a stable Content-Length for one non-chunked request body.
-        headers['Content-Length'] = str(page.page_bytes)
+        headers['Content-Length'] = str(page.source_bytes)
         url = '{}/uploads/{}/pages/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, page.batch_index)
         _status, response_body = upload_with_retry(
             'PUT',
@@ -643,16 +926,18 @@ class RequestsUploadClient:
             headers,
             buffer,
             self._timeout,
-            retryable_error_codes=frozenset((REMOTE_QUERY_PAGE_UPLOAD_IN_PROGRESS_ERROR_CODE,)),
+            mapped_error_codes={
+                REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE
+            },
             deadline=creds.wall_deadline,
         )
-        return parse_page_receipt_body(response_body)
+        return parse_json_object_response(response_body, 'page upload')
 
     def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
         _status, body = upload_with_retry('POST', url, headers, b'{}', self._timeout, deadline=creds.wall_deadline)
-        return parse_finalize_run_body(body)
+        return parse_json_object_response(body, 'run finalize')
 
     def abort(self, creds: UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
@@ -665,37 +950,45 @@ class RequestsUploadClient:
             LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
 
 
-def parse_page_receipt_body(body: bytes) -> Mapping[str, Any]:
-    """Parse the page-upload response, failing closed on a non-JSON or non-object body."""
+def parse_json_object_response(body: bytes, source: str) -> Mapping[str, Any]:
+    """Parse one intake response, failing closed on a non-JSON or non-object body."""
     try:
         parsed = json.loads(body.decode('utf-8'))
     except (UnicodeDecodeError, ValueError):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not valid JSON.')
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake {} response was not valid JSON.'.format(source))
     if not isinstance(parsed, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
+        raise RemoteQueryFailure(
+            'invalid_receipt', 'its-agent-intake {} response was not a JSON object.'.format(source)
+        )
     return parsed
 
 
-def parse_finalize_run_body(body: bytes) -> Mapping[str, Any]:
-    """Parse the run-finalize response, failing closed on a non-JSON or non-object body."""
-    if not body or not body.strip():
-        return {}
-    try:
-        parsed = json.loads(body.decode('utf-8'))
-    except (UnicodeDecodeError, ValueError):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not valid JSON.')
-    if not isinstance(parsed, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
-    return parsed
+def verify_descriptor_response(response: Mapping[str, Any], upload_id: str) -> None:
+    """Fail closed unless intake's descriptor registration response identifies this upload.
+
+    The response body is intake-owned and minimal; an echoed ``upload_id`` is the identity the
+    producer can verify, so a mismatch is an invalid receipt and an absent echo is accepted.
+    """
+    if not isinstance(response, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake descriptor response was not a JSON object.')
+    reported_upload_id = response.get('upload_id')
+    if reported_upload_id is not None and str(reported_upload_id) != upload_id:
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake descriptor response reported upload id {!r} instead of {!r}.'.format(
+                str(reported_upload_id), upload_id
+            ),
+        )
 
 
-def verify_page_response(response: Mapping[str, Any], page: PageUploadMetadata) -> None:
-    """Fail closed unless intake's authoritative page receipt matches the produced page.
+def verify_source_page_receipt(response: Mapping[str, Any], page: SourcePageUploadMetadata) -> None:
+    """Fail closed unless intake's final page receipt matches the source page identity.
 
-    Every receipt field the producer declared is compared exactly before the buffer is
-    deleted and the next page may be produced. The object ``key`` is server-derived and
-    opaque to the producer, so it is validated structurally; its exact value is verified
-    downstream by its-agent.
+    ``batch_index``, ``record_offset``, and ``rows`` must match exactly: one source page maps
+    to one final page with the same rows and offset. ``key``, ``bytes``, and ``sha256`` are
+    intake-derived final metadata, so they are validated for shape only — never compared to
+    the source page's own bytes or checksum. The final key's exact value is verified
+    downstream by its-agent against intake's authoritative result.
     """
     if not isinstance(response, Mapping):
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
@@ -706,16 +999,35 @@ def verify_page_response(response: Mapping[str, Any], page: PageUploadMetadata) 
         )
     verify_page_receipt_field(response, 'batch_index', page.batch_index)
     verify_page_receipt_field(response, 'record_offset', page.record_offset)
-    verify_page_receipt_field(response, 'bytes', page.page_bytes)
     verify_page_receipt_field(response, 'rows', page.rows)
-    reported_sha256 = response.get('sha256')
-    if reported_sha256 != page.sha256_hex:
+    final_bytes = response.get('bytes')
+    if type(final_bytes) is not int or final_bytes < 0:
         raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake page upload response reported sha256 {!r} instead of {!r}.'.format(
-                str(reported_sha256), page.sha256_hex
-            ),
+            'invalid_receipt', 'its-agent-intake page upload response did not report usable final bytes.'
         )
+    final_sha256 = response.get('sha256')
+    if not isinstance(final_sha256, str) or re.fullmatch(r'[0-9a-f]{64}', final_sha256) is None:
+        raise RemoteQueryFailure(
+            'invalid_receipt', 'its-agent-intake page upload response did not report a valid final sha256.'
+        )
+
+
+def finalize_totals(response: Mapping[str, Any]) -> tuple[int, int, int]:
+    """Intake's authoritative run totals: ``(page_count, total_rows, total_bytes)``.
+
+    Run finalization is the authority for the compact completion receipt, so a response that
+    does not report all three totals is an invalid receipt rather than a fallback to local
+    source accounting.
+    """
+    totals = []
+    for field in ('page_count', 'total_rows', 'total_bytes'):
+        reported = response.get(field)
+        if type(reported) is not int or reported < 0:
+            raise RemoteQueryFailure(
+                'invalid_receipt', 'its-agent-intake run finalize response did not report {}.'.format(field)
+            )
+        totals.append(reported)
+    return totals[0], totals[1], totals[2]
 
 
 def verify_page_receipt_field(response: Mapping[str, Any], field: str, expected: int) -> None:
@@ -733,8 +1045,8 @@ def verify_run_finalize_response(response: Mapping[str, Any], upload_id: str) ->
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
     reported_upload_id = response.get('upload_id')
     if reported_upload_id is None or reported_upload_id == '':
-        # The compact receipt is the integration's own accounting; intake's authoritative
-        # result is verified by its-agent, so an absent identity echo is accepted.
+        # The receipt's totals are already intake-derived, and intake's authoritative result
+        # is verified by its-agent downstream, so an absent identity echo is accepted.
         return
     if str(reported_upload_id) != upload_id:
         raise RemoteQueryFailure(
@@ -772,7 +1084,7 @@ def upload_with_retry(
     headers: Mapping[str, str],
     body: bytes | BinaryIO,
     timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
-    retryable_error_codes: frozenset[str] = frozenset(),
+    mapped_error_codes: Mapping[str, str] = frozenset(),
     deadline: float | None = None,
 ) -> tuple[int, bytes]:
     """Send one intake request with bounded retries; ``deadline`` is the run-wide wall.
@@ -806,11 +1118,17 @@ def upload_with_retry(
         else:
             if 200 <= resp.status_code < 300:
                 return resp.status_code, resp.content
-            if is_transient_upload_status(resp.status_code) or (
-                retryable_error_codes and parse_error_code(resp.content) in retryable_error_codes
-            ):
+            if is_transient_upload_status(resp.status_code):
                 last_err = 'status {}'.format(resp.status_code)
             else:
+                error_code = parse_error_code(resp.content)
+                mapped_code = mapped_error_codes.get(error_code) if error_code is not None else None
+                if mapped_code is not None:
+                    # A terminal rejection intake defines a producer behavior for (today the
+                    # defensive final_page_too_large), surfaced as its own failure code.
+                    raise RemoteQueryFailure(
+                        mapped_code, 'its-agent-intake rejected the upload with error code {}.'.format(error_code)
+                    )
                 raise RemoteQueryFailure(
                     'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
                 )
