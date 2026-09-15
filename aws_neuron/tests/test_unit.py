@@ -9,6 +9,13 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert AwsNeuronCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('aws_neuron_metrics.txt'))
