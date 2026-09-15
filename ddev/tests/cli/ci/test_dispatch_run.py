@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     [
         ('head_repo', 'DataDog/other-fork'),
         ('head_repo', None),
-        ('head_ref', 'another-branch'),
+        ('head_branch', 'another-branch'),
         ('head_sha', 'a-newer-sha'),
         ('state', 'closed'),
     ],
@@ -36,7 +36,7 @@ async def test_head_lookup_excludes_nonmatching_pull_requests(
         owner='DataDog',
         repo='integrations-core',
         head_repo='DataDog/integrations-core',
-        head_ref='hs/a-branch',
+        head_branch='hs/a-branch',
         head_sha=HEAD_SHA,
     )
 
@@ -52,7 +52,7 @@ async def test_head_lookup_refuses_incomplete_results(fake_async_github: FakeAsy
         owner='DataDog',
         repo='integrations-core',
         head_repo='DataDog/integrations-core',
-        head_ref='hs/a-branch',
+        head_branch='hs/a-branch',
         head_sha=HEAD_SHA,
     )
 

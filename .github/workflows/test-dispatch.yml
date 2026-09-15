@@ -107,7 +107,7 @@ jobs:
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
           EVENT_NAME: ${{ github.event_name }}
           HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
-          HEAD_REF: ${{ github.event.workflow_run.head_branch }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           PUSH_SHA: ${{ github.sha }}
         run: |
@@ -121,7 +121,7 @@ jobs:
           if [[ "$EVENT_NAME" == workflow_run ]]; then
             args+=(
               --pr-head-repo "$HEAD_REPO"
-              --pr-head-ref "$HEAD_REF"
+              --pr-head-branch "$HEAD_BRANCH"
               --pr-head-sha "$HEAD_SHA"
             )
           else
@@ -138,13 +138,45 @@ jobs:
             echo "available=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "available=true" >> "$GITHUB_OUTPUT"
-          echo "checkout_sha=$(jq -r '.checkout_sha' "$manifest")" >> "$GITHUB_OUTPUT"
-          echo "commit_sha=$(jq -r '.commit_sha' "$manifest")" >> "$GITHUB_OUTPUT"
-          echo "branch=$(jq -r '.branch' "$manifest")" >> "$GITHUB_OUTPUT"
-          echo "pr_number=$(jq -r '.pr_number // empty' "$manifest")" >> "$GITHUB_OUTPUT"
-          echo "target_branch=$(jq -r '.target_branch // empty' "$manifest")" >> "$GITHUB_OUTPUT"
-          echo "target_sha=$(jq -r '.target_sha // empty' "$manifest")" >> "$GITHUB_OUTPUT"
+
+          repository=$(jq -er '.repository' "$manifest")
+          checkout_sha=$(jq -er '.checkout_sha' "$manifest")
+          head_sha=$(jq -er '.head_sha' "$manifest")
+          head_branch=$(jq -er '.head_branch' "$manifest")
+          pr_number=$(jq -r '.pr_number // empty' "$manifest")
+          base_branch=$(jq -r '.base_branch // empty' "$manifest")
+          base_sha=$(jq -r '.base_sha // empty' "$manifest")
+
+          echo "Resolved run:"
+          jq . "$manifest"
+
+          {
+            echo "available=true"
+            echo "checkout_sha=$checkout_sha"
+            echo "head_sha=$head_sha"
+            echo "head_branch=$head_branch"
+            echo "pr_number=$pr_number"
+            echo "base_branch=$base_branch"
+            echo "base_sha=$base_sha"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Resolved run"
+            echo
+            if [[ -n "$pr_number" ]]; then
+              echo "- Run type: Pull request"
+              echo "- Pull request: <${GITHUB_SERVER_URL}/${repository}/pull/${pr_number}>"
+            else
+              echo "- Run type: Master push"
+            fi
+            echo "- Head branch: \`${head_branch}\`"
+            echo "- Head SHA: [\`${head_sha}\`](${GITHUB_SERVER_URL}/${repository}/commit/${head_sha})"
+            echo "- Checkout SHA: [\`${checkout_sha}\`](${GITHUB_SERVER_URL}/${repository}/commit/${checkout_sha})"
+            if [[ -n "$base_branch" ]]; then
+              echo "- Base branch: \`${base_branch}\`"
+              echo "- Base SHA: [\`${base_sha}\`](${GITHUB_SERVER_URL}/${repository}/commit/${base_sha})"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check out the planning tree
         if: steps.resolved.outputs.pr_number != ''
@@ -262,10 +294,10 @@ jobs:
         env:
           DD_GIT_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}.git
           DD_GIT_COMMIT_SHA: ${{ steps.resolved.outputs.checkout_sha }}
-          DD_GIT_COMMIT_HEAD_SHA: ${{ steps.resolved.outputs.pr_number != '' && steps.resolved.outputs.commit_sha || '' }}
-          DD_GIT_BRANCH: ${{ steps.resolved.outputs.branch }}
-          DD_GIT_PULL_REQUEST_BASE_BRANCH: ${{ steps.resolved.outputs.target_branch }}
-          DD_GIT_PULL_REQUEST_BASE_BRANCH_SHA: ${{ steps.resolved.outputs.target_sha }}
+          DD_GIT_COMMIT_HEAD_SHA: ${{ steps.resolved.outputs.pr_number != '' && steps.resolved.outputs.head_sha || '' }}
+          DD_GIT_BRANCH: ${{ steps.resolved.outputs.head_branch }}
+          DD_GIT_PULL_REQUEST_BASE_BRANCH: ${{ steps.resolved.outputs.base_branch }}
+          DD_GIT_PULL_REQUEST_BASE_BRANCH_SHA: ${{ steps.resolved.outputs.base_sha }}
           DD_PR_NUMBER: ${{ steps.resolved.outputs.pr_number }}
         with:
           api_key: ${{ steps.dd-sts.outputs.api_key }}
