@@ -1052,14 +1052,21 @@ def verify_descriptor_response(
 ) -> None:
     """Fail closed unless intake's descriptor receipt exactly confirms the registration.
 
-    Intake pins the receipt as ``upload_id``, ``format_version``, ``include_schema``,
+    Intake pins the receipt as exactly ``upload_id``, ``format_version``, ``include_schema``,
     ``columns``, and ``sha256`` over the canonical descriptor bytes — the same bytes the
-    producer registered — so every field is required and must match exactly. A missing,
-    mistyped, or mismatched value is an invalid receipt: registration is the gate before any
-    result row flows, so a receipt that does not confirm the descriptor never admits rows.
+    producer registered — so the key set is fixed, every field is required, and every value
+    must match exactly. A missing, mistyped, mismatched, or unknown extra key is an invalid
+    receipt: registration is the gate before any result row flows, so a receipt that does
+    not confirm the descriptor never admits rows.
     """
     if not isinstance(response, Mapping):
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake descriptor response was not a JSON object.')
+    extra_keys = set(response) - {'upload_id', 'format_version', 'include_schema', 'columns', 'sha256'}
+    if extra_keys:
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake descriptor response carried unknown key(s): {}.'.format(', '.join(sorted(extra_keys))),
+        )
     verify_descriptor_receipt_field(response, 'upload_id', upload_id)
     verify_descriptor_receipt_field(response, 'format_version', descriptor.format_version)
     verify_descriptor_receipt_field(response, 'include_schema', descriptor.include_schema)

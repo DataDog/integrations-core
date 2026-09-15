@@ -357,6 +357,24 @@ def test_descriptor_receipt_rejects_missing_mistyped_or_mismatched_fields(field,
     assert failure.value.code == 'invalid_receipt'
 
 
+def test_descriptor_receipt_allows_no_keys_beyond_the_pinned_five():
+    """The receipt's key set is exactly the five pinned keys: an unknown extra key — even
+    alongside five matching values — is unknown intake behavior and fails closed."""
+    upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
+    body = rq.descriptor_request_bytes(upload_descriptor)
+    receipt = descriptor_receipt(body)
+    rq.verify_descriptor_response(receipt, 'upload-1', upload_descriptor, body)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        # The legacy provisional echo key is exactly the kind of drift the pinned set rejects.
+        rq.verify_descriptor_response(
+            {**receipt, 'descriptor_sha256': hashlib.sha256(body).hexdigest()},
+            'upload-1',
+            upload_descriptor,
+            body,
+        )
+    assert failure.value.code == 'invalid_receipt'
+
+
 def test_descriptor_receipt_rejects_a_non_object_response():
     with pytest.raises(rq.RemoteQueryFailure) as failure:
         rq.verify_descriptor_response(None, 'upload-1', descriptor(), b'{}')
