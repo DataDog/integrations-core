@@ -1,0 +1,1 @@
+Clarify that the managed_authentication client_id is the managed identity's Client ID, not its Object ID.
