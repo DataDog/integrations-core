@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from .pull_request import PullRequestFile as PullRequestFile
     from .pull_request import PullRequestFileStatus as PullRequestFileStatus
     from .pull_request import PullRequestRef as PullRequestRef
+    from .pull_request import PullRequestRepo as PullRequestRepo
     from .pull_request import PullRequestSimple as PullRequestSimple
     from .pull_request import PullRequestState as PullRequestState
     from .user import GitHubUser as GitHubUser
@@ -66,6 +67,7 @@ MODULE_BY_NAME: dict[str, str] = {
     'PullRequestFile': 'pull_request',
     'PullRequestFileStatus': 'pull_request',
     'PullRequestRef': 'pull_request',
+    'PullRequestRepo': 'pull_request',
     'PullRequestReviewComment': 'comment',
     'PullRequestSimple': 'pull_request',
     'PullRequestState': 'pull_request',

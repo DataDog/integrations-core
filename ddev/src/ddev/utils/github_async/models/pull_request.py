@@ -61,6 +61,14 @@ class PullRequestFile(BaseModel):
     previous_filename: str | None = None
 
 
+class PullRequestRepo(BaseModel):
+    """The repository a pull request's head or base branch lives in."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    full_name: str  # e.g. 'DataDog/integrations-core'
+
+
 class PullRequestRef(BaseModel):
     """A head or base branch reference on a pull request.
 
@@ -73,6 +81,8 @@ class PullRequestRef(BaseModel):
     ref: str
     sha: str
     label: str | None = None  # e.g. 'octocat:new-topic'
+    # Null once the head repository is deleted, which GitHub allows while the pull request survives.
+    repo: PullRequestRepo | None = None
 
 
 class PullRequestSimple(BaseModel):
