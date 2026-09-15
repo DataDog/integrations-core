@@ -167,7 +167,9 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 When multiple certificates share the same subject but have different serial numbers or thumbprints (for example, an expired certificate and its renewed replacement), the integration may only detect one of them, often the expired certificate.
 
-**Agent v7.70.0 and later**: The `certificate_thumbprint` and `certificate_serial_number` tags are available on metrics and service checks, allowing you to distinguish between certificates with identical subjects in Datadog monitors and dashboards. While these tags cannot be used for filtering in the integration configuration (only `certificate_subjects` is supported), you can create custom monitors that group by `certificate_thumbprint` or `certificate_serial_number` instead of the default `subject_cn` grouping to monitor each certificate separately.
+**Agent v7.70.0 to v7.82.x**: The `certificate_thumbprint` and `certificate_serial_number` tags are available on metrics and service checks, allowing you to distinguish between certificates with identical subjects in Datadog monitors and dashboards. While these tags cannot be used for filtering in the integration configuration (only `certificate_subjects` is supported), you can create custom monitors that group by `certificate_thumbprint` or `certificate_serial_number` instead of the default `subject_cn` grouping to monitor each certificate separately.
+
+**Agent v7.83.0 and later**: In addition to the monitor-grouping approach above, you can use `filters.include` or `filters.exclude` with a `certificate_thumbprint` or `certificate_serial_number` rule to scope collection to a specific certificate. See [Configuration](#configuration) for details.
 
 **Agent versions prior to v7.70.0**: If you are running an Agent version older than v7.70.0, delete the expired certificate from the Windows Certificate Store so only the valid, renewed certificate is monitored.
 
