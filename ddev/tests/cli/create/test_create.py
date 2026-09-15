@@ -30,13 +30,15 @@ def test_default_create_writes_manifest_without_overrides(ddev, empty_repo, subc
     'subcommand',
     ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
 )
-def test_skip_manifest_omits_manifest_without_writing_overrides(ddev, empty_repo, subcommand):
+def test_skip_manifest_does_not_affect_new_integration_scaffolding(ddev, empty_repo, subcommand):
     result = ddev('create', subcommand, 'my_integration', '--skip-manifest')
     assert result.exit_code == 0, result.output
 
     integration_dir = empty_repo.path / 'my_integration'
     assert integration_dir.is_dir()
-    assert not (integration_dir / 'manifest.json').exists()
+    manifest_path = integration_dir / 'manifest.json'
+    assert manifest_path.is_file()
+    json.loads(manifest_path.read_text())
     assert not (empty_repo.path / '.ddev' / 'config.toml').exists()
     assert 'deprecated' not in result.output.lower()
 
@@ -110,6 +112,15 @@ def test_check_only_requires_existing_manifest(ddev, empty_repo):
     result = ddev('create', 'check-only', 'partner_thing')
     assert result.exit_code != 0
     assert 'manifest.json' in result.output
+
+
+def test_check_only_skip_manifest_scaffolds_without_existing_manifest(ddev, empty_repo):
+    result = ddev('create', 'check-only', 'partner_thing', '--skip-manifest')
+    assert result.exit_code == 0, result.output
+
+    integration_dir = empty_repo.path / 'partner_thing'
+    assert (integration_dir / 'datadog_checks' / 'partner_thing' / '__about__.py').is_file()
+    assert not (integration_dir / 'manifest.json').exists()
 
 
 def _write_partner_manifest(integration_dir):

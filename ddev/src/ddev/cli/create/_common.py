@@ -28,7 +28,7 @@ def create_options(f: Callable[..., Any]) -> Callable[..., Any]:
     f = click.option(
         '--skip-manifest',
         is_flag=True,
-        help='Do not generate a `manifest.json`.',
+        help='Do not require an existing `manifest.json` when using `check-only`.',
     )(f)
     f = click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created.')(f)
     f = click.option('--location', '-l', default=None, help='The directory where files will be written.')(f)
@@ -55,9 +55,13 @@ def run_subcommand(
     extra_fields: dict[str, Any] = {}
     target_integration_dir: str | None = None
     if integration_type == 'check_only':
-        # The existing manifest supplies check_name, the Python package name consumed by the scaffold.
-        check_only_fields, target_integration_dir = _resolve_check_only_inputs(app, name, location)
-        extra_fields.update(check_only_fields)
+        if skip_manifest:
+            target_integration_dir = normalize_package_name(name)
+            extra_fields['check_name'] = target_integration_dir
+        else:
+            # The existing manifest supplies check_name, the Python package name consumed by the scaffold.
+            check_only_fields, target_integration_dir = _resolve_check_only_inputs(app, name, location)
+            extra_fields.update(check_only_fields)
 
     from ddev.cli.create._scaffold import render
 
@@ -67,7 +71,6 @@ def run_subcommand(
         name,
         location=location,
         dry_run=dry_run,
-        skip_manifest=skip_manifest,
         extra_fields=extra_fields,
         target_integration_dir=target_integration_dir,
     )
