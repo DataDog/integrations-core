@@ -57,6 +57,7 @@ from ddev.utils.github_async.models import (
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
@@ -172,6 +173,8 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 status='completed',
                 conclusion='success',
                 html_url='https://github.com/o/r/actions/runs/123',
+                head_sha='deadbeef',
+                run_number=1,
             ),
             headers={},
         ),
@@ -195,6 +198,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 html_url=None,
                 head_sha='head-sha',
             ),
+            headers={},
+        ),
+        # An empty page; tests that need runs register their own WorkflowRunsList.
+        'list_workflow_runs': lambda: GitHubResponse(
+            data=WorkflowRunsList(total_count=0, workflow_runs=[]),
             headers={},
         ),
         # An empty page; tests that need artifacts register their own ArtifactsList.
@@ -633,6 +641,47 @@ class FakeAsyncGitHubClient:
             output=output,
             timeout=timeout,
         )
+
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str,
+        head_sha: str | None = None,
+        per_page: int = 30,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        """Async-generator mirror. A registered response may be a single page or a list of pages."""
+        self._record(
+            'list_workflow_runs',
+            owner=owner,
+            repo=repo,
+            workflow_id=workflow_id,
+            head_sha=head_sha,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_workflow_runs',
+            {
+                'owner': owner,
+                'repo': repo,
+                'workflow_id': workflow_id,
+                'head_sha': head_sha,
+                'per_page': per_page,
+                'timeout': timeout,
+            },
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            if isinstance(page, GitHubResponse):
+                yield page
+            else:
+                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
 
     async def list_workflow_run_artifacts(
         self,

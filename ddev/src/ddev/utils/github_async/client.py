@@ -51,6 +51,7 @@ from .models import (
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from .retry import (
     DEFAULT_RETRY_POLICIES,
@@ -662,6 +663,46 @@ class AsyncGitHubClient:
         except httpx.HTTPStatusError as error:
             if error.response.status_code != RUN_ALREADY_TERMINAL_STATUS:
                 raise
+
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str,
+        head_sha: str | None = None,
+        per_page: int = 30,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        """
+        Calls the GitHub API to list the runs of a single workflow (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            workflow_id: Workflow file name (for example `resolve-build-deps.yaml`) or numeric workflow ID.
+            head_sha: When given, only runs associated with that head commit SHA are returned.
+            per_page: Number of runs per page (default 30, max 100).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Applies per page. Defaults to the client's policy for replayable requests.
+
+        Returns:
+            AsyncIterator[GitHubResponse[WorkflowRunsList]]: One page of workflow runs per iteration.
+
+        Raises:
+            ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
+        """
+        _ensure_per_page_valid(per_page)
+        endpoint = f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
+        params: dict[str, Any] = {"per_page": per_page}
+        if head_sha is not None:
+            params["head_sha"] = head_sha
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, retry=retry, params=params):
+            yield self._parse_response(response, WorkflowRunsList)
 
     async def list_workflow_run_artifacts(
         self,

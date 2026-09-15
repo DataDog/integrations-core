@@ -146,6 +146,8 @@ def client(request) -> FakeAsyncGitHubClient:
             status="completed",
             conclusion=conclusion,
             html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
+            head_sha="deadbeef",
+            run_number=1,
         ),
     )
     fake.mock_response("list_workflow_run_artifacts", ArtifactsList(total_count=0, artifacts=[]))
@@ -226,7 +228,15 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
             )
         assert request.url.path == "/repos/DataDog/integrations-core/actions/runs/123"
         return httpx.Response(
-            200, json={"id": 123, "status": "completed", "conclusion": "success", "html_url": run_url}
+            200,
+            json={
+                "id": 123,
+                "status": "completed",
+                "conclusion": "success",
+                "html_url": run_url,
+                "head_sha": "deadbeef",
+                "run_number": 1,
+            },
         )
 
     def make_client(token: str, *, rate_limiter: InstrumentedAsyncLimiter) -> AsyncGitHubClient:
@@ -307,7 +317,13 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
     job = make_job()
     client.mock_response(
         "get_workflow_run",
-        WorkflowRun(id=123, status="in_progress", html_url="https://github.com/o/r/actions/runs/123"),
+        WorkflowRun(
+            id=123,
+            status="in_progress",
+            html_url="https://github.com/o/r/actions/runs/123",
+            head_sha="deadbeef",
+            run_number=1,
+        ),
         once=True,
     )
     client.mock_response(
@@ -381,6 +397,8 @@ def a_run_that_never_finishes(client: FakeAsyncGitHubClient) -> None:
             status="in_progress",
             conclusion=None,
             html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
+            head_sha="deadbeef",
+            run_number=1,
         ),
     )
 
@@ -471,6 +489,8 @@ def running_run(run_id: int) -> WorkflowRun:
         status="in_progress",
         conclusion=None,
         html_url=f"https://github.com/o/r/actions/runs/{run_id}",
+        head_sha="deadbeef",
+        run_number=1,
     )
 
 

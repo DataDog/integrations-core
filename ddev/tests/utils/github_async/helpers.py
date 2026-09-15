@@ -132,6 +132,12 @@ ENDPOINT_CALLS = [
         default_retry="safe",
     ),
     EndpointCase(
+        "list_workflow_runs",
+        lambda c: first_page(c.list_workflow_runs("o", "r", "wf.yml")),
+        lambda: json_response({"total_count": 1, "workflow_runs": [workflow_run_payload()]}),
+        default_retry="safe",
+    ),
+    EndpointCase(
         "list_workflow_run_artifacts",
         lambda c: first_page(c.list_workflow_run_artifacts("o", "r", 1)),
         lambda: json_response({"total_count": 1, "artifacts": [artifact(1)]}),
