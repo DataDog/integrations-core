@@ -10,6 +10,13 @@ from datadog_checks.kubernetes_cluster_autoscaler import KubernetesClusterAutosc
 
 from .common import METRICS_MOCK, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert KubernetesClusterAutoscalerCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check_kubernetes_cluster_autoscaler(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('kubernetes_cluster_autoscaler_metrics.txt'))
