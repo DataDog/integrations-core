@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 
 from .utils import get_check
+
+LATEST_SPEC_ACCEPT = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
 
 
 class TestPrometheusEndpoint:
@@ -417,12 +420,70 @@ class TestUseLatestSpec:
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()
         scraper = check.scrapers['test']
-        assert scraper.http.options['headers']['Accept'] == (
-            'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-        )
+        assert scraper._use_latest_spec is True
+        assert scraper.http.get_header('Accept') == LATEST_SPEC_ACCEPT
 
     def test_dynamic_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': False})
         check.configure_scrapers()
         scraper = check.scrapers['test']
-        assert scraper.http.options['headers']['Accept'] == 'text/plain'
+        assert scraper._use_latest_spec is False
+        assert scraper.http.get_header('Accept') == 'text/plain'
+
+    def test_user_accept_header_is_preserved(self, dd_run_check):
+        check = get_check({'use_latest_spec': True, 'headers': {'Accept': 'application/json'}})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        assert scraper.http.get_header('Accept') == 'application/json'
+
+    def test_non_canonically_cased_configured_accept_header_is_preserved(self, dd_run_check):
+        check = get_check({'use_latest_spec': True, 'extra_headers': {'accept': 'application/json'}})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        assert scraper.http.get_header('Accept') == 'application/json'
+
+    def test_per_request_accept_header_is_preserved(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        with mock.patch.object(type(scraper.http), 'get') as mock_get:
+            scraper.send_request(headers={'Accept': 'application/json'})
+
+        assert mock_get.call_args.kwargs['headers'] == {'Accept': 'application/json'}
+        assert 'extra_headers' not in mock_get.call_args.kwargs
+
+    def test_unrelated_per_request_headers_replace_negotiated_accept(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        with mock.patch.object(type(scraper.http), 'get') as mock_get:
+            scraper.send_request(headers={'Authorization': 'Bearer token'})
+
+        assert mock_get.call_args.kwargs['headers'] == {'Authorization': 'Bearer token'}
+        assert 'extra_headers' not in mock_get.call_args.kwargs
+
+    def test_per_request_extra_headers_are_not_mutated(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+        extra_headers = {'X-Custom': 'value'}
+
+        with mock.patch.object(type(scraper.http), 'get') as mock_get:
+            scraper.send_request(extra_headers=extra_headers)
+
+        assert extra_headers == {'X-Custom': 'value'}
+        assert mock_get.call_args.kwargs['extra_headers'] == {'X-Custom': 'value'}
+
+    def test_lowercase_per_request_accept_header_is_preserved(self, dd_run_check):
+        check = get_check({'use_latest_spec': True})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        with mock.patch.object(type(scraper.http), 'get') as mock_get:
+            scraper.send_request(extra_headers={'accept': 'application/json'})
+
+        assert mock_get.call_args.kwargs['extra_headers'] == {'accept': 'application/json'}
