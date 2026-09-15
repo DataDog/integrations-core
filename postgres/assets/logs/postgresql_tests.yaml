@@ -9,11 +9,9 @@ tests:
         severity: "LOG"
       error_severity: "LOG"
       postgres:
-        service_name: "postgresql"
         severity_category: "info"
       timestamp: "2017-11-07 17:30:39 UTC"
     message: "incomplete startup packet"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -39,7 +37,6 @@ tests:
       postgres:
         appname: "psql"
         proc_id: "5237"
-        service_name: "postgresql"
         session_id: "5a0348cd.1475"
         severity_category: "info"
       remote_host: "[local]"
@@ -47,7 +44,6 @@ tests:
       timestamp: "2017-11-08 18:11:35.727 UTC"
       user: "postgres"
     message: "statement: SELECT * FROM playground;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -75,7 +71,6 @@ tests:
       postgres:
         appname: "datadog-agent"
         proc_id: "114"
-        service_name: "postgresql"
         session_id: "5defc7c5.72"
         severity_category: "info"
       remote_host: "172.28.0.1"
@@ -83,7 +78,6 @@ tests:
       timestamp: "2019-12-10 18:27:45.389 UTC"
       user: "datadog"
     message: "duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -109,7 +103,6 @@ tests:
       pid: 20337
       postgres:
         proc_id: "20337"
-        service_name: "postgresql"
         session_id: "68c862e1.4f71"
         severity_category: "info"
         vxid: "384/39221"
@@ -124,7 +117,6 @@ tests:
       user: "shopper_1"
       vxid: "384/39221"
     message: "exec_simple_query, postgres.c:1075"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -153,7 +145,6 @@ tests:
       postgres:
         appname: "pgbench"
         proc_id: "87"
-        service_name: "postgresql"
         session_id: "68c9abb6.57"
         severity_category: "info"
         vxid: "5/2050"
@@ -168,7 +159,6 @@ tests:
       user: "postgres"
       vxid: "5/2050"
     message: "duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -197,7 +187,6 @@ tests:
       postgres:
         appname: "PostgreSQL JDBC Driver"
         proc_id: "194370"
-        service_name: "postgresql"
         session_id: "691e0ab7.2f742"
         severity_category: "info"
         vxid: "15/174689"
@@ -212,7 +201,6 @@ tests:
       user: "service_catalog_rw"
       vxid: "15/174689"
     message: "duration: 1626.107 ms  plan: {}"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -231,7 +219,6 @@ tests:
       pid: 1670514
       postgres:
         proc_id: "1670514"
-        service_name: "postgresql"
         session_id: "6930969e.197d72"
         severity_category: "info"
         vxid: "20/120887"
@@ -243,7 +230,6 @@ tests:
       txid: 0
       vxid: "20/120887"
     message: "automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -259,11 +245,9 @@ tests:
       pid: 63
       postgres:
         proc_id: "63"
-        service_name: "postgresql"
         severity_category: "info"
       timestamp: "2026-08-17 20:46:39.837 UTC"
     message: "checkpoint starting: shutdown immediate"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -279,13 +263,11 @@ tests:
         statement: "SELECT 2 AS c02;"
       error_severity: "LOG"
       postgres:
-        service_name: "postgresql"
         session_id: "6a8372f9.6b"
         severity_category: "info"
       session_id: "6a8372f9.6b"
       timestamp: "2026-08-17 20:45:45 UTC"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -312,7 +294,6 @@ tests:
       postgres:
         appname: "pgllp_app"
         proc_id: "107"
-        service_name: "postgresql"
         session_id: "6a837346.6b"
         severity_category: "info"
       ps: "idle"
@@ -322,7 +303,6 @@ tests:
       timestamp: "2026-08-17 20:47:02 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -352,7 +332,6 @@ tests:
       postgres:
         appname: "pgllp_app"
         proc_id: "108"
-        service_name: "postgresql"
         session_id: "6a837351.6c"
         severity_category: "info"
         vxid: "4/5"
@@ -367,43 +346,11 @@ tests:
       user: "pgllp_user"
       vxid: "4/5"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999633749
- -
-  sample: "pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=172.17.0.1 LOG:  statement: SELECT 2 AS c02;"
-  result:
-    custom:
-      application_name: "pgllp_app"
-      db:
-        instance: "pgllp_db"
-        operation: "SELECT"
-        severity: "LOG"
-        statement: "SELECT 2 AS c02;"
-        user: "pgllp_user"
-      dbname: "pgllp_db"
-      error_severity: "LOG"
-      network:
-        client:
-          ip: "172.17.0.1"
-      pid: 107
-      postgres:
-        appname: "pgllp_app"
-        proc_id: "107"
-        service_name: "postgresql"
-        severity_category: "info"
-      remote_host: "172.17.0.1"
-      user: "pgllp_user"
-    message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-     - "db:pgllp_db"
-    timestamp: 1
  -
   sample: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -424,14 +371,12 @@ tests:
       pid: 107
       postgres:
         proc_id: "107"
-        service_name: "postgresql"
         severity_category: "info"
       remote_host: "172.17.0.1"
       remote_port: 37472
       timestamp: "2026-08-17 20:45:12 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -455,20 +400,18 @@ tests:
       pid: 106
       postgres:
         proc_id: "106"
-        service_name: "postgresql"
         severity_category: "info"
       session_lineno: 10
       timestamp: "2026-08-17 20:46:29.997 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999589997
  -
-  sample: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=172.17.0.1 LOG:  statement: SELECT 2 AS c02;"
+  sample: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=db.123host LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
       db:
@@ -483,18 +426,16 @@ tests:
       line_num: 10
       network:
         client:
-          ip: "172.17.0.1"
+          hostname: "db.123host"
       pid: 119
       postgres:
         proc_id: "119"
-        service_name: "postgresql"
         severity_category: "info"
-      remote_host: "172.17.0.1"
+      remote_host: "db.123host"
       session_lineno: 10
       timestamp: "2026-08-17 20:46:19.015 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -517,13 +458,11 @@ tests:
       pid: 118
       postgres:
         proc_id: "118"
-        service_name: "postgresql"
         severity_category: "info"
       session_lineno: 10
       timestamp: "2026-08-17 20:46:08.111 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -545,12 +484,10 @@ tests:
       pid: 118
       postgres:
         proc_id: "118"
-        service_name: "postgresql"
         severity_category: "info"
       timestamp: "2026-08-17 20:46:41.019 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -574,28 +511,12 @@ tests:
       postgres:
         appname: "pgllp_app"
         proc_id: "105"
-        service_name: "postgresql"
         severity_category: "info"
       timestamp: "2026-08-17 20:45:34.801 UTC"
       user: "pgllp_user"
     message: "statement: SELECT 2 AS c02;"
-    service: "postgresql"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999534801
- -
-  sample: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
-  result:
-    custom:
-      postgres:
-        service_name: "postgresql"
-        severity_category: "info_default"
-    message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
-    service: "postgresql"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1
-
