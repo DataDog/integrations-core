@@ -23,8 +23,8 @@ def validate_options(
     pull_request: str | None,
     pr_head_sha: str | None,
     pr_head_repo: str | None,
-    pr_head_ref: str | None,
-    pr_base_ref: str | None,
+    pr_head_branch: str | None,
+    pr_base_branch: str | None,
     commit: str | None,
     all_targets: bool,
     dry_run: bool,
@@ -38,8 +38,8 @@ def validate_options(
         pull_request=pull_request,
         pr_head_sha=pr_head_sha,
         pr_head_repo=pr_head_repo,
-        pr_head_ref=pr_head_ref,
-        pr_base_ref=pr_base_ref,
+        pr_head_branch=pr_head_branch,
+        pr_base_branch=pr_base_branch,
         commit=commit,
         all_targets=all_targets,
     )
@@ -52,8 +52,8 @@ def validate_options(
             pull_request=pull_request,
             pr_head_sha=pr_head_sha,
             pr_head_repo=pr_head_repo,
-            pr_head_ref=pr_head_ref,
-            pr_base_ref=pr_base_ref,
+            pr_head_branch=pr_head_branch,
+            pr_base_branch=pr_base_branch,
             commit=commit,
         )
 
@@ -79,8 +79,8 @@ def _validate_manifest_options(
     pull_request: str | None,
     pr_head_sha: str | None,
     pr_head_repo: str | None,
-    pr_head_ref: str | None,
-    pr_base_ref: str | None,
+    pr_head_branch: str | None,
+    pr_base_branch: str | None,
     commit: str | None,
     all_targets: bool,
 ) -> None:
@@ -92,9 +92,9 @@ def _validate_manifest_options(
         for option, present in {
             '--pr': pull_request is not None,
             '--pr-head-repo': pr_head_repo is not None,
-            '--pr-head-ref': pr_head_ref is not None,
+            '--pr-head-branch': pr_head_branch is not None,
             '--pr-head-sha': pr_head_sha is not None,
-            '--pr-base-ref': pr_base_ref is not None,
+            '--pr-base-branch': pr_base_branch is not None,
             '--commit': commit is not None,
             '--all': all_targets,
         }.items()
@@ -113,8 +113,8 @@ def _pull_request_resolver(
     pull_request: str | None,
     pr_head_sha: str | None,
     pr_head_repo: str | None,
-    pr_head_ref: str | None,
-    pr_base_ref: str | None,
+    pr_head_branch: str | None,
+    pr_base_branch: str | None,
     commit: str | None,
 ) -> PullRequestResolver | None:
     from ddev.utils.github import parse_pull_request_reference
@@ -122,9 +122,9 @@ def _pull_request_resolver(
     pr_options = {
         '--pr': pull_request,
         '--pr-head-repo': pr_head_repo,
-        '--pr-head-ref': pr_head_ref,
+        '--pr-head-branch': pr_head_branch,
         '--pr-head-sha': pr_head_sha,
-        '--pr-base-ref': pr_base_ref,
+        '--pr-base-branch': pr_base_branch,
     }
     is_pr_run = any(value is not None for value in pr_options.values())
     if commit is not None and is_pr_run:
@@ -141,8 +141,8 @@ def _pull_request_resolver(
         number = parse_pull_request_reference(pull_request)
         if number is None:
             raise click.UsageError(f'`{pull_request}` is neither a pull request number nor a pull request URL.')
-    elif not all((pr_head_repo, pr_head_ref, pr_head_sha)):
-        raise click.UsageError('Specify `--pr` or all of `--pr-head-repo`, `--pr-head-ref`, and `--pr-head-sha`.')
+    elif not all((pr_head_repo, pr_head_branch, pr_head_sha)):
+        raise click.UsageError('Specify `--pr` or all of `--pr-head-repo`, `--pr-head-branch`, and `--pr-head-sha`.')
 
     if pr_head_repo is not None:
         head_owner, _, head_name = pr_head_repo.partition('/')
@@ -154,9 +154,9 @@ def _pull_request_resolver(
         repo=repo,
         number=number,
         head_repo=pr_head_repo,
-        head_ref=pr_head_ref,
+        head_branch=pr_head_branch,
         head_sha=pr_head_sha,
-        base_ref=pr_base_ref,
+        base_branch=pr_base_branch,
     )
 
 

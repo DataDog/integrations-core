@@ -45,19 +45,19 @@ class DispatcherContext:
     """The run being tested. `build_dispatcher` consumes part of it; the rest describes the run
     for the plan header and for the monitoring run context (see `run_fields`).
 
-    `base_sha` and `checkout_sha` are deliberately separate: a pull request is tested at its
-    immutable merge commit, but its checks belong to the head commit. Outside a pull request the
-    two are the same.
+    `checkout_sha` is the tree tested; `head_sha` is the revision that receives its results.
+    They differ for a pull request and are the same for a branch run.
     """
 
     owner: str
     repo: str
     checkout_sha: str
-    base_sha: str
-    branch: str
+    head_sha: str
+    head_branch: str
     workflow: str
     workflow_ref: str
-    target_branch: str | None = None
+    base_branch: str | None = None
+    base_sha: str | None = None
     pr_number: int | None = None
     tags: tuple[str, ...] = ()
     pytest_args: str = ''
@@ -66,7 +66,7 @@ class DispatcherContext:
     @property
     def concurrency_key(self) -> str:
         """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
-        return f'pr-{self.pr_number}' if self.pr_number is not None else self.base_sha
+        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
 
 
 @dataclass(frozen=True)
@@ -100,7 +100,7 @@ def tag_fields(tags: tuple[str, ...]) -> dict[str, Any]:
     return fields
 
 
-PROTECTED_RUN_FIELDS = frozenset({'repo', 'branch', 'commit', 'context', 'pr_number', 'target-branch'})
+PROTECTED_RUN_FIELDS = frozenset({'repo', 'head_branch', 'head_sha', 'context', 'pr_number', 'base_branch', 'base_sha'})
 
 
 def run_fields(context: DispatcherContext) -> dict[str, Any]:
@@ -108,12 +108,11 @@ def run_fields(context: DispatcherContext) -> dict[str, Any]:
     fields = tag_fields(context.tags)
     fields.update(
         {
-            # The head revision the run reports on. `checkout_sha` is deliberately not used: for a
-            # pull request it is the merge commit, whose results belong to the head revision.
-            'commit': context.base_sha,
-            'branch': context.branch,
+            'head_sha': context.head_sha,
+            'head_branch': context.head_branch,
             'pr_number': context.pr_number,
-            'target-branch': context.target_branch,
+            'base_branch': context.base_branch,
+            'base_sha': context.base_sha,
             'repo': f'{context.owner}/{context.repo}',
         }
     )
@@ -289,11 +288,11 @@ def build_dispatcher(
             repo=context.repo,
             workflow_id=context.workflow,
             ref=context.workflow_ref,
-            base_sha=context.base_sha,
+            head_sha=context.head_sha,
             checkout_sha=context.checkout_sha,
             concurrency_key=context.concurrency_key,
             artifacts_base_path=artifacts_path,
-            branch=context.branch,
+            head_branch=context.head_branch,
             is_fork=context.is_fork,
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
