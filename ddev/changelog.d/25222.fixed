@@ -1,0 +1,1 @@
+Require a ``tests/`` directory, not only a ``hatch.toml``, for ddev to consider an integration testable.
