@@ -137,11 +137,6 @@ def properties_to_collect(mor_type, metric_filters):
 
 def cpu_count_metric_name(resource_type):
     # type: (str) -> str
-    """Return the CPU count metric name for a resource type, e.g. `vm.summary.config.numCpu`.
-
-    Namespace-less, which is both the shape `metric_filters` are matched against and the shape
-    `AgentCheck.gauge` expects. Prefix with `vsphere.` only for human-readable output.
-    """
     return "{}.{}".format(resource_type, CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE[resource_type])
 
 
