@@ -212,7 +212,7 @@ class Integration:
 
     @cached_property
     def is_testable(self) -> bool:
-        return (self.path / 'hatch.toml').is_file()
+        return (self.path / 'hatch.toml').is_file() and (self.path / 'tests').is_dir()
 
     @cached_property
     def is_shippable(self) -> bool:
