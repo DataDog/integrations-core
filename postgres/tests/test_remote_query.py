@@ -198,7 +198,14 @@ class FakeUploadClient:
 
     def register_descriptor(self, creds, body):
         self.descriptor_bodies.append(body)
-        return {'upload_id': creds.upload_id, 'descriptor_sha256': hashlib.sha256(body).hexdigest()}
+        registered = json.loads(body)
+        return {
+            'upload_id': creds.upload_id,
+            'format_version': registered['format_version'],
+            'include_schema': registered['include_schema'],
+            'columns': len(registered['columns']),
+            'sha256': hashlib.sha256(body).hexdigest(),
+        }
 
     def put_source_page(self, creds, page, body):
         payload = body.read()

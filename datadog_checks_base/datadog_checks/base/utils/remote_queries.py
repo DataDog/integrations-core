@@ -638,9 +638,10 @@ class SourcePageWriter:
         self._page_rows = 0
         self._page_record_offset = 0
         # Registration precedes any result row: one byte-identical body per upload, and
-        # intake's response identity is verified before rows flow.
-        response = client.register_descriptor(creds, descriptor_request_bytes(descriptor))
-        verify_descriptor_response(response, creds.upload_id)
+        # intake's receipt must exactly confirm the registered descriptor before rows flow.
+        request_body = descriptor_request_bytes(descriptor)
+        response = client.register_descriptor(creds, request_body)
+        verify_descriptor_response(response, creds.upload_id, descriptor, request_body)
 
     def add_row(self, cells: Sequence[EncodedCell]) -> None:
         """Frame and buffer one row's cells; split the page before the final bound overflows."""
@@ -1034,22 +1035,36 @@ def parse_json_object_response(body: bytes, source: str) -> Mapping[str, Any]:
     return parsed
 
 
-def verify_descriptor_response(response: Mapping[str, Any], upload_id: str) -> None:
-    """Fail closed unless intake's descriptor registration response identifies this upload.
+def verify_descriptor_receipt_field(response: Mapping[str, Any], field: str, expected: Any) -> None:
+    reported = response.get(field)
+    if type(reported) is not type(expected) or reported != expected:
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake descriptor response reported {} {!r} instead of {!r}.'.format(field, reported, expected),
+        )
 
-    The response body is intake-owned and minimal; an echoed ``upload_id`` is the identity the
-    producer can verify, so a mismatch is an invalid receipt and an absent echo is accepted.
+
+def verify_descriptor_response(
+    response: Mapping[str, Any],
+    upload_id: str,
+    descriptor: RemoteQueryUploadDescriptor,
+    request_bytes: bytes,
+) -> None:
+    """Fail closed unless intake's descriptor receipt exactly confirms the registration.
+
+    Intake pins the receipt as ``upload_id``, ``format_version``, ``include_schema``,
+    ``columns``, and ``sha256`` over the canonical descriptor bytes — the same bytes the
+    producer registered — so every field is required and must match exactly. A missing,
+    mistyped, or mismatched value is an invalid receipt: registration is the gate before any
+    result row flows, so a receipt that does not confirm the descriptor never admits rows.
     """
     if not isinstance(response, Mapping):
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake descriptor response was not a JSON object.')
-    reported_upload_id = response.get('upload_id')
-    if reported_upload_id is not None and str(reported_upload_id) != upload_id:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake descriptor response reported upload id {!r} instead of {!r}.'.format(
-                str(reported_upload_id), upload_id
-            ),
-        )
+    verify_descriptor_receipt_field(response, 'upload_id', upload_id)
+    verify_descriptor_receipt_field(response, 'format_version', descriptor.format_version)
+    verify_descriptor_receipt_field(response, 'include_schema', descriptor.include_schema)
+    verify_descriptor_receipt_field(response, 'columns', len(descriptor.columns))
+    verify_descriptor_receipt_field(response, 'sha256', hashlib.sha256(request_bytes).hexdigest())
 
 
 def verify_source_page_receipt(response: Mapping[str, Any], page: SourcePageUploadMetadata) -> None:

@@ -117,7 +117,16 @@ class Uploads:
         self.descriptor_bodies.append(body)
         if self.descriptor_response is not None:
             return self.descriptor_response
-        return {'upload_id': creds.upload_id, 'descriptor_sha256': hashlib.sha256(body).hexdigest()}
+        # Intake's pinned receipt: the registered descriptor's identity plus the sha256 over
+        # the canonical registration bytes.
+        registered = json.loads(body)
+        return {
+            'upload_id': creds.upload_id,
+            'format_version': registered['format_version'],
+            'include_schema': registered['include_schema'],
+            'columns': len(registered['columns']),
+            'sha256': hashlib.sha256(body).hexdigest(),
+        }
 
     def final_bytes_for(self, page):
         if self.receipt_bytes is not None:
@@ -295,15 +304,74 @@ def test_descriptor_registration_happens_once_before_any_row(delivery, creds):
     assert uploads.descriptor_bodies == [rq.descriptor_request_bytes(descriptor())]
 
 
-def test_descriptor_response_identity_must_match():
-    rq.verify_descriptor_response({'upload_id': 'upload-1'}, 'upload-1')
-    rq.verify_descriptor_response({}, 'upload-1')  # absent echo is accepted
+def descriptor_receipt(body, **overrides):
+    """Intake's pinned descriptor receipt for one registration body, with field overrides."""
+    registered = json.loads(body)
+    receipt = {
+        'upload_id': 'upload-1',
+        'format_version': registered['format_version'],
+        'include_schema': registered['include_schema'],
+        'columns': len(registered['columns']),
+        'sha256': hashlib.sha256(body).hexdigest(),
+    }
+    receipt.update(overrides)
+    return receipt
+
+
+def test_descriptor_receipt_confirms_the_registration_exactly():
+    upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
+    body = rq.descriptor_request_bytes(upload_descriptor)
+    rq.verify_descriptor_response(descriptor_receipt(body), 'upload-1', upload_descriptor, body)
+
+
+@pytest.mark.parametrize(
+    'field,bad',
+    [
+        ('upload_id', None),  # missing
+        ('upload_id', 123),  # mistyped
+        ('upload_id', 'other-upload'),  # mismatched
+        ('format_version', None),
+        ('format_version', 2),
+        ('format_version', 'csv-json-cell-v2'),
+        ('include_schema', None),
+        ('include_schema', 0),
+        ('include_schema', False),  # flipped against the registered descriptor
+        ('columns', None),
+        ('columns', '1'),
+        ('columns', 2),
+        ('sha256', None),
+        ('sha256', 'A' * 64),  # the pinned receipt is lowercase hex
+        ('sha256', hashlib.sha256(b'other canonical descriptor bytes').hexdigest()),
+    ],
+)
+def test_descriptor_receipt_rejects_missing_mistyped_or_mismatched_fields(field, bad):
+    upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
+    body = rq.descriptor_request_bytes(upload_descriptor)
+    receipt = descriptor_receipt(body)
+    if bad is None:
+        del receipt[field]
+    else:
+        receipt[field] = bad
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        rq.verify_descriptor_response({'upload_id': 'other-upload'}, 'upload-1')
+        rq.verify_descriptor_response(receipt, 'upload-1', upload_descriptor, body)
     assert failure.value.code == 'invalid_receipt'
+
+
+def test_descriptor_receipt_rejects_a_non_object_response():
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        rq.verify_descriptor_response(None, 'upload-1')
+        rq.verify_descriptor_response(None, 'upload-1', descriptor(), b'{}')
     assert failure.value.code == 'invalid_receipt'
+
+
+def test_writer_gates_rows_on_a_descriptor_receipt_that_confirms_the_registration(delivery, creds):
+    """The registration gate fails closed before any row flows or the run finalizes."""
+    uploads = Uploads(descriptor_response={'upload_id': creds.upload_id, 'sha256': '0' * 64})
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        make_writer(delivery, creds, uploads)
+    assert failure.value.code == 'invalid_receipt'
+    assert len(uploads.descriptor_bodies) == 1
+    assert uploads.pages == []
+    assert uploads.finalize_calls == 0
 
 
 # ---------------------------------------------------------------------------
