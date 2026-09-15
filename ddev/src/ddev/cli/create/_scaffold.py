@@ -292,7 +292,6 @@ def collect_template_files(
     config: dict[str, Any],
     *,
     target_integration_dir: str,
-    skip_manifest: bool,
     read: bool,
 ) -> list[TemplateFile]:
     """Walk the template directory for `integration_type` and produce the file list.
@@ -323,9 +322,6 @@ def collect_template_files(
         target_rel = _retarget_top_segment(formatted_rel, template_check_name, target_integration_dir)
         target_path = target_root / target_rel
 
-        if skip_manifest and _is_manifest_path(_StdPath(target_rel), target_integration_dir):
-            continue
-
         binary = source.name.endswith(BINARY_EXTENSIONS)
         tf = TemplateFile(target_path=target_path, source_path=source, binary=binary)
         if read:
@@ -353,10 +349,6 @@ def _walk_template(root: Path) -> Iterator[Path]:
             yield child
 
 
-def _is_manifest_path(target_rel: _StdPath, integration_dir_name: str) -> bool:
-    return target_rel == _StdPath(integration_dir_name) / 'manifest.json'
-
-
 def render(
     app: Application,
     integration_type: str,
@@ -364,7 +356,6 @@ def render(
     *,
     location: str | None,
     dry_run: bool,
-    skip_manifest: bool,
     extra_fields: dict[str, Any] | None = None,
     target_integration_dir: str | None = None,
 ) -> ScaffoldResult:
@@ -391,7 +382,6 @@ def render(
         root,
         config,
         target_integration_dir=integration_dir_name,
-        skip_manifest=skip_manifest,
         read=not dry_run,
     )
 
