@@ -55,8 +55,6 @@ class TestInputValidation:
 
 
 class TestHatchOnlyTarget:
-    # `checkpoint_harmony_endpoint` has a `hatch.toml` but no tests directory, so only the
-    # Hatch-backed operations may select it; a plain test run must stay rejected.
     @pytest.mark.parametrize(
         'flag, script',
         [

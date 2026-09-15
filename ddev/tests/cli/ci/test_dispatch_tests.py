@@ -125,7 +125,7 @@ def test_a_pull_request_supplies_the_whole_run_context(ddev, github, planned, op
     assert MERGE_SHA in result.output
 
 
-def test_dispatch_tests_plans_from_hatch_toml(
+def test_dispatch_tests_plans_from_testable_target(
     ddev: CliRunner, github: FakeAsyncGitHubClient, config_file: ConfigFileWithOverrides, tmp_path: Path
 ):
     root = tmp_path / 'repo'

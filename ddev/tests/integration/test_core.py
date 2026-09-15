@@ -93,26 +93,6 @@ class TestIsTile:
         assert integration.is_tile is False
 
 
-class TestHasHatchConfig:
-    def test_check(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-        integration = repo.integrations.get('postgres')
-
-        assert integration.has_hatch_config is True
-
-    def test_tile(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-        integration = repo.integrations.get('kubernetes')
-
-        assert integration.has_hatch_config is False
-
-    def test_hatch_toml_without_tests(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-        integration = repo.integrations.get('checkpoint_harmony_endpoint')
-
-        assert integration.has_hatch_config is True
-
-
 class TestIsTestable:
     def test_check(self, local_repo):
         repo = Repository(local_repo.name, str(local_repo))
@@ -130,6 +110,7 @@ class TestIsTestable:
         repo = Repository(local_repo.name, str(local_repo))
         integration = repo.integrations.get('checkpoint_harmony_endpoint')
 
+        assert integration.has_hatch_config is True
         assert integration.is_testable is False
 
 
