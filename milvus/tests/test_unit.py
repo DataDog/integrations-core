@@ -9,6 +9,8 @@ from datadog_checks.milvus import MilvusCheck
 
 from .common import STANDALONE_TEST_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('milvus_payload.txt'))
@@ -41,3 +43,9 @@ def test_custom_validation(dd_run_check):
     ):
         check = MilvusCheck('milvus', {}, [{'openmetrics_endpoint': endpoint}])
         dd_run_check(check)
+
+
+def test_default_metric_limit_is_zero(instance):
+    # Kills the core/NumberReplacer mutant at check.py:12 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    check = MilvusCheck('milvus', {}, [instance])
+    assert check.DEFAULT_METRIC_LIMIT == 0
