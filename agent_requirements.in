@@ -58,12 +58,12 @@ requests-toolbelt==1.0.0
 requests-unixsocket2==1.0.1
 requests==2.34.2
 rethinkdb==2.4.10.post1
-securesystemslib[crypto,pynacl]==0.28.0
+securesystemslib[crypto,pynacl]==1.5.1
 semver==3.0.4
 service-identity[idna]==26.1.0
 simplejson==4.1.1
 supervisor==4.3.0
-tuf==4.0.0
+tuf==7.0.1
 urllib3==2.7.0
 vertica-python==1.4.0
 voltdbclient==15.3.0
