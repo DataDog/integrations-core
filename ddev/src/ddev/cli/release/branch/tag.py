@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import asyncio
+import base64
+import json
 import logging
 import re
+import shlex
 from typing import TYPE_CHECKING
 
 import click
+import httpx
 from httpx import HTTPStatusError
 from packaging.version import Version
+from pydantic import ValidationError
 
 from ddev.utils.git import GitRepository
 from ddev.utils.github_errors import GitHubAuthenticationError
@@ -17,7 +23,11 @@ from .create import BRANCH_NAME_REGEX
 if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.utils.github import PullRequest
+    from ddev.utils.github_async import AsyncGitHubClient
 
+DATADOG_AGENT_OWNER = 'DataDog'
+DATADOG_AGENT_REPO = 'datadog-agent'
+RELEASE_JSON_PATH = 'release.json'
 UPDATE_BUILD_AGENT_YAML_WORKFLOW = 'update-build-agent-yaml.yml'
 # The dd-octo-sts policy grants PR-writing credentials only to this workflow on master.
 UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF = 'master'
@@ -143,6 +153,8 @@ def tag(
 
     if build_agent_yaml_needs_update:
         _trigger_build_agent_yaml_update_workflow(app, target_branch)
+
+    _open_datadog_agent_bump_pr(app, git, target_branch, new_tag, effective_ref)
 
 
 def _warn_if_build_agent_yaml_stale(app: Application, git: GitRepository, ref: str) -> bool:
@@ -384,6 +396,218 @@ def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str
         app.display_success(
             f'Dispatched `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}`; check the workflow run for PR creation status.'
         )
+
+
+class _AgentBumpPrError(Exception):
+    """Recovery instructions for the user after the tag was pushed but the bump PR failed.
+
+    The message is the user-facing warning body; the caller prefixes it with the fact that the
+    tag was already pushed.
+    """
+
+
+def _open_datadog_agent_bump_pr(
+    app: Application, git: GitRepository, target_branch: str, new_tag: str, effective_ref: str
+) -> None:
+    """Open a PR on datadog-agent pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit.
+
+    The pin is the integrations-core commit SHA that `effective_ref` (what the tag was placed on)
+    resolves to. It is built through the async GitHub client so no local checkout of datadog-agent
+    is required.
+    """
+    agent_base_branch = _determine_agent_branch(new_tag, target_branch)
+
+    from ddev.utils.github_async import async_github_client
+
+    try:
+        commit_sha = git.capture('rev-parse', '--verify', f'{effective_ref}^{{commit}}').strip()
+    except OSError as e:
+        app.display_warning(
+            f'The tag was pushed, but the datadog-agent bump PR could not be created: '
+            f'failed to resolve commit SHA for `{effective_ref}`: {e}'
+        )
+        return
+
+    open_manually_hint = (
+        f'open one manually against `{agent_base_branch}` pinning `INTEGRATIONS_CORE_VERSION` to `{commit_sha}`'
+    )
+
+    token = app.config.github.token
+    if not token:
+        app.display_warning(
+            'The tag was pushed, but a GitHub token is required to open the datadog-agent bump PR.\n'
+            f'Set `github.token` in your ddev config, then {open_manually_hint}.'
+        )
+        return
+
+    head_branch = f'integrations-core/bump-{new_tag}'
+    title = f'Bump integrations-core to {new_tag}'
+    body = (
+        f'Pins `INTEGRATIONS_CORE_VERSION` in `release.json` to `{commit_sha}`, '
+        f'the integrations-core commit tagged `{new_tag}` on `{target_branch}`.'
+    )
+
+    async def run() -> str | None:
+        async with async_github_client(token=token) as client:
+            return await _create_agent_bump_pr(client, agent_base_branch, head_branch, commit_sha, title, body)
+
+    app.display_waiting(
+        f'Opening datadog-agent PR to bump integrations-core to {new_tag} ({commit_sha}) '
+        f'against `{agent_base_branch}`...'
+    )
+    try:
+        pr_url = asyncio.run(run())
+    except _AgentBumpPrError as e:
+        app.display_warning(f'The tag was pushed, but the datadog-agent bump PR could not be created:\n{e}')
+    except GitHubAuthenticationError:
+        app.display_warning(
+            'The tag was pushed, but the datadog-agent bump PR could not be created due to authentication.\n'
+            f'To recover, {open_manually_hint}.'
+        )
+        raise
+    except (httpx.HTTPError, ValidationError) as e:
+        app.display_warning(
+            f'The tag was pushed, but the datadog-agent bump PR could not be created: {e}\n'
+            f'To recover, {open_manually_hint}.'
+        )
+    else:
+        if pr_url is None:
+            app.display_warning(
+                f'`{RELEASE_JSON_PATH}` on `{agent_base_branch}` already pins `{commit_sha}`; '
+                'skipping datadog-agent PR.'
+            )
+        else:
+            app.display_success(f'Datadog-agent bump PR: {pr_url}')
+
+
+async def _create_agent_bump_pr(
+    client: AsyncGitHubClient,
+    base_branch: str,
+    head_branch: str,
+    commit_sha: str,
+    title: str,
+    body: str,
+) -> str | None:
+    """Bump the pin and open the PR through `client`, returning the PR URL (None if already pinned).
+
+    `release.json` is read at the commit SHA captured by `get_ref`, so the source blob and the
+    head-branch point share one immutable snapshot even if the base branch moves. Failures
+    raise `_AgentBumpPrError` with the recovery instructions the caller displays.
+    """
+    from ddev.utils.github_async.retry import (
+        RETRYABLE_SERVER_STATUSES,
+        RetryPolicy,
+        any_of,
+        on_pre_send_transport_error,
+        on_status,
+    )
+
+    gh_command = (
+        f'gh pr create --repo {DATADOG_AGENT_OWNER}/{DATADOG_AGENT_REPO} '
+        f'--base {base_branch} --head {head_branch} '
+        f'--title {shlex.quote(title)} --body {shlex.quote(body)}'
+    )
+
+    try:
+        base = await client.get_ref(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'heads/{base_branch}')
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code != 404:  # noqa: PLR2004
+            raise
+        raise _AgentBumpPrError(
+            f'the `{base_branch}` branch could not be found on datadog-agent; this usually means '
+            f'the Agent release branch has not been cut yet, but it can also mean the configured '
+            f'GitHub token has no access to {DATADOG_AGENT_OWNER}/{DATADOG_AGENT_REPO}.\n'
+            f'Once the branch exists (and the token has access), open one pinning '
+            f'`INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
+        ) from e
+    current = await client.get_content(
+        DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, RELEASE_JSON_PATH, ref=base.data.object.sha
+    )
+    content = base64.b64decode(current.data.content).decode('utf-8')
+    try:
+        new_content = _bump_integrations_core_version(content, commit_sha)
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        raise _AgentBumpPrError(
+            f'`{RELEASE_JSON_PATH}` on `{base_branch}` is not the expected JSON shape: {e}\n'
+            f'To recover, open one manually against `{base_branch}` pinning '
+            f'`INTEGRATIONS_CORE_VERSION` to `{commit_sha}`.'
+        ) from e
+    if new_content is None:
+        return None
+
+    await client.create_ref(DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, f'refs/heads/{head_branch}', base.data.object.sha)
+    try:
+        await client.create_or_update_file_contents(
+            DATADOG_AGENT_OWNER,
+            DATADOG_AGENT_REPO,
+            RELEASE_JSON_PATH,
+            message=title,
+            content=base64.b64encode(new_content.encode('utf-8')).decode('ascii'),
+            sha=current.data.sha,
+            branch=head_branch,
+        )
+    except (httpx.HTTPError, ValidationError) as e:
+        # GitHub may have applied the commit while reporting the failure, so the recovery must not
+        # assume either way.
+        raise _AgentBumpPrError(
+            f'head branch `{head_branch}` was created on datadog-agent, but the pin commit for '
+            f'`{commit_sha}` may not have been made on it: {e}\n'
+            f'Check `{head_branch}`: if `{RELEASE_JSON_PATH}` there does not pin `{commit_sha}`, '
+            f'commit the pin to `{head_branch}` first, then open the PR:\n{gh_command}'
+        ) from e
+    retry_policy = RetryPolicy(should_retry=any_of(on_pre_send_transport_error, on_status(*RETRYABLE_SERVER_STATUSES)))
+    try:
+        pr = await client.create_pull_request(
+            DATADOG_AGENT_OWNER,
+            DATADOG_AGENT_REPO,
+            title=title,
+            head=head_branch,
+            base=base_branch,
+            body=body,
+            retry=retry_policy,
+        )
+    except (httpx.HTTPError, ValidationError) as e:
+        # A 422 can be GitHub reporting a duplicate of a retried create whose first attempt
+        # actually went through, so resolve it to the existing PR instead of failing.
+        if isinstance(e, httpx.HTTPStatusError) and e.response.status_code == 422:  # noqa: PLR2004
+            try:
+                pulls = await client.list_pull_requests(
+                    DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, head=f'{DATADOG_AGENT_OWNER}:{head_branch}'
+                )
+            except httpx.HTTPError:
+                pass
+            else:
+                if pulls.data:
+                    return pulls.data[0].html_url
+        raise _AgentBumpPrError(
+            f'the pin commit was made on `{head_branch}`, but the PR could not be created: {e}\n'
+            f'Open it manually:\n{gh_command}'
+        ) from e
+    return pr.data.html_url
+
+
+def _determine_agent_branch(tag: str, target_branch: str) -> str:
+    """The datadog-agent branch to target with the pin PR.
+
+    The Agent repo has no release branch yet when the first RC of a milestone is tagged
+    (`X.Y.0-rc.1`), so that pin goes to `main`; every other tag targets the matching Agent
+    release branch.
+    """
+    version = Version(tag)
+    return 'main' if version.micro == 0 and version.pre == ('rc', 1) else target_branch
+
+
+def _bump_integrations_core_version(content: str, commit_sha: str) -> str | None:
+    """Return `release.json` content with `dependencies.INTEGRATIONS_CORE_VERSION` set to `commit_sha`.
+
+    Returns None when the value is already pinned, whatever the file's formatting: a
+    reformatting upstream must not turn the skip into a PR whose only diff is whitespace.
+    """
+    data = json.loads(content)
+    if data['dependencies']['INTEGRATIONS_CORE_VERSION'] == commit_sha:
+        return None
+    data['dependencies']['INTEGRATIONS_CORE_VERSION'] = commit_sha
+    return json.dumps(data, indent=4) + '\n'
 
 
 def _extract_patch_and_rc(version_tags):
