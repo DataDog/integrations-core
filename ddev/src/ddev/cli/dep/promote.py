@@ -11,8 +11,6 @@ from typing import TYPE_CHECKING
 import click
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-
     from ddev.cli.application import Application
     from ddev.utils.github_async.models import WorkflowRun
 
@@ -21,17 +19,6 @@ PROMOTE_WORKFLOW = "dependency-wheel-promotion.yaml"
 PROMOTE_WORKFLOW_REF = "master"
 RESOLUTION_WORKFLOW = "resolve-build-deps.yaml"
 RUNS_PER_PAGE = 100
-
-
-def most_recent_run(runs: Iterable[WorkflowRun]) -> WorkflowRun | None:
-    """Return the most recent run in `runs`, or None when there are none.
-
-    Ordered by run number rather than by the API's own ordering, which does not
-    promise that a re-run of an earlier run comes back last. `run_attempt` breaks
-    ties between attempts of the same run; the API omits it for older runs, which
-    sort as attempt 0.
-    """
-    return max(runs, key=lambda run: (run.run_number, run.run_attempt or 0), default=None)
 
 
 @dataclass(frozen=True)
@@ -55,10 +42,16 @@ class WorkflowRunLookup:
         return cls(token=app.config.github.token, owner=owner, repo=repo)
 
     def latest_run(self, workflow_id: str, head_sha: str) -> WorkflowRun | None:
-        """Return the most recent run of `workflow_id` for `head_sha`, or None if it never ran."""
+        """Return the most recent run of `workflow_id` for `head_sha`, or None if it never ran.
+
+        The most recent run is picked by run number rather than by the API's own ordering, which
+        does not promise that a re-run of an earlier run comes back last. `run_attempt` breaks ties
+        between attempts of the same run; the API omits it for older runs, which sort as attempt 0.
+        """
         import asyncio
 
-        return most_recent_run(asyncio.run(self._fetch_runs(workflow_id, head_sha)))
+        runs = asyncio.run(self._fetch_runs(workflow_id, head_sha))
+        return max(runs, key=lambda run: (run.run_number, run.run_attempt or 0), default=None)
 
     async def _fetch_runs(self, workflow_id: str, head_sha: str) -> list[WorkflowRun]:
         """Collect every page of runs of `workflow_id` for `head_sha`.
@@ -107,6 +100,9 @@ def promote(app: Application, pr_url: str):
     assert match
 
     pr_number = int(match.group(1))
+
+    if not app.config.github.token:
+        app.abort('A GitHub token is required. Set it via `ddev config set github.token <token>`.')
 
     httpx_logger = logging.getLogger('httpx')
     previous_level = httpx_logger.level

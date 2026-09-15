@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from unittest.mock import AsyncMock
 
 import pytest
 
-from ddev.cli.dep.promote import WorkflowRunLookup, most_recent_run
+from ddev.cli.dep.promote import WorkflowRunLookup
 from ddev.utils.github_async.models import WorkflowRun
 
 RUN_DETAILS = {
@@ -215,9 +216,15 @@ def workflow_run(run_number=1, html_url='u', **extra):
         ),
     ],
 )
-def test_most_recent_run(runs, expected_url):
+def test_latest_run_picks_the_most_recent_run(runs, expected_url, mocker):
     """The most recent run for the commit is reported, or None when there are no runs."""
-    result = most_recent_run(runs)
+    # The autouse fixture replaces `latest_run` itself, which is exactly what this test exercises.
+    mocker.stopall()
+    mocker.patch.object(WorkflowRunLookup, '_fetch_runs', return_value=runs, new_callable=AsyncMock)
+
+    result = WorkflowRunLookup(token='token', owner='DataDog', repo='integrations-core').latest_run(
+        'resolve-build-deps.yaml', 'deadbeef'
+    )
 
     assert (result.html_url if result else None) == expected_url
 
@@ -258,6 +265,24 @@ def test_workflow_run_lookup_reads_every_page_and_picks_the_latest(mocker):
         'head_sha': 'deadbeef',
         'per_page': 100,
     }
+
+
+def test_promote_aborts_before_any_github_call_without_a_token(ddev, mocker, config_file, monkeypatch, resolution_run):
+    """A missing token is a configuration problem, not a failed API call."""
+    config_file.model.github = {'user': 'test-user', 'token': ''}
+    config_file.save()
+    for env_var in ('DD_GITHUB_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN'):
+        monkeypatch.delenv(env_var, raising=False)
+    get_pr_head = mocker.patch('ddev.utils.github.GitHubManager.get_pr_head')
+    dispatch = mocker.patch('ddev.utils.github.GitHubManager.dispatch_workflow')
+
+    result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
+
+    assert result.exit_code != 0
+    assert 'ddev config set github.token <token>' in result.output
+    get_pr_head.assert_not_called()
+    dispatch.assert_not_called()
+    resolution_run.assert_not_called()
 
 
 def test_promote_restores_httpx_log_level_on_failure(ddev, mocker, httpx_at_debug):
