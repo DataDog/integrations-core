@@ -60,7 +60,7 @@ instances:
 
 ### Kafka Console
 
-When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
+When `enable_kafka_console` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag. For backward compatibility, `enable_cluster_monitoring` remains available as a synonym; do not set both options.
 
 - **Brokers**: Configuration and health metrics.
 - **Topics and partitions**: Sizes, offsets, and replication status.
@@ -75,7 +75,7 @@ Example configuration:
 ```yaml
 instances:
   - kafka_connect_str: localhost:9092
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: http://localhost:8081  # optional
 ```
 
@@ -83,11 +83,11 @@ instances:
 
 **Cluster** (`kafka-cluster`)
 - DESCRIBE
-- DESCRIBE_CONFIGS (cluster monitoring only)
+- DESCRIBE_CONFIGS (Kafka Console only)
 
 **Topic** (`*`)
 - DESCRIBE
-- DESCRIBE_CONFIGS (cluster monitoring only)
+- DESCRIBE_CONFIGS (Kafka Console only)
 - READ, WRITE ([Kafka messages][21] only)
 
 **Consumer group** (`*`)
