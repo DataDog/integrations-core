@@ -414,13 +414,13 @@ def row_object_bound(row):
     """The conservative final-JSON bound of one row object, computed independently.
 
     Mirrors the intake envelope arithmetic without reusing the producer's implementation:
-    braces and commas, each descriptor key plus its colon, and each cell at its own token
-    length or the fixed redaction marker, whichever is larger.
+    braces and commas, each descriptor key plus its colon, and each scalar string or number
+    leaf at its own token length or the fixed redaction marker, whichever is larger.
     """
     bound = 2 + (len(row) - 1)  # braces plus the commas between columns
     for name, value in row.items():
         bound += len(json.dumps(name, ensure_ascii=False).encode('utf-8')) + 1
-        bound += rq.string_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
+        bound += rq.redactable_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
     return bound
 
 
@@ -1728,20 +1728,31 @@ def test_value_contract_fails_closed_on_non_json_numeric_text(value):
 @pytest.mark.parametrize(
     'value, expected_bound',
     [
+        # Booleans and null are never scanned: their exact token bounds stay exact.
         (None, 4),
         (True, 4),
         (False, 5),
-        (42, 2),
+        # Short integer, decimal, and float tokens reserve the twelve-byte marker intake
+        # substitutes for a matched number leaf.
+        (42, 12),
+        (-42, 12),
+        (Decimal('1.5000'), 12),
+        (RawJsonNumber('0.1'), 12),
+        (0.1, 12),
+        # A number longer than the marker keeps its own token bytes.
+        (9223372036854775807, 19),
+        (Decimal('12345678901234567890.123456789'), 30),
         # A short string leaf bounds to the twelve-byte redaction marker; a longer one keeps
         # its own token length.
         ('x', 12),
         (uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'), 38),
-        # Nested containers bound structurally: each string leaf can grow to the marker.
+        # Nested containers bound structurally: each string or number leaf can grow to the
+        # marker, while booleans and null keep their exact tokens.
         ({'k': 'x'}, 27),
+        ({'k': 42}, 27),
         (['x', 'yy'], 2 + 12 + 1 + 12),
-        # Numbers never grow: redaction replaces only string leaves.
-        (Decimal('1.5000'), 6),
-        (RawJsonNumber('0.1'), 3),
+        ([1, RawJsonNumber('0.1')], 2 + 12 + 1 + 12),
+        ([True, None], 2 + 4 + 1 + 4),
         # Non-finite numerics are strings, so they bound like string leaves.
         (float('nan'), 12),
     ],

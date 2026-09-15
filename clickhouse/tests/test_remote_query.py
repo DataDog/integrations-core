@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import re
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -376,13 +377,13 @@ def row_object_bound(row):
     """The conservative final-JSON bound of one row object, computed independently.
 
     Mirrors the intake envelope arithmetic without reusing the producer's implementation:
-    braces plus commas, each descriptor key plus its colon, and each cell at its own token
-    length or the fixed redaction marker, whichever is larger.
+    braces plus commas, each descriptor key plus its colon, and each scalar string or number
+    leaf at its own token length or the fixed redaction marker, whichever is larger.
     """
     bound = 2 + (len(row) - 1)
     for name, value in row.items():
         bound += len(json.dumps(name, ensure_ascii=False).encode('utf-8')) + 1
-        bound += rq.string_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
+        bound += rq.redactable_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
     return bound
 
 
@@ -1348,6 +1349,37 @@ def encode_stream_tokens(names, types, values):
     """One row's canonical cell tokens, one per described column."""
     columns = remote_query.build_columns(list(names), list(types))
     return [cell.token for cell in remote_query.encode_row(list(values), columns)]
+
+
+@pytest.mark.parametrize(
+    'type_string, value, expected_bound',
+    [
+        # Booleans and null are never scanned: their exact token bounds stay exact.
+        ('Bool', True, 4),
+        ('Bool', False, 5),
+        ('Nullable(String)', None, 4),
+        # Short integer, float, and decimal tokens reserve the twelve-byte marker intake
+        # substitutes for a matched number leaf, quoted big-int spellings included.
+        ('UInt8', 1, 12),
+        ('Int64', -42, 12),
+        ('Float64', Decimal('0.1'), 12),
+        ('Float64', '0.1', 12),
+        ('Decimal(38, 10)', Decimal('1.10'), 12),
+        # A number longer than the marker keeps its own token bytes.
+        ('UInt64', '18446744073709551615', 20),
+        # A short string leaf bounds to the twelve-byte redaction marker; a longer one keeps
+        # its own token length.
+        ('String', 'x', 12),
+        # Nested numbers contribute marker bounds inside arrays, maps, and JSON values,
+        # while nested booleans and null keep their exact tokens.
+        ('Array(UInt8)', [1, None], 2 + 12 + 1 + 4),
+        ('Map(String, UInt64)', {'k': 1}, 2 + 12 + 1 + 12),
+        ('JSON', {'nested': [1, True]}, 2 + 12 + 1 + 2 + 12 + 1 + 4),
+    ],
+)
+def test_cell_final_bounds_account_for_the_redaction_marker(type_string, value, expected_bound):
+    (cell,) = remote_query.encode_row([value], remote_query.build_columns(['v'], [type_string]))
+    assert cell.final_bound == expected_bound
 
 
 def test_value_contract_encodes_scalars_exactly():

@@ -237,9 +237,10 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
     """Encode one normalized PostgreSQL value as ``(canonical JSON token, final bound)``.
 
     The token is the pinned value contract's encoding, unchanged. The bound is the
-    conservative final-JSON size after redaction: any scalar string leaf — including dict
-    keys, conservatively — either keeps its token or is replaced by the fixed ``[REDACTED]``
-    marker, whichever is longer; numbers, booleans, and nulls never grow.
+    conservative final-JSON size after redaction: any scalar string or number leaf —
+    including dict keys, conservatively — either keeps its token or is replaced by the fixed
+    ``[REDACTED]`` marker, whichever is longer; booleans and nulls are never scanned and
+    keep their exact token bounds.
     ``top_type_oid`` is the described column OID for row cells (used to accept bytea
     precisely); inside arrays and json values binary buffers can only come from bytea, so
     ``in_array`` licenses them there. Everything unrecognized fails closed.
@@ -255,22 +256,22 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
             return rq.string_cell_token(text)
         out = bytearray()
         rq.encode_raw_number_text(out, text)
-        return bytes(out), len(out)
+        return bytes(out), rq.redactable_leaf_final_bound(out)
     if isinstance(value, int):
         out = bytearray()
         rq.encode_raw_number_text(out, str(value))
-        return bytes(out), len(out)
+        return bytes(out), rq.redactable_leaf_final_bound(out)
     if isinstance(value, Decimal):
         if value.is_finite():
             out = bytearray()
             rq.encode_decimal(out, value)
-            return bytes(out), len(out)
+            return bytes(out), rq.redactable_leaf_final_bound(out)
         return rq.string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
     if isinstance(value, float):
         if math.isfinite(value):
             out = bytearray()
             rq.encode_float(out, value)
-            return bytes(out), len(out)
+            return bytes(out), rq.redactable_leaf_final_bound(out)
         return rq.string_cell_token('NaN' if math.isnan(value) else ('Infinity' if value > 0 else '-Infinity'))
     if isinstance(value, str):
         return rq.string_cell_token(value)
@@ -282,7 +283,7 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
             )
         out = bytearray()
         _encode_bytea(out, bytes(value))
-        return bytes(out), rq.string_leaf_final_bound(out)
+        return bytes(out), rq.redactable_leaf_final_bound(out)
     if isinstance(value, datetime):
         return rq.string_cell_token(_encode_datetime_text(value))
     if isinstance(value, date):
@@ -317,7 +318,7 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
             key_token = rq.canonical_json_bytes(key)
             parts.append(key_token)
             parts.append(b':')
-            bound += rq.string_leaf_final_bound(key_token) + 1
+            bound += rq.redactable_leaf_final_bound(key_token) + 1
             token, item_bound = _encode_cell_token(item, top_type_oid=None, in_array=True)
             parts.append(token)
             bound += item_bound

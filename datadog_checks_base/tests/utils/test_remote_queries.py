@@ -56,9 +56,9 @@ def descriptor(columns=(('value', 'text', 'string'),), include_schema=False, age
 
 
 def string_cell(text):
-    """One encoded string cell: its canonical JSON token and the string-leaf final bound."""
+    """One encoded string cell: its canonical JSON token and the redactable-leaf final bound."""
     token = json.dumps(text, ensure_ascii=False).encode('utf-8')
-    return rq.EncodedCell(token, rq.string_leaf_final_bound(token))
+    return rq.EncodedCell(token, rq.redactable_leaf_final_bound(token))
 
 
 def cell(token, final_bound):
@@ -408,7 +408,7 @@ def test_source_pages_frame_canonical_json_cell_tokens_as_csv(delivery, creds):
     tokens = [b'null', b'""', b'"q"', b'123.45', b'"a,b"']
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads, descriptor(columns=columns))
-    writer.add_row([cell(token, rq.string_leaf_final_bound(token)) for token in tokens])
+    writer.add_row([cell(token, rq.redactable_leaf_final_bound(token)) for token in tokens])
     result = writer.finish()
 
     # The pinned dialect: comma delimiter, '"' doubled, LF record endings, no header row.
@@ -448,6 +448,19 @@ def test_string_cell_tokens_fail_closed_on_text_that_cannot_encode_as_utf8():
     with pytest.raises(rq.RemoteQueryFailure) as failure:
         rq.string_cell_token('a\ud800')
     assert failure.value.code == 'unsupported_value'
+
+
+def test_redactable_leaf_bound_reserves_the_marker_for_short_number_tokens():
+    """Intake scans number leaves too and substitutes the fixed marker string token for any
+    match, so a short number's final bound is the marker size exactly like a short string's;
+    a number already longer than the marker keeps its own token bytes.
+    """
+    marker = len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN)
+    # Short integer and decimal/float tokens all reserve the marker size.
+    for token in (b'1', b'-42', b'0', b'0.1', b'1e+16', b'-0', b'123.45'):
+        assert rq.redactable_leaf_final_bound(token) == marker
+    long_token = b'12345678901234567890.123456789'
+    assert rq.redactable_leaf_final_bound(long_token) == len(long_token)
 
 
 def test_source_pages_frame_non_ascii_cells_as_raw_utf8_csv(delivery, creds):
@@ -564,6 +577,29 @@ def test_page_bound_accounts_for_the_redaction_marker(delivery, creds):
     writer.finish()
 
     assert [page.rows for page, _ in uploads.pages] == [2, 1]
+
+
+def test_page_bound_accounts_for_redacted_number_leaves(delivery, creds):
+    """A redacted short number grows to the fixed marker, so the split uses that bound.
+
+    Each ``1`` cell token is one byte but bounds to the twelve-byte ``"[REDACTED]"`` marker
+    intake substitutes for a matched number leaf; with a budget that fits exactly two
+    marker-bounded rows, a token-length bound would pack all three rows onto one page and
+    lean on intake's defensive ``final_page_too_large`` rejection instead of splitting
+    before upload.
+    """
+    two_rows = envelope_bound(delivery, 0) + 2 * 22 + 1
+    delivery = bounded_delivery(delivery, maxFileBytes=two_rows, maxSchemaBytes=1)
+    uploads = Uploads()
+    writer = make_writer(delivery, creds, uploads)
+    for _ in range(3):
+        writer.add_row([cell(b'1', 12)])
+    writer.finish()
+
+    # The split happened before upload — every page was accepted on its first attempt, so
+    # intake never answered final_page_too_large — and the source tokens stay exact numbers.
+    assert [(page.rows, payload) for page, payload in uploads.pages] == [(2, b'1\n1\n'), (1, b'1\n')]
+    assert len(uploads.put_attempts) == 2
 
 
 def test_page_limits_fail_closed_without_partial_success(delivery, creds):

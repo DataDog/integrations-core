@@ -106,9 +106,10 @@ RemoteQueryLogicalType = Literal[
     'boolean', 'integer', 'decimal', 'float', 'string', 'temporal', 'json', 'binary', 'vendor'
 ]
 
-# The fixed, bounded replacement marker intake substitutes for any matched scalar string
-# leaf. The producer never emits it; the page bound accounts for intake emitting it in place
-# of a shorter string, the only way redaction can grow a final page.
+# The fixed, bounded replacement marker intake substitutes for any matched scalar string or
+# number leaf. The producer never emits it; the page bound accounts for intake emitting it in
+# place of a shorter string or number — the only way redaction can grow a final page, since
+# booleans and null are never scanned.
 REMOTE_QUERY_REDACTED_MARKER = '[REDACTED]'
 REMOTE_QUERY_REDACTED_MARKER_TOKEN = b'"[REDACTED]"'
 
@@ -138,15 +139,20 @@ def canonical_json_bytes(value: Any) -> bytes:
         raise RemoteQueryFailure('unsupported_value', 'A canonical JSON string cannot be encoded as UTF-8.') from None
 
 
-def string_leaf_final_bound(token: bytes) -> int:
-    """A scalar string leaf's final bytes: its own token or the redaction marker, whichever is larger."""
+def redactable_leaf_final_bound(token: bytes | bytearray) -> int:
+    """A redactable scalar leaf's final bytes: its own token or the marker, whichever is larger.
+
+    Intake scans string and number leaves alike and substitutes the fixed marker string token
+    for any match, so both families bound against the marker; booleans and null are never
+    scanned and keep their exact token bounds at the encoding call sites.
+    """
     return max(len(token), len(REMOTE_QUERY_REDACTED_MARKER_TOKEN))
 
 
 def string_cell_token(text: str) -> tuple[bytes, int]:
-    """A scalar string cell: its canonical JSON token and the string-leaf final bound."""
+    """A scalar string cell: its canonical JSON token and the redactable-leaf final bound."""
     token = canonical_json_bytes(text)
-    return token, string_leaf_final_bound(token)
+    return token, redactable_leaf_final_bound(token)
 
 
 def _validate_utf8_byte_length(value: str, field: str, maximum_bytes: int) -> str:
@@ -415,8 +421,9 @@ class EncodedCell:
     """One canonical JSON value token plus the conservative bound on its final JSON bytes.
 
     ``token`` is the pinned value-contract encoding of the cell. ``final_bound`` bounds the
-    bytes intake can emit for the cell after redaction: every scalar string leaf either keeps
-    its token or is replaced by the fixed ``[REDACTED]`` marker, whichever is longer.
+    bytes intake can emit for the cell after redaction: every scalar string or number leaf
+    either keeps its token or is replaced by the fixed ``[REDACTED]`` marker, whichever is
+    longer; booleans and null are never scanned and keep their exact token bounds.
     """
 
     token: bytes
