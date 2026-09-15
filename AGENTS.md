@@ -104,13 +104,9 @@ The one exception is the OpenMetrics base check, which still emits a service che
 
 ## Manifest Files
 
-**Applicable to:** newly created integrations. Existing integrations that already have a `manifest.json` are exempt.
+**Applicable to:** newly created integrations.
 
-New integrations must not include a `manifest.json`. Instead, add the following to `.ddev/config.toml`, keyed by the integration's directory name:
-
-- Display name under `[overrides.display-name]`.
-- Metrics prefix (matching the prefix used in `metadata.csv`) under `[overrides.metrics-prefix]`.
-- Supported platforms under `[overrides.manifest.platforms]`.
+New integrations must include a `manifest.json`. Do not use `.ddev/config.toml` overrides as a substitute for manifest metadata.
 
 ## Development Workflow
 
