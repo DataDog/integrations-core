@@ -450,8 +450,6 @@ def test_resource_metrics(dd_run_check, aggregator, instance):
 def test_vcpu_count_metric(dd_run_check, aggregator, instance, metric, value, hostname, resource_tags):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
-    # `proxmox_type` has to be on the point itself: for VMs and nodes the check routes the
-    # resource tags to external host tags, which never reach the payload at ingest.
     aggregator.assert_metric(metric, value, hostname=hostname, tags=BASE_TAGS + resource_tags)
 
 
@@ -459,12 +457,8 @@ def test_vcpu_count_metric(dd_run_check, aggregator, instance, metric, value, ho
 def test_cpu_count_metrics_skip_containers(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
-    # A default-configured container reports its host's entire thread count as `maxcpu`
-    # (lxc/111 reports 72 on a 72-thread node), so reporting containers would overstate each one
-    # at full host CPU.
+    # lxc/111 reports its host's full 72 threads as `maxcpu`.
     aggregator.assert_metric('proxmox.container.cpu.max', count=0)
-    # Containers are still collected — the assertion above is about the vCPU point, not the
-    # resource, and would also pass if containers stopped being collected altogether.
     aggregator.assert_metric('proxmox.container.count', at_least=1)
 
 
@@ -509,8 +503,6 @@ def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance)
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric('proxmox.node.cpu.max', count=0)
-    # The rest of the inventory still emits, so the assertion above fails if the node really
-    # is skipped and not merely because the payload override stopped matching.
     aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
 
 
@@ -552,14 +544,10 @@ def test_cpu_count_metrics_distinguish_absent_maxcpu_from_zero(
 ):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
-    # An absent `maxcpu` is skipped; a zero one is a real value and must still be emitted. A
-    # truthiness check instead of `is not None` would silently drop the zero.
     if expected_value is None:
         aggregator.assert_metric('proxmox.vm.cpu.max', count=expected_count)
     else:
         aggregator.assert_metric('proxmox.vm.cpu.max', expected_value, count=expected_count)
-    # The VM itself is still collected either way, so neither assertion above can pass merely
-    # because the payload override dropped the resource.
     aggregator.assert_metric('proxmox.vm.count', at_least=1)
 
 

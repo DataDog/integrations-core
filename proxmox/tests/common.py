@@ -7,8 +7,6 @@ from typing import Any
 
 INSTANCE = {'proxmox_server': 'http://localhost:8006/api2/json', 'tags': ['testing']}
 
-# The tags every point carries: the server tag plus the instance-level `tags` from INSTANCE.
-# Derived from INSTANCE so the two can't drift apart.
 BASE_TAGS = [f'proxmox_server:{INSTANCE["proxmox_server"]}'] + INSTANCE['tags']
 
 CLUSTER_RESOURCES_FIXTURE = (
@@ -17,13 +15,7 @@ CLUSTER_RESOURCES_FIXTURE = (
 
 
 def _cluster_resources_fixture() -> dict[str, Any]:
-    """Return a fresh copy of the shipped `/cluster/resources` payload.
-
-    Mutating the real fixture rather than substituting a minimal one keeps the rest of the
-    inventory in play, so a test asserting one resource's absence can still assert that other
-    resources were collected — otherwise the assertion would also pass if the override
-    silently stopped matching.
-    """
+    """Return a fresh copy of the shipped `/cluster/resources` payload."""
     with CLUSTER_RESOURCES_FIXTURE.open() as f:
         return json.load(f)
 
@@ -38,11 +30,7 @@ def cluster_resources_with_offline_node() -> dict[str, Any]:
 
 
 def cluster_resources_with_vm_maxcpu(maxcpu: int | None) -> dict[str, Any]:
-    """Return the shipped payload with VM `qemu/100`'s `maxcpu` set to `maxcpu`, or removed if None.
-
-    Covers the check's `maxcpu is None` guard: an absent field and a zero have to be told
-    apart, and a truthiness check would silently drop the zero.
-    """
+    """Return the shipped payload with VM `qemu/100`'s `maxcpu` set, or removed if None."""
     payload = _cluster_resources_fixture()
     for resource in payload['data']:
         if resource.get('id') == 'qemu/100':

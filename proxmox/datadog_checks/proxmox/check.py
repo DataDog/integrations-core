@@ -265,22 +265,12 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         point_tags: list[str],
         hostname: str | None,
     ) -> None:
-        """Submit the vCPU count for a VM or node.
-
-        Only VMs and nodes report a meaningful count. Container `maxcpu` falls back to the whole
-        host's thread count when no limit is configured, so reporting it would overstate every
-        default container at full host CPU.
-        """
+        # Containers are excluded: an unlimited container reports the host's whole thread count.
         if resource_type not in (VM_RESOURCE, NODE_RESOURCE):
             return
 
         maxcpu = resource.get('maxcpu')
         if maxcpu is None:
-            # Proxmox strips a node's stats, `maxcpu` included, when the token lacks `Sys.Audit` on
-            # `/nodes/<node>` (`PVE/API2/Cluster.pm:622` -> `PVE/API2Tools.pm:63`). A VM the token
-            # lacks `VM.Audit` on is dropped from the payload entirely (`Cluster.pm:588`) rather
-            # than returned without the field, so this branch is the node case in practice. Log it:
-            # a silently absent count is harder to diagnose downstream than an ordinary metric.
             self.log.debug(
                 "Skipping vCPU metric for %s %s: `maxcpu` missing from the /cluster/resources payload",
                 resource_type,
@@ -288,10 +278,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             )
             return
 
-        # Downstream consumers require `proxmox_type` on the point itself. In
-        # `_collect_resource_metrics` a VM's or node's per-resource `tags` is deliberately empty
-        # (its tags go on external host tags instead), so this call has to be handed the full tag
-        # list directly — external tags never reach the metric payload at ingest.
+        # `point_tags`, not the resource's own `tags`: those go to external host tags, which never
+        # reach the metric payload.
         self.gauge(f'{resource_type}.cpu.max', maxcpu, tags=point_tags, hostname=hostname)
 
     def _collect_resource_metrics(self):
