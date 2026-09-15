@@ -1155,6 +1155,17 @@ def test_target_requires_one_complete_selector(target):
         rq.normalize_target(target)
 
 
+def test_target_validation_wrapper_keeps_no_path_back_to_the_rejected_request():
+    """Pydantic's error object retains the raw request input even though the fixed message
+    excludes it, so the wrapper severs the exception chain: a later traceback log of the
+    wrapper can only ever see the content-free validation message."""
+    with pytest.raises(ValueError) as failure:
+        rq.normalize_target({'host': 'db', 'port': 'SECRET_DO_NOT_LOG', 'dbname': 'db'})
+
+    assert failure.value.__cause__ is None
+    assert 'SECRET_DO_NOT_LOG' not in str(failure.value)
+
+
 @pytest.mark.parametrize(
     'path,value',
     [

@@ -841,6 +841,22 @@ def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(mo
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
+def test_scope_failure_wrapper_keeps_no_path_back_to_the_discovery_exception():
+    """The target_unavailable wrapper severs the discovery exception from its chain: a
+    later traceback log of the wrapper can only ever see the fixed classification message,
+    never the connection strings or identifiers the discovery error can quote."""
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke: SECRET_DO_NOT_LOG'))
+    check = make_check(dbname='postgres', autodiscovery=autodiscovery)
+
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        remote_query.database_in_monitoring_scope(check, 'dogs_1')
+
+    assert failure.value.code == 'target_unavailable'
+    assert failure.value.retryable
+    assert failure.value.__cause__ is None
+    assert 'SECRET_DO_NOT_LOG' not in str(failure.value)
+
+
 def test_stream_rejects_database_instance_with_requested_dbname_before_resolution():
     """dbname must not override the selected check's monitored database."""
     request = valid_request()

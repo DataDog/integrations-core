@@ -732,15 +732,17 @@ def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
         return False
     try:
         return dbname in autodiscovery.get_items()
-    except Exception as e:
-        # The caught exception never reaches the message: discovery failures can quote
-        # connection strings, identifiers, or other server detail. Classification and
-        # retryability are what the event carries, not the underlying text.
+    except Exception:
+        # The caught exception neither reaches the message nor rides the wrapper's
+        # exception chain: discovery failures can quote connection strings, identifiers, or
+        # other server detail, so a traceback log of the wrapper must not recover them.
+        # Classification and retryability are what the event carries, not the underlying
+        # text.
         raise rq.RemoteQueryFailure(
             'target_unavailable',
             "Unable to determine the matched check's autodiscovered database scope.",
             retryable=True,
-        ) from e
+        ) from None
 
 
 # ---------------------------------------------------------------------------

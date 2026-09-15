@@ -831,7 +831,10 @@ def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
     try:
         return RemoteQueryTarget.model_validate(target)
     except ValidationError as e:
-        raise ValueError(validation_message(e)) from e
+        # Pydantic's error object retains the raw request input even though the message is
+        # built with include_input=False, so sever the chain: a traceback log of the
+        # wrapper must not recover the rejected request.
+        raise ValueError(validation_message(e)) from None
 
 
 def is_query_allowlist_enabled() -> bool:
