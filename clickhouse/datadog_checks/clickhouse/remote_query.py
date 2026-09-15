@@ -39,12 +39,15 @@ Value contract (pinned, cross-language):
 
   ClickHouse family          JSON representation
   NULL (Nullable)           null
-  Bool                       JSON boolean (``0``/``1`` spellings normalized by type)
-  integer types              JSON number with the exact database text (quoted spellings
-                            on servers that quote 64-bit+ integers are normalized back to
-                            exact numbers)
-  Float/Decimal              JSON number with the exact database text (rows are parsed with
-                            ``parse_float=Decimal``, quoted decimals are normalized by type)
+  Bool                       JSON boolean (``0``/``1`` spellings, quoted or not, are
+                            normalized by type)
+  integer types              JSON number with the exact database text (rows are parsed
+                            with number hooks that keep every lexeme verbatim; quoted
+                            spellings on servers that quote 64-bit+ integers are validated
+                            against the JSON integer grammar and lose only their quotes)
+  Float/Decimal              JSON number with the exact database text (the same lexeme
+                            hooks; quoted decimals are validated against the JSON number
+                            grammar and normalized by type)
   non-finite floats          ClickHouse JSON formats render them as ``null`` by default;
                             the ``output_format_json_quote_denormals`` setting cannot be
                             requested for read-only-profile users, so the null rendering is
@@ -448,14 +451,36 @@ def _validate_with_select(scanner: StatementScanner) -> bool:
 #
 # Rows arrive server-rendered as JSON arrays, so string quoting, NULLs, booleans, and
 # composite types (Array/Map/Tuple/JSON) are already valid JSON; the encoder below only
-# re-serializes values into the row object and keeps exact numeric text. Rows are parsed
-# with ``parse_float=Decimal`` so float/decimal text never round-trips through a binary
-# float. Servers that quote 64-bit+ integers or decimals (ClickHouse JSON output settings)
-# deliver them as JSON strings; the declared column type normalizes those back to exact
-# JSON numbers.
+# re-serializes values into the row object. Numbers keep their exact server lexemes:
+# rows are parsed with number hooks that carry each lexeme through verbatim, nested
+# composite values included, so no int()/Decimal/repr round-trip can rewrite the text.
+# Servers that quote 64-bit+ integers or decimals (ClickHouse JSON output settings)
+# deliver them as JSON strings; the declared column type validates the text against its
+# family's JSON number grammar and normalizes it back to the same raw lexeme, removing
+# only the quotes.
 
 # A JSON number per RFC 8259: no leading zeros, optional fraction and exponent. Server
-# numeric text must already satisfy this; anything else fails closed.
+# numeric text must already satisfy this; anything else fails closed. The shared
+# ``rq.JSON_NUMBER_PATTERN`` pins the grammar for quoted decimal/float spellings; quoted
+# integer spellings accept the JSON integer form alone (no exponent, no plus sign, no
+# leading zeros).
+JSON_INTEGER_PATTERN = re.compile(r'\A-?(?:0|[1-9][0-9]*)\Z')
+
+
+@dataclass(frozen=True)
+class RawJsonNumber:
+    """One server-rendered JSON number, carried as its exact lexeme.
+
+    The row-line parse hooks and the quoted-spelling normalization both produce this
+    instead of an ``int`` or ``Decimal``, so the encoder emits the server's exact numeric
+    text: no int()/Decimal/str round-trip can rewrite it (``0.000000001`` stays itself,
+    never ``1E-9``; ``1e-7`` keeps its case and sign; ``-0`` survives). By construction
+    the text satisfies the JSON number grammar — the parse hooks only see JSON lexemes,
+    and quoted spellings are validated before their quotes are removed.
+    """
+
+    text: str
+
 
 _INTEGER_TYPE_NAMES = frozenset(
     (
@@ -547,23 +572,29 @@ def normalize_typed_value(family: str, value: Any) -> Any:
     """Normalize server value spellings that depend on server JSON output settings.
 
     Only type-known numeric/bool families are touched, so a String column holding digits
-    stays a JSON string. Anything unexpected is left for the encoder to fail closed on.
+    stays a JSON string. A quoted integer/decimal/float spelling is validated against its
+    family's JSON number grammar and becomes the same raw-lexeme representation the parse
+    hooks produce, losing only its two quotes; a spelling outside the grammar stays a
+    string for the encoder to accept verbatim. Bool's legacy spellings — quoted or not —
+    become JSON booleans. Anything unexpected is left for the encoder to fail closed on.
     """
     if family == 'integer' and isinstance(value, str):
-        if re.fullmatch(r'[+-]?[0-9]+', value):
-            return int(value)
+        if JSON_INTEGER_PATTERN.match(value):
+            return RawJsonNumber(value)
         return value
     if family in ('decimal', 'float') and isinstance(value, str):
         if rq.JSON_NUMBER_PATTERN.match(value):
-            return Decimal(value)
+            return RawJsonNumber(value)
         return value
     if family == 'bool':
         if isinstance(value, int) and not isinstance(value, bool):
             if value in (0, 1):
                 return bool(value)
             return value
-        if isinstance(value, str) and value in ('true', 'false'):
-            return value == 'true'
+        if isinstance(value, str) and value in ('true', 'false', '0', '1'):
+            return value in ('true', '1')
+        if isinstance(value, RawJsonNumber) and value.text in ('0', '1'):
+            return value.text == '1'
         return value
     return value
 
@@ -571,29 +602,38 @@ def normalize_typed_value(family: str, value: Any) -> Any:
 def _encode_cell_token(value: Any) -> tuple[bytes, int]:
     """Encode one normalized ClickHouse value as ``(canonical JSON token, final bound)``.
 
-    Values come from ``json.loads`` on a server-rendered row line, so only JSON-native types
-    plus ``Decimal`` (via ``parse_float``) appear; anything unrecognized fails closed. The
-    bound is the conservative final-JSON size after redaction: any scalar string or number
-    leaf — including dict keys, conservatively — either keeps its token or is replaced by
-    the fixed ``[REDACTED]`` marker, whichever is longer; booleans and nulls are never
-    scanned and keep their exact token bounds.
+    Values come from ``json.loads`` on a server-rendered row line, so only JSON-native
+    types plus ``RawJsonNumber`` (via the parse hooks) appear; ``float``/``Decimal`` stay
+    reachable only through json's non-finite constants (which still parse to floats) and
+    programmatic callers. Anything unrecognized fails closed. The bound is the conservative
+    final-JSON size after redaction: any scalar string or number leaf — including dict
+    keys, conservatively — either keeps its token or is replaced by the fixed
+    ``[REDACTED]`` marker, whichever is longer; booleans and nulls are never scanned and
+    keep their exact token bounds.
     """
     if value is None:
         return b'null', 4
     if isinstance(value, bool):
         token = b'true' if value else b'false'
         return token, len(token)
+    if isinstance(value, RawJsonNumber):
+        out = bytearray()
+        rq.encode_raw_number_text(out, value.text)
+        return bytes(out), rq.redactable_leaf_final_bound(out)
     if isinstance(value, int):
         out = bytearray()
         rq.encode_raw_number_text(out, str(value))
         return bytes(out), rq.redactable_leaf_final_bound(out)
     if isinstance(value, Decimal):
+        # Off-wire since the parse hooks: programmatic values (the bounds tests) only.
         if value.is_finite():
             out = bytearray()
             rq.encode_decimal(out, value)
             return bytes(out), rq.redactable_leaf_final_bound(out)
         return rq.string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
     if isinstance(value, float):
+        # json's bare non-finite constants (NaN/Infinity) still parse to floats; finite
+        # floats arrive only from programmatic callers.
         if math.isfinite(value):
             out = bytearray()
             rq.encode_float(out, value)
@@ -660,8 +700,9 @@ def encode_row(values: Sequence[Any], columns: Sequence[ResultColumn]) -> list[r
 
 def _parse_json_line(line: bytes) -> Any:
     try:
-        # parse_float=Decimal keeps float/decimal text exact: no binary-float round-trip.
-        return json.loads(line, parse_float=Decimal)
+        # Number hooks carry every numeric lexeme through verbatim — nested composite
+        # values included — so no int()/Decimal/str round-trip can rewrite the text.
+        return json.loads(line, parse_float=RawJsonNumber, parse_int=RawJsonNumber)
     except (UnicodeDecodeError, ValueError):
         # Result data must be valid UTF-8 JSON; never echo the offending line.
         raise rq.RemoteQueryFailure('query_failed', 'The result stream carried a row that is not valid JSON.') from None
@@ -738,13 +779,14 @@ REMOTE_QUERY_HEADER_LINE_SLACK = 1024
 # above any line whose framed record still fits maxRowBytes.
 REMOTE_QUERY_ROW_LINE_SLACK = 8
 
-# The quote bytes one column's value can lose to normalization: servers that quote 64-bit
-# integer or decimal spellings (ClickHouse JSON output settings) deliver them as JSON
-# strings, and the declared column type normalizes each back to its unquoted JSON number
-# token. That quote removal is the only value-contract normalization that shortens a cell
-# below its server-rendered spelling; every other value keeps the server's exact bytes
-# (strings verbatim, numbers with the exact database text) or grows the record (CSV
-# quoting of tokens carrying separators).
+# The two quote bytes one column's value can lose to normalization: removing a type-known
+# quoted spelling's quotes is the only normalization that shortens a cell below its
+# server-rendered spelling — quoted 64-bit integer/decimal/float lexemes (ClickHouse JSON
+# output settings) validate against the family's JSON number grammar and become raw
+# numbers, quoted ``true``/``false`` become JSON booleans. Every other value keeps the
+# server's exact bytes (strings verbatim, numbers with their exact lexemes, composites
+# re-serialized from the same tokens) or grows the record (CSV quoting of tokens carrying
+# separators, bool numeric spellings widened to true/false).
 REMOTE_QUERY_ROW_COLUMN_QUOTE_RESERVE = 2
 
 

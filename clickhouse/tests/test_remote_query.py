@@ -1453,10 +1453,21 @@ def test_value_contract_encodes_scalars_exactly():
     assert encode_stream_tokens(('v',), ('UInt64',), ['18446744073709551615']) == [b'18446744073709551615']
     assert encode_stream_tokens(('v',), ('Int64',), ['-42']) == [b'-42']
     # Unconvertible quoted text in a numeric column stays a string for the encoder to
-    # accept verbatim rather than corrupting.
+    # accept verbatim rather than corrupting; the same holds for a quoted integer spelling
+    # outside the JSON integer grammar (leading zeros), which must not become a number.
     assert encode_stream_tokens(('v',), ('UInt64',), ['not-a-number']) == [b'"not-a-number"']
-    # Floats and decimals keep their exact server text: no binary-float round-trip.
+    assert encode_stream_tokens(('v',), ('UInt64',), ['007']) == [b'"007"']
+    # Unquoted lexemes come off the parse hooks as raw numbers and keep their exact text:
+    # no int()/Decimal/repr round-trip may rewrite them (0.000000001 would become 1E-9,
+    # 1e-7 would lose its case, -0 would become 0).
+    assert encode_stream_tokens(('v',), ('Float64',), [remote_query.RawJsonNumber('0.000000001')]) == [b'0.000000001']
+    assert encode_stream_tokens(('v',), ('Float64',), [remote_query.RawJsonNumber('1e-7')]) == [b'1e-7']
+    assert encode_stream_tokens(('v',), ('Float64',), [remote_query.RawJsonNumber('1E+2')]) == [b'1E+2']
+    assert encode_stream_tokens(('v',), ('Int64',), [remote_query.RawJsonNumber('-0')]) == [b'-0']
+    # Quoted decimals keep their exact lexeme too: the grammar check removes only the
+    # quotes, it never re-renders the number.
     assert encode_stream_tokens(('v',), ('Float64',), ['0.1']) == [b'0.1']
+    assert encode_stream_tokens(('v',), ('Decimal(9, 9)',), ['0.000000001']) == [b'0.000000001']
     assert encode_stream_tokens(('v',), ('Decimal(38, 10)',), ['12345678901234567890.1234567890']) == [
         b'12345678901234567890.1234567890'
     ]
@@ -1470,11 +1481,15 @@ def test_value_contract_encodes_scalars_exactly():
     assert encode_stream_tokens(('v',), ('Float64',), ['-nan']) == [b'"-nan"']
     # A String column holding digits is never reinterpreted as a number.
     assert encode_stream_tokens(('v',), ('String',), ['12345']) == [b'"12345"']
-    # Booleans; legacy numeric spellings normalize by type.
+    # Booleans; legacy numeric spellings normalize by type, quoted or not.
     assert encode_stream_tokens(('v',), ('Bool',), [True]) == [b'true']
     assert encode_stream_tokens(('v',), ('Bool',), [0]) == [b'false']
     assert encode_stream_tokens(('v',), ('Bool',), [1]) == [b'true']
     assert encode_stream_tokens(('v',), ('Bool',), ['false']) == [b'false']
+    assert encode_stream_tokens(('v',), ('Bool',), ['0']) == [b'false']
+    assert encode_stream_tokens(('v',), ('Bool',), ['1']) == [b'true']
+    assert encode_stream_tokens(('v',), ('Bool',), [remote_query.RawJsonNumber('0')]) == [b'false']
+    assert encode_stream_tokens(('v',), ('Bool',), [remote_query.RawJsonNumber('1')]) == [b'true']
     # Strings with JSON escapes survive verbatim.
     assert encode_stream_tokens(('v',), ('String',), ['he said "hi"\nend']) == [b'"he said \\"hi\\"\\nend"']
     assert encode_stream_tokens(('v',), ('Nullable(String)',), [None]) == [b'null']
@@ -1579,6 +1594,39 @@ def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
         ('array_value', 'Array(Nullable(String))', 'json'),
         ('map_value', 'Map(String, UInt64)', 'json'),
     ]
+
+
+def test_value_contract_preserves_exact_server_numeric_lexemes(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # One row on the real compact wire whose numeric lexemes no int()/Decimal/repr
+    # round-trip could reproduce: a sub-1e-6 decimal, exponent spellings (case and sign),
+    # negative zero, and numbers nested inside a composite. The parse hooks carry every
+    # lexeme through byte-exact, and the quoted-spelling normalization removes only the
+    # quotes after the family's grammar check.
+    row_line = b'[0.000000001,"0.000000001",1e-7,-0,[0.000000001,1E+2]]'
+    clickhouse_client = FakeClickhouseClient(
+        raw_stream_body(
+            compact_json_line(('tiny', 'quoted_tiny', 'exponent', 'negative_zero', 'nested')),
+            compact_json_line(('Float64', 'Decimal(9, 9)', 'Float64', 'Int64', 'Array(Float64)')),
+            row_line,
+        )
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    assert page == csv_record(
+        [
+            b'0.000000001',
+            b'0.000000001',
+            b'1e-7',
+            b'-0',
+            b'[0.000000001,1E+2]',
+        ]
+    )
 
 
 def test_value_contract_rejects_row_lines_that_are_not_json_arrays(monkeypatch):
