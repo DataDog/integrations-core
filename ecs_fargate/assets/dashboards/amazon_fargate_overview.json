@@ -3,27 +3,37 @@
     "description": "## Amazon Fargate\n\nThis dashboard displays key metrics from your Amazon ECS cluster on AWS Fargate, such as cpu, memory, IO usage, network and Ephemeral Storage\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n",
     "widgets": [
         {
-            "id": 0,
             "definition": {
-                "type": "image",
-                "url": "/static/images/logos/aws-fargate_avatar.svg",
-                "sizing": "fit",
-                "margin":"small"
+                "title": "Containers",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "list_stream",
+                "requests": [
+                    {
+                        "request_type": "infrastructure_list",
+                        "query": {
+                            "data_source": "infrastructure",
+                            "resource_type": "container",
+                            "query_string": "$scope cluster_name:$ecs_cluster.value task_family:$task_family.value container_name:$container_name.value"
+                        },
+                        "columns": []
+                    }
+                ]
             },
             "layout": {
-                "x": 1,
-                "y": 1,
-                "width": 11,
-                "height": 7
-            }
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4
+            },
+            "id": 9000000000001
         },
         {
-            "id": 1,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.cpu.user{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.cpu.user{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -46,38 +56,19 @@
                 "show_legend": false
             },
             "layout": {
-                "x": 98,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 2,
-            "definition": {
-                "type": "note",
-                "content": "CPU",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "x": 0,
+                "y": 4,
+                "width": 6,
+                "height": 3
             },
-            "layout": {
-                "x": 98,
-                "y": 2,
-                "width": 95,
-                "height": 5
-            }
+            "id": 9000000000002
         },
         {
-            "id": 3,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.cpu.percent{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.cpu.percent{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -100,57 +91,19 @@
                 "show_legend": false
             },
             "layout": {
-                "x": 146,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "note",
-                "content": "Memory",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "x": 6,
+                "y": 4,
+                "width": 6,
+                "height": 3
             },
-            "layout": {
-                "x": 13,
-                "y": 2,
-                "width": 83,
-                "height": 5
-            }
+            "id": 9000000000003
         },
         {
-            "id": 5,
-            "definition": {
-                "type": "note",
-                "content": "IO Read/Write",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 1,
-                "y": 42,
-                "width": 95,
-                "height": 5
-            }
-        },
-        {
-            "id": 6,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.mem.usage{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.mem.usage{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -173,162 +126,19 @@
                 "show_legend": false
             },
             "layout": {
-                "x": 1,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:ecs.fargate.io.ops.read{*} by {container_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Average number of read operations per container",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false
+                "x": 0,
+                "y": 7,
+                "width": 6,
+                "height": 3
             },
-            "layout": {
-                "x": 1,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
+            "id": 9000000000004
         },
         {
-            "id": 8,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.io.ops.write{*} by {container_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Average number of write operations per container",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 49,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:ecs.fargate.io.bytes.read{*} by {container_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Average number of bytes read per container",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 1,
-                "y": 65,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:ecs.fargate.io.bytes.write{*} by {container_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Average number of bytes write per container",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 49,
-                "y": 65,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:ecs.fargate.mem.cache{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.mem.cache{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -352,19 +162,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 49,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
+                "x": 6,
+                "y": 7,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000005
         },
         {
-            "id": 12,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.mem.pgpgin{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.mem.pgpgin{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -388,19 +198,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 1,
-                "y": 25,
-                "width": 47,
-                "height": 15
-            }
+                "x": 0,
+                "y": 10,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000006
         },
         {
-            "id": 13,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.mem.rss{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.mem.rss{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -424,38 +234,162 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 49,
-                "y": 25,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 14,
-            "definition": {
-                "type": "note",
-                "content": "Network",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+                "x": 6,
+                "y": 10,
+                "width": 6,
+                "height": 3
             },
-            "layout": {
-                "x": 98,
-                "y": 26,
-                "width": 96,
-                "height": 5
-            }
+            "id": 9000000000007
         },
         {
-            "id": 15,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.net.bytes_sent{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.io.ops.read{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Average number of read operations per container",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000008
+        },
+        {
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:ecs.fargate.io.ops.write{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Average number of write operations per container",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 6,
+                "y": 13,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000009
+        },
+        {
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:ecs.fargate.io.bytes.read{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Average number of bytes read per container",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000010
+        },
+        {
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:ecs.fargate.io.bytes.write{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Average number of bytes write per container",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 6,
+                "y": 16,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000011
+        },
+        {
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:ecs.fargate.net.bytes_sent{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -479,19 +413,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 98,
-                "y": 33,
-                "width": 47,
-                "height": 15
-            }
+                "x": 0,
+                "y": 19,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000012
         },
         {
-            "id": 16,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.net.bytes_rcvd{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.net.bytes_rcvd{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -515,19 +449,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 147,
-                "y": 33,
-                "width": 47,
-                "height": 15
-            }
+                "x": 6,
+                "y": 19,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000013
         },
         {
-            "id": 17,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.net.packet.in_dropped{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.net.packet.in_dropped{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -551,19 +485,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 98,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
+                "x": 0,
+                "y": 22,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000014
         },
         {
-            "id": 18,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.net.packet.out_dropped{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.net.packet.out_dropped{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -587,19 +521,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 147,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
+                "x": 6,
+                "y": 22,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000015
         },
         {
-            "id": 19,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.net.sent_errors{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.net.sent_errors{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -623,19 +557,19 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 98,
-                "y": 65,
-                "width": 47,
-                "height": 15
-            }
+                "x": 0,
+                "y": 25,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000016
         },
         {
-            "id": 20,
             "definition": {
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:ecs.fargate.net.rcvd_errors{*} by {container_id}",
+                        "q": "top(avg:ecs.fargate.net.rcvd_errors{$scope,$ecs_cluster,$task_family,$container_name} by {container_id}, 10, 'mean', 'desc')",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -659,155 +593,45 @@
                 "legend_size": "0"
             },
             "layout": {
-                "x": 147,
-                "y": 65,
-                "width": 47,
-                "height": 15
-            }
+                "x": 6,
+                "y": 25,
+                "width": 6,
+                "height": 3
+            },
+            "id": 9000000000017
         },
         {
-            "id": 3114557731825634,
-            "layout": {
-                "x": 1,
-                "y": 82,
-                "width": 95,
-                "height": 5
-            },
             "definition": {
-                "type": "note",
-                "content": "Ephemeral Storage",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            }
-        },
-        {
-            "id": 256850209781962,
-            "layout": {
-                "x": 1,
-                "y": 89,
-                "width": 47,
-                "height": 15
-            },
-            "definition": {
-                "title": "Reserved MiB of Ephemeral Storage per task, cluster",
+                "title": "Tasks",
                 "title_size": "16",
                 "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns":
-                [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "time":
-                {},
-                "type": "timeseries",
+                "type": "list_stream",
                 "requests": [
                     {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "name": "query1",
-                                "data_source": "metrics",
-                                "query": "avg:ecs.fargate.ephemeral_storage.reserved{*} by {task_name,cluster_name}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "request_type": "infrastructure_list",
+                        "query": {
+                            "data_source": "infrastructure",
+                            "resource_type": "ecsTask",
+                            "query_string": "$scope cluster_name:$ecs_cluster.value task_family:$task_family.value"
                         },
-                        "display_type": "line"
+                        "columns": []
                     }
                 ]
-            }
-        },
-        {
-            "id": 6562039189475188,
-            "layout": {
-                "x": 49,
-                "y": 89,
-                "width": 47,
-                "height": 15
             },
-            "definition": {
-                "title": "Average # of utilized MiB of Ephemeral Storage per task, cluster",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "time": {},
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "name": "query1",
-                                "data_source": "metrics",
-                                "query": "avg:ecs.fargate.ephemeral_storage.utilized{*} by {task_name,cluster_name}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "display_type": "line"
-                    }
-                ]
-            }
-        },
-        {
-            "id": 2841847602733776,
             "layout": {
-                "x": 98,
-                "y": 82,
-                "width": 96,
-                "height": 5
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4
             },
-            "definition": {
-                "type": "note",
-                "content": "Task",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            }
+            "id": 9000000000018
         },
         {
-            "id": 2968193745830470,
             "layout": {
-                "x": 98,
-                "y": 89,
-                "width": 47,
-                "height": 15
+                "x": 0,
+                "y": 4,
+                "width": 6,
+                "height": 3
             },
             "definition": {
                 "title": "Task CPU Limit (shared by all containers)",
@@ -834,7 +658,7 @@
                             {
                                 "name": "query1",
                                 "data_source": "metrics",
-                                "query": "avg:ecs.fargate.cpu.task.limit{*}"
+                                "query": "avg:ecs.fargate.cpu.task.limit{$scope,$ecs_cluster,$task_family}"
                             }
                         ],
                         "response_format": "timeseries",
@@ -846,15 +670,15 @@
                         "display_type": "line"
                     }
                 ]
-            }
+            },
+            "id": 9000000000019
         },
         {
-            "id": 4420041363122044,
             "layout": {
-                "x": 147,
-                "y": 89,
-                "width": 47,
-                "height": 15
+                "x": 6,
+                "y": 4,
+                "width": 6,
+                "height": 3
             },
             "definition": {
                 "title": "Task Memory Limit (shared by all containers)",
@@ -881,7 +705,7 @@
                             {
                                 "name": "query1",
                                 "data_source": "metrics",
-                                "query": "avg:ecs.fargate.mem.task.limit{*}"
+                                "query": "avg:ecs.fargate.mem.task.limit{$scope,$ecs_cluster,$task_family}"
                             }
                         ],
                         "response_format": "timeseries",
@@ -893,11 +717,401 @@
                         "display_type": "line"
                     }
                 ]
+            },
+            "id": 9000000000020
+        },
+        {
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 6,
+                "height": 3
+            },
+            "definition": {
+                "title": "Reserved MiB of Ephemeral Storage per task, cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.ephemeral_storage.reserved{$scope,$ecs_cluster,$task_family} by {task_name,cluster_name}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "id": 9000000000021
+        },
+        {
+            "layout": {
+                "x": 6,
+                "y": 7,
+                "width": 6,
+                "height": 3
+            },
+            "definition": {
+                "title": "Average # of utilized MiB of Ephemeral Storage per task, cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.ephemeral_storage.utilized{$scope,$ecs_cluster,$task_family} by {task_name,cluster_name}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "id": 9000000000022
+        },
+        {
+            "definition": {
+                "title": "Services",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "list_stream",
+                "requests": [
+                    {
+                        "request_type": "infrastructure_list",
+                        "query": {
+                            "data_source": "infrastructure",
+                            "resource_type": "ecsService",
+                            "query_string": "$scope $ecs_cluster"
+                        },
+                        "columns": []
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6
+            },
+            "id": 9000000000023
+        },
+        {
+            "definition": {
+                "title": "Clusters",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "list_stream",
+                "requests": [
+                    {
+                        "request_type": "infrastructure_list",
+                        "query": {
+                            "data_source": "infrastructure",
+                            "resource_type": "ecsCluster",
+                            "query_string": "$scope $ecs_cluster"
+                        },
+                        "columns": []
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6
+            },
+            "id": 9000000000024
+        },
+        {
+            "id": 9000000900001,
+            "definition": {
+                "title": "CPU Utilization by Cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:ecs.fargate.cpu.usage{$scope,$ecs_cluster} by {cluster_name}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:ecs.fargate.cpu.task.limit{$scope,$ecs_cluster} by {cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1 / query2 * 100"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 9000000900002,
+            "definition": {
+                "title": "Memory Usage by Cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:ecs.fargate.mem.usage{$scope,$ecs_cluster} by {cluster_name}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": []
+            },
+            "layout": {
+                "x": 6,
+                "y": 6,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 9000000900003,
+            "definition": {
+                "title": "CPU Utilization by Service",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:ecs.fargate.cpu.usage{$scope,$ecs_cluster} by {ecs_service}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:ecs.fargate.cpu.task.limit{$scope,$ecs_cluster} by {ecs_service}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1 / query2 * 100"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 9000000900004,
+            "definition": {
+                "title": "Memory Usage by Service",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:ecs.fargate.mem.usage{$scope,$ecs_cluster} by {ecs_service}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": []
+            },
+            "layout": {
+                "x": 6,
+                "y": 6,
+                "width": 6,
+                "height": 3
             }
         }
     ],
-"template_variables": [],
-    "layout_type": "free",
+    "template_variables": [
+        {
+            "name": "scope",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "ecs_cluster",
+            "prefix": "ecs_cluster",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "task_family",
+            "prefix": "ecs_task_family",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "container_name",
+            "prefix": "container_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
     "is_read_only": true,
-    "notify_list": []
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "tabs": [
+        {
+            "id": "4b738504-3f5d-4cc0-8fc1-da558c73af18",
+            "name": "Containers",
+            "widget_ids": [
+                9000000000001,
+                9000000000002,
+                9000000000003,
+                9000000000004,
+                9000000000005,
+                9000000000006,
+                9000000000007,
+                9000000000008,
+                9000000000009,
+                9000000000010,
+                9000000000011,
+                9000000000012,
+                9000000000013,
+                9000000000014,
+                9000000000015,
+                9000000000016,
+                9000000000017
+            ]
+        },
+        {
+            "id": "4ea90ce4-5d96-4d55-9730-3caaf8ad8ff4",
+            "name": "Tasks",
+            "widget_ids": [
+                9000000000018,
+                9000000000019,
+                9000000000020,
+                9000000000021,
+                9000000000022
+            ]
+        },
+        {
+            "id": "9d2a8053-9135-459b-bf9b-d9a4e35e7f77",
+            "name": "Services",
+            "widget_ids": [
+                9000000000023,
+                9000000900003,
+                9000000900004
+            ]
+        },
+        {
+            "id": "3f1ce4ed-321e-4eac-b33e-94ceb9c20509",
+            "name": "Clusters",
+            "widget_ids": [
+                9000000000024,
+                9000000900001,
+                9000000900002
+            ]
+        }
+    ]
 }
