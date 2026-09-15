@@ -9,10 +9,12 @@ import re
 import socket
 import warnings
 from collections import ChainMap
+from collections.abc import Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from hashlib import sha256
 from typing import TYPE_CHECKING
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
 import requests
@@ -95,6 +97,15 @@ DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
     'no_proxy': {'name': 'skip_proxy'},
 }
+# `tls_intermediate_ca_certs` is forwarded so the AIA fetch session trusts any CA bundle the operator
+# pre-configured in the instance, in case the issuer endpoint is signed by one of those roots.
+AIA_TLS_CONFIG_FIELDS = frozenset(
+    {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
+)
+AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
+MAX_AIA_CERT_SIZE = 64 * 1024
+DEFAULT_AIA_CHASING_MAX_DEPTH = 5
+
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
     # environment variables. If the proxy options `http`/`https` are missing
@@ -242,6 +253,126 @@ class ResponseWrapper(ObjectProxy):
         return self
 
 
+def _der_to_pem(der_cert: bytes) -> str:
+    return (
+        _http_utils.cryptography_x509_load_certificate(der_cert)
+        .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
+        .decode('utf-8')
+    )
+
+
+def _get_aia_tls_config(tls_config: Mapping[str, object] | None, tls_verify: bool) -> dict[str, object]:
+    # Keep trust/negotiation settings, but never auth, client certs, or session state.
+    config = {
+        key: value for key, value in (tls_config or {}).items() if key in AIA_TLS_CONFIG_FIELDS and value is not None
+    }
+    config['tls_verify'] = tls_verify
+    return config
+
+
+def _is_safe_aia_url(uri: str, logger: logging.Logger | logging.LoggerAdapter) -> bool:
+    # Restrict to http(s); private/internal hosts are allowed since AIA endpoints may live on internal PKI.
+    scheme = urlparse(uri).scheme
+    if scheme not in AIA_ALLOWED_SCHEMES:
+        logger.debug('Skipping intermediate certificate URI with unsupported scheme: `%s`', uri)
+        return False
+    return True
+
+
+def _read_capped_content(
+    response: requests.Response, uri: str, logger: logging.Logger | logging.LoggerAdapter
+) -> bytes | None:
+    chunks = []
+    total = 0
+    for chunk in response.iter_content(8192):
+        total += len(chunk)
+        if total > MAX_AIA_CERT_SIZE:
+            logger.debug('Intermediate certificate from `%s` exceeds %d bytes, skipping', uri, MAX_AIA_CERT_SIZE)
+            return None
+        chunks.append(chunk)
+    return b''.join(chunks)
+
+
+AIA_REQUEST_OPTIONS = ('proxies', 'timeout', 'allow_redirects')
+
+
+def _get_aia_request_options(request_options: Mapping[str, object] | None) -> dict[str, object]:
+    # Carry over non-credential request behavior (proxy, timeout, redirects); never auth or client certs.
+    if not request_options:
+        return {}
+    return {key: request_options[key] for key in AIA_REQUEST_OPTIONS if key in request_options}
+
+
+def _fetch_aia_content(
+    session: RequestsWrapper,
+    uri: str,
+    request_options: dict[str, object],
+    logger: logging.Logger | logging.LoggerAdapter,
+) -> bytes | None:
+    request_options = request_options.copy()
+    follow_redirects = is_affirmative(request_options.pop('allow_redirects', True))
+    request_options.update({'allow_redirects': False, 'stream': True})
+    redirect_count = 0
+
+    while _is_safe_aia_url(uri, logger):
+        response = session.get(uri, **request_options)
+        try:
+            if follow_redirects and response.is_redirect:
+                if redirect_count >= requests.models.DEFAULT_REDIRECT_LIMIT:
+                    raise requests.exceptions.TooManyRedirects(
+                        f'Exceeded {requests.models.DEFAULT_REDIRECT_LIMIT} redirects.', response=response
+                    )
+                uri = urljoin(uri, response.headers['location'])
+                redirect_count += 1
+                continue
+
+            response.raise_for_status()
+            return _read_capped_content(response, uri, logger)
+        finally:
+            response.close()
+
+    return None
+
+
+def fetch_intermediate_cert(
+    uri: str,
+    logger: logging.Logger | logging.LoggerAdapter,
+    tls_config: Mapping[str, object] | None = None,
+    request_options: Mapping[str, object] | None = None,
+) -> bytes | None:
+    if not _is_safe_aia_url(uri, logger):
+        return None
+
+    options = _get_aia_request_options(request_options)
+
+    # Verified attempt first; only retry without verification on TLS failures.
+    try:
+        return _fetch_aia_content(_aia_fetch_session(tls_config, True, logger), uri, options, logger)
+    except SSLError as e:
+        logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=True): %s', uri, e)
+    except Exception as e:
+        logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+        return None
+
+    try:
+        return _fetch_aia_content(_aia_fetch_session(tls_config, False, logger), uri, options, logger)
+    except Exception as e:
+        logger.error('Error fetching intermediate certificate from `%s` after TLS fallback: %s', uri, e)
+        return None
+
+
+def _aia_fetch_session(
+    tls_config: Mapping[str, object] | None,
+    tls_verify: bool,
+    logger: logging.Logger | logging.LoggerAdapter,
+) -> RequestsWrapper:
+    session = RequestsWrapper(_get_aia_tls_config(tls_config, tls_verify), {}, logger=logger)
+    # Override after construction since the constructor always sets DEFAULT_AIA_CHASING_MAX_DEPTH:
+    # the fetch itself must never recurse into another AIA chase.
+    session.aia_chasing_max_depth = 0
+    return session
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -257,6 +388,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'aia_chasing_max_depth',
         'tls_config',
     )
 
@@ -422,6 +554,8 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
+        self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
+
         self.tls_protocols_allowed = []
         for protocol in config['tls_protocols_allowed']:
             if protocol in SUPPORTED_PROTOCOL_VERSIONS:
@@ -530,6 +664,8 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
+            if self.aia_chasing_max_depth <= 0:
+                raise e
             self.logger.debug(
                 'AIA chasing: request to `%s` failed with an SSLError (%s); attempting to recover missing '
                 'intermediate certificate(s)',
@@ -608,7 +744,7 @@ class RequestsWrapper(object):
         self.load_intermediate_certs(der_cert, certs)
         return certs
 
-    def load_intermediate_certs(self, der_cert, certs):
+    def load_intermediate_certs(self, der_cert, certs, visited_cert_ids=None, max_depth=None):
         """
         Fetch missing intermediate certs via Authority Information Access (AIA) chasing.
 
@@ -621,6 +757,18 @@ class RequestsWrapper(object):
         for a given certificate only if its issuer isn't already among the certs collected so far, to
         avoid redundant network fetches.
         """
+        if visited_cert_ids is None:
+            visited_cert_ids = set()
+        if max_depth is None:
+            max_depth = self.aia_chasing_max_depth
+        if max_depth <= 0:
+            return certs
+
+        cert_id = sha256(der_cert).digest()
+        if cert_id in visited_cert_ids:
+            return certs
+        visited_cert_ids.add(cert_id)
+
         try:
             cert_objects = load_x509_certificates(der_cert)
         except Exception as e:
@@ -629,10 +777,10 @@ class RequestsWrapper(object):
 
         known_subjects = {load_x509_certificates(pem_cert.encode('ascii'))[0].subject for pem_cert in certs}
         for cert in cert_objects:
-            self._chase_certificate_issuer(cert, certs, known_subjects)
+            self._chase_certificate_issuer(cert, certs, known_subjects, visited_cert_ids, max_depth)
         return certs
 
-    def _chase_certificate_issuer(self, cert, certs, known_subjects):
+    def _chase_certificate_issuer(self, cert, certs, known_subjects, visited_cert_ids, max_depth):
         if cert.issuer in known_subjects:
             return  # issuer already available; no need to fetch it again
 
@@ -655,21 +803,12 @@ class RequestsWrapper(object):
                 continue
 
             uri = access_description.access_location.value
-
-            # Assume HTTP for now
-            try:
-                response = self.get(uri)  # SKIP_HTTP_VALIDATION
-            except Exception as e:
-                self.logger.error(
-                    'AIA chasing: error fetching the issuer of `%s` from `%s`: %s',
-                    cert.subject.rfc4514_string(),
-                    uri,
-                    e,
-                )
+            intermediate_certs = fetch_intermediate_cert(uri, self.logger, self.tls_config, self.options)
+            if intermediate_certs is None:
                 continue
 
             try:
-                fetched_certs = load_x509_certificates(response.content)
+                fetched_certs = load_x509_certificates(intermediate_certs)
             except Exception as e:
                 # Best-effort: skip this issuer and keep trying the rest rather than aborting the whole
                 # chase. A partial chain may still be enough to complete verification; if it isn't, the
@@ -688,8 +827,7 @@ class RequestsWrapper(object):
                 certs.append(pem_cert)
                 known_subjects.add(fetched_cert.subject)
 
-            for fetched_cert in fetched_certs:
-                self._chase_certificate_issuer(fetched_cert, certs, known_subjects)
+            self.load_intermediate_certs(intermediate_certs, certs, visited_cert_ids, max_depth - 1)
 
     def _create_session(self):
         """
