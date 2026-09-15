@@ -5,6 +5,7 @@
 import csv
 import hashlib
 import json
+import logging
 import re
 from decimal import Decimal
 from types import SimpleNamespace
@@ -1740,38 +1741,42 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     assert clickhouse_client.closed
 
 
-def test_stream_maps_server_error_to_query_failed(monkeypatch):
+def test_stream_maps_server_error_to_query_failed(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1]]),
-        raw_stream_error=DatabaseError('Code: 60. DB::Exception: Table default.remote_query_identity does not exist'),
+        raw_stream_error=DatabaseError('Code: 60. DB::Exception: Table default.SECRET_DO_NOT_LOG does not exist'),
     )
     fake = FakeUploadClient()
 
+    caplog.set_level(logging.DEBUG)
     events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
 
-    # The server's message (table names, query text) never crosses the callback.
+    # The server's message (table names, query text) never crosses the callback or the logs.
     assert_failed_event(events, 'query_failed')
-    assert 'remote_query_identity' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
     assert fake.abort_calls == 1
 
 
-def test_stream_maps_transport_error_to_target_unavailable(monkeypatch):
+def test_stream_maps_transport_error_to_target_unavailable(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1]]),
-        raw_stream_error=OperationalError('Error HTTPSConnectionPool ... Max retries exceeded'),
+        raw_stream_error=OperationalError('Error HTTPSConnectionPool ... SECRET_DO_NOT_LOG'),
     )
 
+    caplog.set_level(logging.DEBUG)
     events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)
 
     assert_failed_event(events, 'target_unavailable')
-    assert 'HTTPSConnectionPool' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
-def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch):
+def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
 
@@ -1779,6 +1784,7 @@ def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch):
         raise OperationalError('connection refused with SECRET_DO_NOT_LOG')
 
     request = valid_request()
+    caplog.set_level(logging.DEBUG)
     events = list(
         iter_agent_rpc_stream_events(
             request, StaticClickhouseCheckRegistry([make_check()]), FakeUploadClient(), broken_factory
@@ -1787,21 +1793,25 @@ def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch):
 
     assert_failed_event(events, 'target_unavailable')
     assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
-def test_stream_maps_mid_stream_connection_drop_to_retryable_timeout(monkeypatch):
+def test_stream_maps_mid_stream_connection_drop_to_retryable_timeout(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1], [2], [3]]),
-        read_error=urllib3.exceptions.ProtocolError('Connection broken: server closed mid-stream'),
+        read_error=urllib3.exceptions.ProtocolError('Connection broken: SECRET_DO_NOT_LOG'),
     )
 
+    caplog.set_level(logging.DEBUG)
     events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)
 
     assert_failed_event(events, 'timeout', 'interrupted')
     assert event_metadata(events[-1])['error']['retryable'] is True
     assert clickhouse_client.stream.closed
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 def test_stream_maps_mid_stream_read_timeout_to_retryable_timeout(monkeypatch):
@@ -1816,6 +1826,30 @@ def test_stream_maps_mid_stream_read_timeout_to_retryable_timeout(monkeypatch):
 
     assert_failed_event(events, 'timeout')
     assert event_metadata(events[-1])['error']['retryable'] is True
+
+
+def test_stream_maps_unexpected_source_failure_to_fixed_query_failed(monkeypatch, caplog):
+    """An unexpected mid-stream failure maps to the fixed query_failed error: the exception
+    can carry raw row fragments, so neither the event nor the logs echo its text."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    clickhouse_client = FakeClickhouseClient(
+        stream_body(('value',), ('UInt8',), [[1], [2], [3], [4], [5]]),
+        read_error=ValueError('SECRET_DO_NOT_LOG row fragment'),
+        error_at=2,
+    )
+    fake = FakeUploadClient()
+
+    caplog.set_level(logging.DEBUG)
+    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
+
+    assert_failed_event(events, 'query_failed', 'Remote query execution failed')
+    assert event_metadata(events[-1])['error']['retryable'] is False
+    assert fake.abort_calls == 1
+    assert clickhouse_client.stream.closed
+    assert clickhouse_client.closed
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 @pytest.mark.parametrize('is_cancelled', [lambda: True, True], ids=['callable', 'bool'])

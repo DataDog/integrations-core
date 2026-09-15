@@ -6,6 +6,7 @@ import csv
 import hashlib
 import io
 import json
+import logging
 from types import SimpleNamespace
 
 import pytest
@@ -1272,3 +1273,80 @@ def test_allowlist_default_and_config(monkeypatch, value, expected):
 )
 def test_test_drive_name_cannot_inject_headers(value, expected):
     assert rq.validate_test_drive_name(value) == expected
+
+
+# ---------------------------------------------------------------------------
+# Failure hygiene: exception and config detail never reach logs or events
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize('trigger', ['transport', 'transient_status'])
+def test_retry_exhausted_upload_failure_reports_only_safe_diagnostics(monkeypatch, creds, caplog, trigger):
+    """The exhausted retry sequence stays retryable upload_failed, and its diagnostic is the
+    fixed failure category or intake's HTTP status — never the caught transport exception,
+    whose text carries the URL and request body."""
+    import requests
+
+    caplog.set_level(logging.DEBUG)
+
+    def request(*args, **kwargs):
+        if trigger == 'transport':
+            raise requests.exceptions.ConnectionError('SECRET_DO_NOT_LOG while sending page bytes')
+        return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.RequestsUploadClient().register_descriptor(creds, b'{}')
+    assert failure.value.code == 'upload_failed'
+    assert failure.value.retryable
+    expected_detail = 'transport failure' if trigger == 'transport' else 'HTTP status 503'
+    message = failure.value.message
+    assert 'failed after {} attempts: {}'.format(rq.REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, expected_detail) in message
+    assert 'SECRET_DO_NOT_LOG' not in message
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+def test_abort_failures_log_fixed_text_only(monkeypatch, creds, caplog):
+    """Both best-effort abort paths log fixed diagnostic text: the caught exception can
+    quote the URL, the request body, or credentials embedded in its message."""
+    import requests
+
+    caplog.set_level(logging.DEBUG)
+
+    def request(*args, **kwargs):
+        raise requests.exceptions.ConnectionError('SECRET_DO_NOT_LOG while aborting')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    rq.RequestsUploadClient().abort(creds)  # best-effort: never raises
+
+    class ExplodingClient:
+        def abort(self, creds):
+            raise RuntimeError('SECRET_DO_NOT_LOG while aborting')
+
+    rq.safe_abort(ExplodingClient(), creds)  # best-effort: never raises
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+def test_invalid_test_drive_name_warning_omits_the_configured_value(caplog):
+    assert rq.validate_test_drive_name('INVALID_NAME_SECRET_DO_NOT_LOG') is None
+    # The verdict and the grammar requirement stay in the warning; only the configured
+    # value is dropped.
+    assert 'Ignoring invalid remote query intake Test Drive name' in caplog.text
+    assert 'lowercase ASCII alphanumerics' in caplog.text
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+def test_agent_config_read_failures_log_fixed_text_only(monkeypatch, caplog):
+    """Both config-reading helpers swallow read failures into fixed debug text: the config
+    layer's exception can quote configuration values."""
+    caplog.set_level(logging.DEBUG)
+
+    def broken_get_config(key):
+        raise Exception('SECRET_DO_NOT_LOG in the config layer')
+
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', broken_get_config)
+    assert rq.get_agent_config('api_key') == ''
+    assert rq.is_query_allowlist_enabled() is True
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text

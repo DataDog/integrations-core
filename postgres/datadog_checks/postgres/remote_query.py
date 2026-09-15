@@ -586,7 +586,9 @@ def produce_remote_query(
                     try:
                         control.execute('ROLLBACK')
                     except Exception:
-                        LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
+                        # Fixed text only: the driver's exception can quote connection strings
+                        # or identifiers embedded in its message.
+                        LOGGER.debug('Unable to roll back remote query read-only transaction')
 
 
 def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
@@ -731,9 +733,12 @@ def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
     try:
         return dbname in autodiscovery.get_items()
     except Exception as e:
+        # The caught exception never reaches the message: discovery failures can quote
+        # connection strings, identifiers, or other server detail. Classification and
+        # retryability are what the event carries, not the underlying text.
         raise rq.RemoteQueryFailure(
             'target_unavailable',
-            "Unable to determine the matched check's autodiscovered database scope: {}".format(e),
+            "Unable to determine the matched check's autodiscovered database scope.",
             retryable=True,
         ) from e
 
@@ -954,7 +959,8 @@ def iter_agent_rpc_stream_events(
         rq.safe_abort(client, creds)
         if not isinstance(e, Exception):
             raise
-        LOGGER.exception('Remote query execution failed')
+        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
+        LOGGER.error('Remote query execution failed')
         yield rq.failed_event(
             'query_failed', 'Remote query execution failed.', stats=rq.stats_metadata(stats, started_at)
         )

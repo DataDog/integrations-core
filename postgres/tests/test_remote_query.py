@@ -4,6 +4,7 @@
 
 import hashlib
 import json
+import logging
 import socket
 import uuid as uuid_module
 from contextlib import contextmanager
@@ -818,13 +819,14 @@ def test_stream_scope_evaluated_only_for_endpoint_matching_checks():
     assert pool.requested_dbnames == []
 
 
-def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(monkeypatch):
+def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(monkeypatch, caplog):
     """An undeterminable discovery set fails closed and visibly, never as a silent no-match."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,)])
-    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke'))
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke: SECRET_DO_NOT_LOG'))
     check = make_check(host='localhost', port=5432, dbname='postgres', pool=pool, autodiscovery=autodiscovery)
 
+    caplog.set_level(logging.DEBUG)
     events = collect_events(valid_request(dbname='dogs_1'), check)
 
     assert_failed_event(events, 'target_unavailable', 'autodiscovered database scope')
@@ -834,6 +836,9 @@ def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(mo
     assert pool.requested_dbnames == []
     assert not pool.cursors
     assert [event.event_type for event in events] == ['error']
+    # The discovery failure's text never reaches the error event or the logs.
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 def test_stream_rejects_database_instance_with_requested_dbname_before_resolution():
@@ -2116,6 +2121,26 @@ def test_stream_maps_server_statement_cancellation_to_timeout(monkeypatch):
     assert_failed_event(events, 'timeout', 'statement timeout')
     assert event_metadata(events[-1])['error']['retryable'] is True
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+
+
+def test_stream_maps_unexpected_execution_failure_to_fixed_query_failed(monkeypatch, caplog):
+    """An unexpected producer failure maps to the fixed query_failed error: the exception's
+    text can carry raw row fragments or query text, so neither the event nor the logs
+    echo it."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)], fetch_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
+    fake = FakeUploadClient()
+
+    caplog.set_level(logging.DEBUG)
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'query_failed', 'Remote query execution failed')
+    assert event_metadata(events[-1])['error']['retryable'] is False
+    assert fake.abort_calls == 1
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 @pytest.mark.parametrize('is_cancelled', [lambda: True, True], ids=['callable', 'bool'])

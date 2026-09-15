@@ -838,7 +838,8 @@ def is_query_allowlist_enabled() -> bool:
     try:
         config_value = datadog_agent.get_config(REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY)
     except Exception:
-        LOGGER.debug('Unable to read remote query allowlist configuration', exc_info=True)
+        # Fixed text only: the config layer's exception can quote configuration values.
+        LOGGER.debug('Unable to read remote query allowlist configuration')
         return True
 
     if config_value is None:
@@ -1026,7 +1027,7 @@ class RequestsUploadClient:
             # exactly when it runs), so it carries no deadline.
             upload_with_retry('POST', url, headers, b'{}', self._timeout)
         except RemoteQueryFailure:
-            LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
+            LOGGER.debug('Remote query upload abort failed (best-effort)')
 
 
 def parse_json_object_response(body: bytes, source: str) -> Mapping[str, Any]:
@@ -1201,7 +1202,10 @@ def upload_with_retry(
     if mapped_error_codes is None:
         mapped_error_codes = {}
     backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
-    last_err: Any = None
+    # The exhausted sequence's diagnostic: intake's HTTP status (a public counter) or one of
+    # the fixed failure categories assigned below, never the caught exception's text or
+    # repr — a transport exception can quote the URL, the request body, or credentials.
+    last_failure = 'transport failure'
     for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
         if deadline is not None:
             raise_if_timed_out(deadline)
@@ -1215,15 +1219,15 @@ def upload_with_retry(
             request_body = DeadlinedPageBody(body, attempt_deadline)
         try:
             resp = requests.request(method, url, headers=dict(headers), data=request_body, timeout=timeout)
-        except UploadAttemptExpired as e:
-            last_err = e
-        except requests.exceptions.RequestException as e:
-            last_err = e
+        except UploadAttemptExpired:
+            last_failure = 'the page upload attempt exceeded its per-attempt deadline'
+        except requests.exceptions.RequestException:
+            last_failure = 'transport failure'
         else:
             if 200 <= resp.status_code < 300:
                 return resp.status_code, resp.content
             if is_transient_upload_status(resp.status_code):
-                last_err = 'status {}'.format(resp.status_code)
+                last_failure = 'HTTP status {}'.format(resp.status_code)
             else:
                 error_code = parse_error_code(resp.content)
                 mapped_code = mapped_error_codes.get(error_code) if error_code is not None else None
@@ -1242,7 +1246,9 @@ def upload_with_retry(
         backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
     raise RemoteQueryFailure(
         'upload_failed',
-        'upload to its-agent-intake failed after {} attempts: {}'.format(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, last_err),
+        'upload to its-agent-intake failed after {} attempts: {}'.format(
+            REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, last_failure
+        ),
         retryable=True,
     )
 
@@ -1251,7 +1257,9 @@ def get_agent_config(key: str) -> str:
     try:
         value = datadog_agent.get_config(key)
     except Exception:
-        LOGGER.debug('Unable to read agent config %s', key, exc_info=True)
+        # Fixed text and the fixed key name only: the config layer's exception can quote
+        # configuration values.
+        LOGGER.debug('Unable to read agent config %s', key)
         return ''
     if value is None:
         return ''
@@ -1276,10 +1284,11 @@ def validate_test_drive_name(value: str | None) -> str | None:
         and REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN.fullmatch(name) is not None
     )
     if not valid:
+        # The configured value never reaches the log; only the verdict and the grammar it
+        # failed. The value is customer configuration text, not a safe diagnostic.
         LOGGER.warning(
-            'Ignoring invalid remote query intake Test Drive name %r: it must be 1-%d '
+            'Ignoring invalid remote query intake Test Drive name: it must be 1-%d '
             'lowercase ASCII alphanumerics or hyphens, starting and ending with an alphanumeric.',
-            value,
             REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH,
         )
         return None
@@ -1309,7 +1318,9 @@ def safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
     try:
         client.abort(creds)
     except Exception:
-        LOGGER.debug('Remote query upload abort failed (best-effort)', exc_info=True)
+        # Fixed text only: the caught exception can quote the URL, the request body, or
+        # credentials embedded in a transport error string.
+        LOGGER.debug('Remote query upload abort failed (best-effort)')
 
 
 def started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:

@@ -915,7 +915,7 @@ def _run_streamed_query(
         try:
             stream.close()
         except Exception:
-            LOGGER.debug('Unable to close the remote query response stream', exc_info=True)
+            LOGGER.debug('Unable to close the remote query response stream')
 
 
 def produce_remote_query(
@@ -952,9 +952,9 @@ def produce_remote_query(
             raise
         except Exception:
             # A connection-level failure: the matched instance could not be reached or refused
-            # the request. Never echo the underlying text (it can quote identifiers or
-            # credentials embedded in connection error strings).
-            LOGGER.debug('Remote query client creation failed', exc_info=True)
+            # the request. Never echo the underlying text or traceback (either can quote
+            # identifiers or credentials embedded in connection error strings).
+            LOGGER.debug('Remote query client creation failed')
             raise rq.RemoteQueryFailure(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
@@ -966,7 +966,7 @@ def produce_remote_query(
             raise
         except clickhouse_errors.OperationalError:
             # A transport-level failure: the request never got a usable server response.
-            LOGGER.debug('Remote query transport failed', exc_info=True)
+            LOGGER.debug('Remote query transport failed')
             raise rq.RemoteQueryFailure(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
@@ -978,7 +978,7 @@ def produce_remote_query(
         ):
             # The stream died mid-read: server-side cancellation (max_execution_time or
             # cancel-on-close) or a dropped connection. Both are retryable for the run.
-            LOGGER.debug('Remote query stream failed mid-stream', exc_info=True)
+            LOGGER.debug('Remote query stream failed mid-stream')
             raise rq.RemoteQueryFailure(
                 'timeout',
                 'The remote query stream was interrupted (server cancellation or connection failure).',
@@ -988,10 +988,12 @@ def produce_remote_query(
             # The server answered with an error (bad SQL, missing table, permissions), or
             # the client refused a request-level setting. The instance is reachable, the
             # run is not. Never echo the underlying message: it can quote query text.
-            LOGGER.debug('Remote query rejected by the server', exc_info=True)
+            LOGGER.debug('Remote query rejected by the server')
             raise rq.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
         except Exception:
-            LOGGER.exception('Remote query execution failed')
+            # Fixed text only: an unexpected exception can carry raw row fragments or query
+            # text.
+            LOGGER.error('Remote query execution failed')
             raise rq.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
         return receipt
     finally:
@@ -1001,7 +1003,7 @@ def produce_remote_query(
             try:
                 clickhouse_client.close()
             except Exception:
-                LOGGER.debug('Unable to close the remote query client', exc_info=True)
+                LOGGER.debug('Unable to close the remote query client')
 
 
 def _default_client_factory(check: 'ClickhouseCheck', timeout_seconds: int) -> ClickhouseClient:
@@ -1193,7 +1195,8 @@ def iter_agent_rpc_stream_events(
         rq.safe_abort(client, creds)
         if not isinstance(e, Exception):
             raise
-        LOGGER.exception('Remote query execution failed')
+        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
+        LOGGER.error('Remote query execution failed')
         yield rq.failed_event(
             'query_failed', 'Remote query execution failed.', stats=rq.stats_metadata(stats, started_at)
         )
