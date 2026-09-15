@@ -112,6 +112,31 @@ RemoteQueryLogicalType = Literal[
 REMOTE_QUERY_REDACTED_MARKER = '[REDACTED]'
 REMOTE_QUERY_REDACTED_MARKER_TOKEN = b'"[REDACTED]"'
 
+# The canonical JSON spelling of the private wire, pinned by intake's canonical encoder:
+# valid non-ASCII rides raw UTF-8 (never ``\uXXXX`` escapes) while JSON control characters,
+# quote, and backslash stay escaped. Descriptor request bytes, the descriptor-derived schema
+# and page-prefix bound bytes, the column-name key bytes used in bounds, and canonical string
+# cell tokens and nested object keys all use it, so the producer's bytes are exactly the
+# bytes intake canonicalizes and checksums.
+
+
+def canonical_json_text(value: Any) -> str:
+    """The canonical JSON text: raw non-ASCII, escaped JSON controls, quote, and backslash."""
+    return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+
+
+def canonical_json_bytes(value: Any) -> bytes:
+    """The canonical JSON text as UTF-8 bytes, failing closed on unencodable text.
+
+    A string that reached Python's text layer but cannot be encoded (a lone surrogate from
+    a driver or a server payload) is a fixed ``unsupported_value`` failure, never an
+    uncaught ``UnicodeEncodeError`` mid-upload.
+    """
+    try:
+        return canonical_json_text(value).encode('utf-8')
+    except UnicodeEncodeError:
+        raise RemoteQueryFailure('unsupported_value', 'A canonical JSON string cannot be encoded as UTF-8.') from None
+
 
 def string_leaf_final_bound(token: bytes) -> int:
     """A scalar string leaf's final bytes: its own token or the redaction marker, whichever is larger."""
@@ -120,18 +145,49 @@ def string_leaf_final_bound(token: bytes) -> int:
 
 def string_cell_token(text: str) -> tuple[bytes, int]:
     """A scalar string cell: its canonical JSON token and the string-leaf final bound."""
-    token = json.dumps(text).encode('utf-8')
+    token = canonical_json_bytes(text)
     return token, string_leaf_final_bound(token)
 
 
+def _validate_utf8_byte_length(value: str, field: str, maximum_bytes: int) -> str:
+    """Bound one descriptor text field by its UTF-8 encoded length.
+
+    Server length limits are byte limits, so a multibyte name is bounded by its encoded byte
+    count, not its character count, and text that cannot be encoded at all (a lone
+    surrogate) is rejected at validation instead of failing the canonical JSON encoding
+    later in the wire.
+    """
+    try:
+        encoded = value.encode('utf-8')
+    except UnicodeEncodeError:
+        raise ValueError('{} must be encodable as UTF-8.'.format(field)) from None
+    if len(encoded) > maximum_bytes:
+        raise ValueError('{} must be at most {} UTF-8 bytes.'.format(field, maximum_bytes))
+    return value
+
+
 class RemoteQueryDescriptorColumn(BaseModel):
-    """One ordered descriptor column: result name, vendor type, and logical type."""
+    """One ordered descriptor column: result name, vendor type, and logical type.
+
+    ``column_name`` and ``vendor_data_type`` are bounded by UTF-8 byte length because the
+    server limits they mirror are byte limits: 255 bytes for names, 1024 for vendor types.
+    """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
     column_name: StrictStr = Field(min_length=1, max_length=255)
     vendor_data_type: StrictStr = Field(min_length=1, max_length=1024)
     logical_type: RemoteQueryLogicalType
+
+    @field_validator('column_name')
+    @classmethod
+    def validate_column_name(cls, value: str) -> str:
+        return _validate_utf8_byte_length(value, 'column_name', 255)
+
+    @field_validator('vendor_data_type')
+    @classmethod
+    def validate_vendor_data_type(cls, value: str) -> str:
+        return _validate_utf8_byte_length(value, 'vendor_data_type', 1024)
 
 
 class RemoteQueryUploadDescriptor(BaseModel):
@@ -149,6 +205,11 @@ class RemoteQueryUploadDescriptor(BaseModel):
     agent_hostname: StrictStr = Field(min_length=1, max_length=255)
     columns: tuple[RemoteQueryDescriptorColumn, ...] = Field(min_length=1)
 
+    @field_validator('agent_hostname')
+    @classmethod
+    def validate_agent_hostname(cls, value: str) -> str:
+        return _validate_utf8_byte_length(value, 'agent_hostname', 255)
+
     @model_validator(mode='after')
     def validate_unique_columns(self) -> 'RemoteQueryUploadDescriptor':
         names = [column.column_name for column in self.columns]
@@ -161,11 +222,12 @@ class RemoteQueryUploadDescriptor(BaseModel):
 def descriptor_request_bytes(descriptor: RemoteQueryUploadDescriptor) -> bytes:
     """Canonical compact JSON for the descriptor registration request.
 
-    Field order is the model's declaration order and the escaping is deterministic, so the
-    body is a pure function of the descriptor and every registration retry for one upload is
-    byte-identical.
+    Field order is the model's declaration order and the spelling is intake's canonical
+    JSON, so the body is a pure function of the descriptor, every registration retry for one
+    upload is byte-identical, and the checksum in intake's receipt is over exactly these
+    bytes.
     """
-    return json.dumps(descriptor.model_dump(), separators=(',', ':')).encode('utf-8')
+    return canonical_json_bytes(descriptor.model_dump())
 
 
 def descriptor_schema_bytes(descriptor: RemoteQueryUploadDescriptor) -> bytes | None:
@@ -180,7 +242,7 @@ def descriptor_schema_bytes(descriptor: RemoteQueryUploadDescriptor) -> bytes | 
         {'column_name': column.column_name, 'vendor_data_type': column.vendor_data_type}
         for column in descriptor.columns
     ]
-    return json.dumps(entries, separators=(',', ':')).encode('utf-8')
+    return canonical_json_bytes(entries)
 
 
 RemoteQueryEmit = Callable[[str, str, bytes], None]
@@ -400,7 +462,7 @@ NON_FINITE_NUMERIC_TEXT = frozenset(('NaN', 'Infinity', '-Infinity'))
 
 
 def encode_non_finite_text(out: bytearray, text: str) -> None:
-    out += json.dumps(text).encode('utf-8')
+    out += canonical_json_bytes(text)
 
 
 def encode_raw_number_text(out: bytearray, text: str) -> None:
@@ -451,16 +513,17 @@ def page_prefix(
     metadata-only in the RFC format labeled contract_version 1: it reaches the upload URL path
     and ``SourcePageUploadMetadata``, not the serialized body.
     """
-    head = (
-        '{"contract_version":%d,"crawl_id":%s,"task_id":%s,"record_offset":%d,"agent_hostname":%s,'
-        % (
-            REMOTE_QUERY_ARTIFACT_VERSION,
-            json.dumps(run_id),
-            json.dumps(task_id),
-            record_offset,
-            json.dumps(agent_hostname),
+    head = b''.join(
+        (
+            b'{"contract_version":%d,"crawl_id":' % REMOTE_QUERY_ARTIFACT_VERSION,
+            canonical_json_bytes(run_id),
+            b',"task_id":',
+            canonical_json_bytes(task_id),
+            b',"record_offset":%d,"agent_hostname":' % record_offset,
+            canonical_json_bytes(agent_hostname),
+            b',',
         )
-    ).encode('utf-8')
+    )
     parts = [head]
     if schema_json is not None:
         parts.append(b'"schema":')
@@ -496,9 +559,10 @@ def frame_csv_record(tokens: Sequence[bytes]) -> bytes:
     """Frame canonical cell tokens as one source-page CSV record.
 
     The pinned private dialect: Python ``csv`` with the default comma delimiter, ``"`` doubled
-    by minimal quoting, LF record endings, UTF-8, and no header row. Canonical tokens are pure
-    ASCII JSON, so the text round-trip is byte-exact and only CSV framing is added; a raw
-    carriage return inside a token would corrupt the record, so it fails closed instead.
+    by minimal quoting, LF record endings, UTF-8, and no header row. Canonical tokens are
+    UTF-8 JSON (valid non-ASCII rides raw), so the text round-trip is byte-exact and only CSV
+    framing is added; a raw carriage return inside a token would corrupt the record, so it
+    fails closed instead.
     """
     for token in tokens:
         if b'\r' in token:
@@ -563,8 +627,9 @@ class SourcePageWriter:
                 'max_file_bytes_exceeded',
                 'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
             )
-        # Each row object repeats every descriptor key, so the keys are part of the bound.
-        self._key_bound = sum(len(json.dumps(column.column_name)) for column in descriptor.columns)
+        # Each row object repeats every descriptor key, so the canonical key tokens' UTF-8
+        # bytes are part of the bound.
+        self._key_bound = sum(len(canonical_json_bytes(column.column_name)) for column in descriptor.columns)
         self._source_page_cap = REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR * limits.max_file_bytes
         self._records: list[bytes] | None = None
         self._record_bounds: list[int] = []

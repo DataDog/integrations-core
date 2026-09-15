@@ -412,7 +412,8 @@ def row_object_bound(row):
     """
     bound = 2 + (len(row) - 1)  # braces plus the commas between columns
     for name, value in row.items():
-        bound += len(json.dumps(name)) + 1 + rq.string_leaf_final_bound(json.dumps(value).encode('utf-8'))
+        bound += len(json.dumps(name, ensure_ascii=False).encode('utf-8')) + 1
+        bound += rq.string_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
     return bound
 
 
@@ -1661,7 +1662,7 @@ def encode_value(value, top_type_oid=None, in_array=False):
         # Text/enum/UUID families become JSON strings.
         ('plain', b'"plain"'),
         ('with "quotes" and \\backslash', b'"with \\"quotes\\" and \\\\backslash"'),
-        ('héllo', b'"h\\u00e9llo"'),
+        ('héllo', '"héllo"'.encode('utf-8')),
         ('a\nb\tc', b'"a\\nb\\tc"'),
         (uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'), b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"'),
         # inet/cidr/interval keep their exact server text (raw text loader output).
@@ -1854,7 +1855,7 @@ def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
         b'42',
         b'12345678901234567890.123456789',
         b'0.1',
-        '"h\\u00e9llo \\"quoted\\""'.encode('utf-8'),
+        '"héllo \\"quoted\\""'.encode('utf-8'),
         b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"',
         b'"AP+A"',
         b'"2026-08-28T12:34:56.123456"',

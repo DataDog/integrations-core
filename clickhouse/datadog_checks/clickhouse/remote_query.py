@@ -623,7 +623,7 @@ def _encode_cell_token(value: Any) -> tuple[bytes, int]:
                 parts.append(b',')
                 bound += 1
             first = False
-            key_token = json.dumps(key).encode('utf-8')
+            key_token = rq.canonical_json_bytes(key)
             parts.append(key_token)
             parts.append(b':')
             bound += rq.string_leaf_final_bound(key_token) + 1

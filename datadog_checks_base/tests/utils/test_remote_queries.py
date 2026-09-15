@@ -57,7 +57,7 @@ def descriptor(columns=(('value', 'text', 'string'),), include_schema=False, age
 
 def string_cell(text):
     """One encoded string cell: its canonical JSON token and the string-leaf final bound."""
-    token = json.dumps(text).encode('utf-8')
+    token = json.dumps(text, ensure_ascii=False).encode('utf-8')
     return rq.EncodedCell(token, rq.string_leaf_final_bound(token))
 
 
@@ -220,6 +220,73 @@ def test_descriptor_accepts_every_closed_logical_type():
     assert tuple(column.logical_type for column in upload_descriptor.columns) == rq.REMOTE_QUERY_LOGICAL_TYPES
 
 
+def test_descriptor_request_and_schema_bytes_emit_valid_non_ascii_as_raw_utf8():
+    """Intake's canonical encoder emits valid non-ASCII as raw UTF-8, never ``\\uXXXX`` escapes.
+
+    The registration body and the schema bytes it derives from the descriptor must spell
+    non-ASCII identically, because intake checksums exactly these canonical bytes.
+    """
+
+    def build():
+        return descriptor(
+            columns=(('colonné', 'véndor', 'string'),),
+            include_schema=True,
+            agent_hostname='agent-hôte',
+        )
+
+    body = rq.descriptor_request_bytes(build())
+    assert body == (
+        b'{"format_version":"csv-json-cell-v1","include_schema":true,'
+        b'"agent_hostname":"agent-h\xc3\xb4te","columns":'
+        b'[{"column_name":"colonn\xc3\xa9","vendor_data_type":"v\xc3\xa9ndor","logical_type":"string"}]}'
+    )
+    assert b'\\u' not in body
+    assert rq.descriptor_request_bytes(build()) == body
+    assert rq.descriptor_schema_bytes(build()) == (
+        b'[{"column_name":"colonn\xc3\xa9","vendor_data_type":"v\xc3\xa9ndor"}]'
+    )
+
+
+@pytest.mark.parametrize(
+    'columns,agent_hostname,valid',
+    [
+        # 255 UTF-8 bytes of a two-byte character (128 characters) pass the name limits.
+        ((('a' + 'é' * 127, 'text', 'string'),), AGENT_HOSTNAME, True),
+        # 256 bytes is over the byte limit even though 128 characters passes a character count.
+        ((('é' * 128, 'text', 'string'),), AGENT_HOSTNAME, False),
+        # The vendor-type limit is 1024 bytes.
+        ((('value', 'é' * 512, 'string'),), AGENT_HOSTNAME, True),
+        ((('value', 'a' + 'é' * 512, 'string'),), AGENT_HOSTNAME, False),
+        ((('value', 'text', 'string'),), 'a' + 'é' * 127, True),
+        ((('value', 'text', 'string'),), 'é' * 128, False),
+    ],
+)
+def test_descriptor_limits_bound_utf8_bytes_not_character_counts(columns, agent_hostname, valid):
+    """The server limits are byte limits: multibyte text within the character count but over
+    the byte count is rejected, and text at exactly the byte boundary passes.
+    """
+    if valid:
+        descriptor(columns=columns, agent_hostname=agent_hostname)
+    else:
+        with pytest.raises(ValidationError):
+            descriptor(columns=columns, agent_hostname=agent_hostname)
+
+
+@pytest.mark.parametrize(
+    'columns,agent_hostname',
+    [
+        ((('a\ud800', 'text', 'string'),), AGENT_HOSTNAME),
+        ((('value', 'a\ud800', 'string'),), AGENT_HOSTNAME),
+        ((('value', 'text', 'string'),), 'a\ud800'),
+    ],
+)
+def test_descriptor_text_that_cannot_encode_as_utf8_fails_validation(columns, agent_hostname):
+    """A lone surrogate cannot ride the UTF-8 wire, so it is rejected at validation instead
+    of crashing the canonical JSON encoding mid-upload."""
+    with pytest.raises(ValidationError):
+        descriptor(columns=columns, agent_hostname=agent_hostname)
+
+
 def test_descriptor_registration_happens_once_before_any_row(delivery, creds):
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads)
@@ -278,8 +345,95 @@ def test_source_pages_reject_tokens_that_would_corrupt_the_csv_record():
     assert failure.value.code == 'unsupported_value'
 
 
+def test_string_cell_tokens_emit_valid_non_ascii_as_raw_utf8():
+    """A canonical string token spells valid non-ASCII as raw UTF-8, never ``\\uXXXX`` escapes."""
+    token, final_bound = rq.string_cell_token('héllo')
+    assert token == b'"h\xc3\xa9llo"'
+    assert b'\\u' not in token
+    # A short multibyte leaf still bounds to the fixed redaction marker; a longer one keeps
+    # its own raw UTF-8 token bytes.
+    assert final_bound == len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN)
+    long_token, long_bound = rq.string_cell_token('héllo ' + 'é' * 64)
+    assert long_token == b'"h\xc3\xa9llo ' + b'\xc3\xa9' * 64 + b'"'
+    assert long_bound == len(long_token)
+
+
+def test_string_cell_tokens_fail_closed_on_text_that_cannot_encode_as_utf8():
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.string_cell_token('a\ud800')
+    assert failure.value.code == 'unsupported_value'
+
+
+def test_source_pages_frame_non_ascii_cells_as_raw_utf8_csv(delivery, creds):
+    columns = (('text_value', 'text', 'string'), ('note_value', 'text', 'string'))
+    uploads = Uploads()
+    writer = make_writer(delivery, creds, uploads, descriptor(columns=columns))
+    writer.add_row([string_cell('héllo'), string_cell('a,bé')])
+    result = writer.finish()
+
+    # Raw UTF-8 tokens ride the CSV unchanged: only JSON framing characters (quote, comma)
+    # trigger CSV quoting, and multibyte sequences never contain ASCII bytes.
+    (page, payload) = uploads.pages[0]
+    assert payload == b'"""h\xc3\xa9llo""","""a,b\xc3\xa9"""\n'
+    assert payload == csv_record([b'"h\xc3\xa9llo"', b'"a,b\xc3\xa9"'])
+    # An independent CSV reader recovers exactly the raw UTF-8 tokens, cell by cell.
+    (fields,) = list(csv.reader([payload.decode('utf-8')]))
+    assert [field.encode('utf-8') for field in fields] == [b'"h\xc3\xa9llo"', b'"a,b\xc3\xa9"']
+    assert page.source_bytes == len(payload)
+    assert page.sha256_hex == hashlib.sha256(payload).hexdigest()
+    assert result['pageCount'] == 1
+
+
 # ---------------------------------------------------------------------------
 # Page identity, bounds, and splitting
+
+
+def test_page_prefix_emits_valid_non_ascii_as_raw_utf8():
+    prefix = rq.page_prefix(
+        run_id='rün-1',
+        task_id='täsk-1',
+        record_offset=3,
+        agent_hostname='agent-hôte',
+        schema_json=None,
+    )
+    assert prefix.startswith(b'{"contract_version":1,"crawl_id":"r\xc3\xbcn-1",')
+    assert b'"task_id":"t\xc3\xa4sk-1"' in prefix
+    assert b'"agent_hostname":"agent-h\xc3\xb4te"' in prefix
+    assert b'"data":[' in prefix
+    assert b'\\u' not in prefix
+
+
+def test_page_bound_counts_column_name_key_tokens_in_canonical_utf8_bytes(delivery, creds):
+    """The per-column key bound counts the canonical key token's UTF-8 bytes, exactly.
+
+    The key ``éé`` canonicalizes to a six-byte token (its ``\\u00e9``-escaped spelling is
+    fourteen bytes and its character count four), so the byte-exact row bound of 21 admits
+    a second row exactly when the page budget covers two rows plus their separator: one
+    byte less splits the page, and the exact budget holds both rows on one page.
+    """
+    columns = (('éé', 'text', 'string'),)
+    key_bytes = b'"\xc3\xa9\xc3\xa9"'  # the canonical key token: six UTF-8 bytes
+    row_bound = 1 + len(key_bytes) + 2 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN)
+    assert row_bound == 21
+
+    def run(max_file_bytes):
+        scoped = bounded_delivery(delivery, maxFileBytes=max_file_bytes, maxSchemaBytes=1)
+        uploads = Uploads()
+        writer = make_writer(scoped, creds, uploads, descriptor(columns=columns))
+        writer.add_row([cell(b'"x"', 12)])
+        writer.add_row([cell(b'"x"', 12)])
+        writer.finish()
+        return [page.rows for page, _ in uploads.pages]
+
+    exact_two_rows = envelope_bound(delivery, 0) + row_bound + 1 + row_bound
+    # One byte short of two byte-exact rows: a character-counted key bound (four bytes)
+    # would wrongly keep both rows on one page.
+    assert run(exact_two_rows - 1) == [1, 1]
+    # The exact byte-exact budget holds both rows; an escaped-ASCII key bound (fourteen
+    # bytes) would wrongly split here.
+    assert run(exact_two_rows) == [2]
+
+
 # ---------------------------------------------------------------------------
 
 
