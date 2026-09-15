@@ -738,17 +738,30 @@ REMOTE_QUERY_HEADER_LINE_SLACK = 1024
 # above any line whose framed record still fits maxRowBytes.
 REMOTE_QUERY_ROW_LINE_SLACK = 8
 
+# The quote bytes one column's value can lose to normalization: servers that quote 64-bit
+# integer or decimal spellings (ClickHouse JSON output settings) deliver them as JSON
+# strings, and the declared column type normalizes each back to its unquoted JSON number
+# token. That quote removal is the only value-contract normalization that shortens a cell
+# below its server-rendered spelling; every other value keeps the server's exact bytes
+# (strings verbatim, numbers with the exact database text) or grows the record (CSV
+# quoting of tokens carrying separators).
+REMOTE_QUERY_ROW_COLUMN_QUOTE_RESERVE = 2
 
-def row_line_ceiling(max_row_bytes: int) -> int:
+
+def row_line_ceiling(max_row_bytes: int, max_columns: int) -> int:
     """A line-length bound past which the framed record cannot fit ``maxRowBytes``.
 
-    A compliant framed record is never shorter than its server line minus one byte — the
-    line's brackets and commas are the record's fields and separators — so a line longer
-    than ``maxRowBytes`` cannot produce a compliant record. The ceiling bounds the read
-    buffer, so an oversized line fails the run during the read instead of being buffered
-    whole; the exact ``maxRowBytes`` check still runs on the framed record.
+    A compliant framed record is never shorter than its server line minus one byte and
+    minus two quote bytes per column: the line's brackets and commas are the record's
+    fields and separators, the record adds one trailing newline, and the quote removal
+    above is the only shrinking normalization, once per column. The delivered max column
+    count bounds how many columns can lose their quotes, so a line longer than
+    ``maxRowBytes`` plus that reserve plus the fixed slack cannot produce a compliant
+    record. The ceiling bounds the read buffer, so an oversized line fails the run during
+    the read instead of being buffered whole; the exact ``maxRowBytes`` check still runs
+    on the framed record.
     """
-    return max(64, max_row_bytes + REMOTE_QUERY_ROW_LINE_SLACK)
+    return max(64, max_row_bytes + REMOTE_QUERY_ROW_COLUMN_QUOTE_RESERVE * max_columns + REMOTE_QUERY_ROW_LINE_SLACK)
 
 
 class LineBoundTracker:
@@ -770,7 +783,7 @@ class LineBoundTracker:
 
     def __init__(self, limits: rq.RemoteQueryUploadLimits):
         self._header_bound = max(limits.max_schema_bytes, limits.max_row_bytes) + REMOTE_QUERY_HEADER_LINE_SLACK
-        self._row_bound = row_line_ceiling(limits.max_row_bytes)
+        self._row_bound = row_line_ceiling(limits.max_row_bytes, limits.max_columns)
         self._max_row_bytes = limits.max_row_bytes
 
     def for_index(self, index: int) -> int:

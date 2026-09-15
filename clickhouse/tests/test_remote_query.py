@@ -47,6 +47,15 @@ def raw_stream_body(*lines):
     return b'\n'.join(line if isinstance(line, bytes) else line.encode('utf-8') for line in lines) + b'\n'
 
 
+def compact_json_line(values):
+    """One stream line rendered with ClickHouse's compact JSON separators (no spaces).
+
+    The shared ``stream_body`` helper uses ``json.dumps`` default separators, whose spaces
+    do not exist on the real wire; byte-exact line arithmetic needs the compact form.
+    """
+    return json.dumps(list(values), separators=(',', ':')).encode('utf-8')
+
+
 class FakeStream:
     """urllib3 HTTPResponse stand-in: bounded reads over the body, close tracking."""
 
@@ -1270,6 +1279,60 @@ def test_page_split_row_too_large_when_line_exceeds_the_buffer_ceiling(monkeypat
     assert stream.offset <= header_bound
     assert not stream.exhausted
     assert clickhouse_client.closed
+
+
+def quoted_numeric_rows_client(names, row, row_count):
+    """A client whose stream repeats one quoted-numeric row on the real compact wire."""
+    body = raw_stream_body(
+        compact_json_line(names), compact_json_line(('UInt64',) * len(names)), *[compact_json_line(row)] * row_count
+    )
+    return FakeClickhouseClient(body)
+
+
+def test_row_line_ceiling_reserves_quote_bytes_for_quoted_numeric_columns(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # Servers that quote 64-bit integers (output_format_json_quote_64bit_integers) deliver
+    # each value as a JSON string, and the declared column type normalizes it back to its
+    # unquoted number token, so a row line runs two quote bytes per column longer than its
+    # framed record. Row lines at that length must pass the read-time ceiling whenever the
+    # normalized record still fits maxRowBytes: only the exact record-size gate may reject
+    # rows. The row repeats so the later lines accumulate through row-bound-sized reads
+    # (the first read is sized by the larger header bound), which is where the ceiling
+    # binds.
+    names = tuple('c{}'.format(index) for index in range(8))
+    quoted_value = '18446744073709551615'
+    row = [quoted_value] * len(names)
+    record = csv_record([quoted_value.encode('utf-8')] * len(names))
+    row_line = compact_json_line(row)
+    assert len(row_line) == len(record) + 2 * len(names) + 1
+    assert len(row_line) > len(record) + remote_query.REMOTE_QUERY_ROW_LINE_SLACK
+    rows = 8
+
+    request = bounded_request(maxRowBytes=len(record), maxFileBytes=2048)
+    fake = FakeUploadClient()
+
+    events = collect_events(
+        request, make_check(), upload_client=fake, clickhouse_client=quoted_numeric_rows_client(names, row, rows)
+    )
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    assert page == record * rows
+    assert event_metadata(events[-1])['upload_receipt']['totalRows'] == rows
+
+    # One byte too many in the normalized record: the exact maxRowBytes gate fails the run
+    # on the framed record, with the read-time ceiling out of the way.
+    request = bounded_request(maxRowBytes=len(record) - 1, maxFileBytes=2048)
+
+    events = collect_events(
+        request,
+        make_check(),
+        upload_client=FakeUploadClient(),
+        clickhouse_client=quoted_numeric_rows_client(names, row, rows),
+    )
+
+    assert_failed_event(events, 'row_too_large', 'A single record exceeds maxRowBytes')
 
 
 def test_stream_fails_closed_on_row_line_larger_than_any_read_chunk(monkeypatch):
