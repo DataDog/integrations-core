@@ -252,7 +252,7 @@ Before writing a `.changed` entry, stop and confirm the change is genuinely brea
 echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/changelog.d/23700.added
 
 # Bug fix for sqlserver in PR #23701
-echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
+echo 'Fix a bug where `tempdb` is wrongly excluded from database files metrics.' > sqlserver/changelog.d/23701.fixed
 ```
 
 ## Review Guidelines
@@ -280,3 +280,5 @@ When a new file is added, make sure to make it available through the navigation 
 ### Style
 
 Maintain a consistent style: technical and professional. Do not start lines or paragraphs with an inline code span.
+
+Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation, comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline literals or roles.
