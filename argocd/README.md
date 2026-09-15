@@ -29,11 +29,14 @@ The Datadog Agent can collect the exposed metrics using this integration. Follow
 #### Containerized
 ##### Metric collection
 
-Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][4] for guidance. Additional configuration options are available by reviewing the [sample argocd.d/conf.yaml][12].
+Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. Configure each of the three components with one of the Kubernetes Autodiscovery options below. Additional configuration options are available by reviewing the [sample argocd.d/conf.yaml][12].
 
 There are use cases where Argo CD Applications contain labels that need to be exposed as Prometheus metrics. These labels are available using the `argocd_app_labels` metric, which is disabled on the Application Controller by default. Refer to the [ArgoCD Documentation][14] for instructions on how to enable it.
 
 Example configurations:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 **Application Controller**:
 ```yaml
@@ -112,6 +115,71 @@ spec:
     - name: 'argocd-repo-server'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Create one resource per target workload. These resources mirror the annotation configurations:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: argocd-application-controller-instrumentation
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: argocd-application-controller
+  config:
+    checks:
+      - integration: argocd
+        containerName: argocd-application-controller
+        initConfig: {}
+        instances:
+          - app_controller_endpoint: "http://%%host%%:8082/metrics"
+---
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: argocd-server-instrumentation
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: argocd-server
+  config:
+    checks:
+      - integration: argocd
+        containerName: argocd-server
+        initConfig: {}
+        instances:
+          - api_server_endpoint: "http://%%host%%:8083/metrics"
+---
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: argocd-repo-server-instrumentation
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: argocd-repo-server
+  config:
+    checks:
+      - integration: argocd
+        containerName: argocd-repo-server
+        initConfig: {}
+        instances:
+          - repo_server_endpoint: "http://%%host%%:8084/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 **Note**: For the full list of supported endpoints, see the [conf.yaml example file][15].
 
@@ -119,6 +187,9 @@ spec:
 
 **Clashing Tag Names**:
 The Argo CD integration attaches a name tag derived from the application name OpenMetrics label when available. This could sometimes lead to querying issues if a name tag is already attached to a host, as seen in the example `name: host_a, app_a`. To prevent any unwanted behavior when querying, it is advisable to [remap the name label][13] to something more unique, such as `argocd_app_name` if the host happens to already have a name tag. Below is an example configuration:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 **Application Controller**:
 ```yaml
@@ -148,6 +219,37 @@ spec:
     - name: 'argocd-application-controller'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Application Controller StatefulSet:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: argocd-application-controller
+  config:
+    checks:
+      - integration: argocd
+        containerName: argocd-application-controller
+        initConfig: {}
+        instances:
+          - app_controller_endpoint: "http://%%host%%:8082/metrics"
+            rename_labels:
+              name: "argocd_app_name"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][17].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### Log collection
 
@@ -206,4 +308,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#exposing-application-labels-as-prometheus-metrics
 [15]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example#L45-L72
 [16]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
-
+[17]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

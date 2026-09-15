@@ -86,3 +86,6 @@ files:
         processes:
           - "process.name == 'krakend'"
   - template: auto_conf/discovery
+    overrides:
+      discovery.example:
+        metrics_prefix: krakend.api

@@ -253,6 +253,73 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     aggregator.assert_metric('sqlserver.database.files.space_used', tags=msdb_tags)
 
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_files_metrics_match_database_context(
+    aggregator, dd_run_check, instance_autodiscovery, datadog_conn_docker
+):
+    databases = ('master', 'msdb', 'tempdb')
+    instance_autodiscovery['autodiscovery_include'] = list(databases)
+
+    # File allocation can change while the check runs, so use only stable metadata as the expected result.
+    expected_files = {}
+    with datadog_conn_docker.cursor() as cursor:
+        for database in databases:
+            cursor.execute(f"USE [{database}]")
+            cursor.execute("SELECT file_id, type FROM sys.database_files")
+            for file_id, file_type in cursor.fetchall():
+                expected_files[(database, file_id)] = file_type == 0
+
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    for metric_name in ('size', 'space_used', 'state'):
+        actual = {}
+        for metric in aggregator.metrics(f'sqlserver.database.files.{metric_name}'):
+            tags = dict(tag.split(':', 1) for tag in metric.tags)
+            key = (tags.get('db'), int(tags['file_id']))
+            if key in expected_files:
+                assert tags['database'] == key[0]
+                actual[key] = metric.value
+
+        assert actual.keys() == expected_files.keys()
+        if metric_name == 'state':
+            assert all(value == 0 for value in actual.values())
+        elif metric_name == 'size':
+            assert all(value > 0 for value in actual.values())
+        else:
+            assert all(actual[key] > 0 for key, is_data_file in expected_files.items() if is_data_file)
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_files_metrics_with_connect_any_database(
+    aggregator, bob_conn_raw, dd_run_check, instance_autodiscovery
+):
+    with bob_conn_raw.cursor() as cursor:
+        cursor.execute("SELECT HAS_PERMS_BY_NAME(NULL, NULL, 'VIEW ANY DEFINITION')")
+        assert cursor.fetchone()[0] == 0
+        cursor.execute("USE [datadog_test-1]")
+        cursor.execute("SELECT COUNT(*) FROM sys.database_files")
+        assert cursor.fetchone()[0] > 0
+
+    instance_autodiscovery['username'] = 'bob'
+    instance_autodiscovery['password'] = 'Password12!'
+    instance_autodiscovery['autodiscovery_include'] = ['datadog_test-1']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    for metric_name in (
+        'sqlserver.database.files.size',
+        'sqlserver.database.files.space_used',
+        'sqlserver.database.files.state',
+    ):
+        metrics = aggregator.metrics(metric_name)
+        assert any('db:datadog_test-1' in metric.tags for metric in metrics)
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize(
     'service_check_enabled,default_count,extra_count',

@@ -98,6 +98,29 @@ def test_stop_on_error(ddev, helpers, data_dir, write_result_file, mocker):
     stop.assert_called_once()
 
 
+def test_unsupported_agent_on_ci_persists_environment_state(ddev, data_dir, write_result_file, mocker):
+    metadata = {'agent_type': 'vagrant'}
+    config = {}
+    run = mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
+    mocker.patch('ddev.cli.env.start.running_on_ci', return_value=True)
+    start_agent = mocker.patch('ddev.e2e.agent.vagrant.VagrantAgent.start')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('env', 'start', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert 'Starting: py3.12' in result.output
+    assert 'Stopping:' not in result.output
+    assert 'Vagrant is not supported on CI' in result.output
+    assert env_data.read_metadata() == metadata
+    assert env_data.read_config() == {'instances': [config]}
+    assert run.call_count == 1
+    start_agent.assert_not_called()
+
+
 def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
     metadata = {}
     config = {}
@@ -168,6 +191,30 @@ def test_agent_build_config(ddev, config_file, helpers, data_dir, write_result_f
     assert env_data.read_config() == {'instances': [config]}
     assert env_data.read_metadata() == metadata
 
+    start.assert_called_once_with(
+        agent_build='registry.datadoghq.com/agent:7',
+        local_packages={},
+        env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
+    )
+
+
+def test_kubernetes_agent_build_uses_configured_docker_image(ddev, config_file, data_dir, write_result_file, mocker):
+    config_file.model.agent = '7'
+    config_file.save()
+
+    metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': '/tmp/kubeconfig'}}
+    config = {}
+    mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
+    start = mocker.patch('ddev.e2e.agent.kubernetes.KubernetesAgent.start')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('env', 'start', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert env_data.read_metadata() == metadata
     start.assert_called_once_with(
         agent_build='registry.datadoghq.com/agent:7',
         local_packages={},

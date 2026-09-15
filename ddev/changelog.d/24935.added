@@ -1,0 +1,1 @@
+Add the `ddev ci dispatch-tests` command and the Dispatcher that runs a batching plan.

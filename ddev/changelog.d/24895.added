@@ -1,0 +1,1 @@
+Add `--to-dd-org` and `--to-dd-key` to `ddev size diff` to send per-module size deltas to Datadog as `datadog.agent_integrations.size_diff`, and report the deltas as a comment on pull requests.

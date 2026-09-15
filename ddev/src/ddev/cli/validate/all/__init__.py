@@ -55,8 +55,9 @@ def all(
     If TARGET is provided (e.g. 'changed'), per-integration validations are
     scoped to that target. Repo-wide validations always run without a target.
     """
-    from ddev.cli.validate.all.github import get_pr_number, write_step_summary
+    from ddev.cli.validate.all.github import get_pr_number
     from ddev.cli.validate.all.orchestrator import ValidationOrchestrator
+    from ddev.utils.github_actions import write_step_summary
 
     selected = _load_validations(app)
     if not selected:

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 13.0.0 / 2026-07-29
+## 13.1.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+## 13.0.0 / 2026-07-29 / Agent 7.82.0
 
 ***Changed***:
 

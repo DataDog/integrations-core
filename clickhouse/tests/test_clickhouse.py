@@ -135,3 +135,8 @@ def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_
     assert 'dbm' in event['metadata']
     assert 'connection_host' in event['metadata']
     assert event['metadata']['connection_host'] == instance['server']
+    assert event['metadata']['hosting_type'] == check.hosting_type
+    assert event['metadata']['single_endpoint_mode'] is False
+    assert event['metadata']['connect_node']
+    assert event['metadata']['nodes']
+    assert event['metadata']['connect_node'] in event['metadata']['nodes']

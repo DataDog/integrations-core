@@ -1,0 +1,1 @@
+Add a retry strategy to the async GitHub client for failures that are not rate limiting.

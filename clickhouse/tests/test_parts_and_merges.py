@@ -836,9 +836,7 @@ def test_emit_events_shape(check):
     captured = []
     with (
         mock.patch.object(check, 'database_monitoring_query_activity', side_effect=captured.append),
-        mock.patch('datadog_checks.clickhouse.parts_and_merges.datadog_agent') as agent_mock,
     ):
-        agent_mock.get_version.return_value = '7.64.0'
         job._emit_events(
             _collected_parts(),
             _collected_merges(),
@@ -870,9 +868,7 @@ def test_emit_events_uses_query_activity_channel_not_metadata(check):
     with (
         mock.patch.object(check, 'database_monitoring_query_activity') as activity_mock,
         mock.patch.object(check, 'database_monitoring_metadata') as metadata_mock,
-        mock.patch('datadog_checks.clickhouse.parts_and_merges.datadog_agent') as agent_mock,
     ):
-        agent_mock.get_version.return_value = '7.64.0'
         job._emit_events(_collected_parts(), [], [], [], [])
 
     activity_mock.assert_called_once()
@@ -886,9 +882,7 @@ def test_emit_events_skips_when_all_collections_empty(check):
 
     with (
         mock.patch.object(check, 'database_monitoring_query_activity') as activity_mock,
-        mock.patch('datadog_checks.clickhouse.parts_and_merges.datadog_agent') as agent_mock,
     ):
-        agent_mock.get_version.return_value = '7.64.0'
         job._emit_events([], [], [], [], [], [])
 
     activity_mock.assert_not_called()
@@ -928,9 +922,7 @@ def test_collect_and_emit_runs_with_partial_failures(check):
         mock.patch.object(job, '_collect_detached_parts', return_value=[]),
         mock.patch.object(job, '_collect_thresholds', return_value=[]),
         mock.patch.object(check, 'database_monitoring_query_activity', side_effect=captured.append),
-        mock.patch('datadog_checks.clickhouse.parts_and_merges.datadog_agent') as agent_mock,
     ):
-        agent_mock.get_version.return_value = '7.64.0'
         job._collect_and_emit()
 
     assert len(captured) == 1
@@ -954,9 +946,7 @@ def test_collect_and_emit_skips_when_all_collectors_empty(check):
         mock.patch.object(job, '_collect_detached_parts', return_value=[]),
         mock.patch.object(job, '_collect_thresholds', return_value=[]),
         mock.patch.object(check, 'database_monitoring_query_activity') as activity_mock,
-        mock.patch('datadog_checks.clickhouse.parts_and_merges.datadog_agent') as agent_mock,
     ):
-        agent_mock.get_version.return_value = '7.64.0'
         job._collect_and_emit()
 
     activity_mock.assert_not_called()

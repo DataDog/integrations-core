@@ -1,1 +1,0 @@
-Add a `hosting_type` tag identifying whether the ClickHouse instance is ClickHouse Cloud or self-hosted.

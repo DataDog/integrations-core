@@ -85,6 +85,8 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
+    host: Optional[str] = None
+    hosts: Optional[tuple[str, ...]] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
@@ -97,14 +99,17 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     ntlm_domain: Optional[str] = None
     only_custom_queries: Optional[bool] = None
-    password: str
+    password: Optional[str] = None
     password_hashed: Optional[bool] = None
     persist_connections: Optional[bool] = None
+    port: Optional[int] = None
+    procedure_timeout: Optional[float] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
+    ssl_config_file: Optional[str] = None
     statistics_components: Optional[tuple[str, ...]] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
@@ -116,10 +121,11 @@ class InstanceConfig(BaseModel):
     tls_protocols_allowed: Optional[tuple[str, ...]] = None
     tls_use_host_header: Optional[bool] = None
     tls_verify: Optional[bool] = None
-    url: str
+    url: Optional[str] = None
     use_global_custom_queries: Optional[str] = None
     use_legacy_auth_encoding: Optional[bool] = None
-    username: str
+    use_ssl: Optional[bool] = None
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

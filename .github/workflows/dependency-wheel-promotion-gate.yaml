@@ -35,7 +35,7 @@ jobs:
     steps:
     - name: Check for a settled promotion status
       id: settled
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           const sha = context.payload.pull_request.head.sha;
@@ -58,7 +58,7 @@ jobs:
     - name: Assess the pull request
       id: assess
       if: steps.settled.outputs.evaluate == 'true'
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           const depPaths = ['agent_requirements.in', '.github/workflows/resolve-build-deps.yaml'];
@@ -166,7 +166,7 @@ jobs:
     # Before the slower steps, so a failure in them still leaves the merge blocked.
     - name: Block the merge while the notice is prepared
       if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.changed == 'true'
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           await github.rest.repos.createCommitStatus({
@@ -183,7 +183,7 @@ jobs:
     # statuses and comments.
     - name: Checkout the promotion script
       if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.check_promotion == 'true'
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ github.event.pull_request.base.ref }}
         sparse-checkout: .builders/promote.py
@@ -191,7 +191,7 @@ jobs:
 
     - name: Checkout the pull request's lockfiles
       if: steps.settled.outputs.evaluate == 'true' && steps.assess.outputs.check_promotion == 'true'
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         path: pr
@@ -279,7 +279,7 @@ jobs:
           > 1. Wait for the resolution workflow to finish and commit the lockfiles to this branch.
           > 2. Review the Agent build triggered by that commit (`default-pipeline` in GitLab), especially `static_quality_gate`.
           > 3. Get the PR approved.
-          > 4. Promote the wheels:
+          > 4. Ask an `agent-integrations` maintainer to promote the wheels. Promotion dispatches a workflow that requires write access to this repository, so only a maintainer can run it (an outside contributor cannot):
           >    ```
           >    ddev dep promote ${{ env.PR_URL }}
           >    ```
@@ -352,7 +352,7 @@ jobs:
 
     - name: Set the dependency-wheel-promotion status
       if: steps.settled.outputs.evaluate == 'true'
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         STATE: ${{ steps.state.outputs.state }}
         NOTICE_COMMENT_ID: >-
@@ -405,7 +405,7 @@ jobs:
     # group. The status is written only because the queue waits on a required context
     # reporting for the group, and the check job above is its sole writer on the head.
     - name: Set dependency-wheel-promotion status to success
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           await github.rest.repos.createCommitStatus({

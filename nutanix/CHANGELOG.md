@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.6.0 / 2026-07-08
+## 1.7.0 / 2026-08-05
+
+***Added***:
+
+* Add support for `infrastructure_mode`. ([#24667](https://github.com/DataDog/integrations-core/pull/24667))
+
+## 1.6.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:
 

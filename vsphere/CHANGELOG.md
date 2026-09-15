@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 9.5.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Fixed***:
+
+* Use SHA-256 instead of MD5 for vSphere alarm events. ([#24765](https://github.com/DataDog/integrations-core/pull/24765))
+
 ## 9.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

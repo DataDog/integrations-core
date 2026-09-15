@@ -1,0 +1,1 @@
+Ignore CI targets and target environments whose names contain characters outside the set used by real integrations, so that a directory name or `hatch.toml` matrix value taken from a pull request cannot inject shell commands or `$GITHUB_ENV` entries into CI jobs.

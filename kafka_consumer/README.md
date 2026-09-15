@@ -58,7 +58,7 @@ instances:
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-### Cluster Monitoring (Preview)
+### Kafka Console
 
 When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
 
@@ -92,7 +92,6 @@ instances:
 
 **Consumer group** (`*`)
 - DESCRIBE
-- READ
 
 ### Validation
 
@@ -183,7 +182,7 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[18]: /data-streams
+[18]: /data-streams/kafka
 [19]: /integrations/kafka?search=kafka
 [20]: /containers/cluster_agent/clusterchecks/
 [21]: /data_streams/messages/

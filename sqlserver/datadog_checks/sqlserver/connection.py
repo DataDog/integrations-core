@@ -218,8 +218,8 @@ class Connection(object):
         self.log.debug('Connection initialized.')
 
     @contextmanager
-    def get_managed_cursor(self, key_prefix):
-        cursor = self.get_cursor(self.DEFAULT_DB_KEY, key_prefix=key_prefix)
+    def get_managed_cursor(self, key_prefix, db_key=None):
+        cursor = self.get_cursor(db_key or self.DEFAULT_DB_KEY, key_prefix=key_prefix)
         try:
             yield cursor
         finally:
@@ -751,6 +751,18 @@ class Connection(object):
             cursor.execute('select DB_NAME()')
             data = cursor.fetchall()
             return data[0][0]
+
+    def set_command_timeout(self, key_prefix, timeout_s, db_name=None):
+        """Override the pyodbc connection-level timeout for a given key_prefix / db_name pair.
+
+        SQL Server has no server-side statement timeout; the only mechanism is the pyodbc
+        connection attribute ``conn.timeout`` (seconds, 0 = infinite). Call this after
+        ``open_db_connections`` / ``_open_managed_db_connections`` and before executing the
+        query.
+        """
+        conn = self._conns.get(self._conn_key(self.DEFAULT_DB_KEY, db_name, key_prefix))
+        if conn is not None:
+            conn.timeout = timeout_s
 
     @contextmanager
     def restore_current_database_context(self, key_prefix):

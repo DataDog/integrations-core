@@ -1,0 +1,1 @@
+Speed up package installs in E2E ``start_commands`` by pointing the Agent container's apt mirror at the generic Ubuntu archive instead of a region-pinned mirror.

@@ -1,0 +1,1 @@
+Export the resolved Dispatcher run to a manifest that a later invocation can reuse for planning.

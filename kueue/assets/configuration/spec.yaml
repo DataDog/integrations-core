@@ -61,3 +61,8 @@ files:
         type: object
         example:
           example.com/fpga: fpga
+  - template: logs
+    example:
+    - type: docker
+      source: kueue
+      service: <SERVICE>

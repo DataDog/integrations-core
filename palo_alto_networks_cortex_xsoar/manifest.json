@@ -3,7 +3,7 @@
   "app_uuid": "e4f68beb-6472-490c-ba02-72ded5b9c203",
   "app_id": "palo-alto-networks-cortex-xsoar",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -59,6 +59,7 @@
       "Category::Log Collection",
       "Category::Automation",
       "Category::Cloud",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
