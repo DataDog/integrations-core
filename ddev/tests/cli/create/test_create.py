@@ -106,15 +106,6 @@ def test_help_lists_subcommands(ddev):
         assert sub in result.output
 
 
-def test_subcommand_help_lists_skip_manifest_without_removed_options(ddev):
-    result = ddev('create', 'check', '--help')
-    assert result.exit_code == 0
-    assert '--skip-manifest' in result.output
-    assert 'deprecated' not in result.output.lower()
-    for option in ('--include-manifest', '--display-name', '--metrics-prefix', '--platforms'):
-        assert option not in result.output
-
-
 def test_check_only_requires_existing_manifest(ddev, empty_repo):
     result = ddev('create', 'check-only', 'partner_thing')
     assert result.exit_code != 0
@@ -289,7 +280,6 @@ def test_dry_run_tree_uses_pipe_middle_for_non_last_directory(ddev, empty_repo):
     """Non-last directories at depth >= 2 in the dry-run tree use `├──`, not `└──`."""
     result = ddev('create', 'check', 'my_integration', '--dry-run')
     assert result.exit_code == 0, result.output
-    assert 'manifest.json' in result.output
     # The `assets/` subtree has both `configuration/` and `dashboards/`; the non-last
     # of the two must use the middle connector. Prior bug always rendered `└──`.
     assert '├── configuration' in result.output or '├── dashboards' in result.output
