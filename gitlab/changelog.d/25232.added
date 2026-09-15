@@ -1,0 +1,1 @@
+Add Gitaly metrics: catfile cache hit/miss, connections, service client requests, total repositories count, adaptive concurrency limit, and build info.
