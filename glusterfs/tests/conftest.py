@@ -140,6 +140,39 @@ def gluster_ready():
                 if unpopulated:
                     raise Exception(f"Brick {brick.get('name')} stats not populated yet: {unpopulated}")
 
+    # Wait until self-heal info is available for started volumes. The E2E
+    # assertions include heal metrics, so the cluster must be able to answer
+    # ``volume heal <vol> info`` before the test runs. This is bounded so a
+    # genuinely broken self-heal daemon fails fast instead of hanging the suite.
+    import subprocess
+
+    for vol in volumes:
+        if vol['status'].lower() != 'started':
+            continue
+        try:
+            subprocess.run(
+                [
+                    'docker',
+                    'exec',
+                    'gluster-node-1',
+                    'gluster',
+                    '--xml',
+                    '--mode=script',
+                    'volume',
+                    'heal',
+                    vol['name'],
+                    'info',
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=True,
+            )
+        except subprocess.TimeoutExpired:
+            raise Exception(f"Self-heal info for volume {vol['name']} is not responding yet")
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Self-heal info for volume {vol['name']} failed: {e.stderr or e.stdout}")
+
 
 def delete_volume():
     run_command("docker exec gluster-node-1 gluster volume stop gv0 force", capture=True, check=False)

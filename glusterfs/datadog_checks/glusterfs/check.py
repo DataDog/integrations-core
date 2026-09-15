@@ -21,6 +21,11 @@ from .metrics import BRICK_STATS, CLUSTER_STATS, HEAL_INFO_STATS, VOL_SUBVOL_STA
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
 
+# Per-command timeout in seconds. A hung ``gluster`` command (for example
+# ``volume heal <vol> info`` on a volume whose self-heal daemon is unresponsive)
+# must not block the agent indefinitely.
+GLUSTER_TIMEOUT = 30
+
 
 class GlusterfsCheck(AgentCheck):
     __NAMESPACE__ = 'glusterfs'
@@ -93,7 +98,10 @@ class GlusterfsCheck(AgentCheck):
             cmd += ['--xml', '--mode=script']
         cmd += list(args)
         self.log.debug("gluster command: %s", ' '.join(cmd))
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=GLUSTER_TIMEOUT)
+        except subprocess.TimeoutExpired as e:
+            raise GlusterXMLError(f"gluster command timed out after {GLUSTER_TIMEOUT}s: {' '.join(cmd)}") from e
         if result.returncode != 0:
             raise subprocess.CalledProcessError(
                 result.returncode, ' '.join(cmd), output=result.stdout, stderr=result.stderr
@@ -110,11 +118,17 @@ class GlusterfsCheck(AgentCheck):
         volumes = parse_volume_status(volume_status_xml, volumes)
 
         for vol in volumes:
+            # Self-heal info is supplementary: the self-heal daemon may be
+            # unresponsive or the volume stopped, in which case ``volume heal``
+            # can fail or hang. Collect it best-effort so a heal failure never
+            # suppresses the cluster/volume/brick metrics collected above.
+            vol['healinfo'] = []
             if vol['status'].lower() == 'started':
-                heal_xml = self._run_gluster('volume', 'heal', vol['name'], 'info')
-                vol['healinfo'] = parse_heal_info(heal_xml)
-            else:
-                vol['healinfo'] = []
+                try:
+                    heal_xml = self._run_gluster('volume', 'heal', vol['name'], 'info')
+                    vol['healinfo'] = parse_heal_info(heal_xml)
+                except (GlusterXMLError, subprocess.CalledProcessError) as e:
+                    self.log.warning("Unable to get self-heal status for volume %s: %s", vol['name'], e)
 
         peers = parse_pool_list(pool_list_xml)
         glusterfs_version = parse_gluster_version(version_text)
