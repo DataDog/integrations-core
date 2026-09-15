@@ -14,14 +14,6 @@ on:
 
 permissions: {}
 
-# One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
-# revision cancels the previous Dispatcher run. Master pushes keep independent runs.
-concurrency:
-  group: test-dispatch-${{
-    github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
-    format('master-{0}', github.run_id) }}
-  cancel-in-progress: true
-
 defaults:
   run:
     shell: bash
@@ -35,6 +27,16 @@ jobs:
     permissions:
       contents: read
       id-token: write # the octo-sts exchange; every write happens with the scoped token
+
+    # One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
+    # revision cancels the previous Dispatcher. Master pushes keep independent runs.
+    # Keep concurrency at job level: workflow_run also fires for canceled triggers, whose skipped
+    # jobs must not cancel newer triggers.
+    concurrency:
+      group: test-dispatch-${{
+        github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
+        format('master-{0}', github.run_id) }}
+      cancel-in-progress: true
 
     if: >-
       github.repository == 'DataDog/integrations-core'
