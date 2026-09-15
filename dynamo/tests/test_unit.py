@@ -60,6 +60,9 @@ def test_check_collects_mapped_metrics(
             metric, None, None, None, monotonic=True, hostname=None, tags=None, at_least=1
         )
 
+    if instance_fixture == 'frontend_instance':
+        aggregator.assert_metric('dynamo.tokio.worker_busy_ratio', value=0.75)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("dynamo.openmetrics.health", ServiceCheck.OK)
