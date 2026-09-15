@@ -9,9 +9,16 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.vllm import check as vllm_check
 from datadog_checks.vllm import vLLMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
+
+
+@pytest.fixture(autouse=True)
+def enable_gpu_monitoring():
+    with mock.patch.object(vllm_check, 'is_gpu_monitoring_enabled', return_value=True):
+        yield
 
 
 def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
@@ -60,6 +67,37 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
 
     version_metadata = _get_version_metadata("0.4.3")
     datadog_agent.assert_metadata("test:123", version_metadata)
+
+
+def test_check_succeeds_without_version_endpoint(dd_run_check, aggregator, instance):
+    check = vLLMCheck("vLLM", {}, [instance])
+    mock_responses = [
+        MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
+        MockResponse(status_code=404),
+    ]
+
+    with mock.patch('requests.Session.get', side_effect=mock_responses):
+        dd_run_check(check)
+
+    aggregator.assert_metric('vllm.num_requests.running')
+    aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.OK)
+
+
+def test_new_metrics_are_not_collected_without_gpu_monitoring(dd_run_check, aggregator, instance):
+    mock_responses = [
+        MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
+        MockResponse(file_path=get_fixture_path("vllm_version.json")),
+    ]
+
+    with (
+        mock.patch.object(vllm_check, 'is_gpu_monitoring_enabled', return_value=False),
+        mock.patch('requests.Session.get', side_effect=mock_responses),
+    ):
+        check = vLLMCheck("vLLM", {}, [instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric('vllm.num_requests.running')
+    aggregator.assert_metric('vllm.request.queue_time.seconds.count', count=0)
 
 
 def _get_version_metadata(raw_version):

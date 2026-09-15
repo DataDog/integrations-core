@@ -652,6 +652,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /dynamo/*.md                                                           @DataDog/gpu-monitoring-agent @DataDog/documentation
 /dynamo/manifest.json                                                  @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 /dynamo/metadata.csv                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+/vllm/                                                                 @DataDog/gpu-monitoring-agent
+/vllm/*.md                                                             @DataDog/gpu-monitoring-agent @DataDog/documentation
+/vllm/manifest.json                                                    @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+/vllm/metadata.csv                                                     @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation
