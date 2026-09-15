@@ -1,0 +1,25 @@
+version: "1"
+
+# Full metric-coverage fixture for the rabbitmq check. A single -management
+# broker exposes both the management API (15672) and the Prometheus/OpenMetrics
+# plugin (15692); the dashboards draw metrics from both, so a consumer runs two
+# check instances against this one endpoint (see ./README.md). A seed primes the
+# static objects, perf-test drives continuous AMQP traffic, and activity-gen
+# churns queues so the node-wide queue counters keep advancing.
+tasks:
+  - id: rabbitmq-full
+    task: ./compose/full-coverage.compose@rabbitmq
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.RABBITMQ_HOST: "{{ .hostname }}"
+      evalya.io/provides.RABBITMQ_AMQP_PORT: "5672"
+      evalya.io/provides.RABBITMQ_MANAGEMENT_PORT: "15672"
+      evalya.io/provides.RABBITMQ_OPENMETRICS_PORT: "15692"
+      evalya.io/provides.RABBITMQ_USER: guest
+      evalya.io/provides.RABBITMQ_PASSWORD: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
