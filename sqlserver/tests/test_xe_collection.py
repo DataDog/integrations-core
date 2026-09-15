@@ -50,7 +50,7 @@ def assert_event_field_values(event, expected_values):
 def validate_common_payload_fields(payload, expected_type):
     """Validate common fields in event payloads"""
     assert 'timestamp' in payload
-    assert payload['host'] == 'test-host'
+    assert payload['host'] == 'reported-host'
     assert payload['ddagentversion'] == '7.30.0'
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
@@ -95,6 +95,7 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
+    check.reported_hostname = "reported-host"
     check.agent_version = '7.30.0'
     check.tag_manager = TagManager()
     check.tag_manager.set_tag('test', 'tag')
@@ -1172,6 +1173,7 @@ class TestRunJob:
 
             # Now validate the actual payload structure that was going to be serialized
             assert original_payload is not None, "Payload was not captured"
+            assert original_payload['host'] == 'reported-host'
 
             # Check essential payload properties
             assert 'ddsource' in original_payload, "Missing 'ddsource' in payload"
