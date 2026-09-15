@@ -4,7 +4,9 @@
       "auth_name": "oauth",
       "oauth2_authorization_code": {
         "authorization_server": {
-          "authorization_endpoint": "https://www.klaviyo.com/oauth/authorize"
+          "authorization_endpoint": "https://www.klaviyo.com/oauth/authorize",
+          "token_endpoint": "https://a.klaviyo.com/oauth/token",
+          "token_endpoint_auth_method": "client_secret_basic"
         },
         "authorization_request": {
           "scopes": [

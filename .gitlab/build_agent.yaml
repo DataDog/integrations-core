@@ -6,7 +6,7 @@
     RELEASE_VERSION_7: "nightly-a7"
     BUCKET_BRANCH: "dev"
     DEPLOY_AGENT: "false"
-    INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
+    INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_SHA}
     INTEGRATIONS_WHEELS_STORAGE: "dev"
     RUN_E2E_TESTS: "on"
     # disable kitchen tests

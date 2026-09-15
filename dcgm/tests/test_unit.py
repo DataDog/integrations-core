@@ -25,14 +25,39 @@ def test_critical_service_check(dd_run_check, aggregator, mock_http_response, ch
 @pytest.mark.usefixtures("mock_label_remap")
 def test_label_remap(dd_run_check, aggregator, check):
     """
-    Test that the labels are remapped correctly.
+    Test that Prometheus labels are remapped and autodiscovery tags for the
+    exporter pod's namespace/pod/container are filtered out via ignore_tags.
     """
+    # First run to initialize scrapers
     dd_run_check(check)
+    aggregator.reset()
+
+    # Simulate autodiscovery adding tags for the exporter pod itself
+    check.set_dynamic_tags(
+        'kube_namespace:gpu-operator',
+        'pod_name:nvidia-dcgm-exporter-abc',
+        'kube_container_name:nvidia-dcgm-exporter',
+    )
+    dd_run_check(check)
+
     aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
-    relabeled_tags = ['kube_namespace:foo', 'pod_name:bar', 'kube_container_name:baz']
-    aggregator.assert_metric('dcgm.gpu_utilization')
-    for tag in relabeled_tags:
-        aggregator.assert_metric_has_tag('dcgm.gpu_utilization', tag)
+
+    aggregator.assert_metric(
+        'dcgm.gpu_utilization',
+        tags=[
+            'DCGM_FI_DRIVER_VERSION:460.106.00',
+            'DCGM_FI_PROCESS_NAME:/usr/bin/dcgm-exporter',
+            'Hostname:424773df46e0',
+            'UUID:GPU-20c56d28-0da5-6d26-a36a-e7af1ce2586e',
+            'device:nvidia0',
+            'endpoint:http://localhost:9400/metrics',
+            'gpu:0',
+            'kube_container_name:baz',
+            'kube_namespace:foo',
+            'modelName:Tesla T4',
+            'pod_name:bar',
+        ],
+    )
 
 
 @pytest.mark.usefixtures("mock_metrics")

@@ -5,7 +5,6 @@ services:
     command: ["server", "-config", "/boundary/boundary.hcl"]
     volumes:
       - ./boundary.hcl:/boundary/boundary.hcl
-      - ${DD_LOG_1}:/var/log/boundary/events.ndjson
     ports:
       - "9200:9200"
       - "9201:9201"

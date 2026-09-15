@@ -9,7 +9,6 @@ import time
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from string import Template
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
@@ -19,7 +18,6 @@ from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
-    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -29,12 +27,14 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
+from datadog_checks.mysql.data_observability import MySQLDataObservability
 from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig, sanitize
+from .config_models.instance import DataObservability
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -104,6 +104,8 @@ except ImportError:
 
 
 class MySql(DatabaseCheck):
+    DBMS = 'mysql'
+
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
@@ -120,15 +122,12 @@ class MySql(DatabaseCheck):
         self.server_uuid = None
         self.cluster_uuid = None
         self._resolved_hostname = None
-        self._database_identifier = None
-        self._agent_hostname = None
         self._database_hostname = None
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
         self._initialized_at = int(time.time() * 1000)
         self._config = MySQLConfig(self.instance, init_config)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
         self._cloud_metadata = self._config.cloud_metadata
@@ -152,15 +151,21 @@ class MySql(DatabaseCheck):
             and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
         )
 
-        # Pass function reference and managed auth flag to async jobs
-        self._statement_metrics = MySQLStatementMetrics(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        self._do_config = DataObservability(
+            **{
+                'enabled': False,
+                'run_sync': False,
+                'collection_interval': 10,
+                **(self.instance.get('data_observability') or {}),
+            }
         )
-        self._statement_samples = MySQLStatementSamples(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.mysql_metadata = None
+        self.query_activity = None
+        self.data_observability = None
+        self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -173,6 +178,39 @@ class MySql(DatabaseCheck):
         self._is_innodb_engine_enabled_cached = None
 
         self._submit_initialization_health_event()
+
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
+        self._query_manager = None
+        self._runtime_queries_cached = None
+        self.health = None
+
+    def _register_async_jobs(self):
+        """Build and register the async jobs enabled by this check's configuration."""
+        if self._config.dbm_enabled:
+            self.statement_metrics = self.register_async_job(
+                MySQLStatementMetrics(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+            self.statement_samples = self.register_async_job(
+                MySQLStatementSamples(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+            self.query_activity = self.register_async_job(
+                MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+
+        # Data Observability needs the schema collection the metadata job performs, so either
+        # feature brings it along.
+        if self._config.dbm_enabled or self._do_config.enabled:
+            self.mysql_metadata = self.register_async_job(
+                MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+            )
+
+        if self._do_config.enabled:
+            self.data_observability = self.register_async_job(
+                MySQLDataObservability(
+                    self, self._do_config, self._config, self._get_connection_args, self._uses_aws_managed_auth
+                )
+            )
 
     def _submit_initialization_health_event(self):
         try:
@@ -200,10 +238,6 @@ class MySql(DatabaseCheck):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
-    def tags(self):
-        return self.tag_manager.get_tags()
-
-    @property
     def reported_hostname(self):
         # type: () -> str
         if self._config.exclude_hostname:
@@ -225,34 +259,17 @@ class MySql(DatabaseCheck):
         return self._cloud_metadata
 
     @property
-    def database_identifier(self):
-        # type: () -> str
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
-            tag_dict = {}
-            tags = self.tag_manager.get_tags()
-            # sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            tag_dict['resolved_hostname'] = self.resolved_hostname
-            tag_dict['host'] = str(self._config.host)
-            tag_dict['port'] = str(self._config.port)
-            tag_dict['mysql_sock'] = str(self._config.mysql_sock)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.get('template') or '$resolved_hostname'
 
     @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
+    def database_identifier_params(self) -> dict:
+        return {
+            'resolved_hostname': self.resolved_hostname,
+            'host': str(self._config.host),
+            'port': str(self._config.port),
+            'mysql_sock': str(self._config.mysql_sock),
+        }
 
     @property
     def database_hostname(self):
@@ -420,12 +437,7 @@ class MySql(DatabaseCheck):
                     if self._get_runtime_queries(db):
                         self._get_runtime_queries(db).execute(extra_tags=tags)
 
-                if self._config.dbm_enabled:
-                    dbm_tags = list(set(self.service_check_tags) | set(tags))
-                    self._statement_metrics.run_job_loop(dbm_tags)
-                    self._statement_samples.run_job_loop(dbm_tags)
-                    self._query_activity.run_job_loop(dbm_tags)
-                    self._mysql_metadata.run_job_loop(dbm_tags)
+                self.run_async_jobs(list(set(self.service_check_tags) | set(tags)))
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -439,12 +451,6 @@ class MySql(DatabaseCheck):
         finally:
             self._conn = None
             self._report_warnings()
-
-    def cancel(self):
-        self._statement_samples.cancel()
-        self._statement_metrics.cancel()
-        self._query_activity.cancel()
-        self._mysql_metadata.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
@@ -559,7 +565,7 @@ class MySql(DatabaseCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = connect_with_session_variables(**connect_args)
+            db = connect_with_session_variables(mysql_version=self.version, **connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
@@ -608,7 +614,9 @@ class MySql(DatabaseCheck):
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
-        if self.global_variables.log_bin_enabled:
+        if self.global_variables.log_bin_enabled and is_affirmative(
+            self._config.options.get('binlog_size_metrics', True)
+        ):
             with tracked_query(self, operation="binary_log_metrics"):
                 results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
@@ -719,7 +727,7 @@ class MySql(DatabaseCheck):
                 status_metric = status_dict["metric_name"]
                 if status_name in metrics.keys():
                     collected_metric = metrics.get(status_name)[0]
-                    self.log.debug(
+                    self.warning(
                         "Skipping status variable %s for metric %s as it is already collected by %s",
                         status_name,
                         status_metric,
@@ -1170,7 +1178,12 @@ class MySql(DatabaseCheck):
             for replica in replica_status:
                 # MySQL <5.7 does not have Channel_Name.
                 # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                channel = (
+                    self._config.replication_channel
+                    or replica.get('Channel_Name')
+                    or replica.get('Connection_name')
+                    or 'default'
+                )
                 for key, value in replica.items():
                     if value is not None:
                         replica_results[key]['channel:{0}'.format(channel)] = value
@@ -1417,9 +1430,9 @@ class MySql(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
-                "dbms": "mysql",
+                "dbms": self.dbms,
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,

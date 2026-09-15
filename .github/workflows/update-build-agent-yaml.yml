@@ -19,7 +19,7 @@ jobs:
       BRANCH: ${{ inputs.branch }}
     steps:
       - name: Checkout release branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.branch }}
 
@@ -61,7 +61,8 @@ jobs:
             exit 0
           fi
           if ! git ls-remote --exit-code --heads https://github.com/DataDog/datadog-agent.git "$BRANCH" >/dev/null 2>&1; then
-            echo "::warning::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent yet. Creating the PR anyway."
+            echo "::error::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent. Refusing to open a PR pointing to a missing upstream branch. Re-dispatch this workflow once the upstream branch is cut."
+            exit 1
           fi
           echo "needs_update=true" >> "$GITHUB_ENV"
 

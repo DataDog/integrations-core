@@ -1,5 +1,7 @@
 provides:
   - id: cisco-aci-network-device-metrics
+    data_type: metrics
     always_on: false
   - id: cisco-aci-network-event-logs
+    data_type: logs
     always_on: false

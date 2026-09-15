@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2026-08-07
+
+***Changed***:
+
+* Bump minimum datadog_checks_base to latest release. ([#24801](https://github.com/DataDog/integrations-core/pull/24801))
+
+## 9.5.0 / 2026-08-05
+
+***Added***:
+
+* Add container-based config discovery support. ([#24118](https://github.com/DataDog/integrations-core/pull/24118))
+
 ## 9.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

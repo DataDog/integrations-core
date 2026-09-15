@@ -1,0 +1,1 @@
+Abandon a batch's gathering when the event bus is shutting down.

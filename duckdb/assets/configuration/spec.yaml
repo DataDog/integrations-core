@@ -17,6 +17,7 @@ files:
       value:
         example: "/path-to-file/my_database.db"
         type: string
+        require_trusted_provider: true
     - name: connection_attempt
       description: | 
         The number of retries to connect to the database in case of failure

@@ -7,6 +7,19 @@ from datadog_checks.marklogic.constants import RESOURCE_TYPES
 
 from .common import build_metric_to_submit, is_metric
 
+# MarkLogic occasionally serializes these forest status properties as measurable
+# `{units, value}` structures even though their values are entity IDs (references to
+# forests or databases), not measurements. They are not documented metrics, so they
+# must never be submitted as gauges.
+EXCLUDED_STATUS_PROPERTIES = frozenset(
+    {
+        'master-forest',
+        'current-master-forest',
+        'current-foreign-master-forest',
+        'current-foreign-master-database',
+    }
+)
+
 
 def parse_summary_status_resource_metrics(resource_type, data, tags):
     #  type: (str, Dict, List[str]) -> Generator[Tuple, None, None]
@@ -51,6 +64,8 @@ def _parse_status_metrics(metric_prefix, metrics, tags):
         elif key == 'cache-properties':
             for metric in _parse_status_metrics(metric_prefix, data, tags):
                 yield metric
+        elif key in EXCLUDED_STATUS_PROPERTIES:
+            continue
         elif is_metric(data):
             m = build_metric_to_submit("{}.{}".format(metric_prefix, key), data, tags)
             if m is not None:

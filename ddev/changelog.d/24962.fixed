@@ -1,0 +1,1 @@
+Fix a message submitted from a worker thread being lost, leaving the event bus running until its timeout.

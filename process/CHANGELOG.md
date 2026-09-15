@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.2 / 2026-08-05
+
+***Fixed***:
+
+* Clarify ``exact_match`` behavior for ``search_string``, including the required file extension on Windows. ([#24560](https://github.com/DataDog/integrations-core/pull/24560))
+
 ## 5.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

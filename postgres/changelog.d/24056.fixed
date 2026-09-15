@@ -1,1 +1,0 @@
-Cache ignored ``/* DDIGNORE */`` queries in incremental query metrics collector to avoid repeated lookups.

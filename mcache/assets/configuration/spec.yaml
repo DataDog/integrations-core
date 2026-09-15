@@ -25,6 +25,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name: port
       description: Port to use when connecting to `url`.
       fleet_configurable: true

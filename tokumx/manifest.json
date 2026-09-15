@@ -36,9 +36,7 @@
   "assets": {
     "integration": {
       "source_type_name": "TokuMX",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
+      "configuration": {},
       "events": {
         "creates_events": true
       },

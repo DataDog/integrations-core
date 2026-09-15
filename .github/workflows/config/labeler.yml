@@ -97,6 +97,10 @@ integration/ambari:
 - changed-files:
   - any-glob-to-any-file:
     - ambari/**/*
+integration/anomali_threatstream:
+- changed-files:
+  - any-glob-to-any-file:
+    - anomali_threatstream/**/*
 integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
@@ -409,10 +413,6 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
-integration/cyberark_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - cyberark_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
@@ -489,6 +489,10 @@ integration/duckdb:
 - changed-files:
   - any-glob-to-any-file:
     - duckdb/**/*
+integration/dynamo:
+- changed-files:
+  - any-glob-to-any-file:
+    - dynamo/**/*
 integration/ecs_fargate:
 - changed-files:
   - any-glob-to-any-file:
@@ -721,6 +725,10 @@ integration/ide_shepherd:
 - changed-files:
   - any-glob-to-any-file:
     - ide_shepherd/**/*
+integration/idira_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - idira_endpoint_privilege_manager/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -889,6 +897,10 @@ integration/kubevirt_handler:
 - changed-files:
   - any-glob-to-any-file:
     - kubevirt_handler/**/*
+integration/kueue:
+- changed-files:
+  - any-glob-to-any-file:
+    - kueue/**/*
 integration/kuma:
 - changed-files:
   - any-glob-to-any-file:

@@ -6,7 +6,7 @@ import logging
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from . import common
@@ -23,9 +23,12 @@ def dd_environment():
     ]
     logging.info(conditions)
     with docker_run(compose_file, conditions=conditions):
-        yield {
-            'instances': [common.MOCKED_INSTANCE],
-        }
+        yield (
+            {
+                'instances': [common.MOCKED_INSTANCE],
+            },
+            get_e2e_discovery_metadata(),
+        )
 
 
 @pytest.fixture

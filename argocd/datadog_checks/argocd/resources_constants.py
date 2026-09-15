@@ -14,11 +14,22 @@ import re
 KEY_SEPARATOR = "|"
 
 GENRESOURCES_API_UP_METRIC = "argocd.genresources.api.up"
+GENRESOURCES_STREAM_UP_METRIC = "argocd.genresources.stream.up"
+GENRESOURCES_STREAM_EVENTS_METRIC = "argocd.genresources.stream.events_received"
+GENRESOURCES_STREAM_RECONNECTS_METRIC = "argocd.genresources.stream.reconnects"
+
+
+def auth_headers(token: str | None) -> dict[str, str]:
+    """Bearer auth header for Argo CD API requests, or empty when no token is configured."""
+    return {"Authorization": f"Bearer {token}"} if token else {}
+
 
 APPLICATION_INCLUDE: dict[str, tuple[str, ...]] = {
     "paths": (
         "metadata.name",
         "metadata.namespace",
+        "metadata.uid",
+        "metadata.creationTimestamp",
         "spec.project",
         "spec.source.repoURL",
         "spec.source.path",
@@ -37,23 +48,36 @@ APPLICATION_INCLUDE: dict[str, tuple[str, ...]] = {
         "status.sync.revision",
         "status.health.status",
         "status.health.message",
+        "status.health.lastTransitionTime",
         "status.conditions[*].type",
         "status.conditions[*].message",
         "status.conditions[*].lastTransitionTime",
         "status.operationState.phase",
         "status.operationState.startedAt",
         "status.operationState.finishedAt",
+        "status.operationState.message",
+        "status.operationState.retryCount",
         "status.operationState.operation.initiatedBy.username",
         "status.operationState.operation.initiatedBy.automated",
         "status.sourceType",
         "status.reconciledAt",
         "status.summary.images[*]",
+        "status.summary.externalURLs[*]",
         "status.history[*].id",
         "status.history[*].revision",
         "status.history[*].deployedAt",
         "status.history[*].deployStartedAt",
         "status.history[*].initiatedBy.username",
         "status.history[*].initiatedBy.automated",
+        "status.history[*].source.repoURL",
+        "status.history[*].source.path",
+        "status.history[*].source.targetRevision",
+        "status.history[*].source.chart",
+        "status.history[*].sources[*].repoURL",
+        "status.history[*].sources[*].path",
+        "status.history[*].sources[*].targetRevision",
+        "status.history[*].sources[*].chart",
+        "status.history[*].revisions[*]",
         "status.resources[*].kind",
         "status.resources[*].name",
         "status.resources[*].namespace",
@@ -75,9 +99,12 @@ CLUSTER_INCLUDE: dict[str, tuple[str, ...]] = {
         "namespaces[*]",
         "connectionState.status",
         "connectionState.message",
+        "connectionState.attemptedAt",
         "info.applicationsCount",
         "info.serverVersion",
         "info.cacheInfo.resourcesCount",
+        "info.connectionState.status",
+        "shard",
     ),
     "map_paths": ("labels",),
     "annotation_keys": (),
@@ -91,6 +118,11 @@ REPOSITORY_INCLUDE: dict[str, tuple[str, ...]] = {
         "project",
         "connectionState.status",
         "connectionState.message",
+        "connectionState.attemptedAt",
+        "insecure",
+        "enableLfs",
+        "enableOCI",
+        "forceHttpBasicAuth",
     ),
     "map_paths": (),
     "annotation_keys": (),

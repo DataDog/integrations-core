@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.0 / 2026-09-02
+
+***Added***:
+
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+
+## 9.3.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 9.2.2 / 2026-06-22 / Agent 7.81.0
+
+***Fixed***:
+
+* Use ``https://agent-integration-wheels.datadoghq.com`` (CloudFront) as the default v2 repository URL, replacing the direct S3 URL. The ``--repository`` flag still accepts any HTTPS base URL. ([#24084](https://github.com/DataDog/integrations-core/pull/24084))
+
 ## 9.2.1 / 2026-06-15
 
 ***Fixed***:

@@ -44,6 +44,12 @@ INSTANCE_PREFIX_MATCH = {
     ],
     'disable_legacy_service_tag': True,
 }
+INSTANCE_GROUP_PER_USER_SERVICES = {
+    'services': ['ALL'],
+    'group_per_user_services': True,
+    'collect_display_name_as_tag': True,
+    'disable_legacy_service_tag': True,
+}
 INSTANCE_TRIGGER_START = {
     'services': [
         {'name': 'eventlog', 'startup_type': 'automatic', 'trigger_start': False},

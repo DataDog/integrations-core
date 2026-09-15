@@ -133,6 +133,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
           example: "<FILE_PATH>"
       - name: ssl_capath
         description: |
@@ -141,6 +142,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
           example: "<DIRECTORY_PATH>"
       - name: tls_ignore_warning
         description: |

@@ -4,7 +4,7 @@
 | --- | --- |
 | CI/CD | [![CI - Test][1]][2] |
 | Docs | [![Docs - Release][19]][20] |
-| Meta | [![Hatch project][26]][27] [![Linting - Ruff][24]][25] [![Code style - black][21]][22] [![Typing - Mypy][28]][29] [![License - BSD-3-Clause][30]][31] |
+| Meta | [![Hatch project][26]][27] [![Linting - Ruff][24]][25] [![Typing - Mypy][28]][29] [![License - BSD-3-Clause][30]][31] |
 
 This repository contains open source integrations that Datadog officially develops and supports.
 To add a new integration, please see the [Integrations Extras][5] repository and the
@@ -43,10 +43,8 @@ For more information on integrations, please reference our [documentation][11] a
 [16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
 [19]: https://github.com/DataDog/integrations-core/workflows/docs/badge.svg
 [20]: https://github.com/DataDog/integrations-core/actions?workflow=docs
-[21]: https://img.shields.io/badge/code%20style-black-000000.svg
-[22]: https://github.com/ambv/black
-[24]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json
-[25]: https://github.com/charliermarsh/ruff
+[24]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+[25]: https://github.com/astral-sh/ruff
 [26]: https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
 [27]: https://github.com/pypa/hatch
 [28]: https://img.shields.io/badge/typing-Mypy-blue.svg

@@ -15,6 +15,10 @@ FLUX_V1_METRICS = {
 }
 assert sorted(FLUX_V1_METRICS) == list(FLUX_V1_METRICS)
 
+KSM_METRICS = {
+    "gotk_resource_info": "gotk.resource.info",
+}
+
 FLUX_V2_METRICS = {
     "leader_election_master_status": "leader_election_master_status",
     "process_cpu_seconds": "process.cpu_seconds",

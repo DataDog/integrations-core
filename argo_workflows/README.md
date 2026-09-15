@@ -18,10 +18,13 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 ### Configuration
 
-The Argo Workflows Workflow Controller has [Prometheus-formatted metrics][11] available at `/metrics` on port `9090`. For the Agent to start collecting metrics, the Workflow Controller pod needs to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_workflows.d/conf.yaml][4].
+The Argo Workflows Workflow Controller has [Prometheus-formatted metrics][11] available at `/metrics` on port `9090`. Configure the check with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [sample argo_workflows.d/conf.yaml][4].
 
 The only parameter required for configuring the Argo Workflows check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `9090`. In containerized environments, `%%host%%` should be used for [host autodetection][3].
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -30,7 +33,7 @@ kind: Pod
 metadata:
   name: '<POD_NAME>'
   annotations:
-    ad.datadoghq.com/argo-workflows.checks: |
+    ad.datadoghq.com/workflow-controller.checks: |
       {
         "argo_workflows": {
           "init_config": {},
@@ -44,9 +47,38 @@ metadata:
     # (...)
 spec:
   containers:
-    - name: 'argo-workflows'
+    - name: 'workflow-controller'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+This example targets the Argo Workflows controller Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: workflow-controller
+  config:
+    checks:
+      - integration: argo_workflows
+        containerName: workflow-controller
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:9090/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][13].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Log collection
 
@@ -100,3 +132,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://argo-workflows.readthedocs.io/en/stable/metrics/
 [12]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
+[13]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

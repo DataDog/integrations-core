@@ -1,9 +1,6 @@
 name: Daily Flaky Tests (every 8 hours)
 
 on:
-  pull_request:
-    paths:
-    - .github/workflows/test-results-master.yml
   workflow_dispatch:
     inputs:
       dry_run:
@@ -41,6 +38,8 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts in test-target.yml
+       id-token: write
 
   publish-test-results:
     needs:
@@ -56,5 +55,5 @@ jobs:
 
     uses: ./.github/workflows/test-results-master.yml
     with:
-      dry_run: ${{ github.event_name == 'pull_request' || inputs.dry_run || false }}
+      dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit

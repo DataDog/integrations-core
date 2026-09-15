@@ -4,7 +4,9 @@
 import pytest
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.haproxy import HAProxyCheck
 
 from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, requires_new_environment
 
@@ -40,3 +42,19 @@ def test_checkv2(dd_agent_check, instancev2, prometheus_metricsv2):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_e2e_discovery(dd_agent_check_discovery, prometheus_metricsv2):
+    aggregator = dd_agent_check_discovery(rate=True)
+
+    # discovery resolves the container's internal network address, which differs from
+    # ENDPOINT_PROMETHEUS's host-mapped one, so the endpoint tag isn't asserted here.
+    for metric in prometheus_metricsv2:
+        aggregator.assert_metric('haproxy.{}'.format(metric))
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, HAProxyCheck)

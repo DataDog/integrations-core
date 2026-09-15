@@ -13,7 +13,7 @@ SINFO_NODE_PARAMS = ["-haNO", "Partition:|,Available:|,NodeList:|,CPUsState:|,Me
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,Features_act:|,Threads:|,AllocMem:"
 GPU_TOTAL = "|,Gres:"
 GPU_PARAMS = GPU_TOTAL + "|,GresUsed:"
-SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%m|%P"]
+SQUEUE_PARAMS = ["-aho", "%A|%u|%j|%T|%N|%C|%R|%b|%P"]
 SSHARE_PARAMS = ["-alnPU"]
 SACCT_PARAMS = [
     "-anpo",
@@ -21,6 +21,15 @@ SACCT_PARAMS = [
     "--units=K",
 ]
 SCONTROL_PARAMS = ["listpid"]
+
+# `scontrol listpid` exits 1 whenever it finds no job steps. This bare message, printed
+# without slurm's "scontrol: error:" prefix, is the whole of stderr only when the node is
+# genuinely idle -- every failure inside stepd_available() also returns an empty step list
+# and so prints it too, after its own prefixed error line.
+SCONTROL_NO_STEPS_MSG = "No job steps exist on this node."
+# stepd_available() failing to stat SlurmdSpoolDir. A static property of the host rather
+# than a per-interval event: the node is not running slurmd.
+SCONTROL_MISSING_SPOOLDIR_MSG = "Domain socket directory"
 
 PARTITION_MAP = {
     "tags": [

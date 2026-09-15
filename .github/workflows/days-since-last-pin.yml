@@ -12,7 +12,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
         id: octo-sts
@@ -26,9 +26,15 @@ jobs:
           GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
         run: python3 .github/workflows/scripts/days_since_last_pin.py
 
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-core-api-key
+
       - name: Submit metric to Datadog
         env:
-          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
           DAYS: ${{ steps.compute.outputs.days }}
         run: |
           python3 - <<'EOF'

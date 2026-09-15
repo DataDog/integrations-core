@@ -1,0 +1,1 @@
+Rename ``TaskPullRequestUpdater`` to ``TaskRunReporter`` and ``PullRequestUpdaterOptions`` to ``RunReporterOptions``, since the task also reports on runs that have no pull request.

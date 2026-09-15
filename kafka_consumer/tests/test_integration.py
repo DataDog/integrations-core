@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
+import base64
 import logging
+import marshal
 from collections import defaultdict
 from contextlib import nullcontext as does_not_raise
 
@@ -27,7 +28,7 @@ def mocked_read_persistent_cache(cache_key):
     cached_offsets["dc_0"][40] = 200
     cached_offsets["dc_1"][25] = 150
     cached_offsets["dc_1"][40] = 200
-    return json.dumps(cached_offsets)
+    return base64.b64encode(marshal.dumps(dict(cached_offsets))).decode('ascii')
 
 
 def mocked_time():

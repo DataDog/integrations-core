@@ -267,7 +267,7 @@ class KafkaActionsCheck(AgentCheck):
         start_timestamp = config.get('start_timestamp')
         n_messages_retrieved = config.get('n_messages_retrieved', 10)
         max_scanned_messages = config.get('max_scanned_messages', 1000)
-        timeout_ms = config.get('timeout_ms', 20000)
+        timeout_ms = config.get('timeout_ms', 5000)
         filter_expression = config.get('filter', '')
         consumer_group_id = config.get('consumer_group_id') or f"datadog-agent-{self.remote_config_id}"
 
@@ -326,6 +326,8 @@ class KafkaActionsCheck(AgentCheck):
         if scanned_count >= max_scanned_messages and sent_count < n_messages_retrieved:
             hit_scan_limit = True
 
+        hit_timeout = self.kafka_client.hit_timeout and not hit_retrieved_limit and not hit_scan_limit
+
         elapsed_time = time.time() - start_time
 
         stats = {
@@ -337,6 +339,7 @@ class KafkaActionsCheck(AgentCheck):
             'messages_filtered_out': filtered_out_count,
             'hit_scan_limit': hit_scan_limit,
             'hit_retrieved_limit': hit_retrieved_limit,
+            'hit_timeout': hit_timeout,
             'elapsed_time_seconds': round(elapsed_time, 3),
             'n_messages_retrieved': n_messages_retrieved,
             'max_scanned_messages': max_scanned_messages,
@@ -355,6 +358,14 @@ class KafkaActionsCheck(AgentCheck):
                 "Hit max_scanned_messages limit (%d) before retrieving %d messages. Only found %d matching messages.",
                 max_scanned_messages,
                 n_messages_retrieved,
+                sent_count,
+            )
+
+        if hit_timeout:
+            self.log.warning(
+                "Hit the %dms timeout after scanning %d messages and retrieving %d. Result may be incomplete.",
+                timeout_ms,
+                scanned_count,
                 sent_count,
             )
 
@@ -678,6 +689,37 @@ class KafkaActionsCheck(AgentCheck):
             if not success:
                 raise Exception(f"Failed to delete configs for topic '{topic}'")
 
+        # Emit the updated topic config so the UI reflects changes immediately,
+        # without waiting for the kafka_consumer check's cache to expire.
+        self._emit_topic_config(topic)
+
+    def _emit_topic_config(self, topic: str):
+        """Fetch and emit the current topic config to the data-streams-message track.
+
+        Called after a successful update_topic_config or delete_topic_config action
+        so the backend UI reflects the change immediately, without waiting for
+        the kafka_consumer check's config cache (default 180s) to expire.
+        """
+        try:
+            topic_config = self.kafka_client.describe_topic_config(topic)
+            if not topic_config:
+                self.log.debug("No config returned for topic '%s', skipping emit", topic)
+                return
+
+            self.log.debug("Emitting updated config for topic '%s' after config change", topic)
+
+            payload = {
+                'collection_timestamp': int(time.time() * 1000),
+                'kafka_cluster_id': self.cluster,
+                'topic': topic,
+                'config_type': 'topic',
+                'config': topic_config,
+            }
+
+            self.event_platform_event(json.dumps(payload), "data-streams-message")
+        except Exception as e:
+            self.log.warning("Failed to emit topic config for '%s': %s", topic, e)
+
     def _action_delete_topic(self):
         """Delete a Kafka topic (RFC Action #4).
 
@@ -732,10 +774,12 @@ class KafkaActionsCheck(AgentCheck):
                 offsets:
                     - topic: orders
                       partition: 0
-                      offset: 1000
+                      offset: 1000       # explicit offset
                     - topic: orders
                       partition: 1
-                      offset: 1500
+                      offset: -2         # earliest
+                    - topic: payments
+                      timestamp: 1735689600000   # all partitions at/after this timestamp
         """
         config = self.config.update_consumer_group_offsets
 
@@ -744,10 +788,14 @@ class KafkaActionsCheck(AgentCheck):
         consumer_group = config['consumer_group']
         offsets = config['offsets']
 
+        self.kafka_client.check_consumer_group_inactive(consumer_group)
+
         self.log.warning(
-            "Updating offsets for consumer group '%s' on cluster '%s' - may cause duplicate processing or data loss",
+            "Updating offsets for consumer group '%s' on cluster '%s' - may cause duplicate processing or data loss. "
+            "Offsets: %s",
             consumer_group,
             self.cluster,
+            offsets,
         )
 
         success = self.kafka_client.update_consumer_group_offsets(consumer_group=consumer_group, offsets=offsets)

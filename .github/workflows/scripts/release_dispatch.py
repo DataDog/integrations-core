@@ -1,6 +1,6 @@
 """Build repository_dispatch batches and write the release summary.
 
-Environment variables: PACKAGES, SOURCE_REPO, REF, DRY_RUN.
+Environment variables: PACKAGES, NEW_TAGS, SOURCE_REPO, REF, DRY_RUN.
 Outputs: batches (JSON array of client_payload dicts, one per batch).
 """
 import json
@@ -36,6 +36,7 @@ def _load_validation(runner_temp: str) -> dict:
 
 def main() -> None:
     packages = json.loads(os.environ["PACKAGES"])
+    new_tags = json.loads(os.environ["NEW_TAGS"])
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ["REF"]
 
@@ -51,12 +52,34 @@ def main() -> None:
         for name in packages:
             print(f"  - {name}")
         print("\nDRY RUN: no tags pushed, no builds triggered")
-        write_summary(build_summary(packages, results, mode, source_repo, ref, dry_run=True, was_dispatched=False))
+        write_summary(
+            build_summary(
+                packages,
+                results,
+                mode,
+                source_repo,
+                ref,
+                dry_run=True,
+                was_dispatched=False,
+                new_tags=new_tags,
+            )
+        )
         return
 
     batches = build_batches(packages, source_repo, ref)
     set_outputs(batches=json.dumps(batches))
-    write_summary(build_summary(packages, results, mode, source_repo, ref, dry_run=False, was_dispatched=False))
+    write_summary(
+        build_summary(
+            packages,
+            results,
+            mode,
+            source_repo,
+            ref,
+            dry_run=False,
+            was_dispatched=False,
+            new_tags=new_tags,
+        )
+    )
 
 
 if __name__ == "__main__":

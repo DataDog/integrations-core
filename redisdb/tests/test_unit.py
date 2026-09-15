@@ -127,13 +127,15 @@ def test_check_all_available_config_options(check, aggregator, redis_instance, d
         'ssl_ca_certs': '/path',
         'ssl_cert_reqs': 0,
         'ssl_check_hostname': True,
+        'client_name': 'datadog-agent',
     }
     redis_instance.update(connection_args)
 
     redis_check = check(redis_instance)
     with mock.patch('redis.Redis') as redis_conn:
         dd_run_check(redis_check)
-        assert redis_conn.call_args.kwargs == connection_args
+        # RESP2 is pinned by the check rather than taken from the client default
+        assert redis_conn.call_args.kwargs == connection_args | {'protocol': 2}
 
 
 def test_slowlog_quiet_failure(check, aggregator, redis_instance):

@@ -123,10 +123,7 @@ jobs:
     write_file(
         repo_path / 'ddev',
         'pyproject.toml',
-        f"""[tool.black]
-target-version = ["py{OLD_PYTHON_VERSION.replace('.', '')}"]
-
-[tool.ruff]
+        f"""[tool.ruff]
 target-version = "py{OLD_PYTHON_VERSION.replace('.', '')}"
 """,
     )

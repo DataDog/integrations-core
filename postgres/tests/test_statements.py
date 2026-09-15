@@ -2077,7 +2077,7 @@ def test_get_query_metrics_payload_rows(integration_check):
     check = integration_check({"host": "host", "username": "user"})
     check.warning = print
     config, _ = build_config(check=check)
-    statement_metrics = PostgresStatementMetrics({}, config)
+    statement_metrics = PostgresStatementMetrics(check, config)
     wrapper = {}
 
     TestCase = namedtuple('TestCase', 'rows max_size expected')

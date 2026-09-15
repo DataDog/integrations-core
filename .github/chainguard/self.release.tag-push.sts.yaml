@@ -1,0 +1,23 @@
+# Policy for: .github/workflows/release-dispatch.yml in DataDog/integrations-core
+# Triggered by automatic and manually dispatched integration releases
+#
+# Security model:
+#   - Workflow runs only from protected stable or prerelease branches
+#   - Access is scoped to the reusable release workflow
+#   - Supports push and workflow_dispatch events only
+#
+# Permissions granted:
+#   - contents: write  - Create and push integration release tags
+
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:ref:refs/heads/(master|\d+\.\d+\.x|(alpha|beta|rc)/.+)
+
+claim_pattern:
+  event_name: (push|workflow_dispatch)
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/release-dispatch\.yml@refs/heads/(master|\d+\.\d+\.x|(alpha|beta|rc)/.+)
+  ref: refs/heads/(master|\d+\.\d+\.x|(alpha|beta|rc)/.+)
+  repository: DataDog/integrations-core
+
+permissions:
+  contents: write

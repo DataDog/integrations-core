@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 8.10.0 / 2026-06-10
+## 8.11.0 / 2026-08-05
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Fixed***:
+
+* Fix a ZeroDivisionError in the queue depth percent calculation when a queue's max depth is configured as 0. ([#24663](https://github.com/DataDog/integrations-core/pull/24663))
+
+## 8.10.0 / 2026-06-10 / Agent 7.81.0
 
 ***Added***:
 
