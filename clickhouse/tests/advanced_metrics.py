@@ -392,6 +392,7 @@ OPTIONAL_METRICS = [
     'clickhouse.asynchronous_metrics.jemalloc.epoch',
     'clickhouse.compilation.function.execute.count',
     'clickhouse.compilation.function.execute.total',
+    'clickhouse.errors.raised',
     'clickhouse.events.AIORead.count',
     'clickhouse.events.AIORead.total',
     'clickhouse.events.AIOReadBytes.count',

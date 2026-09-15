@@ -1,11 +1,30 @@
 version: "1"
 
-# Publish the existing authenticated standalone Compose fixture as
-# redisdb/tests@redis-standalone. The Compose file defaults its config mount to the
-# repository's auth.conf, so consumers only need to select a Redis version.
+# Authenticated standalone Redis (auth.conf); consumers only pick a Redis version.
 tasks:
   - id: redis-standalone
     task: ./compose/standalone.compose@redis-standalone
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "6379"
+      evalya.io/provides.REDIS_PASSWORD: devops-best-friend
+    env:
+      - name: REDIS_PASSWORD
+        value: devops-best-friend
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Full metric-coverage fixture: master/replica behind an info-proxy that adds
+  # the fields OSS Redis can't emit (managed-service, cluster, sentinel,
+  # RediSearch), plus a built-in workload that keeps rate/counter metrics moving.
+  # Presents on 6379 like a standalone. See ./proxy and its README.
+  - id: redis-full
+    task: ./compose/full-coverage.compose@info-proxy
     labels:
       evalya.io/publish: "true"
       evalya.io/provides.DB_HOST: "{{ .hostname }}"

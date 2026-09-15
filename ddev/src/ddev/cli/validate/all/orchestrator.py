@@ -17,10 +17,9 @@ from ddev.cli.validate.all.github import (
     COMMENT_HEADING,
     format_pr_comment,
     format_step_summary,
-    get_workflow_run_url,
-    write_step_summary,
 )
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
+from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -212,6 +211,14 @@ class ValidationOrchestrator(EventBusOrchestrator):
             ValidationProcessor(app, self._results, subprocess_timeout),
             [ValidationMessage],
         )
+
+    def install_signal_handlers(self) -> None:
+        """Left to the default handling, which is what interrupts the validations.
+
+        Each one runs as a subprocess from a pool thread, and a requested stop cannot interrupt either;
+        it would be noticed only once the subprocess returned or timed out. Winding down cleanly needs
+        the children terminated first, so until that exists the default remains the quicker way out.
+        """
 
     async def on_initialize(self) -> None:
         for name in self._validations:

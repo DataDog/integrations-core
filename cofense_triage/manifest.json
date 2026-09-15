@@ -26,6 +26,7 @@
     "classifier_tags": [
       "Category::Cloud",
       "Category::Log Collection",
+      "Category::SIEM",
       "Category::Security",
       "Offering::Integration",
       "Submitted Data Type::Logs"

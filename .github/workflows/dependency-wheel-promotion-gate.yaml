@@ -35,7 +35,7 @@ jobs:
     steps:
     - name: Check if dependency files changed
       id: deps-changed
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           const files = await github.paginate(github.rest.pulls.listFiles, {
@@ -53,7 +53,7 @@ jobs:
 
     - name: Set fallback dependency-wheel-promotion status
       id: promotion-status
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           const sha = context.payload.pull_request.head.sha;
@@ -116,7 +116,7 @@ jobs:
           > 1. Wait for the resolution workflow to finish and commit the lockfiles to this branch.
           > 2. Review the Agent build triggered by that commit (`default-pipeline` in GitLab), especially `static_quality_gate`.
           > 3. Get the PR approved.
-          > 4. Promote the wheels:
+          > 4. Ask an `agent-integrations` maintainer to promote the wheels. Promotion dispatches a workflow that requires write access to this repository, so only a maintainer can run it (an outside contributor cannot):
           >    ```
           >    ddev dep promote ${{ env.PR_URL }}
           >    ```
@@ -149,7 +149,7 @@ jobs:
       contents: read
     steps:
     - name: Set dependency-wheel-promotion status to success
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
         script: |
           await github.rest.repos.createCommitStatus({

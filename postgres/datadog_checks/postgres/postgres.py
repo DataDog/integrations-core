@@ -5,7 +5,7 @@ import contextlib
 import copy
 import functools
 import os
-import threading
+from collections import defaultdict
 from time import time
 
 import psycopg
@@ -195,11 +195,6 @@ class PostgreSql(DatabaseCheck):
         )  # type: TTLCache
 
         self.diagnosis.register(functools.partial(run_diagnostics, self))
-
-        self._cancel_lock = threading.Lock()
-        self._is_running = False
-        self._cancelled = False
-        self._finalized = False
 
     def database_monitoring_column_statistics(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-column-statistics")
@@ -479,52 +474,6 @@ class PostgreSql(DatabaseCheck):
 
         return self._dynamic_queries
 
-    def run(self):
-        # TODO: move this lock into the base class
-        with self._cancel_lock:
-            if self._cancelled:
-                self.log.debug("run() skipped, check already cancelled")
-                return ''
-            self._is_running = True
-        try:
-            return super().run()
-        finally:
-            needs_finalize = False
-            with self._cancel_lock:
-                self._is_running = False
-                if self._cancelled:
-                    needs_finalize = True
-            if needs_finalize:
-                self.log.debug("Check cancel has been signaled, finalizing now that run() is complete")
-                self._finalize()
-
-    def cancel(self):
-        """Signal that the check is being unscheduled.
-
-        This method can be called while check() is running on another thread
-        (the GIL is released during psycopg I/O). It must not perform any
-        destructive operations — closing connections or nulling attributes that
-        check() depends on — because that causes a SIGSEGV in libpq when
-        check() resumes.
-
-        Destructive cleanup is deferred to _finalize(), which is called either
-        here (if the check is idle) or by run()'s finally block (if the check
-        is in-flight). The Agent guarantees it will not call run() again after
-        cancel().
-        """
-        self.log.debug("Marking check as cancelled")
-        self.cancel_async_jobs()
-        needs_finalize = False
-        with self._cancel_lock:
-            self._cancelled = True
-            if not self._is_running:
-                needs_finalize = True
-        if needs_finalize:
-            self.log.debug("cancel() finalizing immediately, check is idle")
-            self._finalize()
-        else:
-            self.log.debug("cancel() deferred finalize, check is still running")
-
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
         if self._config.dbm:
@@ -537,26 +486,13 @@ class PostgreSql(DatabaseCheck):
         if self._config.data_observability.enabled:
             self.data_observability = self.register_async_job(PostgresDataObservability(self, self._config))
 
-    def _finalize(self):
-        """Tear down check state. Runs at most once, and never while check() is executing."""
-        with self._cancel_lock:
-            if self._finalized:
-                return
-            self._finalized = True
-        self.log.debug("Finalizing check: closing connections and clearing state")
-        self.shutdown_async_jobs()
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
         self._clean_state()
-        self.check_initializations.clear()
-        # TODO: move diagnosis cleanup into AgentCheck.cancel() in the base class
-        self._diagnosis = None
         self._query_manager = None
         self.health = None
         self._close_db()
         self._close_db_pool()
-        self.log.debug("Check cleanup complete")
-        # Must come last: the logging adapter reads back through this attribute for checks whose
-        # check_id was never resolved, so anything logged after this would fail.
-        self.log.check = None
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -573,6 +509,12 @@ class PostgreSql(DatabaseCheck):
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
+
+    def _update_replication_role_tags(self, replication_role: str) -> None:
+        self.tag_manager.set_tag('replication_role', replication_role, replace=True)
+        if self.is_aurora:
+            aurora_role = 'reader' if replication_role == 'standby' else 'writer'
+            self.tag_manager.set_tag('aurora_role', aurora_role, replace=True)
 
     def _collect_wal_metrics(self):
         if self.version >= V10:
@@ -751,11 +693,11 @@ class PostgreSql(DatabaseCheck):
                         # if this is a relation-specific query, we need to list all relations last
                         if is_relations:
                             schema_field = get_schema_field(descriptors)
-                            formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                            cursor.execute(formatted_query)
+                            query = self._relations_manager.filter_relation_query(query, schema_field)
                         else:
-                            self.log.debug("Running query: %s", str(query))
-                            cursor.execute(query.replace(r'%', r'%%'))
+                            query = query.replace(r'%', r'%%')
+                        self.log.debug("Running query: %s", query)
+                        cursor.execute(query)
 
                         results = cursor.fetchall()
                         if not results:
@@ -786,7 +728,6 @@ class PostgreSql(DatabaseCheck):
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.log.debug("Disabling replication metrics")
-            self.is_aurora = False
             self.metrics_cache.replication_metrics = {}
         except psycopg.errors.UndefinedFunction as e:
             log_func(e)
@@ -892,19 +833,38 @@ class PostgreSql(DatabaseCheck):
 
         self.metrics_cache.table_activity_metrics[db][tablename][metric_name] = value
 
-    def _collect_metric_autodiscovery(self, instance_tags, scopes, scope_type):
+    def _collect_metric_autodiscovery(self, instance_tags, scope_groups: list[tuple[str, list[dict]]]):
+        """
+        Collect metrics for every autodiscovered database, visiting each database once so its
+        connection pool stays warm across all of its queries.
+
+        Each `scope_groups` entry pairs a telemetry scope type with its scopes; time is reported per
+        group. A group that raises for one database does not skip that database's remaining groups.
+        """
         if not self.autodiscovery:
             return
 
-        start_time = time()
+        groups = [(scope_type, scopes) for scope_type, scopes in scope_groups if scopes]
+        if not groups:
+            return
+
+        elapsed_ms_by_scope_type = defaultdict(float)
         databases = self.autodiscovery.get_items()
         for db in databases:
-            try:
-                for scope in scopes:
-                    self._query_scope(scope, instance_tags, False, dbname=db)
-            except Exception as e:
-                self.log.error("Error collecting metrics for database %s %s", db, str(e))
-        elapsed_ms = (time() - start_time) * 1000
+            for scope_type, scopes in groups:
+                start_time = time()
+                try:
+                    for scope in scopes:
+                        self._query_scope(scope, instance_tags, False, dbname=db)
+                except Exception as e:
+                    self.log.error("Error collecting metrics for database %s %s", db, str(e))
+                finally:
+                    elapsed_ms_by_scope_type[scope_type] += (time() - start_time) * 1000
+
+        for scope_type, _ in groups:
+            self._report_autodiscovery_timing(scope_type, elapsed_ms_by_scope_type[scope_type])
+
+    def _report_autodiscovery_timing(self, scope_type: str, elapsed_ms: float) -> None:
         self.histogram(
             f"dd.postgres.{scope_type}.time",
             elapsed_ms,
@@ -974,22 +934,18 @@ class PostgreSql(DatabaseCheck):
             metric_scope.append(SLRU_METRICS)
 
         # Do we need relation-specific metrics?
+        relations_scopes = []
         if self._config.relations:
             relations_scopes = list(RELATION_METRICS)
 
             if self._config.collect_bloat_metrics:
                 relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
 
-            # If autodiscovery is enabled, get relation metrics from all databases found
-            if self.autodiscovery:
-                self._collect_metric_autodiscovery(
-                    instance_tags,
-                    scopes=relations_scopes,
-                    scope_type='_collect_relations_autodiscovery',
-                )
-            # otherwise, continue just with dbname
-            else:
+            # If autodiscovery is enabled, relation metrics are collected from all databases found
+            # in the single autodiscovery pass below. Otherwise, continue just with dbname.
+            if not self.autodiscovery:
                 metric_scope.extend(relations_scopes)
+                relations_scopes = []
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -1025,17 +981,18 @@ class PostgreSql(DatabaseCheck):
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(activity_metrics, instance_tags, False)
 
-        if per_database_metric_scope:
-            # if autodiscovery is enabled, get per-database metrics from all databases found
-            if self.autodiscovery:
-                self._collect_metric_autodiscovery(
-                    instance_tags,
-                    scopes=per_database_metric_scope,
-                    scope_type='_collect_stat_autodiscovery',
-                )
-            else:
-                # otherwise, continue just with dbname
-                metric_scope.extend(per_database_metric_scope)
+        # With autodiscovery, every per-database scope is collected in a single pass over the
+        # database list so that each database is visited once. Without it, continue just with dbname.
+        if self.autodiscovery:
+            self._collect_metric_autodiscovery(
+                instance_tags,
+                scope_groups=[
+                    ('_collect_relations_autodiscovery', relations_scopes),
+                    ('_collect_stat_autodiscovery', per_database_metric_scope),
+                ],
+            )
+        elif per_database_metric_scope:
+            metric_scope.extend(per_database_metric_scope)
 
         for scope in list(metric_scope):
             self._query_scope(scope, instance_tags, False)
@@ -1183,7 +1140,7 @@ class PostgreSql(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",
@@ -1236,7 +1193,8 @@ class PostgreSql(DatabaseCheck):
                 self.tag_manager.set_tag('postgresql_cluster_name', self.cluster_name, replace=True)
 
             if self._config.tag_replication_role:
-                self.tag_manager.set_tag('replication_role', self._get_replication_role(), replace=True)
+                replication_role = self._get_replication_role()
+                self._update_replication_role_tags(replication_role)
 
             tags = self.tag_manager.get_tags()
             self._send_database_instance_metadata()
@@ -1246,7 +1204,7 @@ class PostgreSql(DatabaseCheck):
 
             if not self._config.only_custom_queries:
                 self._collect_stats(tags)
-                if not self._cancelled:
+                if not self.is_cancelled:
                     self.run_async_jobs(tags)
                 if self._config.collect_wal_metrics is True:
                     # collect wal metrics for pg < 10 only when explicitly enabled

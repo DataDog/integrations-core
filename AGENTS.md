@@ -9,6 +9,8 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Maintaining This File](#maintaining-this-file)
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
+- [Service Checks](#service-checks)
+- [Manifest Files](#manifest-files)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -34,6 +36,8 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 Add type hints to new functions and methods. Use modern syntax: prefer `str | None` over `Optional[str]`, and `list[str]` over `List[str]`.
 
 Type simple generators as `Iterator[T]`. Use `Generator[YieldType, SendType, ReturnType]` when sent or returned values are part of their behavior.
+
+Omit `-> None` on test functions — the return type of a test carries no information. A method that returns `None` in a `Protocol` or an abstract base class must still annotate it, because `mypy` treats an unannotated method as returning `Any`. Elsewhere either form is fine. Existing code is not being retrofitted, so expect to see both.
 
 #### Refactoring Existing Code
 
@@ -90,7 +94,37 @@ ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
 
+## Service Checks
+
+**Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
+
+New integrations should not add their own service checks. Use metrics and metric-based monitors instead.
+
+The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
+## Manifest Files
+
+**Applicable to:** newly created integrations. Existing integrations that already have a `manifest.json` are exempt.
+
+New integrations must not include a `manifest.json`. Instead, add the following to `.ddev/config.toml`, keyed by the integration's directory name:
+
+- Display name under `[overrides.display-name]`.
+- Metrics prefix (matching the prefix used in `metadata.csv`) under `[overrides.metrics-prefix]`.
+- Supported platforms under `[overrides.manifest.platforms]`.
+
 ## Development Workflow
+
+### Dispatcher Run Identity
+
+Use the same identity names across Dispatcher models, manifests, CLI options, workflow inputs, and monitoring fields:
+
+- `checkout_sha` is the immutable commit checked out and tested. For a pull request, this is GitHub's synthetic merge commit.
+- `head_sha` and `head_branch` identify the pull request source. For a master push, they identify the pushed commit and `master`.
+- `base_sha` and `base_branch` identify the pull request target metadata reported by GitHub. They are unset for a master push.
+
+For a synthetic merge, `checkout_sha^1` is the target commit GitHub used to build the merge and `checkout_sha^2` is `head_sha`. Do not assume `checkout_sha^1 == base_sha`: GitHub's recorded pull request base snapshot may lag the target commit used for a newly generated synthetic merge.
+
+Use `head_branch` and `base_branch` within the Dispatcher. Reserve `ref` for external GitHub API fields and values that may identify something other than a branch.
 
 ### Worktrees
 
@@ -230,7 +264,7 @@ Before writing a `.changed` entry, stop and confirm the change is genuinely brea
 echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/changelog.d/23700.added
 
 # Bug fix for sqlserver in PR #23701
-echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
+echo 'Fix a bug where `tempdb` is wrongly excluded from database files metrics.' > sqlserver/changelog.d/23701.fixed
 ```
 
 ## Review Guidelines
@@ -258,3 +292,7 @@ When a new file is added, make sure to make it available through the navigation 
 ### Style
 
 Maintain a consistent style: technical and professional. Do not start lines or paragraphs with an inline code span.
+
+Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation,
+comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline
+literals or roles.

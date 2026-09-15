@@ -22,11 +22,6 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import PartsAndMerges
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
@@ -266,9 +261,9 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-    def cancel(self):
-        super(ClickhousePartsAndMerges, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         if self._db_client:
@@ -282,6 +277,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         return list(self._tags_no_db) if self._tags_no_db else []
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
         try:
@@ -824,7 +821,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         payload = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddagenthostname": self._check.agent_hostname,
             "dbms": self._check.dbms,
             "ddsource": "clickhouse",

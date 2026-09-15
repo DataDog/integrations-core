@@ -137,7 +137,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: https://docs.datadoghq.com/integrations/kubernetes_cluster_autoscaler/
+[1]: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
 [2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler/data/conf.yaml.example

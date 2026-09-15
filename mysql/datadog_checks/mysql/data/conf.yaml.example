@@ -57,6 +57,28 @@ instances:
     #
     # dbm: false
 
+    ## Configure the Data Observability async job, which executes monitoring
+    ## queries delivered via Remote Configuration.
+    ## Enabling Data Observability with Database Monitoring uses one additional
+    ## connection. Increase MAX_USER_CONNECTIONS from 5 to 6 for the monitoring user.
+    #
+    # data_observability:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the Data Observability job.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## How often (in seconds) the job wakes up to check which queries are
+        ## due. Individual queries define when they are due using either
+        ## interval_seconds or a cron schedule. Set this value no greater than
+        ## the shortest query interval or the shortest gap between scheduled
+        ## executions. Longer collection intervals delay queries and can skip
+        ## earlier cron ticks when several become due between collection cycles.
+        #
+        # collection_interval: 10
+
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
     ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
@@ -260,7 +282,8 @@ instances:
         ## Note that this runs a heavy query against your database to compute the relevant metrics
         ## for all your existing schemas. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
-        ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+        ## Only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`)
+        ## privilege are collected.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
@@ -268,7 +291,8 @@ instances:
 
         ## @param table_size_metrics - boolean - optional - default: false
         ## Set to `true` to collect data table size metrics.
-        ## Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+        ## Note that only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`)
+        ## privilege are collected.
         ## This runs a heavy query against your database to compute the relevant metrics
         ## for all your existing tables. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
@@ -278,7 +302,8 @@ instances:
 
         ## @param system_table_size_metrics - boolean - optional - default: false
         ## Set to `true` to collect system table size metrics from performance_schema, information_schema and mysql.
-        ## Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+        ## Note that only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`)
+        ## privilege are collected.
         ## This runs a heavy query against your database to compute the relevant metrics
         ## for all your existing tables. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
@@ -334,12 +359,14 @@ instances:
         # collection_interval: 600
 
     ## Configure collection of schemas (databases).
-    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    ## Only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`) privilege
+    ## are collected.
     #
     # collect_schemas:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        ## Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+        ## Defaults to false.
         #
         # enabled: false
 
@@ -356,7 +383,8 @@ instances:
 
     ## DEPRECATED: Use `collect_schemas` instead.
     ## Configure collection of schemas (databases).
-    ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
+    ## Only tables and schemas for which the user has been granted the `REFERENCES` (or `SELECT`) privilege
+    ## are collected.
     ##
     ##
     ## <<< DEPRECATED >>>
@@ -367,7 +395,8 @@ instances:
     # schemas_collection:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        ## Enable schema collection. Requires `dbm: true` or `data_observability.enabled: true`.
+        ## Defaults to false.
         #
         # enabled: false
 

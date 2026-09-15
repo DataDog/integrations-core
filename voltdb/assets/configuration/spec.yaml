@@ -173,6 +173,7 @@ files:
               password instead of the cleartext. The native binary client does
               not support pre-hashed passwords.
             display_priority: 1
+            secret: true
             value:
               type: boolean
               example: false
