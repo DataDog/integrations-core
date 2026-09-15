@@ -163,6 +163,13 @@ instances:
     #
     # database_metrics:
 
+        ## @param run_heavy_collectors_async - boolean - optional - default: false
+        ## Run the index usage, database fragmentation, and table size metric collectors asynchronously.
+        ## This prevents these resource-intensive, per-database queries from blocking the check runner, but uses
+        ## a dedicated SQL Server connection while they run. Disabled by default.
+        #
+        # run_heavy_collectors_async: false
+
         ## @param ao_metrics - mapping - optional
         ## Configure collection of AlwaysOn availability group metrics.
         ##

@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import traceback
+from collections.abc import Callable
 from copy import deepcopy
 
 import pytest
@@ -13,6 +14,7 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
+from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseMetricsAsyncJob
 from datadog_checks.sqlserver.utils import construct_use_statement
 
 from .common import (
@@ -45,6 +47,31 @@ def init_config_object_name():
 @pytest.fixture
 def init_config_alt_tables():
     return deepcopy(INIT_CONFIG_ALT_TABLES)
+
+
+@pytest.fixture
+def run_database_metrics_synchronously() -> Callable[[dict], None]:
+    """Enable async database metrics while making their job finish before the check returns."""
+
+    def enable(instance: dict) -> None:
+        instance.setdefault('database_metrics', {})['run_heavy_collectors_async'] = True
+
+    return enable
+
+
+@pytest.fixture(autouse=True)
+def isolate_database_metrics_job(monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest) -> None:
+    """Keep the async job from leaking work into tests that do not exercise it."""
+    run_job_loop_original = SqlserverDatabaseMetricsAsyncJob.run_job_loop
+    should_run = 'run_database_metrics_synchronously' in request.fixturenames
+
+    def run_job_loop(job: SqlserverDatabaseMetricsAsyncJob, tags: list[str]) -> None:
+        if not should_run:
+            return
+        job._run_sync = True
+        run_job_loop_original(job, tags)
+
+    monkeypatch.setattr(SqlserverDatabaseMetricsAsyncJob, 'run_job_loop', run_job_loop)
 
 
 @pytest.fixture(scope="session")

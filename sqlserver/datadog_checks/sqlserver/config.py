@@ -54,6 +54,9 @@ class SQLServerConfig:
 
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
+        self.run_heavy_collectors_async: bool = is_affirmative(
+            (instance.get('database_metrics', {}) or {}).get('run_heavy_collectors_async', False)
+        )
         self.database_metrics_config: dict = self._build_database_metrics_configs(instance)
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
         self.agent_jobs_config: dict = instance.get('agent_jobs', {}) or {}
