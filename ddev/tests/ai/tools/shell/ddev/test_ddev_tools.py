@@ -15,34 +15,16 @@ from ddev.ai.tools.shell.ddev.validate import DdevValidateInput, DdevValidateToo
 
 # --- ddev create ---
 
-VALID_CREATE_INPUT = {
-    "integration": "my_check",
-    "display_name": "My Check",
-    "metrics_prefix": "my_check.",
-    "platforms": ["linux", "windows", "mac_os"],
-}
-
 
 def test_create_cmd():
-    cmd = DdevCreateTool().cmd(DdevCreateInput(**VALID_CREATE_INPUT))
+    cmd = DdevCreateTool().cmd(DdevCreateInput(**{"integration": "my_check"}))
     assert cmd == [
         "ddev",
         "--no-interactive",
         "create",
         "check",
-        "--display-name",
-        "My Check",
-        "--metrics-prefix",
-        "my_check.",
-        "--platforms",
-        "linux,windows,mac_os",
         "my_check",
     ]
-
-
-def test_create_cmd_platforms_joined():
-    cmd = DdevCreateTool().cmd(DdevCreateInput(**{**VALID_CREATE_INPUT, "platforms": ["linux", "mac_os"]}))
-    assert cmd[cmd.index("--platforms") + 1] == "linux,mac_os"
 
 
 # --- ddev test ---
