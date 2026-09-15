@@ -685,6 +685,33 @@ def test_http_final_page_too_large_surfaces_as_its_own_code(monkeypatch, creds):
     assert len(calls) == 1  # terminal: the writer splits; the client never retries it
 
 
+def test_http_terminal_rejections_on_default_mapping_requests_fail_closed(monkeypatch, creds):
+    """Descriptor and finalize map no intake error codes: a terminal rejection on either
+    must surface as upload_failed, never as an AttributeError from the missing mapping."""
+    import requests
+
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append((method, url))
+        return SimpleNamespace(status_code=409, content=b'{"error":{"code":"already_exists"}}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    client = rq.RequestsUploadClient()
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        client.register_descriptor(creds, b'{}')
+    assert failure.value.code == 'upload_failed'
+    assert not failure.value.retryable
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        client.finalize_run(creds)
+    assert failure.value.code == 'upload_failed'
+    assert not failure.value.retryable
+    assert calls == [
+        ('POST', 'https://intake.example/uploads/upload-1/descriptor'),
+        ('POST', 'https://intake.example/uploads/upload-1/finalize'),
+    ]
+
+
 @pytest.mark.parametrize('status', [400, 403, 409])
 def test_http_terminal_rejections_are_not_retried(monkeypatch, creds, status):
     import requests

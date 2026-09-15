@@ -1090,7 +1090,7 @@ def upload_with_retry(
     headers: Mapping[str, str],
     body: bytes | BinaryIO,
     timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
-    mapped_error_codes: Mapping[str, str] = frozenset(),
+    mapped_error_codes: Mapping[str, str] | None = None,
     deadline: float | None = None,
 ) -> tuple[int, bytes]:
     """Send one intake request with bounded retries; ``deadline`` is the run-wide wall.
@@ -1102,6 +1102,10 @@ def upload_with_retry(
     """
     import requests  # lazy: only the POC upload path needs it
 
+    # The default is an empty mapping, normalized once here: descriptor, finalize, and abort
+    # map no intake error codes, so their terminal rejections fail closed as upload_failed.
+    if mapped_error_codes is None:
+        mapped_error_codes = {}
     backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
     last_err: Any = None
     for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
