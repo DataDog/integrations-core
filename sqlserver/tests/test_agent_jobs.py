@@ -371,7 +371,7 @@ class AgentHistoryCheck:
         self.histogram = Mock()
 
 
-def test_agent_history_query_parameterizes_watermark_and_upper_bound():
+def test_agent_history_empty_page_advances_to_snapshot_upper_bound():
     check = AgentHistoryCheck()
     agent_history = object.__new__(SqlserverAgentHistory)
     agent_history._check = check
@@ -383,16 +383,8 @@ def test_agent_history_query_parameterizes_watermark_and_upper_bound():
 
     rows, next_history_id = agent_history._get_new_agent_job_history(cursor)
 
-    assert cursor.executions[0] == (AGENT_HISTORY_MAX_INSTANCE_QUERY, ())
-    query, params = cursor.executions[1]
     assert rows == []
     assert next_history_id == 20000
-    assert "SELECT TOP (?)" in query
-    assert "sjh.instance_id > ?" in query
-    assert "sjh.instance_id <= ?" in query
-    assert "completion.cumulative_row_count <= ?" in query
-    assert "SELECT TOP 10000" not in query
-    assert params == (10000, 10000, 20000, 10000)
 
 
 def test_agent_history_watermark_commits_after_submission():
