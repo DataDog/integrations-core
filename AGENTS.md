@@ -281,4 +281,6 @@ When a new file is added, make sure to make it available through the navigation 
 
 Maintain a consistent style: technical and professional. Do not start lines or paragraphs with an inline code span.
 
-Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation, comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline literals or roles.
+Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation,
+comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline
+literals or roles.
