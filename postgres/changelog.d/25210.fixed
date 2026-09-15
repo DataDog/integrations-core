@@ -1,1 +1,1 @@
-Omit non-monotonic metrics from Postgres query metrics >= 0 filter
+Fix Postgres query metrics dropping statements when plan time statistics decrease.
