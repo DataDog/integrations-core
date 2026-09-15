@@ -134,6 +134,7 @@ instances:
     ## - virtio_net
     ## - hv_netvsc
     ## - gve
+    ## - mlx5_core
     #
     # collect_ethtool_metrics: false
 
