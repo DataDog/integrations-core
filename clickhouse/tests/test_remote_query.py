@@ -233,7 +233,7 @@ def valid_result_delivery(**extra):
     result_delivery = {
         'runId': RUN_ID,
         'taskId': TASK_ID,
-        'artifactVersion': 2,
+        'artifactVersion': 1,
         'uploadId': UPLOAD_ID,
         'baseUrl': BASE_URL,
         'limits': valid_limits(),
@@ -894,7 +894,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['resultDelivery']['uploadId'] == UPLOAD_ID
     assert started['resultDelivery']['runId'] == RUN_ID
     assert started['resultDelivery']['taskId'] == TASK_ID
-    assert started['resultDelivery']['artifactVersion'] == 2
+    assert started['resultDelivery']['artifactVersion'] == 1
     assert started['resultDelivery']['baseUrl'] == BASE_URL
     assert 'partBytes' not in started['resultDelivery']
     assert started['resultDelivery']['limits'] == {
@@ -922,7 +922,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert all(event.payload == b'' for event in events)
 
 
-def test_producer_writes_exact_v2_envelope_json(monkeypatch):
+def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(rows=[[1]])
     fake = FakeUploadClient()
@@ -935,7 +935,7 @@ def test_producer_writes_exact_v2_envelope_json(monkeypatch):
     assert page == (prefix_bytes() + b'{"value":1}' + rq.PAGE_SUFFIX)
     parsed = json.loads(page)
     assert parsed == {
-        'contract_version': 2,
+        'contract_version': 1,
         'crawl_id': RUN_ID,
         'task_id': TASK_ID,
         'agent_hostname': AGENT_HOSTNAME,
@@ -1967,7 +1967,7 @@ def real_server_request(instance, query, include_schema=False):
         'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 2,
+            'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
             'limits': limits,
@@ -2008,7 +2008,7 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
         'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 2,
+            'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
             'limits': valid_limits(),
@@ -2023,7 +2023,7 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
     pages = assembled_pages(fake)
     assert list(pages) == [0]
     page = json.loads(pages[0])
-    assert page['contract_version'] == 2
+    assert page['contract_version'] == 1
     assert page['crawl_id'] == RUN_ID
     assert page['task_id'] == TASK_ID
     assert 'batch_index' not in page

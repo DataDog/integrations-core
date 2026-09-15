@@ -21,7 +21,7 @@ def delivery():
         {
             'runId': 'run-1',
             'taskId': 'task-1',
-            'artifactVersion': 2,
+            'artifactVersion': 1,
             'uploadId': 'upload-1',
             'baseUrl': 'https://intake.example',
             'limits': {
@@ -258,7 +258,7 @@ def test_pages_preserve_json_rows_schema_offsets_and_receipts(delivery, creds, i
         if include_schema:
             expected_keys.append('schema')
         assert list(envelope) == expected_keys + ['data']
-        assert envelope['contract_version'] == rq.REMOTE_QUERY_ARTIFACT_VERSION == 2
+        assert envelope['contract_version'] == rq.REMOTE_QUERY_ARTIFACT_VERSION == 1
         assert envelope['crawl_id'] == delivery.run_id
         assert envelope['task_id'] == delivery.task_id
         assert envelope['agent_hostname'] == AGENT_HOSTNAME
@@ -651,6 +651,7 @@ def test_finalize_identity_must_match():
         {'database_instance': ' db '},
         {'database_instance': 'db', 'host': 'db'},
         {'database_instance': 'db', 'port': 5432},
+        {'database_instance': 'db', 'dbname': 'other'},
         {'database_instance': 'db', 'dbname': None},
         {'database_instance': 'db', 'dbname': ''},
         {'database_instance': 'db', 'dbname': ' '},
@@ -662,12 +663,6 @@ def test_target_requires_one_complete_selector(target):
         rq.normalize_target(target)
 
 
-def test_database_instance_target_accepts_requested_dbname():
-    target = rq.normalize_target({'database_instance': 'Primary/DB', 'dbname': 'other'})
-    assert (target.database_instance, target.dbname) == ('Primary/DB', 'other')
-    assert target.host is None and target.port is None
-
-
 @pytest.mark.parametrize(
     'path,value',
     [
@@ -676,7 +671,7 @@ def test_database_instance_target_accepts_requested_dbname():
         (('target', 'port'), '5432'),
         (('resultDelivery',), None),
         (('resultDelivery', 'token'), 'scoped-upload-token'),
-        (('resultDelivery', 'artifactVersion'), 1),
+        (('resultDelivery', 'artifactVersion'), 2),
         (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
         (('resultDelivery', 'limits', 'maxResultBytes'), rq.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
         (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
@@ -713,6 +708,42 @@ def test_target_normalization():
 def test_limits_reject_invalid_bounds(delivery, mutation):
     with pytest.raises(ValidationError):
         bounded_delivery(delivery, **mutation)
+
+
+def test_resolve_request_is_target_only():
+    request = rq.RemoteQueryResolveRequest.model_validate(
+        {'operation': 'resolve_target', 'target': {'host': 'db', 'port': 5432, 'dbname': 'db'}}
+    )
+    assert request.operation == 'resolve_target'
+    assert (request.target.host, request.target.port, request.target.dbname) == ('db', 5432, 'db')
+
+
+@pytest.mark.parametrize(
+    'field,value',
+    [
+        ('query', 'SELECT 1'),
+        ('includeSchema', True),
+        ('resultDelivery', {'runId': 'run-1'}),
+        ('matchFingerprint', 'deadbeef'),
+        ('apiKey', 'SECRET_DO_NOT_LOG'),
+    ],
+)
+def test_resolve_request_rejects_execution_fields_without_echoing_values(field, value):
+    request = {'operation': 'resolve_target', 'target': {'database_instance': 'Primary/DB'}, field: value}
+
+    with pytest.raises(ValidationError) as failure:
+        rq.RemoteQueryResolveRequest.model_validate(request)
+
+    assert field in rq.validation_message(failure.value)
+    assert 'SECRET_DO_NOT_LOG' not in rq.validation_message(failure.value)
+
+
+@pytest.mark.parametrize('operation', ['produce_json_pages', 'resolve', 'RESOLVE_TARGET', ''])
+def test_resolve_request_rejects_other_operations(operation):
+    request = {'operation': operation, 'target': {'database_instance': 'Primary/DB'}}
+
+    with pytest.raises(ValidationError):
+        rq.RemoteQueryResolveRequest.model_validate(request)
 
 
 def test_result_ceiling_is_the_pinned_server_contract(delivery):

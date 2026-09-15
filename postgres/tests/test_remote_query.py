@@ -23,6 +23,7 @@ from datadog_checks.postgres.remote_query import (
     RawTextLoader,
     StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
+    iter_agent_resolve_events,
     iter_agent_rpc_stream_events,
 )
 
@@ -57,7 +58,7 @@ class FakeAdapters:
 
 
 class FakeControlCursor:
-    """Plain cursor for BEGIN/SET LOCAL/ROLLBACK, the schema lookup, and the gate existence lookup."""
+    """Plain cursor for BEGIN/SET LOCAL/ROLLBACK and the schema lookup."""
 
     def __init__(self, pool):
         self.pool = pool
@@ -78,18 +79,6 @@ class FakeControlCursor:
             if vendor_data_type is not None:
                 rows.append((key[0], key[1], vendor_data_type))
         return rows
-
-    def fetchone(self):
-        assert self.executed, 'fetchone called before any execute'
-        query, params = self.executed[-1]
-        assert 'pg_catalog.pg_database' in query, 'fetchone is only expected for the gate existence lookup'
-        assert isinstance(params, tuple) and len(params) == 1
-        if self.pool.existence_query_error is not None:
-            raise self.pool.existence_query_error
-        # A missing mapping entry means the database does not exist on the endpoint.
-        if self.pool.pg_database is None or self.pool.pg_database.get(params[0], False):
-            return (1,)
-        return None
 
 
 class FakeServerCursor:
@@ -154,9 +143,6 @@ class FakePool:
         fetch_error_at=None,
         row_provider=None,
         fetch_log=None,
-        connection_errors=None,
-        pg_database=None,
-        existence_query_error=None,
     ):
         self.rows = rows or []
         self.description = description or [FakeColumn('value', 23)]
@@ -166,14 +152,6 @@ class FakePool:
         self.fetch_error_at = fetch_error_at
         self.row_provider = row_provider
         self.fetch_log = fetch_log
-        # Per-dbname connection failures raised from get_connection, e.g. psycopg
-        # InvalidCatalogName for a database that does not exist on the endpoint.
-        self.connection_errors = connection_errors or {}
-        # Models pg_catalog.pg_database for the dynamic gate existence lookup: a mapping
-        # dbname -> datallowconn, or None for the permissive default (every requested
-        # database exists and allows connections).
-        self.pg_database = pg_database
-        self.existence_query_error = existence_query_error
         self.requested_dbnames = []
         self.cursors = []
 
@@ -183,9 +161,6 @@ class FakePool:
     @contextmanager
     def get_connection(self, dbname):
         self.requested_dbnames.append(dbname)
-        error = self.connection_errors.get(dbname)
-        if error is not None:
-            raise error
         yield FakeConnection(self)
 
 
@@ -253,6 +228,21 @@ class FakeUploadClient:
         self.abort_calls += 1
 
 
+class FakeAutodiscovery:
+    """Stands in for the check's integration-owned PostgresAutodiscovery."""
+
+    def __init__(self, databases=None, error=None):
+        self.databases = databases if databases is not None else []
+        self.error = error
+        self.get_items_calls = 0
+
+    def get_items(self):
+        self.get_items_calls += 1
+        if self.error is not None:
+            raise self.error
+        return list(self.databases)
+
+
 def make_check(
     host='localhost',
     port=5432,
@@ -260,6 +250,7 @@ def make_check(
     pool=None,
     check_database_identifier=None,
     hostname=AGENT_HOSTNAME,
+    autodiscovery=None,
     **metadata,
 ):
     check = SimpleNamespace(
@@ -269,6 +260,8 @@ def make_check(
     )
     if check_database_identifier is not None:
         check.database_identifier = check_database_identifier
+    if autodiscovery is not None:
+        check.autodiscovery = autodiscovery
     return check
 
 
@@ -294,7 +287,7 @@ def valid_result_delivery(**extra):
     result_delivery = {
         'runId': RUN_ID,
         'taskId': TASK_ID,
-        'artifactVersion': 2,
+        'artifactVersion': 1,
         'uploadId': UPLOAD_ID,
         'baseUrl': BASE_URL,
         'limits': valid_limits(),
@@ -780,199 +773,321 @@ def test_stream_missing_pool_returns_credentials_unavailable(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Dynamic database targeting (a requested dbname on the matched check)
+# Configured monitoring scope (tuple targets match a database inside the check's scope)
 # ---------------------------------------------------------------------------
 
 
-def test_dynamic_tuple_requested_dbname_executes_on_requested_database(monkeypatch):
-    """Tuple selection matches the endpoint only; a different dbname executes there."""
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
-    events = collect_events(valid_request(dbname='analytics'), check, client=FakeUploadClient())
-
-    assert_success(events)
-    # The gate classifies existence on the configured database's connection, warms the pool
-    # entry for the requested database, then the producer reuses it.
-    assert pool.requested_dbnames == ['datadog_test', 'analytics', 'analytics']
-    # The existence lookup ran on the configured connection with the requested name bound.
-    assert pool.cursors[0].executed == [(remote_query.REMOTE_QUERY_DATABASE_EXISTENCE_QUERY, ('analytics',))]
-
-
-def test_dynamic_tuple_requested_dbname_matches_when_configured_dbname_is_absent(monkeypatch):
-    """A check configured without a dbname still matches its endpoint; the request names the database."""
+def test_stream_tuple_target_never_defaults_a_missing_configured_dbname(monkeypatch):
+    """The adapter consumes the materialized config dbname only; it must not re-derive the
+    integration's omitted-dbname default itself, or a check whose config never materialized
+    a database would match a request naming the default."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,)])
     check = make_check(host='localhost', port=5432, dbname=None, pool=pool)
 
-    events = collect_events(valid_request(dbname='datadog_test'), check, client=FakeUploadClient())
-
-    assert_success(events)
-    # Probe-only gate path: no configured connection to classify existence on, so the flow
-    # goes straight to the probe and the producer on the requested database.
-    assert pool.requested_dbnames == ['datadog_test', 'datadog_test']
-    assert all('pg_catalog.pg_database' not in entry[0] for cursor in pool.cursors for entry in cursor.executed)
-
-
-def test_dynamic_gate_missing_database_fails_fast_target_not_found(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(rows=[(1,)], pg_database={'datadog_test': True})
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
-    events = collect_events(valid_request(dbname='analytics'), check)
-
-    assert_failed_event(events, 'target_not_found', 'does not exist')
-    # The catalog lookup classifies the miss before any connection to the requested
-    # database is attempted: one existence lookup on the configured connection and no probe.
-    assert pool.requested_dbnames == ['datadog_test']
-    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
-    assert [event.event_type for event in events] == ['error']
-
-
-def test_dynamic_gate_datallowconn_false_fails_target_not_found(monkeypatch):
-    """A database that exists but disallows connections is not a query target."""
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(rows=[(1,)], pg_database={'datadog_test': True, 'analytics': False})
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
-    events = collect_events(valid_request(dbname='analytics'), check)
-
-    assert_failed_event(events, 'target_not_found', 'does not allow connections')
-    assert pool.requested_dbnames == ['datadog_test']
-    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
-
-
-def test_dynamic_gate_existence_query_error_fails_closed_target_unavailable(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(rows=[(1,)], existence_query_error=psycopg_errors.OperationalError('catalog lookup broke'))
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
-    events = collect_events(valid_request(dbname='analytics'), check)
-
-    assert_failed_event(events, 'target_unavailable', 'Unable to verify')
-    assert event_metadata(events[-1])['error']['retryable'] is True
-    # A failing existence lookup never becomes a silent no-match: the request fails
-    # visibly before the probe or any producer execution.
-    assert pool.requested_dbnames == ['datadog_test']
-    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
-
-
-def test_dynamic_tuple_probe_invalid_catalog_name_fails_target_not_found(monkeypatch):
-    """Defense in depth: a catalog-existing database whose probe surfaces InvalidCatalogName."""
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(
-        rows=[(1,)],
-        pg_database={'datadog_test': True, 'postgres': True},
-        connection_errors={'postgres': psycopg_errors.InvalidCatalogName('database "postgres" does not exist')},
-    )
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
     events = collect_events(valid_request(dbname='postgres'), check)
 
-    assert_failed_event(events, 'target_not_found', 'does not exist')
-    # Existence lookup on the configured connection, then one probe; no producer execution.
-    assert pool.requested_dbnames == ['datadog_test', 'postgres']
-    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == []
+
+
+def test_stream_tuple_target_out_of_scope_database_fails_without_pool_access(monkeypatch):
+    """A database outside the configured scope is not a match even when the endpoint matches.
+
+    A database that exists but is unconfigured and a database that does not exist are
+    deliberately indistinguishable: resolution never connects to the requested database or
+    probes its name, so it cannot (and must not) distinguish them.
+    """
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(host='localhost', port=5432, dbname='production_ok', pool=pool)
+
+    events = collect_events(valid_request(dbname='unconfigured_existing_or_missing'), check)
+
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == []
+    assert not pool.cursors
     assert [event.event_type for event in events] == ['error']
 
 
-def test_dynamic_tuple_connection_error_fails_retryable_target_unavailable(monkeypatch):
-    """Existence passes but the probe fails: the database exists, connecting to it does not."""
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(
-        rows=[(1,)],
-        pg_database={'datadog_test': True, 'analytics': True},
-        connection_errors={'analytics': psycopg_errors.OperationalError('connection refused')},
-    )
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool)
-
-    events = collect_events(valid_request(dbname='analytics'), check)
-
-    assert_failed_event(events, 'target_unavailable', 'connection refused')
-    assert event_metadata(events[-1])['error']['retryable'] is True
-    assert pool.requested_dbnames == ['datadog_test', 'analytics']
-    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
-
-
-def test_dynamic_database_instance_with_requested_dbname_executes_on_requested_database(monkeypatch):
+def test_stream_tuple_target_matches_current_autodiscovered_database(monkeypatch):
+    """With autodiscovery enabled, the eligible set is the check's own admitted discovery set."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,)])
-    check = make_check(
-        host='localhost',
-        port=5432,
-        dbname='datadog_test',
-        pool=pool,
-        check_database_identifier='Postgres/Primary-A',
-    )
-    request = valid_request()
-    request['target'] = {'database_instance': 'Postgres/Primary-A', 'dbname': 'analytics'}
+    autodiscovery = FakeAutodiscovery(databases=['dogs_0', 'dogs_1'])
+    # Autodiscovery with an omitted dbname materializes the global view db as the configured
+    # dbname; the request names an autodiscovered database instead.
+    check = make_check(host='localhost', port=5432, dbname='postgres', pool=pool, autodiscovery=autodiscovery)
 
-    events = collect_events(request, check, client=FakeUploadClient())
+    events = collect_events(valid_request(dbname='dogs_1'), check, client=FakeUploadClient())
 
     assert_success(events)
-    assert pool.requested_dbnames == ['datadog_test', 'analytics', 'analytics']
+    assert autodiscovery.get_items_calls == 1
+    # Execution runs on the matched database only; no connection is opened anywhere else.
+    assert pool.requested_dbnames == ['dogs_1']
 
 
-def test_dynamic_database_instance_with_unknown_requested_dbname_fails_target_not_found(monkeypatch):
+def test_stream_tuple_target_excluded_by_autodiscovery_fails_without_pool_access(monkeypatch):
+    """A database the check's own autodiscovery filters out is out of scope."""
     patch_upload_credentials(monkeypatch)
-    pool = FakePool(
-        rows=[(1,)],
-        pg_database={'datadog_test': True, 'analytics': True},
-        connection_errors={'analytics': psycopg_errors.InvalidCatalogName('database "analytics" does not exist')},
-    )
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(databases=['dogs_0', 'dogs_1'])
+    check = make_check(host='localhost', port=5432, dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+
+    events = collect_events(valid_request(dbname='dogs_5'), check)
+
+    assert_failed_event(events, 'target_not_found')
+    assert autodiscovery.get_items_calls == 1
+    assert pool.requested_dbnames == []
+    assert not pool.cursors
+
+
+def test_stream_scope_evaluated_only_for_endpoint_matching_checks():
+    """Only an endpoint-matching check is scope-evaluated, so an undeterminable discovery set
+    on an unrelated check can neither fail nor widen an unrelated request."""
+    pool = FakePool(rows=[(1,)])
+    other_autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke'))
     check = make_check(
-        host='localhost',
-        port=5432,
-        dbname='datadog_test',
-        pool=pool,
-        check_database_identifier='Postgres/Primary-A',
+        host='other.internal', port=5432, dbname='postgres', pool=pool, autodiscovery=other_autodiscovery
     )
-    request = valid_request()
-    request['target'] = {'database_instance': 'Postgres/Primary-A', 'dbname': 'analytics'}
+    request = valid_request(dbname='dogs_1')
 
     events = collect_events(request, check)
 
-    assert_failed_event(events, 'target_not_found', 'does not exist')
-    assert pool.requested_dbnames == ['datadog_test', 'analytics']
-    assert not any(isinstance(cursor, FakeServerCursor) for cursor in pool.cursors)
-
-
-def test_dynamic_gate_dbstrict_rejects_requested_database_without_pool_access(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool, dbstrict=True)
-
-    events = collect_events(valid_request(dbname='analytics'), check)
-
-    assert_failed_event(events, 'target_not_found', 'dbstrict')
+    assert_failed_event(events, 'target_not_found')
+    assert other_autodiscovery.get_items_calls == 0
     assert pool.requested_dbnames == []
 
 
-def test_dynamic_gate_ignore_databases_rejects_requested_database_without_pool_access(monkeypatch):
+def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(monkeypatch):
+    """An undeterminable discovery set fails closed and visibly, never as a silent no-match."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,)])
-    check = make_check(host='localhost', port=5432, dbname='datadog_test', pool=pool, ignore_databases=('template%',))
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke'))
+    check = make_check(host='localhost', port=5432, dbname='postgres', pool=pool, autodiscovery=autodiscovery)
 
-    events = collect_events(valid_request(dbname='template0'), check)
+    events = collect_events(valid_request(dbname='dogs_1'), check)
 
-    assert_failed_event(events, 'target_not_found', 'ignore_databases')
+    assert_failed_event(events, 'target_unavailable', 'autodiscovered database scope')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert autodiscovery.get_items_calls == 1
+    # The customer's SQL never ran: no connection, no cursor, no upload session.
     assert pool.requested_dbnames == []
+    assert not pool.cursors
+    assert [event.event_type for event in events] == ['error']
+
+
+def test_stream_rejects_database_instance_with_requested_dbname_before_resolution():
+    """dbname must not override the selected check's monitored database."""
+    request = valid_request()
+    request['target'] = {'database_instance': 'postgres-dbi', 'dbname': 'analytics'}
+
+    events = collect_events(request, None, registry=ExplodingRegistry())
+
+    assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
+
+
+def test_stream_database_instance_without_configured_dbname_fails_target_unavailable(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    check = make_check(dbname=None, pool=pool, check_database_identifier='Postgres/Primary-A')
+    request = valid_request()
+    request['target'] = {'database_instance': 'Postgres/Primary-A'}
+
+    events = collect_events(request, check, client=FakeUploadClient())
+
+    assert_failed_event(events, 'target_unavailable', 'configured database name')
+    assert pool.requested_dbnames == []
+
+
+# ---------------------------------------------------------------------------
+# Resolve operation (per-check verdict events for the Agent's sweep)
+# ---------------------------------------------------------------------------
+
+
+def resolve_request(**target):
+    """A strict resolve_target request: operation and target only."""
+    if 'database_instance' in target:
+        selector = {'database_instance': target['database_instance']}
+    else:
+        selector = {
+            'host': target.pop('host', 'LOCALHOST.'),
+            'port': target.pop('port', 5432),
+            'dbname': target.pop('dbname', 'datadog_test'),
+        }
+    return {'operation': 'resolve_target', 'target': selector}
+
+
+def collect_resolve_events(request, check=None, registry=None):
+    return list(
+        iter_agent_resolve_events(request, registry if registry is not None else StaticPostgresCheckRegistry([check]))
+    )
+
+
+def assert_matched_verdict(events):
+    """A verdict is exactly one MATCHED final event with no payload and no STARTED event."""
+    assert len(events) == 1
+    event = events[0]
+    assert event.event_type == 'final'
+    assert event.payload == b''
+    metadata = event_metadata(event)
+    assert metadata['status'] == 'MATCHED'
+    return metadata['match']
+
+
+def test_resolve_verdict_reports_sanitized_match_identity():
+    pool = FakePool(rows=[(1,)])
+    check = make_check(pool=pool, check_database_identifier='Postgres/Primary-A')
+
+    events = collect_resolve_events(resolve_request(), check)
+
+    match = assert_matched_verdict(events)
+    assert match == {
+        'host': 'localhost',
+        'port': 5432,
+        'configuredDbname': 'datadog_test',
+        'resolvedDbname': 'datadog_test',
+        'databaseInstance': 'Postgres/Primary-A',
+    }
+    # Resolve is side-effect free: no connection, no cursor, no upload session.
+    assert pool.requested_dbnames == []
+    assert not pool.cursors
+
+
+def test_resolve_verdict_reports_autodiscovered_database_with_configured_dbname():
+    """The verdict distinguishes the admitted database from the configured one: the Agent
+    binds both into its fingerprint."""
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(databases=['dogs_0', 'dogs_1'])
+    check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+
+    events = collect_resolve_events(resolve_request(dbname='dogs_1'), check)
+
+    match = assert_matched_verdict(events)
+    assert match['configuredDbname'] == 'postgres'
+    assert match['resolvedDbname'] == 'dogs_1'
+    assert pool.requested_dbnames == []
+
+
+def test_resolve_no_match_is_one_target_not_found_error():
+    """Out-of-scope and missing databases share the same verdict: target_not_found."""
+    pool = FakePool(rows=[(1,)])
+    check = make_check(dbname='production_ok', pool=pool)
+
+    events = collect_resolve_events(resolve_request(dbname='unconfigured_existing_or_missing'), check)
+
+    assert len(events) == 1
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == []
+    assert not pool.cursors
+
+
+def test_resolve_database_instance_verdict_reports_materialized_configured_dbname():
+    check = make_check(dbname='production_ok', check_database_identifier='Postgres/Primary-A')
+
+    events = collect_resolve_events(resolve_request(database_instance='Postgres/Primary-A'), check)
+
+    match = assert_matched_verdict(events)
+    assert match['configuredDbname'] == match['resolvedDbname'] == 'production_ok'
+    assert match['databaseInstance'] == 'Postgres/Primary-A'
+
+
+def test_resolve_database_instance_without_configured_dbname_fails_target_unavailable():
+    """A matched check that cannot name its database is an error other than target_not_found,
+    so the Agent fails its aggregate resolution instead of skipping the check."""
+    check = make_check(dbname=None, check_database_identifier='Postgres/Primary-A')
+
+    events = collect_resolve_events(resolve_request(database_instance='Postgres/Primary-A'), check)
+
+    assert len(events) == 1
+    assert_failed_event(events, 'target_unavailable', 'configured database name')
 
 
 @pytest.mark.parametrize(
-    'pattern,dbname,expected',
+    'field,value',
     [
-        ('template0', 'template0', True),
-        ('template%', 'template0', True),
-        ('Template0', 'TEMPLATE0', True),
-        ('template_', 'template0', True),
-        ('template_', 'template01', False),
-        ('rdsadmin', 'rdsadmin_extra', False),
+        ('query', 'SELECT 1'),
+        ('includeSchema', True),
+        ('resultDelivery', {'runId': RUN_ID}),
+        ('matchFingerprint', 'deadbeef'),
     ],
 )
-def test_ignore_database_pattern_matches_use_ilike_semantics(pattern, dbname, expected):
-    assert remote_query._matches_ignore_database(pattern, dbname) is expected
+def test_resolve_rejects_execution_fields_before_resolution(field, value):
+    """A resolve dispatch is target-only: SQL, upload instructions, and fingerprints are
+    rejected by strict validation before any check is evaluated."""
+    request = resolve_request()
+    request[field] = value
+
+    events = collect_resolve_events(request, registry=ExplodingRegistry())
+
+    assert len(events) == 1
+    assert_failed_event(events, 'invalid_request', field)
+
+
+def test_resolve_discovery_failure_is_visible_target_unavailable():
+    """An undeterminable eligible set is an error other than target_not_found: the check is
+    never silently skipped from the Agent's sweep."""
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke'))
+    check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+
+    events = collect_resolve_events(resolve_request(dbname='dogs_1'), check)
+
+    assert len(events) == 1
+    assert_failed_event(events, 'target_unavailable', 'autodiscovered database scope')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert autodiscovery.get_items_calls == 1
+    assert pool.requested_dbnames == []
+
+
+def test_resolve_and_execute_share_the_same_matching_authority(monkeypatch):
+    """The resolve verdict must predict execution: a target that resolves MATCHED on one
+    check executes on it, and one that resolves target_not_found never executes."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    autodiscovery = FakeAutodiscovery(databases=['dogs_0'])
+    check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
+    registry = StaticPostgresCheckRegistry([check])
+
+    assert_matched_verdict(list(iter_agent_resolve_events(resolve_request(dbname='dogs_0'), registry)))
+    events = collect_events(valid_request(dbname='dogs_0'), check, client=FakeUploadClient())
+    assert_success(events)
+    assert pool.requested_dbnames == ['dogs_0']
+
+    assert_failed_event(list(iter_agent_resolve_events(resolve_request(dbname='dogs_9'), registry)), 'target_not_found')
+    events = collect_events(valid_request(dbname='dogs_9'), check, client=FakeUploadClient())
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == ['dogs_0']
+
+
+def test_entry_dispatches_resolve_target_by_operation():
+    check = make_check(check_database_identifier='Postgres/Primary-A')
+    events = []
+
+    execute_agent_rpc_stream_copy(json.dumps(resolve_request()), check, lambda *event: events.append(event))
+
+    assert len(events) == 1
+    event_type, metadata_json, payload = events[0]
+    assert event_type == 'final'
+    assert payload == b''
+    metadata = json.loads(metadata_json)
+    assert metadata['status'] == 'MATCHED'
+    assert metadata['match']['databaseInstance'] == 'Postgres/Primary-A'
+
+
+def test_entry_rejects_unknown_operation_without_pool_access():
+    pool = FakePool(rows=[(1,)])
+    request = valid_request()
+    request['operation'] = 'bogus_operation'
+    events = []
+
+    execute_agent_rpc_stream_copy(json.dumps(request), make_check(pool=pool), lambda *event: events.append(event))
+
+    metadata = json.loads(events[-1][1])
+    assert events[-1][0] == 'error'
+    assert metadata['error']['code'] == 'invalid_request'
+    assert pool.requested_dbnames == []
 
 
 # ---------------------------------------------------------------------------
@@ -996,7 +1111,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['resultDelivery']['uploadId'] == UPLOAD_ID
     assert started['resultDelivery']['runId'] == RUN_ID
     assert started['resultDelivery']['taskId'] == TASK_ID
-    assert started['resultDelivery']['artifactVersion'] == 2
+    assert started['resultDelivery']['artifactVersion'] == 1
     assert started['resultDelivery']['baseUrl'] == BASE_URL
     assert 'partBytes' not in started['resultDelivery']
     assert started['resultDelivery']['limits'] == {
@@ -1024,7 +1139,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert all(event.payload == b'' for event in events)
 
 
-def test_producer_writes_exact_v2_envelope_json(monkeypatch):
+def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
@@ -1038,7 +1153,7 @@ def test_producer_writes_exact_v2_envelope_json(monkeypatch):
     assert page == (prefix_bytes() + b'{"value":1}' + rq.PAGE_SUFFIX)
     parsed = json.loads(page)
     assert parsed == {
-        'contract_version': 2,
+        'contract_version': 1,
         'crawl_id': RUN_ID,
         'task_id': TASK_ID,
         'agent_hostname': AGENT_HOSTNAME,

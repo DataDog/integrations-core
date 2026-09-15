@@ -56,10 +56,12 @@ REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 100 * 1024 * 1024 * 1024
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
 
 
-# The v2 page contract: a top-level numeric ``contract_version``, the run serialized under
-# the contract field name ``crawl_id``, no ``batch_index`` in the body (the page index lives in
-# the upload URL path and page metadata), and a bare ``data`` array of row objects.
-REMOTE_QUERY_ARTIFACT_VERSION = 2
+# The RFC-format page contract, labeled contract_version 1: a top-level numeric
+# ``contract_version``, the run serialized under the contract field name ``crawl_id``, no
+# ``batch_index`` in the body (the page index lives in the upload URL path and page metadata),
+# and a bare ``data`` array of row objects. The number is RFC-owner-assigned, not ours to shift:
+# the POC emits the RFC format everywhere and claims no v2; the shape is unchanged.
+REMOTE_QUERY_ARTIFACT_VERSION = 1
 
 
 # The bytes appended after the last row: close the bare ``data`` array and the document.
@@ -67,6 +69,22 @@ PAGE_SUFFIX = b']}'
 
 
 RemoteQueryEmit = Callable[[str, str, bytes], None]
+
+
+def normalize_host(value: str | None) -> str | None:
+    """Normalize one host for endpoint identity: trimmed, lowercased, one trailing dot removed.
+
+    Shared by the target model and the integration adapters so a configured host and a
+    requested host normalize identically before any comparison.
+    """
+    if value is None:
+        return None
+    host = value.strip().lower()
+    if host.endswith('.'):
+        host = host[:-1]
+    if not host:
+        raise ValueError('host must be a non-empty string')
+    return host
 
 
 class RemoteQueryTarget(BaseModel):
@@ -79,15 +97,8 @@ class RemoteQueryTarget(BaseModel):
 
     @field_validator('host')
     @classmethod
-    def normalize_host(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        host = value.strip().lower()
-        if host.endswith('.'):
-            host = host[:-1]
-        if not host:
-            raise ValueError('host must be a non-empty string')
-        return host
+    def validate_host(cls, value: str | None) -> str | None:
+        return normalize_host(value)
 
     @field_validator('dbname')
     @classmethod
@@ -122,10 +133,11 @@ class RemoteQueryTarget(BaseModel):
             raise ValueError('{} must not be null'.format(', '.join(null_fields)))
 
         if self.database_instance is not None:
-            # database_instance selects a loaded check instance; an accompanying dbname
-            # requests a logical execution database on that instance's endpoint. Only the
-            # endpoint fields are a different selector mode.
-            if self.model_fields_set & {'host', 'port'}:
+            # database_instance selects one loaded check, whose materialized configured
+            # database is the execution database; host/port/dbname is the other selector
+            # mode. dbname must not override the selected check's monitored database, so
+            # it is rejected together with the endpoint fields.
+            if self.model_fields_set & {'host', 'port', 'dbname'}:
                 raise ValueError('target must use exactly one selector mode: database_instance or host/port/dbname')
             return self
 
@@ -195,6 +207,21 @@ class RemoteQueryRequest(BaseModel):
     query: StrictStr = Field(min_length=1)
     include_schema: StrictBool = Field(default=False, alias='includeSchema')
     result_delivery: RemoteQueryResultDelivery = Field(alias='resultDelivery')
+
+
+class RemoteQueryResolveRequest(BaseModel):
+    """A resolve_target request: one strict target-only operation, nothing else.
+
+    The Agent's resolve dispatch carries only the operation and the target. Strict validation
+    rejects every execution field — query, includeSchema, resultDelivery, credentials, a match
+    fingerprint, or anything else — so a resolve sweep can never carry SQL or upload
+    instructions.
+    """
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    operation: Literal['resolve_target'] = Field(alias='operation')
+    target: RemoteQueryTarget
 
 
 @dataclass
@@ -487,8 +514,8 @@ def page_prefix(
     executing host's Agent-reported identity, always stamped so the console can attribute
     a run to the agent that produced its pages. It is host identity, not job data, so it is
     threaded from the executing check instance, never the delivery. The page index is
-    metadata-only in v2: it reaches the upload URL path and ``PageUploadMetadata``, not
-    the serialized body.
+    metadata-only in the RFC format labeled contract_version 1: it reaches the upload URL path
+    and ``PageUploadMetadata``, not the serialized body.
     """
     head = (
         '{"contract_version":%d,"crawl_id":%s,"task_id":%s,"record_offset":%d,"agent_hostname":%s,'
@@ -1150,6 +1177,34 @@ def failed_event(
     if execution_diagnostics is not None:
         metadata['executionDiagnostics'] = dict(execution_diagnostics)
     return RemoteQueryEvent('error', metadata)
+
+
+def matched_resolve_event(
+    host: str | None,
+    port: int | None,
+    configured_dbname: str | None,
+    resolved_dbname: str,
+    database_instance: str | None,
+) -> RemoteQueryEvent:
+    """The per-check MATCHED resolve verdict: sanitized effective identity, no payload.
+
+    ``host``, ``port``, ``configured_dbname``, and ``database_instance`` identify the matched
+    check as the integration sees it; ``resolved_dbname`` is the database admitted for the
+    target. The keys are pinned by the cross-repo resolve contract and feed the Agent's
+    match fingerprint: never credentials or raw config. Only identity fields that genuinely
+    do not exist for the matched check are omitted.
+    """
+    match: dict[str, Any] = {}
+    if host is not None:
+        match['host'] = host
+    if port is not None:
+        match['port'] = port
+    if configured_dbname is not None:
+        match['configuredDbname'] = configured_dbname
+    match['resolvedDbname'] = resolved_dbname
+    if database_instance is not None:
+        match['databaseInstance'] = database_instance
+    return RemoteQueryEvent('final', {'status': 'MATCHED', 'match': match})
 
 
 def emit_event(emit: RemoteQueryEmit, event: RemoteQueryEvent) -> None:
