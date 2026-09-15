@@ -10,6 +10,13 @@ from datadog_checks.karpenter import KarpenterCheck
 
 from .common import RENAMED_LABELS, TEST_METRICS, TEST_V1_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert KarpenterCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check_mock_karpenter_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('karpenter_metrics.txt'))
