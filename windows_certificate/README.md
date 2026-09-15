@@ -127,7 +127,7 @@ Beginning with Agent v7.80, six opt-in flags expose additional certificate metad
 
 | Flag | Tags emitted |
 | --- | --- |
-| `certificate_template_tag` | `certificate_template`, `certificate_template_oid`, `certificate_template_major_version`, `certificate_template_minor_version` |
+| `certificate_template_tag` | `certificate_template_name`, `certificate_template_oid`, `certificate_template_major_version`, `certificate_template_minor_version` |
 | `enhanced_key_usage_tag` | `enhanced_key_usage` (one tag per EKU OID; well-known OIDs use short names) |
 | `friendly_name_tag` | `friendly_name` |
 | `subject_alternative_names_tag` | `subject_alt_name_dns`, `subject_alt_name_ip`, `subject_alt_name_email`, `subject_alt_name_uri` |
