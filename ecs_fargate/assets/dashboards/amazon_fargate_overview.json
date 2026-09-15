@@ -14,7 +14,7 @@
                         "query": {
                             "data_source": "infrastructure",
                             "resource_type": "container",
-                            "query_string": "cluster_name:$ecs_cluster.value task_family:$task_family.value container_name:$container_name.value"
+                            "query_string": "$scope cluster_name:$ecs_cluster.value task_family:$task_family.value container_name:$container_name.value"
                         },
                         "columns": []
                     }
@@ -612,7 +612,7 @@
                         "query": {
                             "data_source": "infrastructure",
                             "resource_type": "ecsTask",
-                            "query_string": "cluster_name:$ecs_cluster.value task_family:$task_family.value"
+                            "query_string": "$scope cluster_name:$ecs_cluster.value task_family:$task_family.value"
                         },
                         "columns": []
                     }
@@ -826,7 +826,7 @@
                         "query": {
                             "data_source": "infrastructure",
                             "resource_type": "ecsService",
-                            "query_string": "$ecs_cluster"
+                            "query_string": "$scope $ecs_cluster"
                         },
                         "columns": []
                     }
@@ -852,7 +852,7 @@
                         "query": {
                             "data_source": "infrastructure",
                             "resource_type": "ecsCluster",
-                            "query_string": "$ecs_cluster"
+                            "query_string": "$scope $ecs_cluster"
                         },
                         "columns": []
                     }
@@ -874,9 +874,6 @@
                 "title_align": "left",
                 "show_legend": false,
                 "legend_size": "0",
-                "time": {
-                    "live_span": "4h"
-                },
                 "type": "timeseries",
                 "requests": [
                     {
@@ -885,7 +882,17 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:ecs.fargate.cpu.percent{$scope,$ecs_cluster} by {cluster_name}"
+                                "query": "sum:ecs.fargate.cpu.usage{$scope,$ecs_cluster} by {cluster_name}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:ecs.fargate.cpu.task.limit{$scope,$ecs_cluster} by {cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1 / query2 * 100"
                             }
                         ],
                         "style": {
@@ -913,9 +920,6 @@
                 "title_align": "left",
                 "show_legend": false,
                 "legend_size": "0",
-                "time": {
-                    "live_span": "4h"
-                },
                 "type": "timeseries",
                 "requests": [
                     {
@@ -924,7 +928,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:ecs.fargate.mem.usage{$scope,$ecs_cluster} by {cluster_name}"
+                                "query": "sum:ecs.fargate.mem.usage{$scope,$ecs_cluster} by {cluster_name}"
                             }
                         ],
                         "style": {
@@ -952,9 +956,6 @@
                 "title_align": "left",
                 "show_legend": false,
                 "legend_size": "0",
-                "time": {
-                    "live_span": "4h"
-                },
                 "type": "timeseries",
                 "requests": [
                     {
@@ -963,7 +964,17 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:ecs.fargate.cpu.percent{$scope,$ecs_cluster} by {ecs_service}"
+                                "query": "sum:ecs.fargate.cpu.usage{$scope,$ecs_cluster} by {ecs_service}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:ecs.fargate.cpu.task.limit{$scope,$ecs_cluster} by {ecs_service}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1 / query2 * 100"
                             }
                         ],
                         "style": {
@@ -991,9 +1002,6 @@
                 "title_align": "left",
                 "show_legend": false,
                 "legend_size": "0",
-                "time": {
-                    "live_span": "4h"
-                },
                 "type": "timeseries",
                 "requests": [
                     {
@@ -1002,7 +1010,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:ecs.fargate.mem.usage{$scope,$ecs_cluster} by {ecs_service}"
+                                "query": "sum:ecs.fargate.mem.usage{$scope,$ecs_cluster} by {ecs_service}"
                             }
                         ],
                         "style": {
