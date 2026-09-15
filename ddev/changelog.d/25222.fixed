@@ -1,0 +1,1 @@
+Require a tests directory for `ddev test` to run pytest for an integration, while lint, formatting, and environment listing remain available with only a `hatch.toml`.

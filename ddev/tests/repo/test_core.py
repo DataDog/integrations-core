@@ -184,9 +184,17 @@ class TestIntegrationsIteration:
         pytest.param(
             "iter_testable",
             lambda repo, path: (path / 'hatch.toml').is_file()
+            and (path / 'tests').is_dir()
             # Is not a worktree
             and not (path / ".git").is_file(),
             id="testable",
+        ),
+        pytest.param(
+            "iter_hatch_configured",
+            lambda repo, path: (path / 'hatch.toml').is_file()
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="hatch configured",
         ),
         pytest.param(
             "iter_shippable",
