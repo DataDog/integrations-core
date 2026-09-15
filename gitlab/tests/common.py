@@ -16,6 +16,12 @@ GITLAB_TEST_API_TOKEN = 'token'
 GITLAB_LOCAL_PORT = 8086
 GITLAB_LOCAL_PROMETHEUS_PORT = 8088
 GITLAB_LOCAL_GITALY_PROMETHEUS_PORT = 8089
+GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT = 8090
+GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT = 8091
+
+# Workhorse and Sidekiq expose metrics on their own listeners, which only the
+# `exporters` hatch env turns on. Guard the extra endpoint checks on this.
+EXPORTERS_ENABLED = os.environ.get('GITLAB_EXPORTERS_ENABLED', '').lower() == 'true'
 
 PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_PROMETHEUS_PORT)
 GITLAB_PROMETHEUS_ENDPOINT = "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT)
@@ -23,6 +29,8 @@ GITLAB_READINESS_ENDPOINT = "http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL
 GITLAB_LIVENESS_ENDPOINT = "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_HEALTH_ENDPOINT = "http://{}:{}/-/health".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_GITALY_PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT)
+GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT)
+GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT)
 GITLAB_URL = "http://{}:{}".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_PORT)]
 
@@ -185,7 +193,13 @@ V2_METRICS = COMMON_METRICS + [
 ]
 
 GITALY_METRICS = [
+    "gitaly.build_info",
     "gitaly.cacheinvalidator_rpc.count",
+    "gitaly.catfile_cache.count",
+    "gitaly.concurrency_limiting_current_limit",
+    "gitaly.connections.count",
+    "gitaly.service_client_requests.count",
+    "gitaly.total_repositories_count",
     "gitaly.catfile_cache_members",
     "gitaly.catfile_processes",
     "gitaly.command.context_switches.count",
@@ -290,6 +304,34 @@ METRICS_TO_TEST_V2 = [
 
 GITALY_METRICS_TO_TEST = [
     "gitaly.process_max_fds",
+]
+
+# Raw Prometheus names expected on the Workhorse exporter. These are not in
+# METRICS_MAP yet, so they are asserted against the live exporter rather than
+# through the check.
+WORKHORSE_RAW_METRICS = [
+    "gitlab_workhorse_http_requests_total",
+    "gitlab_workhorse_http_request_duration_seconds",
+]
+
+# Raw Prometheus names expected on the Sidekiq exporter.
+SIDEKIQ_RAW_METRICS = [
+    "sidekiq_mem_total_bytes",
+    "sidekiq_load_balancing_count",
+]
+
+# Raw Prometheus names for the Gitaly metrics that are missing from
+# GITALY_METRICS_MAP. gitlab_build_info is already served by the Gitaly
+# exporter, it is simply not mapped.
+GITALY_RAW_METRICS_NOT_YET_MAPPED = [
+    "gitlab_build_info",
+    "gitaly_catfile_cache_total",
+    "gitaly_connections_total",
+    "gitaly_service_client_requests_total",
+    "gitaly_total_repositories_count",
+    # Requires `adaptive: true` in the Gitaly concurrency config, which
+    # gitlab-exporters.rb sets. Absent on a default install.
+    "gitaly_concurrency_limiting_current_limit",
 ]
 
 

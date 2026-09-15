@@ -10,7 +10,6 @@ from time import sleep
 import mock
 import pytest
 import requests
-
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -19,17 +18,22 @@ from datadog_checks.gitlab import GitlabCheck
 from .common import (
     ALLOWED_METRICS,
     CUSTOM_TAGS,
+    EXPORTERS_ENABLED,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
     GITLAB_HEALTH_ENDPOINT,
     GITLAB_LIVENESS_ENDPOINT,
     GITLAB_LOCAL_GITALY_PROMETHEUS_PORT,
     GITLAB_LOCAL_PORT,
     GITLAB_LOCAL_PROMETHEUS_PORT,
+    GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT,
+    GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT,
     GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_READINESS_ENDPOINT,
+    GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT,
     GITLAB_TEST_API_TOKEN,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
+    GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT,
     HERE,
     HOST,
     PROMETHEUS_ENDPOINT,
@@ -59,6 +63,8 @@ def dd_environment():
         'GITLAB_LOCAL_PORT': str(GITLAB_LOCAL_PORT),
         'GITLAB_LOCAL_PROMETHEUS_PORT': str(GITLAB_LOCAL_PROMETHEUS_PORT),
         'GITLAB_LOCAL_GITALY_PROMETHEUS_PORT': str(GITLAB_LOCAL_GITALY_PROMETHEUS_PORT),
+        'GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT': str(GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT),
+        'GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT': str(GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT),
     }
 
     conditions = []
@@ -75,6 +81,14 @@ def dd_environment():
                 CheckEndpoints(GITLAB_HEALTH_ENDPOINT, attempts=100, wait=10),
             ]
         )
+
+        if EXPORTERS_ENABLED:
+            conditions.extend(
+                [
+                    CheckEndpoints(GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT, attempts=100, wait=10),
+                    CheckEndpoints(GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT, attempts=100, wait=10),
+                ]
+            )
 
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
