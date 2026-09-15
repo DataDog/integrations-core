@@ -197,6 +197,71 @@ class RemoteQueryResultDelivery(BaseModel):
     limits: RemoteQueryUploadLimits
 
 
+# The standard Datadog distributed-tracing headers injected into every intake upload request
+# when the request carried a trace context: the validated trace and parent IDs in their
+# canonical decimal spelling and the integer sampling priority, exactly the header set the
+# Datadog tracing libraries and intake's middleware exchange.
+REMOTE_QUERY_TRACE_ID_HEADER = 'x-datadog-trace-id'
+REMOTE_QUERY_TRACE_PARENT_ID_HEADER = 'x-datadog-parent-id'
+REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER = 'x-datadog-sampling-priority'
+
+# 64-bit trace identity arrives as an unsigned decimal string: a JSON number cannot carry
+# every uint64 without precision loss, so the ids never round-trip through a numeric type.
+REMOTE_QUERY_TRACE_ID_PATTERN = re.compile(r'\A[0-9]+\Z')
+REMOTE_QUERY_TRACE_ID_MAX = (1 << 64) - 1
+
+# The tracer's positive keep priorities: 1 auto-keep, 2 user-keep. Drop and reject
+# priorities are never propagated onto uploads the producer must still make.
+REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_KEEP_VALUES = frozenset((1, 2))
+
+
+class RemoteQueryTraceContext(BaseModel):
+    """The optional Agent-supplied tracing carrier for one execution's upload requests.
+
+    The Agent attaches the active ``action.run`` trace context so the producer can inject
+    standard Datadog distributed-tracing headers into its intake page, finalize, and abort
+    requests, making intake's request spans children of the Agent execution trace instead of
+    unrelated traces. The carrier is observability metadata only: it never authorizes,
+    routes, or validates an upload, and it never appears in page bodies, result envelopes,
+    execution diagnostics, errors, metrics, or logs. A valid absent carrier is supported
+    for mixed versions and preserves request behavior byte for byte; a supplied-but-invalid
+    carrier is a strict validation error, never a silently dropped one.
+    """
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    trace_id: StrictStr = Field(alias='traceId')
+    parent_id: StrictStr = Field(alias='parentId')
+    sampling_priority: StrictInt = Field(alias='samplingPriority')
+
+    @field_validator('trace_id', 'parent_id')
+    @classmethod
+    def validate_trace_identity(cls, value: str) -> str:
+        if REMOTE_QUERY_TRACE_ID_PATTERN.match(value) is None:
+            raise ValueError('must be an unsigned decimal integer string')
+        parsed = int(value)
+        if parsed == 0 or parsed > REMOTE_QUERY_TRACE_ID_MAX:
+            raise ValueError('must be a non-zero unsigned decimal uint64 value')
+        # The canonical decimal spelling: the emitted header value is byte-stable for every
+        # valid spelling of the same id and never echoes a zero-padded input form.
+        return str(parsed)
+
+    @field_validator('sampling_priority')
+    @classmethod
+    def validate_sampling_priority(cls, value: int) -> int:
+        if value not in REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_KEEP_VALUES:
+            raise ValueError('must be a supported positive keep sampling priority (1 or 2)')
+        return value
+
+    def trace_headers(self) -> dict[str, str]:
+        """The standard distributed-tracing headers this validated context injects."""
+        return {
+            REMOTE_QUERY_TRACE_ID_HEADER: self.trace_id,
+            REMOTE_QUERY_TRACE_PARENT_ID_HEADER: self.parent_id,
+            REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER: str(self.sampling_priority),
+        }
+
+
 class RemoteQueryRequest(BaseModel):
     """A single remote query execution producing bounded JSON result pages."""
 
@@ -207,6 +272,7 @@ class RemoteQueryRequest(BaseModel):
     query: StrictStr = Field(min_length=1)
     include_schema: StrictBool = Field(default=False, alias='includeSchema')
     result_delivery: RemoteQueryResultDelivery = Field(alias='resultDelivery')
+    trace_context: RemoteQueryTraceContext | None = Field(default=None, alias='traceContext')
 
 
 class RemoteQueryResolveRequest(BaseModel):
@@ -765,6 +831,10 @@ class UploadCredentials:
     # The run-wide monotonic hard wall for this session's upload requests; None means the
     # request is not wall-scoped (best-effort abort, or a test double driving the client).
     wall_deadline: float | None = None
+    # The validated request tracing carrier, injected as standard distributed-tracing headers
+    # on every page, finalize, and abort request; None means the Agent supplied no context
+    # (mixed versions) and the upload requests carry no tracing headers.
+    trace_context: RemoteQueryTraceContext | None = None
 
 
 class UploadClient(Protocol):
@@ -828,6 +898,11 @@ class RequestsUploadClient:
         if creds.test_drive:
             test_drive_header = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_PREFIX + creds.test_drive
             headers[test_drive_header] = REMOTE_QUERY_UPLOAD_TEST_DRIVE_HEADER_VALUE
+        if creds.trace_context is not None:
+            # Tracing headers ride on every request built from these credentials — page,
+            # finalize, abort, and each retry attempt — alongside the unchanged auth,
+            # integrity, content-length, and Test Drive headers.
+            headers.update(creds.trace_context.trace_headers())
         return headers
 
     def put_page(self, creds: UploadCredentials, page: PageUploadMetadata, buffer: BinaryIO) -> Mapping[str, Any]:
@@ -1081,11 +1156,18 @@ def validate_test_drive_name(value: str | None) -> str | None:
     return name
 
 
-def resolve_upload_credentials(delivery: RemoteQueryResultDelivery, started_at: float) -> UploadCredentials:
+def resolve_upload_credentials(
+    delivery: RemoteQueryResultDelivery,
+    started_at: float,
+    trace_context: RemoteQueryTraceContext | None = None,
+) -> UploadCredentials:
     """Build the session credentials, carrying the run-wide wall for upload retries.
 
     The wall is derived from the same started-at origin and delivered timeout the producer
     uses for its monotonic guard, so the guard and the upload client enforce one deadline.
+    ``trace_context`` is the request's validated tracing carrier; when given it rides on the
+    credentials so every upload request carries the standard tracing headers, and when absent
+    the request behavior is unchanged.
     """
     test_drive = validate_test_drive_name(get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY))
     return UploadCredentials(
@@ -1095,6 +1177,7 @@ def resolve_upload_credentials(delivery: RemoteQueryResultDelivery, started_at: 
         app_key=get_agent_config('app_key'),
         test_drive=test_drive,
         wall_deadline=started_at + delivery.limits.timeout_ms / 1000,
+        trace_context=trace_context,
     )
 
 

@@ -14,6 +14,11 @@ from datadog_checks.base.utils import remote_queries as rq
 
 AGENT_HOSTNAME = 'rq-proof-agent-a'
 
+# A validated tracing carrier: distinct sentinel values so the no-echo assertions below can
+# always find an untouched sentinel in the request whatever the case mutates.
+TRACE_ID = '1234567890123456789'
+PARENT_ID = '9876543210987654321'
+
 
 @pytest.fixture
 def delivery():
@@ -621,6 +626,63 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
     )
 
 
+def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_changes(monkeypatch, creds):
+    import requests
+
+    page = rq.PageUploadMetadata(0, 0, 1, 1, hashlib.sha256(b'x').hexdigest())
+    page_receipt = json.dumps(receipt(page)).encode()
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append((method, url, dict(headers)))
+        if method == 'PUT' and len(calls) == 1:
+            # A transient rejection: the page PUT retries once with the same headers.
+            return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
+        if method == 'PUT':
+            return SimpleNamespace(status_code=200, content=page_receipt)
+        return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    client = rq.RequestsUploadClient()
+
+    def drive(trace_context):
+        calls.clear()
+        scoped = rq.UploadCredentials(
+            creds.base_url, creds.upload_id, creds.api_key, creds.app_key, 'test-intake', trace_context=trace_context
+        )
+        with io.BytesIO(b'x') as body:
+            client.put_page(scoped, page, body)
+        client.finalize_run(scoped)
+        client.abort(scoped)
+        return list(calls)
+
+    plain_calls = drive(None)
+    traced_calls = drive(
+        rq.RemoteQueryTraceContext.model_validate({'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2})
+    )
+
+    # The carrier reaches the page PUT (each attempt), finalize, and abort; the retried
+    # page PUT replays the same tracing headers byte for byte.
+    assert [(method, url) for method, url, _ in traced_calls] == [
+        ('PUT', 'https://intake.example/uploads/upload-1/pages/0'),
+        ('PUT', 'https://intake.example/uploads/upload-1/pages/0'),
+        ('POST', 'https://intake.example/uploads/upload-1/finalize'),
+        ('POST', 'https://intake.example/uploads/upload-1/abort'),
+    ]
+    assert traced_calls[0][2] == traced_calls[1][2]
+    expected_trace_headers = {
+        'x-datadog-trace-id': TRACE_ID,
+        'x-datadog-parent-id': PARENT_ID,
+        'x-datadog-sampling-priority': '2',
+    }
+    for (_, _, traced_headers), (_, _, plain_headers) in zip(traced_calls, plain_calls):
+        # Exactly the three tracing headers differ from a context-free run: the auth,
+        # integrity, content-length, and Test Drive headers are unchanged, and an absent
+        # context preserves the request behavior byte for byte.
+        assert traced_headers == {**plain_headers, **expected_trace_headers}
+
+
 @pytest.mark.parametrize(
     'field,bad',
     [('batch_index', 1), ('record_offset', -1), ('bytes', 2), ('rows', True), ('sha256', 'mismatch'), ('key', '')],
@@ -641,6 +703,104 @@ def test_page_receipt_requires_json_object(body):
 def test_finalize_identity_must_match():
     with pytest.raises(rq.RemoteQueryFailure):
         rq.verify_run_finalize_response({'upload_id': 'other'}, 'upload-1')
+
+
+def test_request_trace_context_parses_the_agent_carrier(delivery):
+    request = {
+        'operation': 'produce_json_pages',
+        'query': 'SELECT 1',
+        'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
+        'resultDelivery': delivery.model_dump(by_alias=True),
+    }
+    # Absence is valid for mixed versions: an Agent that never sends the field — and an
+    # explicit null — carries no context and the request parses exactly as before.
+    assert rq.RemoteQueryRequest.model_validate(request).trace_context is None
+    assert rq.RemoteQueryRequest.model_validate({**request, 'traceContext': None}).trace_context is None
+
+    context = rq.RemoteQueryRequest.model_validate(
+        {**request, 'traceContext': {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}}
+    ).trace_context
+    assert (context.trace_id, context.parent_id, context.sampling_priority) == (TRACE_ID, PARENT_ID, 2)
+
+    # The full uint64 range and both positive keep priorities are accepted; a zero-padded
+    # spelling of the same value validates to the canonical decimal spelling, so the
+    # injected header values are byte-stable.
+    context = rq.RemoteQueryRequest.model_validate(
+        {**request, 'traceContext': {'traceId': '18446744073709551615', 'parentId': PARENT_ID, 'samplingPriority': 1}}
+    ).trace_context
+    assert (context.trace_id, context.sampling_priority) == ('18446744073709551615', 1)
+    context = rq.RemoteQueryRequest.model_validate(
+        {**request, 'traceContext': {'traceId': '00' + TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}}
+    ).trace_context
+    assert context.trace_id == TRACE_ID
+
+
+@pytest.mark.parametrize(
+    'mutation',
+    [
+        {'traceId': '0'},
+        {'traceId': '00'},
+        {'traceId': '18446744073709551616'},
+        {'traceId': '-42'},
+        {'traceId': '0x2a'},
+        {'traceId': '42 '},
+        {'traceId': '1.5'},
+        {'traceId': ''},
+        {'traceId': 12345678901234567890},
+        {'parentId': '0'},
+        {'parentId': '1e3'},
+        {'samplingPriority': 0},
+        {'samplingPriority': -1},
+        {'samplingPriority': 3},
+        {'samplingPriority': '2'},
+        {'samplingPriority': 2.0},
+        {'samplingPriority': True},
+    ],
+)
+def test_request_trace_context_is_strict_without_echoing_values(delivery, mutation):
+    request = {
+        'operation': 'produce_json_pages',
+        'query': 'SELECT 1',
+        'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
+        'resultDelivery': delivery.model_dump(by_alias=True),
+        'traceContext': {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2},
+    }
+    request['traceContext'].update(mutation)
+
+    with pytest.raises(ValidationError) as failure:
+        rq.RemoteQueryRequest.model_validate(request)
+
+    message = rq.validation_message(failure.value)
+    assert 'traceContext' in message
+    # The carrier is observability metadata; a validation error never echoes its values.
+    assert TRACE_ID not in message
+    assert PARENT_ID not in message
+
+
+@pytest.mark.parametrize(
+    'carrier',
+    [
+        {},
+        {'traceId': TRACE_ID},
+        {'traceId': TRACE_ID, 'parentId': PARENT_ID},
+        {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2, 'origin': 'extra'},
+        'not-an-object',
+        5,
+    ],
+)
+def test_request_trace_context_is_a_closed_shape(delivery, carrier):
+    request = {
+        'operation': 'produce_json_pages',
+        'query': 'SELECT 1',
+        'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
+        'resultDelivery': delivery.model_dump(by_alias=True),
+        'traceContext': carrier,
+    }
+
+    with pytest.raises(ValidationError) as failure:
+        rq.RemoteQueryRequest.model_validate(request)
+
+    assert 'traceContext' in rq.validation_message(failure.value)
 
 
 @pytest.mark.parametrize(
@@ -724,6 +884,7 @@ def test_resolve_request_is_target_only():
         ('query', 'SELECT 1'),
         ('includeSchema', True),
         ('resultDelivery', {'runId': 'run-1'}),
+        ('traceContext', {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}),
         ('matchFingerprint', 'deadbeef'),
         ('apiKey', 'SECRET_DO_NOT_LOG'),
     ],

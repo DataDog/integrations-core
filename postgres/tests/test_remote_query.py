@@ -1009,6 +1009,7 @@ def test_resolve_database_instance_without_configured_dbname_fails_target_unavai
         ('query', 'SELECT 1'),
         ('includeSchema', True),
         ('resultDelivery', {'runId': RUN_ID}),
+        ('traceContext', {'traceId': '1234567890123456789', 'parentId': '9876543210987654321', 'samplingPriority': 2}),
         ('matchFingerprint', 'deadbeef'),
     ],
 )
@@ -1926,6 +1927,50 @@ def test_psycopg_array_loading_uses_the_cursor_scoped_loaders():
 # ---------------------------------------------------------------------------
 # Upload client HTTP contract
 # ---------------------------------------------------------------------------
+
+
+class CredsRecordingUploadClient(FakeUploadClient):
+    """FakeUploadClient that also records the credentials each upload call received."""
+
+    def __init__(self):
+        super().__init__()
+        self.seen_creds = []
+
+    def put_page(self, creds, page, body):
+        self.seen_creds.append(creds)
+        return super().put_page(creds, page, body)
+
+    def finalize_run(self, creds):
+        self.seen_creds.append(creds)
+        return super().finalize_run(creds)
+
+    def abort(self, creds):
+        self.seen_creds.append(creds)
+        return super().abort(creds)
+
+
+@pytest.mark.parametrize(
+    'carrier',
+    [None, {'traceId': '1234567890123456789', 'parentId': '9876543210987654321', 'samplingPriority': 2}],
+)
+def test_stream_threads_the_request_trace_context_into_upload_credentials(monkeypatch, carrier):
+    """The validated request carrier reaches the upload credentials unchanged: present
+    context rides on every upload call, absent context (mixed versions) leaves the
+    credentials without one."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    fake = CredsRecordingUploadClient()
+    request = valid_request()
+    if carrier is not None:
+        request['traceContext'] = carrier
+
+    events = collect_events(request, make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    expected_context = rq.RemoteQueryTraceContext.model_validate(carrier) if carrier is not None else None
+    # The page PUT and the run finalize both saw the same threaded context.
+    assert [creds.trace_context for creds in fake.seen_creds] == [expected_context, expected_context]
 
 
 # ---------------------------------------------------------------------------

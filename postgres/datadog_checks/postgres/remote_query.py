@@ -901,7 +901,9 @@ def iter_agent_rpc_stream_events(
         )
         return
 
-    creds = rq.resolve_upload_credentials(parsed_request.result_delivery, started_at)
+    creds = rq.resolve_upload_credentials(
+        parsed_request.result_delivery, started_at, trace_context=parsed_request.trace_context
+    )
     if not creds.api_key or not creds.app_key:
         yield rq.failed_event(
             'credentials_unavailable',
