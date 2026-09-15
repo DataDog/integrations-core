@@ -133,6 +133,7 @@ def test_dispatch_tests_plans_from_hatch_toml(
     (root / '.ddev' / 'config.toml').write_text('')
     subprocess.run(['git', 'init', '--quiet', str(root)], check=True)
     (root / 'ntp').mkdir()
+    (root / 'ntp' / 'tests').mkdir()
     (root / 'ntp' / 'hatch.toml').write_text(
         '[envs.default]\ne2e-env = false\n[[envs.default.matrix]]\npython = ["3.13"]\nversion = ["1", "2"]\n'
     )
