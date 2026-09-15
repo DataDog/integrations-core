@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import csv
 import hashlib
 import json
 import re
-from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -126,6 +126,13 @@ class FakeClickhouseClient:
 
 
 class FakeUploadClient:
+    """Intake-side fake: one descriptor registration, intake-derived page receipts.
+
+    The default receipt reports final bytes equal to the declared source bytes (they are
+    different things in reality) and the default finalize returns authoritative totals over
+    the recorded pages, so the producer's stats and compact receipt come from this metadata.
+    """
+
     def __init__(
         self,
         run_finalize_response=None,
@@ -134,34 +141,37 @@ class FakeUploadClient:
         raise_on_run_finalize=None,
         put_log=None,
     ):
-        # SimpleNamespace(batch_index, record_offset, page_bytes, rows, sha256_hex, payload)
+        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, sha256_hex, payload)
+        self.descriptor_bodies = []
         self.put_page_calls = []
         self.run_finalize_calls = 0
         self.abort_calls = 0
         self.raise_on_put_page = raise_on_put_page
         self.raise_on_run_finalize = raise_on_run_finalize
-        self.run_finalize_response = (
-            run_finalize_response if run_finalize_response is not None else {'upload_id': UPLOAD_ID}
-        )
-        # When unset, the authoritative receipt echoes the producer's own page metadata;
-        # tests pass a mapping (or a callable taking the page metadata) to mutate it.
+        self.run_finalize_response = run_finalize_response
+        # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
+        # mapping (or a callable taking the page metadata) to mutate or reject it.
         self.put_page_response = put_page_response
         self.put_log = put_log
 
-    def put_page(self, creds, page, body):
+    def register_descriptor(self, creds, body):
+        self.descriptor_bodies.append(body)
+        return {'upload_id': creds.upload_id, 'descriptor_sha256': hashlib.sha256(body).hexdigest()}
+
+    def put_source_page(self, creds, page, body):
         payload = body.read()
         self.put_page_calls.append(
             SimpleNamespace(
                 batch_index=page.batch_index,
                 record_offset=page.record_offset,
-                page_bytes=page.page_bytes,
+                source_bytes=page.source_bytes,
                 rows=page.rows,
                 sha256_hex=page.sha256_hex,
                 payload=payload,
             )
         )
         if self.put_log is not None:
-            self.put_log.append(('put', page.batch_index, page.page_bytes, page.rows))
+            self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
         if self.raise_on_put_page is not None:
             raise self.raise_on_put_page
         if self.put_page_response is not None:
@@ -173,7 +183,7 @@ class FakeUploadClient:
                 'batch_index': page.batch_index,
                 'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
                 'record_offset': page.record_offset,
-                'bytes': page.page_bytes,
+                'bytes': page.source_bytes,
                 'rows': page.rows,
                 'sha256': page.sha256_hex,
             }
@@ -183,7 +193,14 @@ class FakeUploadClient:
         self.run_finalize_calls += 1
         if self.raise_on_run_finalize is not None:
             raise self.raise_on_run_finalize
-        return self.run_finalize_response
+        if self.run_finalize_response is not None:
+            return self.run_finalize_response
+        return {
+            'upload_id': creds.upload_id,
+            'page_count': len(self.put_page_calls),
+            'total_rows': sum(call.rows for call in self.put_page_calls),
+            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
+        }
 
     def abort(self, creds):
         self.abort_calls += 1
@@ -344,8 +361,33 @@ def prefix_bytes(record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=Non
 
 
 def assembled_pages(fake_client):
-    """Each completed page's exact uploaded bytes, keyed by batch index."""
+    """Each completed page's exact uploaded source bytes, keyed by batch index."""
     return {call.batch_index: call.payload for call in fake_client.put_page_calls}
+
+
+def row_object_bound(row):
+    """The conservative final-JSON bound of one row object, computed independently.
+
+    Mirrors the intake envelope arithmetic without reusing the producer's implementation:
+    braces plus commas, each descriptor key plus its colon, and each cell at its own token
+    length or the fixed redaction marker, whichever is larger.
+    """
+    bound = 2 + (len(row) - 1)
+    for name, value in row.items():
+        bound += len(json.dumps(name)) + 1 + rq.string_leaf_final_bound(json.dumps(value).encode('utf-8'))
+    return bound
+
+
+def csv_field(token):
+    """The expected CSV field for one canonical token, computed independently of the producer."""
+    if b'"' in token or b',' in token or b'\n' in token:
+        return b'"' + token.replace(b'"', b'""') + b'"'
+    return token
+
+
+def csv_record(tokens):
+    """The expected framed CSV record for one row of canonical tokens."""
+    return b','.join(csv_field(token) for token in tokens) + b'\n'
 
 
 # ---------------------------------------------------------------------------
@@ -656,8 +698,9 @@ def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    assert json.loads(page)['data'] == [{'payload': '\x00ab'}]
-    assert b'"payload":"\\u0000ab"' in page
+    # The source page carries the cell's canonical token, CSV-framed: the NUL stays
+    # JSON-escaped exactly as the server rendered it.
+    assert page == csv_record([b'"\\u0000ab"'])
 
 
 # ---------------------------------------------------------------------------
@@ -857,19 +900,15 @@ def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    # Schema disabled: the schema key is omitted entirely, never null/[].
-    assert page == (prefix_bytes() + b'{"value":1}' + rq.PAGE_SUFFIX)
-    parsed = json.loads(page)
-    assert parsed == {
-        'contract_version': 1,
-        'crawl_id': RUN_ID,
-        'task_id': TASK_ID,
+    # The source page is pure CSV records of canonical cell tokens: no final JSON envelope
+    # is built or uploaded here; intake assembles it from the registered descriptor.
+    assert page == b'1\n'
+    assert json.loads(fake.descriptor_bodies[0]) == {
+        'format_version': 'csv-json-cell-v1',
+        'include_schema': False,
         'agent_hostname': AGENT_HOSTNAME,
-        'record_offset': 0,
-        'data': [{'value': 1}],
+        'columns': [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer'}],
     }
-    assert 'schema' not in parsed
-    assert 'total_records' not in parsed
 
 
 def test_producer_executes_query_exactly_once_verbatim_with_readonly_settings(monkeypatch):
@@ -971,7 +1010,7 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     }
 
 
-def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(monkeypatch):
+def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(rows=[])
     fake = FakeUploadClient()
@@ -982,16 +1021,20 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(m
 
     final = assert_success(events)
     pages = assembled_pages(fake)
+    # include_schema=true keeps schema discovery for an empty result: exactly one
+    # zero-record source page, so intake creates one schema-bearing final page with empty
+    # data.
     assert list(pages) == [0]
-    parsed = json.loads(pages[0])
-    assert 'batch_index' not in parsed
-    assert parsed['record_offset'] == 0
-    assert parsed['schema'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8'}]
-    assert parsed['data'] == []
+    assert pages[0] == b''
+    (call,) = fake.put_page_calls
+    assert (call.batch_index, call.record_offset, call.rows, call.source_bytes) == (0, 0, 0, 0)
+    assert call.sha256_hex == hashlib.sha256(b'').hexdigest()
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert descriptor['include_schema'] is True
+    assert descriptor['columns'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer'}]
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
-    assert final['upload_receipt']['totalBytes'] == len(pages[0])
-    assert [call.batch_index for call in fake.put_page_calls] == [0]
+    assert final['upload_receipt']['totalBytes'] == 0
     assert fake.run_finalize_calls == 1
 
 
@@ -1064,7 +1107,7 @@ def test_producer_rejects_columns_beyond_max_columns(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(monkeypatch):
+def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(
@@ -1072,16 +1115,20 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
     )
     request = bounded_request(query='SELECT city, country FROM cities ORDER BY city')
     request['includeSchema'] = True
-    schema_entries = [
-        {'column_name': 'city', 'vendor_data_type': 'String'},
-        {'column_name': 'country', 'vendor_data_type': 'String'},
-    ]
-    schema_json = json.dumps(schema_entries, separators=(',', ':')).encode('utf-8')
-    longest_row_bytes = b'{"city":"New York","country":"USA"}'
-    # maxFileBytes fits the schema-bearing prefix plus exactly one of the rows, so the
-    # second row forces a second page.
+    schema_json = json.dumps(
+        [
+            {'column_name': 'city', 'vendor_data_type': 'String'},
+            {'column_name': 'country', 'vendor_data_type': 'String'},
+        ],
+        separators=(',', ':'),
+    ).encode('utf-8')
+    # Intake stamps the schema into every final page, so the producer's bound carries the
+    # schema-bearing envelope: maxFileBytes here fits that envelope plus exactly the
+    # longer row, so both rows never fit one page and the second row forces a second page.
     request['resultDelivery']['limits']['maxFileBytes'] = (
-        len(prefix_bytes(schema_json=schema_json)) + len(longest_row_bytes) + len(rq.PAGE_SUFFIX)
+        len(prefix_bytes(schema_json=schema_json))
+        + row_object_bound({'city': 'New York', 'country': 'USA'})
+        + len(rq.PAGE_SUFFIX)
     )
     fake = FakeUploadClient()
 
@@ -1090,19 +1137,20 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
     assert_success(events)
     pages = assembled_pages(fake)
     assert list(pages) == [0, 1]
-    parsed_pages = [json.loads(page) for page in pages.values()]
-    assert 'batch_index' not in parsed_pages[0]
-    assert parsed_pages[0]['record_offset'] == 0
-    assert parsed_pages[0]['data'] == [{'city': 'New York', 'country': 'USA'}]
-    assert parsed_pages[1]['record_offset'] == 1
-    assert parsed_pages[1]['data'] == [{'city': 'Paris', 'country': 'France'}]
-    # The schema repeats identically and in result-column order on every page.
-    assert parsed_pages[0]['schema'] == parsed_pages[1]['schema'] == schema_entries
+    assert pages[0] == csv_record([json.dumps('New York').encode('utf-8'), json.dumps('USA').encode('utf-8')])
+    assert pages[1] == csv_record([json.dumps('Paris').encode('utf-8'), json.dumps('France').encode('utf-8')])
     assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
+    assert [call.record_offset for call in fake.put_page_calls] == [0, 1]
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert descriptor['include_schema'] is True
+    assert descriptor['columns'] == [
+        {'column_name': 'city', 'vendor_data_type': 'String', 'logical_type': 'string'},
+        {'column_name': 'country', 'vendor_data_type': 'String', 'logical_type': 'string'},
+    ]
     assert event_metadata(events[0])['includeSchema'] is True
 
 
-def test_producer_schema_carries_clickhouse_type_strings(monkeypatch):
+def test_producer_descriptor_carries_clickhouse_type_strings_and_logical_types(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(
         names=('count', 'name', 'flag'),
@@ -1117,14 +1165,14 @@ def test_producer_schema_carries_clickhouse_type_strings(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    parsed = json.loads(page)
-    # The vendor data types are the exact ClickHouse type strings from the stream header.
-    assert parsed['schema'] == [
-        {'column_name': 'count', 'vendor_data_type': 'Nullable(UInt64)'},
-        {'column_name': 'name', 'vendor_data_type': 'LowCardinality(String)'},
-        {'column_name': 'flag', 'vendor_data_type': 'Bool'},
+    # The descriptor's vendor data types are the exact ClickHouse type strings from the
+    # stream header, with wrappers peeled for the logical types.
+    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
+        {'column_name': 'count', 'vendor_data_type': 'Nullable(UInt64)', 'logical_type': 'integer'},
+        {'column_name': 'name', 'vendor_data_type': 'LowCardinality(String)', 'logical_type': 'string'},
+        {'column_name': 'flag', 'vendor_data_type': 'Bool', 'logical_type': 'boolean'},
     ]
-    assert parsed['data'] == [{'count': None, 'name': 'x', 'flag': True}]
+    assert page == csv_record([b'null', b'"x"', b'true'])
 
 
 def test_producer_enforces_max_schema_bytes(monkeypatch):
@@ -1155,16 +1203,21 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-ROW_BYTES = b'{"payload":"aaaa"}'  # 18 bytes for names ['payload'], types ['String']
+# One row ['aaaa'] over a single String column: a 24-byte final bound and a 9-byte framed
+# source record.
+BOUND_ROW = {'payload': 'aaaa'}
+ROW_RECORD = csv_record([b'"aaaa"'])
 
 
-def two_row_boundary_request(monkeypatch, extra_file_bytes=0):
+def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
+    """A budget that fits exactly two bound rows in one page (minus the extra bytes)."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request()
     limits = request['resultDelivery']['limits']
-    limits['maxFileBytes'] = prefix_len + len(ROW_BYTES) + 1 + len(ROW_BYTES) + len(rq.PAGE_SUFFIX) + extra_file_bytes
+    row_bound = row_object_bound(BOUND_ROW)
+    limits['maxFileBytes'] = prefix_len + row_bound + 1 + row_bound + len(rq.PAGE_SUFFIX) + extra_bound_bytes
     # Same constraint as bounded_request: the schema budget must stay within the page budget.
     limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     return request
@@ -1174,10 +1227,11 @@ def two_row_client(**stream_kwargs):
     return make_client(names=('payload',), types=('String',), rows=[['aaaa'], ['aaaa']], **stream_kwargs)
 
 
-def test_page_split_row_too_large_when_row_exceeds_max_row_bytes(monkeypatch):
+def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    request = bounded_request(maxRowBytes=len(ROW_BYTES) - 1)
+    # maxRowBytes bounds one framed source record: the 9-byte record for ['aaaa'] cannot fit 8.
+    request = bounded_request(maxRowBytes=len(ROW_RECORD) - 1)
     clickhouse_client = two_row_client()
     fake = FakeUploadClient()
 
@@ -1282,62 +1336,61 @@ def test_page_upload_streams_before_the_result_stream_is_exhausted(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def encode_stream_row(names, types, values):
+def encode_stream_tokens(names, types, values):
+    """One row's canonical cell tokens, one per described column."""
     columns = remote_query.build_columns(list(names), list(types))
-    out = bytearray()
-    remote_query.encode_row(list(values), columns, out)
-    return bytes(out)
+    return [cell.token for cell in remote_query.encode_row(list(values), columns)]
 
 
 def test_value_contract_encodes_scalars_exactly():
-    assert encode_stream_row(('v',), ('UInt64',), [18446744073709551615]) == b'{"v":18446744073709551615}'
-    assert encode_stream_row(('v',), ('Int64',), [-42]) == b'{"v":-42}'
+    assert encode_stream_tokens(('v',), ('UInt64',), [18446744073709551615]) == [b'18446744073709551615']
+    assert encode_stream_tokens(('v',), ('Int64',), [-42]) == [b'-42']
     # Quoted 64-bit+ integers (servers that quote big ints) normalize back to numbers.
-    assert encode_stream_row(('v',), ('UInt64',), ['18446744073709551615']) == b'{"v":18446744073709551615}'
-    assert encode_stream_row(('v',), ('Int64',), ['-42']) == b'{"v":-42}'
+    assert encode_stream_tokens(('v',), ('UInt64',), ['18446744073709551615']) == [b'18446744073709551615']
+    assert encode_stream_tokens(('v',), ('Int64',), ['-42']) == [b'-42']
     # Unconvertible quoted text in a numeric column stays a string for the encoder to
     # accept verbatim rather than corrupting.
-    assert encode_stream_row(('v',), ('UInt64',), ['not-a-number']) == b'{"v":"not-a-number"}'
+    assert encode_stream_tokens(('v',), ('UInt64',), ['not-a-number']) == [b'"not-a-number"']
     # Floats and decimals keep their exact server text: no binary-float round-trip.
-    assert encode_stream_row(('v',), ('Float64',), ['0.1']) == b'{"v":0.1}'
-    assert encode_stream_row(('v',), ('Decimal(38, 10)',), ['12345678901234567890.1234567890']) == (
-        b'{"v":12345678901234567890.1234567890}'
-    )
-    assert encode_stream_row(('v',), ('Nullable(Float64)',), [None]) == b'{"v":null}'
+    assert encode_stream_tokens(('v',), ('Float64',), ['0.1']) == [b'0.1']
+    assert encode_stream_tokens(('v',), ('Decimal(38, 10)',), ['12345678901234567890.1234567890']) == [
+        b'12345678901234567890.1234567890'
+    ]
+    assert encode_stream_tokens(('v',), ('Nullable(Float64)',), [None]) == [b'null']
     # Non-finite floats: the server renders them as null by default (a documented deviation
     # from the Postgres "NaN"/"Infinity" string spellings); a server that quotes them
     # (output_format_json_quote_denormals) delivers strings, which pass through verbatim
     # rather than being reinterpreted.
-    assert encode_stream_row(('v',), ('Float64',), [None]) == b'{"v":null}'
-    assert encode_stream_row(('v',), ('Float64',), ['inf']) == b'{"v":"inf"}'
-    assert encode_stream_row(('v',), ('Float64',), ['-nan']) == b'{"v":"-nan"}'
+    assert encode_stream_tokens(('v',), ('Float64',), [None]) == [b'null']
+    assert encode_stream_tokens(('v',), ('Float64',), ['inf']) == [b'"inf"']
+    assert encode_stream_tokens(('v',), ('Float64',), ['-nan']) == [b'"-nan"']
     # A String column holding digits is never reinterpreted as a number.
-    assert encode_stream_row(('v',), ('String',), ['12345']) == b'{"v":"12345"}'
+    assert encode_stream_tokens(('v',), ('String',), ['12345']) == [b'"12345"']
     # Booleans; legacy numeric spellings normalize by type.
-    assert encode_stream_row(('v',), ('Bool',), [True]) == b'{"v":true}'
-    assert encode_stream_row(('v',), ('Bool',), [0]) == b'{"v":false}'
-    assert encode_stream_row(('v',), ('Bool',), [1]) == b'{"v":true}'
-    assert encode_stream_row(('v',), ('Bool',), ['false']) == b'{"v":false}'
+    assert encode_stream_tokens(('v',), ('Bool',), [True]) == [b'true']
+    assert encode_stream_tokens(('v',), ('Bool',), [0]) == [b'false']
+    assert encode_stream_tokens(('v',), ('Bool',), [1]) == [b'true']
+    assert encode_stream_tokens(('v',), ('Bool',), ['false']) == [b'false']
     # Strings with JSON escapes survive verbatim.
-    assert encode_stream_row(('v',), ('String',), ['he said "hi"\nend']) == b'{"v":"he said \\"hi\\"\\nend"}'
-    assert encode_stream_row(('v',), ('Nullable(String)',), [None]) == b'{"v":null}'
+    assert encode_stream_tokens(('v',), ('String',), ['he said "hi"\nend']) == [b'"he said \\"hi\\"\\nend"']
+    assert encode_stream_tokens(('v',), ('Nullable(String)',), [None]) == [b'null']
     # Temporal/UUID/IP families arrive as server-rendered strings.
-    assert encode_stream_row(('d',), ('Date',), ['2026-08-28']) == b'{"d":"2026-08-28"}'
-    assert encode_stream_row(('u',), ('UUID',), ['8b6fb1b5-94dd-447b-95a4-91f4ef118f4b']) == (
-        b'{"u":"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"}'
-    )
+    assert encode_stream_tokens(('d',), ('Date',), ['2026-08-28']) == [b'"2026-08-28"']
+    assert encode_stream_tokens(('u',), ('UUID',), ['8b6fb1b5-94dd-447b-95a4-91f4ef118f4b']) == [
+        b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"'
+    ]
 
 
 def test_value_contract_encodes_composite_types_as_nested_json():
-    assert encode_stream_row(('a',), ('Array(String)',), [['x', None, 'y']]) == b'{"a":["x",null,"y"]}'
-    assert encode_stream_row(('m',), ('Map(String, UInt64)',), [{'k': 1}]) == b'{"m":{"k":1}}'
-    assert encode_stream_row(('t',), ('Tuple(UInt8, String)',), [None]) == b'{"t":null}'
-    assert encode_stream_row(('t',), ('Tuple(UInt8, String)',), [[1, 'x']]) == b'{"t":[1,"x"]}'
-    assert encode_stream_row(('j',), ('JSON',), [{'nested': [1, True]}]) == b'{"j":{"nested":[1,true]}}'
-    assert encode_stream_row(('n',), ('Array(Array(Nullable(UInt8)))',), [[[1, None], []]]) == (b'{"n":[[1,null],[]]}')
+    assert encode_stream_tokens(('a',), ('Array(String)',), [['x', None, 'y']]) == [b'["x",null,"y"]']
+    assert encode_stream_tokens(('m',), ('Map(String, UInt64)',), [{'k': 1}]) == [b'{"k":1}']
+    assert encode_stream_tokens(('t',), ('Tuple(UInt8, String)',), [None]) == [b'null']
+    assert encode_stream_tokens(('t',), ('Tuple(UInt8, String)',), [[1, 'x']]) == [b'[1,"x"]']
+    assert encode_stream_tokens(('j',), ('JSON',), [{'nested': [1, True]}]) == [b'{"nested":[1,true]}']
+    assert encode_stream_tokens(('n',), ('Array(Array(Nullable(UInt8)))',), [[[1, None], []]]) == [b'[[1,null],[]]']
 
 
-def test_value_contract_producer_emits_pinned_row_json(monkeypatch):
+def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(
@@ -1389,25 +1442,39 @@ def test_value_contract_producer_emits_pinned_row_json(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    parsed = json.loads(page, parse_float=Decimal)['data'][0]
-    assert parsed == {
-        'null_value': None,
-        'bool_value': True,
-        'int_value': 42,
-        'big_int_value': 18446744073709551615,
-        'float_value': Decimal('0.1'),
-        'decimal_value': Decimal('12345678901234567890.1234567890'),
-        'text_value': 'héllo "quoted"',
-        'date_value': '2026-08-28',
-        'json_value': {'nested': [1, None, True], 'price': Decimal('1.1')},
-        'array_value': ['x', None, ['y', 'z']],
-        'map_value': {'a': 1},
-    }
-    # Exact text preservation is byte-pinned for the numeric families.
-    assert b'"big_int_value":18446744073709551615' in page
-    assert b'"decimal_value":12345678901234567890.1234567890' in page
-    assert b'"float_value":0.1' in page
-    assert b'"json_value":{"nested":[1,null,true],"price":1.1}' in page
+    # Every cell rides the page as its exact canonical JSON token, CSV-framed: the tokens
+    # pin exact numeric lexemes, typed normalization, temporal strings, nested JSON,
+    # arrays, and maps.
+    tokens = [
+        b'null',
+        b'true',
+        b'42',
+        b'18446744073709551615',
+        b'0.1',
+        b'12345678901234567890.1234567890',
+        '"h\\u00e9llo \\"quoted\\""'.encode('utf-8'),
+        b'"2026-08-28"',
+        b'{"nested":[1,null,true],"price":1.1}',
+        b'["x",null,["y","z"]]',
+        b'{"a":1}',
+    ]
+    assert page == csv_record(tokens)
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert [
+        (column['column_name'], column['vendor_data_type'], column['logical_type']) for column in descriptor['columns']
+    ] == [
+        ('null_value', 'Nullable(String)', 'string'),
+        ('bool_value', 'Bool', 'boolean'),
+        ('int_value', 'Int64', 'integer'),
+        ('big_int_value', 'UInt64', 'integer'),
+        ('float_value', 'Float64', 'float'),
+        ('decimal_value', 'Decimal(38, 10)', 'decimal'),
+        ('text_value', 'String', 'string'),
+        ('date_value', 'Date', 'temporal'),
+        ('json_value', 'JSON', 'json'),
+        ('array_value', 'Array(Nullable(String))', 'json'),
+        ('map_value', 'Map(String, UInt64)', 'json'),
+    ]
 
 
 def test_value_contract_rejects_row_lines_that_are_not_json_arrays(monkeypatch):
@@ -1474,6 +1541,42 @@ def test_base_type_name_peels_wrappers():
     assert remote_query.base_type_name('Array(String)') == 'Array(String)'
 
 
+@pytest.mark.parametrize(
+    'type_string, expected',
+    [
+        ('UInt64', 'integer'),
+        ('Int128', 'integer'),
+        ('Nullable(UInt64)', 'integer'),
+        ('LowCardinality(Nullable(Int128))', 'integer'),
+        ('SimpleAggregateFunction(sum, UInt64)', 'integer'),
+        ('Decimal(10, 2)', 'decimal'),
+        ('Decimal128(4)', 'decimal'),
+        ('Nullable(Decimal(38, 10))', 'decimal'),
+        ('Float64', 'float'),
+        ('Nullable(Float32)', 'float'),
+        ('Bool', 'boolean'),
+        ('String', 'string'),
+        ('FixedString(16)', 'string'),
+        ('Date', 'temporal'),
+        ('Date32', 'temporal'),
+        ('DateTime64(3)', 'temporal'),
+        ('UUID', 'string'),
+        ("Enum8('a' = 1)", 'string'),
+        ('IPv4', 'vendor'),
+        ('IPv6', 'vendor'),
+        ('JSON', 'json'),
+        ('Array(UInt64)', 'json'),
+        ('Map(String, UInt64)', 'json'),
+        ('Tuple(UInt8, String)', 'json'),
+        ('Nested(x UInt8)', 'json'),
+        ('AggregateFunction(any, UInt8)', 'vendor'),
+        ('Point', 'vendor'),
+    ],
+)
+def test_logical_type_mapping_is_deterministic(type_string, expected):
+    assert remote_query.logical_type_for_type_string(type_string) == expected
+
+
 # ---------------------------------------------------------------------------
 # Upload client HTTP contract
 # ---------------------------------------------------------------------------
@@ -1488,7 +1591,7 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(rq.PAGE_SUFFIX))
+    request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq.PAGE_SUFFIX))
     clickhouse_client = two_row_client()
     fake = FakeUploadClient()
 
@@ -1519,25 +1622,29 @@ def test_stream_aborts_on_page_upload_failure(monkeypatch):
     assert clickhouse_client.stream.closed
 
 
-def test_stream_fails_closed_on_page_receipt_mismatch(monkeypatch):
+def test_stream_fails_closed_on_page_receipt_identity_mismatch(monkeypatch):
+    """Final bytes and checksum are intake-derived and never compared to the source page;
+    only the identity fields (index, offset, rows) must match, and a mismatch fails the run."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
+    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
     clickhouse_client = two_row_client()
-    bad_receipt = {
-        'batch_index': 0,
-        'key': 'agent-intake-test/pages/0.json',
-        'record_offset': 0,
-        'bytes': 123,
-        'rows': 1,
-        'sha256': 'f' * 64,
-    }
-    fake = FakeUploadClient(put_page_response=bad_receipt)
+    fake = FakeUploadClient(
+        put_page_response=lambda page: {
+            'batch_index': page.batch_index,
+            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
+            'record_offset': page.record_offset,
+            # Intake-derived values with no source agreement: these are accepted.
+            'bytes': page.source_bytes + 123,
+            'rows': page.rows + 1,
+            'sha256': 'f' * 64,
+        }
+    )
 
     events = collect_events(request, make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
 
-    # A receipt that disagrees with the produced page fails the run: page 1 is never
-    # produced, the session is aborted, and no partial receipt is emitted.
+    # The receipt disagrees on rows: page 1 is never produced, the session is aborted, and
+    # no partial receipt is emitted.
     assert_failed_event(events, 'invalid_receipt')
     assert [call.batch_index for call in fake.put_page_calls] == [0]
     assert fake.run_finalize_calls == 0
@@ -1799,8 +1906,8 @@ def patch_real_check(monkeypatch, instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytestmark_integration
-def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monkeypatch):
-    """End-to-end producer path against a real server: schema, values, page upload, receipt."""
+def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_clickhouse(instance, monkeypatch):
+    """End-to-end producer path against a real server: descriptor, CSV source page, receipt."""
     check = patch_real_check(monkeypatch, instance)
 
     request = {
@@ -1825,19 +1932,18 @@ def test_remote_query_produces_json_pages_against_real_clickhouse(instance, monk
     final = assert_success(events)
     pages = assembled_pages(fake)
     assert list(pages) == [0]
-    page = json.loads(pages[0])
-    assert page['contract_version'] == 1
-    assert page['crawl_id'] == RUN_ID
-    assert page['task_id'] == TASK_ID
-    assert 'batch_index' not in page
-    assert page['record_offset'] == 0
-    assert page['schema'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8'}]
-    assert page['data'] == [{'value': 1}]
+    assert pages[0] == b'1\n'
+    # One registration with the stream header's real type string and logical type, before
+    # any page is uploaded.
+    (descriptor_body,) = fake.descriptor_bodies
+    assert json.loads(descriptor_body)['columns'] == [
+        {'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer'}
+    ]
     # One complete page uploaded as one direct PUT: exact whole-page identity, rows exact.
     (page_call,) = fake.put_page_calls
     assert page_call.batch_index == 0
     assert page_call.record_offset == 0
-    assert page_call.page_bytes == len(pages[0])
+    assert page_call.source_bytes == len(pages[0])
     assert page_call.rows == 1
     assert page_call.sha256_hex == hashlib.sha256(pages[0]).hexdigest()
     assert fake.run_finalize_calls == 1
@@ -1862,10 +1968,9 @@ def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clic
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    # The payload is the exact three bytes NUL, 'a', 'b': the page JSON value equals the
-    # decoded payload, with the NUL escaped the same way the server rendered it.
-    assert json.loads(page)['data'] == [{'payload': '\x00ab'}]
-    assert b'"payload":"\\u0000ab"' in page
+    # The payload is the exact three bytes NUL, 'a', 'b': the source page carries the
+    # cell's canonical token with the NUL escaped exactly as the server rendered it.
+    assert page == csv_record([b'"\\u0000ab"'])
 
 
 @pytest.mark.integration
@@ -1902,17 +2007,22 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
     assert final['upload_receipt']['totalRows'] == 1
     assert final['upload_receipt']['totalBytes'] == len(pages[0])
     (page_call,) = fake.put_page_calls
-    assert page_call.page_bytes == len(pages[0])
-    assert page_call.page_bytes <= 64 * 1024 * 1024
+    assert page_call.source_bytes == len(pages[0])
+    assert page_call.source_bytes <= 64 * 1024 * 1024
     assert page_call.rows == 1
     assert page_call.sha256_hex == hashlib.sha256(pages[0]).hexdigest()
     assert fake.run_finalize_calls == 1
-    (item,) = json.loads(pages[0])['data']
+    # The single row is one CSV record: an independent reader recovers the canonical cell
+    # token, and its JSON value is the exact row.
+    (record,) = csv.reader([pages[0].decode('utf-8')])
     if expected_payload_bytes is not None:
         # The single payload column carries exactly the intended byte count of 'x' bytes.
-        assert item == {'payload': 'x' * expected_payload_bytes}
+        assert record == [json.dumps('x' * expected_payload_bytes)]
     elif query == remote_query.REMOTE_QUERY_IDENTITY_QUERY:
         # The identity query proves the matched server without a fixture: real host, user,
         # and version strings ride through the pinned String value contract.
-        assert set(item) == {'host', 'user', 'version'}
-        assert all(isinstance(value, str) and value for value in item.values())
+        assert len(record) == 3
+        assert all(isinstance(json.loads(token), str) and json.loads(token) for token in record)
+    else:
+        assert len(record) == 1
+        assert json.loads(record[0]) == 1

@@ -233,12 +233,6 @@ def _encode_bytea(out: bytearray, value: bytes) -> None:
     out += b'"'
 
 
-def _string_cell_token(text: str) -> tuple[bytes, int]:
-    """A scalar string cell: its canonical JSON token and the string-leaf final bound."""
-    token = json.dumps(text).encode('utf-8')
-    return token, rq.string_leaf_final_bound(token)
-
-
 def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) -> tuple[bytes, int]:
     """Encode one normalized PostgreSQL value as ``(canonical JSON token, final bound)``.
 
@@ -258,7 +252,7 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
     if isinstance(value, RawJsonNumber):
         text = str(value)
         if text in rq.NON_FINITE_NUMERIC_TEXT:
-            return _string_cell_token(text)
+            return rq.string_cell_token(text)
         out = bytearray()
         rq.encode_raw_number_text(out, text)
         return bytes(out), len(out)
@@ -271,15 +265,15 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
             out = bytearray()
             rq.encode_decimal(out, value)
             return bytes(out), len(out)
-        return _string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
+        return rq.string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
     if isinstance(value, float):
         if math.isfinite(value):
             out = bytearray()
             rq.encode_float(out, value)
             return bytes(out), len(out)
-        return _string_cell_token('NaN' if math.isnan(value) else ('Infinity' if value > 0 else '-Infinity'))
+        return rq.string_cell_token('NaN' if math.isnan(value) else ('Infinity' if value > 0 else '-Infinity'))
     if isinstance(value, str):
-        return _string_cell_token(value)
+        return rq.string_cell_token(value)
     if isinstance(value, (bytes, bytearray, memoryview)):
         if top_type_oid != BYTEA_OID and not in_array:
             raise rq.RemoteQueryFailure(
@@ -290,13 +284,13 @@ def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) 
         _encode_bytea(out, bytes(value))
         return bytes(out), rq.string_leaf_final_bound(out)
     if isinstance(value, datetime):
-        return _string_cell_token(_encode_datetime_text(value))
+        return rq.string_cell_token(_encode_datetime_text(value))
     if isinstance(value, date):
-        return _string_cell_token(value.isoformat())
+        return rq.string_cell_token(value.isoformat())
     if isinstance(value, dt_time):
-        return _string_cell_token(value.isoformat())
+        return rq.string_cell_token(value.isoformat())
     if isinstance(value, uuid.UUID):
-        return _string_cell_token(str(value))
+        return rq.string_cell_token(str(value))
     if isinstance(value, (list, tuple)):
         parts: list[bytes] = [b'[']
         bound = 2

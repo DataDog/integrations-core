@@ -118,6 +118,12 @@ def string_leaf_final_bound(token: bytes) -> int:
     return max(len(token), len(REMOTE_QUERY_REDACTED_MARKER_TOKEN))
 
 
+def string_cell_token(text: str) -> tuple[bytes, int]:
+    """A scalar string cell: its canonical JSON token and the string-leaf final bound."""
+    token = json.dumps(text).encode('utf-8')
+    return token, string_leaf_final_bound(token)
+
+
 class RemoteQueryDescriptorColumn(BaseModel):
     """One ordered descriptor column: result name, vendor type, and logical type."""
 
