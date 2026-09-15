@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
-import os
-from unittest import mock
+from pathlib import Path
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
@@ -39,29 +39,38 @@ def check(instance):
     return DcgmCheck('dcgm.', {}, [instance])
 
 
-@pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def _text_response(file_path: str | Path) -> FakeHTTPResponse:
+    content = Path(file_path).read_bytes()
+    text = content.decode('utf-8')
+    return FakeHTTPResponse(
+        content=content,
+        text=text,
+        content_chunks=(content,),
+        lines=text.splitlines(),
+        headers={'Content-Type': 'text/plain'},
+    )
 
 
 @pytest.fixture()
-def mock_label_remap():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'label_remap.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(fake_http, instance):
+    fake_http.register_response(
+        'GET',
+        instance['openmetrics_endpoint'],
+        _text_response(Path(__file__).parent / 'fixtures' / 'metrics.txt'),
+        match_options={'stream': True},
+    )
+    yield
+    fake_http.assert_all_responses_consumed()
+
+
+@pytest.fixture()
+def mock_label_remap(fake_http, instance):
+    for _ in range(2):
+        fake_http.register_response(
+            'GET',
+            instance['openmetrics_endpoint'],
+            _text_response(Path(__file__).parent / 'fixtures' / 'label_remap.txt'),
+            match_options={'stream': True},
+        )
+    yield
+    fake_http.assert_all_responses_consumed()

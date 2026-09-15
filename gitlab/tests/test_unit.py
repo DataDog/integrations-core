@@ -5,13 +5,20 @@ import pytest
 from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
+from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
 
 from .common import (
     CUSTOM_TAGS,
     GITALY_METRICS,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_HEALTH_ENDPOINT,
+    GITLAB_LIVENESS_ENDPOINT,
+    GITLAB_PROMETHEUS_ENDPOINT,
+    GITLAB_READINESS_ENDPOINT,
     GITLAB_TAGS,
     V1_METRICS,
     V2_METRICS,
@@ -21,8 +28,34 @@ from .common import (
 pytestmark = [pytest.mark.unit]
 
 
+def _expected_check_requests(
+    *,
+    use_openmetrics: bool,
+    runs: int = 1,
+    include_gitaly: bool = False,
+    include_health: bool = True,
+) -> list[RecordedRequest]:
+    requests = []
+    readiness_endpoint = '{}?all=1'.format(GITLAB_READINESS_ENDPOINT) if use_openmetrics else GITLAB_READINESS_ENDPOINT
+    for _ in range(runs):
+        requests.append(RecordedRequest('GET', GITLAB_PROMETHEUS_ENDPOINT, {'stream': True}))
+        if include_gitaly:
+            requests.append(RecordedRequest('GET', GITLAB_GITALY_PROMETHEUS_ENDPOINT, {'stream': True}))
+        if include_health:
+            requests.extend(
+                [
+                    RecordedRequest('GET', readiness_endpoint),
+                    RecordedRequest('GET', GITLAB_LIVENESS_ENDPOINT),
+                    RecordedRequest('GET', GITLAB_HEALTH_ENDPOINT),
+                ]
+            )
+
+    return requests
+
+
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
 def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, use_openmetrics):
+    fake_http = mock_data(use_openmetrics=use_openmetrics, runs=2)
     check = gitlab_check(get_config(use_openmetrics))
     dd_run_check(check)
     dd_run_check(check)
@@ -30,11 +63,12 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, us
     assert_check(aggregator, V2_METRICS if use_openmetrics else V1_METRICS, use_openmetrics)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    fake_http.assert_requests(_expected_check_requests(use_openmetrics=use_openmetrics, runs=2))
+    fake_http.assert_all_responses_consumed()
 
 
 def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_config):
-    from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
-
+    fake_http = mock_data(use_openmetrics=True, runs=2, include_gitaly=True)
     config = get_config(True)
     instance = config['instances'][0]
     instance["openmetrics_endpoint"] = instance["prometheus_url"]
@@ -52,6 +86,8 @@ def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_con
         status=GitlabCheckV2.OK,
         tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_GITALY_PROMETHEUS_ENDPOINT)],
     )
+    fake_http.assert_requests(_expected_check_requests(use_openmetrics=True, runs=2, include_gitaly=True))
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize(
@@ -62,42 +98,52 @@ def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_con
     ],
 )
 def test_get_gitlab_version(raw_version):
-    http = MagicMock()
-    http.get.return_value.json.return_value = {"version": raw_version}
+    http = FakeHTTPClient()
+    url = "http://localhost/api/v4/version"
+    options = {'params': {'access_token': "my-token"}}
+    http.register_response(
+        'GET',
+        url,
+        FakeHTTPResponse(json_result={"version": raw_version}),
+        match_options=options,
+    )
 
     version = get_gitlab_version(http, MagicMock(), "http://localhost", "my-token")
 
-    http.get.assert_called_with("http://localhost/api/v4/version", params={'access_token': "my-token"})
     assert version == raw_version
+    http.assert_requests([RecordedRequest('GET', url, options)])
+    http.assert_all_responses_consumed()
 
 
 def test_get_gitlab_version_without_token():
-    http = MagicMock()
+    http = FakeHTTPClient()
+
     version = get_gitlab_version(http, MagicMock(), "http://localhost", None)
-    http.get.assert_not_called()
+
     assert version is None
+    http.assert_requests([])
+    http.assert_all_responses_consumed()
 
 
 def test_no_gitlab_url(dd_run_check, aggregator, mock_data, gitlab_check, get_config):
+    fake_http = mock_data(use_openmetrics=True, include_health=False)
     config = get_config(True)
     del config['instances'][0]['gitlab_url']
     check = gitlab_check(config)
     dd_run_check(check)
     aggregator.assert_service_check('gitlab.openmetrics.health', status=AgentCheck.OK)
+    fake_http.assert_requests(_expected_check_requests(use_openmetrics=True, include_health=False))
+    fake_http.assert_all_responses_consumed()
 
 
-def test_parse_readiness_service_checks_with_invalid_payload(
-    dd_run_check, aggregator, mock_data, gitlab_check, get_config
-):
+def test_parse_readiness_service_checks_with_invalid_payload(dd_run_check, aggregator, gitlab_check, get_config):
     check = gitlab_check(get_config(True))
     # Manually init the check
     check.parse_config()
 
-    mocked_response = MagicMock()
-    mocked_response.json.raiseError.side_effect = Exception()
+    response = FakeHTTPResponse(json_error=ValueError("invalid readiness payload"))
 
-    check.parse_readiness_service_checks(mocked_response)
-    mocked_response.json.assert_called_once()
+    check.parse_readiness_service_checks(response)
 
     for service_check in check.READINESS_SERVICE_CHECKS.values():
         aggregator.assert_service_check(
@@ -148,16 +194,15 @@ def test_parse_readiness_service_checks_with_invalid_payload(
     ],
 )
 def test_parse_readiness_service_checks(
-    dd_run_check, aggregator, mock_data, gitlab_check, get_config, service_check, expected_redis_status
+    dd_run_check, aggregator, gitlab_check, get_config, service_check, expected_redis_status
 ):
     check = gitlab_check(get_config(True))
     # Manually init the check
     check.parse_config()
 
-    mocked_response = MagicMock()
-    mocked_response.json.return_value = service_check
+    response = FakeHTTPResponse(json_result=service_check)
 
-    check.parse_readiness_service_checks(mocked_response)
+    check.parse_readiness_service_checks(response)
 
     aggregator.assert_service_check(
         'gitlab.readiness.redis',
@@ -173,3 +218,16 @@ def test_parse_readiness_service_checks(
         )
 
     assert len(aggregator.service_check_names) == 13
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('error_cls', [HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError])
+def test_prometheus_scrape_timeout_reports_critical(aggregator, gitlab_check, get_config, error_cls):
+    check = gitlab_check(get_config(use_openmetrics=False))
+    check.process = MagicMock(side_effect=error_cls("timed out"))
+    check._check_health_endpoint = MagicMock()
+    check.submit_version = MagicMock()
+
+    check.check(None)
+
+    aggregator.assert_service_check(check.PROMETHEUS_SERVICE_CHECK_NAME, status=AgentCheck.CRITICAL)
