@@ -1,0 +1,1 @@
+Show a per-platform totals table and pivot the per-module table by platform in the ``ddev size diff`` markdown output and PR comment.

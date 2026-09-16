@@ -1,1 +1,0 @@
-Fix retention.ms and retention.bytes being dropped from topic config events when a topic has 30+ configs (e.g. tiered-storage topics). The configs were truncated because they sorted late alphabetically and the max_configs cap cut them, even though the corresponding metrics were still emitted.

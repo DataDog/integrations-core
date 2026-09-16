@@ -4,6 +4,8 @@
 import copy
 import gc
 import weakref
+from collections import Counter
+from itertools import groupby
 
 import mock
 import psycopg
@@ -258,6 +260,24 @@ def test_trim_set_stmts(query, expected_trimmed_query):
 )
 def test_collection_interval_gcd(intervals, expected):
     assert util.collection_interval_gcd(*intervals) == expected
+
+
+@pytest.mark.unit
+def test_metadata_job_ticks_at_gcd_of_all_sub_intervals(pg_instance):
+    """
+    Each metadata sub-collector gates itself on its own interval, which only yields the configured
+    cadence if the loop ticks at the GCD of every sub-interval. A tick coarser than that -- because
+    the GCD is computed over only some of the intervals, or not at all -- silently delays whichever
+    collector has the shortest interval.
+    """
+    pg_instance['dbm'] = True
+    pg_instance['collect_settings'] = {'enabled': True, 'collection_interval': 600}
+    pg_instance['collect_schemas'] = {'enabled': True, 'collection_interval': 700}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 800}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    assert check.metadata_samples.collection_interval == 100
 
 
 @pytest.mark.unit
@@ -522,3 +542,67 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
         after = metadata._last_column_statistics_query_time
 
     assert after > before
+
+
+def _autodiscovery_scope(name):
+    return {'name': name, 'query': 'SELECT {metrics_columns} FROM fake', 'metrics': {}, 'descriptors': []}
+
+
+def test_autodiscovery_groups_connection_acquisitions_by_database(pg_instance):
+    """
+    Every scope group for a database is collected while that database's connection pool is the most
+    recently used one, so the pool is acquired in a single contiguous block instead of being
+    re-created once per group when the pool cap evicts it in between.
+    """
+    pg_instance['reported_hostname'] = 'stubbed-host'
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.version = VersionInfo(14, 0, 0)
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = ['db1', 'db2']
+
+    check.db_pool = mock.MagicMock()
+    cursor = check.db_pool.get_connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+    cursor.fetchall.return_value = []
+
+    check._collect_metric_autodiscovery(
+        [],
+        scope_groups=[
+            ('_collect_relations_autodiscovery', [_autodiscovery_scope('relation_scope')]),
+            ('_collect_stat_autodiscovery', [_autodiscovery_scope('stat_scope')]),
+        ],
+    )
+
+    acquired = [call.args[0] for call in check.db_pool.get_connection.call_args_list]
+    assert Counter(acquired) == {'db1': 2, 'db2': 2}, "every group should still run against every database"
+    assert [dbname for dbname, _ in groupby(acquired)] == ['db1', 'db2'], "each database should be acquired once"
+
+
+def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
+    """
+    A group that raises for a database must not abort that database's remaining groups, otherwise
+    one unreadable relation would silently drop the database's stat metrics too.
+    """
+    pg_instance['reported_hostname'] = 'stubbed-host'
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = ['db1']
+
+    relation_scope = _autodiscovery_scope('relation_scope')
+    stat_scope = _autodiscovery_scope('stat_scope')
+    collected = []
+
+    def query_scope(scope, instance_tags, is_custom_metrics, dbname=None):
+        if scope is relation_scope:
+            raise psycopg.errors.InsufficientPrivilege('relation scope failed')
+        collected.append((dbname, scope['name']))
+
+    check._query_scope = query_scope
+    check._collect_metric_autodiscovery(
+        [],
+        scope_groups=[
+            ('_collect_relations_autodiscovery', [relation_scope]),
+            ('_collect_stat_autodiscovery', [stat_scope]),
+        ],
+    )
+
+    assert collected == [('db1', 'stat_scope')]

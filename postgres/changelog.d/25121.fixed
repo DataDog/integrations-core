@@ -1,0 +1,1 @@
+Fix a bug where schemas were collected more often than ``collect_schemas.collection_interval`` when another metadata collection interval was configured lower.

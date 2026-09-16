@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import asyncio
+import signal
 import subprocess
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -108,6 +109,23 @@ class CapturingOrchestrator(ValidationOrchestrator):
         self.submitted.append(message)
 
 
+def test_signals_are_left_to_the_default_handling(mock_app: MagicMock):
+    """A validation is a subprocess run from a pool thread, so a requested stop cannot interrupt it and
+    the command would stay alive until the subprocess timeout instead of terminating.
+    """
+    orch = ValidationOrchestrator(app=mock_app, target=None, validations=["models"])
+    installed: list[signal.Signals] = []
+
+    async def install_with_a_live_loop() -> None:
+        loop = asyncio.get_running_loop()
+        with patch.object(loop, "add_signal_handler", side_effect=lambda sig, *_: installed.append(sig)):
+            orch.install_signal_handlers()
+
+    asyncio.run(install_with_a_live_loop())
+
+    assert installed == []
+
+
 @pytest.mark.parametrize(
     "validation, target, expect_args",
     [
@@ -201,6 +219,29 @@ def test_on_finalize_writes_step_summary(mock_app, step_summary):
     assert "Validation Report" in content
     assert "| Validation | Description | Status |" in content
     assert "| `config` |" in content
+
+
+def test_on_finalize_writes_pr_comment_instead_of_posting(mock_app, tmp_path):
+    mock_app.config.github.token = "fake-token"
+    output = tmp_path / "pr-comment.md"
+
+    orch = ValidationOrchestrator(
+        app=mock_app,
+        validations=["config"],
+        target=None,
+        pr_number=42,
+        pr_comment_output=output,
+    )
+    orch._results = {
+        "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    assert "| `config` | Validate default configuration files against spec.yaml | ❌ |" in output.read_text(
+        encoding="utf-8"
+    )
+    mock_app.github.get_pull_request_comments.assert_not_called()
+    mock_app.github.post_pull_request_comment.assert_not_called()
 
 
 def test_on_finalize_posts_pr_comment_on_failure(mock_app):

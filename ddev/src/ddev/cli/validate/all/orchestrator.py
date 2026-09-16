@@ -22,6 +22,8 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncP
 from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from ddev.cli.application import Application
 
 
@@ -189,6 +191,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         grace_period: float = 5,
         max_timeout: float = 600,
         subprocess_timeout: float = SUBPROCESS_TIMEOUT,
+        pr_comment_output: Path | None = None,
     ):
         validations = validations if validations is not None else list(VALIDATIONS)
         super().__init__(
@@ -205,12 +208,21 @@ class ValidationOrchestrator(EventBusOrchestrator):
         self._target = target
         self._fix = fix
         self._pr_number = pr_number
+        self._pr_comment_output = pr_comment_output
         self._results: dict[str, ValidationResult] = {}
 
         self.register_processor(
             ValidationProcessor(app, self._results, subprocess_timeout),
             [ValidationMessage],
         )
+
+    def install_signal_handlers(self) -> None:
+        """Left to the default handling, which is what interrupts the validations.
+
+        Each one runs as a subprocess from a pool thread, and a requested stop cannot interrupt either;
+        it would be noticed only once the subprocess returned or timed out. Winding down cleanly needs
+        the children terminated first, so until that exists the default remains the quicker way out.
+        """
 
     async def on_initialize(self) -> None:
         for name in self._validations:
@@ -279,6 +291,9 @@ class ValidationOrchestrator(EventBusOrchestrator):
         )
         if run_url := get_workflow_run_url():
             comment_body += f"\n\n[View full run]({run_url})"
+        if self._pr_comment_output is not None:
+            self._pr_comment_output.write_text(comment_body, encoding="utf-8")
+            return
 
         self._app.logger.debug("PR number: %s", self._pr_number)
         self._app.logger.debug("GitHub token configured: %s", bool(self._app.config.github.token))
