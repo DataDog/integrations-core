@@ -20,7 +20,14 @@ from datadog_checks.sqlserver.utils import construct_use_statement, raise_if_can
 from .base import SqlserverDatabaseMetricsBase
 from .db_fragmentation_metrics import SqlserverDBFragmentationMetrics
 from .index_usage_metrics import SqlserverIndexUsageMetrics
-from .scheduler import DurationEstimate, GroupSpec, HeavyCollectorScheduler, ReconcileResult, TaskState
+from .scheduler import (
+    CollectorGroup,
+    DurationEstimate,
+    GroupSpec,
+    HeavyCollectorScheduler,
+    ReconcileResult,
+    TaskState,
+)
 from .table_size_metrics import SqlserverTableSizeMetrics
 
 try:
@@ -343,9 +350,14 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
             self._report_database_error(e, db, collector)
             return []
 
-    def _scheduler_tags(self, collector: str) -> list[str]:
+    def _job_tags(self) -> list[str]:
         tags = list(self._tags or self._check.tag_manager.get_tags())
-        tags.extend(["job:database-metrics", "collector:{}".format(collector)])
+        tags.append("job:database-metrics")
+        return tags
+
+    def _scheduler_tags(self, collector: str) -> list[str]:
+        tags = self._job_tags()
+        tags.append("collector:{}".format(collector))
         return tags
 
     def _emit_window_telemetry(self, result: ReconcileResult, now: float) -> None:
@@ -353,6 +365,19 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         if not result.rolled:
             return
 
+        self._emit_worker_telemetry(now)
+        for group in self._scheduler.groups:
+            if group.name in result.rolled:
+                self._emit_group_telemetry(group)
+
+    def _emit_worker_telemetry(self, now: float) -> None:
+        """Report the state of the single serial worker that every collector shares.
+
+        Utilization, slack, and overload describe that one worker rather than any one collector,
+        so they carry no `collector` tag: attaching one would report a busy collector's load
+        against an idle collector's name.
+        """
+        assert self._scheduler is not None
         # Before every task has run, utilization is built from cold-start placeholders and reads
         # high on any large estate, which would report an overload on every agent restart. Real
         # overload still surfaces through deadline_miss and lateness_seconds while estimates warm up.
@@ -360,55 +385,32 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         utilization = self._scheduler.utilization()
         overloaded = estimates_ready and utilization > 1
         pending = self._scheduler.pending_count()
-        slack = self._scheduler.slack(now)
-        for group in self._scheduler.groups:
-            if group.name not in result.rolled:
-                continue
-            tags = self._scheduler_tags(group.name)
-            if estimates_ready:
-                self._check.gauge(
-                    "dd.sqlserver.database_metrics.scheduler.utilization", utilization, tags=tags, raw=True
-                )
-                self._check.gauge(
-                    "dd.sqlserver.database_metrics.scheduler.overloaded", int(overloaded), tags=tags, raw=True
-                )
-            self._check.gauge("dd.sqlserver.database_metrics.scheduler.slack_seconds", slack, tags=tags, raw=True)
-            self._check.gauge(
-                "dd.sqlserver.database_metrics.scheduler.pending", len(group.pending), tags=tags, raw=True
-            )
-            self._check.gauge(
-                "dd.sqlserver.database_metrics.scheduler.task_count", len(group.tasks), tags=tags, raw=True
-            )
-            if group.missed_last_window:
-                self._check.count(
-                    "dd.sqlserver.database_metrics.scheduler.deadline_miss",
-                    group.missed_last_window,
-                    tags=tags,
-                    raw=True,
-                )
-            if group.coalesced_windows_last_rollover:
-                self._check.count(
-                    "dd.sqlserver.database_metrics.scheduler.coalesced_windows",
-                    group.coalesced_windows_last_rollover,
-                    tags=tags,
-                    raw=True,
-                )
+        tags = self._job_tags()
 
-            if overloaded and hasattr(self._check, 'health'):
-                self._check.health.submit_health_event(
-                    name=HealthEvent.MISSED_COLLECTION,
-                    status=HealthStatus.WARNING,
-                    tags=tags,
-                    cooldown_time=DEFAULT_COOLDOWN,
-                    cooldown_values=[self._check.dbms, "database-metrics", group.name],
-                    data={
-                        "dbms": self._check.dbms,
-                        "job_name": "database-metrics",
-                        "utilization": utilization,
-                        "pending": pending,
-                        "deadline_misses": group.missed_last_window,
-                    },
-                )
+        self._check.gauge(
+            "dd.sqlserver.database_metrics.scheduler.slack_seconds", self._scheduler.slack(now), tags=tags, raw=True
+        )
+        if estimates_ready:
+            self._check.gauge("dd.sqlserver.database_metrics.scheduler.utilization", utilization, tags=tags, raw=True)
+            self._check.gauge(
+                "dd.sqlserver.database_metrics.scheduler.overloaded", int(overloaded), tags=tags, raw=True
+            )
+
+        if overloaded and hasattr(self._check, 'health'):
+            self._check.health.submit_health_event(
+                name=HealthEvent.MISSED_COLLECTION,
+                status=HealthStatus.WARNING,
+                tags=tags,
+                cooldown_time=DEFAULT_COOLDOWN,
+                cooldown_values=[self._check.dbms, "database-metrics"],
+                data={
+                    "dbms": self._check.dbms,
+                    "job_name": "database-metrics",
+                    "utilization": utilization,
+                    "pending": pending,
+                    "deadline_misses": sum(group.missed_last_window for group in self._scheduler.groups),
+                },
+            )
 
         if not estimates_ready:
             # Leave the latched state alone so warming up after a newly discovered database does
@@ -424,6 +426,26 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         elif self._scheduler_overloaded and not overloaded:
             self._log.info("Database metrics scheduler is no longer overloaded")
         self._scheduler_overloaded = overloaded
+
+    def _emit_group_telemetry(self, group: CollectorGroup) -> None:
+        """Report the work one collector owns, which is what a `collector` tag can attribute."""
+        tags = self._scheduler_tags(group.name)
+        self._check.gauge("dd.sqlserver.database_metrics.scheduler.pending", len(group.pending), tags=tags, raw=True)
+        self._check.gauge("dd.sqlserver.database_metrics.scheduler.task_count", len(group.tasks), tags=tags, raw=True)
+        if group.missed_last_window:
+            self._check.count(
+                "dd.sqlserver.database_metrics.scheduler.deadline_miss",
+                group.missed_last_window,
+                tags=tags,
+                raw=True,
+            )
+        if group.coalesced_windows_last_rollover:
+            self._check.count(
+                "dd.sqlserver.database_metrics.scheduler.coalesced_windows",
+                group.coalesced_windows_last_rollover,
+                tags=tags,
+                raw=True,
+            )
 
     def _execute_query_raw(
         self,

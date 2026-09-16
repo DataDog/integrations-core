@@ -455,6 +455,46 @@ def test_scheduler_emits_rollover_and_overload_telemetry(init_config, instance_d
 
 
 @pytest.mark.unit
+def test_worker_telemetry_is_not_attributed_to_an_individual_collector(init_config, instance_docker_metrics):
+    """One busy collector must not report its load against every other collector's name."""
+    instance_docker_metrics['database_metrics'] = {
+        'run_heavy_collectors_async': True,
+        'index_usage_metrics': {'enabled': True, 'collection_interval': 10},
+        'db_fragmentation_metrics': {'enabled': True, 'collection_interval': 10},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    job = check.database_metrics_job
+    job._scheduler = HeavyCollectorScheduler(phase=0, max_wait=15, log=job._log)
+    specs = job._group_specs(('database1',))
+    job._scheduler.reconcile(specs, ('database1',), 0)
+    for group in job._scheduler.groups:
+        for task in group.tasks.values():
+            task.estimate.observe(20)
+    result = job._scheduler.reconcile(specs, ('database1',), 10)
+    assert len(result.rolled) == 2
+    check.gauge = mock.MagicMock()
+
+    job._emit_window_telemetry(result, 10)
+
+    def tags_for(metric):
+        return [call.kwargs['tags'] for call in check.gauge.call_args_list if call.args[0] == metric]
+
+    # The shared worker reports once, without a collector tag to misattribute it to.
+    for metric in (
+        'dd.sqlserver.database_metrics.scheduler.utilization',
+        'dd.sqlserver.database_metrics.scheduler.overloaded',
+        'dd.sqlserver.database_metrics.scheduler.slack_seconds',
+    ):
+        emitted = tags_for(metric)
+        assert len(emitted) == 1, metric
+        assert not [tag for tag in emitted[0] if tag.startswith('collector:')], metric
+
+    # Work a collector actually owns stays attributed to it.
+    collectors = {tag for tags in tags_for('dd.sqlserver.database_metrics.scheduler.pending') for tag in tags}
+    assert {'collector:SqlserverIndexUsageMetrics', 'collector:SqlserverDBFragmentationMetrics'} <= collectors
+
+
+@pytest.mark.unit
 def test_cold_start_estimates_do_not_report_an_overload(init_config, instance_docker_metrics):
     """A restart must not warn about overload from placeholder estimates it has not measured yet."""
     instance_docker_metrics['database_metrics'] = {
