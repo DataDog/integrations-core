@@ -139,6 +139,7 @@ def fake_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         '.builders/build.py': b'build',
         '.builders/upload.py': b'upload',
         '.builders/inputs_hash.py': b'inputs_hash',
+        '.builders/dependency_inputs.py': b'dependency_inputs',
         '.builders/targets.json': b'[{"platform":"linux","arch":"x86_64","runner_os":"ubuntu-22.04"}]',
         '.builders/deps/build_dependencies.txt': b'build-deps',
         '.builders/scripts/build_wheels.py': b'build-wheels',
@@ -207,6 +208,7 @@ def fake_repo_with_fresh_pin(fake_repo: Path) -> dict:
     pytest.param('.builders/venv/lib/x.py', id='ignored-dir-venv'),
     # IGNORED_FILES: specific-file exemptions.
     pytest.param('.builders/promote.py', id='ignored-file-promote'),
+    pytest.param('.builders/dependency_wheel_promotion_gate.py', id='ignored-file-promotion-gate'),
     pytest.param('.builders/pyproject.toml', id='ignored-file-pyproject'),
     pytest.param('.builders/test_dependencies.txt', id='ignored-file-test-deps'),
 ])

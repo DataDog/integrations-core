@@ -24,6 +24,8 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
+from dependency_inputs import IGNORED_DIRS, IGNORED_FILES, RESOLUTION_INPUTS, SHARED_INPUTS
+
 HERE = Path(__file__).parent
 REPO_ROOT = HERE.parent
 PINNED_FILE = REPO_ROOT / '.deps' / 'builder_inputs.toml'
@@ -34,36 +36,8 @@ SECTION_RESOLUTION = 'resolution'
 SECTION_IMAGES = 'images'
 HASH_KEY = 'hash'
 
-# Glob patterns relative to .builders/ for inputs shared across all builder
-# target images.
-SHARED_INPUTS = [
-    'build.py',
-    'deps/build_dependencies.txt',
-    'scripts/**/*',
-    'patches/**/*',
-    'images/helpers.ps1',
-    'images/install-from-source.sh',
-    'images/runner_dependencies.txt',
-]
-
-# Glob patterns relative to the repo root for inputs that affect resolution
-# output (uv pip compile, builder images, wheels, lockfiles, published
-# artifacts). Note: per-target image files are included wholesale, so a
-# change to any single Dockerfile invalidates resolution for all targets.
-# This is intentional — image contents determine what the resolved wheels
-# can link against, so resolution is conservatively rerun on any image change.
-RESOLUTION_INPUTS = [
-    'agent_requirements.in',
-    '.github/workflows/resolve-build-deps.yaml',
-    '.builders/build.py',
-    '.builders/upload.py',
-    '.builders/inputs_hash.py',
-    '.builders/targets.json',
-    '.builders/deps/*.txt',
-    '.builders/scripts/**/*',
-    '.builders/patches/**/*',
-    '.builders/images/**/*',
-]
+# Input patterns and ignored paths live in dependency_inputs.py so the
+# resolution workflow and promotion gate classify paths identically.
 
 # A file under .builders/ is one of:
 #   - covered: matched by a SHARED_INPUTS or RESOLUTION_INPUTS pattern and
@@ -73,29 +47,6 @@ RESOLUTION_INPUTS = [
 #     Changes don't flip the hash and don't error.
 #   - uncovered: anything else. status() raises rather than silently
 #     publishing a hash with a coverage hole.
-
-# Subtrees under .builders/ that are ignored regardless of contents. Matched
-# by relative POSIX path prefix.
-IGNORED_DIRS = (
-    'tests/',  # test infrastructure; not baked into any image or artifact
-    'venv/',   # local virtualenv if a contributor created one
-)
-
-# Specific files under .builders/ that are ignored. Matched by full relative
-# POSIX path so a future file at e.g. images/linux-x86_64/promote.py is not
-# silently exempted.
-IGNORED_FILES = frozenset({
-    # Runs in the separate dependency-wheel-promotion.yaml workflow, not here.
-    'promote.py',
-    # mypy configuration only; does not affect build or resolution output.
-    'pyproject.toml',
-    # Runs in CI to install pytest/etc; not baked into any image or artifact.
-    'test_dependencies.txt',
-    # Contributor documentation; not baked into any image or artifact.
-    'AGENTS.md',
-    'CLAUDE.md',
-})
-
 
 def _is_ignored(name: str) -> bool:
     return name.startswith('.') or name == '__pycache__'

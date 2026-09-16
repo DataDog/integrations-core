@@ -648,6 +648,7 @@ class FakeAsyncGitHubClient:
         repo: str,
         workflow_id: str,
         head_sha: str | None = None,
+        branch: str | None = None,
         per_page: int = 30,
         timeout: float | None = None,
         *,
@@ -660,6 +661,7 @@ class FakeAsyncGitHubClient:
             repo=repo,
             workflow_id=workflow_id,
             head_sha=head_sha,
+            branch=branch,
             per_page=per_page,
             timeout=timeout,
         )
@@ -670,6 +672,7 @@ class FakeAsyncGitHubClient:
                 'repo': repo,
                 'workflow_id': workflow_id,
                 'head_sha': head_sha,
+                'branch': branch,
                 'per_page': per_page,
                 'timeout': timeout,
             },

@@ -109,7 +109,7 @@ def test_promote_checks_resolution_for_the_head_commit(ddev, mocker, resolution_
     result = ddev('dep', 'promote', 'https://github.com/DataDog/integrations-core/pull/12345')
 
     assert result.exit_code == 0, result.output
-    resolution_run.assert_called_once_with('resolve-build-deps.yaml', 'deadbeef')
+    resolution_run.assert_called_once_with('resolve-build-deps.yaml', 'deadbeef', 'feature-branch')
 
 
 @pytest.mark.parametrize('status', ['queued', 'in_progress'])
@@ -223,7 +223,7 @@ def test_latest_run_picks_the_most_recent_run(runs, expected_url, mocker):
     mocker.patch.object(WorkflowRunLookup, '_fetch_runs', return_value=runs, new_callable=AsyncMock)
 
     result = WorkflowRunLookup(token='token', owner='DataDog', repo='integrations-core').latest_run(
-        'resolve-build-deps.yaml', 'deadbeef'
+        'resolve-build-deps.yaml', 'deadbeef', 'feature-branch'
     )
 
     assert (result.html_url if result else None) == expected_url
@@ -254,7 +254,7 @@ def test_workflow_run_lookup_reads_every_page_and_picks_the_latest(mocker):
     )
 
     lookup = WorkflowRunLookup(token='token', owner='DataDog', repo='integrations-core')
-    result = lookup.latest_run('resolve-build-deps.yaml', 'deadbeef')
+    result = lookup.latest_run('resolve-build-deps.yaml', 'deadbeef', 'feature-branch')
 
     assert result is not None
     assert result.html_url == 'newest'
@@ -263,6 +263,7 @@ def test_workflow_run_lookup_reads_every_page_and_picks_the_latest(mocker):
         'repo': 'integrations-core',
         'workflow_id': 'resolve-build-deps.yaml',
         'head_sha': 'deadbeef',
+        'branch': 'feature-branch',
         'per_page': 100,
     }
 

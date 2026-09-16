@@ -137,6 +137,7 @@ async def test_list_workflow_runs_single_page() -> None:
         assert request.method == "GET"
         assert request.url.path.endswith("/actions/workflows/resolve-build-deps.yaml/runs")
         assert request.url.params["head_sha"] == "deadbeef"
+        assert request.url.params["branch"] == "feature-branch"
         assert request.url.params["per_page"] == "100"
         return json_response(
             {
@@ -148,7 +149,12 @@ async def test_list_workflow_runs_single_page() -> None:
     client = make_client(httpx.MockTransport(handler))
     pages = []
     async for page in client.list_workflow_runs(
-        "owner", "repo", "resolve-build-deps.yaml", head_sha="deadbeef", per_page=100
+        "owner",
+        "repo",
+        "resolve-build-deps.yaml",
+        head_sha="deadbeef",
+        branch="feature-branch",
+        per_page=100,
     ):
         pages.append(page)
 
@@ -167,6 +173,7 @@ async def test_list_workflow_runs_single_page() -> None:
 async def test_list_workflow_runs_omits_head_sha_when_not_given() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert "head_sha" not in request.url.params
+        assert "branch" not in request.url.params
         return json_response({"total_count": 0, "workflow_runs": []})
 
     client = make_client(httpx.MockTransport(handler))

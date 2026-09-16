@@ -41,8 +41,8 @@ class WorkflowRunLookup:
         owner, repo = app.github.repo_id.split("/", 1)
         return cls(token=app.config.github.token, owner=owner, repo=repo)
 
-    def latest_run(self, workflow_id: str, head_sha: str) -> WorkflowRun | None:
-        """Return the most recent run of `workflow_id` for `head_sha`, or None if it never ran.
+    def latest_run(self, workflow_id: str, head_sha: str, branch: str) -> WorkflowRun | None:
+        """Return the most recent run of `workflow_id` for `head_sha` on `branch`, or None.
 
         The most recent run is picked by run number rather than by the API's own ordering, which
         does not promise that a re-run of an earlier run comes back last. `run_attempt` breaks ties
@@ -50,11 +50,11 @@ class WorkflowRunLookup:
         """
         import asyncio
 
-        runs = asyncio.run(self._fetch_runs(workflow_id, head_sha))
+        runs = asyncio.run(self._fetch_runs(workflow_id, head_sha, branch))
         return max(runs, key=lambda run: (run.run_number, run.run_attempt or 0), default=None)
 
-    async def _fetch_runs(self, workflow_id: str, head_sha: str) -> list[WorkflowRun]:
-        """Collect every page of runs of `workflow_id` for `head_sha`.
+    async def _fetch_runs(self, workflow_id: str, head_sha: str, branch: str) -> list[WorkflowRun]:
+        """Collect every page of runs of `workflow_id` for `head_sha` on `branch`.
 
         All pages are read because the runs of a single commit can span more than one:
         the newest run is not guaranteed to be on the first page.
@@ -68,6 +68,7 @@ class WorkflowRunLookup:
                 repo=self.repo,
                 workflow_id=workflow_id,
                 head_sha=head_sha,
+                branch=branch,
                 per_page=RUNS_PER_PAGE,
             ):
                 runs.extend(page.data.workflow_runs)
@@ -124,7 +125,7 @@ def promote(app: Application, pr_url: str):
             app.abort('Reopen the change as a branch in this repository, then promote that pull request.')
 
         with app.status('Checking dependency resolution for the head commit...'):
-            resolution_run = WorkflowRunLookup.for_repository(app).latest_run(RESOLUTION_WORKFLOW, head_sha)
+            resolution_run = WorkflowRunLookup.for_repository(app).latest_run(RESOLUTION_WORKFLOW, head_sha, head_ref)
 
         # No run at all leaves nothing to judge, so promotion goes ahead as before.
         if resolution_run is not None:

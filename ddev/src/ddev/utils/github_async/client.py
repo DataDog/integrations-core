@@ -670,6 +670,7 @@ class AsyncGitHubClient:
         repo: str,
         workflow_id: str,
         head_sha: str | None = None,
+        branch: str | None = None,
         per_page: int = 30,
         timeout: float | None = None,
         *,
@@ -686,6 +687,7 @@ class AsyncGitHubClient:
             repo: Repository name.
             workflow_id: Workflow file name (for example `resolve-build-deps.yaml`) or numeric workflow ID.
             head_sha: When given, only runs associated with that head commit SHA are returned.
+            branch: When given, only runs associated with that branch are returned.
             per_page: Number of runs per page (default 30, max 100).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
             retry: Applies per page. Defaults to the client's policy for replayable requests.
@@ -701,6 +703,8 @@ class AsyncGitHubClient:
         params: dict[str, Any] = {"per_page": per_page}
         if head_sha is not None:
             params["head_sha"] = head_sha
+        if branch is not None:
+            params["branch"] = branch
         async for response in self._paginated_request("GET", endpoint, timeout=timeout, retry=retry, params=params):
             yield self._parse_response(response, WorkflowRunsList)
 
