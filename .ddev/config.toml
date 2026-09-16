@@ -49,6 +49,7 @@ control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
+intersystems_iris = "InterSystems IRIS"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -61,6 +62,7 @@ nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
+intersystems_iris = "intersystems_iris."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]

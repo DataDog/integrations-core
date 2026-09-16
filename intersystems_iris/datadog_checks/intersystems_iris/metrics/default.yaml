@@ -1,0 +1,254 @@
+# Maps the raw `iris_*` metric names emitted by IRIS's built-in `/api/monitor/metrics`
+# OpenMetrics endpoint to their namespace-relative submission names. The check's
+# `__NAMESPACE__` ("intersystems_iris") is prepended by the base check on submission, so
+# an entry like `iris_cpu_pct: cpu.pct` is submitted as `intersystems_iris.cpu.pct`.
+#
+# Keys are exactly what the exposition emits; do not add the namespace prefix here.
+
+# CPU metrics
+iris_cpu_pct: cpu.pct
+iris_cpu_usage: cpu.usage
+
+# Web Gateway (CSP), cache and database metrics
+iris_csp_activity: csp.activity
+iris_csp_actual_connections: csp.actual_connections
+iris_csp_gateway_latency: csp.gateway_latency
+iris_csp_in_use_connections: csp.in_use_connections
+iris_csp_private_connections: csp.private_connections
+iris_csp_sessions: csp.sessions
+iris_cache_efficiency: cache_efficiency
+iris_cached_query_by_ns: cached_query_by_ns
+iris_db_expansion_size_mb: db.expansion_size_mb
+iris_db_file_limit_percent: db.file_limit_percent
+iris_db_free_space: db.free_space
+iris_db_latency: db.latency
+iris_db_max_size_mb: db.max_size_mb
+iris_db_size_mb: db.size_mb
+iris_directory_space: directory_space
+iris_disk_percent_full: disk_percent_full
+
+# Journal, license, object and physical I/O metrics
+iris_jrn_block_per_sec: jrn.block_per_sec
+iris_jrn_entry_per_sec: jrn.entry_per_sec
+iris_jrn_free_space: jrn.free_space
+iris_jrn_size: jrn.size
+iris_license_available: license.available
+iris_license_consumed: license.consumed
+iris_license_days_remaining: license.days_remaining
+iris_license_percent_used: license.percent_used
+iris_log_reads_per_sec: log_reads_per_sec
+# Mirroring metrics. `member_type` is emitted by every instance (2=Not-Member on a
+# standalone or Community node). The rest require a licensed instance configured as a
+# failover mirror member: `failover_ready`/`no_failover`/`status` are emitted on both the
+# primary and the backup (`status` reports 2=PRIMARY vs 3=BACKUP), while the two
+# `*_latency_time` families are BACKUP-ONLY — they measure the backup's replication delta
+# from the primary. `journal_latency_bytes`/`journal_latency_files` are also backup-only
+# and are emitted only transiently during an active journal-sync tick, so a point-in-time
+# fixture will usually miss them.
+iris_mirror_database_latency_bytes: mirror.database_latency_bytes
+iris_mirror_database_latency_files: mirror.database_latency_files
+iris_mirror_database_latency_time: mirror.database_latency_time
+iris_mirror_failover_ready: mirror.failover_ready
+iris_mirror_journal_latency_bytes: mirror.journal_latency_bytes
+iris_mirror_journal_latency_files: mirror.journal_latency_files
+iris_mirror_journal_latency_time: mirror.journal_latency_time
+iris_mirror_member_type: mirror.member_type
+iris_mirror_missing_databases: mirror.missing_databases
+iris_mirror_no_failover: mirror.no_failover
+iris_mirror_status: mirror.status
+iris_obj_a_seize_per_sec: obj.a_seize_per_sec
+iris_obj_del_per_sec: obj.del_per_sec
+iris_obj_hit_per_sec: obj.hit_per_sec
+iris_obj_load_per_sec: obj.load_per_sec
+iris_obj_miss_per_sec: obj.miss_per_sec
+iris_obj_new_per_sec: obj.new_per_sec
+iris_obj_seize_per_sec: obj.seize_per_sec
+iris_page_space_percent_used: page_space_percent_used
+iris_phys_mem_percent_used: phys.mem_percent_used
+iris_phys_reads_per_sec: phys.reads_per_sec
+iris_phys_writes_per_sec: phys.writes_per_sec
+
+# Shared memory, SQL, system and transaction metrics
+iris_smh_available: smh.available
+iris_smh_percent_full: smh.percent_full
+iris_smh_total: smh.total
+iris_smh_total_percent_full: smh.total_percent_full
+iris_smh_used: smh.used
+iris_sql_active_queries: sql.active_queries
+iris_sql_active_queries_95_percentile: sql.active_queries_95_percentile
+iris_sql_active_queries_99_percentile: sql.active_queries_99_percentile
+iris_sql_commands_per_second: sql.commands_per_second
+iris_sql_queries_avg_runtime: sql.queries_avg_runtime
+iris_sql_queries_avg_runtime_std_dev: sql.queries_avg_runtime_std_dev
+iris_sql_queries_per_second: sql.queries_per_second
+iris_sql_row_count_per_second: sql.row_count_per_second
+iris_system_alerts: system.alerts
+iris_system_alerts_log: system.alerts_log
+iris_system_alerts_new: system.alerts_new
+# `iris_system_info` is an info-style descriptor metric; pin the submission type so
+# the label set is preserved as a gauge rather than inferred.
+iris_system_info:
+  name: system.info
+  type: gauge
+iris_system_state: system.state
+iris_trans_open_count: trans.open_count
+iris_trans_open_secs: trans.open_secs
+iris_trans_open_secs_max: trans.open_secs.max
+
+# Process, resource, routine and SAM sensor metrics
+iris_process: process
+iris_process_block_allocs: process.block_allocs
+iris_process_block_writes: process.block_writes
+iris_process_commands: process.commands
+iris_process_count: process.count
+iris_process_glo_refs: process.glo_refs
+iris_process_jrn_entries: process.jrn_entries
+iris_process_ppg_size_mb: process.ppg_size_mb
+iris_process_phys_reads: process.phys_reads
+iris_res_a_seize: res.a_seize
+iris_res_n_seize: res.n_seize
+iris_res_seize: res.seize
+iris_rtn_a_seize_per_sec: rtn.a_seize_per_sec
+iris_rtn_call_local_per_sec: rtn.call_local_per_sec
+iris_rtn_call_miss_per_sec: rtn.call_miss_per_sec
+iris_rtn_call_remote_per_sec: rtn.call_remote_per_sec
+iris_rtn_count_by_ns: rtn.count_by_ns
+iris_rtn_load_per_sec: rtn.load_per_sec
+iris_rtn_load_rem_per_sec: rtn.load_rem_per_sec
+iris_rtn_seize_per_sec: rtn.seize_per_sec
+iris_sam_get_db_sensors_seconds: sam.get_db_sensors_seconds
+iris_sam_get_interop_sensors_seconds: sam.get_interop_sensors_seconds
+iris_sam_get_jrn_sensors_seconds: sam.get_jrn_sensors_seconds
+iris_sam_get_sql_sensors_seconds: sam.get_sql_sensors_seconds
+iris_sam_get_wqm_sensors_seconds: sam.get_wqm_sensors_seconds
+
+# Write daemon, WIJ and Work Queue Manager metrics
+iris_wd_buffer_redirty: wd.buffer_redirty
+iris_wd_buffer_write: wd.buffer_write
+iris_wd_condition: wd.condition
+iris_wd_cycle_time: wd.cycle_time
+iris_wd_pass: wd.pass
+iris_wd_phase: wd.phase
+iris_wd_proc_in_global: wd.proc_in_global
+iris_wd_size_write: wd.size_write
+iris_wd_sleep: wd.sleep
+iris_wd_suspended: wd.suspended
+iris_wd_temp_queue: wd.temp_queue
+iris_wd_temp_write: wd.temp_write
+iris_wdwij_time: wdwij_time
+iris_wd_write_time: wd.write_time
+iris_wij_writes_per_sec: wij_writes_per_sec
+iris_wqm_active_worker_jobs: wqm.active_worker_jobs
+iris_wqm_commands_per_sec: wqm.commands_per_sec
+iris_wqm_globals_per_sec: wqm.globals_per_sec
+iris_wqm_max_active_worker_jobs: wqm.max_active_worker_jobs
+iris_wqm_max_work_queue_depth: wqm.max_work_queue_depth
+iris_wqm_waiting_worker_jobs: wqm.waiting_worker_jobs
+
+# ECP, global, journal-update and interoperability metrics.
+# `*_conn`/`*_conn_max`, plus the app-server `latency`, always emit (0 on an idle instance).
+# The granular per-operation families require an active ECP connection carrying traffic, so
+# they are absent from an idle instance and from a point-in-time fixture.
+# `iris_ecp_*` = this system acting as an ECP application server (client side);
+# `iris_ecps_*` = this system acting as an ECP data server. `iris_ecp_clients`/
+# `iris_ecp_servers` (IRIS 2025.3+) emit one label-bearing series per connection, reporting
+# the peer and its connection state.
+iris_ecp_conn: ecp.conn
+iris_ecp_conn_max: ecp.conn_max
+iris_ecp_latency: ecp.latency
+iris_ecp_clients: ecp.clients
+iris_ecp_servers: ecp.servers
+iris_ecp_block_add_per_sec: ecp.block_add_per_sec
+iris_ecp_block_purge_buff_per_sec: ecp.block_purge_buff_per_sec
+iris_ecp_block_purge_svr_per_sec: ecp.block_purge_svr_per_sec
+iris_ecp_byte_rcvd_per_sec: ecp.byte_rcvd_per_sec
+iris_ecp_byte_sent_per_sec: ecp.byte_sent_per_sec
+iris_ecp_glo_ref_per_sec: ecp.glo_ref_per_sec
+iris_ecps_conn: ecps.conn
+iris_ecps_conn_max: ecps.conn_max
+iris_ecps_big_kill: ecps.big_kill
+iris_ecps_big_kill_per_sec: ecps.big_kill_per_sec
+iris_ecps_big_string: ecps.big_string
+iris_ecps_big_string_per_sec: ecps.big_string_per_sec
+iris_ecps_block_sent: ecps.block_sent
+iris_ecps_block_sent_per_sec: ecps.block_sent_per_sec
+iris_ecps_byte_rcvd: ecps.byte_rcvd
+iris_ecps_byte_rcvd_per_sec: ecps.byte_rcvd_per_sec
+iris_ecps_byte_sent: ecps.byte_sent
+iris_ecps_byte_sent_per_sec: ecps.byte_sent_per_sec
+iris_ecps_glo_ref: ecps.glo_ref
+iris_ecps_glo_ref_per_sec: ecps.glo_ref_per_sec
+iris_ecps_glo_update: ecps.glo_update
+iris_ecps_glo_update_per_sec: ecps.glo_update_per_sec
+iris_ecps_lock_fail: ecps.lock_fail
+iris_ecps_lock_fail_per_sec: ecps.lock_fail_per_sec
+iris_ecps_lock_grant: ecps.lock_grant
+iris_ecps_lock_grant_per_sec: ecps.lock_grant_per_sec
+# IRIS declares this `# TYPE ... counter`, but its own HELP text calls it a current queue
+# depth, so the framework default would submit the delta of a gauge. Pin it.
+iris_ecps_lock_que:
+  name: ecps.lock_que
+  type: gauge
+iris_ecps_lock_que_per_sec: ecps.lock_que_per_sec
+iris_ecps_lock_que_fail: ecps.lock_que_fail
+iris_ecps_lock_que_fail_per_sec: ecps.lock_que_fail_per_sec
+iris_ecps_lock_que_grant: ecps.lock_que_grant
+iris_ecps_lock_que_grant_per_sec: ecps.lock_que_grant_per_sec
+iris_ecps_req_buff: ecps.req_buff
+iris_ecps_req_buff_per_sec: ecps.req_buff_per_sec
+iris_ecps_req_rcvd: ecps.req_rcvd
+iris_ecps_req_rcvd_per_sec: ecps.req_rcvd_per_sec
+iris_ecps_routine_purge: ecps.routine_purge
+iris_ecps_routine_purge_per_sec: ecps.routine_purge_per_sec
+iris_ecps_svr_block_purge: ecps.svr_block_purge
+iris_ecps_svr_block_purge_per_sec: ecps.svr_block_purge_per_sec
+iris_glo_a_seize_per_sec: glo.a_seize_per_sec
+iris_glo_n_seize_per_sec: glo.n_seize_per_sec
+iris_glo_ref_per_sec: glo.ref_per_sec
+iris_glo_ref_rem_per_sec: glo.ref_rem_per_sec
+iris_glo_seize_per_sec: glo.seize_per_sec
+iris_glo_update_per_sec: glo.update_per_sec
+iris_glo_update_rem_per_sec: glo.update_rem_per_sec
+iris_iju_count: iju.count
+iris_iju_lock: iju.lock
+iris_interop_alert_delay: interop.alert_delay
+iris_interop_hosts: interop.hosts
+iris_interop_last_activity: interop.last_activity
+iris_interop_messages: interop.messages
+iris_interop_messages_aborted: interop.messages.aborted
+iris_interop_messages_discarded: interop.messages.discarded
+iris_interop_messages_errored: interop.messages.errored
+# Also declared `counter` upstream, but it is an average over the most recent sampling
+# interval rather than a since-start total, so the delta of it has no interpretation.
+iris_interop_messages_per_sec:
+  name: interop.messages.per_sec
+  type: gauge
+iris_interop_messages_suspended: interop.messages.suspended
+iris_interop_queued: interop.queued
+
+# Activity/daily-aggregate interoperability metrics. Emitted once activity monitoring is
+# enabled for the namespace (`Ens.Util.Statistics.EnableSAMForNamespace()`) and the
+# `Ens.SAM.GeneralMetrics.Collect()` task has run. `sample_count*`, `avg_processing_time`
+# and `avg_queueing_time` are per-host activity gauges (labels `hosttype`/`host`/
+# `messagetype`); the rest are per-production daily aggregates (label `id`/`production`,
+# plus `days` on `header_count_older_than`) that accumulate across calendar days.
+iris_interop_avg_processing_time: interop.avg_processing_time
+iris_interop_avg_queueing_time: interop.avg_queueing_time
+iris_interop_header_count_older_than: interop.header_count_older_than
+iris_interop_namespace_storage_mb: interop.namespace_storage_mb
+iris_interop_oldest_message_header_count: interop.oldest_message_header_count
+iris_interop_oldest_message_header_days: interop.oldest_message_header_days
+iris_interop_sample_count: interop.sample_count
+iris_interop_sample_count_per_sec: interop.sample_count_per_sec
+iris_interop_session_count: interop.session_count
+iris_interop_session_storage_kb: interop.session_storage_kb
+
+# HTTP/SOAP outbound transmission metrics. Emitted per business host only when an outbound
+# operation has the adapter's `ProvideMetricsForSAM` setting enabled AND has transmitted
+# traffic (they do not appear on an idle or unconfigured instance).
+iris_interop_avg_http_received_chars: interop.http.avg_received_chars
+iris_interop_avg_http_sent_chars: interop.http.avg_sent_chars
+iris_interop_avg_http_ttfc: interop.http.avg_ttfc
+iris_interop_avg_http_ttlc: interop.http.avg_ttlc
+iris_interop_http_sample_count: interop.http.sample_count
+iris_interop_http_sample_count_per_sec: interop.http.sample_count_per_sec
