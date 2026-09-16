@@ -2163,48 +2163,48 @@ tests:
  -
   sample: |-
     {
-      "level": "Information",
-      "Event": {
-        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
-        "EventData": {
-          "Data": {
-            "Contents": "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579",
-            "ProcessId": "4",
-            "CreationUtcTime": "2026-09-15 17:59:12.125",
-            "Hash": "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000",
-            "Image": "System",
-            "TargetFilename": "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier",
-            "ProcessGuid": "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}",
-            "RuleName": "-",
-            "UtcTime": "2026-09-15 17:59:16.302",
-            "User": "NT AUTHORITY\\SYSTEM"
+      "level" : "Information",
+      "Event" : {
+        "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData" : {
+          "Data" : {
+            "Contents" : "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579",
+            "User" : "NT AUTHORITY\\SYSTEM",
+            "ProcessId" : "4",
+            "CreationUtcTime" : "2026-09-15 17:59:12.125",
+            "Hash" : "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000",
+            "Image" : "System",
+            "TargetFilename" : "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier",
+            "ProcessGuid" : "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}",
+            "RuleName" : "-",
+            "UtcTime" : "2026-09-15 17:59:16.302"
           }
         },
-        "System": {
-          "Correlation": "",
-          "Task": "15",
-          "Keywords": "0x8000000000000000",
-          "Channel": "Microsoft-Windows-Sysmon/Operational",
-          "Opcode": "Info",
-          "Security": {
-            "UserID": "S-1-5-18"
+        "System" : {
+          "Correlation" : "",
+          "Task" : "15",
+          "Keywords" : "0x8000000000000000",
+          "Channel" : "Microsoft-Windows-Sysmon/Operational",
+          "Opcode" : "Info",
+          "Security" : {
+            "UserID" : "S-1-5-18"
           },
-          "Provider": {
-            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
-            "Name": "Microsoft-Windows-Sysmon"
+          "Provider" : {
+            "Guid" : "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name" : "Microsoft-Windows-Sysmon"
           },
-          "TimeCreated": {
-            "SystemTime": "2026-09-15T17:59:16.308447400Z"
+          "TimeCreated" : {
+            "SystemTime" : "2026-09-15T17:59:16.308447400Z"
           },
-          "EventRecordID": "8106597",
-          "Execution": {
-            "ThreadID": "3676",
-            "ProcessID": "2384"
+          "EventRecordID" : "8106597",
+          "Execution" : {
+            "ThreadID" : "3676",
+            "ProcessID" : "2384"
           },
-          "Version": "2",
-          "Computer": "HOST-103.example1.com",
-          "Level": "4",
-          "EventID": "15"
+          "Version" : "2",
+          "Computer" : "HOST-103.example1.com",
+          "EventID" : "15",
+          "Level" : "4"
         }
       }
     }
@@ -2248,124 +2248,126 @@ tests:
       evt:
         id: "15"
       level: "Information"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          process:
+            cpid: "8be822ed-d22f-87f9-914b-faf280dd7c15"
+            name: "System"
+            pid: 4
+            uid: "8be822ed-d22f-87f9-914b-faf280dd7c15"
+          user:
+            domain: "NT AUTHORITY"
+            name: "SYSTEM"
+            type: "System"
+            type_id: 3
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        component: "Zone.Identifier"
+        device:
+          hostname: "HOST-103.example1.com"
+          os:
+            name: "Windows"
+            type: "Windows"
+            type_id: 100
+          type: "Unknown"
+          type_id: 0
+        file:
+          created_time: 1789495152125
+          hashes:
+           -
+            algorithm: "MD5"
+            algorithm_id: 1
+            value: "B1FB6148B5BD8C2221449011AC99CA4C"
+           -
+            algorithm: "SHA-256"
+            algorithm_id: 3
+            value: "B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F"
+          name: "Balance_Sheet_-_example1_-_12_Month (63).xlsx"
+          parent_folder: "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads"
+          path: "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx"
+          type: "Regular File"
+          type_id: 1
+        message: "File stream created"
+        metadata:
+          event_code: "15"
+          log_name: "Microsoft-Windows-Sysmon/Operational"
+          log_provider: "Microsoft-Windows-Sysmon"
+          log_version: "2"
+          original_time: "2026-09-15T17:59:16.308447400Z"
+          product:
+            feature:
+              name: "Microsoft-Windows-Sysmon"
+              uid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            name: "Sysmon"
+            vendor_name: "Microsoft"
+          profiles:
+           - "host"
+           - "security_control"
+          uid: "8106597"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1789495156308
       title: "File stream created"
       usr:
         name: "NT AUTHORITY\\SYSTEM"
-      ocsf:
-        severity: Informational
-        activity_name: Create
-        metadata:
-          uid: '8106597'
-          product:
-            feature:
-              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
-              name: Microsoft-Windows-Sysmon
-            name: Sysmon
-            vendor_name: Microsoft
-          log_name: Microsoft-Windows-Sysmon/Operational
-          event_code: '15'
-          profiles:
-            - host
-            - security_control
-          original_time: '2026-09-15T17:59:16.308447400Z'
-          log_provider: Microsoft-Windows-Sysmon
-          log_version: '2'
-          version: 1.5.0
-        category_uid: 1
-        category_name: System Activity
-        message: File stream created
-        actor:
-          process:
-            uid: 8be822ed-d22f-87f9-914b-faf280dd7c15
-            cpid: 8be822ed-d22f-87f9-914b-faf280dd7c15
-            name: System
-            pid: 4
-          user:
-            type_id: 3
-            domain: NT AUTHORITY
-            name: SYSTEM
-            type: System
-        component: Zone.Identifier
-        file:
-          path: D:\Files\Corp_Share\Finance&Administration_Department\Accounting\accounting\2026\08 August\Financials\Report Downloads\Balance_Sheet_-_example1_-_12_Month (63).xlsx
-          created_time: 1789495152125
-          parent_folder: D:\Files\Corp_Share\Finance&Administration_Department\Accounting\accounting\2026\08 August\Financials\Report Downloads
-          type_id: 1
-          name: Balance_Sheet_-_example1_-_12_Month (63).xlsx
-          hashes:
-            - value: B1FB6148B5BD8C2221449011AC99CA4C
-              algorithm_id: 1
-              algorithm: MD5
-            - value: B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F
-              algorithm_id: 3
-              algorithm: SHA-256
-          type: Regular File
-        status_id: 1
-        class_uid: 1001
-        activity_id: 1
-        time: 1789495156308
-        severity_id: 1
-        device:
-          hostname: HOST-103.example1.com
-          os:
-            type_id: 100
-            name: Windows
-            type: Windows
-          type_id: 0
-          type: Unknown
-        class_name: File System Activity
-        status: Success
-    status: "info"
-    tags:
-      - "source:LOGS_SOURCE"
-    timestamp: 1789495156308
     message: |-
       {
-        "level": "Information",
-        "Event": {
-          "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
-          "EventData": {
-            "Data": {
-              "Contents": "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579",
-              "ProcessId": "4",
-              "CreationUtcTime": "2026-09-15 17:59:12.125",
-              "Hash": "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000",
-              "Image": "System",
-              "TargetFilename": "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier",
-              "ProcessGuid": "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}",
-              "RuleName": "-",
-              "UtcTime": "2026-09-15 17:59:16.302",
-              "User": "NT AUTHORITY\\SYSTEM"
+        "level" : "Information",
+        "Event" : {
+          "xmlns" : "http://schemas.microsoft.com/win/2004/08/events/event",
+          "EventData" : {
+            "Data" : {
+              "Contents" : "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579",
+              "User" : "NT AUTHORITY\\SYSTEM",
+              "ProcessId" : "4",
+              "CreationUtcTime" : "2026-09-15 17:59:12.125",
+              "Hash" : "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000",
+              "Image" : "System",
+              "TargetFilename" : "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier",
+              "ProcessGuid" : "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}",
+              "RuleName" : "-",
+              "UtcTime" : "2026-09-15 17:59:16.302"
             }
           },
-          "System": {
-            "Correlation": "",
-            "Task": "15",
-            "Keywords": "0x8000000000000000",
-            "Channel": "Microsoft-Windows-Sysmon/Operational",
-            "Opcode": "Info",
-            "Security": {
-              "UserID": "S-1-5-18"
+          "System" : {
+            "Correlation" : "",
+            "Task" : "15",
+            "Keywords" : "0x8000000000000000",
+            "Channel" : "Microsoft-Windows-Sysmon/Operational",
+            "Opcode" : "Info",
+            "Security" : {
+              "UserID" : "S-1-5-18"
             },
-            "Provider": {
-              "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
-              "Name": "Microsoft-Windows-Sysmon"
+            "Provider" : {
+              "Guid" : "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+              "Name" : "Microsoft-Windows-Sysmon"
             },
-            "TimeCreated": {
-              "SystemTime": "2026-09-15T17:59:16.308447400Z"
+            "TimeCreated" : {
+              "SystemTime" : "2026-09-15T17:59:16.308447400Z"
             },
-            "EventRecordID": "8106597",
-            "Execution": {
-              "ThreadID": "3676",
-              "ProcessID": "2384"
+            "EventRecordID" : "8106597",
+            "Execution" : {
+              "ThreadID" : "3676",
+              "ProcessID" : "2384"
             },
-            "Version": "2",
-            "Computer": "HOST-103.example1.com",
-            "Level": "4",
-            "EventID": "15"
+            "Version" : "2",
+            "Computer" : "HOST-103.example1.com",
+            "EventID" : "15",
+            "Level" : "4"
           }
         }
       }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1789495156308
  -
   sample: |-
     {
