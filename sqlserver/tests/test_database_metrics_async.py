@@ -551,3 +551,59 @@ def test_scheduler_emits_lateness_for_a_completion_after_its_deadline(init_confi
         tags=job._scheduler_tags(task.collector),
         raw=True,
     )
+
+
+@pytest.mark.unit
+def test_telemetry_failure_does_not_cost_the_collection_it_reports_on(init_config, instance_docker_metrics, caplog):
+    """A broken metrics pipeline must not escalate into losing every database's metrics.
+
+    An exception escaping the job stops DBMAsyncJob's loop for every collector and database, so an
+    unguarded gauge would trade all collection for one unreportable telemetry value.
+    """
+    instance_docker_metrics['database_metrics'] = {
+        'run_heavy_collectors_async': True,
+        'index_usage_metrics': {'enabled': True},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.databases = {Database('database1')}
+    check.gauge = mock.MagicMock(side_effect=RuntimeError('metrics pipeline is unavailable'))
+    job = check.database_metrics_job
+    job._scheduler = HeavyCollectorScheduler(phase=0, max_wait=0, log=job._log)
+    job._execute_query_raw = mock.MagicMock(return_value=[])
+    check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
+
+    job.run_job()
+
+    # The failing gauge must actually have been reached, or this asserts nothing about the guard.
+    assert check.gauge.called
+    assert job._execute_query_raw.call_count == 1
+    assert 'metrics pipeline is unavailable' in caplog.text
+
+
+@pytest.mark.unit
+def test_orphaned_job_stops_querying_once_the_check_stops_running(init_config, instance_docker_metrics, monkeypatch):
+    """A job outliving its check must stop issuing expensive per-database queries.
+
+    Without the inactivity check, a removed or reconfigured instance would keep a background
+    connection busy sweeping databases nothing is collecting from any more.
+    """
+    instance_docker_metrics['database_metrics'] = {
+        'run_heavy_collectors_async': True,
+        'index_usage_metrics': {'enabled': True},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    check.databases = {Database('database1')}
+    job = check.database_metrics_job
+    job._run_sync = True
+    job._scheduler = HeavyCollectorScheduler(phase=0, max_wait=15, log=job._log)
+    job._execute_query_raw = mock.MagicMock(return_value=[])
+    check.connection.open_managed_default_connection = mock.MagicMock(return_value=nullcontext())
+    check.connection.restore_current_database_context = mock.MagicMock(return_value=nullcontext())
+    stale_by = float(check._config.min_collection_interval) * 2 + 1
+    monkeypatch.setattr(async_job_module.time, 'time', lambda: 10_000.0)
+    job._last_check_run = 10_000.0 - stale_by
+
+    job.run_job()
+
+    assert job._execute_query_raw.call_count == 0

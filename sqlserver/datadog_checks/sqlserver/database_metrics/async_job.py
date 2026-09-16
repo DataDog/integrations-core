@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import contextlib
 import functools
 import hashlib
 import logging
 import time
+from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from datadog_checks.base.errors import ConfigurationError
@@ -177,8 +179,22 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         database_names = self._database_names()
         result = scheduler.reconcile(self._group_specs(database_names), database_names, now)
         if not self._run_sync:
-            self._emit_window_telemetry(result, now)
+            with self._telemetry_guard("window telemetry"):
+                self._emit_window_telemetry(result, now)
         return result
+
+    @contextlib.contextmanager
+    def _telemetry_guard(self, description: str) -> Iterator[None]:
+        """Keep a reporting failure from costing the collection it was reporting on.
+
+        `DBMAsyncJob` treats an exception escaping the job as a crash and stops the loop for every
+        collector and database, so an unguarded gauge, count, or health event would turn a broken
+        metrics pipeline into a total loss of database metrics.
+        """
+        try:
+            yield
+        except Exception as e:
+            self._log.warning("Failed to report database metrics scheduler %s: %s", description, e)
 
     def _scheduler_for_current_identifier(self) -> HeavyCollectorScheduler:
         identifier = self._check.database_identifier
@@ -306,14 +322,16 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
             finished = get_precise_time()
             completed_at = time.time()
             self._scheduler.record_completion(task, finished - started)
-            lateness = self._scheduler.lateness(task, completed_at)
-            if lateness > 0 and not self._run_sync:
-                self._check.gauge(
-                    "dd.sqlserver.database_metrics.scheduler.lateness_seconds",
-                    lateness,
-                    tags=self._scheduler_tags(task.collector),
-                    raw=True,
-                )
+            if not self._run_sync:
+                with self._telemetry_guard("lateness"):
+                    lateness = self._scheduler.lateness(task, completed_at)
+                    if lateness > 0:
+                        self._check.gauge(
+                            "dd.sqlserver.database_metrics.scheduler.lateness_seconds",
+                            lateness,
+                            tags=self._scheduler_tags(task.collector),
+                            raw=True,
+                        )
         raise_if_cancelled(self._cancel_event)
 
     @property
@@ -486,13 +504,16 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
             error,
             exc_info=self._log.getEffectiveLevel() == logging.DEBUG,
         )
-        tags = list(self._tags or self._check.tag_manager.get_tags())
-        tags.extend(
-            [
-                "job:database-metrics",
-                "collector:{}".format(collector),
-                "database:{}".format(database),
-                "error:database-{}".format(type(error).__name__),
-            ]
-        )
-        self._check.count("dd.sqlserver.async_job.error", 1, tags=tags, raw=True)
+        # Guarded after the log so the database failure is recorded even if reporting it fails: this
+        # is the path that contains a per-database error, and it must not become one itself.
+        with self._telemetry_guard("collection error"):
+            tags = list(self._tags or self._check.tag_manager.get_tags())
+            tags.extend(
+                [
+                    "job:database-metrics",
+                    "collector:{}".format(collector),
+                    "database:{}".format(database),
+                    "error:database-{}".format(type(error).__name__),
+                ]
+            )
+            self._check.count("dd.sqlserver.async_job.error", 1, tags=tags, raw=True)

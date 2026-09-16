@@ -25,7 +25,7 @@ from __future__ import annotations
 import collections
 import dataclasses
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
@@ -183,6 +183,7 @@ class HeavyCollectorScheduler:
         self._log = log
         self._groups: dict[str, CollectorGroup] = {}
         self._group_order: list[str] = []
+        self._warned_periods: set[str] = set()
         self._retired_estimates: collections.OrderedDict[tuple[str, str], DurationEstimate] = collections.OrderedDict()
 
     @property
@@ -218,6 +219,7 @@ class HeavyCollectorScheduler:
             if group is None:
                 group = CollectorGroup(spec.name, period, margin)
                 self._groups[spec.name] = group
+                self._group_order.append(spec.name)
             else:
                 group.period = period
                 group.margin = margin
@@ -231,15 +233,8 @@ class HeavyCollectorScheduler:
                     group.pending = collections.deque(item for item in group.pending if item != database)
                     removed += 1
 
-            new_databases = [database for database in group_databases if database not in group.tasks]
-            for database in new_databases:
-                key = (spec.name, database)
-                estimate = self._retired_estimates.pop(key, None) or DurationEstimate(spec.estimate_cap)
-                task = spec.task_factory(database, estimate)
-                if task.key != key:
-                    raise ValueError("task_factory returned a task with a mismatched key")
-                group.tasks[database] = task
-                added += 1
+            new_databases = self._add_tasks(group, spec, group_databases)
+            added += len(new_databases)
 
             window_changed, missed = self._roll_window(group, now)
             missed_total += missed
@@ -248,8 +243,34 @@ class HeavyCollectorScheduler:
             if not window_changed:
                 group.pending.extend(new_databases)
 
+        # Every group now exists, so the spec sequence can be published as the rotation order.
         self._group_order = spec_names
         return ReconcileResult(added=added, removed=removed, missed=missed_total, rolled=tuple(rolled))
+
+    def _add_tasks(self, group: CollectorGroup, spec: GroupSpec, group_databases: Sequence[str]) -> list[str]:
+        """Build a task for each newly discovered database, skipping those that cannot be built.
+
+        A collector constructor can reject a single database, for example one whose configuration
+        only fails once it is resolved. Letting that escape would abandon the rest of this
+        reconciliation, and the caller treats an exception leaving the job as a crash that stops
+        collection for every collector and database -- repeatedly, because the inputs are unchanged.
+        """
+        new_databases = []
+        for database in group_databases:
+            if database in group.tasks:
+                continue
+            key = (spec.name, database)
+            estimate = self._retired_estimates.pop(key, None) or DurationEstimate(spec.estimate_cap)
+            try:
+                task = spec.task_factory(database, estimate)
+            except Exception as e:
+                self._log.warning("%s cannot build a collector for database %s: %s", spec.name, database, e)
+                continue
+            if task.key != key:
+                raise ValueError("task_factory returned a task with a mismatched key")
+            group.tasks[database] = task
+            new_databases.append(database)
+        return new_databases
 
     def decide(self, now: float, allow_idle: bool = True) -> Decision:
         """Choose work and pacing without consuming the occurrence.
@@ -317,7 +338,10 @@ class HeavyCollectorScheduler:
         candidates = self._deadline_candidates(now)
         if not candidates:
             return 0.0
-        return min(bound - now - self._demand(bound) for bound in candidates)
+        # Group costs do not depend on the bound, and summing them per candidate dominated the
+        # decision cost once heterogeneous periods filled the candidate list.
+        costs = {group.name: (group.pending_cost(), group.full_cost()) for group in self.groups}
+        return min(bound - now - self._demand(bound, costs) for bound in candidates)
 
     def utilization(self) -> float:
         """Return total serial-worker utilization, ``sum(task cost / collector period)``."""
@@ -341,8 +365,15 @@ class HeavyCollectorScheduler:
     def _valid_period(self, spec: GroupSpec) -> float:
         period = float(spec.period)
         if period > 0:
+            self._warned_periods.discard(spec.name)
             return period
-        self._log.warning("%s has a non-positive collection interval; using %s seconds", spec.name, DEFAULT_PERIOD_S)
+        if spec.name not in self._warned_periods:
+            # `reconcile` runs after every completed task, so warning on each call would repeat
+            # this several times a minute for as long as the misconfiguration lasts.
+            self._warned_periods.add(spec.name)
+            self._log.warning(
+                "%s has a non-positive collection interval; using %s seconds", spec.name, DEFAULT_PERIOD_S
+            )
         return DEFAULT_PERIOD_S
 
     def _roll_window(self, group: CollectorGroup, now: float) -> tuple[bool, int]:
@@ -404,13 +435,19 @@ class HeavyCollectorScheduler:
         candidates = set()
         for group in self.groups:
             deadline = group.effective_deadline(self._phase)
-            while deadline <= horizon:
+            # A group contributes deadlines in increasing order, so once it has offered as many as
+            # survive the truncation below, its later ones cannot displace anything already held.
+            # Without this a one-minute collector beside a daily one walked thousands of deadlines
+            # to have all but the earliest few discarded.
+            offered = 0
+            while deadline <= horizon and offered < MAX_DEADLINE_CANDIDATES:
                 if deadline >= now or group.pending:
                     candidates.add(deadline)
+                    offered += 1
                 deadline += group.period
         return sorted(candidates)[:MAX_DEADLINE_CANDIDATES]
 
-    def _demand(self, bound: float) -> float:
+    def _demand(self, bound: float, costs: Mapping[str, tuple[float, float]]) -> float:
         """Estimate pending and future work whose effective deadline is at most ``bound``.
 
         This is a bounded-horizon adaptation of the processor-demand criterion from Baruah,
@@ -419,14 +456,15 @@ class HeavyCollectorScheduler:
         """
         total = 0.0
         for group in self.groups:
+            pending_cost, full_cost = costs[group.name]
             current_deadline = group.effective_deadline(self._phase)
             if current_deadline <= bound + TIE_EPSILON:
-                total += group.pending_cost()
+                total += pending_cost
 
             future_deadline = current_deadline + group.period
             if future_deadline <= bound + TIE_EPSILON:
                 occurrences = math.floor((bound - future_deadline + TIE_EPSILON) / group.period) + 1
-                total += occurrences * group.full_cost()
+                total += occurrences * full_cost
         return total
 
     def _retire(self, task: TaskState) -> None:

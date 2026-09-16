@@ -345,12 +345,57 @@ def test_duration_estimate_rises_immediately_and_decays_after_four_samples():
 
 
 @pytest.mark.unit
-def test_non_positive_period_uses_safe_default(caplog: pytest.LogCaptureFixture):
-    """Invalid user intervals must not cause division-by-zero or stuck scheduling."""
-    scheduler = make_scheduler()
+def test_duration_estimate_never_exceeds_its_cap():
+    """A command timeout must bound the estimate that every feasibility calculation consumes.
 
-    scheduler.reconcile([make_spec('collector', 0)], ['db'], 0)
+    Without the clamp a single slow observation would inflate pending cost past anything the
+    driver can actually allow, suppressing pacing for every task in the group.
+    """
+    estimate = DurationEstimate(cap=5.0)
+
+    estimate.observe(100.0)
+
+    assert estimate.value == 5.0
+
+
+@pytest.mark.unit
+def test_non_positive_period_uses_safe_default(caplog: pytest.LogCaptureFixture):
+    """Invalid user intervals must not cause division-by-zero, stuck scheduling, or log floods."""
+    scheduler = make_scheduler()
+    spec = make_spec('collector', 0)
+
+    for now in (0, 1, 2):
+        scheduler.reconcile([spec], ['db'], now)
 
     group: CollectorGroup = scheduler.groups[0]
     assert group.period == 300
-    assert 'non-positive collection interval' in caplog.text
+    # `reconcile` runs after every completed task, so an unlatched warning repeats all day.
+    assert caplog.text.count('non-positive collection interval') == 1
+
+
+@pytest.mark.unit
+def test_undiscoverable_database_is_skipped_without_losing_other_work(caplog: pytest.LogCaptureFixture):
+    """One database whose collector cannot be built must not cost every other database its metrics.
+
+    An exception escaping `reconcile` reaches the job loop, which stops collection for every
+    collector and database, and would do so again on each later pass because the inputs repeat.
+    """
+
+    def make_task(database: str, estimate: DurationEstimate) -> TaskState:
+        if database == 'broken':
+            raise ValueError('cannot resolve database')
+        return TaskState('fragile', database, estimate)
+
+    specs = [GroupSpec('fragile', 60, None, make_task), make_spec('healthy', 60)]
+    scheduler = make_scheduler()
+
+    result = scheduler.reconcile(specs, ['broken', 'working'], 0)
+
+    assert result.added == 3
+    assert sorted(scheduler.groups[0].tasks) == ['working']
+    assert [group.name for group in scheduler.groups] == ['fragile', 'healthy']
+    assert 'cannot resolve database' in caplog.text
+
+    # The surviving work must stay schedulable, and a later pass must not replay the failure fatally.
+    assert scheduler.reconcile(specs, ['broken', 'working'], 1).added == 0
+    assert scheduler.pending_count() == 3
