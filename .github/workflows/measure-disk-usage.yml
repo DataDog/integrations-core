@@ -40,6 +40,11 @@ jobs:
         with:
           policy: integrations-core-api-key
 
+      - name: Use ddev from master
+        run: |
+          git fetch origin master
+          git checkout origin/master -- ddev datadog_checks_dev
+
       - name: Install ddev
         uses: ./.github/actions/setup-ddev
         with:
