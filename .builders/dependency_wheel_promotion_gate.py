@@ -12,7 +12,7 @@ import urllib.request
 from dataclasses import asdict, dataclass
 from enum import StrEnum, auto
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from dependency_inputs import affects_resolution, is_resolution_output
 
@@ -54,6 +54,24 @@ class Assessment:
         data = json.loads(path.read_text(encoding='utf-8'))
         data['state'] = PromotionState(data['state'])
         return cls(**data)
+
+
+class GateGitHubClient(Protocol):
+    def pull_request_files(self, pr_number: int) -> list[dict[str, Any]]: ...
+
+    def pull_request_commits(self, pr_number: int) -> list[dict[str, Any]]: ...
+
+    def commit_files(self, sha: str) -> list[dict[str, Any]]: ...
+
+    def current_status(self, sha: str) -> dict[str, Any] | None: ...
+
+    def create_status(self, sha: str, state: str, description: str, target_url: str | None = None) -> None: ...
+
+    def issue_comments(self, pr_number: int) -> list[dict[str, Any]]: ...
+
+    def create_comment(self, pr_number: int, body: str) -> int: ...
+
+    def update_comment(self, comment_id: int, body: str) -> int: ...
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -199,7 +217,7 @@ def _indeterminate(event: dict[str, Any], run_url: str, reason: str) -> Assessme
     )
 
 
-def assess_pull_request(event: dict[str, Any], client: GitHubClient, run_url: str) -> Assessment:
+def assess_pull_request(event: dict[str, Any], client: GateGitHubClient, run_url: str) -> Assessment:
     pr = event['pull_request']
     repository = event['repository']['full_name']
     common = {
@@ -371,7 +389,7 @@ Pushing another dependency change starts resolution and promotion again. Other p
     raise ValueError(f'Unknown promotion state: {assessment.state}')
 
 
-def _find_notice(client: GitHubClient, assessment: Assessment) -> dict[str, Any] | None:
+def _find_notice(client: GateGitHubClient, assessment: Assessment) -> dict[str, Any] | None:
     marker = comment_marker(assessment.pr_number)
     return next(
         (
@@ -383,7 +401,7 @@ def _find_notice(client: GitHubClient, assessment: Assessment) -> dict[str, Any]
     )
 
 
-def publish(client: GitHubClient, assessment: Assessment) -> None:
+def publish(client: GateGitHubClient, assessment: Assessment) -> None:
     current = client.current_status(assessment.head_sha)
     if current and current.get('state') in {'success', 'error'}:
         print(f'{STATUS_CONTEXT} is already {current["state"]}; leaving the newer result unchanged.')

@@ -1,7 +1,7 @@
 import json
 from dataclasses import replace
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import patch
 
 import pytest
 
@@ -308,15 +308,14 @@ def test_not_applicable_does_not_create_a_notice():
 
 def test_pagination_follows_the_next_link_on_the_same_api_host():
     client = gate.GitHubClient('token', 'DataDog/integrations-core')
-    client.request = Mock(
-        side_effect=[
-            ([{'id': 1}], {'link': '<https://api.github.com/resource?page=2>; rel="next"'}),
-            ([{'id': 2}], {}),
-        ]
-    )
-    assert client.paginate('/resource') == [{'id': 1}, {'id': 2}]
-    assert client.request.call_args_list[1].args == ('GET', '/resource')
-    assert client.request.call_args_list[1].kwargs['params'] == {'page': '2'}
+    responses = [
+        ([{'id': 1}], {'link': '<https://api.github.com/resource?page=2>; rel="next"'}),
+        ([{'id': 2}], {}),
+    ]
+    with patch.object(client, 'request', side_effect=responses) as request:
+        assert client.paginate('/resource') == [{'id': 1}, {'id': 2}]
+    assert request.call_args_list[1].args == ('GET', '/resource')
+    assert request.call_args_list[1].kwargs['params'] == {'page': '2'}
 
 
 def test_settled_status_stands_down_without_overwriting_it(monkeypatch, tmp_path):
@@ -351,15 +350,11 @@ def test_unknown_persisted_state_is_rejected(tmp_path: Path):
 def test_assess_command_blocks_before_a_later_api_failure(monkeypatch, tmp_path):
     event = pull_request_event([pr_file('agent_requirements.in')])
     client = FakeGitHub(files=[pr_file('agent_requirements.in')])
-
-    def fail(_pr_number):
-        raise RuntimeError('API unavailable')
-
-    client.pull_request_files = fail
     state_path = tmp_path / 'state.json'
     monkeypatch.setattr(gate, '_environment', lambda: (event, client, 'https://github.com/run', state_path))
-    with pytest.raises(RuntimeError, match='API unavailable'):
-        gate.command_assess()
+    with patch.object(client, 'pull_request_files', side_effect=RuntimeError('API unavailable')):
+        with pytest.raises(RuntimeError, match='API unavailable'):
+            gate.command_assess()
     assert client.created_statuses == [
         ('head-sha', 'pending', 'Checking wheel promotion.', 'https://github.com/run')
     ]
