@@ -18,6 +18,8 @@ import pytest
 from pydantic import ValidationError
 
 from ddev.cli.ci.tests import messages
+from ddev.cli.ci.tests.dispatcher import DispatcherContext
+from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import Status, conclusion_to_status
@@ -117,20 +119,31 @@ def make_runner(
     origin_run_url: str | None = None,
     pr_number: int | None = None,
     handler: logging.Handler | None = None,
+    context: DispatcherContext | None = None,
 ) -> TaskTestRunner:
-    options = TestRunnerOptions(
+    context = context or DispatcherContext(
         owner="DataDog",
         repo="integrations-core",
-        workflow_id="test-batch.yaml",
-        ref="master",
+        workflow="test-batch.yaml",
+        workflow_ref="master",
         head_sha="head-sha-aaa",
         checkout_sha="merge-sha-bbb",
-        concurrency_key="pr-123",
-        artifacts_base_path=tmp_path,
         head_branch="a-branch",
+        base_branch="master",
+        base_sha="base-sha-ccc",
+        pr_number=123,
+        is_fork=is_fork,
+    )
+    options = TestRunnerOptions(
+        owner=context.owner,
+        repo=context.repo,
+        workflow_id=context.workflow,
+        ref=context.workflow_ref,
+        run_fields=run_fields(context),
+        concurrency_key=context.concurrency_key,
+        artifacts_base_path=tmp_path,
         poll_interval_seconds=0.0,
         pytest_args=pytest_args,
-        is_fork=is_fork,
         origin_run_url=origin_run_url,
         pr_number=pr_number,
     )
@@ -285,7 +298,10 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
     assert kwargs["inputs"]["head_branch"] == "a-branch"
     assert kwargs["inputs"]["concurrency_key"] == "pr-123"
     assert kwargs["inputs"]["integrations"] == json.dumps(["ntp", "kafka"])
-    assert decode_job_list(kwargs["inputs"]["job_list"]) == [
+    assert kwargs["inputs"]["context"] == "pr"
+    jobs = decode_job_list(kwargs["inputs"]["job_list"])
+    additional_tags = [job.pop("additional_tags") for job in jobs]
+    assert jobs == [
         {
             "name": "j1",
             "target": "ntp",
@@ -315,6 +331,93 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             "artifact_name": "ntp_py3.13_linux",
         },
     ]
+    common_tags = (
+        "dispatcher.base_branch:master,dispatcher.base_sha:base-sha-ccc,dispatcher.batch.id:batch-1,"
+        "dispatcher.batch.job.e2e_tests:false,dispatcher.batch.job.environment:py3.13,"
+        "dispatcher.batch.job.integration:ntp,dispatcher.batch.job.minimum_base_package:false,"
+        "dispatcher.batch.job.name:{name},dispatcher.batch.job.platform:linux,"
+        "dispatcher.batch.job.python_version:3.13,dispatcher.batch.job.unit_tests:true,"
+        "dispatcher.checkout_sha:merge-sha-bbb,dispatcher.context:pr,dispatcher.pr.number:123,"
+        "dispatcher.run.is_fork:false,team:agent-integrations"
+    )
+    assert additional_tags == [common_tags.format(name="j1"), common_tags.format(name="j2")]
+
+
+@pytest.mark.parametrize(
+    ("context", "expected_context", "has_pr_tags"),
+    [
+        pytest.param(None, "pr", True, id="pull-request"),
+        pytest.param(
+            DispatcherContext(
+                owner="DataDog",
+                repo="integrations-core",
+                workflow="test-batch.yaml",
+                workflow_ref="master",
+                head_sha="master-sha",
+                checkout_sha="master-sha",
+                head_branch="master",
+            ),
+            "master",
+            False,
+            id="master",
+        ),
+        pytest.param(
+            DispatcherContext(
+                owner="DataDog",
+                repo="integrations-core",
+                workflow="test-batch.yaml",
+                workflow_ref="master",
+                head_sha="agent-sha",
+                checkout_sha="agent-sha",
+                head_branch="test-agent",
+                tags=("context:test-agent",),
+            ),
+            "test-agent",
+            False,
+            id="custom-context",
+        ),
+    ],
+)
+def test_run_identity_and_context_reach_workflow_and_job_tags(
+    tmp_path: Path,
+    context: DispatcherContext | None,
+    expected_context: str,
+    has_pr_tags: bool,
+):
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, context=context)
+
+    inputs = runner._build_inputs(make_batch("batch-context"))
+    [job] = decode_job_list(inputs["job_list"])
+    tags = job["additional_tags"].split(",")
+
+    assert inputs["context"] == expected_context
+    assert inputs["checkout_sha"] == (context.checkout_sha if context else "merge-sha-bbb")
+    assert inputs["head_sha"] == (context.head_sha if context else "head-sha-aaa")
+    assert inputs["head_branch"] == (context.head_branch if context else "a-branch")
+    assert f"dispatcher.context:{expected_context}" in tags
+    assert ("dispatcher.pr.number:123" in tags) is has_pr_tags
+    assert ("dispatcher.base_branch:master" in tags) is has_pr_tags
+    assert not any(tag.startswith(("git.", "dispatcher.head_sha", "dispatcher.head_branch")) for tag in tags)
+
+
+def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
+    context = DispatcherContext(
+        owner="DataDog",
+        repo="integrations-core",
+        workflow="test-batch.yaml",
+        workflow_ref="master",
+        head_sha="agent-sha",
+        checkout_sha="agent-sha",
+        head_branch="test-agent",
+        tags=("context:release,candidate\nunsafe\rvalue",),
+    )
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, context=context)
+
+    inputs = runner._build_inputs(make_batch("batch-context"))
+    [job] = decode_job_list(inputs["job_list"])
+
+    assert inputs["context"] == "release,candidate\nunsafe\rvalue"
+    assert "dispatcher.context:release_candidate_unsafe_value" in job["additional_tags"].split(",")
 
 
 @pytest.mark.asyncio

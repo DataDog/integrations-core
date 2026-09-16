@@ -10,7 +10,7 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, message_fields
+from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, message_fields, run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
@@ -234,6 +234,7 @@ def build_dispatcher(
     rate_limiters = RateLimiterFactory(config.github_rate_limits, client_logger)
     client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations), logger=client_logger)
 
+    canonical_run_fields = run_fields(context)
     runner = TaskTestRunner(
         "test-runner",
         client,
@@ -242,12 +243,9 @@ def build_dispatcher(
             repo=context.repo,
             workflow_id=context.workflow,
             ref=context.workflow_ref,
-            head_sha=context.head_sha,
-            checkout_sha=context.checkout_sha,
+            run_fields=canonical_run_fields,
             concurrency_key=context.concurrency_key,
             artifacts_base_path=artifacts_path,
-            head_branch=context.head_branch,
-            is_fork=context.is_fork,
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
             origin_run_url=get_workflow_run_url(),
