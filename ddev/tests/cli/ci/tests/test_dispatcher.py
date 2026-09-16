@@ -22,15 +22,8 @@ import pytest
 
 from ddev.cli.ci.tests import dispatcher as dispatcher_module
 from ddev.cli.ci.tests import rate_limiting
-from ddev.cli.ci.tests.dispatcher import (
-    CANCELLED_RATE_LIMITS,
-    PROTECTED_RUN_FIELDS,
-    Dispatcher,
-    DispatcherContext,
-    build_dispatcher,
-    message_fields,
-    run_fields,
-)
+from ddev.cli.ci.tests.dispatcher import CANCELLED_RATE_LIMITS, Dispatcher, DispatcherContext, build_dispatcher
+from ddev.cli.ci.tests.dispatcher_attributes import PROTECTED_RUN_FIELDS, log_tag_mapping, message_fields, run_fields
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
@@ -71,7 +64,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
 )
 from tests.helpers.github_async import FakeAsyncGitHubClient
-from tests.helpers.monitoring import RecordingSink
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
 
 # Every test here runs a Dispatcher to completion, and `on_finalize` writes the run summary. Without
 # this the reports land in the real job summary whenever the suite runs inside a workflow.
@@ -585,13 +578,18 @@ class ObservingGatherer(TaskTestGatherer):
         (
             CONTEXT,
             {
+                'team': 'agent-integrations',
+                'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'head-sha',
                 'head_branch': 'a-branch',
-                'context': 'pr',
+                'is_default_branch': False,
+                'checkout_sha': 'merge-sha-mmm',
+                'is_fork': False,
                 'pr_number': 42,
+                'context': 'pr',
                 'base_branch': 'master',
                 'base_sha': 'base-sha',
-                'repo': 'DataDog/integrations-core',
             },
         ),
         (
@@ -600,42 +598,71 @@ class ObservingGatherer(TaskTestGatherer):
                 pr_number=None,
                 checkout_sha='a-master-sha',
                 head_sha='a-master-sha',
+                head_branch='master',
                 base_branch=None,
                 base_sha=None,
             ),
             {
+                'team': 'agent-integrations',
+                'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'a-master-sha',
-                'head_branch': 'a-branch',
-                'context': 'master',
+                'head_branch': 'master',
+                'is_default_branch': True,
+                'checkout_sha': 'a-master-sha',
                 'pr_number': None,
                 'base_branch': None,
                 'base_sha': None,
-                'repo': 'DataDog/integrations-core',
+                'is_fork': False,
+                'context': 'master',
             },
         ),
         (
-            dataclasses.replace(CONTEXT, tags=('head_sha:sneaky', 'team:platform')),
+            dataclasses.replace(
+                CONTEXT,
+                tags=(
+                    'repo:sneaky/repo',
+                    'head_sha:sneaky',
+                    'head_branch:sneaky',
+                    'is_default_branch:true',
+                    'checkout_sha:sneaky',
+                    'base_sha:sneaky',
+                    'base_branch:sneaky',
+                    'pr_number:999',
+                    'context:sneaky',
+                    'team:platform',
+                ),
+            ),
             {
+                'team': 'platform',
+                'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'head-sha',
                 'head_branch': 'a-branch',
-                'context': 'pr',
+                'is_default_branch': False,
+                'checkout_sha': 'merge-sha-mmm',
+                'is_fork': False,
                 'pr_number': 42,
+                'context': 'pr',
                 'base_branch': 'master',
                 'base_sha': 'base-sha',
-                'repo': 'DataDog/integrations-core',
-                'team': 'platform',
             },
         ),
         (
             dataclasses.replace(CONTEXT, pr_number=None, tags=('context:release',)),
             {
+                'team': 'agent-integrations',
+                'context': 'release',
+                'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'head-sha',
                 'head_branch': 'a-branch',
-                'context': 'release',
+                'is_default_branch': False,
+                'checkout_sha': 'merge-sha-mmm',
                 'pr_number': None,
+                'is_fork': False,
                 'base_branch': 'master',
                 'base_sha': 'base-sha',
-                'repo': 'DataDog/integrations-core',
             },
         ),
     ],
@@ -643,6 +670,34 @@ class ObservingGatherer(TaskTestGatherer):
 )
 def test_run_fields(context, fields):
     assert run_fields(context) == fields
+
+
+def test_non_pr_runtime_events_carry_the_resolved_custom_context():
+    handler = RecordingJsonHandler()
+    monitoring = MonitoringRuntime(protected_fields=PROTECTED_RUN_FIELDS)
+    monitoring.add_log_handler(handler)
+    monitoring.set_run_fields(pr_number='999', base_branch='caller-base', base_sha='caller-sha')
+    context = dataclasses.replace(
+        CONTEXT,
+        pr_number=None,
+        base_branch=None,
+        base_sha=None,
+        tags=('context:test-agent',),
+    )
+
+    monitoring.set_run_fields(**run_fields(context))
+    monitoring.component('dispatcher').logger.info('Resolved run')
+
+    [event] = handler.events
+    assert event['context'] == 'test-agent'
+    assert event['pr_number'] is None
+    assert event['base_branch'] is None
+    assert event['base_sha'] is None
+    rendered = log_tag_mapping(event)
+    assert rendered['dispatcher.context'] == 'test-agent'
+    assert 'dispatcher.pr.number' not in rendered
+    assert 'dispatcher.base_branch' not in rendered
+    assert 'dispatcher.base_sha' not in rendered
 
 
 def test_message_fields_carry_batch_identity_only_where_a_message_has_one():

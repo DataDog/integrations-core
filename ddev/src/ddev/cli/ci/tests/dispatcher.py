@@ -9,8 +9,9 @@ import asyncio
 import logging
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.dispatcher_attributes import message_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
@@ -89,49 +90,6 @@ class DispatcherOutcome:
             and self.progress.done
             and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
         )
-
-
-def tag_fields(tags: tuple[str, ...]) -> dict[str, Any]:
-    fields: dict[str, Any] = {}
-    for tag in tags:
-        key, _, value = tag.partition(':')
-        if key:
-            fields[key] = value
-    return fields
-
-
-PROTECTED_RUN_FIELDS = frozenset({'repo', 'head_branch', 'head_sha', 'context', 'pr_number', 'base_branch', 'base_sha'})
-
-
-def run_fields(context: DispatcherContext) -> dict[str, Any]:
-    """Resolved identity wins; non-PR context uses the caller's tag or defaults to master."""
-    fields = tag_fields(context.tags)
-    fields.update(
-        {
-            'head_sha': context.head_sha,
-            'head_branch': context.head_branch,
-            'pr_number': context.pr_number,
-            'base_branch': context.base_branch,
-            'base_sha': context.base_sha,
-            'repo': f'{context.owner}/{context.repo}',
-        }
-    )
-    if context.pr_number is not None:
-        fields['context'] = 'pr'
-    elif 'context' not in fields:
-        fields['context'] = 'master'
-    return fields
-
-
-def message_fields(message: BaseMessage) -> dict[str, Any]:
-    """Run-wide reports must not inherit the identity of the batch that triggered them."""
-    match message:
-        case TestBatch(batch_id=batch_id):
-            return {'batch_id': batch_id}
-        case BatchProgressUpdate(batch_id=batch_id, run_id=run_id) | BatchFinished(batch_id=batch_id, run_id=run_id):
-            return {'batch_id': batch_id, 'run_id': run_id}
-        case _:
-            return {}
 
 
 def message_scope(context: MonitorContext) -> MessageScope:
