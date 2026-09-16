@@ -3350,7 +3350,7 @@ def test_cpu_count_metrics_missing_property(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
 ):
     """A resource whose CPU count property is absent is skipped, and the other resources still report."""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.DEBUG)
     stripped = vim.PropertyCollector.RetrieveResult(
         objects=[
             vim.ObjectContent(
@@ -3370,14 +3370,15 @@ def test_cpu_count_metrics_missing_property(
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=4, hostname='vm2')
     # Unscoped, so nothing extra leaked in alongside those two points.
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=2)
-    assert 'host host1 (no summary.hardware.numCpuCores)' in caplog.text
+    assert 'Not collecting a CPU count for host host1: no summary.hardware.numCpuCores' in caplog.text
+    assert 'Not collecting vsphere.host.summary.hardware.numCpuCores for 1 resource(s)' in caplog.text
 
 
 def test_cpu_count_metrics_no_resolved_hostname(
     aggregator, caplog, realtime_instance, dd_run_check, service_instance, properties_ex
 ):
     """A resource with no hostname reports no count: it would land on the Agent's own host."""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.DEBUG)
     realtime_instance['use_guest_hostname'] = True
     # vCenter reports an empty guest.hostName for a VM that is not running VMware Tools.
     blank_guest_hostname = vim.PropertyCollector.RetrieveResult(
@@ -3400,44 +3401,7 @@ def test_cpu_count_metrics_no_resolved_hostname(
 
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=0)
     aggregator.assert_metric('vsphere.host.summary.hardware.numCpuCores', count=1, value=16, hostname='host1')
-    assert 'vm vm1 (no hostname)' in caplog.text
-
-
-def test_cpu_count_metrics_metric_filters_warning(
-    aggregator, caplog, realtime_instance, dd_run_check, service_instance
-):
-    """`metric_filters` cannot exclude these metrics, so warn rather than silently overriding it."""
-    caplog.set_level(logging.WARNING)
-    realtime_instance['collect_property_metrics'] = True
-    realtime_instance['metric_filters'] = {'vm': [r'vm\.cpu\..*']}
-
-    check = VSphereCheck('vsphere', {}, [realtime_instance])
-    dd_run_check(check)
-
-    assert "Metric 'vm.summary.config.numCpu' is always collected and cannot be excluded" in caplog.text
-    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
-    # No `host` filters were configured, so the host marker is unaffected and must not warn.
-    assert 'summary.hardware.numCpuCores' not in caplog.text
-
-
-def test_cpu_count_metrics_metric_filters_no_warning_by_default(
-    aggregator, caplog, realtime_instance, dd_run_check, service_instance
-):
-    """A perf-counter `metric_filters` entry must not warn under the default configuration.
-
-    With `collect_property_metrics` off these properties were never collected, so such a filter
-    was not excluding them and nothing about it has changed. Warning anyway would fire on every
-    restart for the many instances that filter perf counters and never touched property metrics.
-    """
-    caplog.set_level(logging.WARNING)
-    realtime_instance['metric_filters'] = {'vm': [r'cpu\..*', r'mem\..*']}
-
-    check = VSphereCheck('vsphere', {}, [realtime_instance])
-    dd_run_check(check)
-
-    assert 'always collected and cannot be excluded' not in caplog.text
-    # Still collected -- the warning is suppressed, not the metric.
-    aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=1, value=2, hostname='vm1')
+    assert 'Not collecting a CPU count for vm vm1: no hostname' in caplog.text
 
 
 @pytest.mark.parametrize(

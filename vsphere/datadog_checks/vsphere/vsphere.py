@@ -30,7 +30,6 @@ from datadog_checks.vsphere.constants import (
     PROPERTY_COUNT_METRICS,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
-    UNCOLLECTED_LOG_SAMPLE_SIZE,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
 from datadog_checks.vsphere.event import VSphereEvent
@@ -244,8 +243,6 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
-        # A bounded sample for the warning, plus the totals and resource types it summarizes.
-        uncollected = []  # type: List[str]
         uncollected_types = set()  # type: Set[str]
         uncollected_total = 0
         for mor, properties in infrastructure_data.items():
@@ -361,8 +358,6 @@ class VSphereCheck(AgentCheck):
                     hostname = hostname.lower()
                 mor_payload['hostname'] = hostname
 
-            # Top-level, not under `properties`: `clear_properties()` empties only that sub-dict,
-            # so this survives refreshes for `check()` to re-submit on every run.
             cpu_count_property = CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
             if cpu_count_property is not None:
                 cpu_count_value = properties.get(cpu_count_property)
@@ -372,34 +367,28 @@ class VSphereCheck(AgentCheck):
                     # Without a hostname the count lands on the Agent's own host. Better missing.
                     reason = 'no hostname'
                 else:
+                    # Top-level, not under `properties`: `clear_properties()` empties only that
+                    # sub-dict, so this survives refreshes for `check()` to re-submit every run.
                     mor_payload["cpu_count"] = cpu_count_value
                     reason = None
 
                 if reason is not None:
                     uncollected_total += 1
                     uncollected_types.add(mor_type_str)
-                    if len(uncollected) < UNCOLLECTED_LOG_SAMPLE_SIZE:
-                        uncollected.append('{} {} ({})'.format(mor_type_str, mor_name, reason))
-                    # One line per resource: greppable, and unlike a single list of thousands it
-                    # survives log-pipeline truncation. The warning's sample stays bounded.
                     self.log.debug("Not collecting a CPU count for %s %s: %s", mor_type_str, mor_name, reason)
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
         if uncollected_total:
-            # Summarized: the causes are systemic (restricted vCenter role, VMware Tools missing
-            # fleet-wide), so per-resource warnings would run to thousands on every refresh.
-            truncated = uncollected_total > UNCOLLECTED_LOG_SAMPLE_SIZE
             self.log.warning(
-                "Not collecting %s for %d resource(s)%s: %s. A missing property usually means the vCenter "
-                "user cannot read it; a missing hostname means none could be resolved for the resource.",
+                "Not collecting %s for %d resource(s); enable debug logs to see which and why. A missing "
+                "property usually means the vCenter user cannot read it; a missing hostname means none "
+                "could be resolved for the resource.",
                 " or ".join(
                     'vsphere.{}'.format(cpu_count_metric_name(resource_type))
                     for resource_type in sorted(uncollected_types)
                 ),
                 uncollected_total,
-                " (showing {})".format(UNCOLLECTED_LOG_SAMPLE_SIZE) if truncated else "",
-                ", ".join(uncollected),
             )
 
     def submit_metrics_callback(self, query_results):

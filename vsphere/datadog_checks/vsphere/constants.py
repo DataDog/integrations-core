@@ -151,9 +151,6 @@ CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE = {
     'host': HOST_CPU_COUNT_PROPERTY,
 }
 
-# Cap on resources named in the summarized warning; each is also logged individually at debug.
-UNCOLLECTED_LOG_SAMPLE_SIZE = 10
-
 
 OBJECT_PROPERTIES_TO_METRIC_NAME = {
     "guest.net": ["guest.net.ipConfig.address", "guest.net"],
