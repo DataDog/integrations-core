@@ -87,6 +87,38 @@ instances:
       - .*
 ```
 
+Beginning with Agent v7.83.0, the integration supports `filters.include` and `filters.exclude` to scope certificate collection using [Go `regexp`][13] patterns matched against tag values. Each rule maps a tag key (for example `certificate_thumbprint`, `subject_CN`, or `subject_alt_name_dns`) to a pattern:
+
+- `include`: a certificate must satisfy **all** include rules to be reported. A certificate that has no tag for a given include key is excluded.
+- `exclude`: a certificate is dropped if **any** exclude rule matches one of its tag values.
+- When both are specified, `exclude` takes precedence over `include`.
+- An invalid regex pattern causes the check to fail at configuration time.
+
+A filter rule only matches a tag that is actually collected. Tags emitted by the opt-in flags described in [Tags](#tags) (`subject_alt_name_dns`, `certificate_template_name`, `signature_algorithm`, and similar) can only be used as filter keys when the corresponding `*_tag` flag is enabled; otherwise the rule is dropped with a warning instead of excluding every certificate. `certificate_store` and `server` are not supported as filter keys.
+
+This example configuration reports only certificates with a specific thumbprint:
+
+```yaml
+instances:
+  - certificate_store: ROOT
+    filters:
+      include:
+        certificate_thumbprint: "^3a7b9c"
+```
+
+This example configuration scopes collection to certificates using the `WebServer` template while excluding any with `staging` in the subject CN (`certificate_template_tag` must be enabled to filter on `certificate_template_name`):
+
+```yaml
+instances:
+  - certificate_store: ROOT
+    certificate_template_tag: true
+    filters:
+      include:
+        certificate_template_name: "WebServer"
+      exclude:
+        subject_CN: "staging"
+```
+
 ### Tags
 
 The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the CRL's issuer and thumbprint.
@@ -95,7 +127,7 @@ Beginning with Agent v7.80, six opt-in flags expose additional certificate metad
 
 | Flag | Tags emitted |
 | --- | --- |
-| `certificate_template_tag` | `certificate_template`, `certificate_template_oid`, `certificate_template_major_version`, `certificate_template_minor_version` |
+| `certificate_template_tag` | `certificate_template_name`, `certificate_template_oid`, `certificate_template_major_version`, `certificate_template_minor_version` |
 | `enhanced_key_usage_tag` | `enhanced_key_usage` (one tag per EKU OID; well-known OIDs use short names) |
 | `friendly_name_tag` | `friendly_name` |
 | `subject_alternative_names_tag` | `subject_alt_name_dns`, `subject_alt_name_ip`, `subject_alt_name_email`, `subject_alt_name_uri` |
@@ -135,7 +167,9 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 When multiple certificates share the same subject but have different serial numbers or thumbprints (for example, an expired certificate and its renewed replacement), the integration may only detect one of them, often the expired certificate.
 
-**Agent v7.70.0 and later**: The `certificate_thumbprint` and `certificate_serial_number` tags are available on metrics and service checks, allowing you to distinguish between certificates with identical subjects in Datadog monitors and dashboards. While these tags cannot be used for filtering in the integration configuration (only `certificate_subjects` is supported), you can create custom monitors that group by `certificate_thumbprint` or `certificate_serial_number` instead of the default `subject_cn` grouping to monitor each certificate separately.
+**Agent v7.70.0 to v7.82.x**: The `certificate_thumbprint` and `certificate_serial_number` tags are available on metrics and service checks, allowing you to distinguish between certificates with identical subjects in Datadog monitors and dashboards. While these tags cannot be used for filtering in the integration configuration (only `certificate_subjects` is supported), you can create custom monitors that group by `certificate_thumbprint` or `certificate_serial_number` instead of the default `subject_cn` grouping to monitor each certificate separately.
+
+**Agent v7.83.0 and later**: In addition to the monitor-grouping approach above, you can use `filters.include` or `filters.exclude` with a `certificate_thumbprint` or `certificate_serial_number` rule to scope collection to a specific certificate. See [Configuration](#configuration) for details.
 
 **Agent versions prior to v7.70.0**: If you are running an Agent version older than v7.70.0, delete the expired certificate from the Windows Certificate Store so only the valid, renewed certificate is monitored.
 
