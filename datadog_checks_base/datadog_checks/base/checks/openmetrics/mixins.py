@@ -838,10 +838,12 @@ class OpenMetricsScraperMixin(object):
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
-        except IOError:
+        except IOError as e:
+            self.endpoint_unreachable_issue_reporter.report(self, endpoint, e, scraper_config.get('namespace', ''))
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
+        self.endpoint_unreachable_issue_reporter.resolve(self, endpoint, scraper_config.get('namespace', ''))
         try:
             response.raise_for_status()
             if health_service_check:

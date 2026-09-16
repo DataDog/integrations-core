@@ -13,6 +13,7 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics.endpoint_unreachable_issue import EndpointUnreachableIssueReporter
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
@@ -66,6 +67,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
             filter_option_text='metrics / exclude_metrics'
         )
+        self.endpoint_unreachable_issue_reporter: EndpointUnreachableIssueReporter = EndpointUnreachableIssueReporter()
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]

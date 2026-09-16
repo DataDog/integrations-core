@@ -9,6 +9,7 @@ from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tracing import traced_class
 
+from .endpoint_unreachable_issue import EndpointUnreachableIssueReporter
 from .metric_limit_issue import MetricLimitIssueReporter
 from .mixins import OpenMetricsScraperMixin
 
@@ -92,6 +93,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
             filter_option_text='metrics / ignore_metrics'
         )
+        self.endpoint_unreachable_issue_reporter: EndpointUnreachableIssueReporter = EndpointUnreachableIssueReporter()
         self.config_map = {}
         self._http_handlers = {}
         self.default_instances = default_instances
