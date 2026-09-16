@@ -10,16 +10,17 @@ import re
 import shutil
 import subprocess
 import tempfile
-import time
 import zipfile
 import zlib
 from datetime import date
 from types import TracebackType
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Type, TypedDict, get_args
+from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
 
 import requests
 import squarify
 from datadog import api, initialize
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from ddev.cli.application import Application
 from ddev.cli.size.utils.common_params import WheelsStorageTier
@@ -324,29 +325,19 @@ def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[st
     return [resolve_wheel_url(url, tier) for tier in tiers]
 
 
-WHEEL_REQUEST_MAX_ATTEMPTS = 3
+WHEEL_REQUEST_MAX_RETRIES = 3
 WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
 WHEEL_REQUEST_TIMEOUT_SECONDS = 30
 
-
-def _request_with_retries(method: Callable[..., requests.Response], url: str, **kwargs: object) -> requests.Response:
-    """
-    Retries a request a few times with backoff when the connection drops mid-request.
-
-    The wheels storage host resets the connection under load often enough to fail a disk-usage
-    measurement run several times a week. HTTP error statuses are not retried here: they're
-    handled by request_wheel's tier fallback and immediate-abort logic.
-    """
-    last_error: requests.exceptions.ConnectionError | None = None
-    for attempt in range(WHEEL_REQUEST_MAX_ATTEMPTS):
-        try:
-            return method(url, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS, **kwargs)
-        except requests.exceptions.ConnectionError as e:
-            last_error = e
-            if attempt < WHEEL_REQUEST_MAX_ATTEMPTS - 1:
-                time.sleep(WHEEL_REQUEST_RETRY_BACKOFF_SECONDS * (attempt + 1))
-    assert last_error is not None
-    raise last_error
+# The wheels storage host resets the connection under load often enough to fail a disk-usage
+# measurement run several times a week, so connection failures get a few retries with backoff.
+# HTTP error statuses are not retried here: they're handled by request_wheel's tier fallback and
+# immediate-abort logic.
+WHEEL_REQUEST_SESSION = requests.Session()
+WHEEL_REQUEST_SESSION.mount(
+    "https://",
+    HTTPAdapter(max_retries=Retry(total=WHEEL_REQUEST_MAX_RETRIES, backoff_factor=WHEEL_REQUEST_RETRY_BACKOFF_SECONDS)),
+)
 
 
 def request_wheel(
@@ -365,9 +356,9 @@ def request_wheel(
     tried: list[str] = []
     for index, candidate in enumerate(candidates):
         response = (
-            _request_with_retries(requests.head, candidate)
+            WHEEL_REQUEST_SESSION.head(candidate, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS)
             if head
-            else _request_with_retries(requests.get, candidate, stream=True)
+            else WHEEL_REQUEST_SESSION.get(candidate, stream=True, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS)
         )
         try:
             response.raise_for_status()
