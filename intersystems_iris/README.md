@@ -47,48 +47,24 @@ No additional installation is needed on your server.
 
 _Available for Agent versions 6.0 and later._
 
-InterSystems IRIS can channel all of its log information into a single machine-readable file called the [structured log][7]. This is the recommended log source: in JSON format each entry is a self-contained object on one line, so the Agent parses it into structured attributes without any custom processing rules. The structured log is a superset of `messages.log` and also carries audit events.
+InterSystems IRIS can emit log data in two formats, and this integration's log pipeline parses both:
 
-#### Option 1: Structured log (recommended)
+- The `messages.log` file, which IRIS writes by default and which needs no additional IRIS configuration.
+- The [structured log][7], a single machine-readable file that is a superset of `messages.log` and additionally carries audit events.
 
-1. Enable structured logging in IRIS. In the Management Portal, go to **System > Configuration > System Configuration > Log Daemon Configuration** and set:
+Both formats are normalized to the same `iris.*` log attributes, so the **IRIS Facility**, **IRIS Severity**, and **IRIS Level** facets, along with any dashboards and saved views built on them, work the same way whichever format you collect.
 
-   | Setting                      | Value                                                                  |
-   | ---------------------------- | ---------------------------------------------------------------------- |
-   | Enabled                      | `YES`                                                                  |
-   | Child Process Launch Command | `irislogd -f /var/log/iris/structured.log -h <HOSTNAME> -i <INSTANCE>` |
-   | Format                       | `JSON`                                                                 |
-   | Level                        | `WARN` (default) or lower                                              |
-
-   Replace the path with the destination file of your choice. The optional `-h` and `-i` arguments stamp each entry with the host and instance name. You can apply the same configuration with the `^LOGDMN` routine or the `SYS.LogDmn` class API in the `%SYS` namespace.
-
-   **Note**: At log level `INFO` or lower, the structured log includes audit events, which can contain PII or PHI, particularly `%DirectMode` and `%SQL` event types. Keep the level at `WARN` or higher, or use the Event Filter (for example, `-Audit.*`) to exclude them.
-
-   **Note**: If you already forward IRIS telemetry to an OpenTelemetry-compatible destination using OTLP/HTTP, that carries the same information and enabling structured logging is not necessary.
-
-2. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
    ```
 
-3. Add this configuration block to your `intersystems_iris.d/conf.yaml` file, pointing `path` at the file you configured in step 1:
+2. Add one of the two stanzas below to your `intersystems_iris.d/conf.yaml` file, then [restart the Agent][6].
 
-   ```yaml
-   logs:
-     - type: file
-       path: /var/log/iris/structured.log
-       source: intersystems_iris
-       service: <SERVICE_NAME>
-   ```
+#### Option 1: messages.log
 
-   Each entry carries `when`, `pid`, `level`, `event`, and `text`, plus `host`, `instance`, `namespace`, `source`, `type`, and `group` where applicable.
-
-4. [Restart the Agent][6].
-
-#### Option 2: messages.log
-
-If you cannot enable structured logging, collect `messages.log` directly. Entries span multiple lines, so a `multi_line` rule is required:
+Entries span multiple lines, so a `multi_line` rule is required:
 
 ```yaml
 logs:
@@ -102,6 +78,43 @@ logs:
         # pattern to match: 08/17/26-13:18:52:293
         pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
 ```
+
+Change `path` to match your instance's installation directory. IRIS for Health, for example, typically uses `/opt/irishealth/mgr/messages.log`.
+
+#### Option 2: Structured log
+
+1. Enable structured logging in IRIS. In the Management Portal, go to **System > Configuration > System Configuration > Log Daemon Configuration** and set:
+
+   | Setting                      | Value                                                                  |
+   | ---------------------------- | ---------------------------------------------------------------------- |
+   | Enabled                      | `YES`                                                                  |
+   | Child Process Launch Command | `irislogd -f /var/log/iris/structured.log -h <HOSTNAME> -i <INSTANCE>` |
+   | Format                       | `JSON`                                                                 |
+   | Level                        | `WARN` (default) or lower                                              |
+
+   Replace the path with the destination file of your choice. The optional `-h` and `-i` arguments stamp each entry with the host and instance name. You can apply the same configuration with the `^LOGDMN` routine or the `SYS.LogDmn` class API in the `%SYS` namespace.
+
+   The `Format` setting must be `JSON`. The pipeline does not parse the alternative `NVP` (name/value pair) format.
+
+2. Point `path` at the file you passed to `irislogd -f`. Each entry is a self-contained JSON object on one line, so no `log_processing_rules` are needed:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/iris/structured.log
+       source: intersystems_iris
+       service: <SERVICE_NAME>
+   ```
+
+   Each entry carries `when`, `pid`, `level`, `event`, and `text`, plus `host`, `instance`, `namespace`, `source`, `type`, and `group` where applicable. The pipeline maps `event` to `iris.facility` and `level` to `iris.level`, so structured-log entries sit alongside `messages.log` entries in the same views.
+
+   **Note**: At log level `INFO` or lower, the structured log includes audit events, which can contain PII or PHI, particularly `%DirectMode` and `%SQL` event types. Keep the level at `WARN` or higher, or use the Event Filter (for example, `-Audit.*`) to exclude them.
+
+   **Note**: If you already forward IRIS telemetry to an OpenTelemetry-compatible destination using OTLP/HTTP, that carries the same information and enabling structured logging is not necessary.
+
+#### Timestamps and time zones
+
+Neither format records a UTC offset: `messages.log` timestamps and the structured log's `when` field are both written in the instance's local time. The log pipeline interprets them as UTC, so if your IRIS instance does not run in UTC, collected log timestamps are shifted by the instance's offset. Run IRIS in UTC to keep log timestamps accurate.
 
 For containerized environments, follow the instructions on the [Kubernetes Log Collection][8] or [Docker Log Collection][9] pages.
 

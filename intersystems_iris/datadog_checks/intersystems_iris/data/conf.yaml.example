@@ -663,24 +663,26 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 ##
-## IRIS can channel all of its log information into a single machine-readable file, the
-## structured log, which also carries audit events. Use one of the two stanzas below.
+## IRIS emits log data in two formats and the log pipeline parses both, normalizing them
+## to the same iris.* attributes. Use one of the two stanzas below.
 ##
-## 1. Structured log (recommended)
-##   - Enable structured logging with format JSON, then set `path` to the file passed to
-##     `irislogd -f`. Each entry is one JSON object per line, so no `log_processing_rules`
-##     are needed. At log level INFO or lower the structured log includes audit events,
-##     which can contain PII or PHI.
+## 1. messages.log
+##   - Written by default, with no additional IRIS configuration. Entries span multiple
+##     lines, so the multi_line rule is required. Change `path` to match the instance
+##     installation directory; IRIS for Health typically uses
+##     /opt/irishealth/mgr/messages.log.
+## 2. Structured log
+##   - A superset of messages.log that also carries audit events. Enable structured
+##     logging with format JSON, then set `path` to the file passed to `irislogd -f`.
+##     Each entry is one JSON object per line, so no log_processing_rules are needed.
+##     The NVP format is not parsed. At log level INFO or lower the structured log
+##     includes audit events, which can contain PII or PHI.
 ##   - See https://docs.intersystems.com/iris20262/csp/docbook/Doc.View.cls?KEY=GCM_structuredlog
-## 2. messages.log
-##   - Use this stanza if structured logging cannot be enabled. Entries span multiple
-##     lines, so the multi_line rule is required.
+##
+## Neither format records a UTC offset, so the pipeline interprets timestamps as UTC.
+## Run IRIS in UTC to keep log timestamps accurate.
 #
 # logs:
-#   - type: file
-#     path: /var/log/iris/structured.log
-#     source: intersystems_iris
-#     service: <SERVICE>
 #   - type: file
 #     path: /usr/irissys/mgr/messages.log
 #     source: intersystems_iris
@@ -689,3 +691,7 @@ instances:
 #     - type: multi_line
 #       name: new_log_start_with_date
 #       pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
+#   - type: file
+#     path: /var/log/iris/structured.log
+#     source: intersystems_iris
+#     service: <SERVICE>
