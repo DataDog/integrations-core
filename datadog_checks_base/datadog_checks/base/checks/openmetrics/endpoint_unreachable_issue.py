@@ -9,13 +9,15 @@ import json
 from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-from urllib.parse import parse_qsl, unquote, urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
 if TYPE_CHECKING:
     from datadog_checks.base.checks import AgentCheck
 
 ISSUE_NAME = 'OpenMetrics Endpoint Unreachable'
 ISSUE_TYPE = 'openmetrics_endpoint_unreachable'
+ISSUE_ID_PREFIX = 'openmetrics-endpoint-unreachable'
+ERROR_MESSAGE = f'[Errno {errno.EHOSTUNREACH}] No route to host'
 
 REMEDIATION_SUMMARY = (
     'Restore network reachability from the reporting Agent or Cluster Check Runner to this OpenMetrics endpoint, '
@@ -29,25 +31,23 @@ class EndpointDetails:
     host: str
     port: int
     path: str
-    secrets: frozenset[str]
-    query: str
 
 
 class EndpointUnreachableIssueReporter:
     @staticmethod
     def report(check: AgentCheck, endpoint: str | None, error: BaseException, namespace: str = '') -> None:
         """Report an issue when an endpoint failure means no route to host."""
-        details = _endpoint_details(endpoint)
-        if details is None:
-            check.log.debug('Cannot report an OpenMetrics endpoint-unreachable issue without a valid endpoint')
-            return
-
-        is_unreachable, error_message = _classify_error(error)
-        if not is_unreachable:
-            return
-
-        issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
         try:
+            details = _endpoint_details(endpoint)
+            if details is None:
+                _debug(check, 'Cannot report an OpenMetrics endpoint-unreachable issue without a valid endpoint')
+                return
+
+            if not _is_unreachable(error):
+                return
+
+            namespace = str(namespace)
+            issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
             check.report_issue(
                 id=issue_id,
                 issue_name=ISSUE_NAME,
@@ -67,26 +67,27 @@ class EndpointUnreachableIssueReporter:
                     'target_path': details.path,
                     'namespace': namespace,
                     'error_kind': 'no_route_to_host',
-                    'error_message': _sanitize_error_message(error_message, endpoint, details),
+                    'error_message': ERROR_MESSAGE,
                 },
                 remediation=_remediation(check.name, details),
                 tags=[f'integration:{check.name}', 'openmetrics', 'endpoint-unreachable'],
             )
         except Exception:
-            check.log.debug('Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True)
+            _debug(check, 'Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True)
 
     @staticmethod
     def resolve(check: AgentCheck, endpoint: str | None, namespace: str = '') -> None:
         """Resolve the issue associated with an endpoint."""
-        if _endpoint_details(endpoint) is None:
-            check.log.debug('Cannot resolve an OpenMetrics endpoint-unreachable issue without a valid endpoint')
-            return
-
-        issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
         try:
+            if _endpoint_details(endpoint) is None:
+                _debug(check, 'Cannot resolve an OpenMetrics endpoint-unreachable issue without a valid endpoint')
+                return
+
+            namespace = str(namespace)
+            issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
             check.resolve_issue(issue_id)
         except Exception:
-            check.log.debug('Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
+            _debug(check, 'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
 
 
 def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
@@ -110,28 +111,18 @@ def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
 
     display_host = f'[{host}]' if ':' in host else host
     sanitized_netloc = display_host if explicit_port is None else f'{display_host}:{explicit_port}'
-    sanitized = urlunsplit((scheme, sanitized_netloc, parsed.path, '', ''))
-
-    raw_userinfo, separator, _ = parsed.netloc.rpartition('@')
-    secrets = set()
-    if separator:
-        secrets.add(raw_userinfo)
-        secrets.update(unquote(part) for part in raw_userinfo.split(':', 1) if part)
-    if parsed.query:
-        secrets.add(parsed.query)
-        secrets.update(value for _, value in parse_qsl(parsed.query, keep_blank_values=True) if value)
+    path = parsed.path or '/'
+    sanitized = urlunsplit((scheme, sanitized_netloc, path, '', ''))
 
     return EndpointDetails(
         sanitized=sanitized,
         host=host,
         port=port,
-        path=parsed.path or '/',
-        secrets=frozenset(secrets),
-        query=parsed.query,
+        path=path,
     )
 
 
-def _classify_error(error: BaseException) -> tuple[bool, str]:
+def _is_unreachable(error: BaseException) -> bool:
     pending = deque([error])
     seen: set[int] = set()
     messages: list[str] = []
@@ -158,22 +149,20 @@ def _classify_error(error: BaseException) -> tuple[bool, str]:
 
     flattened = ': '.join(messages) or error.__class__.__name__
     fallback = f'[Errno {errno.EHOSTUNREACH}]' in flattened
-    return errno_match or fallback, flattened
+    return errno_match or fallback
 
 
 def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: str) -> str:
     identity = json.dumps((hostname, check_name, endpoint, namespace), separators=(',', ':'))
     digest = hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]
-    return f'openmetrics-endpoint-unreachable:{digest}'
+    return f'{ISSUE_ID_PREFIX}:{digest}'
 
 
-def _sanitize_error_message(message: str, endpoint: str, details: EndpointDetails) -> str:
-    sanitized = message.replace(endpoint, details.sanitized)
-    if details.query:
-        sanitized = sanitized.replace(f'?{details.query}', '')
-    for secret in sorted(details.secrets, key=len, reverse=True):
-        sanitized = sanitized.replace(secret, '[redacted]')
-    return sanitized
+def _debug(check: AgentCheck, message: str, *, exc_info: bool = False) -> None:
+    try:
+        check.log.debug(message, exc_info=exc_info)
+    except Exception:
+        pass
 
 
 def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | list[dict[str, int | str]]]:
@@ -185,7 +174,7 @@ def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | l
                 'text': (
                     f'If {details.host} is a Kubernetes Pod IP, confirm it still belongs to a live pod. '
                     f'Run: kubectl get pods -A -o wide --field-selector=status.podIP={details.host}. '
-                    'If no live pod owns it, inspect agent configcheck and fix stale Autodiscovery.'
+                    'If no live pod owns it, Run: agent configcheck and fix stale Autodiscovery.'
                 ),
             },
             {
@@ -212,8 +201,8 @@ def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | l
             {
                 'order': 5,
                 'text': (
-                    f'From the same runner, use Run: agent check {check_name}. The issue resolves automatically after '
-                    'the endpoint becomes reachable.'
+                    f'From the same reporting Agent or Cluster Check Runner, run: agent check {check_name}. '
+                    'The issue resolves automatically after the endpoint becomes reachable.'
                 ),
             },
         ],

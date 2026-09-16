@@ -12,16 +12,74 @@ from urllib3.connectionpool import HTTPConnectionPool
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.openmetrics.endpoint_unreachable_issue import (
+    ISSUE_ID_PREFIX,
     ISSUE_NAME,
     ISSUE_TYPE,
     EndpointUnreachableIssueReporter,
 )
+from datadog_checks.base.checks.openmetrics.mixins import OpenMetricsScraperMixin
+from datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper import OpenMetricsScraper
+from datadog_checks.base.constants import ServiceCheck
 
 RAW_ENDPOINT = 'http://alice:s3cr3t@10.0.0.8:9102/metrics?token=secret'
 SANITIZED_ENDPOINT = 'http://10.0.0.8:9102/metrics'
-ISSUE_ID = 'openmetrics-endpoint-unreachable:9fe9b88c342a66ef'
+ISSUE_ID = f'{ISSUE_ID_PREFIX}:9fe9b88c342a66ef'
 SECOND_ENDPOINT = 'http://10.0.0.9:9102/metrics'
+CANONICAL_ERROR_MESSAGE = f'[Errno {errno.EHOSTUNREACH}] No route to host'
+
+
+class EndpointWithBrokenHash(str):
+    def __hash__(self) -> int:
+        raise RuntimeError('endpoint parsing failure')
+
+
+class ErrorWithBrokenReason(RuntimeError):
+    @property
+    def reason(self) -> BaseException:
+        raise RuntimeError('error classification failure')
+
+
+class Namespace:
+    def __init__(self, value: str):
+        self.value = value
+
+    def __str__(self) -> str:
+        return self.value
+
+
+class NamespaceWithBrokenString:
+    def __str__(self) -> str:
+        raise RuntimeError('namespace normalization failure')
+
+
+class SeverityWithBrokenLookup:
+    def __getitem__(self, key: str) -> int:
+        raise RuntimeError(f'payload construction failure for {key}')
+
+
+class CheckWithoutEndpointReporter:
+    def __init__(self, *, broken_hostname: bool = False):
+        self._broken_hostname = broken_hostname
+        self.name = 'openmetrics_test'
+        self.IssueSeverity = {'MEDIUM': 2}
+        self.log = mock.Mock()
+        self.report_issue = mock.Mock()
+        self.resolve_issue = mock.Mock()
+        self.service_check = mock.Mock()
+        self.gauge = mock.Mock()
+
+    @property
+    def hostname(self) -> str:
+        if self._broken_hostname:
+            raise RuntimeError('issue identity failure')
+        return 'stubbed.hostname'
+
+
+class V1MixinConsumer(OpenMetricsScraperMixin, CheckWithoutEndpointReporter):
+    def __init__(self):
+        CheckWithoutEndpointReporter.__init__(self)
 
 
 def create_check(hostname: str = 'stubbed.hostname', name: str = 'openmetrics_test') -> mock.Mock:
@@ -68,6 +126,27 @@ def create_v1_check(endpoint: str = RAW_ENDPOINT) -> tuple[OpenMetricsBaseCheck,
     return check, check.get_scraper_config(instance)
 
 
+def create_v1_scraper_config(endpoint: str = RAW_ENDPOINT) -> dict:
+    return {
+        'prometheus_url': endpoint,
+        'namespace': 'demo',
+        'health_service_check': True,
+        'custom_tags': [],
+    }
+
+
+def create_v2_scraper_without_reporter() -> tuple[OpenMetricsScraper, CheckWithoutEndpointReporter]:
+    check = CheckWithoutEndpointReporter()
+    scraper = object.__new__(OpenMetricsScraper)
+    scraper.check = check
+    scraper.endpoint = RAW_ENDPOINT
+    scraper.namespace = 'demo'
+    scraper.enable_health_service_check = True
+    scraper.static_tags = (f'endpoint:{RAW_ENDPOINT}',)
+    scraper.tags = scraper.static_tags
+    return scraper, check
+
+
 def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
     check = create_check()
 
@@ -107,7 +186,7 @@ def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
                     'text': (
                         'If 10.0.0.8 is a Kubernetes Pod IP, confirm it still belongs to a live pod. '
                         'Run: kubectl get pods -A -o wide --field-selector=status.podIP=10.0.0.8. '
-                        'If no live pod owns it, inspect agent configcheck and fix stale Autodiscovery.'
+                        'If no live pod owns it, Run: agent configcheck and fix stale Autodiscovery.'
                     ),
                 },
                 {
@@ -134,8 +213,8 @@ def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
                 {
                     'order': 5,
                     'text': (
-                        'From the same runner, use Run: agent check openmetrics_test. The issue resolves automatically '
-                        'after the endpoint becomes reachable.'
+                        'From the same reporting Agent or Cluster Check Runner, run: agent check openmetrics_test. '
+                        'The issue resolves automatically after the endpoint becomes reachable.'
                     ),
                 },
             ],
@@ -143,9 +222,43 @@ def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
         'tags': ['integration:openmetrics_test', 'openmetrics', 'endpoint-unreachable'],
     }
     error_message = issue['extra']['error_message']
-    assert f'[Errno {errno.EHOSTUNREACH}]' in error_message
-    assert all(secret not in error_message for secret in ('alice', 's3cr3t', 'token=secret'))
+    assert error_message == CANONICAL_ERROR_MESSAGE
+    assert 'secret' not in error_message
     assert all('`' not in step['text'] for step in issue['remediation']['steps'])
+
+
+@pytest.mark.parametrize(
+    ('endpoint', 'sanitized_endpoint', 'url_secret'),
+    [
+        pytest.param(
+            'http://example.test?verbose=1',
+            'http://example.test/',
+            'verbose=1',
+            id='short-query-value',
+        ),
+        pytest.param('http://:@example.test', 'http://example.test/', ':@', id='empty-userinfo'),
+        pytest.param(
+            "http://!$&'()*+,;=:@example.test/metrics?token=secret",
+            'http://example.test/metrics',
+            "!$&'()*+,;=:@",
+            id='punctuation-only-userinfo',
+        ),
+    ],
+)
+def test_report_emits_canonical_error_without_url_leakage_or_corruption(
+    endpoint: str, sanitized_endpoint: str, url_secret: str
+):
+    check = create_check()
+
+    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+
+    issue = check.report_issue.call_args.kwargs
+    assert issue['extra']['endpoint'] == sanitized_endpoint
+    assert issue['extra']['target_path'] == sanitized_endpoint.removeprefix('http://example.test')
+    assert issue['extra']['error_message'] == CANONICAL_ERROR_MESSAGE
+    emitted_issue = repr(issue)
+    assert endpoint not in emitted_issue
+    assert url_secret not in emitted_issue
 
 
 def test_report_uses_flattened_errno_text_as_narrow_fallback():
@@ -219,6 +332,18 @@ def test_resolve_uses_the_same_raw_endpoint_identity():
     check.resolve_issue.assert_called_once_with(ISSUE_ID)
 
 
+def test_namespace_is_normalized_for_identity_and_emitted_context():
+    check = create_check()
+    namespace = Namespace('demo')
+
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace)
+    issue = check.report_issue.call_args.kwargs
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace)
+
+    assert issue['extra']['namespace'] == 'demo'
+    check.resolve_issue.assert_called_once_with(issue['id'])
+
+
 def test_report_and_resolve_bridge_failures_are_best_effort():
     check = create_check()
     check.report_issue.side_effect = RuntimeError('report bridge failure')
@@ -227,7 +352,55 @@ def test_report_and_resolve_bridge_failures_are_best_effort():
     EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
     EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
 
-    assert check.log.debug.call_count == 2
+    assert check.log.debug.call_args_list == [
+        mock.call('Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True),
+        mock.call('Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True),
+    ]
+
+
+@pytest.mark.parametrize('stage', ['endpoint-parsing', 'classification', 'identity', 'payload'])
+def test_report_is_best_effort_across_the_complete_operation(stage: str):
+    check = CheckWithoutEndpointReporter(broken_hostname=stage == 'identity')
+    endpoint = EndpointWithBrokenHash(RAW_ENDPOINT) if stage == 'endpoint-parsing' else RAW_ENDPOINT
+    error = (
+        ErrorWithBrokenReason('classification failure') if stage == 'classification' else unreachable_connection_error()
+    )
+    if stage == 'payload':
+        check.IssueSeverity = SeverityWithBrokenLookup()
+
+    EndpointUnreachableIssueReporter.report(check, endpoint, error, namespace='demo')
+
+    check.report_issue.assert_not_called()
+    check.log.debug.assert_called_once_with(
+        'Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True
+    )
+
+
+@pytest.mark.parametrize('stage', ['endpoint-parsing', 'namespace', 'identity'])
+def test_resolve_is_best_effort_across_the_complete_operation(stage: str):
+    check = CheckWithoutEndpointReporter(broken_hostname=stage == 'identity')
+    endpoint = EndpointWithBrokenHash(RAW_ENDPOINT) if stage == 'endpoint-parsing' else RAW_ENDPOINT
+    namespace = NamespaceWithBrokenString() if stage == 'namespace' else 'demo'
+
+    EndpointUnreachableIssueReporter.resolve(check, endpoint, namespace)
+
+    check.resolve_issue.assert_not_called()
+    check.log.debug.assert_called_once_with(
+        'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True
+    )
+
+
+@pytest.mark.parametrize('operation', ['report', 'resolve'])
+def test_secondary_debug_failure_does_not_escape_best_effort_operation(operation: str):
+    check = create_check()
+    check.log.debug.side_effect = RuntimeError('debug logging failure')
+
+    if operation == 'report':
+        check.report_issue.side_effect = RuntimeError('report bridge failure')
+        EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error())
+    else:
+        check.resolve_issue.side_effect = RuntimeError('resolve bridge failure')
+        EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT)
 
 
 @pytest.mark.parametrize(
@@ -375,3 +548,62 @@ def test_resolver_bridge_failure_does_not_fail_successful_scrape():
 
     assert check.scrapers[RAW_ENDPOINT].get_connection() is response
     check.resolve_issue.assert_called_once_with(ISSUE_ID)
+
+
+def test_v1_mixin_consumer_without_reporter_preserves_success_and_service_check():
+    check = V1MixinConsumer()
+    response = create_response(RAW_ENDPOINT)
+    check.send_request = mock.Mock(return_value=response)
+
+    assert check.poll(create_v1_scraper_config()) is response
+
+    check.resolve_issue.assert_called_once()
+    check.service_check.assert_called_once_with(
+        'demo.prometheus.health', AgentCheck.OK, tags=[f'endpoint:{RAW_ENDPOINT}']
+    )
+
+
+def test_v1_mixin_consumer_without_reporter_preserves_failure_and_service_check():
+    check = V1MixinConsumer()
+    error = unreachable_connection_error()
+    check.send_request = mock.Mock(side_effect=error)
+
+    with pytest.raises(requests.ConnectionError) as exc_info:
+        check.poll(create_v1_scraper_config())
+
+    assert exc_info.value is error
+    check.report_issue.assert_called_once()
+    check.service_check.assert_called_once_with(
+        'demo.prometheus.health', AgentCheck.CRITICAL, tags=[f'endpoint:{RAW_ENDPOINT}']
+    )
+
+
+def test_v2_scraper_without_reporter_preserves_success_and_service_check():
+    scraper, check = create_v2_scraper_without_reporter()
+    response = create_response(RAW_ENDPOINT)
+    scraper.send_request = mock.Mock(return_value=response)
+
+    assert scraper.get_connection() is response
+
+    check.resolve_issue.assert_called_once()
+    check.service_check.assert_called_once_with(
+        'openmetrics.health', ServiceCheck.OK, tags=(f'endpoint:{RAW_ENDPOINT}',)
+    )
+
+
+def test_v2_scraper_without_reporter_preserves_failure_and_service_check():
+    scraper, check = create_v2_scraper_without_reporter()
+    error = unreachable_connection_error()
+    scraper.send_request = mock.Mock(side_effect=error)
+
+    with pytest.raises(requests.ConnectionError) as exc_info:
+        scraper.get_connection()
+
+    assert exc_info.value is error
+    check.report_issue.assert_called_once()
+    check.service_check.assert_called_once_with(
+        'openmetrics.health',
+        ServiceCheck.CRITICAL,
+        tags=(f'endpoint:{RAW_ENDPOINT}',),
+        message=str(error),
+    )
