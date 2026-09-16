@@ -19,7 +19,7 @@
 * Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#24999](https://github.com/DataDog/integrations-core/pull/24999))
 * Cache the Agent version instead of resolving it for every payload. ([#25022](https://github.com/DataDog/integrations-core/pull/25022))
 
-## 15.20.0 / 2026-08-24
+## 15.20.0 / 2026-08-24 / Agent 7.83.0
 
 ***Security***:
 
