@@ -392,34 +392,6 @@ GITALY_METRICS_TO_TEST = [
     "gitaly.process_max_fds",
 ]
 
-# Raw Prometheus names expected on the Workhorse exporter. These are not in
-# METRICS_MAP yet, so they are asserted against the live exporter rather than
-# through the check.
-WORKHORSE_RAW_METRICS = [
-    "gitlab_workhorse_http_requests_total",
-    "gitlab_workhorse_http_request_duration_seconds",
-]
-
-# Raw Prometheus names expected on the Sidekiq exporter.
-SIDEKIQ_RAW_METRICS = [
-    "sidekiq_mem_total_bytes",
-    "sidekiq_load_balancing_count",
-]
-
-# Raw Prometheus names for the Gitaly metrics that are missing from
-# GITALY_METRICS_MAP. gitlab_build_info is already served by the Gitaly
-# exporter, it is simply not mapped.
-GITALY_RAW_METRICS_NOT_YET_MAPPED = [
-    "gitlab_build_info",
-    "gitaly_catfile_cache_total",
-    "gitaly_connections_total",
-    "gitaly_service_client_requests_total",
-    "gitaly_total_repositories_count",
-    # Requires `adaptive: true` in the Gitaly concurrency config, which
-    # gitlab-exporters.rb sets. Absent on a default install.
-    "gitaly_concurrency_limiting_current_limit",
-]
-
 
 def assert_check(aggregator, metrics=None, use_openmetrics=False):
     """
