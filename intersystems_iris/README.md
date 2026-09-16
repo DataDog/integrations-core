@@ -4,7 +4,7 @@
 
 This check monitors [InterSystems IRIS][1] through the Datadog Agent. To learn more, see the [InterSystems IRIS integration documentation][2].
 
-InterSystems IRIS is a data platform combining a multi-model database, an interoperability engine, and an analytics layer. This integration scrapes the built-in `/api/monitor/metrics` OpenMetrics endpoint, providing visibility into platform health without requiring additional instrumentation.
+InterSystems IRIS is a data platform combining a multi-model database, an interoperability engine, and an analytics layer. This integration collects metrics from the `/api/monitor/metrics` OpenMetrics endpoint that is built into IRIS. No additional instrumentation is required.
 
 ### What this integration monitors
 
@@ -39,7 +39,7 @@ No additional installation is needed on your server.
 
    This endpoint is unauthenticated by default. If you have secured it, use the `auth_token`, `username` and `password`, or `headers` options.
 
-3. Interoperability metrics (`intersystems_iris.interop.*`) are only emitted once the "Record Statistics for SAM" setting is enabled (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a running production. Enable it if you want interoperability visibility.
+3. Interoperability metrics (`intersystems_iris.interop.*`) are only emitted once the "Record Statistics for SAM" setting is enabled (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a running production.
 
 4. [Restart the Agent][6].
 
@@ -52,7 +52,7 @@ InterSystems IRIS can emit log data in two formats, and this integration's log p
 - The `messages.log` file, which IRIS writes by default and which needs no additional IRIS configuration.
 - The [structured log][7], a single machine-readable file that is a superset of `messages.log` and additionally carries audit events.
 
-Both formats are normalized to the same `iris.*` log attributes, so the **IRIS Facility**, **IRIS Severity**, and **IRIS Level** facets, along with any dashboards and saved views built on them, work the same way whichever format you collect.
+Both formats are normalized to the same `iris.*` log attributes and populate the **IRIS Facility**, **IRIS Severity**, and **IRIS Level** facets.
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
@@ -106,15 +106,13 @@ Change `path` to match your instance's installation directory. IRIS for Health, 
        service: <SERVICE_NAME>
    ```
 
-   Each entry carries `when`, `pid`, `level`, `event`, and `text`, plus `host`, `instance`, `namespace`, `source`, `type`, and `group` where applicable. The pipeline maps `event` to `iris.facility` and `level` to `iris.level`, so structured-log entries sit alongside `messages.log` entries in the same views.
+   Each entry carries `when`, `pid`, `level`, `event`, and `text`, plus `host`, `instance`, `namespace`, `source`, `type`, and `group` where applicable. The pipeline maps `event` to `iris.facility`, `level` to `iris.level`, and `text` to the log message.
 
-   **Note**: At log level `INFO` or lower, the structured log includes audit events, which can contain PII or PHI, particularly `%DirectMode` and `%SQL` event types. Keep the level at `WARN` or higher, or use the Event Filter (for example, `-Audit.*`) to exclude them.
-
-   **Note**: If you already forward IRIS telemetry to an OpenTelemetry-compatible destination using OTLP/HTTP, that carries the same information and enabling structured logging is not necessary.
+   **Note**: At log level `INFO` or lower, the structured log includes audit events, which can contain PII or PHI, particularly `%DirectMode` and `%SQL` event types. To exclude them, set the level to `WARN` or higher, or filter them with the Event Filter (for example, `-Audit.*`).
 
 #### Timestamps and time zones
 
-Neither format records a UTC offset: `messages.log` timestamps and the structured log's `when` field are both written in the instance's local time. The log pipeline interprets them as UTC, so if your IRIS instance does not run in UTC, collected log timestamps are shifted by the instance's offset. Run IRIS in UTC to keep log timestamps accurate.
+Neither format records a UTC offset: `messages.log` timestamps and the structured log's `when` field are both written in the instance's local time. The log pipeline interprets them as UTC. If the instance does not run in UTC, collected log timestamps are shifted by the instance's UTC offset.
 
 For containerized environments, follow the instructions on the [Kubernetes Log Collection][8] or [Docker Log Collection][9] pages.
 
@@ -137,7 +135,7 @@ Two labels from the IRIS metrics endpoint are submitted under a different tag ke
 | `host`     | `interop_host`  | `intersystems_iris.interop.*`   | Business host name, not the reporting infrastructure host.  |
 | `version`  | `iris_version`  | `intersystems_iris.system.info` | IRIS product version, not the Agent version.               |
 
-Scope your dashboards and monitors on the Datadog tag key. Every other endpoint label is submitted under its original name.
+Every other endpoint label is submitted under its original name.
 
 ### Service Checks
 
