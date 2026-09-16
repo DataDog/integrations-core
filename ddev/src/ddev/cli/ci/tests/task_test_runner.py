@@ -8,6 +8,7 @@ import base64
 import dataclasses
 import gzip
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from itertools import count
 from pathlib import Path
@@ -15,6 +16,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, test_tag_mapping
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import conclusion_to_status
@@ -50,6 +52,15 @@ class JobListTooLargeError(Exception):
         self.size = size
 
 
+def _serialize_test_tags(fields: Mapping[str, Any]) -> str:
+    tags = test_tag_mapping(fields)
+    return ','.join(f'{name}:{_sanitize_test_tag_value(value)}' for name, value in sorted(tags.items()))
+
+
+def _sanitize_test_tag_value(value: str) -> str:
+    return value.replace(',', '_').replace('\n', '_').replace('\r', '_')
+
+
 def encode_job_list(jobs: list[dict[str, Any]]) -> str:
     """Encode a batch's jobs for a workflow input, as gzip then base64.
 
@@ -73,12 +84,9 @@ class TestRunnerOptions:
     repo: str
     workflow_id: str | int
     ref: str
-    head_sha: str
-    checkout_sha: str
+    run_fields: Mapping[str, Any]
     concurrency_key: str
     artifacts_base_path: Path
-    head_branch: str = ''
-    is_fork: bool = False
     poll_interval_seconds: float = 30.0
     pytest_args: str = ''
     origin_run_url: str | None = None
@@ -333,20 +341,22 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         return jobs
 
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
+        run = self._options.run_fields
         inputs = {
             "batch_id": message.batch_id,
-            "checkout_sha": self._options.checkout_sha,
+            "checkout_sha": str(run["checkout_sha"]),
             # Keys the workflow's cancellation group; see `DispatcherContext.concurrency_key`.
             "concurrency_key": self._options.concurrency_key,
             # The batch is dispatched at the default branch, so its own context describes master.
             # These two say which commit the results belong to, for CI Visibility and the check run.
-            "head_sha": self._options.head_sha,
-            "head_branch": self._options.head_branch,
+            "head_sha": str(run["head_sha"]),
+            "head_branch": str(run["head_branch"]),
+            "context": str(run["context"]),
             # The batch withholds every credential when this is true, so it is sent on every dispatch
             # rather than only when set: an absent input would default the workflow to trusting it.
-            "is_fork": str(self._options.is_fork).lower(),
+            "is_fork": str(run["is_fork"]).lower(),
             "integrations": json.dumps(message.integrations),
-            "job_list": encode_job_list([self._job_input(job) for job in message.job_list]),
+            "job_list": encode_job_list([self._job_input(message, job) for job in message.job_list]),
         }
         # GitHub rejects inputs the workflow does not declare, so unset means absent, not empty.
         if self._options.pytest_args:
@@ -361,11 +371,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
         return inputs
 
-    @staticmethod
-    def _job_input(job: BatchJob) -> dict[str, Any]:
-        """Serialize a job for the workflow, carrying the artifact name so all its files upload under
-        a single folder/zip named after it (matched later via `BatchJob.artifact_name`)."""
-        return {**dataclasses.asdict(job), "artifact_name": job.artifact_name()}
+    def _job_input(self, batch: TestBatch, job: BatchJob) -> dict[str, Any]:
+        """Serialize a job with its artifact identity and centrally defined CI Visibility tags."""
+        fields = {**self._options.run_fields, **batch_fields(batch), **job_fields(job)}
+        return {
+            **dataclasses.asdict(job),
+            "artifact_name": job.artifact_name(),
+            "additional_tags": _serialize_test_tags(fields),
+        }
 
     async def _download_artifacts(self, run_id: int, batch_id: str) -> dict[str, Path]:
         """Download the run's artifacts and return an artifact-name -> path map.

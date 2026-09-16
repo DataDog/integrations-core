@@ -293,7 +293,8 @@ jobs:
           minimum_base_package: ${{ matrix.minimum_base_package }}
           pytest_args: ${{ inputs.pytest_args }}
           context: ${{ inputs.context }}
-          additional_tags: "dispatcher.head_branch:${{ inputs.head_branch }},dispatcher.context:${{ inputs.context }},dispatcher.head_sha:${{ inputs.head_sha }}"
+          additional_tags: ${{ matrix.additional_tags }}
+          replace_tags: "true"
           is_fork: "false"
           dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
           # A rate-limit lift for the ~70 api.github.com calls `ddev validate licenses` makes, not an
@@ -406,6 +407,8 @@ jobs:
           minimum_base_package: ${{ matrix.minimum_base_package }}
           pytest_args: ${{ inputs.pytest_args }}
           context: ${{ inputs.context }}
+          additional_tags: ${{ matrix.additional_tags }}
+          replace_tags: "true"
           is_fork: "true"
 
       - name: Collect the job's reports
