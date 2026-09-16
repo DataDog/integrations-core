@@ -61,7 +61,7 @@ def test_check_collects_mapped_metrics(
         )
 
     if instance_fixture == 'frontend_instance':
-        aggregator.assert_metric('dynamo.tokio.worker_busy_ratio', value=0.75)
+        aggregator.assert_metric('dynamo.tokio.worker_busy_ratio', value=750)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

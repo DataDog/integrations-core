@@ -162,7 +162,7 @@ dynamo.router.overhead.seq_hashing_ms.sum,count,,millisecond,,Time spent computi
 dynamo.router.overhead.total_ms,gauge,,millisecond,,Total routing overhead per request (distribution).,0,dynamo,,,
 dynamo.router.overhead.total_ms.count,count,,,,Total routing overhead per request (histogram observation count).,0,dynamo,,,
 dynamo.router.overhead.total_ms.sum,count,,millisecond,,Total routing overhead per request (histogram sum in milliseconds).,0,dynamo,,,
-dynamo.tokio.worker_busy_ratio,gauge,,fraction,,Fraction of time the Tokio worker spends processing work.,0,dynamo,,,
+dynamo.tokio.worker_busy_ratio,gauge,,permille,,Per-mille of time the Tokio worker spends processing work.,0,dynamo,,,
 dynamo.transport.tcp.bytes_received.count,count,,byte,,Total bytes received by the TCP transport.,0,dynamo,,,
 dynamo.transport.tcp.bytes_sent.count,count,,byte,,Total bytes sent by the TCP transport.,0,dynamo,,,
 dynamo.transport.tcp.errors.count,count,,error,,Total TCP transport errors.,0,dynamo,,,
