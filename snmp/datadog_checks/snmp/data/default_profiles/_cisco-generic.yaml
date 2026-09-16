@@ -6,6 +6,7 @@ extends:
   - _generic-udp.yaml
   - _generic-ospf.yaml
   - _generic-bgp4.yaml
+  - _generic-bfd.yaml
   - _generic-ip.yaml
   - _cisco-cpu-memory.yaml
   - _cisco-metadata.yaml
