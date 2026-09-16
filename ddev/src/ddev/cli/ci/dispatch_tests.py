@@ -167,10 +167,10 @@ def dispatch_tests(
 
     from ddev.cli.application import AppLoggingHandler
     from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
-    from ddev.cli.ci.tests.dispatcher import (
+    from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
+    from ddev.cli.ci.tests.dispatcher_attributes import (
         PROTECTED_RUN_FIELDS,
-        DispatcherContext,
-        build_dispatcher,
+        repository_fields,
         run_fields,
         tag_fields,
     )
@@ -185,7 +185,7 @@ def dispatch_tests(
     console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags))))
     monitoring = MonitoringRuntime(console_handler=console_handler, protected_fields=PROTECTED_RUN_FIELDS)
     try:
-        monitoring.set_run_fields(**{**tag_fields(caller_tags), 'repo': f'{owner}/{repo}'})
+        monitoring.set_run_fields(**{**tag_fields(caller_tags), **repository_fields(owner, repo)})
 
         # One INFO line per request would bury the Dispatcher's own progress.
         logging.getLogger('httpx').setLevel(logging.WARNING)
