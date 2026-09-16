@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import PureWindowsPath
+
 import psutil
 from pymongo.errors import OperationFailure
 
@@ -18,7 +20,6 @@ class ProcessStatsCollector(MongoCollector):
     def __init__(self, check, tags):
         super(ProcessStatsCollector, self).__init__(check, tags)
         self._clean_server_name = check._config.clean_server_name
-        self._process = None
 
     @property
     def is_localhost(self):
@@ -34,12 +35,21 @@ class ProcessStatsCollector(MongoCollector):
         )
         return deployment.hosting_type == HostingType.SELF_HOSTED and self.is_localhost
 
+    @staticmethod
+    def _executable_name(process_name):
+        """Reduce the serverStatus `process` field to a bare executable name."""
+        if not process_name:
+            return None
+        # MongoDB derives that field from argv[0] but only strips POSIX separators, so on Windows
+        # it can be a full path where psutil reports just the executable name.
+        return PureWindowsPath(process_name).name
+
     def _get_pid_and_process_name(self, api):
         """Fetch PID and process name from MongoDB serverStatus."""
         try:
             server_status = api.server_status()
             pid = server_status.get("pid")
-            process_name = server_status.get("process")
+            process_name = self._executable_name(server_status.get("process"))
             if not pid or not process_name:
                 self.log.warning("PID or process name not found in serverStatus.")
             return pid, process_name
@@ -68,8 +78,10 @@ class ProcessStatsCollector(MongoCollector):
 
     def _get_mongo_process(self, api):
         """Retrieve the MongoDB process using either PID or process name."""
-        if self._process:
-            return self._process
+        cached_process = self.check._mongo_process
+        # is_running() compares creation time, so a restarted mongod or a reused PID is rejected.
+        if cached_process is not None and cached_process.is_running():
+            return cached_process, False
 
         # Try to get the PID and process name from serverStatus
         pid, process_name = self._get_pid_and_process_name(api)
@@ -84,20 +96,22 @@ class ProcessStatsCollector(MongoCollector):
         if not process:
             self.log.warning("Unable to retrieve MongoDB process.")
 
-        self._process = process
-        return self._process
+        self.check._mongo_process = process
+        return process, True
 
     def collect(self, api):
-        process = self._get_mongo_process(api)
+        process, newly_resolved = self._get_mongo_process(api)
         if not process:
             return
 
         try:
-            if (cpu_percent := process.cpu_percent()) != 0:
-                # the first call of cpu_percent is 0.0 and should be ignored
-                # the cpu_percent can be > 100% if the process has multiple threads
-                self._submit_payload({"system": {"cpu_percent": cpu_percent}})
-            else:
-                self.log.warning("The MongoDB process with PID %s is not consuming CPU", process.pid)
+            cpu_percent = process.cpu_percent()
+            if newly_resolved:
+                # psutil returns 0.0 the first time a process is sampled, so skip that run rather
+                # than the value, which lets a genuinely idle node report 0%.
+                self.log.debug("Ignoring first CPU sample for MongoDB process with PID %s", process.pid)
+                return
+            # the cpu_percent can be > 100% if the process has multiple threads
+            self._submit_payload({"system": {"cpu_percent": cpu_percent}})
         except Exception as e:
             self.log.error("Failed to collect process stats for MongoDB process with PID %s: %s", process.pid, e)

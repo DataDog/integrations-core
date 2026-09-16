@@ -16,7 +16,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
-from datadog_checks.mongo.collectors import MongoCollector
+from datadog_checks.mongo.collectors import MongoCollector, ProcessStatsCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.dbm.utils import get_explain_plan, should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
@@ -1024,3 +1024,123 @@ def test_get_explain_plan_adds_cursor_for_aggregate(command, expected_cursor):
             assert captured_command["cursor"] == command["cursor"]
         else:
             assert "cursor" not in captured_command, f"cursor should not be added for {command}"
+
+
+class FakePsutilProcess:
+    """
+    Stand-in for `psutil.Process`: `cpu_percent()` returns 0.0 the first time it is called on a
+    given object, and a real measurement afterwards.
+    """
+
+    def __init__(self, pid, name, cpu_percent=12.5, running=True):
+        self.pid = pid
+        self._name = name
+        self._cpu_percent = cpu_percent
+        self._running = running
+        self._sampled = False
+
+    def name(self):
+        return self._name
+
+    def is_running(self):
+        return self._running
+
+    def as_dict(self, attrs=None, ad_value=None):
+        # process_iter() populates `info` through as_dict.
+        return {'pid': self.pid, 'name': self._name}
+
+    def cpu_percent(self):
+        if not self._sampled:
+            self._sampled = True
+            return 0.0
+        return self._cpu_percent
+
+
+def run_process_stats(mongo_check, api, times=1):
+    """Collect `times` times, rebuilding the collector each run as `_collect_metrics` does."""
+    for _ in range(times):
+        ProcessStatsCollector(mongo_check, []).collect(api)
+
+
+@pytest.mark.parametrize(
+    ('reported_process', 'psutil_name'),
+    [
+        pytest.param('mongod', 'mongod', id='posix-bare-name'),
+        pytest.param('mongos', 'mongos', id='posix-mongos'),
+        pytest.param(r'C:\GetSmart\CE_MongoDB\bin\mongod.exe', 'mongod.exe', id='windows-absolute-path'),
+        pytest.param(r'C:\Program Files\MongoDB\Server\8.0\bin\mongod.exe', 'mongod.exe', id='windows-path-with-space'),
+    ],
+)
+def test_process_stats_resolves_process_regardless_of_reported_path(
+    check, instance_integration, aggregator, reported_process, psutil_name
+):
+    """
+    The process is resolved whether serverStatus reports a bare name or a Windows absolute path.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 4321, 'process': reported_process}
+
+    with mock.patch('psutil.Process', return_value=FakePsutilProcess(4321, psutil_name)):
+        run_process_stats(mongo_check, api, times=2)
+
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=1)
+
+
+def test_process_stats_survives_collector_rebuild(check, instance_integration, aggregator):
+    """
+    The resolved process outlives the collector, which the check rebuilds on every run.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 4321, 'process': 'mongod'}
+    process = FakePsutilProcess(4321, 'mongod')
+
+    with mock.patch('psutil.Process', return_value=process) as process_ctor:
+        run_process_stats(mongo_check, api, times=1)
+        aggregator.assert_metric('mongodb.system.cpu.percent', count=0)  # first sample is 0%
+
+        run_process_stats(mongo_check, api, times=3)
+
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=3)
+    assert process_ctor.call_count == 1, 'the process should be resolved once, not once per run'
+
+
+def test_process_stats_recovers_after_mongod_restart(check, instance_integration, aggregator):
+    """
+    CPU collection moves onto the new PID after mongod restarts.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 111, 'process': 'mongod'}
+    old_process = FakePsutilProcess(111, 'mongod')
+    new_process = FakePsutilProcess(222, 'mongod', cpu_percent=44.0)
+
+    with mock.patch('psutil.Process', return_value=old_process):
+        run_process_stats(mongo_check, api, times=2)
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=1)
+
+    # mongod restarts: the cached process is gone and serverStatus reports the new PID.
+    old_process._running = False
+    api.server_status.return_value = {'pid': 222, 'process': 'mongod'}
+    with mock.patch('psutil.Process', return_value=new_process):
+        run_process_stats(mongo_check, api, times=2)
+
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=44.0, count=1)
+    assert mongo_check._mongo_process is new_process
+
+
+def test_process_stats_reports_genuinely_idle_node_as_zero(check, instance_integration, aggregator):
+    """
+    Only the first sample after resolving a process is discarded, so an idle node reports 0%.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 4321, 'process': 'mongod'}
+    idle_process = FakePsutilProcess(4321, 'mongod', cpu_percent=0.0)
+
+    with mock.patch('psutil.Process', return_value=idle_process):
+        run_process_stats(mongo_check, api, times=4)
+
+    # The first run is the discarded sample; the rest are real 0% measurements.
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=0.0, count=3)
