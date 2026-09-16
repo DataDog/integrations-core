@@ -107,6 +107,14 @@ def dd_environment():
                 {
                     'openmetrics_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
                     'gitaly_server_endpoint': GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+                    **(
+                        {
+                            'workhorse_endpoint': GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT,
+                            'sidekiq_endpoint': GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT,
+                        }
+                        if EXPORTERS_ENABLED
+                        else {}
+                    ),
                     'gitlab_url': GITLAB_URL,
                     'disable_ssl_validation': True,
                     'tags': CUSTOM_TAGS,
@@ -154,6 +162,26 @@ def mocked_requests_get(*args, **kwargs):
             )
     elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gitaly.txt')
+
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            return mock.MagicMock(
+                status_code=200,
+                iter_lines=lambda **kwargs: text_data.split("\n"),
+                headers={'Content-Type': "text/plain"},
+            )
+    elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'workhorse.txt')
+
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            return mock.MagicMock(
+                status_code=200,
+                iter_lines=lambda **kwargs: text_data.split("\n"),
+                headers={'Content-Type': "text/plain"},
+            )
+    elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'sidekiq.txt')
 
         with open(f_name, 'r') as f:
             text_data = f.read()
