@@ -263,9 +263,12 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         with self._lock:
             return self._snapshot()
 
-    def _snapshot(self) -> DispatcherProgress:
-        """Hold the lock while reading the live aggregate."""
-        return DispatcherProgress(batches=tuple(self._progress_by_batch.values()), done=self._done())
+    def _snapshot(self, done: bool | None = None) -> DispatcherProgress:
+        """Build the reconciled aggregate while holding the lock, deriving *done* unless supplied."""
+        return DispatcherProgress(
+            batches=tuple(self._progress_by_batch.values()),
+            done=self._done() if done is None else done,
+        ).reconciled()
 
     def _done(self) -> bool:
         """Whether every batch is terminal. Hold ``self._lock``."""
@@ -285,7 +288,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         return UpdatePRComment(
             id=message_id,
             revision=revision,
-            progress=DispatcherProgress(batches=tuple(self._progress_by_batch.values()), done=done),
+            progress=self._snapshot(done),
         )
 
     @staticmethod

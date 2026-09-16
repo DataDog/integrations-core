@@ -268,6 +268,41 @@ def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_pat
     assert drain_queue(gatherer.bus.queue) == []
 
 
+@pytest.mark.parametrize(
+    "job_statuses, expected_state",
+    [
+        pytest.param((WorkflowJobStatus.IN_PROGRESS,), ExecutionState.RUNNING, id="running-job"),
+        pytest.param(
+            (WorkflowJobStatus.COMPLETED, WorkflowJobStatus.QUEUED),
+            ExecutionState.RUNNING,
+            id="completed-job",
+        ),
+        pytest.param((WorkflowJobStatus.QUEUED,), ExecutionState.QUEUED, id="waiting-job"),
+    ],
+)
+def test_queued_batch_state_reflects_observed_jobs(
+    tmp_path: Path,
+    job_statuses: tuple[WorkflowJobStatus, ...],
+    expected_state: ExecutionState,
+):
+    gatherer = _make_gatherer(
+        tmp_path, {"batch-1": [_batch_job(f"j{index}") for index in range(1, len(job_statuses) + 1)]}
+    )
+    jobs = tuple(
+        WorkflowJob(
+            id=index,
+            run_id=100,
+            name=f"j{index}",
+            status=status,
+            conclusion=WorkflowJobConclusion.SUCCESS if status is WorkflowJobStatus.COMPLETED else None,
+        )
+        for index, status in enumerate(job_statuses, start=1)
+    )
+    gatherer.process_message(_progress_update(*jobs, state=ExecutionState.QUEUED))
+    [update] = drain_queue(gatherer.bus.queue)
+    assert _batch_progress(update, "batch-1").state is expected_state
+
+
 def test_progress_does_not_regress_execution_or_collection(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_progress_update(_workflow_job("j1", "success"), sequence=2))

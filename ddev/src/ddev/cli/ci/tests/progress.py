@@ -12,7 +12,7 @@ their planned jobs, and each job's executions in attempt order.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum, StrEnum, auto
 from typing import TYPE_CHECKING
 
@@ -125,6 +125,19 @@ class BatchProgress:
     jobs_progress: tuple[JobProgress, ...]
     error: ProgressError | None = None
 
+    def reconciled(self) -> BatchProgress:
+        """Return a snapshot whose batch state agrees with observed jobs.
+
+        Workflow and job statuses arrive separately, so jobs may prove execution started while the
+        workflow still appears queued. Only ``QUEUED`` is promoted; later states remain authoritative.
+        """
+        if self.state is ExecutionState.QUEUED and any(
+            job.latest is not None and job.latest.state in (ExecutionState.RUNNING, ExecutionState.FINISHED)
+            for job in self.jobs_progress
+        ):
+            return replace(self, state=ExecutionState.RUNNING)
+        return self
+
 
 @dataclass(frozen=True)
 class DispatcherProgress:
@@ -168,3 +181,8 @@ class DispatcherProgress:
         return sum(
             1 for job in self._jobs_progress if job.complete and job.latest is not None and job.latest.status == status
         )
+
+    def reconciled(self) -> DispatcherProgress:
+        """Reconcile every batch before exposing the aggregate snapshot."""
+        batches = tuple(batch.reconciled() for batch in self.batches)
+        return self if batches == self.batches else replace(self, batches=batches)
