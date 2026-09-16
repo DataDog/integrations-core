@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -34,9 +34,9 @@ class PullRequestResolver:
     repo: str
     number: int | None = None
     head_repo: str | None = None
-    head_ref: str | None = None
+    head_branch: str | None = None
     head_sha: str | None = None
-    base_ref: str | None = None
+    base_branch: str | None = None
 
     async def resolve(self, client: AsyncGitHubClient) -> PullRequest | None:
         """Return the matching open PR, or None if it is closed, missing from lookup, or superseded."""
@@ -45,12 +45,12 @@ class PullRequestResolver:
 
         number = self.number
         if number is None:
-            assert self.head_repo is not None and self.head_ref is not None and self.head_sha is not None, (
+            assert self.head_repo is not None and self.head_branch is not None and self.head_sha is not None, (
                 'PR lookup requires a number or complete head identity.'
             )
             head_owner = self.head_repo.partition('/')[0]
             response = await client.list_pull_requests(
-                self.owner, self.repo, state='open', head=f'{head_owner}:{self.head_ref}', base=self.base_ref
+                self.owner, self.repo, state='open', head=f'{head_owner}:{self.head_branch}', base=self.base_branch
             )
             if PaginationData.from_header(response.headers.get('link')).next is not None:
                 raise ChangeResolutionError(
@@ -112,9 +112,9 @@ class PullRequestResolver:
             pull.head.repo is None or pull.head.repo.full_name.casefold() != self.head_repo.casefold()
         ):
             return False
-        if self.head_ref is not None and pull.head.ref != self.head_ref:
+        if self.head_branch is not None and pull.head.ref != self.head_branch:
             return False
-        return self.base_ref is None or pull.base.ref == self.base_ref
+        return self.base_branch is None or pull.base.ref == self.base_branch
 
 
 class ResolvedRun(BaseModel):
@@ -123,17 +123,17 @@ class ResolvedRun(BaseModel):
     the manifest schema; bump `schema_version` whenever a field changes meaning.
     """
 
-    model_config = ConfigDict(frozen=True, extra='forbid', populate_by_name=True)
+    model_config = ConfigDict(frozen=True, extra='forbid')
 
-    schema_version: Literal[1] = 1
+    schema_version: Literal[2] = 2
     repository: str
-    base_sha: str = Field(alias='commit_sha')
     checkout_sha: str
-    branch: str
+    head_sha: str
+    head_branch: str
     all_targets: bool
     pr_number: int | None = None
-    target_branch: str | None = None
-    target_sha: str | None = None
+    base_branch: str | None = None
+    base_sha: str | None = None
     is_fork: bool = False
 
 
@@ -145,7 +145,7 @@ def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
     no manifest.
     """
     base_path.mkdir(parents=True, exist_ok=True)
-    (base_path / RUN_MANIFEST_NAME).write_text(f'{run.model_dump_json(by_alias=True, indent=2)}\n', encoding='utf-8')
+    (base_path / RUN_MANIFEST_NAME).write_text(f'{run.model_dump_json(indent=2)}\n', encoding='utf-8')
 
 
 def load_run_manifest(app: Application, path: Path, *, repository: str) -> ResolvedRun:
@@ -187,9 +187,9 @@ def resolve_run(
     tested_commit = commit or app.repo.git.latest_commit().sha
     return ResolvedRun(
         repository=repository,
-        base_sha=tested_commit,
         checkout_sha=tested_commit,
-        branch=app.repo.git.current_branch(),
+        head_sha=tested_commit,
+        head_branch=app.repo.git.current_branch(),
         all_targets=all_targets,
     )
 
@@ -209,10 +209,7 @@ def changes_for_run(app: Application, *, run: ResolvedRun) -> list[ChangedFile] 
 
 
 def validate_checkout(app: Application, *, run: ResolvedRun) -> None:
-    """Planning reads the checked-out tree whatever the run compares, so the checkout must be
-    the run's own commit. A pull request additionally reports on the head its merge was built
-    from: parents that are not the recorded head and base belong to a merge GitHub has replaced.
-    """
+    """Require the resolved checkout and, for a PR, a merge built from its resolved head."""
     checked_out = app.repo.git.latest_commit().sha
     if checked_out != run.checkout_sha:
         app.abort(f'The checkout is {checked_out}, not the run\'s commit {run.checkout_sha}.')
@@ -221,20 +218,15 @@ def validate_checkout(app: Application, *, run: ResolvedRun) -> None:
         return
 
     try:
-        base_parent = app.repo.git.capture('rev-parse', f'{run.checkout_sha}^1').strip()
         head_parent = app.repo.git.capture('rev-parse', f'{run.checkout_sha}^2').strip()
     except OSError as error:
         app.abort(
             f'{run.checkout_sha} is not a merge commit this repository holds: {error}\n'
-            'The checkout needs the merge and its first parent, which `fetch-depth: 2` provides.'
+            'The checkout needs the merge and its parents, which `fetch-depth: 2` provides.'
         )
 
-    if head_parent != run.base_sha:
-        app.abort(f'The merge {run.checkout_sha} carries {head_parent} as the pull request head, not {run.base_sha}.')
-    if run.target_sha is None or base_parent != run.target_sha:
-        app.abort(
-            f'The merge {run.checkout_sha} was made against {base_parent}, not the recorded base {run.target_sha}.'
-        )
+    if head_parent != run.head_sha:
+        app.abort(f'The merge {run.checkout_sha} carries PR head {head_parent}, not {run.head_sha}.')
 
 
 def head_is_fork(head: PullRequestRef, *, owner: str, repo: str) -> bool:
@@ -276,13 +268,13 @@ def resolve_pull_request_run(
 
             return ResolvedRun(
                 repository=repository,
-                base_sha=pull.head.sha,
                 checkout_sha=pull.merge_commit_sha,
-                branch=pull.head.ref,
+                head_sha=pull.head.sha,
+                head_branch=pull.head.ref,
                 all_targets=all_targets,
                 pr_number=pull.number,
-                target_branch=pull.base.ref,
-                target_sha=pull.base.sha,
+                base_branch=pull.base.ref,
+                base_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
             )
 

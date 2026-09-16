@@ -54,13 +54,13 @@ DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
     help='Expected PR head repository. Required for head-based PR lookup; optional with `--pr`.',
 )
 @click.option(
-    '--pr-head-ref',
+    '--pr-head-branch',
     default=None,
     metavar='BRANCH',
     help='Expected PR head branch. Required for head-based PR lookup; optional with `--pr`.',
 )
 @click.option(
-    '--pr-base-ref',
+    '--pr-base-branch',
     default=None,
     metavar='BRANCH',
     help='Optional base branch to narrow or verify the pull request. Otherwise read from the resolved PR.',
@@ -119,8 +119,8 @@ def dispatch_tests(
     pull_request: str | None,
     pr_head_sha: str | None,
     pr_head_repo: str | None,
-    pr_head_ref: str | None,
-    pr_base_ref: str | None,
+    pr_head_branch: str | None,
+    pr_base_branch: str | None,
     commit: str | None,
     tags: str | None,
     pytest_args: str | None,
@@ -156,8 +156,8 @@ def dispatch_tests(
         pull_request=pull_request,
         pr_head_sha=pr_head_sha,
         pr_head_repo=pr_head_repo,
-        pr_head_ref=pr_head_ref,
-        pr_base_ref=pr_base_ref,
+        pr_head_branch=pr_head_branch,
+        pr_base_branch=pr_base_branch,
         commit=commit,
         all_targets=all_targets,
         dry_run=dry_run,
@@ -227,12 +227,13 @@ def dispatch_tests(
             tags=caller_tags,
             pytest_args=pytest_args or '',
             checkout_sha=run.checkout_sha,
-            base_sha=run.base_sha,
-            branch=run.branch,
+            head_sha=run.head_sha,
+            head_branch=run.head_branch,
             is_fork=run.is_fork,
             workflow=workflow or config.workflow,
             workflow_ref=workflow_ref or config.workflow_ref,
-            target_branch=run.target_branch,
+            base_branch=run.base_branch,
+            base_sha=run.base_sha,
             pr_number=run.pr_number,
         )
 
@@ -321,13 +322,15 @@ def build_plan(
 def display_plan(app: Application, context: DispatcherContext, batches: list[TestBatch]) -> None:
     app.display_header('Dispatcher plan')
     app.display_pair('Repository', f'{context.owner}/{context.repo}')
-    app.display_pair('Branch', context.branch)
-    app.display_pair('Base commit', context.base_sha)
+    app.display_pair('Head branch', context.head_branch)
+    app.display_pair('Head SHA', context.head_sha)
     app.display_pair('Checkout SHA', context.checkout_sha)
     if context.pr_number is not None:
         app.display_pair('Pull request', str(context.pr_number))
-    if context.target_branch is not None:
-        app.display_pair('Target branch', context.target_branch)
+    if context.base_branch is not None:
+        app.display_pair('Base branch', context.base_branch)
+    if context.base_sha is not None:
+        app.display_pair('Base SHA', context.base_sha)
     if context.tags:
         app.display_pair('Tags', ' '.join(context.tags))
     if context.pytest_args:

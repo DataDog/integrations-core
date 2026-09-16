@@ -37,20 +37,21 @@ HEAD_LOOKUP_OPTIONS = (
     HEAD_SHA,
     '--pr-head-repo',
     'DataDog/integrations-core',
-    '--pr-head-ref',
+    '--pr-head-branch',
     'hs/a-branch',
 )
 
 MERGE_SHA = 'merge-sha-mmm'
 BASE_SHA = 'base-sha-bbb'
-PARENTS = {f'{MERGE_SHA}^1': BASE_SHA, f'{MERGE_SHA}^2': HEAD_SHA}
+# GitHub's base snapshot may lag the first parent used for the synthetic merge.
+PARENTS = {f'{MERGE_SHA}^1': 'current-master-sha-ccc', f'{MERGE_SHA}^2': HEAD_SHA}
 
 
 def pull_request(
     state: str = 'open',
     number: int = PR_NUMBER,
     head_sha: str = HEAD_SHA,
-    base_ref: str = 'a-target-branch',
+    base_branch: str = 'a-target-branch',
     base_sha: str = BASE_SHA,
     head_repo: str | None = 'DataDog/integrations-core',
     merge_commit_sha: str | None = MERGE_SHA,
@@ -64,7 +65,7 @@ def pull_request(
             'sha': head_sha,
             'repo': {'full_name': head_repo} if head_repo is not None else None,
         },
-        base={'ref': base_ref, 'sha': base_sha},
+        base={'ref': base_branch, 'sha': base_sha},
         changed_files=1,
         merge_commit_sha=merge_commit_sha,
     )
@@ -108,8 +109,8 @@ def github(fake_async_github, resolved_changes):
         ['--pr', str(PR_NUMBER)],
         ['--pr', f'https://github.com/DataDog/integrations-core/pull/{PR_NUMBER}'],
         ['--pr', str(PR_NUMBER), '--pr-head-sha', HEAD_SHA],
-        ['--pr', str(PR_NUMBER), '--pr-head-ref', 'hs/a-branch'],
-        ['--pr', str(PR_NUMBER), '--pr-base-ref', 'a-target-branch'],
+        ['--pr', str(PR_NUMBER), '--pr-head-branch', 'hs/a-branch'],
+        ['--pr', str(PR_NUMBER), '--pr-base-branch', 'a-target-branch'],
     ],
     ids=['number', 'url', 'number-with-expected-head', 'number-with-head-constraint', 'number-with-base-constraint'],
 )
@@ -125,7 +126,7 @@ def test_a_pull_request_supplies_the_whole_run_context(ddev, github, planned, op
     assert MERGE_SHA in result.output
 
 
-def test_dispatch_tests_plans_from_hatch_toml(
+def test_dispatch_tests_plans_from_testable_target(
     ddev: CliRunner, github: FakeAsyncGitHubClient, config_file: ConfigFileWithOverrides, tmp_path: Path
 ):
     root = tmp_path / 'repo'
@@ -133,6 +134,7 @@ def test_dispatch_tests_plans_from_hatch_toml(
     (root / '.ddev' / 'config.toml').write_text('')
     subprocess.run(['git', 'init', '--quiet', str(root)], check=True)
     (root / 'ntp').mkdir()
+    (root / 'ntp' / 'tests').mkdir()
     (root / 'ntp' / 'hatch.toml').write_text(
         '[envs.default]\ne2e-env = false\n[[envs.default.matrix]]\npython = ["3.13"]\nversion = ["1", "2"]\n'
     )
@@ -183,7 +185,7 @@ def test_a_head_heading_several_pull_requests_is_refused(
 ):
     github.mock_response(
         'list_pull_requests',
-        pulls_page(listed_pull_request(number=1), listed_pull_request(number=2, base_ref='7.62.x')),
+        pulls_page(listed_pull_request(number=1), listed_pull_request(number=2, base_branch='7.62.x')),
     )
 
     result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS)
@@ -198,35 +200,35 @@ def test_a_head_heading_several_pull_requests_is_refused(
     github.assert_not_called('create_workflow_dispatch')
 
 
-def test_a_base_ref_narrows_an_ambiguous_head(ddev, github, planned):
+def test_a_base_branch_narrows_an_ambiguous_head(ddev, github, planned):
     github.mock_response(
         'list_pull_requests',
-        pulls_page(listed_pull_request(number=1), listed_pull_request(number=2, base_ref='7.62.x')),
+        pulls_page(listed_pull_request(number=1), listed_pull_request(number=2, base_branch='7.62.x')),
     )
-    github.mock_response('get_pull_request', pull_request(number=2, base_ref='7.62.x'))
+    github.mock_response('get_pull_request', pull_request(number=2, base_branch='7.62.x'))
 
-    result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS, '--pr-base-ref', '7.62.x', '--dry-run')
+    result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS, '--pr-base-branch', '7.62.x', '--dry-run')
 
     assert result.exit_code == 0, result.output
     assert github.last_call('get_pull_request').kwargs['pull_number'] == 2
 
 
 @pytest.mark.parametrize(
-    ('head_repo', 'base_ref'),
+    ('head_repo', 'base_branch'),
     [('DataDog/integrations-core', 'a-target-branch'), ('contributor/integrations-core', 'another-base')],
     ids=['same-repository', 'fork'],
 )
 def test_head_metadata_resolves_a_pull_request(
-    ddev: CliRunner, github: FakeAsyncGitHubClient, planned: MagicMock, head_repo: str, base_ref: str
+    ddev: CliRunner, github: FakeAsyncGitHubClient, planned: MagicMock, head_repo: str, base_branch: str
 ):
     github.mock_response(
         'list_pull_requests',
-        pulls_page(listed_pull_request(head_repo=head_repo.upper(), base_ref=base_ref)),
+        pulls_page(listed_pull_request(head_repo=head_repo.upper(), base_branch=base_branch)),
         state='open',
         head=f'{head_repo.split("/")[0]}:hs/a-branch',
         base=None,
     )
-    github.mock_response('get_pull_request', pull_request(head_repo=head_repo, base_ref=base_ref))
+    github.mock_response('get_pull_request', pull_request(head_repo=head_repo, base_branch=base_branch))
 
     result = ddev(
         'ci',
@@ -235,7 +237,7 @@ def test_head_metadata_resolves_a_pull_request(
         HEAD_SHA,
         '--pr-head-repo',
         head_repo,
-        '--pr-head-ref',
+        '--pr-head-branch',
         'hs/a-branch',
         '--dry-run',
     )
@@ -243,7 +245,7 @@ def test_head_metadata_resolves_a_pull_request(
     assert result.exit_code == 0, result.output
     assert MERGE_SHA in result.output
     assert HEAD_SHA in result.output
-    assert base_ref in result.output
+    assert base_branch in result.output
 
 
 def test_a_head_repository_that_changes_after_lookup_dispatches_nothing(
@@ -264,18 +266,18 @@ def test_a_head_repository_that_changes_after_lookup_dispatches_nothing(
     [
         (['--pr-head-sha', HEAD_SHA], 'Specify `--pr` or all of'),
         (['--pr-head-sha', HEAD_SHA, '--pr-head-repo', 'DataDog/integrations-core'], 'Specify `--pr` or all of'),
-        (['--pr-head-sha', HEAD_SHA, '--pr-head-ref', 'hs/a-branch'], 'Specify `--pr` or all of'),
+        (['--pr-head-sha', HEAD_SHA, '--pr-head-branch', 'hs/a-branch'], 'Specify `--pr` or all of'),
         (
-            ['--pr-head-repo', 'DataDog/integrations-core', '--pr-head-ref', 'hs/a-branch'],
+            ['--pr-head-repo', 'DataDog/integrations-core', '--pr-head-branch', 'hs/a-branch'],
             'Specify `--pr` or all of',
         ),
         (
-            ['--pr-head-sha', HEAD_SHA, '--pr-head-repo', 'integrations-core', '--pr-head-ref', 'hs/a-branch'],
+            ['--pr-head-sha', HEAD_SHA, '--pr-head-repo', 'integrations-core', '--pr-head-branch', 'hs/a-branch'],
             'OWNER/NAME',
         ),
         (
-            ['--pr-head-sha', HEAD_SHA, '--pr-head-repo', 'DataDog/integrations-core', '--pr-head-ref', ''],
-            '`--pr-head-ref` must not be empty',
+            ['--pr-head-sha', HEAD_SHA, '--pr-head-repo', 'DataDog/integrations-core', '--pr-head-branch', ''],
+            '`--pr-head-branch` must not be empty',
         ),
         (['--pr', str(PR_NUMBER), '--pr-head-sha', ''], '`--pr-head-sha` must not be empty'),
     ],
@@ -300,7 +302,7 @@ def test_incomplete_head_identity_is_refused(
 
 
 def test_a_numbered_pull_request_must_match_its_base_constraint(ddev, github, planned):
-    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pr-base-ref', 'another-base', '--dry-run')
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--pr-base-branch', 'another-base', '--dry-run')
 
     assert result.exit_code == 0, result.output
     assert 'No open pull request matches the requested revision' in result.output
@@ -360,7 +362,7 @@ def test_a_pull_request_that_moves_while_its_merge_commit_is_awaited_is_refused(
 
 @pytest.mark.parametrize(
     'pr_option',
-    ['--pr', '--pr-head-sha', '--pr-head-repo', '--pr-head-ref', '--pr-base-ref'],
+    ['--pr', '--pr-head-sha', '--pr-head-repo', '--pr-head-branch', '--pr-base-branch'],
 )
 def test_commit_and_pr_options_cannot_be_combined(ddev, github, planned, pr_option: str):
     result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', pr_option, 'a-value', '--dry-run')
@@ -497,7 +499,7 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
         'a-sha',
         '--dry-run',
         '--tags',
-        'repo:contributor/other commit:sneaky team:platform',
+        'repo:contributor/other head_sha:sneaky team:platform',
         '--output-dir',
         str(tmp_path),
     )
@@ -508,7 +510,7 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
     assert (tmp_path / 'run.json').exists()
     [record] = sink.records
     assert record.fields['repo'] == 'DataDog/integrations-core'
-    assert record.fields['commit'] == 'a-sha'
+    assert record.fields['head_sha'] == 'a-sha'
     assert record.fields['team'] == 'platform'
     assert record.fields['component'] == 'planner'
 
@@ -540,43 +542,43 @@ def test_console_visibility_does_not_change_structured_events(
         'a-sha',
         '--dry-run',
         '--tags',
-        'repo:contributor/other commit:sneaky team:platform',
+        'repo:contributor/other head_sha:sneaky team:platform',
     )
 
     assert result.exit_code == 0, result.output
     assert ('planning batches' in result.output) == (not global_options)
     assert 'repo=' not in result.output
-    assert 'commit=' not in result.output
+    assert 'head_sha=' not in result.output
     assert 'team=' not in result.output
     [event] = json_handler.events
     assert event['repo'] == 'DataDog/integrations-core'
-    assert event['commit'] == 'a-sha'
+    assert event['head_sha'] == 'a-sha'
     assert event['team'] == 'platform'
     assert event['component'] == 'planner'
     assert event['event'] == 'planning batches'
 
 
 PULL_REQUEST_RUN_MANIFEST = {
-    'schema_version': 1,
+    'schema_version': 2,
     'repository': 'DataDog/integrations-core',
-    'commit_sha': HEAD_SHA,
     'checkout_sha': MERGE_SHA,
-    'branch': 'hs/a-branch',
+    'head_sha': HEAD_SHA,
+    'head_branch': 'hs/a-branch',
     'all_targets': False,
     'pr_number': PR_NUMBER,
-    'target_branch': 'a-target-branch',
-    'target_sha': BASE_SHA,
+    'base_branch': 'a-target-branch',
+    'base_sha': BASE_SHA,
     'is_fork': False,
 }
 
 COMMIT_RUN_MANIFEST = {
     **PULL_REQUEST_RUN_MANIFEST,
-    'commit_sha': 'a-sha',
     'checkout_sha': 'a-sha',
-    'branch': 'a-branch',
+    'head_sha': 'a-sha',
+    'head_branch': 'a-branch',
     'pr_number': None,
-    'target_branch': None,
-    'target_sha': None,
+    'base_branch': None,
+    'base_sha': None,
 }
 
 
@@ -663,16 +665,14 @@ def test_a_pull_request_round_trips_through_its_manifest(
     ('checked_out', 'parents', 'message'),
     [
         (HEAD_SHA, PARENTS, 'The checkout is'),
-        (MERGE_SHA, {f'{MERGE_SHA}^1': BASE_SHA, f'{MERGE_SHA}^2': BASE_SHA}, 'as the pull request head'),
-        (MERGE_SHA, {f'{MERGE_SHA}^1': HEAD_SHA, f'{MERGE_SHA}^2': HEAD_SHA}, 'was made against'),
+        (MERGE_SHA, {f'{MERGE_SHA}^2': BASE_SHA}, 'carries PR head'),
         (MERGE_SHA, {}, 'is not a merge commit this repository holds'),
     ],
 )
 def test_a_manifest_the_checkout_does_not_match_is_refused_before_planning(
     ddev, planned, tmp_path, mocker, checked_out, parents, message
 ):
-    """Phase two never attaches one revision's results to another's tree, and a checkout that
-    cannot answer for the merge's parents, as a depth-1 fetch cannot, stops the run too."""
+    """Phase two refuses a different tree or a merge built from a different PR head."""
     merge_checkout(mocker, checked_out, parents)
     (tmp_path / 'run.json').write_text(json.dumps(PULL_REQUEST_RUN_MANIFEST), encoding='utf-8')
 
@@ -715,7 +715,7 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
         pytest.param('{not json', 'is not a valid run', id='malformed-json'),
         pytest.param(b'\xff', 'is not a valid run', id='invalid-utf8'),
         pytest.param(
-            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 2}),
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 3}),
             'is not a valid run',
             id='newer-schema',
         ),
@@ -741,7 +741,7 @@ def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str |
 
 
 @pytest.mark.parametrize(
-    'option', ['--pr', '--commit', '--all', '--pr-head-sha', '--pr-head-repo', '--pr-head-ref', '--pr-base-ref']
+    'option', ['--pr', '--commit', '--all', '--pr-head-sha', '--pr-head-repo', '--pr-head-branch', '--pr-base-branch']
 )
 def test_a_manifest_cannot_also_select_the_run(ddev, github, planned, option: str):
     """The manifest decides the run; also passing a selection option would leave the choice ambiguous."""

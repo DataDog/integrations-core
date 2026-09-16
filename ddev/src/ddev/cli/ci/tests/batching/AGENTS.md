@@ -85,8 +85,7 @@ would point the dependency the wrong way.
 
 **Comments explain intent, not mechanics.** State the contract and the reasoning a caller cannot
 infer from the signature, and use inline field comments for per-field notes. Do not restate what the
-code says, do not narrate what other modules do, and do not use Sphinx roles (`:class:`, `:func:`)
-or double backticks.
+code says or narrate what other modules do.
 
 ## Keeping this file current
 

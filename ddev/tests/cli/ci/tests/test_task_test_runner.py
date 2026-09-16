@@ -120,10 +120,11 @@ def make_runner(
         repo="integrations-core",
         workflow_id="test-batch.yaml",
         ref="master",
-        base_sha="base-sha-aaa",
+        head_sha="head-sha-aaa",
         checkout_sha="merge-sha-bbb",
         concurrency_key="pr-123",
         artifacts_base_path=tmp_path,
+        head_branch="a-branch",
         poll_interval_seconds=0.0,
         pytest_args=pytest_args,
         is_fork=is_fork,
@@ -274,6 +275,8 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
     }
     assert kwargs["inputs"]["batch_id"] == "batch-1"
     assert kwargs["inputs"]["checkout_sha"] == "merge-sha-bbb"
+    assert kwargs["inputs"]["head_sha"] == "head-sha-aaa"
+    assert kwargs["inputs"]["head_branch"] == "a-branch"
     assert kwargs["inputs"]["concurrency_key"] == "pr-123"
     assert kwargs["inputs"]["integrations"] == json.dumps(["ntp", "kafka"])
     assert decode_job_list(kwargs["inputs"]["job_list"]) == [

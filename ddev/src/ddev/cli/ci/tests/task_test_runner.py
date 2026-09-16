@@ -74,11 +74,11 @@ class TestRunnerOptions:
     repo: str
     workflow_id: str | int
     ref: str
-    base_sha: str
+    head_sha: str
     checkout_sha: str
     concurrency_key: str
     artifacts_base_path: Path
-    branch: str = ''
+    head_branch: str = ''
     is_fork: bool = False
     poll_interval_seconds: float = 30.0
     pytest_args: str = ''
@@ -333,8 +333,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             "concurrency_key": self._options.concurrency_key,
             # The batch is dispatched at the default branch, so its own context describes master.
             # These two say which commit the results belong to, for CI Visibility and the check run.
-            "head_sha": self._options.base_sha,
-            "branch": self._options.branch,
+            "head_sha": self._options.head_sha,
+            "head_branch": self._options.head_branch,
             # The batch withholds every credential when this is true, so it is sent on every dispatch
             # rather than only when set: an absent input would default the workflow to trusting it.
             "is_fork": str(self._options.is_fork).lower(),
