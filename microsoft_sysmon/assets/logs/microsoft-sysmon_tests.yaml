@@ -64,7 +64,9 @@ tests:
         EventData:
           Data:
             DestinationHostname: "-"
+            DestinationIp: "fe80:0:0:0:1958:16a1:813f:bbe8"
             DestinationIsIpv6: "true"
+            DestinationPort: "5353"
             DestinationPortName: "-"
             Image: "C:\\Windows\\System32\\svchost.exe"
             Initiated: "false"
@@ -73,13 +75,17 @@ tests:
             Protocol: "udp"
             RuleName: "technique_id=T1571,technique_name=Non-Standard Port"
             SourceHostname: "-"
+            SourceIp: "ff02:0:0:0:0:0:0:fb"
             SourceIsIpv6: "true"
+            SourcePort: "5353"
             SourcePortName: "-"
+            User: "NT AUTHORITY\\NETWORK SERVICE"
             UtcTime: "2025-03-18 11:53:54.968"
         System:
           Channel: "Microsoft-Windows-Sysmon/Operational"
           Computer: "zero-test.zeroad.local"
           Correlation: ""
+          EventID: "3"
           EventRecordID: "126015"
           Execution:
             ProcessID: "3340"
@@ -112,10 +118,80 @@ tests:
       title: "Network connection detected"
       usr:
         name: "NT AUTHORITY\\NETWORK SERVICE"
+      ocsf:
+        severity: Informational
+        activity_name: Open
+        metadata:
+          uid: '126015'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '3'
+          profiles:
+            - host
+            - security_control
+          original_time: '2025-03-18T11:53:57.0797708Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '5'
+          version: 1.5.0
+          labels:
+            - technique_id=T1571
+            - technique_name=Non-Standard Port
+        category_uid: 4
+        category_name: Network Activity
+        src_endpoint:
+          port: 5353
+          ip: ff02:0:0:0:0:0:0:fb
+        message: Network connection detected
+        actor:
+          process:
+            uid: ac9e6aaa-ab97-67d2-1a00-000000001500
+            file:
+              path: C:\Windows\System32\svchost.exe
+              type_id: 1
+              name: svchost.exe
+              type: Regular File
+            cpid: ac9e6aaa-ab97-67d2-1a00-000000001500
+            name: svchost.exe
+            pid: 1400
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: NETWORK SERVICE
+            type: System
+        status_id: 1
+        connection_info:
+          protocol_num: 17
+          direction_id: 1
+          protocol_ver: Internet Protocol version 6 (IPv6)
+          protocol_ver_id: 6
+          direction: Inbound
+          protocol_name: udp
+        class_uid: 4001
+        activity_id: 1
+        time: 1742298837079
+        severity_id: 1
+        dst_endpoint:
+          port: 5353
+          ip: fe80:0:0:0:1958:16a1:813f:bbe8
+        device:
+          hostname: zero-test.zeroad.local
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Network Activity
+        status: Success
     message: "Network connection detected:\r\nRuleName: technique_id=T1571,technique_name=Non-Standard Port\r\nUtcTime: 2025-03-18 11:53:54.968\r\nProcessGuid: {ac9e6aaa-ab97-67d2-1a00-000000001500}\r\nProcessId: 1400\r\nImage: C:\\Windows\\System32\\svchost.exe\r\nUser: NT AUTHORITY\\NETWORK SERVICE\r\nProtocol: udp\r\nInitiated: false\r\nSourceIsIpv6: true\r\nSourceIp: ff02:0:0:0:0:0:0:fb\r\nSourceHostname: -\r\nSourcePort: 5353\r\nSourcePortName: -\r\nDestinationIsIpv6: true\r\nDestinationIp: fe80:0:0:0:1958:16a1:813f:bbe8\r\nDestinationHostname: -\r\nDestinationPort: 5353\r\nDestinationPortName: -"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1742298837079
  -
   sample: |-
@@ -173,13 +249,17 @@ tests:
             Image: "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
             ProcessGuid: "{ac9e6aaa-ac1b-67d2-d100-000000001500}"
             ProcessId: "6556"
+            QueryName: "agent-http-intake.logs.datadoghq.com"
+            QueryResults: "type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;"
             QueryStatus: "0"
             RuleName: "-"
+            User: "ZEROAD\\ddagentuser"
             UtcTime: "2025-03-18 11:54:05.278"
         System:
           Channel: "Microsoft-Windows-Sysmon/Operational"
           Computer: "zero-test.zeroad.local"
           Correlation: ""
+          EventID: "22"
           EventRecordID: "126021"
           Execution:
             ProcessID: "3340"
@@ -208,8 +288,2670 @@ tests:
       title: "Dns query executed"
       usr:
         name: "ZEROAD\\ddagentuser"
+      ocsf:
+        severity: Informational
+        activity_name: Query
+        metadata:
+          uid: '126021'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '22'
+          profiles:
+            - host
+            - security_control
+          original_time: '2025-03-18T11:54:07.3147754Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '5'
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        status_code: '0'
+        query:
+          hostname: agent-http-intake.logs.datadoghq.com
+        src_endpoint:
+          hostname: zero-test.zeroad.local
+        rcode: NoError
+        message: Dns query
+        actor:
+          process:
+            uid: ac9e6aaa-ac1b-67d2-d100-000000001500
+            file:
+              path: C:\Program Files\Datadog\Datadog Agent\bin\agent.exe
+              type_id: 1
+              name: agent.exe
+              type: Regular File
+            cpid: ac9e6aaa-ac1b-67d2-d100-000000001500
+            name: agent.exe
+            pid: 6556
+          user:
+            type_id: 1
+            domain: ZEROAD
+            name: ddagentuser
+            type: User
+        rcode_id: 0
+        status_id: 1
+        class_uid: 4003
+        activity_id: 1
+        time: 1742298847314
+        severity_id: 1
+        device:
+          hostname: zero-test.zeroad.local
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: DNS Activity
+        status: Success
+        answers:
+          - rdata: "type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com"
+          - rdata: "2600:1f18:24e6:b901:bc25:8af3:b8c5:379f"
+          - rdata: "2600:1f18:24e6:b900:6c95:a871:b291:a0c2"
+          - rdata: "2600:1f18:24e6:b900:5514:23e8:c81c:ac65"
+          - rdata: "2600:1f18:24e6:b900:954f:416b:a2f9:3e09"
+          - rdata: "2600:1f18:24e6:b902:2717:60a2:f762:a702"
+          - rdata: "2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb"
+          - rdata: "2600:1f18:24e6:b900:4e3a:a924:af85:cda6"
+          - rdata: "2600:1f18:24e6:b901:b3c6:a361:fb6d:7502"
+          - rdata: "::ffff:3.233.144.0"
+          - rdata: "::ffff:3.233.144.52"
+          - rdata: "::ffff:3.233.144.38"
+          - rdata: "::ffff:3.233.144.98"
+          - rdata: "::ffff:3.233.144.113"
+          - rdata: "::ffff:3.233.144.39"
+          - rdata: "::ffff:3.233.144.51"
+          - rdata: "::ffff:3.233.144.97"
     message: "Dns query:\r\nRuleName: -\r\nUtcTime: 2025-03-18 11:54:05.278\r\nProcessGuid: {ac9e6aaa-ac1b-67d2-d100-000000001500}\r\nProcessId: 6556\r\nQueryName: agent-http-intake.logs.datadoghq.com\r\nQueryStatus: 0\r\nQueryResults: type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe\r\nUser: ZEROAD\\ddagentuser"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1742298847314
+ -
+  sample: |-
+    {
+      "message": "Process Create:\r\nRuleName: -\r\nUtcTime: 2026-09-15 19:19:10.780\r\nProcessGuid: {115ac6cb-3c58-fd84-6ec5-c07ff6908e53}\r\nProcessId: 9488\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\r\nFileVersion: 7.77.0.0\r\nDescription: Datadog Installer\r\nProduct: Datadog Installer\r\nCompany: Datadog, Inc.\r\nOriginalFileName: datadog-installer.exe\r\nCommandLine: \"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" get-states\r\nCurrentDirectory: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\\r\nUser: NT AUTHORITY\\SYSTEM\r\nLogonGuid: {1201af82-3a0a-4fe0-5170-cff294dc13fc}\r\nLogonId: 0x3E7\r\nTerminalSessionId: 0\r\nIntegrityLevel: System\r\nHashes: MD5=C11969C60C3B97DF608CF40102433B36,SHA256=BB5B0886FDE0AE7E4BA3D380036F3C8BE51BE4EEECB2D918B534A9E25BE16A22,IMPHASH=490E34DDDEFF47A04862310B7DAC70CB\r\nParentProcessGuid: {0a3eced4-9c8b-e3e6-93af-8a68f77282bd}\r\nParentProcessId: 3552\r\nParentImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\r\nParentCommandLine: \"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" run\r\nParentUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "Company": "Datadog, Inc.",
+            "ParentImage": "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe",
+            "Description": "Datadog Installer",
+            "LogonGuid": "{1201af82-3a0a-4fe0-5170-cff294dc13fc}",
+            "OriginalFileName": "datadog-installer.exe",
+            "IntegrityLevel": "System",
+            "TerminalSessionId": "0",
+            "ParentProcessId": "3552",
+            "ParentUser": "NT AUTHORITY\\SYSTEM",
+            "Product": "Datadog Installer",
+            "Image": "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe",
+            "ProcessGuid": "{115ac6cb-3c58-fd84-6ec5-c07ff6908e53}",
+            "UtcTime": "2026-09-15 19:19:10.780",
+            "CurrentDirectory": "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\",
+            "CommandLine": "\"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" get-states",
+            "Hashes": "MD5=C11969C60C3B97DF608CF40102433B36,SHA256=BB5B0886FDE0AE7E4BA3D380036F3C8BE51BE4EEECB2D918B534A9E25BE16A22,IMPHASH=490E34DDDEFF47A04862310B7DAC70CB",
+            "FileVersion": "7.77.0.0",
+            "ProcessId": "9488",
+            "ParentCommandLine": "\"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" run",
+            "ParentProcessGuid": "{0a3eced4-9c8b-e3e6-93af-8a68f77282bd}",
+            "LogonId": "0x3e7",
+            "RuleName": "-",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "1",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:19:10.7997027Z"
+          },
+          "EventRecordID": "3565630",
+          "Execution": {
+            "ThreadID": "4544",
+            "ProcessID": "3168"
+          },
+          "Version": "5",
+          "Computer": "HOST-101.example1.com",
+          "Level": "4",
+          "EventID": "1"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            CommandLine: "\"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" get-states"
+            Company: "Datadog, Inc."
+            CurrentDirectory: "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\"
+            Description: "Datadog Installer"
+            FileVersion: "7.77.0.0"
+            Hashes: "MD5=C11969C60C3B97DF608CF40102433B36,SHA256=BB5B0886FDE0AE7E4BA3D380036F3C8BE51BE4EEECB2D918B534A9E25BE16A22,IMPHASH=490E34DDDEFF47A04862310B7DAC70CB"
+            Image: "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe"
+            IntegrityLevel: "System"
+            LogonGuid: "{1201af82-3a0a-4fe0-5170-cff294dc13fc}"
+            LogonId: "0x3e7"
+            OriginalFileName: "datadog-installer.exe"
+            ParentCommandLine: "\"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" run"
+            ParentImage: "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe"
+            ParentProcessGuid: "{0a3eced4-9c8b-e3e6-93af-8a68f77282bd}"
+            ParentProcessId: "3552"
+            ParentUser: "NT AUTHORITY\\SYSTEM"
+            ProcessGuid: "{115ac6cb-3c58-fd84-6ec5-c07ff6908e53}"
+            ProcessId: "9488"
+            Product: "Datadog Installer"
+            RuleName: "-"
+            TerminalSessionId: "0"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:19:10.780"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-101.example1.com"
+          Correlation: ""
+          EventID: "1"
+          EventRecordID: "3565630"
+          Execution:
+            ProcessID: "3168"
+            ThreadID: "4544"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "1"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:19:10.7997027Z"
+          Version: "5"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "1"
+      level: "Information"
+      title: "Process created"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Launch
+        metadata:
+          uid: '3565630'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '1'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:19:10.7997027Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '5'
+          version: 1.5.0
+        process:
+          uid: 115ac6cb-3c58-fd84-6ec5-c07ff6908e53
+          integrity: System
+          file:
+            path: C:\Program Files\Datadog\Datadog Agent\bin\datadog-installer.exe
+            type_id: 1
+            name: datadog-installer.exe
+            hashes:
+              - value: C11969C60C3B97DF608CF40102433B36
+                algorithm_id: 1
+                algorithm: MD5
+              - value: BB5B0886FDE0AE7E4BA3D380036F3C8BE51BE4EEECB2D918B534A9E25BE16A22
+                algorithm_id: 3
+                algorithm: SHA-256
+            type: Regular File
+          cmd_line: '"C:\Program Files\Datadog\Datadog Agent\bin\datadog-installer.exe" get-states'
+          cpid: 115ac6cb-3c58-fd84-6ec5-c07ff6908e53
+          name: datadog-installer.exe
+          pid: 9488
+          working_directory: C:\Program Files\Datadog\Datadog Agent\bin\
+          parent_process:
+            uid: 0a3eced4-9c8b-e3e6-93af-8a68f77282bd
+            file:
+              path: C:\Program Files\Datadog\Datadog Agent\bin\datadog-installer.exe
+              type_id: 1
+              name: datadog-installer.exe
+              type: Regular File
+            cmd_line: '"C:\Program Files\Datadog\Datadog Agent\bin\datadog-installer.exe" run'
+            cpid: 0a3eced4-9c8b-e3e6-93af-8a68f77282bd
+            name: datadog-installer.exe
+            pid: 3552
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+          integrity_id: 5
+        category_uid: 1
+        category_name: System Activity
+        message: Process Create
+        actor:
+          process:
+            uid: 0a3eced4-9c8b-e3e6-93af-8a68f77282bd
+            file:
+              path: C:\Program Files\Datadog\Datadog Agent\bin\datadog-installer.exe
+              type_id: 1
+              name: datadog-installer.exe
+              type: Regular File
+            cpid: 0a3eced4-9c8b-e3e6-93af-8a68f77282bd
+            name: datadog-installer.exe
+            pid: 3552
+          session:
+            uid: '0x3e7'
+            uuid: 1201af82-3a0a-4fe0-5170-cff294dc13fc
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        status_id: 1
+        class_uid: 1007
+        activity_id: 1
+        time: 1789499950799
+        severity_id: 1
+        device:
+          hostname: HOST-101.example1.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Process Activity
+        status: Success
+    message: "Process Create:\r\nRuleName: -\r\nUtcTime: 2026-09-15 19:19:10.780\r\nProcessGuid: {115ac6cb-3c58-fd84-6ec5-c07ff6908e53}\r\nProcessId: 9488\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\r\nFileVersion: 7.77.0.0\r\nDescription: Datadog Installer\r\nProduct: Datadog Installer\r\nCompany: Datadog, Inc.\r\nOriginalFileName: datadog-installer.exe\r\nCommandLine: \"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" get-states\r\nCurrentDirectory: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\\r\nUser: NT AUTHORITY\\SYSTEM\r\nLogonGuid: {1201af82-3a0a-4fe0-5170-cff294dc13fc}\r\nLogonId: 0x3E7\r\nTerminalSessionId: 0\r\nIntegrityLevel: System\r\nHashes: MD5=C11969C60C3B97DF608CF40102433B36,SHA256=BB5B0886FDE0AE7E4BA3D380036F3C8BE51BE4EEECB2D918B534A9E25BE16A22,IMPHASH=490E34DDDEFF47A04862310B7DAC70CB\r\nParentProcessGuid: {0a3eced4-9c8b-e3e6-93af-8a68f77282bd}\r\nParentProcessId: 3552\r\nParentImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\r\nParentCommandLine: \"C:\\Program Files\\Datadog\\Datadog Agent\\bin\\datadog-installer.exe\" run\r\nParentUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499950799
+ -
+  sample: |-
+    {
+      "message": "File creation time changed:\r\nRuleName: \r\nUtcTime: 2026-09-14 16:15:44.698\r\nProcessGuid: {f8e3dd70-6ecb-5245-4c50-82af09e88a08}\r\nProcessId: 8728\r\nImage: C:\\Users\\user1\\AppData\\Local\\Apps\\SharePointMigrationTool\\SPMT\\CefSharp.BrowserSubprocess.exe\r\nTargetFilename: C:\\Users\\user1\\AppData\\Local\\CefSharp\\Cache_732\\Default\\Network\\a67e90ec-30bc-65d5-7594-e68e791fa9ad.tmp\r\nCreationUtcTime: 2026-09-14 16:15:07.382\r\nPreviousCreationUtcTime: 2026-09-14 16:15:44.688",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "PreviousCreationUtcTime": "2026-09-14 16:15:44.688",
+            "ProcessId": "8728",
+            "CreationUtcTime": "2026-09-14 16:15:07.382",
+            "Image": "C:\\Users\\user1\\AppData\\Local\\Apps\\SharePointMigrationTool\\SPMT\\CefSharp.BrowserSubprocess.exe",
+            "TargetFilename": "C:\\Users\\user1\\AppData\\Local\\CefSharp\\Cache_732\\Default\\Network\\a67e90ec-30bc-65d5-7594-e68e791fa9ad.tmp",
+            "ProcessGuid": "{f8e3dd70-6ecb-5245-4c50-82af09e88a08}",
+            "UtcTime": "2026-09-14 16:15:44.698"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "2",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-14T16:15:44.699238000Z"
+          },
+          "EventRecordID": "12648340",
+          "Execution": {
+            "ThreadID": "4664",
+            "ProcessID": "3156"
+          },
+          "Version": "4",
+          "Computer": "HOST-301.example3.com",
+          "Level": "4",
+          "EventID": "2"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            CreationUtcTime: "2026-09-14 16:15:07.382"
+            Image: "C:\\Users\\user1\\AppData\\Local\\Apps\\SharePointMigrationTool\\SPMT\\CefSharp.BrowserSubprocess.exe"
+            PreviousCreationUtcTime: "2026-09-14 16:15:44.688"
+            ProcessGuid: "{f8e3dd70-6ecb-5245-4c50-82af09e88a08}"
+            ProcessId: "8728"
+            TargetFilename: "C:\\Users\\user1\\AppData\\Local\\CefSharp\\Cache_732\\Default\\Network\\a67e90ec-30bc-65d5-7594-e68e791fa9ad.tmp"
+            UtcTime: "2026-09-14 16:15:44.698"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-301.example3.com"
+          Correlation: ""
+          EventID: "2"
+          EventRecordID: "12648340"
+          Execution:
+            ProcessID: "3156"
+            ThreadID: "4664"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "2"
+          TimeCreated:
+            SystemTime: "2026-09-14T16:15:44.699238000Z"
+          Version: "4"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "2"
+      level: "Information"
+      title: "File creation time changed"
+      ocsf:
+        severity: Informational
+        activity_name: Set Attributes
+        metadata:
+          uid: '12648340'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '2'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-14T16:15:44.699238000Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '4'
+          version: 1.5.0
+        category_uid: 1
+        category_name: System Activity
+        message: File creation time changed
+        actor:
+          process:
+            uid: f8e3dd70-6ecb-5245-4c50-82af09e88a08
+            file:
+              path: C:\Users\user1\AppData\Local\Apps\SharePointMigrationTool\SPMT\CefSharp.BrowserSubprocess.exe
+              type_id: 1
+              name: CefSharp.BrowserSubprocess.exe
+              type: Regular File
+            cpid: f8e3dd70-6ecb-5245-4c50-82af09e88a08
+            name: CefSharp.BrowserSubprocess.exe
+            pid: 8728
+        file:
+          path: C:\Users\user1\AppData\Local\CefSharp\Cache_732\Default\Network\a67e90ec-30bc-65d5-7594-e68e791fa9ad.tmp
+          created_time: 1789402507382
+          parent_folder: C:\Users\user1\AppData\Local\CefSharp\Cache_732\Default\Network
+          type_id: 1
+          name: a67e90ec-30bc-65d5-7594-e68e791fa9ad.tmp
+          type: Regular File
+        status_id: 1
+        class_uid: 1001
+        activity_id: 6
+        time: 1789402544699
+        severity_id: 1
+        device:
+          hostname: HOST-301.example3.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: File System Activity
+        status: Success
+    message: "File creation time changed:\r\nRuleName: \r\nUtcTime: 2026-09-14 16:15:44.698\r\nProcessGuid: {f8e3dd70-6ecb-5245-4c50-82af09e88a08}\r\nProcessId: 8728\r\nImage: C:\\Users\\user1\\AppData\\Local\\Apps\\SharePointMigrationTool\\SPMT\\CefSharp.BrowserSubprocess.exe\r\nTargetFilename: C:\\Users\\user1\\AppData\\Local\\CefSharp\\Cache_732\\Default\\Network\\a67e90ec-30bc-65d5-7594-e68e791fa9ad.tmp\r\nCreationUtcTime: 2026-09-14 16:15:07.382\r\nPreviousCreationUtcTime: 2026-09-14 16:15:44.688"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789402544699
+ -
+  sample: |-
+    {
+      "message": "Sysmon service state changed:\r\nUtcTime: 2026-09-14 16:58:40.783\r\nState: Started\r\nVersion: 14.13\r\nSchemaVersion: 4.83",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "SchemaVersion": "4.83",
+            "Version": "14.13",
+            "State": "Started",
+            "UtcTime": "2026-09-14 16:58:40.783"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "Sysmon service state changed",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-14T16:58:40.792814800Z"
+          },
+          "EventRecordID": "22441737",
+          "Execution": {
+            "ThreadID": "5444",
+            "ProcessID": "3420"
+          },
+          "Version": "3",
+          "Computer": "HOST-108.example1.com",
+          "Level": "4",
+          "EventID": "4"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            SchemaVersion: "4.83"
+            State: "Started"
+            UtcTime: "2026-09-14 16:58:40.783"
+            Version: "14.13"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-108.example1.com"
+          Correlation: ""
+          EventID: "4"
+          EventRecordID: "22441737"
+          Execution:
+            ProcessID: "3420"
+            ThreadID: "5444"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "Sysmon service state changed"
+          TimeCreated:
+            SystemTime: "2026-09-14T16:58:40.792814800Z"
+          Version: "3"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "4"
+      level: "Information"
+      title: "Sysmon service state changed"
+      ocsf:
+        severity: Informational
+        activity_name: Start
+        metadata:
+          uid: '22441737'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+              version: '14.13'
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '4'
+          profiles:
+            - host
+          original_time: '2026-09-14T16:58:40.792814800Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '3'
+          version: 1.5.0
+        category_uid: 1
+        category_name: System Activity
+        log_name: Microsoft-Windows-Sysmon/Operational
+        message: Sysmon service state changed
+        log_type: OS
+        status_id: 1
+        log_type_id: 1
+        class_uid: 1008
+        activity_id: 6
+        time: 1789405120792
+        severity_id: 1
+        device:
+          hostname: HOST-108.example1.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Event Log Activity
+        log_provider: Microsoft-Windows-Sysmon
+        status: Success
+    message: "Sysmon service state changed:\r\nUtcTime: 2026-09-14 16:58:40.783\r\nState: Started\r\nVersion: 14.13\r\nSchemaVersion: 4.83"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789405120792
+ -
+  sample: |-
+    {
+      "message": "Process terminated:\r\nRuleName: -\r\nUtcTime: 2026-09-15 19:19:19.467\r\nProcessGuid: {706a18e7-c672-1297-8e9a-42f0fdf3f46f}\r\nProcessId: 5764\r\nImage: C:\\Windows\\System32\\conhost.exe\r\nUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "ProcessId": "5764",
+            "Image": "C:\\Windows\\System32\\conhost.exe",
+            "ProcessGuid": "{706a18e7-c672-1297-8e9a-42f0fdf3f46f}",
+            "RuleName": "-",
+            "UtcTime": "2026-09-15 19:19:19.467",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "5",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:19:19.4675939Z"
+          },
+          "EventRecordID": "75837",
+          "Execution": {
+            "ThreadID": "6344",
+            "ProcessID": "4000"
+          },
+          "Version": "3",
+          "Computer": "HOST-402.example4.local",
+          "Level": "4",
+          "EventID": "5"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Image: "C:\\Windows\\System32\\conhost.exe"
+            ProcessGuid: "{706a18e7-c672-1297-8e9a-42f0fdf3f46f}"
+            ProcessId: "5764"
+            RuleName: "-"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:19:19.467"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-402.example4.local"
+          Correlation: ""
+          EventID: "5"
+          EventRecordID: "75837"
+          Execution:
+            ProcessID: "4000"
+            ThreadID: "6344"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "5"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:19:19.4675939Z"
+          Version: "3"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "5"
+      level: "Information"
+      title: "Process terminated"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Terminate
+        metadata:
+          uid: '75837'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '5'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:19:19.4675939Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '3'
+          version: 1.5.0
+        process:
+          uid: 706a18e7-c672-1297-8e9a-42f0fdf3f46f
+          integrity: Unknown
+          file:
+            path: C:\Windows\System32\conhost.exe
+            type_id: 1
+            name: conhost.exe
+            type: Regular File
+          cpid: 706a18e7-c672-1297-8e9a-42f0fdf3f46f
+          name: conhost.exe
+          pid: 5764
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+          integrity_id: 0
+        category_uid: 1
+        category_name: System Activity
+        message: Process terminated
+        actor:
+          process:
+            uid: 706a18e7-c672-1297-8e9a-42f0fdf3f46f
+            file:
+              path: C:\Windows\System32\conhost.exe
+              type_id: 1
+              name: conhost.exe
+              type: Regular File
+            cpid: 706a18e7-c672-1297-8e9a-42f0fdf3f46f
+            name: conhost.exe
+            pid: 5764
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        status_id: 1
+        class_uid: 1007
+        activity_id: 2
+        time: 1789499959467
+        severity_id: 1
+        device:
+          hostname: HOST-402.example4.local
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Process Activity
+        status: Success
+    message: "Process terminated:\r\nRuleName: -\r\nUtcTime: 2026-09-15 19:19:19.467\r\nProcessGuid: {706a18e7-c672-1297-8e9a-42f0fdf3f46f}\r\nProcessId: 5764\r\nImage: C:\\Windows\\System32\\conhost.exe\r\nUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499959467
+ -
+  sample: |-
+    {
+      "message": "Driver loaded:\r\nRuleName: -\r\nUtcTime: 2026-09-14 16:58:14.769\r\nImageLoaded: C:\\Windows\\System32\\drivers\\ena.sys\r\nHashes: MD5=8104CE1688B4C1EC2B682C532972D636,SHA256=4EFD432D0AED31A5D88578D71B5837A5FF386C782AF0D592DE8F3315F80A255D,IMPHASH=B96827074A6CE7E1FF7DB78AD1B35897\r\nSigned: true\r\nSignature: Amazon Web Services, Inc.\r\nSignatureStatus: Valid",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "SignatureStatus": "Valid",
+            "ImageLoaded": "C:\\Windows\\System32\\drivers\\ena.sys",
+            "Hashes": "MD5=8104CE1688B4C1EC2B682C532972D636,SHA256=4EFD432D0AED31A5D88578D71B5837A5FF386C782AF0D592DE8F3315F80A255D,IMPHASH=B96827074A6CE7E1FF7DB78AD1B35897",
+            "Signed": "true",
+            "Signature": "Amazon Web Services, Inc.",
+            "RuleName": "-",
+            "UtcTime": "2026-09-14 16:58:14.769"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "6",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-14T16:58:43.424979200Z"
+          },
+          "EventRecordID": "22441955",
+          "Execution": {
+            "ThreadID": "5452",
+            "ProcessID": "3420"
+          },
+          "Version": "4",
+          "Computer": "HOST-108.example1.com",
+          "Level": "4",
+          "EventID": "6"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Hashes: "MD5=8104CE1688B4C1EC2B682C532972D636,SHA256=4EFD432D0AED31A5D88578D71B5837A5FF386C782AF0D592DE8F3315F80A255D,IMPHASH=B96827074A6CE7E1FF7DB78AD1B35897"
+            ImageLoaded: "C:\\Windows\\System32\\drivers\\ena.sys"
+            RuleName: "-"
+            Signature: "Amazon Web Services, Inc."
+            SignatureStatus: "Valid"
+            Signed: "true"
+            UtcTime: "2026-09-14 16:58:14.769"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-108.example1.com"
+          Correlation: ""
+          EventID: "6"
+          EventRecordID: "22441955"
+          Execution:
+            ProcessID: "3420"
+            ThreadID: "5452"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "6"
+          TimeCreated:
+            SystemTime: "2026-09-14T16:58:43.424979200Z"
+          Version: "4"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "6"
+      level: "Information"
+      title: "Driver loaded"
+      ocsf:
+        severity: Informational
+        activity_name: Load
+        metadata:
+          uid: '22441955'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '6'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-14T16:58:43.424979200Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '4'
+          version: 1.5.0
+        category_uid: 1
+        category_name: System Activity
+        message: Driver loaded
+        actor:
+          invoked_by: Windows kernel
+        status_id: 1
+        driver:
+          file:
+            path: C:\Windows\System32\drivers\ena.sys
+            signature:
+              state: Valid
+              state_id: 1
+              algorithm_id: 4
+              algorithm: Authenticode
+            type_id: 1
+            name: ena.sys
+            hashes:
+              - value: 8104CE1688B4C1EC2B682C532972D636
+                algorithm_id: 1
+                algorithm: MD5
+              - value: 4EFD432D0AED31A5D88578D71B5837A5FF386C782AF0D592DE8F3315F80A255D
+                algorithm_id: 3
+                algorithm: SHA-256
+            type: Regular File
+        class_uid: 1002
+        activity_id: 1
+        time: 1789405123424
+        severity_id: 1
+        device:
+          hostname: HOST-108.example1.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Kernel Extension Activity
+        status: Success
+    message: "Driver loaded:\r\nRuleName: -\r\nUtcTime: 2026-09-14 16:58:14.769\r\nImageLoaded: C:\\Windows\\System32\\drivers\\ena.sys\r\nHashes: MD5=8104CE1688B4C1EC2B682C532972D636,SHA256=4EFD432D0AED31A5D88578D71B5837A5FF386C782AF0D592DE8F3315F80A255D,IMPHASH=B96827074A6CE7E1FF7DB78AD1B35897\r\nSigned: true\r\nSignature: Amazon Web Services, Inc.\r\nSignatureStatus: Valid"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789405123424
+ -
+  sample: |-
+    {
+      "message": "Image loaded:\r\nRuleName: technique_id=T1047,technique_name=Windows Management Instrumentation\r\nUtcTime: 2026-09-15 19:15:18.024\r\nProcessGuid: {04D75546-2F24-359A-7D89-77EF083C9B7A}\r\nProcessId: 5756\r\nImage: C:\\Program Files\\Huntress\\HuntressAgent.exe\r\nImageLoaded: C:\\Windows\\System32\\wbem\\wmiutils.dll\r\nFileVersion: 10.0.14393.4169 (rs1_release.210107-1130)\r\nDescription: WMI\r\nProduct: Microsoft\u00ae Windows\u00ae Operating System\r\nCompany: Microsoft Corporation\r\nOriginalFileName: wmiutils.dll\r\nHashes: SHA1=A46DDC1EB4C9D2507D83A0FF53556F679A9DBA24,MD5=5179B0DEF3AB5CAC3BA02316AF1B6B40,SHA256=FA4112CB0D1A133C41FD001F958F0BE930BB49072BF97A3D765AEA8DB841ABC4,IMPHASH=EE3767E8CDC80CCB91A8FC0A7407A4A9\r\nSigned: true\r\nSignature: Microsoft Windows\r\nSignatureStatus: Valid\r\nUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "SignatureStatus": "Valid",
+            "Company": "Microsoft Corporation",
+            "Description": "WMI",
+            "OriginalFileName": "wmiutils.dll",
+            "Signed": "true",
+            "Product": "Microsoft\u00ae Windows\u00ae Operating System",
+            "Image": "C:\\Program Files\\Huntress\\HuntressAgent.exe",
+            "ProcessGuid": "{04D75546-2F24-359A-7D89-77EF083C9B7A}",
+            "UtcTime": "2026-09-15 19:15:18.024",
+            "ImageLoaded": "C:\\Windows\\System32\\wbem\\wmiutils.dll",
+            "Hashes": "SHA1=A46DDC1EB4C9D2507D83A0FF53556F679A9DBA24,MD5=5179B0DEF3AB5CAC3BA02316AF1B6B40,SHA256=FA4112CB0D1A133C41FD001F958F0BE930BB49072BF97A3D765AEA8DB841ABC4,IMPHASH=EE3767E8CDC80CCB91A8FC0A7407A4A9",
+            "FileVersion": "10.0.14393.4169 (rs1_release.210107-1130)",
+            "Signature": "Microsoft Windows",
+            "ProcessId": "5756",
+            "RuleName": "technique_id=T1047,technique_name=Windows Management Instrumentation",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "7",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:15:18.025545700Z"
+          },
+          "EventRecordID": "98105984",
+          "Execution": {
+            "ThreadID": "5692",
+            "ProcessID": "1652"
+          },
+          "Version": "3",
+          "Computer": "HOST-201.example2.org",
+          "Level": "4",
+          "EventID": "7"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Company: "Microsoft Corporation"
+            Description: "WMI"
+            FileVersion: "10.0.14393.4169 (rs1_release.210107-1130)"
+            Hashes: "SHA1=A46DDC1EB4C9D2507D83A0FF53556F679A9DBA24,MD5=5179B0DEF3AB5CAC3BA02316AF1B6B40,SHA256=FA4112CB0D1A133C41FD001F958F0BE930BB49072BF97A3D765AEA8DB841ABC4,IMPHASH=EE3767E8CDC80CCB91A8FC0A7407A4A9"
+            Image: "C:\\Program Files\\Huntress\\HuntressAgent.exe"
+            ImageLoaded: "C:\\Windows\\System32\\wbem\\wmiutils.dll"
+            OriginalFileName: "wmiutils.dll"
+            ProcessGuid: "{04D75546-2F24-359A-7D89-77EF083C9B7A}"
+            ProcessId: "5756"
+            Product: "Microsoft® Windows® Operating System"
+            RuleName: "technique_id=T1047,technique_name=Windows Management Instrumentation"
+            Signature: "Microsoft Windows"
+            SignatureStatus: "Valid"
+            Signed: "true"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:15:18.024"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-201.example2.org"
+          Correlation: ""
+          EventID: "7"
+          EventRecordID: "98105984"
+          Execution:
+            ProcessID: "1652"
+            ThreadID: "5692"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "7"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:15:18.025545700Z"
+          Version: "3"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "7"
+      level: "Information"
+      title: "Image loaded"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Load
+        metadata:
+          uid: '98105984'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '7'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:15:18.025545700Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '3'
+          version: 1.5.0
+          labels:
+            - technique_id=T1047
+            - technique_name=Windows Management Instrumentation
+        category_uid: 1
+        category_name: System Activity
+        module:
+          load_type: Standard
+          file:
+            path: C:\Windows\System32\wbem\wmiutils.dll
+            internal_name: wmiutils.dll
+            signature:
+              state: Valid
+              state_id: 1
+              algorithm_id: 4
+              algorithm: Authenticode
+            type_id: 1
+            company_name: Microsoft Corporation
+            name: wmiutils.dll
+            hashes:
+              - value: 5179B0DEF3AB5CAC3BA02316AF1B6B40
+                algorithm_id: 1
+                algorithm: MD5
+              - value: A46DDC1EB4C9D2507D83A0FF53556F679A9DBA24
+                algorithm_id: 2
+                algorithm: SHA-1
+              - value: FA4112CB0D1A133C41FD001F958F0BE930BB49072BF97A3D765AEA8DB841ABC4
+                algorithm_id: 3
+                algorithm: SHA-256
+            type: Regular File
+            version: 10.0.14393.4169 (rs1_release.210107-1130)
+          load_type_id: 1
+        message: Image loaded
+        actor:
+          process:
+            uid: 04d75546-2f24-359a-7d89-77ef083c9b7a
+            file:
+              path: C:\Program Files\Huntress\HuntressAgent.exe
+              type_id: 1
+              name: HuntressAgent.exe
+              type: Regular File
+            cpid: 04d75546-2f24-359a-7d89-77ef083c9b7a
+            name: HuntressAgent.exe
+            pid: 5756
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        status_id: 1
+        class_uid: 1005
+        activity_id: 1
+        time: 1789499718025
+        severity_id: 1
+        device:
+          hostname: HOST-201.example2.org
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Module Activity
+        status: Success
+    message: "Image loaded:\r\nRuleName: technique_id=T1047,technique_name=Windows Management Instrumentation\r\nUtcTime: 2026-09-15 19:15:18.024\r\nProcessGuid: {04D75546-2F24-359A-7D89-77EF083C9B7A}\r\nProcessId: 5756\r\nImage: C:\\Program Files\\Huntress\\HuntressAgent.exe\r\nImageLoaded: C:\\Windows\\System32\\wbem\\wmiutils.dll\r\nFileVersion: 10.0.14393.4169 (rs1_release.210107-1130)\r\nDescription: WMI\r\nProduct: Microsoft® Windows® Operating System\r\nCompany: Microsoft Corporation\r\nOriginalFileName: wmiutils.dll\r\nHashes: SHA1=A46DDC1EB4C9D2507D83A0FF53556F679A9DBA24,MD5=5179B0DEF3AB5CAC3BA02316AF1B6B40,SHA256=FA4112CB0D1A133C41FD001F958F0BE930BB49072BF97A3D765AEA8DB841ABC4,IMPHASH=EE3767E8CDC80CCB91A8FC0A7407A4A9\r\nSigned: true\r\nSignature: Microsoft Windows\r\nSignatureStatus: Valid\r\nUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499718025
+ -
+  sample: |-
+    {
+      "message": "CreateRemoteThread detected:\r\nRuleName: -\r\nUtcTime: 2026-09-15 17:13:44.839\r\nSourceProcessGuid: {aeae2975-109b-1ad4-509a-f5ed26b1c713}\r\nSourceProcessId: 14072\r\nSourceImage: C:\\Windows\\System32\\dwm.exe\r\nTargetProcessGuid: {67dfebc3-15c7-7c8a-f429-fcf59430b281}\r\nTargetProcessId: 8828\r\nTargetImage: C:\\Windows\\System32\\csrss.exe\r\nNewThreadId: 5784\r\nStartAddress: 0xFFFFAB9598298DF0\r\nStartModule: -\r\nStartFunction: -\r\nSourceUser: Window Manager\\DWM-18\r\nTargetUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "NewThreadId": "5784",
+            "SourceImage": "C:\\Windows\\System32\\dwm.exe",
+            "SourceProcessGuid": "{aeae2975-109b-1ad4-509a-f5ed26b1c713}",
+            "SourceProcessId": "14072",
+            "StartModule": "-",
+            "StartAddress": "0xFFFFAB9598298DF0",
+            "TargetUser": "NT AUTHORITY\\SYSTEM",
+            "UtcTime": "2026-09-15 17:13:44.839",
+            "TargetProcessId": "8828",
+            "SourceUser": "Window Manager\\DWM-18",
+            "StartFunction": "-",
+            "TargetImage": "C:\\Windows\\System32\\csrss.exe",
+            "RuleName": "-",
+            "TargetProcessGuid": "{67dfebc3-15c7-7c8a-f429-fcf59430b281}"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "8",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T17:13:44.8510187Z"
+          },
+          "EventRecordID": "2493789",
+          "Execution": {
+            "ThreadID": "6876",
+            "ProcessID": "3424"
+          },
+          "Version": "2",
+          "Computer": "HOST-401.example4.local",
+          "Level": "4",
+          "EventID": "8"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            NewThreadId: "5784"
+            RuleName: "-"
+            SourceImage: "C:\\Windows\\System32\\dwm.exe"
+            SourceProcessGuid: "{aeae2975-109b-1ad4-509a-f5ed26b1c713}"
+            SourceProcessId: "14072"
+            SourceUser: "Window Manager\\DWM-18"
+            StartAddress: "0xFFFFAB9598298DF0"
+            StartFunction: "-"
+            StartModule: "-"
+            TargetImage: "C:\\Windows\\System32\\csrss.exe"
+            TargetProcessGuid: "{67dfebc3-15c7-7c8a-f429-fcf59430b281}"
+            TargetProcessId: "8828"
+            TargetUser: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 17:13:44.839"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-401.example4.local"
+          Correlation: ""
+          EventID: "8"
+          EventRecordID: "2493789"
+          Execution:
+            ProcessID: "3424"
+            ThreadID: "6876"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "8"
+          TimeCreated:
+            SystemTime: "2026-09-15T17:13:44.8510187Z"
+          Version: "2"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "8"
+      level: "Information"
+      title: "CreateRemoteThread detected"
+      ocsf:
+        severity: Informational
+        activity_name: Inject
+        metadata:
+          uid: '2493789'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '8'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T17:13:44.8510187Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '2'
+          version: 1.5.0
+        process:
+          uid: 67dfebc3-15c7-7c8a-f429-fcf59430b281
+          integrity: Unknown
+          file:
+            path: C:\Windows\System32\csrss.exe
+            type_id: 1
+            name: csrss.exe
+            type: Regular File
+          cpid: 67dfebc3-15c7-7c8a-f429-fcf59430b281
+          name: csrss.exe
+          pid: 8828
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+          integrity_id: 0
+          tid: 5784
+        category_uid: 1
+        category_name: System Activity
+        injection_type: Remote Thread
+        message: CreateRemoteThread detected
+        actor:
+          process:
+            uid: aeae2975-109b-1ad4-509a-f5ed26b1c713
+            file:
+              path: C:\Windows\System32\dwm.exe
+              type_id: 1
+              name: dwm.exe
+              type: Regular File
+            cpid: aeae2975-109b-1ad4-509a-f5ed26b1c713
+            name: dwm.exe
+            pid: 14072
+          user:
+            type_id: 3
+            domain: Window Manager
+            name: DWM-18
+            type: System
+        status_id: 1
+        class_uid: 1007
+        activity_id: 4
+        injection_type_id: 1
+        time: 1789492424851
+        severity_id: 1
+        device:
+          hostname: HOST-401.example4.local
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Process Activity
+        status: Success
+    message: "CreateRemoteThread detected:\r\nRuleName: -\r\nUtcTime: 2026-09-15 17:13:44.839\r\nSourceProcessGuid: {aeae2975-109b-1ad4-509a-f5ed26b1c713}\r\nSourceProcessId: 14072\r\nSourceImage: C:\\Windows\\System32\\dwm.exe\r\nTargetProcessGuid: {67dfebc3-15c7-7c8a-f429-fcf59430b281}\r\nTargetProcessId: 8828\r\nTargetImage: C:\\Windows\\System32\\csrss.exe\r\nNewThreadId: 5784\r\nStartAddress: 0xFFFFAB9598298DF0\r\nStartModule: -\r\nStartFunction: -\r\nSourceUser: Window Manager\\DWM-18\r\nTargetUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789492424851
+ -
+  sample: |-
+    {
+      "message": "Process accessed:\r\nRuleName: technique_id=T1055.001,technique_name=Dynamic-link Library Injection\r\nUtcTime: 2026-09-15 19:18:58.878\r\nSourceProcessGUID: {6DFD4602-CC3F-525D-91DA-942BF2F44203}\r\nSourceProcessId: 7736\r\nSourceThreadId: 5716\r\nSourceImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe\r\nTargetProcessGUID: {AC2C8155-8B8D-F6D7-A58A-40E3AEC4FAA1}\r\nTargetProcessId: 3848\r\nTargetImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgentPatcher.exe\r\nGrantedAccess: 0x1410\r\nCallTrace: C:\\Windows\\SYSTEM32\ntdll.dll+a68f4|C:\\Windows\\System32\\wow64.dll+124f4|C:\\Windows\\System32\\wow64.dll+6e75|C:\\Windows\\System32\\wow64cpu.dll+1d07|C:\\Windows\\System32\\wow64.dll+1bf87|C:\\Windows\\System32\\wow64.dll+cba0|C:\\Windows\\SYSTEM32\ntdll.dll+78b80|C:\\Windows\\SYSTEM32\ntdll.dll+7874e|C:\\Windows\\SYSTEM32\ntdll.dll+6f33c(wow64)|C:\\Windows\\System32\\KERNELBASE.dll+c76d8(wow64)|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+4812ab|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+2b296e|UNKNOWN(000000007E0B42C9)\r\nSourceUser: NT AUTHORITY\\SYSTEM\r\nTargetUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "GrantedAccess": "0x1410",
+            "SourceImage": "C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe",
+            "SourceProcessId": "7736",
+            "SourceProcessGUID": "{6DFD4602-CC3F-525D-91DA-942BF2F44203}",
+            "TargetUser": "NT AUTHORITY\\SYSTEM",
+            "UtcTime": "2026-09-15 19:18:58.878",
+            "TargetProcessId": "3848",
+            "SourceUser": "NT AUTHORITY\\SYSTEM",
+            "SourceThreadId": "5716",
+            "TargetImage": "C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgentPatcher.exe",
+            "CallTrace": "C:\\Windows\\SYSTEM32\\ntdll.dll+a68f4|C:\\Windows\\System32\\wow64.dll+124f4|C:\\Windows\\System32\\wow64.dll+6e75|C:\\Windows\\System32\\wow64cpu.dll+1d07|C:\\Windows\\System32\\wow64.dll+1bf87|C:\\Windows\\System32\\wow64.dll+cba0|C:\\Windows\\SYSTEM32\\ntdll.dll+78b80|C:\\Windows\\SYSTEM32\\ntdll.dll+7874e|C:\\Windows\\SYSTEM32\\ntdll.dll+6f33c(wow64)|C:\\Windows\\System32\\KERNELBASE.dll+c76d8(wow64)|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+4812ab|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+2b296e|UNKNOWN(000000007E0B42C9)",
+            "RuleName": "technique_id=T1055.001,technique_name=Dynamic-link Library Injection",
+            "TargetProcessGUID": "{AC2C8155-8B8D-F6D7-A58A-40E3AEC4FAA1}"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "10",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:18:58.879353300Z"
+          },
+          "EventRecordID": "98106623",
+          "Execution": {
+            "ThreadID": "5692",
+            "ProcessID": "1652"
+          },
+          "Version": "3",
+          "Computer": "HOST-201.example2.org",
+          "Level": "4",
+          "EventID": "10"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            CallTrace: "C:\\Windows\\SYSTEM32\\ntdll.dll+a68f4|C:\\Windows\\System32\\wow64.dll+124f4|C:\\Windows\\System32\\wow64.dll+6e75|C:\\Windows\\System32\\wow64cpu.dll+1d07|C:\\Windows\\System32\\wow64.dll+1bf87|C:\\Windows\\System32\\wow64.dll+cba0|C:\\Windows\\SYSTEM32\\ntdll.dll+78b80|C:\\Windows\\SYSTEM32\\ntdll.dll+7874e|C:\\Windows\\SYSTEM32\\ntdll.dll+6f33c(wow64)|C:\\Windows\\System32\\KERNELBASE.dll+c76d8(wow64)|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+4812ab|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+2b296e|UNKNOWN(000000007E0B42C9)"
+            GrantedAccess: "0x1410"
+            RuleName: "technique_id=T1055.001,technique_name=Dynamic-link Library Injection"
+            SourceImage: "C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe"
+            SourceProcessGUID: "{6DFD4602-CC3F-525D-91DA-942BF2F44203}"
+            SourceProcessId: "7736"
+            SourceThreadId: "5716"
+            SourceUser: "NT AUTHORITY\\SYSTEM"
+            TargetImage: "C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgentPatcher.exe"
+            TargetProcessGUID: "{AC2C8155-8B8D-F6D7-A58A-40E3AEC4FAA1}"
+            TargetProcessId: "3848"
+            TargetUser: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:18:58.878"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-201.example2.org"
+          Correlation: ""
+          EventID: "10"
+          EventRecordID: "98106623"
+          Execution:
+            ProcessID: "1652"
+            ThreadID: "5692"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "10"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:18:58.879353300Z"
+          Version: "3"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "10"
+      level: "Information"
+      title: "Process accessed"
+      ocsf:
+        severity: Informational
+        activity_name: Open
+        metadata:
+          uid: '98106623'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '10'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:18:58.879353300Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '3'
+          version: 1.5.0
+          labels:
+            - technique_id=T1055.001
+            - technique_name=Dynamic-link Library Injection
+        process:
+          uid: ac2c8155-8b8d-f6d7-a58a-40e3aec4faa1
+          integrity: Unknown
+          file:
+            path: C:\Program Files (x86)\example2orgserversfe72b5-6.0.1901\NinjaRMMAgentPatcher.exe
+            type_id: 1
+            name: NinjaRMMAgentPatcher.exe
+            type: Regular File
+          cpid: ac2c8155-8b8d-f6d7-a58a-40e3aec4faa1
+          name: NinjaRMMAgentPatcher.exe
+          pid: 3848
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+          integrity_id: 0
+        category_uid: 1
+        category_name: System Activity
+        message: Process accessed
+        actor:
+          process:
+            uid: 6dfd4602-cc3f-525d-91da-942bf2f44203
+            file:
+              path: C:\Program Files (x86)\example2orgserversfe72b5-6.0.1901\NinjaRMMAgent.exe
+              type_id: 1
+              name: NinjaRMMAgent.exe
+              type: Regular File
+            cpid: 6dfd4602-cc3f-525d-91da-942bf2f44203
+            name: NinjaRMMAgent.exe
+            pid: 7736
+            tid: 5716
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        status_id: 1
+        class_uid: 1007
+        activity_id: 3
+        time: 1789499938879
+        severity_id: 1
+        device:
+          hostname: HOST-201.example2.org
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Process Activity
+        status: Success
+    message: "Process accessed:\r\nRuleName: technique_id=T1055.001,technique_name=Dynamic-link Library Injection\r\nUtcTime: 2026-09-15 19:18:58.878\r\nSourceProcessGUID: {6DFD4602-CC3F-525D-91DA-942BF2F44203}\r\nSourceProcessId: 7736\r\nSourceThreadId: 5716\r\nSourceImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe\r\nTargetProcessGUID: {AC2C8155-8B8D-F6D7-A58A-40E3AEC4FAA1}\r\nTargetProcessId: 3848\r\nTargetImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgentPatcher.exe\r\nGrantedAccess: 0x1410\r\nCallTrace: C:\\Windows\\SYSTEM32\ntdll.dll+a68f4|C:\\Windows\\System32\\wow64.dll+124f4|C:\\Windows\\System32\\wow64.dll+6e75|C:\\Windows\\System32\\wow64cpu.dll+1d07|C:\\Windows\\System32\\wow64.dll+1bf87|C:\\Windows\\System32\\wow64.dll+cba0|C:\\Windows\\SYSTEM32\ntdll.dll+78b80|C:\\Windows\\SYSTEM32\ntdll.dll+7874e|C:\\Windows\\SYSTEM32\ntdll.dll+6f33c(wow64)|C:\\Windows\\System32\\KERNELBASE.dll+c76d8(wow64)|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+4812ab|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+2b296e|UNKNOWN(000000007E0B42C9)\r\nSourceUser: NT AUTHORITY\\SYSTEM\r\nTargetUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499938879
+ -
+  sample: |-
+    {
+      "message": "File created:\r\nRuleName: technique_id=T1574.010,technique_name=Services File Permissions Weakness\r\nUtcTime: 2026-09-15 19:19:09.459\r\nProcessGuid: {7E7B91BC-A965-5DC7-AA94-AFFD753150AE}\r\nProcessId: 1036\r\nImage: C:\\Windows\\System32\\svchost.exe\r\nTargetFilename: C:\\Windows\\System32\\LogFiles\\Sum\\Svctmp.log\r\nCreationUtcTime: 2025-07-10 00:36:43.600\r\nUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "ProcessId": "1036",
+            "CreationUtcTime": "2025-07-10 00:36:43.600",
+            "Image": "C:\\Windows\\System32\\svchost.exe",
+            "TargetFilename": "C:\\Windows\\System32\\LogFiles\\Sum\\Svctmp.log",
+            "ProcessGuid": "{7E7B91BC-A965-5DC7-AA94-AFFD753150AE}",
+            "RuleName": "technique_id=T1574.010,technique_name=Services File Permissions Weakness",
+            "UtcTime": "2026-09-15 19:19:09.459",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "11",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:19:09.460156200Z"
+          },
+          "EventRecordID": "116841144",
+          "Execution": {
+            "ThreadID": "5644",
+            "ProcessID": "4264"
+          },
+          "Version": "2",
+          "Computer": "HOST-202.example2.org",
+          "Level": "4",
+          "EventID": "11"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            CreationUtcTime: "2025-07-10 00:36:43.600"
+            Image: "C:\\Windows\\System32\\svchost.exe"
+            ProcessGuid: "{7E7B91BC-A965-5DC7-AA94-AFFD753150AE}"
+            ProcessId: "1036"
+            RuleName: "technique_id=T1574.010,technique_name=Services File Permissions Weakness"
+            TargetFilename: "C:\\Windows\\System32\\LogFiles\\Sum\\Svctmp.log"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:19:09.459"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-202.example2.org"
+          Correlation: ""
+          EventID: "11"
+          EventRecordID: "116841144"
+          Execution:
+            ProcessID: "4264"
+            ThreadID: "5644"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "11"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:19:09.460156200Z"
+          Version: "2"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "11"
+      level: "Information"
+      title: "File created"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Create
+        metadata:
+          uid: '116841144'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '11'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:19:09.460156200Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '2'
+          version: 1.5.0
+          labels:
+            - technique_id=T1574.010
+            - technique_name=Services File Permissions Weakness
+        category_uid: 1
+        category_name: System Activity
+        message: File created
+        actor:
+          process:
+            uid: 7e7b91bc-a965-5dc7-aa94-affd753150ae
+            file:
+              path: C:\Windows\System32\svchost.exe
+              type_id: 1
+              name: svchost.exe
+              type: Regular File
+            cpid: 7e7b91bc-a965-5dc7-aa94-affd753150ae
+            name: svchost.exe
+            pid: 1036
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        file:
+          path: C:\Windows\System32\LogFiles\Sum\Svctmp.log
+          created_time: 1752107803600
+          parent_folder: C:\Windows\System32\LogFiles\Sum
+          type_id: 1
+          name: Svctmp.log
+          type: Regular File
+        status_id: 1
+        class_uid: 1001
+        activity_id: 1
+        time: 1789499949460
+        severity_id: 1
+        device:
+          hostname: HOST-202.example2.org
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: File System Activity
+        status: Success
+    message: "File created:\r\nRuleName: technique_id=T1574.010,technique_name=Services File Permissions Weakness\r\nUtcTime: 2026-09-15 19:19:09.459\r\nProcessGuid: {7E7B91BC-A965-5DC7-AA94-AFFD753150AE}\r\nProcessId: 1036\r\nImage: C:\\Windows\\System32\\svchost.exe\r\nTargetFilename: C:\\Windows\\System32\\LogFiles\\Sum\\Svctmp.log\r\nCreationUtcTime: 2025-07-10 00:36:43.600\r\nUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499949460
+ -
+  sample: |-
+    {
+      "message": "Registry object added or deleted:\r\nRuleName: -\r\nEventType: DeleteKey\r\nUtcTime: 2026-09-15 18:37:24.832\r\nProcessGuid: {dc682858-8dd7-7855-87d3-6a46673abc2b}\r\nProcessId: 3320\r\nImage: C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26080.3-0\\MsMpEng.exe\r\nTargetObject: HKLM\\SOFTWARE\\Microsoft\\Windows Defender\\Features\\Controls\r\nUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "EventType": "DeleteKey",
+            "ProcessId": "3320",
+            "Image": "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26080.3-0\\MsMpEng.exe",
+            "ProcessGuid": "{dc682858-8dd7-7855-87d3-6a46673abc2b}",
+            "RuleName": "-",
+            "TargetObject": "HKLM\\SOFTWARE\\Microsoft\\Windows Defender\\Features\\Controls",
+            "UtcTime": "2026-09-15 18:37:24.832",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "12",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T18:37:24.8328083Z"
+          },
+          "EventRecordID": "5753481",
+          "Execution": {
+            "ThreadID": "5172",
+            "ProcessID": "3188"
+          },
+          "Version": "2",
+          "Computer": "HOST-302.example3.com",
+          "Level": "4",
+          "EventID": "12"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            EventType: "DeleteKey"
+            Image: "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26080.3-0\\MsMpEng.exe"
+            ProcessGuid: "{dc682858-8dd7-7855-87d3-6a46673abc2b}"
+            ProcessId: "3320"
+            RuleName: "-"
+            TargetObject: "HKLM\\SOFTWARE\\Microsoft\\Windows Defender\\Features\\Controls"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 18:37:24.832"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-302.example3.com"
+          Correlation: ""
+          EventID: "12"
+          EventRecordID: "5753481"
+          Execution:
+            ProcessID: "3188"
+            ThreadID: "5172"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "12"
+          TimeCreated:
+            SystemTime: "2026-09-15T18:37:24.8328083Z"
+          Version: "2"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "12"
+      level: "Information"
+      title: "Registry object added or deleted"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Registry object added or deleted
+        metadata:
+          uid: '5753481'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '12'
+          profiles:
+            - host
+          original_time: '2026-09-15T18:37:24.8328083Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '2'
+          version: 1.5.0
+        category_uid: 0
+        message: Registry object added or deleted
+        actor:
+          process:
+            uid: '3320'
+            file:
+              path: C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.26080.3-0\MsMpEng.exe
+              type_id: 1
+              name: MsMpEng.exe
+              type: Regular File
+            cpid: dc682858-8dd7-7855-87d3-6a46673abc2b
+            name: MsMpEng.exe
+            pid: 3320
+          user:
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type_id: 3
+            type: System
+        status_id: 0
+        class_uid: 0
+        activity_id: 99
+        time: 1789497444832
+        severity_id: 1
+        device:
+          hostname: HOST-302.example3.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Base Event
+        status: Unknown
+    message: "Registry object added or deleted:\r\nRuleName: -\r\nEventType: DeleteKey\r\nUtcTime: 2026-09-15 18:37:24.832\r\nProcessGuid: {dc682858-8dd7-7855-87d3-6a46673abc2b}\r\nProcessId: 3320\r\nImage: C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26080.3-0\\MsMpEng.exe\r\nTargetObject: HKLM\\SOFTWARE\\Microsoft\\Windows Defender\\Features\\Controls\r\nUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789497444832
+ -
+  sample: |-
+    {
+      "message": "Registry value set:\r\nRuleName: -\r\nEventType: SetValue\r\nUtcTime: 2026-09-15 19:18:49.005\r\nProcessGuid: {0F98219D-B516-4189-8C29-AEC5BF56E7CF}\r\nProcessId: 1456\r\nImage: C:\\Windows\\system32\\wbem\\WmiApSrv.exe\r\nTargetObject: HKLM\\System\\CurrentControlSet\\Services\\WmiApRpl\\Performance\\PerfIniFile\r\nDetails: WmiApRpl.ini\r\nUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "Details": "WmiApRpl.ini",
+            "EventType": "SetValue",
+            "ProcessId": "1456",
+            "Image": "C:\\Windows\\system32\\wbem\\WmiApSrv.exe",
+            "ProcessGuid": "{0F98219D-B516-4189-8C29-AEC5BF56E7CF}",
+            "RuleName": "-",
+            "TargetObject": "HKLM\\System\\CurrentControlSet\\Services\\WmiApRpl\\Performance\\PerfIniFile",
+            "UtcTime": "2026-09-15 19:18:49.005",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "13",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:18:49.005707800Z"
+          },
+          "EventRecordID": "98106474",
+          "Execution": {
+            "ThreadID": "5692",
+            "ProcessID": "1652"
+          },
+          "Version": "2",
+          "Computer": "HOST-201.example2.org",
+          "Level": "4",
+          "EventID": "13"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Details: "WmiApRpl.ini"
+            EventType: "SetValue"
+            Image: "C:\\Windows\\system32\\wbem\\WmiApSrv.exe"
+            ProcessGuid: "{0F98219D-B516-4189-8C29-AEC5BF56E7CF}"
+            ProcessId: "1456"
+            RuleName: "-"
+            TargetObject: "HKLM\\System\\CurrentControlSet\\Services\\WmiApRpl\\Performance\\PerfIniFile"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:18:49.005"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-201.example2.org"
+          Correlation: ""
+          EventID: "13"
+          EventRecordID: "98106474"
+          Execution:
+            ProcessID: "1652"
+            ThreadID: "5692"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "13"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:18:49.005707800Z"
+          Version: "2"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "13"
+      level: "Information"
+      title: "Registry value set"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Registry value set
+        metadata:
+          uid: '98106474'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '13'
+          profiles:
+            - host
+          original_time: '2026-09-15T19:18:49.005707800Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '2'
+          version: 1.5.0
+        category_uid: 0
+        message: Registry value set
+        actor:
+          process:
+            uid: '1456'
+            file:
+              path: C:\Windows\system32\wbem\WmiApSrv.exe
+              type_id: 1
+              name: WmiApSrv.exe
+              type: Regular File
+            cpid: 0f98219d-b516-4189-8c29-aec5bf56e7cf
+            name: WmiApSrv.exe
+            pid: 1456
+          user:
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type_id: 3
+            type: System
+        status_id: 0
+        class_uid: 0
+        activity_id: 99
+        time: 1789499929005
+        severity_id: 1
+        device:
+          hostname: HOST-201.example2.org
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Base Event
+        status: Unknown
+    message: "Registry value set:\r\nRuleName: -\r\nEventType: SetValue\r\nUtcTime: 2026-09-15 19:18:49.005\r\nProcessGuid: {0F98219D-B516-4189-8C29-AEC5BF56E7CF}\r\nProcessId: 1456\r\nImage: C:\\Windows\\system32\\wbem\\WmiApSrv.exe\r\nTargetObject: HKLM\\System\\CurrentControlSet\\Services\\WmiApRpl\\Performance\\PerfIniFile\r\nDetails: WmiApRpl.ini\r\nUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499929005
+ -
+  sample: |-
+    {
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "Contents": "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579",
+            "ProcessId": "4",
+            "CreationUtcTime": "2026-09-15 17:59:12.125",
+            "Hash": "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000",
+            "Image": "System",
+            "TargetFilename": "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier",
+            "ProcessGuid": "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}",
+            "RuleName": "-",
+            "UtcTime": "2026-09-15 17:59:16.302",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "15",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T17:59:16.308447400Z"
+          },
+          "EventRecordID": "8106597",
+          "Execution": {
+            "ThreadID": "3676",
+            "ProcessID": "2384"
+          },
+          "Version": "2",
+          "Computer": "HOST-103.example1.com",
+          "Level": "4",
+          "EventID": "15"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Contents: "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579"
+            CreationUtcTime: "2026-09-15 17:59:12.125"
+            Hash: "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000"
+            Image: "System"
+            ProcessGuid: "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}"
+            ProcessId: "4"
+            RuleName: "-"
+            TargetFilename: "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 17:59:16.302"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-103.example1.com"
+          Correlation: ""
+          EventID: "15"
+          EventRecordID: "8106597"
+          Execution:
+            ProcessID: "2384"
+            ThreadID: "3676"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "15"
+          TimeCreated:
+            SystemTime: "2026-09-15T17:59:16.308447400Z"
+          Version: "2"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "15"
+      level: "Information"
+      title: "File stream created"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Create
+        metadata:
+          uid: '8106597'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '15'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T17:59:16.308447400Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '2'
+          version: 1.5.0
+        category_uid: 1
+        category_name: System Activity
+        message: File stream created
+        actor:
+          process:
+            uid: 8be822ed-d22f-87f9-914b-faf280dd7c15
+            cpid: 8be822ed-d22f-87f9-914b-faf280dd7c15
+            name: System
+            pid: 4
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        component: Zone.Identifier
+        file:
+          path: D:\Files\Corp_Share\Finance&Administration_Department\Accounting\accounting\2026\08 August\Financials\Report Downloads\Balance_Sheet_-_example1_-_12_Month (63).xlsx
+          created_time: 1789495152125
+          parent_folder: D:\Files\Corp_Share\Finance&Administration_Department\Accounting\accounting\2026\08 August\Financials\Report Downloads
+          type_id: 1
+          name: Balance_Sheet_-_example1_-_12_Month (63).xlsx
+          hashes:
+            - value: B1FB6148B5BD8C2221449011AC99CA4C
+              algorithm_id: 1
+              algorithm: MD5
+            - value: B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F
+              algorithm_id: 3
+              algorithm: SHA-256
+          type: Regular File
+        status_id: 1
+        class_uid: 1001
+        activity_id: 1
+        time: 1789495156308
+        severity_id: 1
+        device:
+          hostname: HOST-103.example1.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: File System Activity
+        status: Success
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789495156308
+    message: |-
+      {
+        "level": "Information",
+        "Event": {
+          "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+          "EventData": {
+            "Data": {
+              "Contents": "[ZoneTransfer]  ZoneId=3  ReferrerUrl=https://www.example-saas.com/example1/d/gateway.htmld?reloadToken=da20c7701de02f75e22a0772ef8dea87d306234e14abd2eaa127c18982cab37a  HostUrl=https://www.example-saas.com/example1/doc-ready/0key.xlsx?docName=Balance_Sheet_-_example1_-_12_Month.xlsx&instance-id=1422%241579",
+              "ProcessId": "4",
+              "CreationUtcTime": "2026-09-15 17:59:12.125",
+              "Hash": "MD5=B1FB6148B5BD8C2221449011AC99CA4C,SHA256=B20AEC4607745FD3EF456582D55AF5B69E9631AFEB5407AA08495E0B74F7620F,IMPHASH=00000000000000000000000000000000",
+              "Image": "System",
+              "TargetFilename": "D:\\Files\\Corp_Share\\Finance&Administration_Department\\Accounting\\accounting\\2026\\08 August\\Financials\\Report Downloads\\Balance_Sheet_-_example1_-_12_Month (63).xlsx:Zone.Identifier",
+              "ProcessGuid": "{8BE822ED-D22F-87F9-914B-FAF280DD7C15}",
+              "RuleName": "-",
+              "UtcTime": "2026-09-15 17:59:16.302",
+              "User": "NT AUTHORITY\\SYSTEM"
+            }
+          },
+          "System": {
+            "Correlation": "",
+            "Task": "15",
+            "Keywords": "0x8000000000000000",
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Opcode": "Info",
+            "Security": {
+              "UserID": "S-1-5-18"
+            },
+            "Provider": {
+              "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+              "Name": "Microsoft-Windows-Sysmon"
+            },
+            "TimeCreated": {
+              "SystemTime": "2026-09-15T17:59:16.308447400Z"
+            },
+            "EventRecordID": "8106597",
+            "Execution": {
+              "ThreadID": "3676",
+              "ProcessID": "2384"
+            },
+            "Version": "2",
+            "Computer": "HOST-103.example1.com",
+            "Level": "4",
+            "EventID": "15"
+          }
+        }
+      }
+ -
+  sample: |-
+    {
+      "message": "Pipe Created:\r\nRuleName: -\r\nEventType: CreatePipe\r\nUtcTime: 2026-09-15 19:19:17.352\r\nProcessGuid: {6DFD4602-CC3F-525D-91DA-942BF2F44203}\r\nProcessId: 7736\r\nPipeName: \\qt-1E38-C829DDD9\r\nImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe\r\nUser: NT AUTHORITY\\SYSTEM",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "EventType": "CreatePipe",
+            "PipeName": "\\qt-1E38-C829DDD9",
+            "ProcessId": "7736",
+            "Image": "C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe",
+            "ProcessGuid": "{6DFD4602-CC3F-525D-91DA-942BF2F44203}",
+            "RuleName": "-",
+            "UtcTime": "2026-09-15 19:19:17.352",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "17",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:19:17.354141400Z"
+          },
+          "EventRecordID": "98106629",
+          "Execution": {
+            "ThreadID": "5692",
+            "ProcessID": "1652"
+          },
+          "Version": "1",
+          "Computer": "HOST-201.example2.org",
+          "Level": "4",
+          "EventID": "17"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            EventType: "CreatePipe"
+            Image: "C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe"
+            PipeName: "\\qt-1E38-C829DDD9"
+            ProcessGuid: "{6DFD4602-CC3F-525D-91DA-942BF2F44203}"
+            ProcessId: "7736"
+            RuleName: "-"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:19:17.352"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-201.example2.org"
+          Correlation: ""
+          EventID: "17"
+          EventRecordID: "98106629"
+          Execution:
+            ProcessID: "1652"
+            ThreadID: "5692"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "17"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:19:17.354141400Z"
+          Version: "1"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "17"
+      level: "Information"
+      title: "Named pipe created"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Create
+        metadata:
+          uid: '98106629'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '17'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:19:17.354141400Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '1'
+          version: 1.5.0
+        category_uid: 1
+        category_name: System Activity
+        message: Pipe Created
+        actor:
+          process:
+            uid: 6dfd4602-cc3f-525d-91da-942bf2f44203
+            file:
+              path: C:\Program Files (x86)\example2orgserversfe72b5-6.0.1901\NinjaRMMAgent.exe
+              type_id: 1
+              name: NinjaRMMAgent.exe
+              type: Regular File
+            cpid: 6dfd4602-cc3f-525d-91da-942bf2f44203
+            name: NinjaRMMAgent.exe
+            pid: 7736
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        file:
+          path: \qt-1E38-C829DDD9
+          type_id: 6
+          name: qt-1E38-C829DDD9
+          type: Named Pipe
+        status_id: 1
+        class_uid: 1001
+        activity_id: 1
+        time: 1789499957354
+        severity_id: 1
+        device:
+          hostname: HOST-201.example2.org
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: File System Activity
+        status: Success
+    message: "Pipe Created:\r\nRuleName: -\r\nEventType: CreatePipe\r\nUtcTime: 2026-09-15 19:19:17.352\r\nProcessGuid: {6DFD4602-CC3F-525D-91DA-942BF2F44203}\r\nProcessId: 7736\r\nPipeName: \\qt-1E38-C829DDD9\r\nImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe\r\nUser: NT AUTHORITY\\SYSTEM"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499957354
+ -
+  sample: |-
+    {
+      "message": "Pipe Connected:\r\nRuleName: -\r\nEventType: ConnectPipe\r\nUtcTime: 2026-09-15 18:37:09.261\r\nProcessGuid: {330ec367-de3d-130e-41b6-4a8d9ca805e1}\r\nProcessId: 3512\r\nPipeName: \\MICROSOFT##WID\\tsql\\query\r\nImage: C:\\Program Files\\Update Services\\Services\\WsusService.exe\r\nUser: NT AUTHORITY\\NETWORK SERVICE",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "EventType": "ConnectPipe",
+            "PipeName": "\\MICROSOFT##WID\\tsql\\query",
+            "ProcessId": "3512",
+            "Image": "C:\\Program Files\\Update Services\\Services\\WsusService.exe",
+            "ProcessGuid": "{330ec367-de3d-130e-41b6-4a8d9ca805e1}",
+            "RuleName": "-",
+            "UtcTime": "2026-09-15 18:37:09.261",
+            "User": "NT AUTHORITY\\NETWORK SERVICE"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "18",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T18:37:09.264616600Z"
+          },
+          "EventRecordID": "9788293",
+          "Execution": {
+            "ThreadID": "4852",
+            "ProcessID": "2104"
+          },
+          "Version": "1",
+          "Computer": "HOST-107.example1.com",
+          "Level": "4",
+          "EventID": "18"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            EventType: "ConnectPipe"
+            Image: "C:\\Program Files\\Update Services\\Services\\WsusService.exe"
+            PipeName: "\\MICROSOFT##WID\\tsql\\query"
+            ProcessGuid: "{330ec367-de3d-130e-41b6-4a8d9ca805e1}"
+            ProcessId: "3512"
+            RuleName: "-"
+            User: "NT AUTHORITY\\NETWORK SERVICE"
+            UtcTime: "2026-09-15 18:37:09.261"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-107.example1.com"
+          Correlation: ""
+          EventID: "18"
+          EventRecordID: "9788293"
+          Execution:
+            ProcessID: "2104"
+            ThreadID: "4852"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "18"
+          TimeCreated:
+            SystemTime: "2026-09-15T18:37:09.264616600Z"
+          Version: "1"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "18"
+      level: "Information"
+      title: "Named pipe connected"
+      usr:
+        name: "NT AUTHORITY\\NETWORK SERVICE"
+      ocsf:
+        severity: Informational
+        activity_name: Open
+        metadata:
+          uid: '9788293'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '18'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T18:37:09.264616600Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '1'
+          version: 1.5.0
+        category_uid: 1
+        category_name: System Activity
+        message: Pipe Connected
+        actor:
+          process:
+            uid: 330ec367-de3d-130e-41b6-4a8d9ca805e1
+            file:
+              path: C:\Program Files\Update Services\Services\WsusService.exe
+              type_id: 1
+              name: WsusService.exe
+              type: Regular File
+            cpid: 330ec367-de3d-130e-41b6-4a8d9ca805e1
+            name: WsusService.exe
+            pid: 3512
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: NETWORK SERVICE
+            type: System
+        file:
+          path: \MICROSOFT##WID\tsql\query
+          parent_folder: \MICROSOFT##WID\tsql
+          type_id: 6
+          name: query
+          type: Named Pipe
+        status_id: 1
+        class_uid: 1001
+        activity_id: 14
+        time: 1789497429264
+        severity_id: 1
+        device:
+          hostname: HOST-107.example1.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: File System Activity
+        status: Success
+    message: "Pipe Connected:\r\nRuleName: -\r\nEventType: ConnectPipe\r\nUtcTime: 2026-09-15 18:37:09.261\r\nProcessGuid: {330ec367-de3d-130e-41b6-4a8d9ca805e1}\r\nProcessId: 3512\r\nPipeName: \\MICROSOFT##WID\\tsql\\query\r\nImage: C:\\Program Files\\Update Services\\Services\\WsusService.exe\r\nUser: NT AUTHORITY\\NETWORK SERVICE"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789497429264
+ -
+  sample: |-
+    {
+      "message": "File Delete archived:\r\nRuleName: Office documents\r\nUtcTime: 2026-09-15 19:19:20.603\r\nProcessGuid: {68BE1A78-0BCF-2845-99FA-BE3F814F7172}\r\nProcessId: 4\r\nUser: NT AUTHORITY\\SYSTEM\r\nImage: System\r\nTargetFilename: M:\\Home\\ddmarrat\\Scanned Documents\\Scan_0002.pdf\r\nHashes: SHA1=597E8465D6063188EF4F6C1D824EDF777C6BA1DB,MD5=D97286893E73EEABA5D27B4A4A1E4D16,SHA256=46D2AE1BE922E6F65241A3C6D2BBB8E8B7507503016221977B42A09A33B7A095,IMPHASH=00000000000000000000000000000000\r\nIsExecutable: false\r\nArchived: true",
+      "level": "Information",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "Hashes": "SHA1=597E8465D6063188EF4F6C1D824EDF777C6BA1DB,MD5=D97286893E73EEABA5D27B4A4A1E4D16,SHA256=46D2AE1BE922E6F65241A3C6D2BBB8E8B7507503016221977B42A09A33B7A095,IMPHASH=00000000000000000000000000000000",
+            "ProcessId": "4",
+            "Image": "System",
+            "TargetFilename": "M:\\Home\\ddmarrat\\Scanned Documents\\Scan_0002.pdf",
+            "IsExecutable": "false",
+            "ProcessGuid": "{68BE1A78-0BCF-2845-99FA-BE3F814F7172}",
+            "RuleName": "Office documents",
+            "Archived": "true",
+            "UtcTime": "2026-09-15 19:19:20.603",
+            "User": "NT AUTHORITY\\SYSTEM"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "23",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-15T19:19:20.604767400Z"
+          },
+          "EventRecordID": "41211315",
+          "Execution": {
+            "ThreadID": "4952",
+            "ProcessID": "3544"
+          },
+          "Version": "5",
+          "Computer": "HOST-203.example2.org",
+          "Level": "4",
+          "EventID": "23"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Archived: "true"
+            Hashes: "SHA1=597E8465D6063188EF4F6C1D824EDF777C6BA1DB,MD5=D97286893E73EEABA5D27B4A4A1E4D16,SHA256=46D2AE1BE922E6F65241A3C6D2BBB8E8B7507503016221977B42A09A33B7A095,IMPHASH=00000000000000000000000000000000"
+            Image: "System"
+            IsExecutable: "false"
+            ProcessGuid: "{68BE1A78-0BCF-2845-99FA-BE3F814F7172}"
+            ProcessId: "4"
+            RuleName: "Office documents"
+            TargetFilename: "M:\\Home\\ddmarrat\\Scanned Documents\\Scan_0002.pdf"
+            User: "NT AUTHORITY\\SYSTEM"
+            UtcTime: "2026-09-15 19:19:20.603"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-203.example2.org"
+          Correlation: ""
+          EventID: "23"
+          EventRecordID: "41211315"
+          Execution:
+            ProcessID: "3544"
+            ThreadID: "4952"
+          Keywords: "0x8000000000000000"
+          Level: "4"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385F-C22A-43E0-BF4C-06F5698FFBD9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "23"
+          TimeCreated:
+            SystemTime: "2026-09-15T19:19:20.604767400Z"
+          Version: "5"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "23"
+      level: "Information"
+      title: "File Delete archived"
+      usr:
+        name: "NT AUTHORITY\\SYSTEM"
+      ocsf:
+        severity: Informational
+        activity_name: Delete
+        metadata:
+          uid: '41211315'
+          product:
+            feature:
+              uid: '{5770385F-C22A-43E0-BF4C-06F5698FFBD9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '23'
+          profiles:
+            - host
+            - security_control
+          original_time: '2026-09-15T19:19:20.604767400Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '5'
+          version: 1.5.0
+          labels:
+            - Office documents
+        category_uid: 1
+        category_name: System Activity
+        message: File Delete archived
+        actor:
+          process:
+            uid: 68be1a78-0bcf-2845-99fa-be3f814f7172
+            cpid: 68be1a78-0bcf-2845-99fa-be3f814f7172
+            name: System
+            pid: 4
+          user:
+            type_id: 3
+            domain: NT AUTHORITY
+            name: SYSTEM
+            type: System
+        file:
+          path: M:\Home\ddmarrat\Scanned Documents\Scan_0002.pdf
+          parent_folder: M:\Home\ddmarrat\Scanned Documents
+          type_id: 1
+          name: Scan_0002.pdf
+          hashes:
+            - value: D97286893E73EEABA5D27B4A4A1E4D16
+              algorithm_id: 1
+              algorithm: MD5
+            - value: 597E8465D6063188EF4F6C1D824EDF777C6BA1DB
+              algorithm_id: 2
+              algorithm: SHA-1
+            - value: 46D2AE1BE922E6F65241A3C6D2BBB8E8B7507503016221977B42A09A33B7A095
+              algorithm_id: 3
+              algorithm: SHA-256
+          type: Regular File
+        status_id: 1
+        class_uid: 1001
+        activity_id: 4
+        time: 1789499960604
+        severity_id: 1
+        device:
+          hostname: HOST-203.example2.org
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: File System Activity
+        status: Success
+    message: "File Delete archived:\r\nRuleName: Office documents\r\nUtcTime: 2026-09-15 19:19:20.603\r\nProcessGuid: {68BE1A78-0BCF-2845-99FA-BE3F814F7172}\r\nProcessId: 4\r\nUser: NT AUTHORITY\\SYSTEM\r\nImage: System\r\nTargetFilename: M:\\Home\\ddmarrat\\Scanned Documents\\Scan_0002.pdf\r\nHashes: SHA1=597E8465D6063188EF4F6C1D824EDF777C6BA1DB,MD5=D97286893E73EEABA5D27B4A4A1E4D16,SHA256=46D2AE1BE922E6F65241A3C6D2BBB8E8B7507503016221977B42A09A33B7A095,IMPHASH=00000000000000000000000000000000\r\nIsExecutable: false\r\nArchived: true"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789499960604
+ -
+  sample: |-
+    {
+      "message": "Error report:\r\nUtcTime: 2026-09-14 16:58:02.195\r\nID: GetConfigurationOptions\r\nDescription: Failed to open service configuration with error 92 - Last error: The media is write protected.",
+      "level": "Error",
+      "Event": {
+        "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "EventData": {
+          "Data": {
+            "Description": "Failed to open service configuration with error 92 - Last error: The media is write protected.",
+            "ID": "GetConfigurationOptions",
+            "UtcTime": "2026-09-14 16:58:02.195"
+          }
+        },
+        "System": {
+          "Correlation": "",
+          "Task": "255",
+          "Keywords": "0x8000000000000000",
+          "Channel": "Microsoft-Windows-Sysmon/Operational",
+          "Opcode": "Info",
+          "Security": {
+            "UserID": "S-1-5-18"
+          },
+          "Provider": {
+            "Guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "Name": "Microsoft-Windows-Sysmon"
+          },
+          "TimeCreated": {
+            "SystemTime": "2026-09-14T16:58:02.207176300Z"
+          },
+          "EventRecordID": "22441558",
+          "Execution": {
+            "ThreadID": "4440",
+            "ProcessID": "3484"
+          },
+          "Version": "3",
+          "Computer": "HOST-108.example1.com",
+          "Level": "2",
+          "EventID": "255"
+        }
+      }
+    }
+  result:
+    custom:
+      Event:
+        EventData:
+          Data:
+            Description: "Failed to open service configuration with error 92 - Last error: The media is write protected."
+            ID: "GetConfigurationOptions"
+            UtcTime: "2026-09-14 16:58:02.195"
+        System:
+          Channel: "Microsoft-Windows-Sysmon/Operational"
+          Computer: "HOST-108.example1.com"
+          Correlation: ""
+          EventID: "255"
+          EventRecordID: "22441558"
+          Execution:
+            ProcessID: "3484"
+            ThreadID: "4440"
+          Keywords: "0x8000000000000000"
+          Level: "2"
+          Opcode: "Info"
+          Provider:
+            Guid: "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+            Name: "Microsoft-Windows-Sysmon"
+          Security:
+            UserID: "S-1-5-18"
+          Task: "255"
+          TimeCreated:
+            SystemTime: "2026-09-14T16:58:02.207176300Z"
+          Version: "3"
+        xmlns: "http://schemas.microsoft.com/win/2004/08/events/event"
+      evt:
+        id: "255"
+      level: "Error"
+      title: "Sysmon error"
+      ocsf:
+        severity: High
+        activity_name: General Error
+        metadata:
+          uid: '22441558'
+          product:
+            feature:
+              uid: '{5770385f-c22a-43e0-bf4c-06f5698ffbd9}'
+              name: Microsoft-Windows-Sysmon
+            name: Sysmon
+            vendor_name: Microsoft
+          log_name: Microsoft-Windows-Sysmon/Operational
+          event_code: '255'
+          profiles:
+            - host
+          original_time: '2026-09-14T16:58:02.207176300Z'
+          log_provider: Microsoft-Windows-Sysmon
+          log_version: '3'
+          version: 1.5.0
+        category_uid: 6
+        category_name: Application Activity
+        status_code: GetConfigurationOptions
+        message: 'Failed to open service configuration with error 92 - Last error: The media is write protected.'
+        status_detail: 'Failed to open service configuration with error 92 - Last error: The media is write protected.'
+        status_id: 2
+        class_uid: 6008
+        activity_id: 1
+        time: 1789405082207
+        severity_id: 4
+        device:
+          hostname: HOST-108.example1.com
+          os:
+            type_id: 100
+            name: Windows
+            type: Windows
+          type_id: 0
+          type: Unknown
+        class_name: Application Error
+        status: Failure
+    message: "Error report:\r\nUtcTime: 2026-09-14 16:58:02.195\r\nID: GetConfigurationOptions\r\nDescription: Failed to open service configuration with error 92 - Last error: The media is write protected."
+    status: "error"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1789405082207

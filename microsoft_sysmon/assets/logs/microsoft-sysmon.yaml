@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-count-per-pipeline-checks
 # bypass-global-no-service-config-checks
 id: microsoft-sysmon
 metric_id: microsoft-sysmon
@@ -108,6 +109,431 @@ facets:
     name: User Name
     path: usr.name
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Invoked by
+    path: ocsf.actor.invoked_by
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process Common Process Identifier
+    path: ocsf.actor.process.cpid
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process File Name
+    path: ocsf.actor.process.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process File Path
+    path: ocsf.actor.process.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process Name
+    path: ocsf.actor.process.name
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process ID
+    path: ocsf.actor.process.pid
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process Thread ID
+    path: ocsf.actor.process.tid
+    source: log
+  - groups:
+      - OCSF
+    name: Actor Process Unique ID
+    path: ocsf.actor.process.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Session Unique ID
+    path: ocsf.actor.session.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Actor User Domain
+    path: ocsf.actor.user.domain
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Unique ID
+    path: ocsf.actor.user.uid
+    source: log
+  - groups:
+      - OCSF
+    name: DNS Answer
+    path: ocsf.answers
+    source: log
+  - groups:
+      - OCSF
+    name: Application Name
+    path: ocsf.app.name
+    source: log
+  - groups:
+      - OCSF
+    name: Application Vendor Name
+    path: ocsf.app.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Component
+    path: ocsf.component
+    source: log
+  - groups:
+      - OCSF
+    name: Device Hostname
+    path: ocsf.device.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Device OS Name
+    path: ocsf.device.os.name
+    source: log
+  - groups:
+      - OCSF
+    name: Device OS Version
+    path: ocsf.device.os.version
+    source: log
+  - groups:
+      - OCSF
+    name: Kernel Driver File Name
+    path: ocsf.driver.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Kernel Driver File Path
+    path: ocsf.driver.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: Dst Endpoint Hostname
+    path: ocsf.dst_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Destination IP Address
+    path: ocsf.dst_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Dst Endpoint Port
+    path: ocsf.dst_endpoint.port
+    source: log
+  - groups:
+      - OCSF
+    name: File Created Time
+    path: ocsf.file.created_time
+    source: log
+  - groups:
+      - OCSF
+    name: File Name
+    path: ocsf.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: File Parent Folder
+    path: ocsf.file.parent_folder
+    source: log
+  - groups:
+      - OCSF
+    name: File Path
+    path: ocsf.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: Log Name
+    path: ocsf.log_name
+    source: log
+  - groups:
+      - OCSF
+    name: Log Provider
+    path: ocsf.log_provider
+    source: log
+  - groups:
+      - OCSF
+    name: Message
+    path: ocsf.message
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Labels
+    path: ocsf.metadata.labels
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Log Name
+    path: ocsf.metadata.log_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Log Provider
+    path: ocsf.metadata.log_provider
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Log Version
+    path: ocsf.metadata.log_version
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Original Time
+    path: ocsf.metadata.original_time
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Product Feature Name
+    path: ocsf.metadata.product.feature.name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Product Feature Unique ID
+    path: ocsf.metadata.product.feature.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Product Feature Version
+    path: ocsf.metadata.product.feature.version
+    source: log
+  - groups:
+      - OCSF
+    name: Product Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Vendor Name
+    path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Event UID
+    path: ocsf.metadata.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Module File Company Name
+    path: ocsf.module.file.company_name
+    source: log
+  - groups:
+      - OCSF
+    name: Module File Internal Name
+    path: ocsf.module.file.internal_name
+    source: log
+  - groups:
+      - OCSF
+    name: Module File Name
+    path: ocsf.module.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Module File Path
+    path: ocsf.module.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: Module File Version
+    path: ocsf.module.file.version
+    source: log
+  - groups:
+      - OCSF
+    name: Process Command Line
+    path: ocsf.process.cmd_line
+    source: log
+  - groups:
+      - OCSF
+    name: Process Common Process Identifier
+    path: ocsf.process.cpid
+    source: log
+  - groups:
+      - OCSF
+    name: Process File Name
+    path: ocsf.process.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Process File Path
+    path: ocsf.process.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: Process Name
+    path: ocsf.process.name
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process Command Line
+    path: ocsf.process.parent_process.cmd_line
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process Common Process Identifier
+    path: ocsf.process.parent_process.cpid
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process File Name
+    path: ocsf.process.parent_process.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process File Path
+    path: ocsf.process.parent_process.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process Name
+    path: ocsf.process.parent_process.name
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process ID
+    path: ocsf.process.parent_process.pid
+    source: log
+  - groups:
+      - OCSF
+    name: Process Parent Process Unique ID
+    path: ocsf.process.parent_process.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Process ID
+    path: ocsf.process.pid
+    source: log
+  - groups:
+      - OCSF
+    name: Process Thread ID
+    path: ocsf.process.tid
+    source: log
+  - groups:
+      - OCSF
+    name: Process Unique ID
+    path: ocsf.process.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Process User Domain
+    path: ocsf.process.user.domain
+    source: log
+  - groups:
+      - OCSF
+    name: Process User Name
+    path: ocsf.process.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Process Working Directory
+    path: ocsf.process.working_directory
+    source: log
+  - groups:
+      - OCSF
+    name: DNS Query Hostname
+    path: ocsf.query.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Hostname
+    path: ocsf.src_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Src Endpoint Port
+    path: ocsf.src_endpoint.port
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status Code
+    path: ocsf.status_code
+    source: log
+  - groups:
+      - OCSF
+    name: Status Detail
+    path: ocsf.status_detail
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+  - groups:
+      - OCSF
+    name: Type Name
+    path: ocsf.type_name
+    source: log
+  - groups:
+      - OCSF
+    name: Type ID
+    path: ocsf.type_uid
+    source: log
 pipeline:
   type: pipeline
   name: Microsoft Sysmon
@@ -175,7 +601,7 @@ pipeline:
       sourceType: attribute
       target: evt.id
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `Event.EventData.Data.User` to `usr.name`
@@ -185,7 +611,7 @@ pipeline:
       sourceType: attribute
       target: usr.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: pipeline
       name: Process Network connection detected event logs
@@ -201,7 +627,7 @@ pipeline:
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `Event.EventData.Data.DestinationIp` to `network.destination.ip`
@@ -211,7 +637,7 @@ pipeline:
           sourceType: attribute
           target: network.destination.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `Event.EventData.Data.SourcePort` to `network.client.port`
@@ -221,7 +647,7 @@ pipeline:
           sourceType: attribute
           target: network.client.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `Event.EventData.Data.DestinationPort` to `network.destination.port`
@@ -231,7 +657,7 @@ pipeline:
           sourceType: attribute
           target: network.destination.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: geo-ip-parser
           name: Parse network.destination.ip
@@ -254,7 +680,7 @@ pipeline:
           sourceType: attribute
           target: dns.question.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `Event.EventData.Data.QueryResults` to `dns.answer.name`
@@ -264,7 +690,7 @@ pipeline:
           sourceType: attribute
           target: dns.answer.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: attribute-remapper
       name: Map `Event.EventData.Data.IpAddress` to `network.client.ip`
@@ -274,7 +700,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: geo-ip-parser
       name: Parse network.client.ip
@@ -283,3 +709,4528 @@ pipeline:
         - network.client.ip
       target: network.client.geoip
       ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "Windows Event Log"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: "Microsoft"
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add device OS name
+          enabled: true
+          template: "Windows"
+          target: ocsf.device.os.name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `Event.System.Provider.Name` to `ocsf.metadata.product.feature.name`
+          enabled: true
+          sources:
+            - Event.System.Provider.Name
+          sourceType: attribute
+          target: ocsf.metadata.product.feature.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Event.System.EventID` to `ocsf.metadata.event_code`
+          enabled: true
+          sources:
+            - Event.System.EventID
+          sourceType: attribute
+          target: ocsf.metadata.event_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+          targetFormat: string
+        - type: attribute-remapper
+          name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
+          enabled: true
+          sources:
+            - Event.System.EventRecordID
+          sourceType: attribute
+          target: ocsf.metadata.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+          targetFormat: string
+        - type: attribute-remapper
+          name: Map `Event.System.Channel` to `ocsf.metadata.log_name`
+          enabled: true
+          sources:
+            - Event.System.Channel
+          sourceType: attribute
+          target: ocsf.metadata.log_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Event.System.Provider.Name` to `ocsf.metadata.log_provider`
+          enabled: true
+          sources:
+            - Event.System.Provider.Name
+          sourceType: attribute
+          target: ocsf.metadata.log_provider
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Event.System.Version` to `ocsf.metadata.log_version`
+          enabled: true
+          sources:
+            - Event.System.Version
+          sourceType: attribute
+          target: ocsf.metadata.log_version
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+          targetFormat: string
+        - type: attribute-remapper
+          name: Map `Event.System.Provider.Guid` to `ocsf.metadata.product.feature.uid`
+          enabled: true
+          sources:
+            - Event.System.Provider.Guid
+          sourceType: attribute
+          target: ocsf.metadata.product.feature.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
+          enabled: true
+          sources:
+            - Event.System.TimeCreated.SystemTime
+          sourceType: attribute
+          target: ocsf.metadata.original_time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.UtcTime` to `ocsf.time`
+          enabled: true
+          source: Event.EventData.Data.UtcTime
+          samples:
+            - "2026-08-31 18:25:19.837"
+          grok:
+            supportRules: ""
+            matchRules: |
+              utc_time %{date("yyyy-MM-dd HH:mm:ss.SSS","UTC"):ocsf.time}
+        - type: grok-parser
+          name: Parse `Event.System.TimeCreated.SystemTime` to `ocsf.time`
+          enabled: true
+          source: Event.System.TimeCreated.SystemTime
+          samples:
+            - "2024-01-02T03:04:05.7005647Z"
+            - "2024-01-02T03:04:05.700564700Z"
+          grok:
+            supportRules: ""
+            matchRules: |
+              win_time_frac %{date("yyyy-MM-dd'T'HH:mm:ss.SSS"):ocsf.time}%{regex("[0-9]*")}Z
+              win_time_plain %{date("yyyy-MM-dd'T'HH:mm:ss"):ocsf.time}Z
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "Sysmon"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: lookup-processor
+          name: Map `Event.System.EventID` to `ocsf.message`
+          enabled: true
+          source: Event.System.EventID
+          target: ocsf.message
+          lookupTable: "1,Process Create\n2,File creation time changed\n3,Network connection detected\n4,Sysmon service state changed\n5,Process terminated\n6,Driver loaded\n7,Image loaded\n8,CreateRemoteThread detected\n9,RawAccessRead detected\n10,Process accessed\n11,File created\n12,Registry object added or deleted\n13,Registry value set\n14,Registry object renamed\n15,File stream created\n16,Sysmon configuration change\n17,Pipe Created\n18,Pipe Connected\n19,WmiEventFilter activity detected\n20,WmiEventConsumer activity detected\n21,WmiEventConsumerToFilter activity detected\n22,Dns query\n23,File Delete archived\n24,Clipboard changed\n25,Process Tampering\n26,File Delete logged\n27,File Block Executable\n28,File Block Shredding\n29,File Executable Detected"
+          defaultLookup:
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.RuleName` to `ocsf.attack_ev.technique.uid`, `ocsf.metadata.labels`
+          enabled: true
+          source: Event.EventData.Data.RuleName
+          samples:
+            - "-"
+            - "Proxy"
+            - "T1099"
+            - "T1060,RunKey"
+            - "Context,DeviceConnectedOrUpdated"
+          grok:
+            supportRules: ""
+            matchRules: |
+              absent %{regex("-"):}
+              technique_with_labels %{regex("T[0-9]{4}(\\.[0-9]{3})?"):ocsf.attack_ev.technique.uid},%{data:ocsf.metadata.labels:array(",")}
+              technique_only %{regex("T[0-9]{4}(\\.[0-9]{3})?"):ocsf.attack_ev.technique.uid}
+              labels %{data:ocsf.metadata.labels:array(",")}
+        - type: array-processor
+          name: Move `ocsf.attack_ev` into the `ocsf.attacks` array
+          enabled: true
+          operation:
+            source: ocsf.attack_ev
+            target: ocsf.attacks
+            preserveSource: false
+            type: append
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.Image` to `ocsf.actor.process.name`
+          enabled: true
+          source: Event.EventData.Data.Image
+          samples:
+            - C:\Windows\System32\svchost.exe
+            - System
+          grok:
+            supportRules: ""
+            matchRules: |
+              basename %{regex(".*\\\\"):}%{data:ocsf.actor.process.name}
+              basename_no_dir %{data:ocsf.actor.process.name}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.Image` to `ocsf.actor.process.file.path`
+          enabled: true
+          source: Event.EventData.Data.Image
+          samples:
+            - C:\Windows\System32\svchost.exe
+            - System
+          grok:
+            supportRules: ""
+            matchRules: |
+              full_path %{regex(".*\\\\.*"):ocsf.actor.process.file.path}
+        - type: grok-parser
+          name: Parse `ocsf.actor.process.file.path` to `ocsf.actor.process.file.name`
+          enabled: true
+          source: ocsf.actor.process.file.path
+          samples:
+            - C:\Windows\System32\svchost.exe
+          grok:
+            supportRules: ""
+            matchRules: |
+              basename %{regex(".*\\\\"):}%{data:ocsf.actor.process.file.name}
+              basename_no_dir %{data:ocsf.actor.process.file.name}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.ProcessGuid` to `ocsf.actor.process.cpid`
+          enabled: true
+          source: Event.EventData.Data.ProcessGuid
+          samples:
+            - "{11111111-2222-3333-4444-555555555555}"
+          grok:
+            supportRules: ""
+            matchRules: |
+              braced %{regex("[{]"):}%{regex("[^{}]+"):ocsf.actor.process.cpid:lowercase}%{regex("[}]"):}
+              plain %{regex("[^{}]+"):ocsf.actor.process.cpid:lowercase}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.User` to `ocsf.actor.user.domain` and `ocsf.actor.user.name`
+          enabled: true
+          source: Event.EventData.Data.User
+          samples:
+            - NT AUTHORITY\SYSTEM
+            - SYSTEM
+          grok:
+            supportRules: ""
+            matchRules: |
+              domain_user %{regex("[^\\\\]+"):ocsf.actor.user.domain}%{regex("\\\\"):}%{regex(".*"):ocsf.actor.user.name}
+              user_only %{regex(".*"):ocsf.actor.user.name}
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.Hashes`, `Event.EventData.Data.Hash` to `ocsf.tmp_hashes`
+          enabled: true
+          sources:
+            - Event.EventData.Data.Hashes
+            - Event.EventData.Data.Hash
+          sourceType: attribute
+          target: ocsf.tmp_hashes
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.Hashes` to `ocsf.hash_md5_ev.value`, `ocsf.hash_sha1_ev.value`, `ocsf.hash_sha256_ev.value`
+          enabled: true
+          source: ocsf.tmp_hashes
+          samples:
+            - "MD5=00000000000000000000000000000000,SHA256=0000000000000000000000000000000000000000000000000000000000000000,IMPHASH=00000000000000000000000000000000"
+            - "SHA256=0000000000000000000000000000000000000000000000000000000000000000"
+            - "SHA1=0000000000000000000000000000000000000000,MD5=00000000000000000000000000000000,SHA256=0000000000000000000000000000000000000000000000000000000000000000"
+          grok:
+            supportRules: |
+              _hash %{regex("[0-9A-Fa-f]+")}
+              _other_hash %{regex("(?:,[A-Za-z0-9_]+=[0-9A-Fa-f]+)?")}
+            matchRules: |
+              sha1_md5_sha256 SHA1=%{_hash:ocsf.hash_sha1_ev.value},MD5=%{_hash:ocsf.hash_md5_ev.value},SHA256=%{_hash:ocsf.hash_sha256_ev.value}%{_other_hash}%{_other_hash}
+              sha1_md5 SHA1=%{_hash:ocsf.hash_sha1_ev.value},MD5=%{_hash:ocsf.hash_md5_ev.value}%{_other_hash}%{_other_hash}
+              sha1_sha256 SHA1=%{_hash:ocsf.hash_sha1_ev.value},SHA256=%{_hash:ocsf.hash_sha256_ev.value}%{_other_hash}%{_other_hash}
+              md5_sha256 MD5=%{_hash:ocsf.hash_md5_ev.value},SHA256=%{_hash:ocsf.hash_sha256_ev.value}%{_other_hash}%{_other_hash}
+              sha1 SHA1=%{_hash:ocsf.hash_sha1_ev.value}%{_other_hash}%{_other_hash}
+              md5 MD5=%{_hash:ocsf.hash_md5_ev.value}%{_other_hash}%{_other_hash}
+              sha256 SHA256=%{_hash:ocsf.hash_sha256_ev.value}%{_other_hash}%{_other_hash}
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_hashes`
+          enabled: true
+          attributeToExclude: ocsf.tmp_hashes
+    - type: pipeline
+      name: OCSF sub pipeline for class File System Activity [1001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(2 OR 9 OR 11 OR 15 OR 17 OR 18 OR 23 OR 26 OR 27 OR 28 OR 29) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.TargetFilename` to `ocsf.file.path` and `ocsf.component`
+          enabled: true
+          source: Event.EventData.Data.TargetFilename
+          samples:
+            - C:\Windows\Temp\example.dat
+            - E:\docs\report.pdf:Zone.Identifier
+          grok:
+            supportRules: ""
+            matchRules: |
+              alternate_data_stream %{regex(".*\\\\[^\\\\:]+"):ocsf.file.path}:%{regex("[^\\\\:]+"):ocsf.component}
+              plain_path %{regex(".*"):ocsf.file.path}
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.Device` to `ocsf.file.path`
+          enabled: true
+          sources:
+            - Event.EventData.Data.Device
+          sourceType: attribute
+          target: ocsf.file.path
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.PipeName` to `ocsf.file.path`
+          enabled: true
+          sources:
+            - Event.EventData.Data.PipeName
+          sourceType: attribute
+          target: ocsf.file.path
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.file.path` to `ocsf.file.name`, `ocsf.file.parent_folder`
+          enabled: true
+          source: ocsf.file.path
+          samples:
+            - C:\Windows\Temp\example.dat
+          grok:
+            supportRules: ""
+            matchRules: |
+              path_with_dir %{regex(".*"):ocsf.file.parent_folder}%{regex("\\\\"):}%{data:ocsf.file.name}
+              name_only %{data:ocsf.file.name}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.CreationUtcTime` to `ocsf.file.created_time`
+          enabled: true
+          source: Event.EventData.Data.CreationUtcTime
+          samples:
+            - "2026-01-02 03:04:05.678"
+          grok:
+            supportRules: ""
+            matchRules: |
+              utc_time %{date("yyyy-MM-dd HH:mm:ss.SSS","UTC"):ocsf.file.created_time}
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: MD5
+          target: ocsf.hash_md5_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: "1"
+          target: ocsf.hash_md5_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_md5_ev.algorithm_id` to `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_md5_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_md5_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: SHA-1
+          target: ocsf.hash_sha1_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: "2"
+          target: ocsf.hash_sha1_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha1_ev.algorithm_id` to `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha1_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha1_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: SHA-256
+          target: ocsf.hash_sha256_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: "3"
+          target: ocsf.hash_sha256_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha256_ev.algorithm_id` to `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha256_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha256_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: array-processor
+          name: Move `ocsf.hash_md5_ev` into the `ocsf.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_md5_ev
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha1_ev` into the `ocsf.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha1_ev
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha256_ev` into the `ocsf.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha256_ev
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 1001
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.path` to `ocsf.actor.process.file.path`
+              sources:
+                - ocsf.actor.process.file.path
+              target: ocsf.actor.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.name` to `ocsf.actor.process.file.name`
+              sources:
+                - ocsf.actor.process.file.name
+              target: ocsf.actor.process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.actor.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.actor.process.file.type
+                id: ocsf.actor.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ProcessId` to `ocsf.actor.process.pid`
+              sources:
+                - Event.EventData.Data.ProcessId
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.cpid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.domain` to `ocsf.actor.user.domain`
+              sources:
+                - ocsf.actor.user.domain
+              target: ocsf.actor.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.name` to `ocsf.actor.user.name`
+              sources:
+                - ocsf.actor.user.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.actor.user.domain:("NT AUTHORITY" OR "NT-AUTORITÄT" OR "Window Manager" OR "Font Driver Host") OR @ocsf.actor.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.actor.user.name:(Administrator OR admin)"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "@ocsf.actor.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+            - type: schema-remapper
+              name: Map `ocsf.file.path` to `ocsf.file.path`
+              sources:
+                - ocsf.file.path
+              target: ocsf.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.name` to `ocsf.file.name`
+              sources:
+                - ocsf.file.name
+              target: ocsf.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.parent_folder` to `ocsf.file.parent_folder`
+              sources:
+                - ocsf.file.parent_folder
+              target: ocsf.file.parent_folder
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.component` to `ocsf.component`
+              sources:
+                - ocsf.component
+              target: ocsf.component
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.created_time` to `ocsf.file.created_time`
+              sources:
+                - ocsf.file.created_time
+              target: ocsf.file.created_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.file.hashes` to `ocsf.file.hashes`
+              sources:
+                - ocsf.file.hashes
+              target: ocsf.file.hashes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.file.type_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:(17 OR 18)"
+                  name: Named Pipe
+                  id: 6
+                - filter:
+                    query: "@Event.System.EventID:9"
+                  name: Block Device
+                  id: 4
+                - filter:
+                    query: "@ocsf.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.file.type
+                id: ocsf.file.type_id
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:2"
+                  name: Set Attributes
+                  id: 6
+                - filter:
+                    query: "@Event.System.EventID:9"
+                  name: Read
+                  id: 2
+                - filter:
+                    query: "@Event.System.EventID:18"
+                  name: Open
+                  id: 14
+                - filter:
+                    query: "@Event.System.EventID:(23 OR 26 OR 28)"
+                  name: Delete
+                  id: 4
+                - filter:
+                    query: "@Event.System.EventID:(11 OR 15 OR 17 OR 27 OR 29)"
+                  name: Create
+                  id: 1
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:(27 OR 28)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@Event.System.EventID:29"
+                  name: Observed
+                  id: 3
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:(27 OR 28)"
+                  name: Blocked
+                  id: 2
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: File System Activity
+            classUid: 1001
+            extensions: []
+            profiles:
+              - host
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Kernel Extension Activity [1002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(6) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.ImageLoaded` to `ocsf.driver.file.path`
+          enabled: true
+          sources:
+            - Event.EventData.Data.ImageLoaded
+          sourceType: attribute
+          target: ocsf.driver.file.path
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.driver.file.path` to `ocsf.driver.file.name`
+          enabled: true
+          source: ocsf.driver.file.path
+          samples:
+            - C:\Windows\System32\drivers\foo.sys
+          grok:
+            supportRules: ""
+            matchRules: |
+              basename %{regex(".*\\\\"):}%{data:ocsf.driver.file.name}
+              basename_no_dir %{data:ocsf.driver.file.name}
+        - type: string-builder-processor
+          name: Add `ocsf.actor.invoked_by`
+          enabled: true
+          template: Windows kernel
+          target: ocsf.actor.invoked_by
+          replaceMissing: false
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: MD5
+          target: ocsf.hash_md5_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: "1"
+          target: ocsf.hash_md5_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_md5_ev.algorithm_id` to `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_md5_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_md5_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: SHA-1
+          target: ocsf.hash_sha1_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: "2"
+          target: ocsf.hash_sha1_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha1_ev.algorithm_id` to `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha1_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha1_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: SHA-256
+          target: ocsf.hash_sha256_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: "3"
+          target: ocsf.hash_sha256_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha256_ev.algorithm_id` to `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha256_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha256_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: array-processor
+          name: Move `ocsf.hash_md5_ev` into the `ocsf.driver.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_md5_ev
+            target: ocsf.driver.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha1_ev` into the `ocsf.driver.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha1_ev
+            target: ocsf.driver.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha256_ev` into the `ocsf.driver.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha256_ev
+            target: ocsf.driver.file.hashes
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 1002
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.invoked_by` to `ocsf.actor.invoked_by`
+              sources:
+                - ocsf.actor.invoked_by
+              target: ocsf.actor.invoked_by
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.driver.file.path` to `ocsf.driver.file.path`
+              sources:
+                - ocsf.driver.file.path
+              target: ocsf.driver.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.driver.file.name` to `ocsf.driver.file.name`
+              sources:
+                - ocsf.driver.file.name
+              target: ocsf.driver.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.driver.file.hashes` to `ocsf.driver.file.hashes`
+              sources:
+                - ocsf.driver.file.hashes
+              target: ocsf.driver.file.hashes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.driver.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.driver.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.driver.file.type
+                id: ocsf.driver.file.type_id
+            - type: schema-category-mapper
+              name: ocsf.driver.file.signature.algorithm_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true"
+                  name: Authenticode
+                  id: 4
+              targets:
+                name: ocsf.driver.file.signature.algorithm
+                id: ocsf.driver.file.signature.algorithm_id
+            - type: schema-category-mapper
+              name: ocsf.driver.file.signature.state_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true @Event.EventData.Data.SignatureStatus:Valid"
+                  name: Valid
+                  id: 1
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true @Event.EventData.Data.SignatureStatus:Expired"
+                  name: Expired
+                  id: 2
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true @Event.EventData.Data.SignatureStatus:Revoked"
+                  name: Revoked
+                  id: 3
+                - filter:
+                    query: "@Event.EventData.Data.SignatureStatus:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.driver.file.signature.state
+                id: ocsf.driver.file.signature.state_id
+              fallback:
+                values:
+                  ocsf.driver.file.signature.state: Other
+                  ocsf.driver.file.signature.state_id: '99'
+                sources:
+                  ocsf.driver.file.signature.state:
+                    - Event.EventData.Data.SignatureStatus
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Load
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Kernel Extension Activity
+            classUid: 1002
+            extensions: []
+            profiles:
+              - host
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Module Activity [1005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(7) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.ImageLoaded` to `ocsf.module.file.path`
+          enabled: true
+          sources:
+            - Event.EventData.Data.ImageLoaded
+          sourceType: attribute
+          target: ocsf.module.file.path
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.module.file.path` to `ocsf.module.file.name`
+          enabled: true
+          source: ocsf.module.file.path
+          samples:
+            - C:\Windows\System32\kernel32.dll
+          grok:
+            supportRules: ""
+            matchRules: |
+              basename %{regex(".*\\\\"):}%{data:ocsf.module.file.name}
+              basename_no_dir %{data:ocsf.module.file.name}
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: MD5
+          target: ocsf.hash_md5_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: "1"
+          target: ocsf.hash_md5_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_md5_ev.algorithm_id` to `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_md5_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_md5_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: SHA-1
+          target: ocsf.hash_sha1_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: "2"
+          target: ocsf.hash_sha1_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha1_ev.algorithm_id` to `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha1_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha1_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: SHA-256
+          target: ocsf.hash_sha256_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: "3"
+          target: ocsf.hash_sha256_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha256_ev.algorithm_id` to `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha256_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha256_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: array-processor
+          name: Move `ocsf.hash_md5_ev` into the `ocsf.module.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_md5_ev
+            target: ocsf.module.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha1_ev` into the `ocsf.module.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha1_ev
+            target: ocsf.module.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha256_ev` into the `ocsf.module.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha256_ev
+            target: ocsf.module.file.hashes
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 1005
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.path` to `ocsf.actor.process.file.path`
+              sources:
+                - ocsf.actor.process.file.path
+              target: ocsf.actor.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.name` to `ocsf.actor.process.file.name`
+              sources:
+                - ocsf.actor.process.file.name
+              target: ocsf.actor.process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.actor.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.actor.process.file.type
+                id: ocsf.actor.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ProcessId` to `ocsf.actor.process.pid`
+              sources:
+                - Event.EventData.Data.ProcessId
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.cpid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.domain` to `ocsf.actor.user.domain`
+              sources:
+                - ocsf.actor.user.domain
+              target: ocsf.actor.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.name` to `ocsf.actor.user.name`
+              sources:
+                - ocsf.actor.user.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.actor.user.domain:("NT AUTHORITY" OR "NT-AUTORITÄT" OR "Window Manager" OR "Font Driver Host") OR @ocsf.actor.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.actor.user.name:(Administrator OR admin)"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "@ocsf.actor.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+            - type: schema-remapper
+              name: Map `ocsf.module.file.path` to `ocsf.module.file.path`
+              sources:
+                - ocsf.module.file.path
+              target: ocsf.module.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.module.file.name` to `ocsf.module.file.name`
+              sources:
+                - ocsf.module.file.name
+              target: ocsf.module.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.module.file.hashes` to `ocsf.module.file.hashes`
+              sources:
+                - ocsf.module.file.hashes
+              target: ocsf.module.file.hashes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.module.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.module.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.module.file.type
+                id: ocsf.module.file.type_id
+            - type: schema-category-mapper
+              name: ocsf.module.load_type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Standard
+                  id: 1
+              targets:
+                name: ocsf.module.load_type
+                id: ocsf.module.load_type_id
+            - type: schema-category-mapper
+              name: ocsf.module.file.signature.algorithm_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true"
+                  name: Authenticode
+                  id: 4
+              targets:
+                name: ocsf.module.file.signature.algorithm
+                id: ocsf.module.file.signature.algorithm_id
+            - type: schema-category-mapper
+              name: ocsf.module.file.signature.state_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true @Event.EventData.Data.SignatureStatus:Valid"
+                  name: Valid
+                  id: 1
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true @Event.EventData.Data.SignatureStatus:Expired"
+                  name: Expired
+                  id: 2
+                - filter:
+                    query: "@Event.EventData.Data.Signed:true @Event.EventData.Data.SignatureStatus:Revoked"
+                  name: Revoked
+                  id: 3
+                - filter:
+                    query: "@Event.EventData.Data.SignatureStatus:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.module.file.signature.state
+                id: ocsf.module.file.signature.state_id
+              fallback:
+                values:
+                  ocsf.module.file.signature.state: Other
+                  ocsf.module.file.signature.state_id: '99'
+                sources:
+                  ocsf.module.file.signature.state:
+                    - Event.EventData.Data.SignatureStatus
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.OriginalFileName` to `ocsf.module.file.internal_name`
+              sources:
+                - Event.EventData.Data.OriginalFileName
+              target: ocsf.module.file.internal_name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.Company` to `ocsf.module.file.company_name`
+              sources:
+                - Event.EventData.Data.Company
+              target: ocsf.module.file.company_name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.FileVersion` to `ocsf.module.file.version`
+              sources:
+                - Event.EventData.Data.FileVersion
+              target: ocsf.module.file.version
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Load
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Module Activity
+            classUid: 1005
+            extensions: []
+            profiles:
+              - host
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Process Activity [1007]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(1 OR 5 OR 8 OR 10 OR 25) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.ParentProcessGuid`, `Event.EventData.Data.SourceProcessGuid`, `Event.EventData.Data.SourceProcessGUID` to `ocsf.tmp_actor_process_guid`
+          enabled: true
+          sources:
+            - Event.EventData.Data.ParentProcessGuid
+            - Event.EventData.Data.SourceProcessGuid
+            - Event.EventData.Data.SourceProcessGUID
+          sourceType: attribute
+          target: ocsf.tmp_actor_process_guid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.SourceProcessGUID` to `ocsf.actor.process.cpid`
+          enabled: true
+          source: ocsf.tmp_actor_process_guid
+          samples:
+            - "{11111111-2222-3333-4444-555555555555}"
+          grok:
+            supportRules: ""
+            matchRules: |
+              braced %{regex("[{]"):}%{regex("[^{}]+"):ocsf.actor.process.cpid:lowercase}%{regex("[}]"):}
+              plain %{regex("[^{}]+"):ocsf.actor.process.cpid:lowercase}
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.ParentImage`, `Event.EventData.Data.SourceImage` to `ocsf.tmp_actor_image`
+          enabled: true
+          sources:
+            - Event.EventData.Data.ParentImage
+            - Event.EventData.Data.SourceImage
+          sourceType: attribute
+          target: ocsf.tmp_actor_image
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.tmp_actor_image` to `ocsf.actor.process.name`, `ocsf.actor.process.file.name`, `ocsf.tmp_actor_dir`
+          enabled: true
+          source: ocsf.tmp_actor_image
+          samples:
+            - "C:\\\\Windows\\\\System32\\\\svchost.exe"
+            - "System"
+          grok:
+            supportRules: ""
+            matchRules: |
+              with_dir %{regex(".*\\\\"):ocsf.tmp_actor_dir}%{data:ocsf.actor.process.file.name}
+              no_dir %{data:ocsf.actor.process.name}
+        - type: string-builder-processor
+          name: Add `ocsf.actor.process.file.path`
+          enabled: true
+          template: "%{ocsf.tmp_actor_dir}%{ocsf.actor.process.file.name}"
+          target: ocsf.actor.process.file.path
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.ParentUser`, `Event.EventData.Data.SourceUser` to `ocsf.tmp_actor_user`
+          enabled: true
+          sources:
+            - Event.EventData.Data.ParentUser
+            - Event.EventData.Data.SourceUser
+          sourceType: attribute
+          target: ocsf.tmp_actor_user
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.SourceUser` to `ocsf.actor.user.domain` and `ocsf.actor.user.name`
+          enabled: true
+          source: ocsf.tmp_actor_user
+          samples:
+            - NT AUTHORITY\SYSTEM
+            - SYSTEM
+          grok:
+            supportRules: ""
+            matchRules: |
+              domain_user %{regex("[^\\\\]+"):ocsf.actor.user.domain}%{regex("\\\\"):}%{regex(".*"):ocsf.actor.user.name}
+              user_only %{regex(".*"):ocsf.actor.user.name}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.LogonGuid` to `ocsf.actor.session.uuid`
+          enabled: true
+          source: Event.EventData.Data.LogonGuid
+          samples:
+            - "{11111111-2222-3333-4444-555555555555}"
+          grok:
+            supportRules: ""
+            matchRules: |
+              braced %{regex("[{]"):}%{regex("[^{}]+"):ocsf.actor.session.uuid:lowercase}%{regex("[}]"):}
+              plain %{regex("[^{}]+"):ocsf.actor.session.uuid:lowercase}
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.TargetProcessGuid`, `Event.EventData.Data.TargetProcessGUID`, `Event.EventData.Data.ProcessGuid` to `ocsf.tmp_process_guid`
+          enabled: true
+          sources:
+            - Event.EventData.Data.TargetProcessGuid
+            - Event.EventData.Data.TargetProcessGUID
+            - Event.EventData.Data.ProcessGuid
+          sourceType: attribute
+          target: ocsf.tmp_process_guid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.ProcessGuid` to `ocsf.process.cpid`
+          enabled: true
+          source: ocsf.tmp_process_guid
+          samples:
+            - "{11111111-2222-3333-4444-555555555555}"
+          grok:
+            supportRules: ""
+            matchRules: |
+              braced %{regex("[{]"):}%{regex("[^{}]+"):ocsf.process.cpid:lowercase}%{regex("[}]"):}
+              plain %{regex("[^{}]+"):ocsf.process.cpid:lowercase}
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.TargetImage`, `Event.EventData.Data.Image` to `ocsf.tmp_process_image`
+          enabled: true
+          sources:
+            - Event.EventData.Data.TargetImage
+            - Event.EventData.Data.Image
+          sourceType: attribute
+          target: ocsf.tmp_process_image
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.tmp_process_image` to `ocsf.process.name`, `ocsf.process.file.name`, `ocsf.tmp_process_dir`
+          enabled: true
+          source: ocsf.tmp_process_image
+          samples:
+            - "C:\\\\Windows\\\\System32\\\\svchost.exe"
+            - "System"
+          grok:
+            supportRules: ""
+            matchRules: |
+              with_dir %{regex(".*\\\\"):ocsf.tmp_process_dir}%{data:ocsf.process.file.name}
+              no_dir %{data:ocsf.process.name}
+        - type: string-builder-processor
+          name: Add `ocsf.process.file.path`
+          enabled: true
+          template: "%{ocsf.tmp_process_dir}%{ocsf.process.file.name}"
+          target: ocsf.process.file.path
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `Event.EventData.Data.TargetUser`, `Event.EventData.Data.User` to `ocsf.tmp_process_user`
+          enabled: true
+          sources:
+            - Event.EventData.Data.TargetUser
+            - Event.EventData.Data.User
+          sourceType: attribute
+          target: ocsf.tmp_process_user
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.User` to `ocsf.process.user.domain` and `ocsf.process.user.name`
+          enabled: true
+          source: ocsf.tmp_process_user
+          samples:
+            - NT AUTHORITY\SYSTEM
+            - SYSTEM
+          grok:
+            supportRules: ""
+            matchRules: |
+              domain_user %{regex("[^\\\\]+"):ocsf.process.user.domain}%{regex("\\\\"):}%{regex(".*"):ocsf.process.user.name}
+              user_only %{regex(".*"):ocsf.process.user.name}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.ParentProcessGuid` to `ocsf.process.parent_process.cpid`
+          enabled: true
+          source: Event.EventData.Data.ParentProcessGuid
+          samples:
+            - "{11111111-2222-3333-4444-555555555555}"
+          grok:
+            supportRules: ""
+            matchRules: |
+              braced %{regex("[{]"):}%{regex("[^{}]+"):ocsf.process.parent_process.cpid:lowercase}%{regex("[}]"):}
+              plain %{regex("[^{}]+"):ocsf.process.parent_process.cpid:lowercase}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.ParentImage` to `ocsf.process.parent_process.name`, `ocsf.process.parent_process.file.name`, `ocsf.tmp_parent_dir`
+          enabled: true
+          source: Event.EventData.Data.ParentImage
+          samples:
+            - "C:\\\\Windows\\\\explorer.exe"
+            - "System"
+          grok:
+            supportRules: ""
+            matchRules: |
+              with_dir %{regex(".*\\\\"):ocsf.tmp_parent_dir}%{data:ocsf.process.parent_process.file.name}
+              no_dir %{data:ocsf.process.parent_process.name}
+        - type: string-builder-processor
+          name: Add `ocsf.process.parent_process.file.path`
+          enabled: true
+          template: "%{ocsf.tmp_parent_dir}%{ocsf.process.parent_process.file.name}"
+          target: ocsf.process.parent_process.file.path
+          replaceMissing: false
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: MD5
+          target: ocsf.hash_md5_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_md5_ev.value:*"
+              name: "1"
+          target: ocsf.hash_md5_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_md5_ev.algorithm_id` to `ocsf.hash_md5_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_md5_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_md5_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: SHA-1
+          target: ocsf.hash_sha1_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha1_ev.value:*"
+              name: "2"
+          target: ocsf.hash_sha1_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha1_ev.algorithm_id` to `ocsf.hash_sha1_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha1_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha1_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: SHA-256
+          target: ocsf.hash_sha256_ev.algorithm
+        - type: category-processor
+          name: Set `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.hash_sha256_ev.value:*"
+              name: "3"
+          target: ocsf.hash_sha256_ev.algorithm_id
+        - type: attribute-remapper
+          name: Map `ocsf.hash_sha256_ev.algorithm_id` to `ocsf.hash_sha256_ev.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.hash_sha256_ev.algorithm_id
+          sourceType: attribute
+          target: ocsf.hash_sha256_ev.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: true
+          targetFormat: integer
+        - type: array-processor
+          name: Move `ocsf.hash_md5_ev` into the `ocsf.process.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_md5_ev
+            target: ocsf.process.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha1_ev` into the `ocsf.process.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha1_ev
+            target: ocsf.process.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.hash_sha256_ev` into the `ocsf.process.file.hashes` array
+          enabled: true
+          operation:
+            source: ocsf.hash_sha256_ev
+            target: ocsf.process.file.hashes
+            preserveSource: false
+            type: append
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_actor_process_guid`
+          enabled: true
+          attributeToExclude: ocsf.tmp_actor_process_guid
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_process_guid`
+          enabled: true
+          attributeToExclude: ocsf.tmp_process_guid
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_actor_image`
+          enabled: true
+          attributeToExclude: ocsf.tmp_actor_image
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_process_image`
+          enabled: true
+          attributeToExclude: ocsf.tmp_process_image
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_actor_user`
+          enabled: true
+          attributeToExclude: ocsf.tmp_actor_user
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_process_user`
+          enabled: true
+          attributeToExclude: ocsf.tmp_process_user
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_actor_dir`
+          enabled: true
+          attributeToExclude: ocsf.tmp_actor_dir
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_process_dir`
+          enabled: true
+          attributeToExclude: ocsf.tmp_process_dir
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_parent_dir`
+          enabled: true
+          attributeToExclude: ocsf.tmp_parent_dir
+        - type: schema-processor
+          name: Apply OCSF schema for 1007
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.name`, `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.file.name
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.path` to `ocsf.actor.process.file.path`
+              sources:
+                - ocsf.actor.process.file.path
+              target: ocsf.actor.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.name` to `ocsf.actor.process.file.name`
+              sources:
+                - ocsf.actor.process.file.name
+              target: ocsf.actor.process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.actor.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.actor.process.file.type
+                id: ocsf.actor.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ParentProcessId`, `Event.EventData.Data.SourceProcessId`, `Event.EventData.Data.ProcessId` to `ocsf.actor.process.pid`
+              sources:
+                - Event.EventData.Data.ParentProcessId
+                - Event.EventData.Data.SourceProcessId
+                - Event.EventData.Data.ProcessId
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.cpid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.SourceThreadId` to `ocsf.actor.process.tid`
+              sources:
+                - Event.EventData.Data.SourceThreadId
+              target: ocsf.actor.process.tid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.domain` to `ocsf.actor.user.domain`
+              sources:
+                - ocsf.actor.user.domain
+              target: ocsf.actor.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.name` to `ocsf.actor.user.name`
+              sources:
+                - ocsf.actor.user.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.actor.user.domain:("NT AUTHORITY" OR "NT-AUTORITÄT" OR "Window Manager" OR "Font Driver Host") OR @ocsf.actor.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.actor.user.name:(Administrator OR admin)"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "@ocsf.actor.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.LogonId`, `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+              sources:
+                - Event.EventData.Data.LogonId
+                - ocsf.actor.session.uid
+              target: ocsf.actor.session.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.process.file.name`, `ocsf.process.name` to `ocsf.process.name`
+              sources:
+                - ocsf.process.file.name
+                - ocsf.process.name
+              target: ocsf.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.file.path` to `ocsf.process.file.path`
+              sources:
+                - ocsf.process.file.path
+              target: ocsf.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.file.name` to `ocsf.process.file.name`
+              sources:
+                - ocsf.process.file.name
+              target: ocsf.process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.file.hashes` to `ocsf.process.file.hashes`
+              sources:
+                - ocsf.process.file.hashes
+              target: ocsf.process.file.hashes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.process.file.type
+                id: ocsf.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ProcessId`, `Event.EventData.Data.TargetProcessId` to `ocsf.process.pid`
+              sources:
+                - Event.EventData.Data.ProcessId
+                - Event.EventData.Data.TargetProcessId
+              target: ocsf.process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.process.uid` to `ocsf.process.uid`
+              sources:
+                - ocsf.process.uid
+              target: ocsf.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.process.cpid` to `ocsf.process.cpid`
+              sources:
+                - ocsf.process.cpid
+              target: ocsf.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.NewThreadId` to `ocsf.process.tid`
+              sources:
+                - Event.EventData.Data.NewThreadId
+              target: ocsf.process.tid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.CommandLine` to `ocsf.process.cmd_line`
+              sources:
+                - Event.EventData.Data.CommandLine
+              target: ocsf.process.cmd_line
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.CurrentDirectory` to `ocsf.process.working_directory`
+              sources:
+                - Event.EventData.Data.CurrentDirectory
+              target: ocsf.process.working_directory
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.process.user.domain` to `ocsf.process.user.domain`
+              sources:
+                - ocsf.process.user.domain
+              target: ocsf.process.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.user.name` to `ocsf.process.user.name`
+              sources:
+                - ocsf.process.user.name
+              target: ocsf.process.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.process.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.process.user.domain:("NT AUTHORITY" OR "Window Manager" OR "Font Driver Host") OR @ocsf.process.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.process.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.process.user.type
+                id: ocsf.process.user.type_id
+            - type: schema-category-mapper
+              name: ocsf.process.integrity_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.IntegrityLevel:Untrusted"
+                  name: Untrusted
+                  id: 1
+                - filter:
+                    query: "@Event.EventData.Data.IntegrityLevel:Low"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: '@Event.EventData.Data.IntegrityLevel:("Medium" OR "Medium Plus")'
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.EventData.Data.IntegrityLevel:High"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.EventData.Data.IntegrityLevel:System"
+                  name: System
+                  id: 5
+                - filter:
+                    query: "@Event.EventData.Data.IntegrityLevel:Protected"
+                  name: Protected
+                  id: 6
+                - filter:
+                    query: "@Event.EventData.Data.IntegrityLevel:AppContainer"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.process.integrity
+                id: ocsf.process.integrity_id
+              fallback:
+                values:
+                  ocsf.process.integrity: Other
+                  ocsf.process.integrity_id: '99'
+                sources:
+                  ocsf.process.integrity:
+                    - Event.EventData.Data.IntegrityLevel
+            - type: schema-remapper
+              name: Map `ocsf.process.parent_process.file.name`, `ocsf.process.parent_process.name` to `ocsf.process.parent_process.name`
+              sources:
+                - ocsf.process.parent_process.file.name
+                - ocsf.process.parent_process.name
+              target: ocsf.process.parent_process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.parent_process.file.path` to `ocsf.process.parent_process.file.path`
+              sources:
+                - ocsf.process.parent_process.file.path
+              target: ocsf.process.parent_process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.parent_process.file.name` to `ocsf.process.parent_process.file.name`
+              sources:
+                - ocsf.process.parent_process.file.name
+              target: ocsf.process.parent_process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.process.parent_process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.process.parent_process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.process.parent_process.file.type
+                id: ocsf.process.parent_process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ParentProcessId` to `ocsf.process.parent_process.pid`
+              sources:
+                - Event.EventData.Data.ParentProcessId
+              target: ocsf.process.parent_process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.process.parent_process.uid` to `ocsf.process.parent_process.uid`
+              sources:
+                - ocsf.process.parent_process.uid
+              target: ocsf.process.parent_process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.process.parent_process.cpid` to `ocsf.process.parent_process.cpid`
+              sources:
+                - ocsf.process.parent_process.cpid
+              target: ocsf.process.parent_process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ParentCommandLine` to `ocsf.process.parent_process.cmd_line`
+              sources:
+                - Event.EventData.Data.ParentCommandLine
+              target: ocsf.process.parent_process.cmd_line
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:1"
+                  name: Launch
+                  id: 1
+                - filter:
+                    query: "@Event.System.EventID:5"
+                  name: Terminate
+                  id: 2
+                - filter:
+                    query: "@Event.System.EventID:10"
+                  name: Open
+                  id: 3
+                - filter:
+                    query: "@Event.System.EventID:8"
+                  name: Inject
+                  id: 4
+                - filter:
+                    query: "@Event.System.EventID:25"
+                  name: Process Tampering
+                  id: 99
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.injection_type_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:8"
+                  name: Remote Thread
+                  id: 1
+              targets:
+                name: ocsf.injection_type
+                id: ocsf.injection_type_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.process.cpid` to `ocsf.process.uid`
+              sources:
+                - ocsf.process.cpid
+              target: ocsf.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.process.parent_process.cpid` to `ocsf.process.parent_process.uid`
+              sources:
+                - ocsf.process.parent_process.cpid
+              target: ocsf.process.parent_process.uid
+              preserveSource: true
+              overrideOnConflict: false
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Process Activity
+            classUid: 1007
+            extensions: []
+            profiles:
+              - host
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Event Log Activity [1008]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(4) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.Version` to `ocsf.metadata.product.feature.version`
+          enabled: true
+          source: Event.EventData.Data.Version
+          samples:
+            - "15.21"
+            - 10.0.26100.8521 (WinBuild.160101.0800)
+          grok:
+            supportRules: ""
+            matchRules: |
+              sysmon_version %{regex("[0-9]+\\.[0-9]+"):ocsf.metadata.product.feature.version}
+              os_build_string %{regex("[0-9]+\\.[0-9]+\\.[0-9]+.*"):ocsf.device.os.version}
+        - type: schema-processor
+          name: Apply OCSF schema for 1008
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.version` to `ocsf.metadata.product.feature.version`
+              sources:
+                - ocsf.metadata.product.feature.version
+              target: ocsf.metadata.product.feature.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.version` to `ocsf.device.os.version`
+              sources:
+                - ocsf.device.os.version
+              target: ocsf.device.os.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Channel` to `ocsf.log_name`
+              sources:
+                - Event.System.Channel
+              target: ocsf.log_name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.System.Provider.Name` to `ocsf.log_provider`
+              sources:
+                - Event.System.Provider.Name
+              target: ocsf.log_provider
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.log_type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: OS
+                  id: 1
+              targets:
+                name: ocsf.log_type
+                id: ocsf.log_type_id
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.State:Started"
+                  name: Start
+                  id: 6
+                - filter:
+                    query: "@Event.EventData.Data.State:Stopped"
+                  name: Stop
+                  id: 7
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Event Log Activity
+            classUid: 1008
+            extensions: []
+            profiles:
+              - host
+    - type: pipeline
+      name: OCSF sub pipeline for class Network Activity [4001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(3) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.SourceHostname` to `ocsf.src_endpoint.hostname`
+          enabled: true
+          source: Event.EventData.Data.SourceHostname
+          samples:
+            - hostname.internal
+            - "-"
+          grok:
+            supportRules: ""
+            matchRules: |
+              absent %{regex("-"):}
+              present %{data:ocsf.src_endpoint.hostname}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.DestinationHostname` to `ocsf.dst_endpoint.hostname`
+          enabled: true
+          source: Event.EventData.Data.DestinationHostname
+          samples:
+            - hostname.internal
+            - "-"
+          grok:
+            supportRules: ""
+            matchRules: |
+              absent %{regex("-"):}
+              present %{data:ocsf.dst_endpoint.hostname}
+        - type: schema-processor
+          name: Apply OCSF schema for 4001
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.path` to `ocsf.actor.process.file.path`
+              sources:
+                - ocsf.actor.process.file.path
+              target: ocsf.actor.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.name` to `ocsf.actor.process.file.name`
+              sources:
+                - ocsf.actor.process.file.name
+              target: ocsf.actor.process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.actor.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.actor.process.file.type
+                id: ocsf.actor.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ProcessId` to `ocsf.actor.process.pid`
+              sources:
+                - Event.EventData.Data.ProcessId
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.cpid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.domain` to `ocsf.actor.user.domain`
+              sources:
+                - ocsf.actor.user.domain
+              target: ocsf.actor.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.name` to `ocsf.actor.user.name`
+              sources:
+                - ocsf.actor.user.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.actor.user.domain:("NT AUTHORITY" OR "NT-AUTORITÄT" OR "Window Manager" OR "Font Driver Host") OR @ocsf.actor.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.actor.user.name:(Administrator OR admin)"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "@ocsf.actor.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.SourceIp` to `ocsf.src_endpoint.ip`
+              sources:
+                - Event.EventData.Data.SourceIp
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.SourcePort` to `ocsf.src_endpoint.port`
+              sources:
+                - Event.EventData.Data.SourcePort
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.src_endpoint.hostname` to `ocsf.src_endpoint.hostname`
+              sources:
+                - ocsf.src_endpoint.hostname
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.DestinationIp` to `ocsf.dst_endpoint.ip`
+              sources:
+                - Event.EventData.Data.DestinationIp
+              target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.DestinationPort` to `ocsf.dst_endpoint.port`
+              sources:
+                - Event.EventData.Data.DestinationPort
+              target: ocsf.dst_endpoint.port
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.hostname` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - ocsf.dst_endpoint.hostname
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.Initiated:true"
+                  name: Outbound
+                  id: 2
+                - filter:
+                    query: "@Event.EventData.Data.Initiated:false"
+                  name: Inbound
+                  id: 1
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.connection_info.protocol_num
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.Protocol:tcp"
+                  name: tcp
+                  id: 6
+                - filter:
+                    query: "@Event.EventData.Data.Protocol:udp"
+                  name: udp
+                  id: 17
+                - filter:
+                    query: "@Event.EventData.Data.Protocol:icmp"
+                  name: icmp
+                  id: 1
+              targets:
+                name: ocsf.connection_info.protocol_name
+                id: ocsf.connection_info.protocol_num
+            - type: schema-category-mapper
+              name: ocsf.connection_info.protocol_ver_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.SourceIsIpv6:true"
+                  name: Internet Protocol version 6 (IPv6)
+                  id: 6
+                - filter:
+                    query: "@Event.EventData.Data.SourceIsIpv6:false"
+                  name: Internet Protocol version 4 (IPv4)
+                  id: 4
+              targets:
+                name: ocsf.connection_info.protocol_ver
+                id: ocsf.connection_info.protocol_ver_id
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Open
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Network Activity
+            classUid: 4001
+            extensions: []
+            profiles:
+              - host
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class DNS Activity [4003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(22) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.QueryResults` to `ocsf.tmp_query_results`
+          enabled: true
+          source: Event.EventData.Data.QueryResults
+          samples:
+            - "192.0.2.10;192.0.2.11;198.51.100.20;"
+            - "::ffff:192.0.2.30;"
+            - "type:  5 name.example.com;"
+            - "-"
+          grok:
+            supportRules: ""
+            matchRules: |
+              absent %{regex("-"):}
+              results %{regex(".*[^;]"):ocsf.tmp_query_results:array(";")}%{regex(";*"):}
+        - type: array-map-processor
+          name: Map `ocsf.tmp_query_results` to `ocsf.answers`
+          enabled: true
+          source: ocsf.tmp_query_results
+          target: ocsf.answers
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem` to `$targetElem.rdata`
+              sources:
+                - $sourceElem
+              target: $targetElem.rdata
+              preserveSource: true
+              overrideOnConflict: false
+          preserve_source: false
+        - type: schema-processor
+          name: Apply OCSF schema for 4003
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.path` to `ocsf.actor.process.file.path`
+              sources:
+                - ocsf.actor.process.file.path
+              target: ocsf.actor.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.name` to `ocsf.actor.process.file.name`
+              sources:
+                - ocsf.actor.process.file.name
+              target: ocsf.actor.process.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.actor.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.actor.process.file.type
+                id: ocsf.actor.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ProcessId` to `ocsf.actor.process.pid`
+              sources:
+                - Event.EventData.Data.ProcessId
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.cpid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.domain` to `ocsf.actor.user.domain`
+              sources:
+                - ocsf.actor.user.domain
+              target: ocsf.actor.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.name` to `ocsf.actor.user.name`
+              sources:
+                - ocsf.actor.user.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.actor.user.domain:("NT AUTHORITY" OR "NT-AUTORITÄT" OR "Window Manager" OR "Font Driver Host") OR @ocsf.actor.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.actor.user.name:(Administrator OR admin)"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "@ocsf.actor.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
+              sources:
+                - Event.EventData.Data.QueryName
+              target: ocsf.query.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.src_endpoint.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.answers` to `ocsf.answers`
+              sources:
+                - ocsf.answers
+              target: ocsf.answers
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.rcode_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:(0 OR 9501)"
+                  name: NoError
+                  id: 0
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9001"
+                  name: FormError
+                  id: 1
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9002"
+                  name: ServError
+                  id: 2
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9003"
+                  name: NXDomain
+                  id: 3
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9004"
+                  name: NotImp
+                  id: 4
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9005"
+                  name: Refused
+                  id: 5
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9006"
+                  name: YXDomain
+                  id: 6
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9007"
+                  name: YXRRSet
+                  id: 7
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:(9008 OR 9701)"
+                  name: NXRRSet
+                  id: 8
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9009"
+                  name: NotAuth
+                  id: 9
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:9010"
+                  name: NotZone
+                  id: 10
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.rcode
+                id: ocsf.rcode_id
+              fallback:
+                values:
+                  ocsf.rcode: Other
+                  ocsf.rcode_id: "99"
+                sources:
+                  ocsf.rcode:
+                    - Event.EventData.Data.QueryStatus
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Query
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@Event.EventData.Data.QueryStatus:(0 OR 9501)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "*"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.QueryStatus` to `ocsf.status_code`
+              sources:
+                - Event.EventData.Data.QueryStatus
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: DNS Activity
+            classUid: 4003
+            extensions: []
+            profiles:
+              - host
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Application Lifecycle [6002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(16) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: string-builder-processor
+          name: Add `ocsf.app.name`
+          enabled: true
+          template: Sysmon
+          target: ocsf.app.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add `ocsf.app.vendor_name`
+          enabled: true
+          template: Microsoft
+          target: ocsf.app.vendor_name
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 6002
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `ocsf.app.name` to `ocsf.app.name`
+              sources:
+                - ocsf.app.name
+              target: ocsf.app.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.app.vendor_name` to `ocsf.app.vendor_name`
+              sources:
+                - ocsf.app.vendor_name
+              target: ocsf.app.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Update
+                  id: 8
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Success
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Application Lifecycle
+            classUid: 6002
+            extensions: []
+            profiles:
+              - host
+    - type: pipeline
+      name: OCSF sub pipeline for class Application Error [6008]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@ocsf.metadata.event_code:(255) @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 6008
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ID` to `ocsf.status_code`
+              sources:
+                - Event.EventData.Data.ID
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.Description` to `ocsf.status_detail`
+              sources:
+                - Event.EventData.Data.Description
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: General Error
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.Description` to `ocsf.message`
+              sources:
+                - Event.EventData.Data.Description
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: false
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Application Error
+            classUid: 6008
+            extensions: []
+            profiles:
+              - host
+    - type: pipeline
+      name: OCSF sub pipeline for class Base Event [0]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@Event.System.Provider.Name:"Microsoft-Windows-Sysmon" -@ocsf.class_uid:*'
+      processors:
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.Image` to `ocsf.actor.process.name`
+          enabled: true
+          source: Event.EventData.Data.Image
+          samples:
+            - "C:\\Windows\\System32\\svchost.exe"
+            - "svchost.exe"
+          grok:
+            supportRules: ""
+            matchRules: |
+              basename %{regex(".*\\\\"):}%{data:ocsf.actor.process.name}
+              basename_no_dir %{data:ocsf.actor.process.name}
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.ProcessId` to `ocsf.actor.process.pid`
+          enabled: true
+          source: Event.EventData.Data.ProcessId
+          samples:
+            - "1234"
+          grok:
+            supportRules: ""
+            matchRules: |
+              decimal_pid %{integer:ocsf.actor.process.pid}
+        - type: schema-processor
+          name: Apply OCSF schema for 0
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.name` to `ocsf.metadata.product.feature.name`
+              sources:
+                - ocsf.metadata.product.feature.name
+              target: ocsf.metadata.product.feature.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.os.name` to `ocsf.device.os.name`
+              sources:
+                - ocsf.device.os.name
+              target: ocsf.device.os.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+              sources:
+                - ocsf.metadata.log_provider
+              target: ocsf.metadata.log_provider
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_version` to `ocsf.metadata.log_version`
+              sources:
+                - ocsf.metadata.log_version
+              target: ocsf.metadata.log_version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.feature.uid` to `ocsf.metadata.product.feature.uid`
+              sources:
+                - ocsf.metadata.product.feature.uid
+              target: ocsf.metadata.product.feature.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+              sources:
+                - ocsf.metadata.original_time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `title` to `ocsf.message`
+              sources:
+                - title
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.device.hostname`
+              sources:
+                - Event.System.Computer
+              target: ocsf.device.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.os.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Windows
+                  id: 100
+              targets:
+                name: ocsf.device.os.type
+                id: ocsf.device.os.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: '@Event.System.Keywords:("0x8010000000000000" OR "0x8030000000000000" OR "0x4010000000000000" OR "0x4030000000000000" OR "0x0010000000000000")'
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@ocsf.actor.user.domain:("NT AUTHORITY" OR "NT-AUTORITÄT" OR "Window Manager" OR "Font Driver Host") OR @ocsf.actor.user.name:*$'
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@ocsf.actor.user.name:(Administrator OR admin)"
+                  name: Admin
+                  id: 2
+                - filter:
+                    query: "@ocsf.actor.user.name:*"
+                  name: User
+                  id: 1
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@Event.System.EventID:12 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: Registry object added or deleted
+                  id: 99
+                - filter:
+                    query: '@Event.System.EventID:13 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: Registry value set
+                  id: 99
+                - filter:
+                    query: '@Event.System.EventID:14 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: Registry object renamed
+                  id: 99
+                - filter:
+                    query: '@Event.System.EventID:19 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: WmiEventFilter activity detected
+                  id: 99
+                - filter:
+                    query: '@Event.System.EventID:20 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: WmiEventConsumer activity detected
+                  id: 99
+                - filter:
+                    query: '@Event.System.EventID:21 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: WmiEventConsumerToFilter activity detected
+                  id: 99
+                - filter:
+                    query: '@Event.System.EventID:24 @Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
+                  name: Clipboard changed
+                  id: 99
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - Event.System.Task
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: '@Event.System.Keywords:("0x8010000000000000" OR "0x8030000000000000" OR "0x4010000000000000" OR "0x4030000000000000" OR "0x0010000000000000")'
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: '@Event.System.Keywords:("0x8020000000000000" OR "0x8030000000000000" OR "0x4020000000000000" OR "0x4030000000000000" OR "0x0020000000000000")'
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.file.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.file.name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-category-mapper
+              name: ocsf.actor.process.file.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.actor.process.file.path:*"
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.actor.process.file.type
+                id: ocsf.actor.process.file.type_id
+            - type: schema-remapper
+              name: Map `Event.EventData.Data.ProcessId` to `ocsf.actor.process.uid`
+              sources:
+                - Event.EventData.Data.ProcessId
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.file.path` to `ocsf.actor.process.file.path`
+              sources:
+                - ocsf.actor.process.file.path
+              target: ocsf.actor.process.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.cpid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.cpid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.pid` to `ocsf.actor.process.pid`
+              sources:
+                - ocsf.actor.process.pid
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.domain` to `ocsf.actor.user.domain`
+              sources:
+                - ocsf.actor.user.domain
+              target: ocsf.actor.user.domain
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.name` to `ocsf.actor.user.name`
+              sources:
+                - ocsf.actor.user.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.cpid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.cpid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.metadata.labels` to `ocsf.metadata.labels`
+              sources:
+                - ocsf.metadata.labels
+              target: ocsf.metadata.labels
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.attacks` to `ocsf.attacks`
+              sources:
+                - ocsf.attacks
+              target: ocsf.attacks
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Base Event
+            classUid: 0
+            extensions: []
+            profiles:
+              - host
