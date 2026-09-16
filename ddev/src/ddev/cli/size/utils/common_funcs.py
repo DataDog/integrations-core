@@ -10,11 +10,12 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 import zipfile
 import zlib
 from datetime import date
 from types import TracebackType
-from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Type, TypedDict, get_args
 
 import requests
 import squarify
@@ -323,6 +324,31 @@ def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[st
     return [resolve_wheel_url(url, tier) for tier in tiers]
 
 
+WHEEL_REQUEST_MAX_ATTEMPTS = 3
+WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
+WHEEL_REQUEST_TIMEOUT_SECONDS = 30
+
+
+def _request_with_retries(method: Callable[..., requests.Response], url: str, **kwargs: object) -> requests.Response:
+    """
+    Retries a request a few times with backoff when the connection drops mid-request.
+
+    The wheels storage host resets the connection under load often enough to fail a disk-usage
+    measurement run several times a week. HTTP error statuses are not retried here: they're
+    handled by request_wheel's tier fallback and immediate-abort logic.
+    """
+    last_error: requests.exceptions.ConnectionError | None = None
+    for attempt in range(WHEEL_REQUEST_MAX_ATTEMPTS):
+        try:
+            return method(url, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS, **kwargs)
+        except requests.exceptions.ConnectionError as e:
+            last_error = e
+            if attempt < WHEEL_REQUEST_MAX_ATTEMPTS - 1:
+                time.sleep(WHEEL_REQUEST_RETRY_BACKOFF_SECONDS * (attempt + 1))
+    assert last_error is not None
+    raise last_error
+
+
 def request_wheel(
     app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
 ) -> requests.Response:
@@ -338,7 +364,11 @@ def request_wheel(
     candidates = wheel_url_candidates(url, wheels_storage)
     tried: list[str] = []
     for index, candidate in enumerate(candidates):
-        response = requests.head(candidate) if head else requests.get(candidate, stream=True)
+        response = (
+            _request_with_retries(requests.head, candidate)
+            if head
+            else _request_with_retries(requests.get, candidate, stream=True)
+        )
         try:
             response.raise_for_status()
         except requests.HTTPError as e:

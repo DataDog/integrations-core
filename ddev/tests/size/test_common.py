@@ -9,6 +9,8 @@ import pytest
 import requests
 
 from ddev.cli.size.utils.common_funcs import (
+    WHEEL_REQUEST_MAX_ATTEMPTS,
+    WHEEL_REQUEST_TIMEOUT_SECONDS,
     _matches_gitignore,
     check_python_version,
     compress,
@@ -191,7 +193,11 @@ def test_get_dependencies_sizes():
         )
 
     # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
-    mock_get.assert_called_once_with("https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True)
+    mock_get.assert_called_once_with(
+        "https://example.com/dev/dependency1/dependency1-1.1.1-.whl",
+        timeout=WHEEL_REQUEST_TIMEOUT_SECONDS,
+        stream=True,
+    )
 
     assert file_data == [
         {
@@ -746,4 +752,29 @@ def test_request_wheel_uses_head_when_requested():
     with patch("requests.head", return_value=found) as mock_head:
         assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
 
-    mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")
+    mock_head.assert_called_once_with(
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl", timeout=WHEEL_REQUEST_TIMEOUT_SECONDS
+    )
+
+
+def test_request_wheel_retries_a_dropped_connection(monkeypatch):
+    monkeypatch.setattr("time.sleep", lambda _: None)
+    found = make_wheel_response(200)
+
+    with patch(
+        "requests.get", side_effect=[requests.exceptions.ConnectionError("connection reset by peer"), found]
+    ) as mock_get:
+        assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
+
+    assert mock_get.call_count == 2
+
+
+def test_request_wheel_gives_up_after_repeated_dropped_connections(monkeypatch):
+    monkeypatch.setattr("time.sleep", lambda _: None)
+    error = requests.exceptions.ConnectionError("connection reset by peer")
+
+    with patch("requests.get", side_effect=[error] * WHEEL_REQUEST_MAX_ATTEMPTS) as mock_get:
+        with pytest.raises(requests.exceptions.ConnectionError):
+            request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == WHEEL_REQUEST_MAX_ATTEMPTS
