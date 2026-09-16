@@ -243,8 +243,6 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
-        uncollected_types = set()  # type: Set[str]
-        uncollected_total = 0
         for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
@@ -372,24 +370,10 @@ class VSphereCheck(AgentCheck):
                     mor_payload["cpu_count"] = cpu_count_value
                     reason = None
 
-                if reason is not None:
-                    uncollected_total += 1
-                    uncollected_types.add(mor_type_str)
+                if reason:
                     self.log.debug("Not collecting a CPU count for %s %s: %s", mor_type_str, mor_name, reason)
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
-
-        if uncollected_total:
-            self.log.warning(
-                "Not collecting %s for %d resource(s); enable debug logs to see which and why. A missing "
-                "property usually means the vCenter user cannot read it; a missing hostname means none "
-                "could be resolved for the resource.",
-                " or ".join(
-                    'vsphere.{}'.format(cpu_count_metric_name(resource_type))
-                    for resource_type in sorted(uncollected_types)
-                ),
-                uncollected_total,
-            )
 
     def submit_metrics_callback(self, query_results):
         # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None

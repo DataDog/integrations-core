@@ -3371,7 +3371,6 @@ def test_cpu_count_metrics_missing_property(
     # Unscoped, so nothing extra leaked in alongside those two points.
     aggregator.assert_metric('vsphere.vm.summary.config.numCpu', count=2)
     assert 'Not collecting a CPU count for host host1: no summary.hardware.numCpuCores' in caplog.text
-    assert 'Not collecting vsphere.host.summary.hardware.numCpuCores for 1 resource(s)' in caplog.text
 
 
 def test_cpu_count_metrics_no_resolved_hostname(
