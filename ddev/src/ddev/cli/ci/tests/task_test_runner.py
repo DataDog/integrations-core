@@ -82,6 +82,8 @@ class TestRunnerOptions:
     is_fork: bool = False
     poll_interval_seconds: float = 30.0
     pytest_args: str = ''
+    origin_run_url: str | None = None
+    pr_number: int | None = None
 
 
 class TaskTestRunner(AsyncProcessor[TestBatch]):
@@ -344,6 +346,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         # GitHub rejects inputs the workflow does not declare, so unset means absent, not empty.
         if self._options.pytest_args:
             inputs["pytest_args"] = self._options.pytest_args
+        if self._options.origin_run_url:
+            inputs["origin_run_url"] = self._options.origin_run_url
+        if self._options.pr_number is not None:
+            inputs["pr_number"] = str(self._options.pr_number)
         size = sum(len(value) for value in inputs.values())
         if size > WORKFLOW_INPUTS_LIMIT:
             raise JobListTooLargeError(message.batch_id, size)
