@@ -9,6 +9,7 @@ from collections.abc import Mapping, Sequence
 
 import pytest
 
+from datadog_checks.sqlserver.database_metrics.async_job import MAX_PACING_WAIT_S
 from datadog_checks.sqlserver.database_metrics.scheduler import (
     ESTIMATE_SAFETY_FACTOR,
     CollectorGroup,
@@ -89,17 +90,22 @@ def test_pacing_keeps_heterogeneous_work_feasible_for_every_task_order(order: tu
 
 
 @pytest.mark.unit
-def test_many_databases_are_spread_across_the_window_without_collisions():
-    """A low-utilization estate must not collapse back into one packed sweep."""
-    databases = [f'db{i:02}' for i in range(50)]
-    scheduler = make_scheduler()
+@pytest.mark.parametrize('database_count', [5, 50])
+def test_many_databases_are_spread_across_the_window_without_collisions(database_count: int):
+    """A low-utilization estate must not collapse back into one packed sweep.
+
+    Runs at the production pacing cap, because a small estate is the case whose per-step wait
+    that cap actually clamps.
+    """
+    databases = [f'db{i:02}' for i in range(database_count)]
+    scheduler = make_scheduler(max_wait=MAX_PACING_WAIT_S)
     spec = make_spec('collector', 300)
     durations = {('collector', database): 0.2 for database in databases}
 
     trace, _ = simulate(scheduler, [spec], databases, durations, until=299)
     starts = [row[0] for row in trace]
 
-    assert len(trace) == 50
+    assert len(trace) == database_count
     assert starts[-1] - starts[0] >= 150
     assert all(right - left > 1e-9 for left, right in itertools.pairwise(starts))
 

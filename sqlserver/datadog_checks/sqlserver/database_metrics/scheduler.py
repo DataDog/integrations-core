@@ -205,8 +205,11 @@ class HeavyCollectorScheduler:
                 for task in group.tasks.values():
                     self._retire(task)
                     removed += 1
+        # `groups` indexes `_groups` by these names, so `_group_order` must stay a subset of
+        # `_groups` at every point. Publishing a name before its group is built would make every
+        # later read raise `KeyError` if the construction below raised.
+        self._group_order = [name for name in self._group_order if name in self._groups]
 
-        self._group_order = spec_names
         desired_databases = tuple(sorted(set(databases)))
         for spec in specs:
             period = self._valid_period(spec)
@@ -244,6 +247,8 @@ class HeavyCollectorScheduler:
                 rolled.append(group.name)
             if not window_changed:
                 group.pending.extend(new_databases)
+
+        self._group_order = spec_names
         return ReconcileResult(added=added, removed=removed, missed=missed_total, rolled=tuple(rolled))
 
     def decide(self, now: float, allow_idle: bool = True) -> Decision:
@@ -317,6 +322,14 @@ class HeavyCollectorScheduler:
     def utilization(self) -> float:
         """Return total serial-worker utilization, ``sum(task cost / collector period)``."""
         return sum(group.full_cost() / group.period for group in self.groups)
+
+    def estimates_observed(self) -> bool:
+        """Return whether every task has contributed at least one measured runtime.
+
+        Until then `utilization()` is built from `COLD_START_ESTIMATE_S` placeholders, so it
+        describes the scheduler's own conservatism rather than the instance's real load.
+        """
+        return all(task.estimate.observed for group in self.groups for task in group.tasks.values())
 
     def lateness(self, task: TaskState, now: float) -> float:
         group = self._groups.get(task.collector)

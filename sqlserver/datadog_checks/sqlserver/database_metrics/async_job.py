@@ -45,6 +45,12 @@ HEAVY_DATABASE_METRIC_CLASSES = (
     SqlserverTableSizeMetrics,
 )
 SCHEDULER_LOOP_RATE = 1_000.0
+# Cap on one intentional idle. `decide` already refuses to sleep past the next release, so this
+# only bounds how stale a selection and its discovery snapshot may get before the worker
+# re-reconciles. Keep it independent of `min_collection_interval`: tying the two truncated the
+# pacing of small estates to the check interval and undid the spreading on exactly the
+# configurations that are cheapest to spread.
+MAX_PACING_WAIT_S = 60.0
 # A command timeout bounds time inside the driver, but a task also pays Python/driver overhead.
 # Ten percent is an operational allowance, not a driver guarantee or empirically tuned value.
 COMMAND_TIMEOUT_ESTIMATE_FACTOR = 1.1
@@ -71,7 +77,7 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         self._database_signature: tuple[str, ...] | None = None
         self._scheduler_spec_signature: tuple[str, ...] | None = None
         self._scheduler_specs: tuple[GroupSpec, ...] = ()
-        self._max_wait = max(1.0, float(config.min_collection_interval))
+        self._max_idle = max(1.0, float(config.min_collection_interval))
         metric_configs = (
             config.database_metrics_config['index_usage_metrics'],
             config.database_metrics_config['db_fragmentation_metrics'],
@@ -121,7 +127,7 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
 
         if not scheduler.has_pending():
             if not self._run_sync:
-                self._wait(min(scheduler.seconds_until_next_release(now), self._max_wait))
+                self._wait(min(scheduler.seconds_until_next_release(now), self._max_idle))
                 raise_if_cancelled(self._cancel_event)
             return
 
@@ -174,13 +180,16 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         ):
             # Six digest bytes remain exactly representable after the scheduler normalizes this to float.
             phase = int.from_bytes(hashlib.sha256(identifier.encode()).digest()[:6], 'big')
-            self._scheduler = HeavyCollectorScheduler(phase=phase, max_wait=self._max_wait, log=self._log)
+            self._scheduler = HeavyCollectorScheduler(phase=phase, max_wait=MAX_PACING_WAIT_S, log=self._log)
             self._scheduler_identifier = identifier
         return self._scheduler
 
     def _wait(self, seconds: float) -> bool:
-        """Idle interruptibly, returning whether cancellation ended the wait."""
-        return self._cancel_event.wait(max(0.0, min(seconds, self._max_wait)))
+        """Idle interruptibly, returning whether cancellation ended the wait.
+
+        Callers bound their own durations; this only guards against a negative wait.
+        """
+        return self._cancel_event.wait(max(0.0, seconds))
 
     def _check_went_inactive(self) -> bool:
         return bool(
@@ -344,21 +353,28 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
         if not result.rolled:
             return
 
+        # Before every task has run, utilization is built from cold-start placeholders and reads
+        # high on any large estate, which would report an overload on every agent restart. Real
+        # overload still surfaces through deadline_miss and lateness_seconds while estimates warm up.
+        estimates_ready = self._scheduler.estimates_observed()
         utilization = self._scheduler.utilization()
-        overloaded = utilization > 1
+        overloaded = estimates_ready and utilization > 1
         pending = self._scheduler.pending_count()
         slack = self._scheduler.slack(now)
         for group in self._scheduler.groups:
             if group.name not in result.rolled:
                 continue
             tags = self._scheduler_tags(group.name)
-            self._check.gauge("dd.sqlserver.database_metrics.scheduler.utilization", utilization, tags=tags, raw=True)
+            if estimates_ready:
+                self._check.gauge(
+                    "dd.sqlserver.database_metrics.scheduler.utilization", utilization, tags=tags, raw=True
+                )
+                self._check.gauge(
+                    "dd.sqlserver.database_metrics.scheduler.overloaded", int(overloaded), tags=tags, raw=True
+                )
             self._check.gauge("dd.sqlserver.database_metrics.scheduler.slack_seconds", slack, tags=tags, raw=True)
             self._check.gauge(
                 "dd.sqlserver.database_metrics.scheduler.pending", len(group.pending), tags=tags, raw=True
-            )
-            self._check.gauge(
-                "dd.sqlserver.database_metrics.scheduler.overloaded", int(overloaded), tags=tags, raw=True
             )
             self._check.gauge(
                 "dd.sqlserver.database_metrics.scheduler.task_count", len(group.tasks), tags=tags, raw=True
@@ -393,6 +409,11 @@ class SqlserverDatabaseMetricsAsyncJob(DBMAsyncJob):
                         "deadline_misses": group.missed_last_window,
                     },
                 )
+
+        if not estimates_ready:
+            # Leave the latched state alone so warming up after a newly discovered database does
+            # not read as a recovery from an overload that was never reported.
+            return
 
         if overloaded and not self._scheduler_overloaded:
             self._log.warning(

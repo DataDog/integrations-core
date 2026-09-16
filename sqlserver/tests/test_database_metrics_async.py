@@ -452,6 +452,33 @@ def test_scheduler_emits_rollover_and_overload_telemetry(init_config, instance_d
 
 
 @pytest.mark.unit
+def test_cold_start_estimates_do_not_report_an_overload(init_config, instance_docker_metrics):
+    """A restart must not warn about overload from placeholder estimates it has not measured yet."""
+    instance_docker_metrics['database_metrics'] = {
+        'run_heavy_collectors_async': True,
+        'index_usage_metrics': {'enabled': True, 'collection_interval': 10},
+    }
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    job = check.database_metrics_job
+    job._scheduler = HeavyCollectorScheduler(phase=0, max_wait=15, log=job._log)
+    databases = tuple(f'database{index}' for index in range(50))
+    specs = job._group_specs(databases)
+    result = job._scheduler.reconcile(specs, databases, 0)
+    check.gauge = mock.MagicMock()
+    check.health.submit_health_event = mock.MagicMock()
+
+    # Cold-start placeholders put utilization far above 1 for an estate of this size.
+    assert job._scheduler.utilization() > 1
+    job._emit_window_telemetry(result, 0)
+
+    gauge_names = {call.args[0] for call in check.gauge.call_args_list}
+    assert 'dd.sqlserver.database_metrics.scheduler.overloaded' not in gauge_names
+    assert 'dd.sqlserver.database_metrics.scheduler.utilization' not in gauge_names
+    assert 'dd.sqlserver.database_metrics.scheduler.pending' in gauge_names
+    check.health.submit_health_event.assert_not_called()
+
+
+@pytest.mark.unit
 def test_scheduler_emits_lateness_for_a_completion_after_its_deadline(init_config, instance_docker_metrics):
     """A late completion must report its delay so operators can distinguish severity from miss count."""
     instance_docker_metrics['database_metrics'] = {
