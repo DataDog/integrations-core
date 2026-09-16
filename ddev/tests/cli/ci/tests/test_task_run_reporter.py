@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import replace
 
 import httpx
@@ -40,6 +41,7 @@ from tests.cli.ci.tests.helpers import (
     uniform_progress,
 )
 from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 OWNER = "DataDog"
 REPO = "integrations-core"
@@ -63,8 +65,18 @@ def _failing_update(revision: int, *, done: bool = False) -> UpdatePRComment:
     return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=failing_progress(done=done))
 
 
-def _reporter(client: FakeAsyncGitHubClient, *, pr_number: int | None = PR_NUMBER) -> TaskRunReporter:
-    return TaskRunReporter("run-reporter", client, RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number))
+def _reporter(
+    client: FakeAsyncGitHubClient,
+    *,
+    pr_number: int | None = PR_NUMBER,
+    handler: logging.Handler | None = None,
+) -> TaskRunReporter:
+    return TaskRunReporter(
+        "run-reporter",
+        client,
+        RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number),
+        monitor=make_monitor('run-reporter', handler=handler),
+    )
 
 
 SHUTDOWN_WITHOUT_RESULTS_NOTES = {
@@ -287,17 +299,19 @@ def test_concurrent_revisions_are_serialized():
 # ---------------------------------------------------------------------------
 
 
-def test_no_pr_number_renders_to_the_log_and_calls_no_api(caplog: pytest.LogCaptureFixture):
+def test_no_pr_number_renders_to_the_log_and_calls_no_api():
     """Master pushes, the nightly cron and merge-queue runs have no PR; the graph stays the same."""
     client = FakeAsyncGitHubClient()
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level("INFO"):
-        asyncio.run(_reporter(client, pr_number=None).process_message(_update(0, done=True)))
+    asyncio.run(_reporter(client, pr_number=None, handler=handler).process_message(_update(0, done=True)))
 
     client.assert_not_called("create_issue_comment")
     client.assert_not_called("update_issue_comment")
     client.assert_not_called("list_issue_comments")
-    assert f"Dispatcher tests complete: {TOTAL_JOBS}/{TOTAL_JOBS} jobs" in caplog.text
+    assert any(
+        f"Dispatcher tests complete: {TOTAL_JOBS}/{TOTAL_JOBS} jobs" in event['event'] for event in handler.events
+    )
 
 
 def test_a_run_without_a_pull_request_still_retains_its_report():
@@ -393,7 +407,7 @@ def test_a_failed_write_keeps_the_report_rather_than_losing_it():
     assert jobs_reported(reporter.latest_body) == TOTAL_JOBS
 
 
-def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.LogCaptureFixture):
+def test_a_rejected_token_is_reported_without_failing_the_run():
     """A credentials problem is a reporting problem, and reporting never fails the run.
 
     Its own message is the fix instruction, so that is what gets logged rather than a generic failure.
@@ -405,13 +419,13 @@ def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.Log
         response=httpx.Response(401),
     )
     client.mock_response("create_issue_comment", error)
-    reporter = _reporter(client)
+    handler = RecordingJsonHandler()
+    reporter = _reporter(client, handler=handler)
 
-    with caplog.at_level("ERROR"):
-        asyncio.run(reporter.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert "rejected the credentials" in caplog.text
+    assert any("rejected the credentials" in event['event'] for event in handler.events)
     assert reporter.pr_comment_failed
     assert reporter.latest_body is not None
 
@@ -631,15 +645,15 @@ def test_a_rejection_shrinking_cannot_fix_is_not_answered_with_a_shorter_body(er
     assert reporter.pr_comment_failed
 
 
-def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log(caplog: pytest.LogCaptureFixture):
+def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log():
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _spam_error())
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level("ERROR"):
-        asyncio.run(_reporter(client).process_message(_update(1)))
+    asyncio.run(_reporter(client, handler=handler).process_message(_update(1)))
 
-    assert "PR comment write failed" in caplog.text
-    assert "too long" not in caplog.text
+    assert any("PR comment write failed" in event['event'] for event in handler.events)
+    assert all("too long" not in event['event'] for event in handler.events)
 
 
 # ---------------------------------------------------------------------------
