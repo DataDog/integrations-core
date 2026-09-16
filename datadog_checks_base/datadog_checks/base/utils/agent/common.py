@@ -16,6 +16,8 @@ METRIC_NAMESPACE_PROFILE = 'datadog.agent.profile'
 def get_agent_embedded_path(*parts: str) -> str | None:
     """Resolve a path under the agent's `embedded` directory, or ``None`` if unavailable."""
     if os.name == 'nt':
+        if 'embedded' not in sys.executable:
+            return None
         install_path = sys.executable.split('embedded')[0].rstrip(os.sep)
         return os.path.join(install_path, 'embedded3', *parts)
     run_path = datadog_agent.get_config('run_path')
