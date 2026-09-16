@@ -1255,7 +1255,8 @@ def test_set_default_driver_conf_linux():
 
 
 @windows_ci
-def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
+def test_check_local(aggregator, dd_run_check, init_config, instance_docker, run_database_metrics_synchronously):
+    run_database_metrics_synchronously(instance_docker)
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     check_tags = sqlserver_check._config.tags + [
@@ -1855,24 +1856,25 @@ DBM_JOB_NAMES = [
     'agent-jobs-history',
     'deadlocks',
 ]
+DATABASE_METRICS_JOB_NAMES = ['database-metrics']
 
 
 @pytest.mark.parametrize(
     'dbm, data_observability_enabled, expected_jobs',
     [
-        (False, False, []),
-        (False, True, ['data-observability']),
-        (True, False, DBM_JOB_NAMES),
-        (True, True, DBM_JOB_NAMES + ['data-observability']),
+        (False, False, DATABASE_METRICS_JOB_NAMES),
+        (False, True, DATABASE_METRICS_JOB_NAMES + ['data-observability']),
+        (True, False, DATABASE_METRICS_JOB_NAMES + DBM_JOB_NAMES),
+        (True, True, DATABASE_METRICS_JOB_NAMES + DBM_JOB_NAMES + ['data-observability']),
     ],
     ids=['neither', 'data-observability-only', 'dbm-only', 'both'],
 )
 def test_async_job_registry_matches_config(instance_docker, dbm, data_observability_enabled, expected_jobs):
     """Only the jobs enabled by the instance config are built and registered.
 
-    Data observability is deliberately outside the DBM gate: it collects for instances that have
-    not turned DBM on. Every other job requires DBM, and each one's own enabled flag defaults to
-    true, so without the gate a non-DBM instance would start collecting.
+    Database metrics and data observability are deliberately outside the DBM gate: they collect for
+    instances that have not turned DBM on. Every other job requires DBM, and each one's own enabled
+    flag defaults to true, so without the gate a non-DBM instance would start collecting.
     """
     instance_docker['dbm'] = dbm
     instance_docker['data_observability'] = {'enabled': data_observability_enabled, 'queries': []}

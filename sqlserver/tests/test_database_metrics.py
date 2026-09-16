@@ -2196,7 +2196,9 @@ def test_sqlserver_database_metrics_init(
     assert sqlserver_check.database_metrics is not None
 
     index_usage_metrics = [
-        metric for metric in sqlserver_check.database_metrics if isinstance(metric, SqlserverIndexUsageMetrics)
+        metric
+        for metric in sqlserver_check.database_metrics_job.database_metrics
+        if isinstance(metric, SqlserverIndexUsageMetrics)
     ]
     assert len(index_usage_metrics) == 1
     assert index_usage_metrics[0].enabled is True
