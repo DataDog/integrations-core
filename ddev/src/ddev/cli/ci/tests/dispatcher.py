@@ -24,7 +24,7 @@ from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import ComponentMonitor
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.runtime import MonitoringRuntime
-from ddev.utils.github_actions import write_step_summary
+from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 from ddev.utils.rate_limiting import RelaxedRateLimits
 
 if TYPE_CHECKING:
@@ -254,6 +254,8 @@ def build_dispatcher(
             is_fork=context.is_fork,
             poll_interval_seconds=config.poll_interval_seconds,
             pytest_args=context.pytest_args,
+            origin_run_url=get_workflow_run_url(),
+            pr_number=context.pr_number,
         ),
         artifact_client=client.with_rate_limit(rate_limiters.artifacts),
         monitor=view('test-runner'),

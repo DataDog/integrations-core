@@ -73,6 +73,16 @@ on:
         required: false
         default: "standard"
         type: string
+      origin_run_url:
+        description: "URL of the Test Dispatch workflow run that dispatched this batch"
+        required: false
+        default: ""
+        type: string
+      pr_number:
+        description: "Resolved pull request number, when the batch belongs to a pull request"
+        required: false
+        default: ""
+        type: string
       is_fork:
         description: "Whether the tested commit comes from a fork. Withholds every credential when true"
         required: false
@@ -106,7 +116,13 @@ jobs:
         env:
           JOB_LIST: ${{ inputs.job_list }}
           BATCH_ID: ${{ inputs.batch_id }}
-          INTEGRATIONS: ${{ inputs.integrations }}
+          CHECKOUT_SHA: ${{ inputs.checkout_sha }}
+          HEAD_SHA: ${{ inputs.head_sha }}
+          HEAD_BRANCH: ${{ inputs.head_branch }}
+          TEST_CONTEXT: ${{ inputs.context }}
+          ORIGIN_RUN_URL: ${{ inputs.origin_run_url }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           set -euo pipefail
 
@@ -129,12 +145,40 @@ jobs:
             echo "__MATRIX__"
           } >> "$GITHUB_OUTPUT"
 
-          {
-            echo "### ${BATCH_ID}"
-            echo
-            echo "- jobs: ${count}"
-            echo "- targets: $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["INTEGRATIONS"])) or "-")')"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import html
+          import json
+          import os
+          from urllib.parse import quote
+
+          with open("jobs.json", encoding="utf-8") as f:
+              jobs = json.load(f)
+
+          def code(value):
+              return f"<code>{html.escape(str(value))}</code>"
+
+          repository_url = os.environ["REPOSITORY_URL"]
+          checkout_sha = os.environ["CHECKOUT_SHA"]
+          head_sha = os.environ["HEAD_SHA"]
+          lines = [
+              "## Test Batch",
+              "",
+              f"- **Batch ID:** {code(os.environ['BATCH_ID'])}",
+              f"- **Test context:** {code(os.environ['TEST_CONTEXT'])}",
+              f"- **Checkout:** [{code(checkout_sha)}]({repository_url}/commit/{quote(checkout_sha, safe='')})",
+              f"- **Head:** [{code(head_sha)}]({repository_url}/commit/{quote(head_sha, safe='')}) on {code(os.environ['HEAD_BRANCH'])}",
+          ]
+          if origin_run_url := os.environ["ORIGIN_RUN_URL"]:
+              lines.append(f"- **Test Dispatch:** [View workflow run]({origin_run_url})")
+          if (pr_number := os.environ["PR_NUMBER"]).isdigit():
+              lines.append(f"- **Pull request:** [#{pr_number}]({repository_url}/pull/{pr_number})")
+
+          lines.extend(("", f"### Jobs ({len(jobs)})", ""))
+          for job in jobs:
+              name = " ".join(str(job["name"]).splitlines())
+              lines.append(f"- {code(name)}")
+          print("\n".join(lines))
+          PY
 
       # A status, not a check run: a check run at a SHA this workflow was not dispatched at gets filed
       # under whichever workflow already has a check suite there.

@@ -112,6 +112,8 @@ def make_runner(
     pytest_args: str = "",
     is_fork: bool = False,
     artifact_client: FakeAsyncGitHubClient | None = None,
+    origin_run_url: str | None = None,
+    pr_number: int | None = None,
 ) -> TaskTestRunner:
     options = TestRunnerOptions(
         owner="DataDog",
@@ -126,6 +128,8 @@ def make_runner(
         poll_interval_seconds=0.0,
         pytest_args=pytest_args,
         is_fork=is_fork,
+        origin_run_url=origin_run_url,
+        pr_number=pr_number,
     )
     runner = TaskTestRunner(
         name="task-test-runner",
@@ -307,6 +311,37 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             "artifact_name": "ntp_py3.13_linux",
         },
     ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("origin_run_url", "pr_number", "expected"),
+    [
+        (
+            "https://github.com/DataDog/integrations-core/actions/runs/456",
+            123,
+            {
+                "origin_run_url": "https://github.com/DataDog/integrations-core/actions/runs/456",
+                "pr_number": "123",
+            },
+        ),
+        (None, None, {}),
+    ],
+)
+async def test_optional_navigation_context_reaches_the_batch_workflow(
+    tmp_path: Path, origin_run_url: str | None, pr_number: int | None, expected: dict[str, str]
+):
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    runner = make_runner(fake, tmp_path, origin_run_url=origin_run_url, pr_number=pr_number)
+
+    await runner.process_message(make_batch("batch-1"))
+
+    inputs = fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]
+    assert {key: inputs[key] for key in expected} == expected
+    assert ("origin_run_url" in inputs) is (origin_run_url is not None)
+    assert ("pr_number" in inputs) is (pr_number is not None)
 
 
 @pytest.mark.asyncio
