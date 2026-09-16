@@ -2,162 +2,56 @@
 
 ## Overview
 
-This check monitors [InterSystems IRIS][1] through the Datadog Agent. To learn more, see the [InterSystems IRIS integration documentation][2].
+This check monitors [InterSystems IRIS][1] through the Datadog Agent.
 
-InterSystems IRIS is a data platform combining a multi-model database, an interoperability engine, and an analytics layer. This integration collects metrics from the `/api/monitor/metrics` OpenMetrics endpoint that is built into IRIS. No additional instrumentation is required.
+InterSystems IRIS is a data platform combining a multi-model database, an interoperability engine, and an analytics layer. This integration collects metrics from the `/api/monitor/metrics` OpenMetrics endpoint built into IRIS, so no additional instrumentation is required.
 
-### What this integration monitors
-
-- **Enterprise Cache Protocol (ECP)**: client and server block transfers, connection state, and latency across distributed deployments.
-- **Interoperability**: production, business host, and queue activity for interoperability namespaces.
-- **Write daemon and journaling**: write daemon cycle timing, WIJ activity, and journal entry throughput.
-- **Mirroring**: mirror member status, journal transfer latency, and dejournaling backlog.
-- **Caches and databases**: global, routine, and object cache efficiency, database growth, and directory space.
-- **SQL**: statement counts, cached query inventory, and per-namespace query activity.
-- **Processes and work queues**: process counts by state, work queue manager activity, and shared memory heap usage.
-- **System and host**: CPU usage, paging, disk utilization, license consumption, and CSP gateway activity.
+The collected metrics cover distributed cache (ECP) and mirroring topology, interoperability productions and queues, write daemon and journaling throughput, cache and database efficiency, SQL activity, processes and work queues, and host-level CPU, disk, and license consumption.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery integration templates][3] for guidance on applying these instructions.
 
 ### Installation
 
-The InterSystems IRIS check is included in the [Datadog Agent][4] package.
+The InterSystems IRIS check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `intersystems_iris.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to start collecting your InterSystems IRIS performance data. See the [sample intersystems_iris.d/conf.yaml][5] for all available configuration options.
+1. Edit the `intersystems_iris.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your InterSystems IRIS performance data. See the [sample intersystems_iris.d/conf.yaml][4] for all available configuration options.
 
-2. At minimum, configure the `openmetrics_endpoint`:
-
-   ```yaml
-   instances:
-     - openmetrics_endpoint: http://localhost:52773/api/monitor/metrics
-   ```
-
-   This endpoint is unauthenticated by default. If you have secured it, use the `auth_token`, `username` and `password`, or `headers` options.
-
-3. Interoperability metrics (`intersystems_iris.interop.*`) are only emitted once the "Record Statistics for SAM" setting is enabled (`^Ens.Config("Stats","RecordSAM")=1`) in a namespace with a running production.
-
-4. [Restart the Agent][6].
-
-### Log collection
-
-_Available for Agent versions 6.0 and later._
-
-InterSystems IRIS can emit log data in two formats, and this integration's log pipeline parses both:
-
-- The `messages.log` file, which IRIS writes by default and which needs no additional IRIS configuration.
-- The [structured log][7], a single machine-readable file that is a superset of `messages.log` and additionally carries audit events.
-
-Both formats are normalized to the same `iris.*` log attributes and populate the **IRIS Facility**, **IRIS Severity**, and **IRIS Level** facets.
-
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
-
-   ```yaml
-   logs_enabled: true
-   ```
-
-2. Add one of the two stanzas below to your `intersystems_iris.d/conf.yaml` file, then [restart the Agent][6].
-
-#### Option 1: messages.log
-
-Entries span multiple lines, so a `multi_line` rule is required:
-
-```yaml
-logs:
-  - type: file
-    path: /usr/irissys/mgr/messages.log
-    source: intersystems_iris
-    service: <SERVICE_NAME>
-    log_processing_rules:
-      - type: multi_line
-        name: new_log_start_with_date
-        # pattern to match: 08/17/26-13:18:52:293
-        pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
-```
-
-Change `path` to match your instance's installation directory. IRIS for Health, for example, typically uses `/opt/irishealth/mgr/messages.log`.
-
-#### Option 2: Structured log
-
-1. Enable structured logging in IRIS. In the Management Portal, go to **System > Configuration > System Configuration > Log Daemon Configuration** and set:
-
-   | Setting                      | Value                                                                  |
-   | ---------------------------- | ---------------------------------------------------------------------- |
-   | Enabled                      | `YES`                                                                  |
-   | Child Process Launch Command | `irislogd -f /var/log/iris/structured.log -h <HOSTNAME> -i <INSTANCE>` |
-   | Format                       | `JSON`                                                                 |
-   | Level                        | `WARN` (default) or lower                                              |
-
-   Replace the path with the destination file of your choice. The optional `-h` and `-i` arguments stamp each entry with the host and instance name. You can apply the same configuration with the `^LOGDMN` routine or the `SYS.LogDmn` class API in the `%SYS` namespace.
-
-   The `Format` setting must be `JSON`. The pipeline does not parse the alternative `NVP` (name/value pair) format.
-
-2. Point `path` at the file you passed to `irislogd -f`. Each entry is a self-contained JSON object on one line, so no `log_processing_rules` are needed:
-
-   ```yaml
-   logs:
-     - type: file
-       path: /var/log/iris/structured.log
-       source: intersystems_iris
-       service: <SERVICE_NAME>
-   ```
-
-   Each entry carries `when`, `pid`, `level`, `event`, and `text`, plus `host`, `instance`, `namespace`, `source`, `type`, and `group` where applicable. The pipeline maps `event` to `iris.facility`, `level` to `iris.level`, and `text` to the log message.
-
-   **Note**: At log level `INFO` or lower, the structured log includes audit events, which can contain PII or PHI, particularly `%DirectMode` and `%SQL` event types. To exclude them, set the level to `WARN` or higher, or filter them with the Event Filter (for example, `-Audit.*`).
-
-#### Timestamps and time zones
-
-Neither format records a UTC offset: `messages.log` timestamps and the structured log's `when` field are both written in the instance's local time. The log pipeline interprets them as UTC. If the instance does not run in UTC, collected log timestamps are shifted by the instance's UTC offset.
-
-For containerized environments, follow the instructions on the [Kubernetes Log Collection][8] or [Docker Log Collection][9] pages.
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `intersystems_iris` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `intersystems_iris` under the Checks section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
-See [metadata.csv][11] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
-This integration was built against InterSystems IRIS 2026.1. Other versions expose a different set of metrics on `/api/monitor/metrics`. For example, 2026.2 adds `iris_last_activity` and `iris_ecp_connections`, which are not collected. If a metric you expect is missing, first check whether your IRIS version publishes it.
+### Events
 
-### Tags
+The InterSystems IRIS integration does not include any events.
 
-Two labels from the IRIS metrics endpoint are submitted under a different tag key, because their original names collide with the special meaning Datadog attaches to `host` and `version`. The values are preserved. Only the key changes:
+### Service checks
 
-| IRIS label | Datadog tag     | Metrics affected                | Description                                                |
-| ---------- | --------------- | ------------------------------- | ---------------------------------------------------------- |
-| `host`     | `interop_host`  | `intersystems_iris.interop.*`   | Business host name, not the reporting infrastructure host.  |
-| `version`  | `iris_version`  | `intersystems_iris.system.info` | IRIS product version, not the Agent version.               |
-
-Every other endpoint label is submitted under its original name.
-
-### Service Checks
-
-**intersystems_iris.openmetrics.health**
-
-Returns `CRITICAL` if the Agent is unable to connect to or parse the InterSystems IRIS OpenMetrics endpoint, otherwise returns `OK`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][9].
+
 
 [1]: https://www.intersystems.com/products/intersystems-iris/
-[2]: https://docs.datadoghq.com/integrations/intersystems_iris/
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[4]: https://app.datadoghq.com/account/settings/agent/latest
-[5]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/datadog_checks/intersystems_iris/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.intersystems.com/iris20262/csp/docbook/Doc.View.cls?KEY=GCM_structuredlog
-[8]: https://docs.datadoghq.com/containers/kubernetes/log/
-[9]: https://docs.datadoghq.com/containers/docker/log/
-[10]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/metadata.csv
-[12]: https://docs.datadoghq.com/help/
+[4]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/datadog_checks/intersystems_iris/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/intersystems_iris/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
