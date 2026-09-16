@@ -282,4 +282,5 @@ nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
+intersystems_iris = ["linux", "windows", "mac_os"]
 

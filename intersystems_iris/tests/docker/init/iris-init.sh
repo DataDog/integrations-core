@@ -10,29 +10,22 @@
 #   3. pushes a small burst of test messages so the counters are non-zero.
 set -euo pipefail
 
-# `iris session` exits 0 whether or not the ObjectScript inside it succeeded, and ObjectScript
-# `halt` cannot set an exit code, so `set -e` alone cannot see a failed step. Each step below
-# instead checks its own %Status and writes a `FATAL:` line; this wrapper turns that marker into
-# a nonzero exit. Without it a failure here stays silent until the `WaitFor` readiness gate in
-# conftest.py times out five minutes later with a generic "metrics never appeared" assertion,
-# which says nothing about which step actually broke.
+# `iris session` exits 0 no matter what the ObjectScript did, and `halt` cannot set an exit code,
+# so each block below reports its own outcome: a `FATAL:` line for a bad %Status, and a terminating
+# `DONE:` line whose absence also catches unhandled runtime errors (<UNDEFINED>, a compile error)
+# that abort the block before any FATAL is written. Without this the first failure stays silent
+# until the readiness gate in conftest.py times out with a generic "metrics never appeared".
 run_objectscript() {
     local label=$1 namespace=$2 output
     output=$(iris session IRIS -U "$namespace")
-    printf '%s\n' "$output"
-    if printf '%s\n' "$output" | grep -q '^FATAL:'; then
-        echo "[iris-init] $label failed:" >&2
-        printf '%s\n' "$output" | grep '^FATAL:' >&2
+    echo "$output"
+
+    if grep -q '^FATAL:' <<<"$output"; then
+        echo "[iris-init] $label failed: $(grep '^FATAL:' <<<"$output")" >&2
         exit 1
     fi
-    # A %Status check can only report the failures an API returns as a status. An unhandled
-    # runtime error -- <UNDEFINED>, a compile error from a bad class reference -- aborts the block
-    # where it happens, prints an interactive error, and leaves `iris session` to exit 0 at EOF
-    # without ever writing a FATAL line. Requiring each block's own terminating DONE marker turns
-    # that into a failure too, and unlike matching on known error strings it catches every form of
-    # early exit, including ones we have not thought to enumerate.
-    if ! printf '%s\n' "$output" | grep -q '^DONE:'; then
-        echo "[iris-init] $label did not run to completion (no DONE marker); see session output above" >&2
+    if ! grep -q '^DONE:' <<<"$output"; then
+        echo "[iris-init] $label did not run to completion (no DONE marker); see output above" >&2
         exit 1
     fi
 }

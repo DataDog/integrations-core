@@ -13,10 +13,7 @@ from datadog_checks.base.types import InstanceType
 
 from .config_models import ConfigMixin
 
-# Endpoint labels that collide with reserved Datadog tag keys. The values are still
-# preserved as tags (satisfying the requirement to keep this information visible); only
-# the tag *key* is renamed so it does not clash with the special meaning Datadog attaches
-# to `host` (infra hostname) and `version` (a reserved software-version facet).
+# Endpoint labels renamed to avoid Datadog's reserved tag keys; see the class docstring.
 RENAME_LABELS_MAP = {
     # Business-host name on `iris_interop_*` metrics, not the reporting infra host.
     'host': 'interop_host',
@@ -52,13 +49,9 @@ class IrisCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     METRICS_MAP = (MetricsMapping(Path('metrics/default.yaml')),)
 
     def get_config_with_defaults(self, config: InstanceType) -> Mapping[str, Any]:
-        # Merge per label rather than letting the instance replace the whole mapping, so an
-        # instance that renames one label does not silently lose the collision-avoiding renames
-        # it did not mention. The copy also keeps the shared module-level map immutable.
-        #
-        # `datadog-checks-base` 38.3.0 merges a `get_default_config` rename map itself (#24921),
-        # which would make this override redundant -- but this check's declared floor is older,
-        # so the merge still has to happen here.
+        # Merge per label so an instance that renames one label does not silently drop the
+        # renames it did not mention. `datadog-checks-base` does this itself as of 38.3.0
+        # (#24921), but this check's floor is 37.39.0, so the merge still has to happen here.
         rename_labels = dict(RENAME_LABELS_MAP)
         rename_labels.update(config.get('rename_labels') or {})
         return ChainMap({'rename_labels': rename_labels}, super().get_config_with_defaults(config))

@@ -126,6 +126,8 @@ For containerized environments, follow the instructions on the [Kubernetes Log C
 
 See [metadata.csv][11] for a list of metrics provided by this integration.
 
+This integration was built against InterSystems IRIS 2026.1. Other versions expose a different set of metrics on `/api/monitor/metrics`. For example, 2026.2 adds `iris_last_activity` and `iris_ecp_connections`, which are not collected. If a metric you expect is missing, first check whether your IRIS version publishes it.
+
 ### Tags
 
 Two labels from the IRIS metrics endpoint are submitted under a different tag key, because their original names collide with the special meaning Datadog attaches to `host` and `version`. The values are preserved. Only the key changes:
