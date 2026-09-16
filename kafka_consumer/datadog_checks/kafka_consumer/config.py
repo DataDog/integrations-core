@@ -31,6 +31,11 @@ class KafkaConfig:
             if self._consumer_groups_regex
             else ""
         )
+        self._consumer_groups_compiled_group_regex = (
+            self._compile_group_regex(self._consumer_groups_regex, self._consumer_groups)
+            if self._consumer_groups_regex
+            else ""
+        )
         # Optimization to avoid OOM kill:
         # https://github.com/confluentinc/confluent-kafka-python/issues/759
         self._consumer_queued_max_messages_kbytes = instance.get('consumer_queued_max_messages_kbytes', 1024)
@@ -254,6 +259,15 @@ class KafkaConfig:
         patterns.extend(self.get_patterns(consumer_groups_regex))
 
         return re.compile("|".join(patterns))
+
+    @staticmethod
+    def _compile_group_regex(consumer_groups_regex, consumer_groups):
+        # Compile only the consumer-group portion so discovered groups can be
+        # filtered before fetching their offsets. Topic and partition filtering
+        # is still handled by _consumer_groups_compiled_regex.
+        patterns = list(consumer_groups)
+        patterns.extend(consumer_groups_regex)
+        return re.compile("|".join(f"({pattern})" for pattern in patterns))
 
     @staticmethod
     def get_patterns(consumer_groups):
