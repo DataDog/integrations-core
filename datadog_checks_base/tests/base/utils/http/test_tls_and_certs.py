@@ -573,6 +573,29 @@ class TestAIAChasing:
         response.close.assert_called_once_with()
         assert certs == []
 
+    @pytest.mark.parametrize(
+        'location',
+        [
+            pytest.param('', id='empty'),
+            pytest.param('/caf\u00c3\u00a9.der', id='non-ascii'),
+        ],
+    )
+    def test_load_intermediate_certs_rejects_invalid_redirect(self, location: str):
+        http = RequestsWrapper({}, {})
+        certs = []
+        response = aia_response(b'')
+        response.is_redirect = True
+        response.headers = {'location': location}
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
+
+        session.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
+        response.close.assert_called_once_with()
+        assert certs == []
+
     def test_load_intermediate_certs_follows_safe_redirect(self):
         http = RequestsWrapper({}, {})
         certs = []

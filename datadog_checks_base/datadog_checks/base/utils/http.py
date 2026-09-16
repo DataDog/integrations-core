@@ -318,11 +318,17 @@ def _fetch_aia_content(
         response = session.get(uri, **request_options)
         try:
             if follow_redirects and response.is_redirect:
+                location = response.headers.get('location')
+                if not location or not location.isascii():
+                    logger.debug(
+                        'Skipping intermediate certificate redirect from `%s` with invalid Location header', uri
+                    )
+                    return None
                 if redirect_count >= requests.models.DEFAULT_REDIRECT_LIMIT:
                     raise requests.exceptions.TooManyRedirects(
                         f'Exceeded {requests.models.DEFAULT_REDIRECT_LIMIT} redirects.', response=response
                     )
-                uri = urljoin(uri, response.headers['location'])
+                uri = urljoin(uri, location)
                 redirect_count += 1
                 continue
 
