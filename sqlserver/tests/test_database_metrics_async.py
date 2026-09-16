@@ -141,6 +141,9 @@ def test_scheduler_phase_uses_resolved_static_database_identifier(init_config, i
 
     assert job._scheduler_identifier == 'server-b'
     assert second_scheduler is not first_scheduler
+    # A rebuilt scheduler is only useful if it staggers: equal phases would align both instances
+    # on the same window boundaries and defeat the point of hashing the identifier.
+    assert second_scheduler._phase != first_scheduler._phase
 
 
 @pytest.mark.unit
