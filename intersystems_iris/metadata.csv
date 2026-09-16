@@ -48,7 +48,7 @@ intersystems_iris.ecps.lock_fail.count,count,,,,Locks failed (per connection) on
 intersystems_iris.ecps.lock_fail_per_sec,gauge,,,second,"Locks failed (per second, summed across all connections) on this system as an ECP data server.",0,intersystems_iris,,,
 intersystems_iris.ecps.lock_grant.count,count,,,,Locks granted (per connection) on this system as an ECP data server.,0,intersystems_iris,,,
 intersystems_iris.ecps.lock_grant_per_sec,gauge,,,second,"Locks granted (per second, summed across all connections) on this system as an ECP data server.",0,intersystems_iris,,,
-intersystems_iris.ecps.lock_que,gauge,,,,Current lock queue size (per connection) on this system as an ECP data server.,0,intersystems_iris,,,
+intersystems_iris.ecps.lock_que.count,count,,,,Locks queued (per connection) on this system as an ECP data server.,0,intersystems_iris,,,
 intersystems_iris.ecps.lock_que_fail.count,count,,,,Locks queue failed (per connection) on this system as an ECP data server.,0,intersystems_iris,,,
 intersystems_iris.ecps.lock_que_fail_per_sec,gauge,,,second,"Locks queue failed (per second, summed across all connections) on this system as an ECP data server.",0,intersystems_iris,,,
 intersystems_iris.ecps.lock_que_grant.count,count,,,,Locks queue granted (per connection) on this system as an ECP data server.,0,intersystems_iris,,,
