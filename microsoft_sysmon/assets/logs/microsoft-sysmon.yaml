@@ -114,6 +114,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -204,6 +205,7 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Class
@@ -214,6 +216,7 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Component
@@ -254,11 +257,13 @@ facets:
     name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: File Created Time
@@ -484,6 +489,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Source Endpoint Hostname
@@ -494,11 +500,13 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status
@@ -519,11 +527,14 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
-  - groups:
+    type: integer
+  - facetType: range
+    groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Type Name
@@ -534,6 +545,7 @@ facets:
     name: Type ID
     path: ocsf.type_uid
     source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Microsoft Sysmon
