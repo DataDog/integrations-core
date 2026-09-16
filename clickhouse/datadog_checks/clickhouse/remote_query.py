@@ -2,24 +2,27 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""Remote query JSON page producer for the ClickHouse integration.
+"""Remote query source-page producer for the ClickHouse integration.
 
 Executes one validated read-only query through a dedicated ``clickhouse-connect`` client,
 streams the server-rendered rows with bounded memory, normalizes ClickHouse values into
-the pinned cross-language JSON contract, splits the rows into byte-bounded JSON page files,
-and uploads each complete page to its-agent-intake as one direct HTTP request. The shared
-page writer retains one bounded page in memory through byte-identical retries.
-Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action
-output; the emit callback carries only ``metadata``/``final``/``error`` events, and the
-final event carries only the compact run receipt.
+the pinned cross-language JSON contract, and sends them as record-complete CSV source
+pages to its-agent-intake. The stream's own header supplies the descriptor — column names,
+ClickHouse type strings, logical types — registered once before any result row is read; the
+shared source-page writer frames, bounds, and uploads each page. Intake decodes, redacts,
+and writes the final JSON pages, so this module no longer constructs a final JSON envelope
+and no longer claims source bytes or checksums are final artifact metadata. Bulk page bytes
+never traverse the native emit bridge, AgentSecure, PAR, or AP action output; the emit
+callback carries only ``metadata``/``final``/``error`` events, and the final event carries
+only the compact run receipt.
 
-The request, event, receipt, page-artifact, and intake-upload contracts mirror the Postgres
+The request, event, receipt, descriptor, and intake-upload contracts mirror the Postgres
 executor so the Agent bridge (``datadog_checks.clickhouse.remote_query`` ->
 ``execute_agent_rpc_stream_copy``) and its-agent-intake treat both integrations uniformly.
 The integration-specific parts are the internal source format, the read-only posture, and
 the value normalization documented below. The public result contract is unchanged: ITS and
 its consumers see the same RFC-format JSON page artifact (labeled contract_version 1) and events
-as Postgres.
+as Postgres, now produced by intake from the shared source wire.
 
 Wire format (internal to the check<->server hop, not a public result format): ``FORMAT
 JSONCompactEachRowWithNamesAndTypes``. The stream carries the column names, the ClickHouse
@@ -36,12 +39,15 @@ Value contract (pinned, cross-language):
 
   ClickHouse family          JSON representation
   NULL (Nullable)           null
-  Bool                       JSON boolean (``0``/``1`` spellings normalized by type)
-  integer types              JSON number with the exact database text (quoted spellings
-                            on servers that quote 64-bit+ integers are normalized back to
-                            exact numbers)
-  Float/Decimal              JSON number with the exact database text (rows are parsed with
-                            ``parse_float=Decimal``, quoted decimals are normalized by type)
+  Bool                       JSON boolean (``0``/``1`` spellings, quoted or not, are
+                            normalized by type)
+  integer types              JSON number with the exact database text (rows are parsed
+                            with number hooks that keep every lexeme verbatim; quoted
+                            spellings on servers that quote 64-bit+ integers are validated
+                            against the JSON integer grammar and lose only their quotes)
+  Float/Decimal              JSON number with the exact database text (the same lexeme
+                            hooks; quoted decimals are validated against the JSON number
+                            grammar and normalized by type)
   non-finite floats          ClickHouse JSON formats render them as ``null`` by default;
                             the ``output_format_json_quote_denormals`` setting cannot be
                             requested for read-only-profile users, so the null rendering is
@@ -151,11 +157,12 @@ REMOTE_QUERY_STREAM_CHUNK_BYTES = 256 * 1024
 
 @dataclass(frozen=True)
 class ResultColumn:
-    """One described result field: its column name, ClickHouse type string, and type family."""
+    """One described result field: name, type string, normalization family, logical type."""
 
     name: str
     vendor_data_type: str
     family: str
+    logical_type: str
 
 
 @dataclass(frozen=True)
@@ -464,14 +471,36 @@ def _validate_with_select(scanner: StatementScanner) -> bool:
 #
 # Rows arrive server-rendered as JSON arrays, so string quoting, NULLs, booleans, and
 # composite types (Array/Map/Tuple/JSON) are already valid JSON; the encoder below only
-# re-serializes values into the row object and keeps exact numeric text. Rows are parsed
-# with ``parse_float=Decimal`` so float/decimal text never round-trips through a binary
-# float. Servers that quote 64-bit+ integers or decimals (ClickHouse JSON output settings)
-# deliver them as JSON strings; the declared column type normalizes those back to exact
-# JSON numbers.
+# re-serializes values into the row object. Numbers keep their exact server lexemes:
+# rows are parsed with number hooks that carry each lexeme through verbatim, nested
+# composite values included, so no int()/Decimal/repr round-trip can rewrite the text.
+# Servers that quote 64-bit+ integers or decimals (ClickHouse JSON output settings)
+# deliver them as JSON strings; the declared column type validates the text against its
+# family's JSON number grammar and normalizes it back to the same raw lexeme, removing
+# only the quotes.
 
 # A JSON number per RFC 8259: no leading zeros, optional fraction and exponent. Server
-# numeric text must already satisfy this; anything else fails closed.
+# numeric text must already satisfy this; anything else fails closed. The shared
+# ``rq.JSON_NUMBER_PATTERN`` pins the grammar for quoted decimal/float spellings; quoted
+# integer spellings accept the JSON integer form alone (no exponent, no plus sign, no
+# leading zeros).
+JSON_INTEGER_PATTERN = re.compile(r'\A-?(?:0|[1-9][0-9]*)\Z')
+
+
+@dataclass(frozen=True)
+class RawJsonNumber:
+    """One server-rendered JSON number, carried as its exact lexeme.
+
+    The row-line parse hooks and the quoted-spelling normalization both produce this
+    instead of an ``int`` or ``Decimal``, so the encoder emits the server's exact numeric
+    text: no int()/Decimal/str round-trip can rewrite it (``0.000000001`` stays itself,
+    never ``1E-9``; ``1e-7`` keeps its case and sign; ``-0`` survives). By construction
+    the text satisfies the JSON number grammar — the parse hooks only see JSON lexemes,
+    and quoted spellings are validated before their quotes are removed.
+    """
+
+    text: str
+
 
 _INTEGER_TYPE_NAMES = frozenset(
     (
@@ -528,88 +557,160 @@ def type_family(type_string: str) -> str:
     return 'other'
 
 
+def logical_type_for_type_string(type_string: str) -> str:
+    """Map one ClickHouse type string to a closed descriptor logical type, deterministically.
+
+    Wrappers (Nullable/LowCardinality/SimpleAggregateFunction) peel to the base type; the
+    pinned families map to their stable cross-database families; array/map/tuple/nested
+    families and the JSON type carry nested JSON values. Anything else — exotic or
+    vendor-specific families whose values still must pass the fail-closed value contract —
+    is ``vendor``, never a stringify escape hatch.
+    """
+    base = base_type_name(type_string)
+    if base in _INTEGER_TYPE_NAMES:
+        return 'integer'
+    if base.startswith('Decimal'):
+        return 'decimal'
+    if base in _FLOAT_TYPE_NAMES:
+        return 'float'
+    if base == 'Bool':
+        return 'boolean'
+    if base == 'String' or base.startswith('FixedString('):
+        return 'string'
+    if base in ('Date', 'Date32') or base.startswith('DateTime'):
+        return 'temporal'
+    if base == 'UUID' or base.startswith('Enum'):
+        return 'string'
+    if base in ('IPv4', 'IPv6'):
+        return 'vendor'
+    if base == 'JSON' or base.startswith(('Array(', 'Map(', 'Tuple(', 'Nested(')):
+        return 'json'
+    return 'vendor'
+
+
 def normalize_typed_value(family: str, value: Any) -> Any:
     """Normalize server value spellings that depend on server JSON output settings.
 
     Only type-known numeric/bool families are touched, so a String column holding digits
-    stays a JSON string. Anything unexpected is left for the encoder to fail closed on.
+    stays a JSON string. A quoted integer/decimal/float spelling is validated against its
+    family's JSON number grammar and becomes the same raw-lexeme representation the parse
+    hooks produce, losing only its two quotes; a spelling outside the grammar stays a
+    string for the encoder to accept verbatim. Bool's legacy spellings — quoted or not —
+    become JSON booleans. Anything unexpected is left for the encoder to fail closed on.
     """
     if family == 'integer' and isinstance(value, str):
-        if re.fullmatch(r'[+-]?[0-9]+', value):
-            return int(value)
+        if JSON_INTEGER_PATTERN.match(value):
+            return RawJsonNumber(value)
         return value
     if family in ('decimal', 'float') and isinstance(value, str):
         if rq.JSON_NUMBER_PATTERN.match(value):
-            return Decimal(value)
+            return RawJsonNumber(value)
         return value
     if family == 'bool':
         if isinstance(value, int) and not isinstance(value, bool):
             if value in (0, 1):
                 return bool(value)
             return value
-        if isinstance(value, str) and value in ('true', 'false'):
-            return value == 'true'
+        if isinstance(value, str) and value in ('true', 'false', '0', '1'):
+            return value in ('true', '1')
+        if isinstance(value, RawJsonNumber) and value.text in ('0', '1'):
+            return value.text == '1'
         return value
     return value
 
 
-def _encode_json_value(out: bytearray, value: Any) -> None:
-    """Encode one normalized ClickHouse value into ``out`` as JSON bytes.
+def _encode_cell_token(value: Any) -> tuple[bytes, int]:
+    """Encode one normalized ClickHouse value as ``(canonical JSON token, final bound)``.
 
-    Values come from ``json.loads`` on a server-rendered row line, so only JSON-native types
-    plus ``Decimal`` (via ``parse_float``) appear; anything unrecognized fails closed.
+    Values come from ``json.loads`` on a server-rendered row line, so only JSON-native
+    types plus ``RawJsonNumber`` (via the parse hooks) appear; ``float``/``Decimal`` stay
+    reachable only through json's non-finite constants (which still parse to floats) and
+    programmatic callers. Anything unrecognized fails closed. The bound is the conservative
+    final-JSON size after redaction: any scalar string or number leaf — including dict
+    keys, conservatively — either keeps its token or is replaced by the fixed
+    ``[REDACTED]`` marker, whichever is longer; booleans and nulls are never scanned and
+    keep their exact token bounds.
     """
     if value is None:
-        out += b'null'
-    elif isinstance(value, bool):
-        out += b'true' if value else b'false'
-    elif isinstance(value, int):
+        return b'null', 4
+    if isinstance(value, bool):
+        token = b'true' if value else b'false'
+        return token, len(token)
+    if isinstance(value, RawJsonNumber):
+        out = bytearray()
+        rq.encode_raw_number_text(out, value.text)
+        return bytes(out), rq.redactable_leaf_final_bound(out)
+    if isinstance(value, int):
+        out = bytearray()
         rq.encode_raw_number_text(out, str(value))
-    elif isinstance(value, Decimal):
-        rq.encode_decimal(out, value)
-    elif isinstance(value, float):
-        rq.encode_float(out, value)
-    elif isinstance(value, str):
-        out += json.dumps(value).encode('utf-8')
-    elif isinstance(value, (list, tuple)):
-        out += b'['
+        return bytes(out), rq.redactable_leaf_final_bound(out)
+    if isinstance(value, Decimal):
+        # Off-wire since the parse hooks: programmatic values (the bounds tests) only.
+        if value.is_finite():
+            out = bytearray()
+            rq.encode_decimal(out, value)
+            return bytes(out), rq.redactable_leaf_final_bound(out)
+        return rq.string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
+    if isinstance(value, float):
+        # json's bare non-finite constants (NaN/Infinity) still parse to floats; finite
+        # floats arrive only from programmatic callers.
+        if math.isfinite(value):
+            out = bytearray()
+            rq.encode_float(out, value)
+            return bytes(out), rq.redactable_leaf_final_bound(out)
+        return rq.string_cell_token('NaN' if math.isnan(value) else ('Infinity' if value > 0 else '-Infinity'))
+    if isinstance(value, str):
+        return rq.string_cell_token(value)
+    if isinstance(value, (list, tuple)):
+        parts: list[bytes] = [b'[']
+        bound = 2
         for index, item in enumerate(value):
             if index:
-                out += b','
-            _encode_json_value(out, item)
-        out += b']'
-    elif isinstance(value, dict):
-        out += b'{'
+                parts.append(b',')
+                bound += 1
+            token, item_bound = _encode_cell_token(item)
+            parts.append(token)
+            bound += item_bound
+        parts.append(b']')
+        return b''.join(parts), bound
+    if isinstance(value, dict):
+        parts = [b'{']
+        bound = 2
         first = True
         for key, item in value.items():
             if not isinstance(key, str):
                 raise rq.RemoteQueryFailure('unsupported_value', 'JSON object keys must be strings.')
             if not first:
-                out += b','
+                parts.append(b',')
+                bound += 1
             first = False
-            out += json.dumps(key).encode('utf-8')
-            out += b':'
-            _encode_json_value(out, item)
-        out += b'}'
-    else:
-        raise rq.RemoteQueryFailure(
-            'unsupported_value',
-            'ClickHouse value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
-        )
+            key_token = rq.canonical_json_bytes(key)
+            parts.append(key_token)
+            parts.append(b':')
+            bound += rq.redactable_leaf_final_bound(key_token) + 1
+            token, item_bound = _encode_cell_token(item)
+            parts.append(token)
+            bound += item_bound
+        parts.append(b'}')
+        return b''.join(parts), bound
+    raise rq.RemoteQueryFailure(
+        'unsupported_value',
+        'ClickHouse value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
+    )
 
 
-def encode_row(values: Sequence[Any], columns: Sequence[ResultColumn], out: bytearray) -> None:
-    """Encode one result row as a JSON object keyed by result-column name."""
+def encode_row(values: Sequence[Any], columns: Sequence[ResultColumn]) -> list[rq.EncodedCell]:
+    """Encode one result row as one canonical cell token per described column.
+
+    The row-object JSON document is never built: intake assembles the final rows from these
+    cell tokens in descriptor order.
+    """
     if len(values) != len(columns):
         raise rq.RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
-    out += b'{'
-    for index, (column, value) in enumerate(zip(columns, values)):
-        if index:
-            out += b','
-        out += json.dumps(column.name).encode('utf-8')
-        out += b':'
-        _encode_json_value(out, normalize_typed_value(column.family, value))
-    out += b'}'
+    return [
+        rq.EncodedCell(*_encode_cell_token(normalize_typed_value(column.family, value)))
+        for column, value in zip(columns, values)
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -619,8 +720,9 @@ def encode_row(values: Sequence[Any], columns: Sequence[ResultColumn], out: byte
 
 def _parse_json_line(line: bytes) -> Any:
     try:
-        # parse_float=Decimal keeps float/decimal text exact: no binary-float round-trip.
-        return json.loads(line, parse_float=Decimal)
+        # Number hooks carry every numeric lexeme through verbatim — nested composite
+        # values included — so no int()/Decimal/str round-trip can rewrite the text.
+        return json.loads(line, parse_float=RawJsonNumber, parse_int=RawJsonNumber)
     except (UnicodeDecodeError, ValueError):
         # Result data must be valid UTF-8 JSON; never echo the offending line.
         raise rq.RemoteQueryFailure('query_failed', 'The result stream carried a row that is not valid JSON.') from None
@@ -639,7 +741,12 @@ def build_columns(names: Sequence[str], types: Sequence[str]) -> list[ResultColu
     if len(names) != len(types):
         raise rq.RemoteQueryFailure('query_failed', 'The result stream header rows do not agree on column count.')
     return [
-        ResultColumn(name=name, vendor_data_type=vendor_data_type, family=type_family(vendor_data_type))
+        ResultColumn(
+            name=name,
+            vendor_data_type=vendor_data_type,
+            family=type_family(vendor_data_type),
+            logical_type=logical_type_for_type_string(vendor_data_type),
+        )
         for name, vendor_data_type in zip(names, types)
     ]
 
@@ -660,56 +767,63 @@ def validate_columns(columns: Sequence[ResultColumn], max_columns: int) -> None:
         seen.add(column.name)
 
 
-def build_schema_json(
-    columns: Sequence[ResultColumn], delivery: rq.RemoteQueryResultDelivery, agent_hostname: str
-) -> bytes:
-    """Build the ordered schema entries, rejecting oversize schemas.
+def build_upload_descriptor(
+    request: rq.RemoteQueryRequest, columns: Sequence[ResultColumn], agent_hostname: str
+) -> rq.RemoteQueryUploadDescriptor:
+    """Build the immutable source-page descriptor from the streamed header's columns.
 
-    The encoded schema repeats in every page, so it must fit both ``maxSchemaBytes`` and the
-    smallest valid page frame; both are enforced before any row data is written.
+    The stream's type row is the schema source — no second metadata query — and the
+    descriptor is registered once, before any result row is read; intake stamps the schema
+    (when requested) into every final page from it.
     """
-    entries = [{'column_name': column.name, 'vendor_data_type': column.vendor_data_type} for column in columns]
-    schema_json = json.dumps(entries, separators=(',', ':')).encode('utf-8')
-    limits = delivery.limits
-    if len(schema_json) > limits.max_schema_bytes:
-        raise rq.RemoteQueryFailure(
-            'max_schema_bytes_exceeded',
-            'Encoded schema is {} bytes; the limit is {}.'.format(len(schema_json), limits.max_schema_bytes),
-        )
-    prefix_len = len(
-        rq.page_prefix(
-            run_id=delivery.run_id,
-            task_id=delivery.task_id,
-            record_offset=0,
-            agent_hostname=agent_hostname,
-            schema_json=schema_json,
-        )
+    return rq.RemoteQueryUploadDescriptor(
+        format_version=rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+        include_schema=request.include_schema,
+        agent_hostname=agent_hostname,
+        columns=[
+            rq.RemoteQueryDescriptorColumn(
+                column_name=column.name,
+                vendor_data_type=column.vendor_data_type,
+                logical_type=column.logical_type,
+            )
+            for column in columns
+        ],
     )
-    if prefix_len + len(rq.PAGE_SUFFIX) > limits.max_file_bytes:
-        raise rq.RemoteQueryFailure(
-            'max_file_bytes_exceeded',
-            'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
-        )
-    return schema_json
 
 
 # Slack for header-row buffering: the header lines carry names and type strings whose
-# byte accounting differs slightly from the schema/row budgets that justify the bound.
+# byte accounting belongs to the schema/columns budgets, not the row budgets.
 REMOTE_QUERY_HEADER_LINE_SLACK = 1024
 
+# A few bytes of slack beyond the derived line bound, keeping the read-time ceiling safely
+# above any line whose framed record still fits maxRowBytes.
+REMOTE_QUERY_ROW_LINE_SLACK = 8
 
-def row_line_ceiling(columns: Sequence[ResultColumn], max_row_bytes: int) -> int:
-    """A line-length bound past which the encoded row cannot fit ``max_row_bytes``.
+# The two quote bytes one column's value can lose to normalization: removing a type-known
+# quoted spelling's quotes is the only normalization that shortens a cell below its
+# server-rendered spelling — quoted 64-bit integer/decimal/float lexemes (ClickHouse JSON
+# output settings) validate against the family's JSON number grammar and become raw
+# numbers, quoted ``true``/``false`` become JSON booleans. Every other value keeps the
+# server's exact bytes (strings verbatim, numbers with their exact lexemes, composites
+# re-serialized from the same tokens) or grows the record (CSV quoting of tokens carrying
+# separators, bool numeric spellings widened to true/false).
+REMOTE_QUERY_ROW_COLUMN_QUOTE_RESERVE = 2
 
-    The encoded row is the server line plus the column-name overhead, minus at most a few
-    bytes per column when a quoted numeric spelling is normalized back to a number. The
-    exact ``maxRowBytes`` check still runs on the encoded row; this ceiling is the buffer
-    bound, so a row line larger than any compliant row fails the run during the read
-    instead of being buffered whole.
+
+def row_line_ceiling(max_row_bytes: int, max_columns: int) -> int:
+    """A line-length bound past which the framed record cannot fit ``maxRowBytes``.
+
+    A compliant framed record is never shorter than its server line minus one byte and
+    minus two quote bytes per column: the line's brackets and commas are the record's
+    fields and separators, the record adds one trailing newline, and the quote removal
+    above is the only shrinking normalization, once per column. The delivered max column
+    count bounds how many columns can lose their quotes, so a line longer than
+    ``maxRowBytes`` plus that reserve plus the fixed slack cannot produce a compliant
+    record. The ceiling bounds the read buffer, so an oversized line fails the run during
+    the read instead of being buffered whole; the exact ``maxRowBytes`` check still runs
+    on the framed record.
     """
-    name_overhead = sum(len(json.dumps(column.name)) + 1 for column in columns) + 2
-    ceiling = max_row_bytes - name_overhead + 4 * len(columns) + 8
-    return max(64, ceiling)
+    return max(64, max_row_bytes + REMOTE_QUERY_ROW_COLUMN_QUOTE_RESERVE * max_columns + REMOTE_QUERY_ROW_LINE_SLACK)
 
 
 class LineBoundTracker:
@@ -731,15 +845,11 @@ class LineBoundTracker:
 
     def __init__(self, limits: rq.RemoteQueryUploadLimits):
         self._header_bound = max(limits.max_schema_bytes, limits.max_row_bytes) + REMOTE_QUERY_HEADER_LINE_SLACK
-        self._row_bound = self._header_bound
+        self._row_bound = row_line_ceiling(limits.max_row_bytes, limits.max_columns)
         self._max_row_bytes = limits.max_row_bytes
 
     def for_index(self, index: int) -> int:
         return self._header_bound if index < 2 else self._row_bound
-
-    def bind_columns(self, columns: Sequence[ResultColumn]) -> None:
-        """Tighten the data-row bound once the column names are known."""
-        self._row_bound = row_line_ceiling(columns, self._max_row_bytes)
 
     def too_large_failure(self, index: int, buffered: int) -> rq.RemoteQueryFailure:
         if index < 2:
@@ -845,8 +955,8 @@ def _run_streamed_query(
     try:
         with timings.phase('database_setup'):
             # The second setup segment (client creation was the first, in the caller):
-            # settings resolution, stream open, header/column building, schema build.
-            # Every raw stream read inside — header or data — is the fetch phase.
+            # settings resolution, stream open, header/column building, and descriptor
+            # registration. Every raw stream read inside — header or data — is the fetch phase.
             settings = resolve_readonly_settings(clickhouse_client, rq.remaining_wall_ms(deadline))
             # The user query is passed verbatim; the client appends the FORMAT clause.
             stream = TimedStreamSource(
@@ -866,15 +976,12 @@ def _run_streamed_query(
                 _parse_header_row(names_line, 'column names'), _parse_header_row(types_line, 'column types')
             )
             validate_columns(columns, limits.max_columns)
-            # Now that the column names are known, data-row lines are bounded by the row budget.
-            bounds.bind_columns(columns)
-            schema_json = None
-            if request.include_schema:
-                schema_json = build_schema_json(columns, delivery, agent_hostname)
-
-            # The executing check's Agent-reported hostname: the stamp must match the
-            # agent node identity Fleet reports, never socket.gethostname().
-            writer = rq.PageWriter(delivery, creds, client, agent_hostname, schema_json, guard, stats, timings)
+            # The descriptor is registered once from the stream's own header before any result
+            # row is read; the executing check's Agent-reported hostname travels in it so intake
+            # stamps the envelope with the agent node identity Fleet reports, never
+            # socket.gethostname().
+            descriptor = build_upload_descriptor(request, columns, agent_hostname)
+            writer = rq.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings)
         try:
             guard()
             with timings.phase('encode_and_page_build'):
@@ -883,16 +990,7 @@ def _run_streamed_query(
                     values = _parse_json_line(line)
                     if not isinstance(values, list):
                         raise rq.RemoteQueryFailure('query_failed', 'A result row was not a JSON array.')
-                    row_buffer = bytearray()
-                    encode_row(values, columns, row_buffer)
-                    if len(row_buffer) > limits.max_row_bytes:
-                        raise rq.RemoteQueryFailure(
-                            'row_too_large',
-                            'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
-                                len(row_buffer), limits.max_row_bytes
-                            ),
-                        )
-                    writer.add_row(bytes(row_buffer))
+                    writer.add_row(encode_row(values, columns))
             return writer.finish()
         finally:
             # Release the page even if the response stream or row conversion fails.
@@ -904,7 +1002,8 @@ def _run_streamed_query(
             try:
                 stream.close()
             except Exception:
-                LOGGER.debug('Unable to close the remote query response stream', exc_info=True)
+                # Fixed text only: the transport's exception can quote the URL or request bytes.
+                LOGGER.debug('Unable to close the remote query response stream')
 
 
 def produce_remote_query(
@@ -923,10 +1022,10 @@ def produce_remote_query(
     disabled; it is never wrapped in a probe and never executed twice. Row lines are read
     from the streamed response incrementally and encoded one row at a time.
 
-    Producer phases: client creation, stream open, header/column building, and schema
-    build are database setup; every raw stream read is a database fetch; the row loop is
-    encode and page build (with any upload ``add_row`` triggers nested inside it); page
-    uploads and finalize are accounted by the shared page writer.
+    Producer phases: client creation, stream open, header/column building, and descriptor
+    registration are database setup; every raw stream read is a database fetch; the row loop
+    is encode and page build (with any upload ``add_row`` triggers nested inside it); page
+    uploads and finalize are accounted by the shared source-page writer.
     """
     delivery = request.result_delivery
     limits = delivery.limits
@@ -950,9 +1049,9 @@ def produce_remote_query(
             raise
         except Exception:
             # A connection-level failure: the matched instance could not be reached or refused
-            # the request. Never echo the underlying text (it can quote identifiers or
-            # credentials embedded in connection error strings).
-            LOGGER.debug('Remote query client creation failed', exc_info=True)
+            # the request. Never echo the underlying text or traceback (either can quote
+            # identifiers or credentials embedded in connection error strings).
+            LOGGER.debug('Remote query client creation failed')
             raise rq.RemoteQueryFailure(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
@@ -964,7 +1063,7 @@ def produce_remote_query(
             raise
         except clickhouse_errors.OperationalError:
             # A transport-level failure: the request never got a usable server response.
-            LOGGER.debug('Remote query transport failed', exc_info=True)
+            LOGGER.debug('Remote query transport failed')
             raise rq.RemoteQueryFailure(
                 'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
             ) from None
@@ -976,7 +1075,7 @@ def produce_remote_query(
         ):
             # The stream died mid-read: server-side cancellation (max_execution_time or
             # cancel-on-close) or a dropped connection. Both are retryable for the run.
-            LOGGER.debug('Remote query stream failed mid-stream', exc_info=True)
+            LOGGER.debug('Remote query stream failed mid-stream')
             raise rq.RemoteQueryFailure(
                 'timeout',
                 'The remote query stream was interrupted (server cancellation or connection failure).',
@@ -986,10 +1085,12 @@ def produce_remote_query(
             # The server answered with an error (bad SQL, missing table, permissions), or
             # the client refused a request-level setting. The instance is reachable, the
             # run is not. Never echo the underlying message: it can quote query text.
-            LOGGER.debug('Remote query rejected by the server', exc_info=True)
+            LOGGER.debug('Remote query rejected by the server')
             raise rq.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
         except Exception:
-            LOGGER.exception('Remote query execution failed')
+            # Fixed text only: an unexpected exception can carry raw row fragments or query
+            # text.
+            LOGGER.error('Remote query execution failed')
             raise rq.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
         return receipt
     finally:
@@ -999,7 +1100,7 @@ def produce_remote_query(
             try:
                 clickhouse_client.close()
             except Exception:
-                LOGGER.debug('Unable to close the remote query client', exc_info=True)
+                LOGGER.debug('Unable to close the remote query client')
 
 
 def _default_client_factory(check: 'ClickhouseCheck', timeout_seconds: int) -> ClickhouseClient:
@@ -1231,7 +1332,8 @@ def iter_agent_rpc_stream_events(
         rq.safe_abort(client, creds)
         if not isinstance(e, Exception):
             raise
-        LOGGER.exception('Remote query execution failed')
+        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
+        LOGGER.error('Remote query execution failed')
         yield rq.failed_event(
             'query_failed',
             'Remote query execution failed.',

@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import hashlib
 import json
+import logging
 import socket
 import uuid as uuid_module
 from contextlib import contextmanager
@@ -147,7 +149,9 @@ class FakePool:
         self.rows = rows or []
         self.description = description or [FakeColumn('value', 23)]
         self.closed = closed
-        self.vendor_types = vendor_types or {}
+        # The descriptor always resolves vendor types, so the default covers the default
+        # int4 description; tests with custom descriptions pass their own catalog entries.
+        self.vendor_types = vendor_types if vendor_types is not None else {(23, -1): 'integer'}
         self.fetch_error = fetch_error
         self.fetch_error_at = fetch_error_at
         self.row_provider = row_provider
@@ -165,6 +169,13 @@ class FakePool:
 
 
 class FakeUploadClient:
+    """Intake-side fake: one descriptor registration, intake-derived page receipts.
+
+    The default receipt reports final bytes equal to the declared source bytes (they are
+    different things in reality) and the default finalize returns authoritative totals over
+    the recorded pages, so the producer's stats and compact receipt come from this metadata.
+    """
+
     def __init__(
         self,
         run_finalize_response=None,
@@ -173,34 +184,44 @@ class FakeUploadClient:
         raise_on_run_finalize=None,
         put_log=None,
     ):
-        # SimpleNamespace(batch_index, record_offset, page_bytes, rows, sha256_hex, payload)
+        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, sha256_hex, payload)
+        self.descriptor_bodies = []
         self.put_page_calls = []
         self.run_finalize_calls = 0
         self.abort_calls = 0
         self.raise_on_put_page = raise_on_put_page
         self.raise_on_run_finalize = raise_on_run_finalize
-        self.run_finalize_response = (
-            run_finalize_response if run_finalize_response is not None else {'upload_id': UPLOAD_ID}
-        )
-        # When unset, the authoritative receipt echoes the producer's own page metadata;
-        # tests pass a mapping (or a callable taking the page metadata) to mutate it.
+        self.run_finalize_response = run_finalize_response
+        # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
+        # mapping (or a callable taking the page metadata) to mutate or reject it.
         self.put_page_response = put_page_response
         self.put_log = put_log
 
-    def put_page(self, creds, page, body):
+    def register_descriptor(self, creds, body):
+        self.descriptor_bodies.append(body)
+        registered = json.loads(body)
+        return {
+            'upload_id': creds.upload_id,
+            'format_version': registered['format_version'],
+            'include_schema': registered['include_schema'],
+            'columns': len(registered['columns']),
+            'sha256': hashlib.sha256(body).hexdigest(),
+        }
+
+    def put_source_page(self, creds, page, body):
         payload = body.read()
         self.put_page_calls.append(
             SimpleNamespace(
                 batch_index=page.batch_index,
                 record_offset=page.record_offset,
-                page_bytes=page.page_bytes,
+                source_bytes=page.source_bytes,
                 rows=page.rows,
                 sha256_hex=page.sha256_hex,
                 payload=payload,
             )
         )
         if self.put_log is not None:
-            self.put_log.append(('put', page.batch_index, page.page_bytes, page.rows))
+            self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
         if self.raise_on_put_page is not None:
             raise self.raise_on_put_page
         if self.put_page_response is not None:
@@ -212,7 +233,7 @@ class FakeUploadClient:
                 'batch_index': page.batch_index,
                 'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
                 'record_offset': page.record_offset,
-                'bytes': page.page_bytes,
+                'bytes': page.source_bytes,
                 'rows': page.rows,
                 'sha256': page.sha256_hex,
             }
@@ -222,7 +243,14 @@ class FakeUploadClient:
         self.run_finalize_calls += 1
         if self.raise_on_run_finalize is not None:
             raise self.raise_on_run_finalize
-        return self.run_finalize_response
+        if self.run_finalize_response is not None:
+            return self.run_finalize_response
+        return {
+            'upload_id': creds.upload_id,
+            'page_count': len(self.put_page_calls),
+            'total_rows': sum(call.rows for call in self.put_page_calls),
+            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
+        }
 
     def abort(self, creds):
         self.abort_calls += 1
@@ -358,9 +386,10 @@ def instrument_postgres_fakes(monkeypatch, clock):
     """Advance the mutable clock inside each fake at its phase's boundary.
 
     Each advance lands wholly inside the producer phase that brackets it, so the emitted
-    buckets pin the brackets: connection acquisition, BEGIN, and SET LOCAL are database
-    setup, fetchmany is database fetch, put_page is page upload, finalize_run is finalize,
-    and the ROLLBACK teardown (outside every phase) is the otherMs remainder.
+    buckets pin the brackets: connection acquisition, BEGIN, SET LOCAL, and the vendor-type
+    lookup are database setup, fetchmany is database fetch, put_source_page is page upload,
+    finalize_run is finalize, and the ROLLBACK teardown (outside every phase) is the otherMs
+    remainder.
     """
 
     original_get_connection = FakePool.get_connection
@@ -397,13 +426,13 @@ def instrument_postgres_fakes(monkeypatch, clock):
 
     monkeypatch.setattr(FakeServerCursor, 'fetchmany', timed_fetchmany)
 
-    original_put_page = FakeUploadClient.put_page
+    original_put_source_page = FakeUploadClient.put_source_page
 
-    def timed_put_page(self, creds, page, body):
+    def timed_put_source_page(self, creds, page, body):
         clock.advance_seconds(0.625)
-        return original_put_page(self, creds, page, body)
+        return original_put_source_page(self, creds, page, body)
 
-    monkeypatch.setattr(FakeUploadClient, 'put_page', timed_put_page)
+    monkeypatch.setattr(FakeUploadClient, 'put_source_page', timed_put_source_page)
 
     original_finalize_run = FakeUploadClient.finalize_run
 
@@ -456,8 +485,34 @@ def prefix_bytes(record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=Non
 
 
 def assembled_pages(fake_client):
-    """Each completed page's exact uploaded bytes, keyed by batch index."""
+    """Each completed page's exact uploaded source bytes, keyed by batch index."""
     return {call.batch_index: call.payload for call in fake_client.put_page_calls}
+
+
+def row_object_bound(row):
+    """The conservative final-JSON bound of one row object, computed independently.
+
+    Mirrors the intake envelope arithmetic without reusing the producer's implementation:
+    braces and commas, each descriptor key plus its colon, and each scalar string or number
+    leaf at its own token length or the fixed redaction marker, whichever is larger.
+    """
+    bound = 2 + (len(row) - 1)  # braces plus the commas between columns
+    for name, value in row.items():
+        bound += len(json.dumps(name, ensure_ascii=False).encode('utf-8')) + 1
+        bound += rq.redactable_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
+    return bound
+
+
+def csv_field(token):
+    """The expected CSV field for one canonical token, computed independently of the producer."""
+    if b'"' in token or b',' in token or b'\n' in token:
+        return b'"' + token.replace(b'"', b'""') + b'"'
+    return token
+
+
+def csv_record(tokens):
+    """The expected framed CSV record for one row of canonical tokens."""
+    return b','.join(csv_field(token) for token in tokens) + b'\n'
 
 
 # ---------------------------------------------------------------------------
@@ -859,13 +914,14 @@ def test_stream_scope_evaluated_only_for_endpoint_matching_checks():
     assert pool.requested_dbnames == []
 
 
-def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(monkeypatch):
+def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(monkeypatch, caplog):
     """An undeterminable discovery set fails closed and visibly, never as a silent no-match."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,)])
-    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke'))
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke: SECRET_DO_NOT_LOG'))
     check = make_check(host='localhost', port=5432, dbname='postgres', pool=pool, autodiscovery=autodiscovery)
 
+    caplog.set_level(logging.DEBUG)
     events = collect_events(valid_request(dbname='dogs_1'), check)
 
     assert_failed_event(events, 'target_unavailable', 'autodiscovered database scope')
@@ -875,6 +931,25 @@ def test_stream_autodiscovery_failure_is_visible_retryable_target_unavailable(mo
     assert pool.requested_dbnames == []
     assert not pool.cursors
     assert [event.event_type for event in events] == ['error']
+    # The discovery failure's text never reaches the error event or the logs.
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+def test_scope_failure_wrapper_keeps_no_path_back_to_the_discovery_exception():
+    """The target_unavailable wrapper severs the discovery exception from its chain: a
+    later traceback log of the wrapper can only ever see the fixed classification message,
+    never the connection strings or identifiers the discovery error can quote."""
+    autodiscovery = FakeAutodiscovery(error=psycopg_errors.OperationalError('discovery broke: SECRET_DO_NOT_LOG'))
+    check = make_check(dbname='postgres', autodiscovery=autodiscovery)
+
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        remote_query.database_in_monitoring_scope(check, 'dogs_1')
+
+    assert failure.value.code == 'target_unavailable'
+    assert failure.value.retryable
+    assert failure.value.__cause__ is None
+    assert 'SECRET_DO_NOT_LOG' not in str(failure.value)
 
 
 def test_stream_rejects_database_instance_with_requested_dbname_before_resolution():
@@ -1140,7 +1215,7 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert all(event.payload == b'' for event in events)
 
 
-def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
+def test_producer_writes_exact_source_page_csv_and_descriptor(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
@@ -1150,23 +1225,19 @@ def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    # Schema disabled: the schema key is omitted entirely, never null/[].
-    assert page == (prefix_bytes() + b'{"value":1}' + rq.PAGE_SUFFIX)
-    parsed = json.loads(page)
-    assert parsed == {
-        'contract_version': 1,
-        'crawl_id': RUN_ID,
-        'task_id': TASK_ID,
+    # The source page is pure CSV records of canonical cell tokens: no final JSON envelope
+    # is built or uploaded here; intake assembles it from the registered descriptor.
+    assert page == b'1\n'
+    assert json.loads(fake.descriptor_bodies[0]) == {
+        'format_version': 'csv-json-cell-v1',
+        'include_schema': False,
         'agent_hostname': AGENT_HOSTNAME,
-        'record_offset': 0,
-        'data': [{'value': 1}],
+        'columns': [{'column_name': 'value', 'vendor_data_type': 'integer', 'logical_type': 'integer'}],
     }
-    assert 'schema' not in parsed
-    assert 'total_records' not in parsed
 
 
 def test_producer_stamps_agent_reported_hostname_from_the_check_instance(monkeypatch):
-    """The stamp is the check instance's Agent-reported hostname, never the machine's socket name."""
+    """The descriptor carries the check instance's Agent-reported hostname, never the machine's socket name."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
@@ -1180,10 +1251,9 @@ def test_producer_stamps_agent_reported_hostname_from_the_check_instance(monkeyp
     events = collect_events(valid_request(), check, client=fake)
 
     assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    envelope = json.loads(page)
-    assert envelope['agent_hostname'] == check_hostname
-    assert envelope['agent_hostname'] != socket.gethostname()
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert descriptor['agent_hostname'] == check_hostname
+    assert descriptor['agent_hostname'] != socket.gethostname()
 
 
 def test_producer_executes_query_exactly_once_in_read_only_transaction_with_timeout(monkeypatch):
@@ -1204,13 +1274,13 @@ def test_producer_executes_query_exactly_once_in_read_only_transaction_with_time
     # wrapped in a probe and not executed twice.
     assert server.executed == [('SELECT 1 AS value', None)]
     assert server.fetch_sizes  # rows were fetched in bounded batches
-    # BEGIN READ ONLY, transaction-local statement timeout, then ROLLBACK at the end.
-    # SET statements do not accept bind parameters, so the validated timeout is inlined.
-    assert [entry[0] for entry in control.executed] == [
-        'BEGIN READ ONLY',
-        'SET LOCAL statement_timeout = 5000',
-        'ROLLBACK',
-    ]
+    # BEGIN READ ONLY, transaction-local statement timeout, one descriptor vendor-type
+    # lookup, then ROLLBACK at the end. SET statements do not accept bind parameters, so
+    # the validated timeout is inlined.
+    executed = [entry[0] for entry in control.executed]
+    assert executed[:2] == ['BEGIN READ ONLY', 'SET LOCAL statement_timeout = 5000']
+    assert executed[-1] == 'ROLLBACK'
+    assert len(executed) == 4 and 'pg_catalog.format_type' in executed[2]
     assert control.executed[1][1] is None
     assert server.closed
 
@@ -1229,11 +1299,9 @@ def test_producer_caps_instance_timeout_at_the_producer_wall(monkeypatch):
 
     assert_success(events)
     control = pool.cursors[0]
-    assert [entry[0] for entry in control.executed] == [
-        'BEGIN READ ONLY',
-        'SET LOCAL statement_timeout = 5000',
-        'ROLLBACK',
-    ]
+    executed = [entry[0] for entry in control.executed]
+    assert executed[:2] == ['BEGIN READ ONLY', 'SET LOCAL statement_timeout = 5000']
+    assert executed[-1] == 'ROLLBACK'
 
 
 def test_producer_honors_instance_timeout_shorter_than_the_wall(monkeypatch):
@@ -1249,11 +1317,9 @@ def test_producer_honors_instance_timeout_shorter_than_the_wall(monkeypatch):
 
     assert_success(events)
     control = pool.cursors[0]
-    assert [entry[0] for entry in control.executed] == [
-        'BEGIN READ ONLY',
-        'SET LOCAL statement_timeout = 3000',
-        'ROLLBACK',
-    ]
+    executed = [entry[0] for entry in control.executed]
+    assert executed[:2] == ['BEGIN READ ONLY', 'SET LOCAL statement_timeout = 3000']
+    assert executed[-1] == 'ROLLBACK'
 
 
 def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypatch):
@@ -1278,11 +1344,9 @@ def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypa
     assert_failed_event(events, 'timeout')
     assert event_metadata(events[-1])['error']['retryable'] is True
     control = pool.cursors[0]
-    assert [entry[0] for entry in control.executed] == [
-        'BEGIN READ ONLY',
-        'SET LOCAL statement_timeout = 1000',
-        'ROLLBACK',
-    ]
+    executed = [entry[0] for entry in control.executed]
+    assert executed[:2] == ['BEGIN READ ONLY', 'SET LOCAL statement_timeout = 1000']
+    assert executed[-1] == 'ROLLBACK'
     assert fake.abort_calls == 1
 
 
@@ -1356,9 +1420,10 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
     producer = final['executionDiagnostics']['producer']
     assert final['executionDiagnostics']['contractVersion'] == 1
     assert producer == {
-        'totalMs': 3000,
-        # Connection acquisition, BEGIN, SET LOCAL, and the cursor execute are setup.
-        'databaseSetupMs': 1125,
+        'totalMs': 3250,
+        # Connection acquisition, BEGIN, SET LOCAL, the cursor execute, the vendor-type
+        # lookup, and the descriptor registration are setup.
+        'databaseSetupMs': 1375,
         # Two bounded fetchmany calls (the row batch and the empty one).
         'databaseFetchMs': 750,
         # Real encode work with this clock runs in well under a millisecond.
@@ -1367,7 +1432,7 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
         'finalizeMs': 250,
         # The ROLLBACK teardown runs outside every phase and lands in the remainder.
         'otherMs': 250,
-        'timeToFirstPageMs': 2500,
+        'timeToFirstPageMs': 2750,
         'pageCount': 1,
         'rowCount': 2,
         'byteCount': len(assembled_pages(fake)[0]),
@@ -1384,7 +1449,7 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
     assert 'uploadRetryCount' not in producer
 
 
-def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(monkeypatch):
+def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[], vendor_types={(23, -1): 'integer'})
@@ -1394,16 +1459,20 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(m
 
     final = assert_success(events)
     pages = assembled_pages(fake)
+    # include_schema=true keeps schema discovery for an empty result: exactly one
+    # zero-record source page, so intake creates one schema-bearing final page with empty
+    # data.
     assert list(pages) == [0]
-    parsed = json.loads(pages[0])
-    assert 'batch_index' not in parsed
-    assert parsed['record_offset'] == 0
-    assert parsed['schema'] == [{'column_name': 'value', 'vendor_data_type': 'integer'}]
-    assert parsed['data'] == []
+    assert pages[0] == b''
+    (call,) = fake.put_page_calls
+    assert (call.batch_index, call.record_offset, call.rows, call.source_bytes) == (0, 0, 0, 0)
+    assert call.sha256_hex == hashlib.sha256(b'').hexdigest()
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert descriptor['include_schema'] is True
+    assert descriptor['columns'] == [{'column_name': 'value', 'vendor_data_type': 'integer', 'logical_type': 'integer'}]
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
-    assert final['upload_receipt']['totalBytes'] == len(pages[0])
-    assert [call.batch_index for call in fake.put_page_calls] == [0]
+    assert final['upload_receipt']['totalBytes'] == 0
     assert fake.run_finalize_calls == 1
 
 
@@ -1412,7 +1481,7 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_schema_bearing_page(m
 # ---------------------------------------------------------------------------
 
 
-def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(monkeypatch):
+def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     columns = [
@@ -1426,16 +1495,20 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
     )
     request = bounded_request(query='SELECT city, country FROM cities ORDER BY city')
     request['includeSchema'] = True
-    schema_entries = [
-        {'column_name': 'city', 'vendor_data_type': 'character varying(255)'},
-        {'column_name': 'country', 'vendor_data_type': 'character varying(255)'},
-    ]
-    schema_json = json.dumps(schema_entries, separators=(',', ':')).encode('utf-8')
-    longest_row_bytes = b'{"city":"Beautiful city of lights","country":"France"}'
-    # maxFileBytes fits the schema-bearing prefix plus exactly the longer row, so both
-    # rows never fit one page and the second row forces a second page.
+    schema_json = json.dumps(
+        [
+            {'column_name': 'city', 'vendor_data_type': 'character varying(255)'},
+            {'column_name': 'country', 'vendor_data_type': 'character varying(255)'},
+        ],
+        separators=(',', ':'),
+    ).encode('utf-8')
+    # Intake stamps the schema into every final page, so the producer's bound carries the
+    # schema-bearing envelope: maxFileBytes here fits that envelope plus exactly the longer
+    # row, so both rows never fit one page and the second row forces a second page.
     request['resultDelivery']['limits']['maxFileBytes'] = (
-        len(prefix_bytes(schema_json=schema_json)) + len(longest_row_bytes) + len(rq.PAGE_SUFFIX)
+        len(prefix_bytes(schema_json=schema_json))
+        + row_object_bound({'city': 'Beautiful city of lights', 'country': 'France'})
+        + len(rq.PAGE_SUFFIX)
     )
     fake = FakeUploadClient()
 
@@ -1444,26 +1517,24 @@ def test_producer_schema_enabled_repeats_identical_ordered_schema_across_pages(m
     assert_success(events)
     pages = assembled_pages(fake)
     assert list(pages) == [0, 1]
-    parsed_pages = [json.loads(page) for page in pages.values()]
-    assert 'batch_index' not in parsed_pages[0]
-    assert parsed_pages[0]['record_offset'] == 0
-    assert parsed_pages[0]['data'] == [{'city': 'New York', 'country': 'USA'}]
-    assert parsed_pages[1]['record_offset'] == 1
-    assert parsed_pages[1]['data'] == [{'city': 'Beautiful city of lights', 'country': 'France'}]
-    # The schema repeats identically and in result-column order on every page.
-    assert (
-        parsed_pages[0]['schema']
-        == parsed_pages[1]['schema']
-        == [
-            {'column_name': 'city', 'vendor_data_type': 'character varying(255)'},
-            {'column_name': 'country', 'vendor_data_type': 'character varying(255)'},
-        ]
+    assert pages[0] == csv_record([json.dumps('New York').encode('utf-8'), json.dumps('USA').encode('utf-8')])
+    assert pages[1] == csv_record(
+        [json.dumps('Beautiful city of lights').encode('utf-8'), json.dumps('France').encode('utf-8')]
     )
     assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
+    assert [call.record_offset for call in fake.put_page_calls] == [0, 1]
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert descriptor['include_schema'] is True
+    assert descriptor['columns'] == [
+        {'column_name': 'city', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
+        {'column_name': 'country', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
+    ]
     assert event_metadata(events[0])['includeSchema'] is True
 
 
-def test_producer_schema_omitted_entirely_when_not_requested(monkeypatch):
+def test_producer_resolves_vendor_types_even_when_schema_is_not_requested(monkeypatch):
+    """The descriptor needs every vendor type name, schema or not: the catalog lookup always
+    runs, and include_schema stays false in the registered descriptor."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], vendor_types={(23, -1): 'integer'})
@@ -1472,11 +1543,11 @@ def test_producer_schema_omitted_entirely_when_not_requested(monkeypatch):
     events = collect_events(valid_request(include_schema=False), make_check(pool=pool), client=fake)
 
     assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    assert b'"schema"' not in page
-    # The schema lookup is never issued when schema is not requested.
     control_executed = [entry[0] for entry in pool.cursors[0].executed]
-    assert 'pg_catalog.format_type' not in ' '.join(control_executed)
+    assert sum('pg_catalog.format_type' in query for query in control_executed) == 1
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert descriptor['include_schema'] is False
+    assert descriptor['columns'][0]['vendor_data_type'] == 'integer'
 
 
 def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(monkeypatch):
@@ -1485,12 +1556,12 @@ def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(mon
     columns = [
         FakeColumn('a', 1043, 255),
         FakeColumn('b', 1043, 255),
-        FakeColumn('c', 23, -1),
+        FakeColumn('c', 25, -1),
     ]
     pool = FakePool(
         rows=[('x', 'y', 'z')],
         description=columns,
-        vendor_types={(1043, 255): 'character varying(255)', (23, -1): 'text'},
+        vendor_types={(1043, 255): 'character varying(255)', (25, -1): 'text'},
     )
     fake = FakeUploadClient()
 
@@ -1505,14 +1576,13 @@ def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(mon
     assert 'unnest(%s::text[], %s::text[])' in query
     assert 'pg_catalog.format_type(t.type_oid::oid, t.type_mod::int4)' in query
     # Only the DISTINCT (oid, typmod) pairs are resolved (two columns share one pair).
-    assert sorted(zip(params[0], params[1])) == [('1043', '255'), ('23', '-1')]
+    assert sorted(zip(params[0], params[1])) == [('1043', '255'), ('25', '-1')]
     executed_names = [entry[0] for entry in control.executed]
     assert executed_names.index(schema_queries[0][0]) < executed_names.index('ROLLBACK')
-    (page,) = assembled_pages(fake).values()
-    assert json.loads(page)['schema'] == [
-        {'column_name': 'a', 'vendor_data_type': 'character varying(255)'},
-        {'column_name': 'b', 'vendor_data_type': 'character varying(255)'},
-        {'column_name': 'c', 'vendor_data_type': 'text'},
+    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
+        {'column_name': 'a', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
+        {'column_name': 'b', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
+        {'column_name': 'c', 'vendor_data_type': 'text', 'logical_type': 'string'},
     ]
 
 
@@ -1555,29 +1625,36 @@ def test_producer_rejects_columns_beyond_max_columns(monkeypatch):
     assert_failed_event(events, 'max_columns_exceeded')
 
 
-def test_producer_fails_closed_on_incomplete_requested_schema(monkeypatch):
+@pytest.mark.parametrize('include_schema', [False, True])
+def test_producer_fails_closed_on_unresolvable_vendor_types(monkeypatch, include_schema):
+    """The descriptor needs every vendor type name, schema or not: an unresolvable catalog
+    lookup fails the run before any row is read, any descriptor is registered, or any page
+    is uploaded."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    # The catalog lookup cannot resolve the described (oid, typmod).
     pool = FakePool(rows=[(1,)], vendor_types={})
     fake = FakeUploadClient()
 
-    events = collect_events(valid_request(include_schema=True), make_check(pool=pool), client=fake)
+    events = collect_events(valid_request(include_schema=include_schema), make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'schema_unavailable')
     server = pool.cursors[1]
     assert server.fetch_sizes == []
     assert fake.put_page_calls == []
+    assert fake.descriptor_bodies == []
 
 
-def test_producer_fails_closed_when_description_lacks_type_modifiers(monkeypatch):
+@pytest.mark.parametrize('include_schema', [False, True])
+def test_producer_fails_closed_when_description_lacks_type_modifiers(monkeypatch, include_schema):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     column = FakeColumn('value', 23)
     column._fmod = None
-    pool = FakePool(rows=[(1,)], description=[column])
+    pool = FakePool(rows=[(1,)], description=[column], vendor_types={})
 
-    events = collect_events(valid_request(include_schema=True), make_check(pool=pool), client=FakeUploadClient())
+    events = collect_events(
+        valid_request(include_schema=include_schema), make_check(pool=pool), client=FakeUploadClient()
+    )
 
     assert_failed_event(events, 'schema_unavailable', 'type modifier')
 
@@ -1612,26 +1689,32 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-ROW_BYTES = b'{"payload":"aaaa"}'  # 18 bytes for description [FakeColumn('payload', 25)]
+# One row ('aaaa',) over a single text column: a 23-byte final bound and a 9-byte framed
+# source record.
+BOUND_ROW = {'payload': 'aaaa'}
+ROW_RECORD = csv_record([b'"aaaa"'])
 
 
-def two_row_boundary_request(monkeypatch, extra_file_bytes=0):
+def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
+    """A budget that fits exactly two bound rows in one page (minus the extra bytes)."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
+    row_bound = row_object_bound(BOUND_ROW)
     request = bounded_request()
     request['resultDelivery']['limits']['maxFileBytes'] = (
-        prefix_len + len(ROW_BYTES) + 1 + len(ROW_BYTES) + len(rq.PAGE_SUFFIX) + extra_file_bytes
+        prefix_len + row_bound + 1 + row_bound + len(rq.PAGE_SUFFIX) + extra_bound_bytes
     )
     request['resultDelivery']['limits']['maxSchemaBytes'] = 1
     return request
 
 
-def test_page_split_row_too_large_when_row_exceeds_max_row_bytes(monkeypatch):
+def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    request = bounded_request(maxRowBytes=len(ROW_BYTES) - 1)
-    pool = FakePool(rows=[('aaaa',)], description=[FakeColumn('payload', 25)])
+    # maxRowBytes bounds one framed source record: the 9-byte record for ('aaaa',) cannot fit 8.
+    request = bounded_request(maxRowBytes=len(ROW_RECORD) - 1)
+    pool = FakePool(rows=[('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'})
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
@@ -1654,6 +1737,7 @@ def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
     pool = FakePool(
         rows=None,
         description=[FakeColumn('payload', 25)],
+        vendor_types={(25, -1): 'text'},
         row_provider=row_provider,
         fetch_log=order_log,
     )
@@ -1663,7 +1747,7 @@ def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
 
     assert_success(events)
     # Pages are uploaded while rows are still being fetched: the producer never buffers
-    # the complete result before uploading, only one bounded page at a time.
+    # the complete result before uploading, only one bounded source page at a time.
     first_put = next(index for index, entry in enumerate(order_log) if entry[0] == 'put')
     later_fetch = next(
         index for index, entry in enumerate(order_log[first_put:], start=first_put) if entry[0] == 'fetch'
@@ -1671,15 +1755,39 @@ def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
     assert later_fetch > first_put
     exhausted = next(index for index, entry in enumerate(order_log) if entry[0] == 'exhausted')
     assert exhausted > first_put
-    # Pages are contiguous zero-based, no page exceeds maxFileBytes, and every row is
-    # declared exactly once across the page PUTs.
+    # Pages are contiguous zero-based and every row is declared exactly once across the
+    # page PUTs; the compact receipt repeats intake's finalize totals.
     page_indexes = sorted({call.batch_index for call in fake.put_page_calls})
     assert page_indexes == list(range(len(page_indexes)))
     assert sum(call.rows for call in fake.put_page_calls) == 500
-    assert event_metadata(events[-1])['upload_receipt']['totalRows'] == 500
-    assert event_metadata(events[-1])['upload_receipt']['pageCount'] == len(page_indexes)
-    max_file_bytes = request['resultDelivery']['limits']['maxFileBytes']
-    assert all(call.page_bytes <= max_file_bytes for call in fake.put_page_calls)
+    receipt = event_metadata(events[-1])['upload_receipt']
+    assert receipt['totalRows'] == 500
+    assert receipt['pageCount'] == len(page_indexes)
+    assert receipt['totalBytes'] == sum(call.source_bytes for call in fake.put_page_calls)
+
+
+def test_descriptor_is_registered_before_the_first_row_fetch(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    order_log = []
+    pool = FakePool(rows=[(1,)], fetch_log=order_log)
+    fake = FakeUploadClient(put_log=order_log)
+    original_register = fake.register_descriptor
+
+    def register_descriptor(creds, body):
+        order_log.append('descriptor')
+        return original_register(creds, body)
+
+    fake.register_descriptor = register_descriptor
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    # One registration, before any result row is read and before any page is uploaded.
+    assert order_log[0] == 'descriptor'
+    assert order_log.count('descriptor') == 1
+    assert order_log[1] == ('fetch', 1)
+    assert order_log[-1][0] == 'put'
 
 
 # ---------------------------------------------------------------------------
@@ -1688,9 +1796,8 @@ def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
 
 
 def encode_value(value, top_type_oid=None, in_array=False):
-    out = bytearray()
-    remote_query._encode_json_value(out, value, top_type_oid=top_type_oid, in_array=in_array)
-    return bytes(out)
+    token, _bound = remote_query._encode_cell_token(value, top_type_oid=top_type_oid, in_array=in_array)
+    return token
 
 
 @pytest.mark.parametrize(
@@ -1728,7 +1835,7 @@ def encode_value(value, top_type_oid=None, in_array=False):
         # Text/enum/UUID families become JSON strings.
         ('plain', b'"plain"'),
         ('with "quotes" and \\backslash', b'"with \\"quotes\\" and \\\\backslash"'),
-        ('héllo', b'"h\\u00e9llo"'),
+        ('héllo', '"héllo"'.encode('utf-8')),
         ('a\nb\tc', b'"a\\nb\\tc"'),
         (uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'), b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"'),
         # inet/cidr/interval keep their exact server text (raw text loader output).
@@ -1784,7 +1891,89 @@ def test_value_contract_fails_closed_on_non_json_numeric_text(value):
     assert excinfo.value.code == 'unsupported_value'
 
 
-def test_value_contract_producer_emits_pinned_row_json(monkeypatch):
+@pytest.mark.parametrize(
+    'value, expected_bound',
+    [
+        # Booleans and null are never scanned: their exact token bounds stay exact.
+        (None, 4),
+        (True, 4),
+        (False, 5),
+        # Short integer, decimal, and float tokens reserve the twelve-byte marker intake
+        # substitutes for a matched number leaf.
+        (42, 12),
+        (-42, 12),
+        (Decimal('1.5000'), 12),
+        (RawJsonNumber('0.1'), 12),
+        (0.1, 12),
+        # A number longer than the marker keeps its own token bytes.
+        (9223372036854775807, 19),
+        (Decimal('12345678901234567890.123456789'), 30),
+        # A short string leaf bounds to the twelve-byte redaction marker; a longer one keeps
+        # its own token length.
+        ('x', 12),
+        (uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'), 38),
+        # Nested containers bound structurally: each string or number leaf can grow to the
+        # marker, while booleans and null keep their exact tokens.
+        ({'k': 'x'}, 27),
+        ({'k': 42}, 27),
+        (['x', 'yy'], 2 + 12 + 1 + 12),
+        ([1, RawJsonNumber('0.1')], 2 + 12 + 1 + 12),
+        ([True, None], 2 + 4 + 1 + 4),
+        # Non-finite numerics are strings, so they bound like string leaves.
+        (float('nan'), 12),
+    ],
+)
+def test_cell_final_bounds_account_for_the_redaction_marker(value, expected_bound):
+    _token, bound = remote_query._encode_cell_token(value, top_type_oid=None, in_array=True)
+    assert bound == expected_bound
+
+
+@pytest.mark.parametrize(
+    'type_oid, vendor_data_type, expected',
+    [
+        (16, 'boolean', 'boolean'),
+        (17, 'bytea', 'binary'),
+        (18, 'char', 'string'),
+        (19, 'name', 'string'),
+        (20, 'bigint', 'integer'),
+        (21, 'smallint', 'integer'),
+        (23, 'integer', 'integer'),
+        (25, 'text', 'string'),
+        (26, 'oid', 'integer'),
+        (114, 'json', 'json'),
+        (700, 'real', 'float'),
+        (701, 'double precision', 'float'),
+        (790, 'money', 'vendor'),
+        (829, 'macaddr', 'vendor'),
+        (869, 'inet', 'vendor'),
+        (650, 'cidr', 'vendor'),
+        (1042, 'character(1)', 'string'),
+        (1043, 'character varying(255)', 'string'),
+        (1082, 'date', 'temporal'),
+        (1083, 'time without time zone', 'temporal'),
+        (1114, 'timestamp without time zone', 'temporal'),
+        (1184, 'timestamp with time zone', 'temporal'),
+        (1186, 'interval', 'temporal'),
+        (1266, 'time with time zone', 'temporal'),
+        (2249, 'record', 'json'),
+        (2950, 'uuid', 'string'),
+        (3802, 'jsonb', 'json'),
+        # Array families carry JSON arrays whatever the element type, including quoted names.
+        (1009, 'text[]', 'json'),
+        (1015, 'character varying(255)[]', 'json'),
+        (1007, 'integer[]', 'json'),
+        # Custom types, domains, and extensions have no stable cross-vendor family.
+        (16709, 'mood', 'vendor'),
+        (16710, 'my_int_domain', 'vendor'),
+        (46001, 'int4range', 'vendor'),
+    ],
+)
+def test_logical_type_mapping_is_deterministic(type_oid, vendor_data_type, expected):
+    column = remote_query.ResultColumn('c', type_oid, -1)
+    assert remote_query.logical_type_for_column(column, vendor_data_type) == expected
+
+
+def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     columns = [
@@ -1819,36 +2008,67 @@ def test_value_contract_producer_emits_pinned_row_json(monkeypatch):
         {'nested': [1, None, True], 'price': Decimal('1.10')},
         ['x', None, ['y', b'\x00\xff']],
     )
-    pool = FakePool(rows=[row], description=columns)
+    vendor_types = {
+        (25, -1): 'text',
+        (16, -1): 'boolean',
+        (20, -1): 'bigint',
+        (1700, -1): 'numeric',
+        (701, -1): 'double precision',
+        (2950, -1): 'uuid',
+        (17, -1): 'bytea',
+        (1114, -1): 'timestamp without time zone',
+        (1184, -1): 'timestamp with time zone',
+        (1082, -1): 'date',
+        (1186, -1): 'interval',
+        (114, -1): 'json',
+        (1009, -1): 'text[]',
+    }
+    pool = FakePool(rows=[row], description=columns, vendor_types=vendor_types)
     fake = FakeUploadClient()
 
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    parsed = json.loads(page)['data'][0]
-    assert parsed == {
-        'null_value': None,
-        'bool_value': True,
-        'int_value': 42,
-        'numeric_value': 12345678901234567890.123456789,
-        'float_value': 0.1,
-        'text_value': 'héllo "quoted"',
-        'uuid_value': '8b6fb1b5-94dd-447b-95a4-91f4ef118f4b',
-        'bytea_value': 'AP+A',
-        'timestamp_value': '2026-08-28T12:34:56.123456',
-        'timestamptz_value': '2026-08-28T12:34:56.123456Z',
-        'date_value': '2026-08-28',
-        'interval_value': '1 mon 2 days 03:04:05',
-        'json_value': {'nested': [1, None, True], 'price': 1.10},
-        'array_value': ['x', None, ['y', 'AP8=']],
-    }
-    # Exact text preservation is byte-pinned for the numeric families.
-    assert b'"numeric_value":12345678901234567890.123456789' in page
-    assert b'"float_value":0.1' in page
-    assert b'"bytea_value":"AP+A"' in page
-    assert b'"timestamptz_value":"2026-08-28T12:34:56.123456Z"' in page
-    assert b'"json_value":{"nested":[1,null,true],"price":1.10}' in page
+    # Every cell rides the page as its exact canonical JSON token, CSV-framed: the token
+    # pins null versus empty string, exact numeric lexemes, non-finite strings, temporal
+    # strings, base64 binary, nested JSON, and arrays.
+    tokens = [
+        b'null',
+        b'true',
+        b'42',
+        b'12345678901234567890.123456789',
+        b'0.1',
+        '"héllo \\"quoted\\""'.encode('utf-8'),
+        b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"',
+        b'"AP+A"',
+        b'"2026-08-28T12:34:56.123456"',
+        b'"2026-08-28T12:34:56.123456Z"',
+        b'"2026-08-28"',
+        b'"1 mon 2 days 03:04:05"',
+        b'{"nested":[1,null,true],"price":1.10}',
+        b'["x",null,["y","AP8="]]',
+    ]
+    assert page == csv_record(tokens)
+    descriptor = json.loads(fake.descriptor_bodies[0])
+    assert [
+        (column['column_name'], column['vendor_data_type'], column['logical_type']) for column in descriptor['columns']
+    ] == [
+        ('null_value', 'text', 'string'),
+        ('bool_value', 'boolean', 'boolean'),
+        ('int_value', 'bigint', 'integer'),
+        ('numeric_value', 'numeric', 'decimal'),
+        ('float_value', 'double precision', 'float'),
+        ('text_value', 'text', 'string'),
+        ('uuid_value', 'uuid', 'string'),
+        ('bytea_value', 'bytea', 'binary'),
+        ('timestamp_value', 'timestamp without time zone', 'temporal'),
+        ('timestamptz_value', 'timestamp with time zone', 'temporal'),
+        ('date_value', 'date', 'temporal'),
+        ('interval_value', 'interval', 'temporal'),
+        ('json_value', 'json', 'json'),
+        ('array_value', 'text[]', 'json'),
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -1936,9 +2156,13 @@ class CredsRecordingUploadClient(FakeUploadClient):
         super().__init__()
         self.seen_creds = []
 
-    def put_page(self, creds, page, body):
+    def register_descriptor(self, creds, body):
         self.seen_creds.append(creds)
-        return super().put_page(creds, page, body)
+        return super().register_descriptor(creds, body)
+
+    def put_source_page(self, creds, page, body):
+        self.seen_creds.append(creds)
+        return super().put_source_page(creds, page, body)
 
     def finalize_run(self, creds):
         self.seen_creds.append(creds)
@@ -1969,8 +2193,13 @@ def test_stream_threads_the_request_trace_context_into_upload_credentials(monkey
 
     assert_success(events)
     expected_context = rq.RemoteQueryTraceContext.model_validate(carrier) if carrier is not None else None
-    # The page PUT and the run finalize both saw the same threaded context.
-    assert [creds.trace_context for creds in fake.seen_creds] == [expected_context, expected_context]
+    # The descriptor registration, the page PUT, and the run finalize all saw the same
+    # threaded context.
+    assert [creds.trace_context for creds in fake.seen_creds] == [
+        expected_context,
+        expected_context,
+        expected_context,
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -1982,8 +2211,12 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    request = bounded_request(maxFileBytes=prefix_len + len(ROW_BYTES) + len(rq.PAGE_SUFFIX))
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
+    request = bounded_request(
+        maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq.PAGE_SUFFIX), maxSchemaBytes=1
+    )
+    pool = FakePool(
+        rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
+    )
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
@@ -2012,25 +2245,31 @@ def test_stream_aborts_on_page_upload_failure(monkeypatch):
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
 
 
-def test_stream_fails_closed_on_page_receipt_mismatch(monkeypatch):
+def test_stream_fails_closed_on_page_receipt_identity_mismatch(monkeypatch):
+    """Final bytes and checksum are intake-derived and never compared to the source page;
+    only the identity fields (index, offset, rows) must match, and a mismatch fails the run."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
-    bad_receipt = {
-        'batch_index': 0,
-        'key': 'agent-intake-test/pages/0.json',
-        'record_offset': 0,
-        'bytes': 123,
-        'rows': 1,
-        'sha256': 'f' * 64,
-    }
-    fake = FakeUploadClient(put_page_response=bad_receipt)
+    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
+    pool = FakePool(
+        rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
+    )
+    fake = FakeUploadClient(
+        put_page_response=lambda page: {
+            'batch_index': page.batch_index,
+            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
+            'record_offset': page.record_offset,
+            # Intake-derived values with no source agreement: these are accepted.
+            'bytes': page.source_bytes + 123,
+            'rows': page.rows + 1,
+            'sha256': 'f' * 64,
+        }
+    )
 
     events = collect_events(request, make_check(pool=pool), client=fake)
 
-    # A receipt that disagrees with the produced page fails the run: page 1 is never
-    # produced, the session is aborted, and no partial receipt is emitted.
+    # The receipt disagrees on rows: page 1 is never produced, the session is aborted, and
+    # no partial receipt is emitted.
     assert_failed_event(events, 'invalid_receipt')
     assert [call.batch_index for call in fake.put_page_calls] == [0]
     assert fake.run_finalize_calls == 0
@@ -2046,8 +2285,10 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
     instrument_postgres_fakes(monkeypatch, clock)
     # A two-page boundary whose second page upload fails: the first page is acknowledged
     # and counted, the second attempt's wall is measured but never promoted.
-    request = two_row_boundary_request(monkeypatch, extra_file_bytes=-1)
-    pool = FakePool(rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)])
+    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
+    pool = FakePool(
+        rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
+    )
 
     def fail_second_page(page):
         if page.batch_index == 1:
@@ -2056,7 +2297,7 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
             'batch_index': page.batch_index,
             'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
             'record_offset': page.record_offset,
-            'bytes': page.page_bytes,
+            'bytes': page.source_bytes,
             'rows': page.rows,
             'sha256': page.sha256_hex,
         }
@@ -2073,16 +2314,16 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
     assert fake.run_finalize_calls == 0
     first_page_bytes = len(assembled_pages(fake)[0])
     assert error['stats'] == {
-        'rowsEmitted': 2,
+        'rowsEmitted': 1,
         'pagesEmitted': 1,
         'bytesEmitted': first_page_bytes,
-        'elapsedMs': 3375,
+        'elapsedMs': 3625,
     }
     assert error['executionDiagnostics'] == {
         'contractVersion': 1,
         'producer': {
-            'totalMs': 3375,
-            'databaseSetupMs': 1125,
+            'totalMs': 3625,
+            'databaseSetupMs': 1375,
             'databaseFetchMs': 750,
             'encodeAndPageBuildMs': 0,
             # Both upload walls are kept: the acknowledged page and the failed attempt's.
@@ -2090,9 +2331,9 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
             # finalizeMs is absent: finalize never ran. uploadAttemptCount/RetryCount are
             # absent too: the injected client makes no HTTP attempts.
             'otherMs': 250,
-            'timeToFirstPageMs': 2125,
+            'timeToFirstPageMs': 2375,
             'pageCount': 1,
-            'rowCount': 2,
+            'rowCount': 1,
             'byteCount': first_page_bytes,
             # The distribution holds only the acknowledged page's wall.
             'pageUploadMinMs': 625,
@@ -2164,6 +2405,26 @@ def test_stream_maps_server_statement_cancellation_to_timeout(monkeypatch):
     assert_failed_event(events, 'timeout', 'statement timeout')
     assert event_metadata(events[-1])['error']['retryable'] is True
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+
+
+def test_stream_maps_unexpected_execution_failure_to_fixed_query_failed(monkeypatch, caplog):
+    """An unexpected producer failure maps to the fixed query_failed error: the exception's
+    text can carry raw row fragments or query text, so neither the event nor the logs
+    echo it."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)], fetch_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
+    fake = FakeUploadClient()
+
+    caplog.set_level(logging.DEBUG)
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'query_failed', 'Remote query execution failed')
+    assert event_metadata(events[-1])['error']['retryable'] is False
+    assert fake.abort_calls == 1
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 @pytest.mark.parametrize('is_cancelled', [lambda: True, True], ids=['callable', 'bool'])

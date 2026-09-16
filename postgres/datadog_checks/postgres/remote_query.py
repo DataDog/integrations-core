@@ -2,15 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""Remote query JSON page producer for the Postgres integration.
+"""Remote query source-page producer for the Postgres integration.
 
 Executes one validated query through a named (server-side) cursor, normalizes PostgreSQL
-values into the pinned cross-language JSON contract, splits the rows into byte-bounded JSON
-page files, and uploads each complete page to its-agent-intake as one direct HTTP request.
-The shared page writer retains one bounded page in memory through byte-identical retries.
-Bulk page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP
-action output; the emit callback carries only ``metadata``/``final``/``error`` events, and
-the final event carries only the compact run receipt.
+values into the pinned cross-language JSON contract, and streams them as record-complete CSV
+source pages to its-agent-intake. The adapter describes the result once and registers one
+immutable descriptor (column names, vendor types, logical types) before any result row is
+read; the shared source-page writer frames, bounds, and uploads each page. Intake decodes,
+redacts, and writes the final JSON pages, so this module no longer constructs a final JSON
+envelope and no longer claims source bytes or checksums are final artifact metadata. Bulk
+page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action output;
+the emit callback carries only ``metadata``/``final``/``error`` events, and the final event
+carries only the compact run receipt.
 
 Two operations dispatch through the single Agent entry point by their ``operation`` field:
 ``produce_json_pages`` runs the producer, and ``resolve_target`` answers the Agent's
@@ -26,6 +29,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import math
 import time
 import uuid
 from collections.abc import Iterable, Iterator, Mapping, Sequence
@@ -229,90 +233,119 @@ def _encode_bytea(out: bytearray, value: bytes) -> None:
     out += b'"'
 
 
-def _encode_json_value(out: bytearray, value: Any, *, top_type_oid: int | None, in_array: bool) -> None:
-    """Encode one normalized PostgreSQL value into ``out`` as JSON bytes.
+def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) -> tuple[bytes, int]:
+    """Encode one normalized PostgreSQL value as ``(canonical JSON token, final bound)``.
 
-    ``top_type_oid`` is the described column OID for row fields (used to accept bytea
+    The token is the pinned value contract's encoding, unchanged. The bound is the
+    conservative final-JSON size after redaction: any scalar string or number leaf —
+    including dict keys, conservatively — either keeps its token or is replaced by the fixed
+    ``[REDACTED]`` marker, whichever is longer; booleans and nulls are never scanned and
+    keep their exact token bounds.
+    ``top_type_oid`` is the described column OID for row cells (used to accept bytea
     precisely); inside arrays and json values binary buffers can only come from bytea, so
     ``in_array`` licenses them there. Everything unrecognized fails closed.
     """
     if value is None:
-        out += b'null'
-    elif isinstance(value, bool):
-        out += b'true' if value else b'false'
-    elif isinstance(value, RawJsonNumber):
+        return b'null', 4
+    if isinstance(value, bool):
+        token = b'true' if value else b'false'
+        return token, len(token)
+    if isinstance(value, RawJsonNumber):
         text = str(value)
         if text in rq.NON_FINITE_NUMERIC_TEXT:
-            rq.encode_non_finite_text(out, text)
-        else:
-            rq.encode_raw_number_text(out, text)
-    elif isinstance(value, int):
+            return rq.string_cell_token(text)
+        out = bytearray()
+        rq.encode_raw_number_text(out, text)
+        return bytes(out), rq.redactable_leaf_final_bound(out)
+    if isinstance(value, int):
+        out = bytearray()
         rq.encode_raw_number_text(out, str(value))
-    elif isinstance(value, Decimal):
-        rq.encode_decimal(out, value)
-    elif isinstance(value, float):
-        rq.encode_float(out, value)
-    elif isinstance(value, str):
-        out += json.dumps(value).encode('utf-8')
-    elif isinstance(value, (bytes, bytearray, memoryview)):
-        if top_type_oid == BYTEA_OID or in_array:
-            _encode_bytea(out, bytes(value))
-        else:
+        return bytes(out), rq.redactable_leaf_final_bound(out)
+    if isinstance(value, Decimal):
+        if value.is_finite():
+            out = bytearray()
+            rq.encode_decimal(out, value)
+            return bytes(out), rq.redactable_leaf_final_bound(out)
+        return rq.string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
+    if isinstance(value, float):
+        if math.isfinite(value):
+            out = bytearray()
+            rq.encode_float(out, value)
+            return bytes(out), rq.redactable_leaf_final_bound(out)
+        return rq.string_cell_token('NaN' if math.isnan(value) else ('Infinity' if value > 0 else '-Infinity'))
+    if isinstance(value, str):
+        return rq.string_cell_token(value)
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        if top_type_oid != BYTEA_OID and not in_array:
             raise rq.RemoteQueryFailure(
                 'unsupported_value',
                 'Binary value from a non-bytea column (type oid {}) cannot be converted.'.format(top_type_oid),
             )
-    elif isinstance(value, datetime):
-        out += json.dumps(_encode_datetime_text(value)).encode('utf-8')
-    elif isinstance(value, date):
-        out += json.dumps(value.isoformat()).encode('utf-8')
-    elif isinstance(value, dt_time):
-        out += json.dumps(value.isoformat()).encode('utf-8')
-    elif isinstance(value, uuid.UUID):
-        out += json.dumps(str(value)).encode('utf-8')
-    elif isinstance(value, (list, tuple)):
-        out += b'['
+        out = bytearray()
+        _encode_bytea(out, bytes(value))
+        return bytes(out), rq.redactable_leaf_final_bound(out)
+    if isinstance(value, datetime):
+        return rq.string_cell_token(_encode_datetime_text(value))
+    if isinstance(value, date):
+        return rq.string_cell_token(value.isoformat())
+    if isinstance(value, dt_time):
+        return rq.string_cell_token(value.isoformat())
+    if isinstance(value, uuid.UUID):
+        return rq.string_cell_token(str(value))
+    if isinstance(value, (list, tuple)):
+        parts: list[bytes] = [b'[']
+        bound = 2
         for index, item in enumerate(value):
             if index:
-                out += b','
-            _encode_json_value(out, item, top_type_oid=None, in_array=True)
-        out += b']'
-    elif isinstance(value, dict):
-        out += b'{'
+                parts.append(b',')
+                bound += 1
+            token, item_bound = _encode_cell_token(item, top_type_oid=None, in_array=True)
+            parts.append(token)
+            bound += item_bound
+        parts.append(b']')
+        return b''.join(parts), bound
+    if isinstance(value, dict):
+        parts = [b'{']
+        bound = 2
         first = True
         for key, item in value.items():
             if not isinstance(key, str):
                 raise rq.RemoteQueryFailure('unsupported_value', 'JSON object keys must be strings.')
             if not first:
-                out += b','
+                parts.append(b',')
+                bound += 1
             first = False
-            out += json.dumps(key).encode('utf-8')
-            out += b':'
-            _encode_json_value(out, item, top_type_oid=None, in_array=True)
-        out += b'}'
-    else:
-        raise rq.RemoteQueryFailure(
-            'unsupported_value',
-            'PostgreSQL value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
-        )
+            key_token = rq.canonical_json_bytes(key)
+            parts.append(key_token)
+            parts.append(b':')
+            bound += rq.redactable_leaf_final_bound(key_token) + 1
+            token, item_bound = _encode_cell_token(item, top_type_oid=None, in_array=True)
+            parts.append(token)
+            bound += item_bound
+        parts.append(b'}')
+        return b''.join(parts), bound
+    raise rq.RemoteQueryFailure(
+        'unsupported_value',
+        'PostgreSQL value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
+    )
 
 
-def encode_row(row: Sequence[Any], columns: Sequence[ResultColumn], out: bytearray) -> None:
-    """Encode one result row as a JSON object keyed by result-column name."""
+def encode_row(row: Sequence[Any], columns: Sequence[ResultColumn]) -> list[rq.EncodedCell]:
+    """Encode one result row as one canonical cell token per described column.
+
+    The row-object JSON document is never built: intake assembles the final rows from these
+    cell tokens in descriptor order.
+    """
     if len(row) != len(columns):
         raise rq.RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
-    out += b'{'
-    for index, (column, value) in enumerate(zip(columns, row)):
-        if index:
-            out += b','
-        out += json.dumps(column.name).encode('utf-8')
-        out += b':'
-        _encode_json_value(out, value, top_type_oid=column.type_oid, in_array=False)
-    out += b'}'
+    return [
+        rq.EncodedCell(*_encode_cell_token(value, top_type_oid=column.type_oid, in_array=False))
+        for column, value in zip(columns, row)
+    ]
 
 
 # ---------------------------------------------------------------------------
-# Result description and schema
+# Result description, vendor types, and the upload descriptor
 # ---------------------------------------------------------------------------
 
 VENDOR_TYPE_QUERY = (
@@ -397,44 +430,78 @@ def resolve_vendor_types(control_cursor: Any, columns: Sequence[ResultColumn]) -
     return type_map
 
 
-def build_schema_json(
-    control_cursor: Any,
-    columns: Sequence[ResultColumn],
-    delivery: rq.RemoteQueryResultDelivery,
-    agent_hostname: str,
-) -> bytes:
-    """Build the ordered schema entries, rejecting incomplete metadata and oversize schemas.
+# Descriptor logical types for the built-in OID families the value contract converts. Any
+# array family (a vendor type rendered with an ``[]`` suffix) carries a JSON array; custom
+# types, domains, and extensions have no stable cross-vendor family, so they map to
+# ``vendor`` — their values still must pass the fail-closed value contract, and ``vendor``
+# never widens it.
+POSTGRES_LOGICAL_TYPE_BY_OID = {
+    16: 'boolean',  # bool
+    17: 'binary',  # bytea
+    18: 'string',  # char
+    19: 'string',  # name
+    20: 'integer',  # int8
+    21: 'integer',  # int2
+    23: 'integer',  # int4
+    25: 'string',  # text
+    26: 'integer',  # oid
+    114: 'json',  # json
+    700: 'float',  # float4
+    701: 'float',  # float8
+    1700: 'decimal',  # numeric
+    790: 'vendor',  # money (locale-dependent text)
+    829: 'vendor',  # macaddr
+    869: 'vendor',  # inet
+    650: 'vendor',  # cidr
+    1042: 'string',  # bpchar
+    1043: 'string',  # varchar
+    1082: 'temporal',  # date
+    1083: 'temporal',  # time
+    1114: 'temporal',  # timestamp
+    1184: 'temporal',  # timestamptz
+    1186: 'temporal',  # interval
+    1266: 'temporal',  # timetz
+    2249: 'json',  # record
+    2950: 'string',  # uuid
+    3802: 'json',  # jsonb
+}
 
-    The encoded schema repeats in every page, so it must fit both ``maxSchemaBytes`` and the
-    smallest valid page frame; both are enforced before any row data is written.
+
+def logical_type_for_column(column: ResultColumn, vendor_data_type: str) -> str:
+    """Map one described column to a closed descriptor logical type, deterministically."""
+    if vendor_data_type.endswith('[]'):
+        return 'json'
+    return POSTGRES_LOGICAL_TYPE_BY_OID.get(column.type_oid, 'vendor')
+
+
+def build_upload_descriptor(
+    request: rq.RemoteQueryRequest,
+    columns: Sequence[ResultColumn],
+    type_map: Mapping[tuple[int, int], str],
+    agent_hostname: str,
+) -> rq.RemoteQueryUploadDescriptor:
+    """Build the immutable source-page descriptor from the described result columns.
+
+    The vendor type names always come from ``pg_catalog.format_type`` — schema or not —
+    because the descriptor is registered once, before any result row is read, and intake
+    stamps the schema (when requested) into every final page from it.
     """
-    type_map = resolve_vendor_types(control_cursor, columns)
-    entries = [
-        {'column_name': column.name, 'vendor_data_type': type_map[(column.type_oid, column.type_modifier)]}
-        for column in columns
-    ]
-    schema_json = json.dumps(entries, separators=(',', ':')).encode('utf-8')
-    limits = delivery.limits
-    if len(schema_json) > limits.max_schema_bytes:
-        raise rq.RemoteQueryFailure(
-            'max_schema_bytes_exceeded',
-            'Encoded schema is {} bytes; the limit is {}.'.format(len(schema_json), limits.max_schema_bytes),
+    descriptor_columns = []
+    for column in columns:
+        vendor_data_type = type_map[(column.type_oid, column.type_modifier)]
+        descriptor_columns.append(
+            rq.RemoteQueryDescriptorColumn(
+                column_name=column.name,
+                vendor_data_type=vendor_data_type,
+                logical_type=logical_type_for_column(column, vendor_data_type),
+            )
         )
-    prefix_len = len(
-        rq.page_prefix(
-            run_id=delivery.run_id,
-            task_id=delivery.task_id,
-            record_offset=0,
-            agent_hostname=agent_hostname,
-            schema_json=schema_json,
-        )
+    return rq.RemoteQueryUploadDescriptor(
+        format_version=rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+        include_schema=request.include_schema,
+        agent_hostname=agent_hostname,
+        columns=descriptor_columns,
     )
-    if prefix_len + len(rq.PAGE_SUFFIX) > limits.max_file_bytes:
-        raise rq.RemoteQueryFailure(
-            'max_file_bytes_exceeded',
-            'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
-        )
-    return schema_json
 
 
 # ---------------------------------------------------------------------------
@@ -459,12 +526,14 @@ def produce_remote_query(
     smaller of the instance-configured ``remote_queries.timeout_ms`` and the remaining
     run-wide wall, where the wall is the delivered ``limits.timeout_ms`` that no instance
     setting may lengthen; it is never wrapped in a probe and never executed twice. Bounded
-    row batches are fetched from the same cursor and encoded one row at a time.
+    row batches are fetched from the same cursor and encoded one row of canonical cell tokens
+    at a time; the vendor-type lookup and descriptor registration both precede the first
+    fetch, so no result row is read before intake knows the page shape.
 
-    Producer phases: connection acquisition through schema construction is database
+    Producer phases: connection acquisition through descriptor registration is database
     setup, each ``fetchmany`` call is a database fetch, the row loop is encode and page
     build (with any upload ``add_row`` triggers nested inside it), and page uploads and
-    finalize are accounted by the shared page writer. Everything else — timeout
+    finalize are accounted by the shared source-page writer. Everything else — timeout
     resolution, the pre-fetch guards, transaction teardown — lands in ``otherMs``.
     """
     delivery = request.result_delivery
@@ -484,7 +553,7 @@ def produce_remote_query(
         rq.raise_if_cancelled(check)
 
     cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
-    # The setup phase spans pool connection acquisition through schema construction and
+    # The setup phase spans pool connection acquisition through descriptor registration and
     # ends at the first fetch; the connection and cursor contexts outlive the phase, so
     # it is entered and exited explicitly. The inline exit marks the boundary before the
     # row loop; the spanning ``finally`` re-exits it (idempotently) so a setup interrupted
@@ -506,15 +575,14 @@ def produce_remote_query(
                         server_cursor.execute(request.query)
                         columns = described_columns(server_cursor)
                         validate_columns(columns, limits.max_columns)
-                        schema_json = None
-                        if request.include_schema:
-                            schema_json = build_schema_json(control, columns, delivery, check.hostname)
-
-                        # The executing check's Agent-reported hostname: the stamp must match the
-                        # agent node identity Fleet reports, never socket.gethostname().
-                        writer = rq.PageWriter(
-                            delivery, creds, client, check.hostname, schema_json, guard, stats, timings
-                        )
+                        # The descriptor needs every vendor type name, schema or not: it is
+                        # registered once, before any result row is read.
+                        type_map = resolve_vendor_types(control, columns)
+                        descriptor = build_upload_descriptor(request, columns, type_map, check.hostname)
+                        # The executing check's Agent-reported hostname: the descriptor carries it
+                        # so intake stamps the envelope with the agent node identity Fleet reports,
+                        # never socket.gethostname().
+                        writer = rq.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings)
                         guard()
                         # Setup ends here: the first fetch below is its own phase.
                         timings.exit_phase(setup_phase)
@@ -527,16 +595,7 @@ def produce_remote_query(
                                         break
                                     for row in rows:
                                         guard()
-                                        row_buffer = bytearray()
-                                        encode_row(row, columns, row_buffer)
-                                        if len(row_buffer) > limits.max_row_bytes:
-                                            raise rq.RemoteQueryFailure(
-                                                'row_too_large',
-                                                'A single row exceeds maxRowBytes ({} > {} bytes).'.format(
-                                                    len(row_buffer), limits.max_row_bytes
-                                                ),
-                                            )
-                                        writer.add_row(bytes(row_buffer))
+                                        writer.add_row(encode_row(row, columns))
                             return writer.finish()
                         finally:
                             # Release the page even if encoding or cursor iteration fails.
@@ -546,7 +605,9 @@ def produce_remote_query(
                         try:
                             control.execute('ROLLBACK')
                         except Exception:
-                            LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
+                            # Fixed text only: the driver's exception can quote connection strings
+                            # or identifiers embedded in its message.
+                            LOGGER.debug('Unable to roll back remote query read-only transaction')
     finally:
         timings.exit_phase(setup_phase)
 
@@ -709,12 +770,17 @@ def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
         return False
     try:
         return dbname in autodiscovery.get_items()
-    except Exception as e:
+    except Exception:
+        # The caught exception neither reaches the message nor rides the wrapper's
+        # exception chain: discovery failures can quote connection strings, identifiers, or
+        # other server detail, so a traceback log of the wrapper must not recover them.
+        # Classification and retryability are what the event carries, not the underlying
+        # text.
         raise rq.RemoteQueryFailure(
             'target_unavailable',
-            "Unable to determine the matched check's autodiscovered database scope: {}".format(e),
+            "Unable to determine the matched check's autodiscovered database scope.",
             retryable=True,
-        ) from e
+        ) from None
 
 
 # ---------------------------------------------------------------------------
@@ -976,7 +1042,8 @@ def iter_agent_rpc_stream_events(
         rq.safe_abort(client, creds)
         if not isinstance(e, Exception):
             raise
-        LOGGER.exception('Remote query execution failed')
+        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
+        LOGGER.error('Remote query execution failed')
         yield rq.failed_event(
             'query_failed',
             'Remote query execution failed.',
