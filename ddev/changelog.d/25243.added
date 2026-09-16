@@ -1,0 +1,1 @@
+Allow `ddev validate all` to write its formatted pull request comment to a file.
