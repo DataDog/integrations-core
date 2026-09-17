@@ -13,7 +13,7 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.checks.openmetrics.endpoint_unreachable_issue import EndpointUnreachableIssueReporter
+from datadog_checks.base.checks.openmetrics import endpoint_unreachable_issue
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
@@ -68,7 +68,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
             filter_option_text='metrics / exclude_metrics'
         )
-        self.endpoint_unreachable_issue_reporter: EndpointUnreachableIssueReporter = EndpointUnreachableIssueReporter()
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]
@@ -91,7 +90,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         We take care of instance-level customization at initialization time.
         """
         self.refresh_scrapers()
-        self.endpoint_unreachable_issue_reporter.resolve_stale(
+        endpoint_unreachable_issue.resolve_stale(
             self,
             ((scraper.endpoint, scraper.namespace) for scraper in self.scrapers.values()),
         )
@@ -120,7 +119,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     def cancel(self) -> None:
         try:
-            tracked_issues_drained = self.endpoint_unreachable_issue_reporter.cancel(self)
+            tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
             if self._uses_process_isolation() and not tracked_issues_drained:
                 # The isolated child owns runtime reporter state. The parent can only reconstruct endpoints present
                 # directly in configuration; endpoints discovered or transformed at runtime remain best-effort.
@@ -149,7 +148,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                             endpoint_namespaces.add((endpoint, str(namespace)))
 
                 for endpoint, namespace in endpoint_namespaces:
-                    self.endpoint_unreachable_issue_reporter.resolve(self, endpoint, namespace)
+                    endpoint_unreachable_issue.resolve(self, endpoint, namespace)
         except Exception:
             self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
         finally:

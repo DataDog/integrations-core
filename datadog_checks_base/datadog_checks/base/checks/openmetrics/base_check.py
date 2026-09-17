@@ -10,7 +10,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tracing import traced_class
 
-from .endpoint_unreachable_issue import EndpointUnreachableIssueReporter
+from . import endpoint_unreachable_issue
 from .metric_limit_issue import MetricLimitIssueReporter
 from .mixins import OpenMetricsScraperMixin
 
@@ -94,7 +94,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
             filter_option_text='metrics / ignore_metrics'
         )
-        self.endpoint_unreachable_issue_reporter: EndpointUnreachableIssueReporter = EndpointUnreachableIssueReporter()
         self.config_map = {}
         self._http_handlers = {}
         self.default_instances = default_instances
@@ -159,7 +158,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
     def cancel(self) -> None:
         try:
-            tracked_issues_drained = self.endpoint_unreachable_issue_reporter.cancel(self)
+            tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
             instance = self.instance or {}
             init_config = self.init_config or {}
             process_isolation = is_affirmative(
@@ -167,7 +166,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             )
             if process_isolation and not tracked_issues_drained:
                 for config in tuple(self.config_map.values()):
-                    self.endpoint_unreachable_issue_reporter.resolve(
+                    endpoint_unreachable_issue.resolve(
                         self,
                         config.get('prometheus_url'),
                         config.get('namespace', ''),

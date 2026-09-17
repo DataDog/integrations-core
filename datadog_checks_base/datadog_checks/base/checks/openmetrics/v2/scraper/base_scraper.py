@@ -16,8 +16,7 @@ from prometheus_client.parser import text_fd_to_metric_families as parse_prometh
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
-from datadog_checks.base.checks.openmetrics import parser_optimizations
-from datadog_checks.base.checks.openmetrics.endpoint_unreachable_issue import EndpointUnreachableIssueReporter
+from datadog_checks.base.checks.openmetrics import endpoint_unreachable_issue, parser_optimizations
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
 from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
@@ -443,16 +442,14 @@ class OpenMetricsScraper:
         try:
             response = self.send_request()
         except Exception as e:
-            reporter = getattr(self.check, 'endpoint_unreachable_issue_reporter', EndpointUnreachableIssueReporter)
             if vars(self).get('ignore_connection_errors', False):
-                reporter.resolve(self.check, self.endpoint, self.namespace)
+                endpoint_unreachable_issue.resolve(self.check, self.endpoint, self.namespace)
             else:
-                reporter.report(self.check, self.endpoint, e, self.namespace)
+                endpoint_unreachable_issue.report(self.check, self.endpoint, e, self.namespace)
             self.submit_health_check(ServiceCheck.CRITICAL, message=str(e))
             raise
         else:
-            reporter = getattr(self.check, 'endpoint_unreachable_issue_reporter', EndpointUnreachableIssueReporter)
-            reporter.resolve(self.check, self.endpoint, self.namespace)
+            endpoint_unreachable_issue.resolve(self.check, self.endpoint, self.namespace)
             try:
                 response.raise_for_status()
             except Exception as e:

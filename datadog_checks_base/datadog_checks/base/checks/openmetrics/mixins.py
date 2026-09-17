@@ -21,7 +21,7 @@ from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.http import RequestsWrapper
 
-from .endpoint_unreachable_issue import EndpointUnreachableIssueReporter
+from . import endpoint_unreachable_issue
 
 
 class OpenMetricsScraperMixin(object):
@@ -841,13 +841,11 @@ class OpenMetricsScraperMixin(object):
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except IOError as e:
-            reporter = getattr(self, 'endpoint_unreachable_issue_reporter', EndpointUnreachableIssueReporter)
-            reporter.report(self, endpoint, e, scraper_config.get('namespace', ''))
+            endpoint_unreachable_issue.report(self, endpoint, e, scraper_config.get('namespace', ''))
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
-        reporter = getattr(self, 'endpoint_unreachable_issue_reporter', EndpointUnreachableIssueReporter)
-        reporter.resolve(self, endpoint, scraper_config.get('namespace', ''))
+        endpoint_unreachable_issue.resolve(self, endpoint, scraper_config.get('namespace', ''))
         try:
             response.raise_for_status()
             if health_service_check:

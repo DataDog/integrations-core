@@ -15,16 +15,12 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 from urllib3.exceptions import ProxyError as Urllib3ProxyError
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics import endpoint_unreachable_issue
 from datadog_checks.base.checks.openmetrics.endpoint_unreachable_issue import (
     ISSUE_ID_PREFIX,
     ISSUE_NAME,
     ISSUE_TYPE,
-    EndpointUnreachableIssueReporter,
 )
-from datadog_checks.base.checks.openmetrics.mixins import OpenMetricsScraperMixin
-from datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper import OpenMetricsScraper
-from datadog_checks.base.constants import ServiceCheck
 
 RAW_ENDPOINT = 'http://alice:s3cr3t@10.0.0.8:9102/metrics?token=secret'
 SANITIZED_ENDPOINT = 'http://10.0.0.8:9102/metrics'
@@ -43,26 +39,6 @@ class Namespace:
 
     def __str__(self) -> str:
         return self.value
-
-
-class CheckWithoutEndpointReporter:
-    def __init__(self):
-        self.name = 'openmetrics_test'
-        self.IssueSeverity = {'MEDIUM': 2}
-        self.log = mock.Mock()
-        self.report_issue = mock.Mock()
-        self.resolve_issue = mock.Mock()
-        self.service_check = mock.Mock()
-        self.gauge = mock.Mock()
-
-    @property
-    def hostname(self) -> str:
-        return 'stubbed.hostname'
-
-
-class V1MixinConsumer(OpenMetricsScraperMixin, CheckWithoutEndpointReporter):
-    def __init__(self):
-        super().__init__()
 
 
 class NamespacedV2Check(OpenMetricsBaseCheckV2):
@@ -128,26 +104,10 @@ def create_v1_check(endpoint: str = RAW_ENDPOINT) -> tuple[OpenMetricsBaseCheck,
     return check, check.get_scraper_config(instance)
 
 
-def create_v1_scraper_config(endpoint: str = RAW_ENDPOINT) -> dict:
-    return {
-        'prometheus_url': endpoint,
-        'namespace': 'demo',
-        'health_service_check': True,
-        'custom_tags': [],
-    }
-
-
-def create_v2_scraper_without_reporter() -> tuple[OpenMetricsScraper, OpenMetricsBaseCheckV2]:
-    check = create_v2_check()
-    scraper = check.scrapers[RAW_ENDPOINT]
-    del check.endpoint_unreachable_issue_reporter
-    return scraper, check
-
-
 def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
 
     check.report_issue.assert_called_once()
     issue = check.report_issue.call_args.kwargs
@@ -247,7 +207,7 @@ def test_report_emits_canonical_error_without_url_leakage_or_corruption(
 ):
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+    endpoint_unreachable_issue.report(check, endpoint, unreachable_connection_error(endpoint))
 
     issue = check.report_issue.call_args.kwargs
     assert issue['extra']['endpoint'] == sanitized_endpoint
@@ -269,7 +229,7 @@ def test_report_emits_canonical_error_without_url_leakage_or_corruption(
 def test_remediation_shell_quotes_the_endpoint(endpoint: str):
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+    endpoint_unreachable_issue.report(check, endpoint, unreachable_connection_error(endpoint))
 
     issue = check.report_issue.call_args.kwargs
     sanitized_endpoint = issue['extra']['endpoint']
@@ -282,7 +242,7 @@ def test_remediation_does_not_put_an_unvalidated_host_in_a_kubectl_command():
     endpoint = 'http://10.0.0.8;id;/metrics'
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+    endpoint_unreachable_issue.report(check, endpoint, unreachable_connection_error(endpoint))
 
     step = check.report_issue.call_args.kwargs['remediation']['steps'][0]['text']
     assert 'kubectl' not in step
@@ -303,7 +263,7 @@ def test_remediation_does_not_put_an_unvalidated_host_in_a_kubectl_command():
 def test_remediation_does_not_treat_a_scoped_ipv6_host_as_a_pod_ip(endpoint: str, unsafe_text: str):
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+    endpoint_unreachable_issue.report(check, endpoint, unreachable_connection_error(endpoint))
 
     step = check.report_issue.call_args.kwargs['remediation']['steps'][0]['text']
     assert 'kubectl' not in step
@@ -315,7 +275,7 @@ def test_remediation_does_not_treat_a_scoped_ipv6_host_as_a_pod_ip(endpoint: str
 def test_remediation_does_not_interpolate_an_unsafe_check_name(check_name: str):
     check = create_check(name=check_name)
 
-    EndpointUnreachableIssueReporter.report(check, SANITIZED_ENDPOINT, unreachable_connection_error())
+    endpoint_unreachable_issue.report(check, SANITIZED_ENDPOINT, unreachable_connection_error())
 
     step = check.report_issue.call_args.kwargs['remediation']['steps'][4]['text']
     assert check_name not in step
@@ -330,7 +290,7 @@ def test_report_does_not_classify_errno_text_in_the_request_url():
         OSError(errno.ECONNREFUSED, 'Connection refused'),
     )
 
-    EndpointUnreachableIssueReporter.report(check, endpoint, error)
+    endpoint_unreachable_issue.report(check, endpoint, error)
 
     check.report_issue.assert_not_called()
 
@@ -338,7 +298,7 @@ def test_report_does_not_classify_errno_text_in_the_request_url():
 def test_report_does_not_attribute_an_unreachable_proxy_to_the_endpoint():
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_proxy_error())
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_proxy_error())
 
     check.report_issue.assert_not_called()
 
@@ -356,7 +316,7 @@ def test_report_classifies_windows_host_unreachable_error(error_code: int, winer
     if winerror is not None:
         error.winerror = winerror
 
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, requests.ConnectionError(error))
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, requests.ConnectionError(error))
 
     check.report_issue.assert_called_once()
     assert check.report_issue.call_args.kwargs['extra']['error_message'] == CANONICAL_ERROR_MESSAGE
@@ -370,7 +330,7 @@ def test_exception_graph_walks_context_and_is_cycle_safe():
     nested.__context__ = outer
     nested.args = (*nested.args, OSError(errno.EHOSTUNREACH, 'No route to host'))
 
-    EndpointUnreachableIssueReporter.report(check, 'http://example.test/metrics', outer)
+    endpoint_unreachable_issue.report(check, 'http://example.test/metrics', outer)
 
     check.report_issue.assert_called_once()
 
@@ -392,7 +352,7 @@ def test_exception_graph_walks_context_and_is_cycle_safe():
 def test_report_ignores_errors_other_than_no_route_to_host(error: BaseException):
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, 'http://example.test/metrics', error)
+    endpoint_unreachable_issue.report(check, 'http://example.test/metrics', error)
 
     check.report_issue.assert_not_called()
 
@@ -405,7 +365,7 @@ def test_issue_identity_is_stable_and_uses_every_raw_identity_component():
         namespace: str = 'demo',
     ) -> str:
         check = create_check(hostname, check_name)
-        EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint), namespace)
+        endpoint_unreachable_issue.report(check, endpoint, unreachable_connection_error(endpoint), namespace)
         return check.report_issue.call_args.kwargs['id']
 
     assert report_id() == report_id() == ISSUE_ID
@@ -422,7 +382,7 @@ def test_issue_identity_is_stable_and_uses_every_raw_identity_component():
 def test_resolve_uses_the_same_raw_endpoint_identity():
     check = create_check()
 
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
 
     check.resolve_issue.assert_called_once_with(ISSUE_ID)
 
@@ -430,10 +390,10 @@ def test_resolve_uses_the_same_raw_endpoint_identity():
 def test_resolve_crosses_the_bridge_once_until_the_issue_is_reported_again():
     check = create_check()
 
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
 
     assert check.resolve_issue.call_args_list == [mock.call(ISSUE_ID), mock.call(ISSUE_ID)]
 
@@ -442,8 +402,8 @@ def test_failed_untracked_resolve_is_retried():
     check = create_check()
     check.resolve_issue.side_effect = [RuntimeError('resolve bridge failure'), None]
 
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
 
     assert check.resolve_issue.call_args_list == [mock.call(ISSUE_ID), mock.call(ISSUE_ID)]
 
@@ -454,7 +414,7 @@ def test_resolve_stale_does_not_consume_endpoints_when_no_issues_are_tracked(ini
     iterations = 0
 
     if initialize_state:
-        EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+        endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
         check.resolve_issue.reset_mock()
 
     def active_endpoints():
@@ -462,7 +422,7 @@ def test_resolve_stale_does_not_consume_endpoints_when_no_issues_are_tracked(ini
         iterations += 1
         yield RAW_ENDPOINT, 'demo'
 
-    EndpointUnreachableIssueReporter.resolve_stale(check, active_endpoints())
+    endpoint_unreachable_issue.resolve_stale(check, active_endpoints())
 
     assert iterations == 0
     check.resolve_issue.assert_not_called()
@@ -470,21 +430,21 @@ def test_resolve_stale_does_not_consume_endpoints_when_no_issues_are_tracked(ini
 
 def test_endpoint_returning_after_stale_resolution_is_reconciled_again():
     check = create_check()
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
 
-    EndpointUnreachableIssueReporter.resolve_stale(check, ())
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.resolve_stale(check, ())
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
 
     assert check.resolve_issue.call_args_list == [mock.call(ISSUE_ID), mock.call(ISSUE_ID)]
 
 
 def test_cancel_drains_exact_reported_issue_and_suppresses_late_reports():
     check = create_check()
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
     issue_id = check.report_issue.call_args.kwargs['id']
 
-    EndpointUnreachableIssueReporter.cancel(check)
-    EndpointUnreachableIssueReporter.report(
+    endpoint_unreachable_issue.cancel(check)
+    endpoint_unreachable_issue.report(
         check,
         SECOND_ENDPOINT,
         unreachable_connection_error(SECOND_ENDPOINT),
@@ -497,11 +457,11 @@ def test_cancel_drains_exact_reported_issue_and_suppresses_late_reports():
 
 def test_successful_resolve_removes_tracked_issue_before_cancel():
     check = create_check()
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
     issue_id = check.report_issue.call_args.kwargs['id']
 
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
-    EndpointUnreachableIssueReporter.cancel(check)
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.cancel(check)
 
     check.resolve_issue.assert_called_once_with(issue_id)
 
@@ -509,11 +469,11 @@ def test_successful_resolve_removes_tracked_issue_before_cancel():
 def test_failed_resolve_leaves_tracked_issue_for_cancellation_retry():
     check = create_check()
     check.resolve_issue.side_effect = [RuntimeError('resolve bridge failure'), None]
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
     issue_id = check.report_issue.call_args.kwargs['id']
 
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
-    EndpointUnreachableIssueReporter.cancel(check)
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.cancel(check)
 
     assert check.resolve_issue.call_args_list == [mock.call(issue_id), mock.call(issue_id)]
 
@@ -522,9 +482,9 @@ def test_namespace_is_normalized_for_identity_and_emitted_context():
     check = create_check()
     namespace = Namespace('demo')
 
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace)
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace)
     issue = check.report_issue.call_args.kwargs
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace)
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace)
 
     assert issue['extra']['namespace'] == 'demo'
     check.resolve_issue.assert_called_once_with(issue['id'])
@@ -535,8 +495,8 @@ def test_report_and_resolve_bridge_failures_are_best_effort():
     check.report_issue.side_effect = RuntimeError('report bridge failure')
     check.resolve_issue.side_effect = RuntimeError('resolve bridge failure')
 
-    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
-    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
 
     assert check.log.debug.call_args_list == [
         mock.call('Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True),
@@ -559,8 +519,8 @@ def test_report_and_resolve_bridge_failures_are_best_effort():
 def test_missing_or_invalid_endpoint_is_ignored_without_leaking_secrets(endpoint: str | None):
     check = create_check()
 
-    EndpointUnreachableIssueReporter.report(check, endpoint, OSError(errno.EHOSTUNREACH, 'No route to host'))
-    EndpointUnreachableIssueReporter.resolve(check, endpoint)
+    endpoint_unreachable_issue.report(check, endpoint, OSError(errno.EHOSTUNREACH, 'No route to host'))
+    endpoint_unreachable_issue.resolve(check, endpoint)
 
     check.report_issue.assert_not_called()
     check.resolve_issue.assert_not_called()
@@ -671,7 +631,7 @@ def test_v2_cancel_resolves_process_isolation_endpoint_from_config(
         {},
         [{key: value for key, value in instance.items() if key != 'process_isolation'}],
     )
-    EndpointUnreachableIssueReporter.report(
+    endpoint_unreachable_issue.report(
         child_check,
         RAW_ENDPOINT,
         unreachable_connection_error(),
@@ -795,7 +755,7 @@ def test_v1_cancel_uses_runtime_config_endpoint_for_process_isolation_fallback(d
         {},
         [{**instance, 'prometheus_url': SECOND_ENDPOINT, 'process_isolation': False}],
     )
-    EndpointUnreachableIssueReporter.report(
+    endpoint_unreachable_issue.report(
         child_check,
         SECOND_ENDPOINT,
         unreachable_connection_error(SECOND_ENDPOINT),
@@ -855,67 +815,3 @@ def test_non_no_route_connection_error_does_not_report(datadog_agent):
 
     assert exc_info.value is error
     datadog_agent.assert_no_reported_issues()
-
-
-def test_v1_mixin_consumer_without_reporter_preserves_success_and_service_check():
-    check = V1MixinConsumer()
-    response = create_response(RAW_ENDPOINT)
-    check.send_request = mock.Mock(return_value=response)
-
-    assert check.poll(create_v1_scraper_config()) is response
-
-    check.resolve_issue.assert_called_once_with(ISSUE_ID)
-    check.service_check.assert_called_once_with(
-        'demo.prometheus.health', AgentCheck.OK, tags=[f'endpoint:{RAW_ENDPOINT}']
-    )
-
-
-def test_v1_mixin_consumer_without_reporter_preserves_failure_and_service_check():
-    check = V1MixinConsumer()
-    error = unreachable_connection_error()
-    check.send_request = mock.Mock(side_effect=error)
-
-    with pytest.raises(requests.ConnectionError) as exc_info:
-        check.poll(create_v1_scraper_config())
-
-    assert exc_info.value is error
-    assert check.report_issue.call_args.kwargs['id'] == ISSUE_ID
-    check.service_check.assert_called_once_with(
-        'demo.prometheus.health', AgentCheck.CRITICAL, tags=[f'endpoint:{RAW_ENDPOINT}']
-    )
-
-
-def test_v2_scraper_without_reporter_preserves_success_and_service_check(aggregator, datadog_agent):
-    scraper, _ = create_v2_scraper_without_reporter()
-    response = create_response(RAW_ENDPOINT)
-    scraper.send_request = mock.Mock(return_value=response)
-
-    assert scraper.get_connection() is response
-
-    datadog_agent.assert_resolved_issue(ISSUE_ID)
-    datadog_agent.assert_resolved_issue_count(1)
-    aggregator.assert_service_check(
-        'openmetrics.health',
-        ServiceCheck.OK,
-        tags=(f'endpoint:{RAW_ENDPOINT}',),
-        count=1,
-    )
-
-
-def test_v2_scraper_without_reporter_preserves_failure_and_service_check(aggregator, datadog_agent):
-    scraper, _ = create_v2_scraper_without_reporter()
-    error = unreachable_connection_error()
-    scraper.send_request = mock.Mock(side_effect=error)
-
-    with pytest.raises(requests.ConnectionError) as exc_info:
-        scraper.get_connection()
-
-    assert exc_info.value is error
-    datadog_agent.assert_reported_issue('openmetrics_test', ISSUE_ID)
-    datadog_agent.assert_reported_issue_count('openmetrics_test', 1)
-    aggregator.assert_service_check(
-        'openmetrics.health',
-        ServiceCheck.CRITICAL,
-        tags=(f'endpoint:{RAW_ENDPOINT}',),
-        count=1,
-    )

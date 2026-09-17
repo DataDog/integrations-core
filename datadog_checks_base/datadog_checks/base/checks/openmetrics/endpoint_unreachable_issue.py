@@ -66,131 +66,129 @@ STATE_ATTRIBUTE = '_openmetrics_endpoint_unreachable_issue_state'
 STATE_INITIALIZATION_LOCK = Lock()
 
 
-class EndpointUnreachableIssueReporter:
-    @staticmethod
-    def report(check: AgentCheck, endpoint: str | None, error: BaseException, namespace: str = '') -> None:
-        """Report an issue when an endpoint failure means no route to host."""
-        try:
-            details = _endpoint_details(endpoint)
-            if details is None:
-                _debug(check, 'Cannot report an OpenMetrics endpoint-unreachable issue without a valid endpoint')
+def report(check: AgentCheck, endpoint: str | None, error: BaseException, namespace: str = '') -> None:
+    """Report an issue when an endpoint failure means no route to host."""
+    try:
+        details = _endpoint_details(endpoint)
+        if details is None:
+            _debug(check, 'Cannot report an OpenMetrics endpoint-unreachable issue without a valid endpoint')
+            return
+
+        if not _is_unreachable(error):
+            return
+
+        namespace = str(namespace)
+        issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
+        state = _state(check)
+        with state.lock:
+            if state.cancelled:
                 return
 
-            if not _is_unreachable(error):
+        check.report_issue(
+            id=issue_id,
+            issue_name=ISSUE_NAME,
+            issue_type=ISSUE_TYPE,
+            title=f'OpenMetrics endpoint unreachable: {details.sanitized}',
+            description=(
+                f'The {check.name} check cannot reach {details.sanitized} because no network route exists from '
+                'the reporting Agent or Cluster Check Runner.'
+            ),
+            category='integration',
+            severity=check.IssueSeverity['MEDIUM'],
+            extra={
+                'check_name': check.name,
+                'endpoint': details.sanitized,
+                'target_host': details.host,
+                'target_port': details.port,
+                'target_path': details.path,
+                'namespace': namespace,
+                'error_kind': 'no_route_to_host',
+                'error_message': ERROR_MESSAGE,
+            },
+            remediation=_remediation(check.name, details),
+            tags=[f'integration:{check.name}', 'openmetrics', 'endpoint-unreachable'],
+        )
+
+        with state.lock:
+            state.reconciled.discard(issue_id)
+            if state.cancelled:
+                resolve_after_cancel = True
+            else:
+                state.issues[issue_id] = TrackedIssue(issue_id, endpoint, namespace)
+                resolve_after_cancel = False
+
+        if resolve_after_cancel:
+            _resolve_issue_id(check, issue_id)
+    except Exception:
+        _debug(check, 'Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True)
+
+
+def resolve(check: AgentCheck, endpoint: str | None, namespace: str = '') -> None:
+    """Resolve the issue associated with an endpoint."""
+    try:
+        if _endpoint_details(endpoint) is None:
+            _debug(check, 'Cannot resolve an OpenMetrics endpoint-unreachable issue without a valid endpoint')
+            return
+
+        namespace = str(namespace)
+        issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
+        state = _state(check)
+        with state.lock:
+            tracked_issue = state.issues.get(issue_id)
+            if tracked_issue is None and issue_id in state.reconciled:
                 return
 
-            namespace = str(namespace)
-            issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
-            state = _state(check)
+        if not _resolve_issue_id(check, issue_id):
+            return
+
+        with state.lock:
+            if state.issues.get(issue_id) is tracked_issue:
+                state.issues.pop(issue_id, None)
+            state.reconciled.add(issue_id)
+    except Exception:
+        _debug(check, 'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
+
+
+def resolve_stale(check: AgentCheck, active_endpoint_namespaces: Iterable[tuple[str, str]]) -> None:
+    """Resolve tracked issues that are no longer active without creating state for checks that never reported."""
+    try:
+        state = _existing_state(check)
+        if state is None:
+            return
+        with state.lock:
+            tracked_issues = tuple(state.issues.values())
+        if not tracked_issues:
+            return
+
+        active = {(endpoint, str(namespace)) for endpoint, namespace in active_endpoint_namespaces}
+        stale_issues = tuple(issue for issue in tracked_issues if (issue.endpoint, issue.namespace) not in active)
+
+        for issue in stale_issues:
+            if not _resolve_issue_id(check, issue.issue_id):
+                continue
             with state.lock:
-                if state.cancelled:
-                    return
+                if state.issues.get(issue.issue_id) is issue:
+                    state.issues.pop(issue.issue_id, None)
+                state.reconciled.discard(issue.issue_id)
+    except Exception:
+        _debug(check, 'Failed to resolve stale OpenMetrics endpoint-unreachable issues', exc_info=True)
 
-            check.report_issue(
-                id=issue_id,
-                issue_name=ISSUE_NAME,
-                issue_type=ISSUE_TYPE,
-                title=f'OpenMetrics endpoint unreachable: {details.sanitized}',
-                description=(
-                    f'The {check.name} check cannot reach {details.sanitized} because no network route exists from '
-                    'the reporting Agent or Cluster Check Runner.'
-                ),
-                category='integration',
-                severity=check.IssueSeverity['MEDIUM'],
-                extra={
-                    'check_name': check.name,
-                    'endpoint': details.sanitized,
-                    'target_host': details.host,
-                    'target_port': details.port,
-                    'target_path': details.path,
-                    'namespace': namespace,
-                    'error_kind': 'no_route_to_host',
-                    'error_message': ERROR_MESSAGE,
-                },
-                remediation=_remediation(check.name, details),
-                tags=[f'integration:{check.name}', 'openmetrics', 'endpoint-unreachable'],
-            )
 
-            with state.lock:
-                state.reconciled.discard(issue_id)
-                if state.cancelled:
-                    resolve_after_cancel = True
-                else:
-                    state.issues[issue_id] = TrackedIssue(issue_id, endpoint, namespace)
-                    resolve_after_cancel = False
+def cancel(check: AgentCheck) -> bool:
+    """Mark the check cancelled and best-effort resolve all tracked issues."""
+    try:
+        state = _state(check)
+        with state.lock:
+            state.cancelled = True
+            tracked_issues = tuple(state.issues.values())
+            state.issues.clear()
 
-            if resolve_after_cancel:
-                _resolve_issue_id(check, issue_id)
-        except Exception:
-            _debug(check, 'Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True)
-
-    @staticmethod
-    def resolve(check: AgentCheck, endpoint: str | None, namespace: str = '') -> None:
-        """Resolve the issue associated with an endpoint."""
-        try:
-            if _endpoint_details(endpoint) is None:
-                _debug(check, 'Cannot resolve an OpenMetrics endpoint-unreachable issue without a valid endpoint')
-                return
-
-            namespace = str(namespace)
-            issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
-            state = _state(check)
-            with state.lock:
-                tracked_issue = state.issues.get(issue_id)
-                if tracked_issue is None and issue_id in state.reconciled:
-                    return
-
-            if not _resolve_issue_id(check, issue_id):
-                return
-
-            with state.lock:
-                if state.issues.get(issue_id) is tracked_issue:
-                    state.issues.pop(issue_id, None)
-                state.reconciled.add(issue_id)
-        except Exception:
-            _debug(check, 'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
-
-    @staticmethod
-    def resolve_stale(check: AgentCheck, active_endpoint_namespaces: Iterable[tuple[str, str]]) -> None:
-        """Resolve tracked issues that are no longer active without creating state for checks that never reported."""
-        try:
-            state = _existing_state(check)
-            if state is None:
-                return
-            with state.lock:
-                tracked_issues = tuple(state.issues.values())
-            if not tracked_issues:
-                return
-
-            active = {(endpoint, str(namespace)) for endpoint, namespace in active_endpoint_namespaces}
-            stale_issues = tuple(issue for issue in tracked_issues if (issue.endpoint, issue.namespace) not in active)
-
-            for issue in stale_issues:
-                if not _resolve_issue_id(check, issue.issue_id):
-                    continue
-                with state.lock:
-                    if state.issues.get(issue.issue_id) is issue:
-                        state.issues.pop(issue.issue_id, None)
-                    state.reconciled.discard(issue.issue_id)
-        except Exception:
-            _debug(check, 'Failed to resolve stale OpenMetrics endpoint-unreachable issues', exc_info=True)
-
-    @staticmethod
-    def cancel(check: AgentCheck) -> bool:
-        """Mark the check cancelled and best-effort resolve every exactly tracked issue."""
-        try:
-            state = _state(check)
-            with state.lock:
-                state.cancelled = True
-                tracked_issues = tuple(state.issues.values())
-                state.issues.clear()
-
-            for issue in tracked_issues:
-                _resolve_issue_id(check, issue.issue_id)
-            return bool(tracked_issues)
-        except Exception:
-            _debug(check, 'Failed to cancel OpenMetrics endpoint-unreachable issue reporting', exc_info=True)
-            return False
+        for issue in tracked_issues:
+            _resolve_issue_id(check, issue.issue_id)
+        return bool(tracked_issues)
+    except Exception:
+        _debug(check, 'Failed to cancel OpenMetrics endpoint-unreachable issue reporting', exc_info=True)
+        return False
 
 
 def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
