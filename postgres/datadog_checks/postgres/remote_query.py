@@ -94,11 +94,63 @@ class PostgresCheckRegistry(Protocol):
 # Result description, vendor types, and the upload descriptor
 # ---------------------------------------------------------------------------
 
-VENDOR_TYPE_QUERY = (
-    'SELECT t.type_oid::oid, t.type_mod::int4, '
-    'pg_catalog.format_type(t.type_oid::oid, t.type_mod::int4) AS vendor_data_type '
-    'FROM unnest(%s::text[], %s::text[]) AS t(type_oid, type_mod)'
+# The catalog lookup resolves each described type through domain chains to its effective
+# base type, decides whether that effective type is an array (typcategory 'A'), and for
+# array columns resolves the ELEMENT type's own domain chain to read its typdelim — the
+# delimiter PostgreSQL's own array parser uses for that element family (box is semicolon-
+# delimited, for example). Depth bounds keep a pathological domain loop from recursing
+# forever; DISTINCT ON keeps the deepest (fully resolved) walk row per requested type.
+VENDOR_TYPE_QUERY = """
+WITH RECURSIVE
+requested AS (
+    SELECT t.type_oid::oid AS type_oid, t.type_mod::int4 AS type_mod
+    FROM unnest(%s::text[], %s::text[]) AS t(type_oid, type_mod)
+),
+type_walk(origin, type_oid, depth) AS (
+    SELECT r.type_oid, r.type_oid, 0 FROM requested r
+    UNION ALL
+    SELECT w.origin, b.typbasetype, w.depth + 1
+    FROM type_walk w
+    JOIN pg_catalog.pg_type b ON b.oid = w.type_oid AND b.typtype = 'd'
+    WHERE w.depth < 32
+),
+effective AS (
+    SELECT DISTINCT ON (origin) origin, type_oid FROM type_walk ORDER BY origin, depth DESC
+),
+element_walk(origin, type_oid, depth) AS (
+    SELECT e.origin, a.typelem, 0
+    FROM effective e
+    JOIN pg_catalog.pg_type a ON a.oid = e.type_oid
+    WHERE a.typcategory = 'A'
+    UNION ALL
+    SELECT w.origin, b.typbasetype, w.depth + 1
+    FROM element_walk w
+    JOIN pg_catalog.pg_type b ON b.oid = w.type_oid AND b.typtype = 'd'
+    WHERE w.depth < 32
+),
+element AS (
+    SELECT DISTINCT ON (origin) origin, type_oid FROM element_walk ORDER BY origin, depth DESC
 )
+SELECT r.type_oid, r.type_mod,
+       pg_catalog.format_type(r.type_oid, r.type_mod) AS vendor_data_type,
+       (a.typcategory = 'A') AS is_array,
+       pg_catalog.ascii(e.typdelim::text) AS element_delimiter
+FROM requested r
+JOIN effective f ON f.origin = r.type_oid
+JOIN pg_catalog.pg_type a ON a.oid = f.type_oid
+LEFT JOIN element el ON el.origin = r.type_oid
+LEFT JOIN pg_catalog.pg_type e ON e.oid = el.type_oid
+"""
+
+
+@dataclass(frozen=True)
+class ResolvedVendorType:
+    """One described type's vendor name plus its catalog-resolved array metadata."""
+
+    vendor_data_type: str
+    is_array: bool
+    # The element delimiter's internal-char byte code, or None for non-array types.
+    element_delimiter: int | None
 
 
 def described_columns(cursor: Any) -> list[ResultColumn]:
@@ -141,13 +193,18 @@ def validate_columns(columns: Sequence[ResultColumn], max_columns: int) -> None:
         seen.add(column.name)
 
 
-def resolve_vendor_types(control_cursor: Any, columns: Sequence[ResultColumn]) -> dict[tuple[int, int], str]:
+def resolve_vendor_types(
+    control_cursor: Any, columns: Sequence[ResultColumn]
+) -> dict[tuple[int, int], ResolvedVendorType]:
     """Resolve every DISTINCT (type_oid, type_modifier) pair with one parameterized lookup.
 
     The catalog query runs in the same read-only transaction and statement timeout scope as
     the user query. Types are passed as text arrays and cast element-wise (text -> oid and
     text -> int4 both cast via I/O), which is version-stable and avoids psycopg's
-    element-width-dependent int array dump OIDs.
+    element-width-dependent int array dump OIDs. Each resolved type carries its vendor
+    name, whether its domain-resolved effective type is an array, and — for array types —
+    the byte code of the element type's own typdelim, resolved through the element's
+    domain chain.
     """
     distinct_pairs = sorted({(column.type_oid, column.type_modifier) for column in columns})
     if any(pair[1] is None for pair in distinct_pairs):
@@ -160,12 +217,22 @@ def resolve_vendor_types(control_cursor: Any, columns: Sequence[ResultColumn]) -
     control_cursor.execute(VENDOR_TYPE_QUERY, (oids, type_modifiers))
     rows = control_cursor.fetchall()
 
-    type_map: dict[tuple[int, int], str] = {}
+    type_map: dict[tuple[int, int], ResolvedVendorType] = {}
     for row in rows:
-        oid, type_modifier, vendor_data_type = row[0], row[1], row[2]
+        oid, type_modifier, vendor_data_type, is_array, element_delimiter = (
+            row[0],
+            row[1],
+            row[2],
+            row[3],
+            row[4],
+        )
         if not isinstance(vendor_data_type, str) or not vendor_data_type:
             raise rq.RemoteQueryFailure('schema_unavailable', 'pg_catalog.format_type returned an unusable type name.')
-        type_map[(oid, type_modifier)] = vendor_data_type
+        type_map[(oid, type_modifier)] = ResolvedVendorType(
+            vendor_data_type=vendor_data_type,
+            is_array=bool(is_array),
+            element_delimiter=element_delimiter,
+        )
 
     missing = [pair for pair in distinct_pairs if pair not in type_map]
     if missing:
@@ -223,7 +290,7 @@ def logical_type_for_column(column: ResultColumn, vendor_data_type: str) -> str:
 def build_upload_descriptor(
     request: rq.RemoteQueryRequest,
     columns: Sequence[ResultColumn],
-    type_map: Mapping[tuple[int, int], str],
+    type_map: Mapping[tuple[int, int], ResolvedVendorType],
     agent_hostname: str,
 ) -> rq.RemoteQueryUploadDescriptor:
     """Build the immutable source-page descriptor from the described result columns.
@@ -232,16 +299,31 @@ def build_upload_descriptor(
     because the descriptor is registered once, before any result record is read, and intake
     stamps the schema (when requested) into every final page from it. The format version
     selects the native COPY CSV cell grammar, so intake decodes the source pages by these
-    column types instead of canonical JSON tokens.
+    column types instead of canonical JSON tokens. Every array column (a vendor name
+    rendered with an ``[]`` suffix) carries its element type's own typdelim — resolved
+    through the catalog, never guessed — so intake splits the native array literal on
+    exactly the separator PostgreSQL uses; a rendered array whose catalog type disagrees
+    fails closed instead of describing an undecodable column.
     """
     descriptor_columns = []
     for column in columns:
-        vendor_data_type = type_map[(column.type_oid, column.type_modifier)]
+        resolved = type_map[(column.type_oid, column.type_modifier)]
+        vendor_data_type = resolved.vendor_data_type
+        is_array_column = vendor_data_type.endswith('[]')
+        element_delimiter = None
+        if is_array_column:
+            if not resolved.is_array or resolved.element_delimiter is None:
+                raise rq.RemoteQueryFailure(
+                    'schema_unavailable',
+                    'A rendered array column type did not resolve to a catalog array element delimiter.',
+                )
+            element_delimiter = rq.valid_array_element_delimiter_code(resolved.element_delimiter)
         descriptor_columns.append(
             rq.RemoteQueryDescriptorColumn(
                 column_name=column.name,
                 vendor_data_type=vendor_data_type,
                 logical_type=logical_type_for_column(column, vendor_data_type),
+                array_element_delimiter=element_delimiter,
             )
         )
     return rq.RemoteQueryUploadDescriptor(

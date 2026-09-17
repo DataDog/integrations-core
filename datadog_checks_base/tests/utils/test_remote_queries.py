@@ -55,16 +55,31 @@ def descriptor(
     agent_hostname=AGENT_HOSTNAME,
     format_version=None,
 ):
+    """Build a descriptor; a column may carry its array element delimiter as a 4th element."""
+    column_kwargs = []
+    for column in columns:
+        name, vendor, logical = column[:3]
+        delimiter = column[3] if len(column) > 3 else None
+        if delimiter is None:
+            column_kwargs.append(
+                {'column_name': name, 'vendor_data_type': vendor, 'logical_type': logical}
+            )
+        else:
+            column_kwargs.append(
+                {
+                    'column_name': name,
+                    'vendor_data_type': vendor,
+                    'logical_type': logical,
+                    'array_element_delimiter': delimiter,
+                }
+            )
     return rq.RemoteQueryUploadDescriptor(
         format_version=format_version
         if format_version is not None
         else rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
         include_schema=include_schema,
         agent_hostname=agent_hostname,
-        columns=[
-            rq.RemoteQueryDescriptorColumn(column_name=name, vendor_data_type=vendor, logical_type=logical)
-            for name, vendor, logical in columns
-        ],
+        columns=[rq.RemoteQueryDescriptorColumn(**kwargs) for kwargs in column_kwargs],
     )
 
 
@@ -367,8 +382,10 @@ def test_descriptor_request_bytes_are_canonical_and_deterministic():
     expected = (
         b'{"format_version":"csv-json-cell-v1","include_schema":true,'
         b'"agent_hostname":"rq-proof-agent-a","columns":['
-        b'{"column_name":"value","vendor_data_type":"text","logical_type":"string"},'
-        b'{"column_name":"payload","vendor_data_type":"bytea","logical_type":"binary"}]}'
+        b'{"column_name":"value","vendor_data_type":"text","logical_type":"string",'
+        b'"array_element_delimiter":null},'
+        b'{"column_name":"payload","vendor_data_type":"bytea","logical_type":"binary",'
+        b'"array_element_delimiter":null}]}'
     )
     assert rq.descriptor_request_bytes(build()) == expected
     # A fresh construction produces a byte-identical registration body for retries.
@@ -415,7 +432,8 @@ def test_descriptor_request_and_schema_bytes_emit_valid_non_ascii_as_raw_utf8():
     assert body == (
         b'{"format_version":"csv-json-cell-v1","include_schema":true,'
         b'"agent_hostname":"agent-h\xc3\xb4te","columns":'
-        b'[{"column_name":"colonn\xc3\xa9","vendor_data_type":"v\xc3\xa9ndor","logical_type":"string"}]}'
+        b'[{"column_name":"colonn\xc3\xa9","vendor_data_type":"v\xc3\xa9ndor","logical_type":"string",'
+        b'"array_element_delimiter":null}]}'
     )
     assert b'\\u' not in body
     assert rq.descriptor_request_bytes(build()) == body
@@ -602,6 +620,64 @@ def test_source_pages_reject_tokens_that_would_corrupt_the_csv_record():
 # ---------------------------------------------------------------------------
 # Native COPY CSV records (postgres-copy-csv-v1)
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize('delimiter', [',', ';', 'x', '!', '~'])
+def test_descriptor_accepts_printable_non_structural_array_element_delimiters(delimiter):
+    column = rq.RemoteQueryDescriptorColumn(
+        column_name='a', vendor_data_type='text[]', logical_type='json', array_element_delimiter=delimiter
+    )
+    assert column.array_element_delimiter == delimiter
+    # Non-array and json-cell columns carry null.
+    assert (
+        rq.RemoteQueryDescriptorColumn(column_name='a', vendor_data_type='text', logical_type='string')
+        .array_element_delimiter
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    'delimiter',
+    ['ab', '', ' ', '"', '\\', '{', '}', '\x00', '\x7f', '\n', 'é', ',,'],
+)
+def test_descriptor_rejects_invalid_array_element_delimiters(delimiter):
+    with pytest.raises(ValidationError):
+        rq.RemoteQueryDescriptorColumn(
+            column_name='a', vendor_data_type='text[]', logical_type='json', array_element_delimiter=delimiter
+        )
+
+
+@pytest.mark.parametrize('include_schema', [False, True])
+def test_descriptor_enforces_per_format_delimiter_consistency(include_schema):
+    # A native array column without its delimiter cannot be decoded: fail at build time.
+    with pytest.raises(ValidationError, match='require an array_element_delimiter'):
+        descriptor(
+            columns=(('a', 'text[]', 'json'),),
+            include_schema=include_schema,
+            format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
+        )
+    # A native non-array column with a delimiter is inconsistent.
+    with pytest.raises(ValidationError, match='must be null for non-array'):
+        descriptor(
+            columns=(('a', 'text', 'string', ','),),
+            include_schema=include_schema,
+            format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
+        )
+    # Every csv-json-cell-v1 column carries null: the cell grammar has no array literals.
+    with pytest.raises(ValidationError, match='must be null for the csv-json-cell-v1'):
+        descriptor(columns=(('a', 'text[]', 'json', ','),), include_schema=include_schema)
+    # The consistent shapes build: an array column with its catalog delimiter, and every
+    # non-array column without one.
+    native = descriptor(
+        columns=(('a', 'text[]', 'json', ','), ('b', 'text', 'string')),
+        include_schema=include_schema,
+        format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
+    )
+    assert rq.descriptor_request_bytes(native).endswith(
+        b'"array_element_delimiter":","},'
+        b'{"column_name":"b","vendor_data_type":"text","logical_type":"string",'
+        b'"array_element_delimiter":null}]}'
+    )
 
 
 def test_descriptor_accepts_exactly_the_two_active_source_formats():

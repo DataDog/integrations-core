@@ -189,8 +189,18 @@ def test_remote_query_registers_real_descriptor_and_sends_source_pages(integrati
         client,
         True,
         [
-            {'column_name': 'city', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
-            {'column_name': 'country', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
+            {
+                'column_name': 'city',
+                'vendor_data_type': 'character varying(255)',
+                'logical_type': 'string',
+                'array_element_delimiter': None,
+            },
+            {
+                'column_name': 'country',
+                'vendor_data_type': 'character varying(255)',
+                'logical_type': 'string',
+                'array_element_delimiter': None,
+            },
         ],
     )
     # The source page carries the native COPY CSV records verbatim: every field quoted by
@@ -294,7 +304,8 @@ def test_remote_query_native_csv_type_families(integration_check, pg_instance, m
         "'{\"price\": 1.10}'::jsonb AS jsonb_value, "
         "'8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'::uuid AS uuid_value, '192.168.1.0/24'::cidr AS cidr_value, "
         "ARRAY[1, 2, NULL] AS int_array, ARRAY['a,b', 'He said \"Hi\"'] AS text_array, "
-        "ARRAY[true, false] AS bool_array, ARRAY['2026-08-28'::date, '2026-08-29'::date] AS date_array",
+        "ARRAY[true, false] AS bool_array, ARRAY['2026-08-28'::date, '2026-08-29'::date] AS date_array, "
+        "ARRAY['(1,2),(3,4)'::box, '(5,6),(7,8)'::box] AS box_array",
     )
 
     events, client = run_producer(request, check)
@@ -326,33 +337,40 @@ def test_remote_query_native_csv_type_families(integration_check, pg_instance, m
         '{"a,b","He said \\"Hi\\""}',  # array elements escape quotes with backslashes
         '{t,f}',
         '{2026-08-28,2026-08-29}',
+        '{(3,4),(1,2);(7,8),(5,6)}',  # box[]: semicolon-delimited elements, commas ride as data
     )
     descriptor = json.loads(client.descriptor_bodies[0])
-    assert [(column['column_name'], column['logical_type']) for column in descriptor['columns']] == [
-        ('int_value', 'integer'),
-        ('bigint_value', 'integer'),
-        ('numeric_value', 'decimal'),
-        ('nan_value', 'decimal'),
-        ('infinity_value', 'float'),
-        ('float_value', 'float'),
-        ('real_value', 'float'),
-        ('true_value', 'boolean'),
-        ('false_value', 'boolean'),
-        ('date_value', 'temporal'),
-        ('time_value', 'temporal'),
-        ('timestamp_value', 'temporal'),
-        ('timestamptz_value', 'temporal'),
-        ('timetz_value', 'temporal'),
-        ('interval_value', 'temporal'),
-        ('bytea_value', 'binary'),
-        ('json_value', 'json'),
-        ('jsonb_value', 'json'),
-        ('uuid_value', 'string'),
-        ('cidr_value', 'vendor'),
-        ('int_array', 'json'),
-        ('text_array', 'json'),
-        ('bool_array', 'json'),
-        ('date_array', 'json'),
+    assert [
+        (column['column_name'], column['logical_type'], column['array_element_delimiter'])
+        for column in descriptor['columns']
+    ] == [
+        ('int_value', 'integer', None),
+        ('bigint_value', 'integer', None),
+        ('numeric_value', 'decimal', None),
+        ('nan_value', 'decimal', None),
+        ('infinity_value', 'float', None),
+        ('float_value', 'float', None),
+        ('real_value', 'float', None),
+        ('true_value', 'boolean', None),
+        ('false_value', 'boolean', None),
+        ('date_value', 'temporal', None),
+        ('time_value', 'temporal', None),
+        ('timestamp_value', 'temporal', None),
+        ('timestamptz_value', 'temporal', None),
+        ('timetz_value', 'temporal', None),
+        ('interval_value', 'temporal', None),
+        ('bytea_value', 'binary', None),
+        ('json_value', 'json', None),
+        ('jsonb_value', 'json', None),
+        ('uuid_value', 'string', None),
+        ('cidr_value', 'vendor', None),
+        # Every array column declares its element type's own catalog delimiter: the common
+        # comma, and box's own semicolon.
+        ('int_array', 'json', ','),
+        ('text_array', 'json', ','),
+        ('bool_array', 'json', ','),
+        ('date_array', 'json', ','),
+        ('box_array', 'json', ';'),
     ]
 
 
@@ -487,7 +505,16 @@ def test_remote_query_bytea_and_select_one_pages(integration_check, pg_instance,
     # representation from the descriptor's binary logical type.
     assert page == native_record('\\x00ff80')
     assert_registered_descriptor(
-        client, True, [{'column_name': 'payload', 'vendor_data_type': 'bytea', 'logical_type': 'binary'}]
+        client,
+        True,
+        [
+            {
+                'column_name': 'payload',
+                'vendor_data_type': 'bytea',
+                'logical_type': 'binary',
+                'array_element_delimiter': None,
+            }
+        ],
     )
 
 
@@ -504,7 +531,16 @@ def test_remote_query_select_one_and_zero_row_schema_page(integration_check, pg_
     (page,) = client.pages().values()
     assert page == native_record('1')
     assert_registered_descriptor(
-        client, True, [{'column_name': 'value', 'vendor_data_type': 'integer', 'logical_type': 'integer'}]
+        client,
+        True,
+        [
+            {
+                'column_name': 'value',
+                'vendor_data_type': 'integer',
+                'logical_type': 'integer',
+                'array_element_delimiter': None,
+            }
+        ],
     )
 
     # The zero-row query is not allowlisted; the E2E producer path is under test here.

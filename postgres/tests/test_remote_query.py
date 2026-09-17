@@ -62,9 +62,16 @@ class FakePlainCursor:
         rows = []
         for oid_text, type_mod_text in zip(params[0], params[1]):
             key = (int(oid_text), int(type_mod_text))
-            vendor_data_type = self.pool.vendor_types.get(key)
-            if vendor_data_type is not None:
-                rows.append((key[0], key[1], vendor_data_type))
+            resolved = self.pool.vendor_types.get(key)
+            if resolved is None:
+                continue
+            if isinstance(resolved, str):
+                # A plain vendor name: a non-array type.
+                rows.append((key[0], key[1], resolved, False, None))
+            else:
+                # (vendor name, element delimiter character): a catalog array type.
+                name, delimiter = resolved
+                rows.append((key[0], key[1], name, True, ord(delimiter)))
         return rows
 
     @contextmanager
@@ -1260,7 +1267,14 @@ def test_producer_writes_exact_source_page_csv_and_descriptor(monkeypatch):
         'format_version': 'postgres-copy-csv-v1',
         'include_schema': False,
         'agent_hostname': AGENT_HOSTNAME,
-        'columns': [{'column_name': 'value', 'vendor_data_type': 'integer', 'logical_type': 'integer'}],
+        'columns': [
+            {
+                'column_name': 'value',
+                'vendor_data_type': 'integer',
+                'logical_type': 'integer',
+                'array_element_delimiter': None,
+            }
+        ],
     }
 
 
@@ -1511,7 +1525,14 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
     assert call.sha256_hex == hashlib.sha256(b'').hexdigest()
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
-    assert descriptor['columns'] == [{'column_name': 'value', 'vendor_data_type': 'integer', 'logical_type': 'integer'}]
+    assert descriptor['columns'] == [
+        {
+            'column_name': 'value',
+            'vendor_data_type': 'integer',
+            'logical_type': 'integer',
+            'array_element_delimiter': None,
+        }
+    ]
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
     assert final['upload_receipt']['totalBytes'] == 0
@@ -1566,8 +1587,18 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
     assert descriptor['columns'] == [
-        {'column_name': 'city', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
-        {'column_name': 'country', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
+        {
+            'column_name': 'city',
+            'vendor_data_type': 'character varying(255)',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
+        {
+            'column_name': 'country',
+            'vendor_data_type': 'character varying(255)',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
     ]
     assert event_metadata(events[0])['includeSchema'] is True
 
@@ -1614,15 +1645,31 @@ def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(mon
     assert len(schema_queries) == 1
     query, params = schema_queries[0]
     assert 'unnest(%s::text[], %s::text[])' in query
-    assert 'pg_catalog.format_type(t.type_oid::oid, t.type_mod::int4)' in query
+    assert 'pg_catalog.format_type(r.type_oid, r.type_mod)' in query
+    assert 'pg_catalog.ascii(e.typdelim::text)' in query
     # Only the DISTINCT (oid, typmod) pairs are resolved (two columns share one pair).
     assert sorted(zip(params[0], params[1])) == [('1043', '255'), ('25', '-1')]
     executed_names = [entry[0] for entry in control.executed]
     assert executed_names.index(schema_queries[0][0]) < executed_names.index('ROLLBACK')
     assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {'column_name': 'a', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
-        {'column_name': 'b', 'vendor_data_type': 'character varying(255)', 'logical_type': 'string'},
-        {'column_name': 'c', 'vendor_data_type': 'text', 'logical_type': 'string'},
+        {
+            'column_name': 'a',
+            'vendor_data_type': 'character varying(255)',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
+        {
+            'column_name': 'b',
+            'vendor_data_type': 'character varying(255)',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
+        {
+            'column_name': 'c',
+            'vendor_data_type': 'text',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
     ]
 
 
@@ -2005,6 +2052,108 @@ def test_producer_emits_native_copy_records_verbatim(monkeypatch):
     ]
 
 
+def test_producer_carries_the_catalog_array_element_delimiter(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # A box[] column: box's own pg_type.typdelim is the semicolon, so the descriptor must
+    # declare it — intake splits the native {(...);(...)} literal on that and nothing else.
+    record = native_record('{(1,2);(3,4)}')
+    pool = FakePool(
+        copy_blocks=[record],
+        description=[FakeColumn('box_array', 1021)],
+        vendor_types={(1021, -1): ('box[]', ';')},
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    assert page == record
+    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
+        {
+            'column_name': 'box_array',
+            'vendor_data_type': 'box[]',
+            'logical_type': 'json',
+            'array_element_delimiter': ';',
+        }
+    ]
+
+
+@pytest.mark.parametrize('delimiter', ['"', ' ', '\\', '{', '}'])
+def test_producer_fails_closed_on_structural_element_delimiters(monkeypatch, delimiter):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # A catalog element delimiter that is structural to the array literal grammar cannot be
+    # described: the run fails closed before any COPY or page.
+    pool = FakePool(
+        copy_blocks=[native_record('{a}')],
+        description=[FakeColumn('array_value', 1009)],
+        vendor_types={(1009, -1): ('text[]', delimiter)},
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'schema_unavailable')
+    assert len(pool.cursors) == 2
+    assert fake.put_page_calls == []
+    assert fake.descriptor_bodies == []
+
+
+@pytest.mark.parametrize(
+    'vendor_types',
+    [
+        {(1009, -1): 'text[]'},  # a rendered array the catalog says is not an array
+        {(1009, -1): None},  # no catalog resolution at all
+    ],
+)
+def test_producer_fails_closed_on_a_rendered_array_without_catalog_resolution(monkeypatch, vendor_types):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(
+        copy_blocks=[native_record('{a}')],
+        description=[FakeColumn('array_value', 1009)],
+        vendor_types=vendor_types,
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'schema_unavailable')
+    assert len(pool.cursors) == 2
+    assert fake.put_page_calls == []
+
+
+def test_producer_describes_a_domain_over_array_without_a_delimiter(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # A domain over an array renders as the bare domain name, so the closed wire grammar
+    # classifies it with the vendor family: no delimiter, the exact server text, matching
+    # the decoder's own name-based classification.
+    record = native_record('{a,b}')
+    pool = FakePool(
+        copy_blocks=[record],
+        description=[FakeColumn('domain_value', 20000)],
+        vendor_types={(20000, -1): ('my_domain', ',')},
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    (page,) = assembled_pages(fake).values()
+    assert page == record
+    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
+        {
+            'column_name': 'domain_value',
+            'vendor_data_type': 'my_domain',
+            'logical_type': 'vendor',
+            'array_element_delimiter': None,
+        }
+    ]
+
+
 def test_producer_scales_the_page_bound_for_array_columns(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -2025,7 +2174,7 @@ def test_producer_scales_the_page_bound_for_array_columns(monkeypatch):
     pool = FakePool(
         copy_blocks=[record, record],
         description=[FakeColumn('array_value', 1000)],
-        vendor_types={(1000, -1): 'boolean[]'},
+        vendor_types={(1000, -1): ('boolean[]', ',')},
     )
     fake = FakeUploadClient()
 
@@ -2037,7 +2186,12 @@ def test_producer_scales_the_page_bound_for_array_columns(monkeypatch):
     assert pages[0] == record
     assert pages[1] == record
     assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {'column_name': 'array_value', 'vendor_data_type': 'boolean[]', 'logical_type': 'json'}
+        {
+            'column_name': 'array_value',
+            'vendor_data_type': 'boolean[]',
+            'logical_type': 'json',
+            'array_element_delimiter': ',',
+        }
     ]
 
 

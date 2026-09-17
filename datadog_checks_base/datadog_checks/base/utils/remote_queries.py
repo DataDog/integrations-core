@@ -167,6 +167,49 @@ def string_cell_token(text: str) -> tuple[bytes, int]:
     return token, redactable_leaf_final_bound(token)
 
 
+# The transport-only array-element delimiter contract, shared by both sides of the wire:
+# one PostgreSQL internal ``char`` — exactly one byte — that is printable (no space, no
+# control bytes, no DEL) and none of the native array literal's structural characters
+# (quote, backslash, brace), so a literal split on it is unambiguous. Producers resolve
+# it from ``pg_type.typdelim`` of the column's effective array element type; intake splits
+# native array literals on exactly this character and nothing else.
+POSTGRES_ARRAY_ELEMENT_DELIMITER_STRUCTURAL_CHARS = frozenset('" \\{}')
+
+
+def validate_array_element_delimiter(value: str | None) -> str | None:
+    """Validate one delimiter character: a single printable non-structural byte, or null."""
+    if value is None:
+        return value
+    encoded = value.encode('utf-8', errors='strict')
+    if len(encoded) != 1 or len(value) != 1:
+        raise ValueError('array_element_delimiter must be exactly one single-byte character.')
+    code = encoded[0]
+    if code < 0x21 or code > 0x7E:
+        raise ValueError('array_element_delimiter must be a printable character.')
+    if value in POSTGRES_ARRAY_ELEMENT_DELIMITER_STRUCTURAL_CHARS:
+        raise ValueError('array_element_delimiter must not be an array-literal structural character.')
+    return value
+
+
+def valid_array_element_delimiter_code(code: int) -> str:
+    """Validate one ``pg_type.typdelim`` internal-char byte code into its delimiter string.
+
+    Producers resolve the delimiter as the raw internal ``char`` code from the catalog;
+    this is the same contract as :func:`validate_array_element_delimiter` applied to the
+    byte before it becomes descriptor text.
+    """
+    if code < 0x21 or code > 0x7E:
+        raise RemoteQueryFailure(
+            'schema_unavailable', 'A column type carries an array element delimiter that is not printable.'
+        )
+    value = chr(code)
+    if value in POSTGRES_ARRAY_ELEMENT_DELIMITER_STRUCTURAL_CHARS:
+        raise RemoteQueryFailure(
+            'schema_unavailable', 'A column type carries an array-literal structural element delimiter.'
+        )
+    return value
+
+
 def _validate_utf8_byte_length(value: str, field: str, maximum_bytes: int) -> str:
     """Bound one descriptor text field by its UTF-8 encoded length.
 
@@ -185,10 +228,15 @@ def _validate_utf8_byte_length(value: str, field: str, maximum_bytes: int) -> st
 
 
 class RemoteQueryDescriptorColumn(BaseModel):
-    """One ordered descriptor column: result name, vendor type, and logical type.
+    """One ordered descriptor column: result name, vendor type, logical type, and delimiter.
 
     ``column_name`` and ``vendor_data_type`` are bounded by UTF-8 byte length because the
     server limits they mirror are byte limits: 255 bytes for names, 1024 for vendor types.
+    ``array_element_delimiter`` is transport-only schema metadata — one PostgreSQL
+    ``pg_type.typdelim`` of the column's effective array ELEMENT type for the native
+    postgres-copy-csv-v1 array columns, null for every non-array column and every
+    csv-json-cell-v1 column — that never reaches the consumer-visible final page: intake
+    splits native array literals on it instead of guessing a separator from contents.
     """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
@@ -196,6 +244,7 @@ class RemoteQueryDescriptorColumn(BaseModel):
     column_name: StrictStr = Field(min_length=1, max_length=255)
     vendor_data_type: StrictStr = Field(min_length=1, max_length=1024)
     logical_type: RemoteQueryLogicalType
+    array_element_delimiter: StrictStr | None = None
 
     @field_validator('column_name')
     @classmethod
@@ -206,6 +255,11 @@ class RemoteQueryDescriptorColumn(BaseModel):
     @classmethod
     def validate_vendor_data_type(cls, value: str) -> str:
         return _validate_utf8_byte_length(value, 'vendor_data_type', 1024)
+
+    @field_validator('array_element_delimiter')
+    @classmethod
+    def validate_array_element_delimiter(cls, value: str | None) -> str | None:
+        return validate_array_element_delimiter(value)
 
 
 class RemoteQueryUploadDescriptor(BaseModel):
@@ -236,6 +290,19 @@ class RemoteQueryUploadDescriptor(BaseModel):
         duplicates = sorted({name for name in names if names.count(name) > 1})
         if duplicates:
             raise ValueError('Duplicate descriptor column name(s): {}'.format(', '.join(duplicates)))
+        for column in self.columns:
+            is_array = column.vendor_data_type.endswith('[]')
+            if self.format_version == POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION:
+                if is_array and column.array_element_delimiter is None:
+                    raise ValueError(
+                        'Array columns of the postgres-copy-csv-v1 format require an array_element_delimiter.'
+                    )
+                if not is_array and column.array_element_delimiter is not None:
+                    raise ValueError(
+                        'array_element_delimiter must be null for non-array postgres-copy-csv-v1 columns.'
+                    )
+            elif column.array_element_delimiter is not None:
+                raise ValueError('array_element_delimiter must be null for the csv-json-cell-v1 format.')
         return self
 
 
