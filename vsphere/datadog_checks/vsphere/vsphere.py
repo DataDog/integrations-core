@@ -1232,7 +1232,6 @@ class VSphereCheck(AgentCheck):
                     hostname=None,
                 )
 
-                # Submitted here, not with the property metrics, so they emit on every run.
                 self.submit_cpu_count_metrics(resource_type, mor_props, resource_tags)
 
         # Creating a thread pool and starting metric collection
