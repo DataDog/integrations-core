@@ -1,0 +1,91 @@
+# Full metric-coverage environment for the rabbitmq check.
+#
+# The rabbitmq OOTB dashboards reference metrics from BOTH check backends: the
+# management API (e.g. rabbitmq.queue.messages_ready, rabbitmq.queue.memory,
+# rabbitmq.queue.messages.*.rate) and the Prometheus/OpenMetrics plugin (e.g.
+# rabbitmq.erlang.*, the *.count counters, rabbitmq.queues.*.count). The
+# `-management` image exposes both endpoints (15672 management API, 15692
+# Prometheus), so a single broker feeds both. A consumer of this fixture must run
+# two check instances against it, one per backend; see ../README.md.
+#
+# Three services:
+#   - rabbitmq   the broker (both endpoints).
+#   - seed       one-shot: vhosts, static queues/exchanges/bindings, cluster name.
+#   - load       continuous AMQP workload (perf-test): drives channels,
+#                connections, publish/deliver/ack counters, and queue depth.
+#   - activity-gen  periodic queue declare/delete churn for the
+#                   rabbitmq.queues.created/declared/deleted.count counters.
+services:
+  rabbitmq:
+    image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  seed:
+    image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ../seed.sh:/opt/seed.sh:ro
+    environment:
+      RABBITMQ_HOST: rabbitmq
+    command: ["sh", "/opt/seed.sh"]
+
+  # Continuous AMQP traffic. rabbitmqadmin (HTTP) cannot populate channel,
+  # connection, or delivery counters; a real AMQP client is required, and
+  # perf-test is the canonical one. Publishers + acking consumers keep the
+  # publish/deliver/ack counters and queue-depth gauges moving across scrapes.
+  load:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    command:
+      - --uri
+      - amqp://guest:guest@rabbitmq:5672
+      - --producers
+      - "4"
+      - --consumers
+      - "4"
+      - --queue-pattern
+      - perf-%d
+      - --queue-pattern-from
+      - "1"
+      - --queue-pattern-to
+      - "4"
+      - --auto-delete
+      - "false"
+      - --rate
+      - "60"
+      - --consumer-rate
+      - "45"
+      - --confirm
+      - "10"
+      - --multi-ack-every
+      - "5"
+
+  activity-gen:
+    image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      # Set ACTIVITY_GEN=0 (host env) to idle: the container stays up but
+      # generates no queue churn. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    command: ["sh", "/opt/activity-gen.sh"]
