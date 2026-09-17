@@ -614,7 +614,7 @@ class TestAIAChasing:
         response.close.assert_called_once_with()
         assert certs == []
 
-    def test_load_intermediate_certs_rejects_sixth_redirect(self):
+    def test_load_intermediate_certs_rejects_eleventh_redirect(self):
         http = RequestsWrapper({}, {})
         certs = []
         response = aia_response(b'')
@@ -626,8 +626,8 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
 
-        assert session.get.call_count == 6
-        assert response.close.call_count == 6
+        assert session.get.call_count == 11
+        assert response.close.call_count == 11
         assert certs == []
 
     def test_load_intermediate_certs_follows_safe_redirect(self):
