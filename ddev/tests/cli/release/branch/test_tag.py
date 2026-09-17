@@ -671,18 +671,22 @@ def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr, fake_async_gi
 @pytest.mark.parametrize('status_code', [500, 422], ids=['server-error', 'non-duplicate-422'])
 def test_agent_pr_creation_failure_prints_gh_command(ddev, agent_pr, fake_async_github, status_code):
     """A PR-creation failure happens after the head branch and pin commit exist, so only the PR
-    is missing: the warning must carry the `gh` command that opens it. A 422 with no existing PR
+    is missing: the abort must carry the `gh` command that opens it. A 422 with no existing PR
     (e.g. no commits between base and head) is not a duplicate, so it fails the same way."""
     fake_async_github.mock_response('create_pull_request', _http_status_error(status_code, method='POST'))
 
     result = _run_final_tag(ddev)
 
-    _assert_tag_pushed(agent_pr, result, '7.56.0')
+    assert result.exit_code == 1, result.output
+    agent_pr.tag.assert_not_called()
+    agent_pr.push.assert_not_called()
     assert 'could not be created' in result.output
+    assert 'The tag `7.56.0` was not pushed' in result.output
     assert (
         'gh pr create --repo DataDog/datadog-agent --base 7.56.x --head integrations-core/bump-7.56.0 '
         "--title 'Bump integrations-core to 7.56.0'" in result.output
     )
+    assert '--skip-pr-creation' in result.output
 
 
 def test_agent_pr_creation_uses_http_retries(ddev, agent_pr, fake_async_github):
@@ -700,14 +704,17 @@ def test_agent_pr_creation_uses_http_retries(ddev, agent_pr, fake_async_github):
 
 def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr, fake_async_github):
     """A 404 resolving the base branch means the Agent release branch isn't cut yet, or the
-    token cannot see the repo, not a bug."""
+    token cannot see the repo, not a bug. The abort must say the tag was not pushed."""
     fake_async_github.mock_response('get_ref', _http_status_error(404, 'Not Found'))
 
     result = _run_final_tag(ddev)
 
-    _assert_tag_pushed(agent_pr, result, '7.56.0')
+    assert result.exit_code == 1, result.output
+    agent_pr.tag.assert_not_called()
     assert 'the `7.56.x` branch could not be found on datadog-agent' in result.output
     assert 'token has no access to DataDog/datadog-agent' in result.output
+    assert 'Rerun the command once the branch exists' in result.output
+    assert 'The tag `7.56.0` was not pushed' in result.output
 
 
 @pytest.mark.parametrize(
@@ -718,15 +725,16 @@ def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr, f
         pytest.param('{"dependencies": null}', id='non-object-dependencies'),
     ],
 )
-def test_agent_pr_malformed_release_json_degrades_gracefully(ddev, agent_pr, fake_async_github, release_json):
-    """`release.json` comes from an external repo; bad JSON must degrade like any other failure.
+def test_agent_pr_malformed_release_json_aborts_before_tagging(ddev, agent_pr, fake_async_github, release_json):
+    """`release.json` comes from an external repo; bad JSON must abort like any other failure.
 
-    The tag was already pushed, so a crash here strands the user with no recovery hint."""
+    The tag is not pushed until the PR exists, so the abort leaves nothing behind to recover from."""
     _mock_release_json(fake_async_github, release_json=release_json)
 
     result = _run_final_tag(ddev)
 
-    _assert_tag_pushed(agent_pr, result, '7.56.0')
+    assert result.exit_code == 1, result.output
+    agent_pr.tag.assert_not_called()
     assert 'not the expected JSON shape' in result.output
     assert f'pinning `INTEGRATIONS_CORE_VERSION` to `{RESOLVED_COMMIT_SHA}`' in result.output
     fake_async_github.assert_not_called('create_or_update_file_contents')
@@ -739,11 +747,13 @@ def test_agent_pr_pin_commit_failure_reports_head_branch_state(ddev, agent_pr, f
 
     result = _run_final_tag(ddev)
 
-    _assert_tag_pushed(agent_pr, result, '7.56.0')
+    assert result.exit_code == 1, result.output
+    agent_pr.tag.assert_not_called()
     assert 'integrations-core/bump-7.56.0` was created on datadog-agent' in result.output
     assert 'may not have been made' in result.output
     assert 'commit the pin to `integrations-core/bump-7.56.0` first' in result.output
     assert 'gh pr create --repo DataDog/datadog-agent' in result.output
+    assert 'The tag `7.56.0` was not pushed' in result.output
 
 
 def test_agent_pr_duplicate_creation_reports_existing_pr(ddev, agent_pr, fake_async_github):
@@ -762,19 +772,70 @@ def test_agent_pr_duplicate_creation_reports_existing_pr(ddev, agent_pr, fake_as
     assert 'could not be created' not in result.output
 
 
-def test_agent_pr_without_token_warns_and_pushes_tag(ddev, agent_pr, fake_async_github, config_file):
+def test_agent_pr_without_token_aborts_before_tagging(ddev, agent_pr, fake_async_github, config_file):
+    """Without a token the PR cannot be opened, so the tag must not be pushed; the abort must
+    say how to get a token and how to push the tag without the PR."""
     config_file.model.github = {'user': 'test-user', 'token': ''}
     config_file.save()
 
     result = _run_final_tag(ddev)
 
-    _assert_tag_pushed(agent_pr, result, '7.56.0')
-    assert 'a GitHub token is required' in result.output
-    assert (
-        f'open one manually against `7.56.x` pinning `INTEGRATIONS_CORE_VERSION` to `{RESOLVED_COMMIT_SHA}`'
-        in result.output
-    )
+    assert result.exit_code == 1, result.output
+    agent_pr.tag.assert_not_called()
+    assert 'A GitHub token is required' in result.output
+    assert 'ddev config set github.token' in result.output
+    assert '--skip-pr-creation' in result.output
     fake_async_github.assert_not_called('get_ref')
+
+
+def test_agent_pr_authentication_failure_aborts_before_tagging(ddev, agent_pr, fake_async_github):
+    """An expired or invalid token aborts through the central handler like in every other command,
+    with the actionable token message instead of a generic PR failure."""
+    fake_async_github.mock_response(
+        'get_ref', GitHubAuthenticationError.from_http_status_error(_http_status_error(403))
+    )
+
+    result = _run_final_tag(ddev)
+
+    assert result.exit_code == 1, result.output
+    agent_pr.tag.assert_not_called()
+    assert 'ddev config set github.token' in result.output
+    assert 'bump PR could not be created' not in result.output
+
+
+def test_agent_pr_opened_before_tag_is_pushed(ddev, agent_pr, fake_async_github):
+    """The pin PR must be created before the tag is pushed, so a PR failure aborts before the
+    tag exists instead of leaving a tag with no PR."""
+
+    def push(tag):
+        assert fake_async_github.calls_to('create_pull_request'), 'the pin PR was not created before the tag push'
+        return ''
+
+    agent_pr.push.side_effect = push
+
+    result = _run_final_tag(ddev)
+
+    _assert_tag_pushed(agent_pr, result, '7.56.0')
+
+
+def test_agent_pr_rerun_reuses_leftover_head_branch(ddev, agent_pr, fake_async_github):
+    """A head branch left over from a previous run answers `create_ref` with 422; rerunning is the
+    documented recovery, so the flow must continue on it rather than fail."""
+    fake_async_github.mock_response('create_ref', _http_status_error(422, method='POST'))
+
+    result = _run_final_tag(ddev)
+
+    _assert_tag_pushed(agent_pr, result, '7.56.0')
+    assert 'Datadog-agent bump PR: ' in result.output
+
+
+def test_skip_pr_creation_flag_pushes_tag_without_agent_pr(ddev, agent_pr, fake_async_github):
+    """`--skip-pr-creation` restores the plain tagging behavior: no datadog-agent calls at all."""
+    result = _run_tag(ddev, '--final', '--skip-open-pr-check', '--skip-pr-creation', input='y\n')
+
+    _assert_tag_pushed(agent_pr, result, '7.56.0')
+    fake_async_github.assert_not_called('get_ref')
+    fake_async_github.assert_not_called('create_pull_request')
 
 
 def test_bump_integrations_core_version_preserves_other_keys():
