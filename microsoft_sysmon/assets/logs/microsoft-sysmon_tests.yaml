@@ -138,9 +138,6 @@ tests:
           log_provider: Microsoft-Windows-Sysmon
           log_version: '5'
           version: 1.5.0
-          labels:
-            - technique_id=T1571
-            - technique_name=Non-Standard Port
         category_uid: 4
         category_name: Network Activity
         src_endpoint:
@@ -188,6 +185,10 @@ tests:
           type: Unknown
         class_name: Network Activity
         status: Success
+        attacks:
+          - technique:
+              uid: T1571
+              name: Non-Standard Port
     message: "Network connection detected:\r\nRuleName: technique_id=T1571,technique_name=Non-Standard Port\r\nUtcTime: 2025-03-18 11:53:54.968\r\nProcessGuid: {ac9e6aaa-ab97-67d2-1a00-000000001500}\r\nProcessId: 1400\r\nImage: C:\\Windows\\System32\\svchost.exe\r\nUser: NT AUTHORITY\\NETWORK SERVICE\r\nProtocol: udp\r\nInitiated: false\r\nSourceIsIpv6: true\r\nSourceIp: ff02:0:0:0:0:0:0:fb\r\nSourceHostname: -\r\nSourcePort: 5353\r\nSourcePortName: -\r\nDestinationIsIpv6: true\r\nDestinationIp: fe80:0:0:0:1958:16a1:813f:bbe8\r\nDestinationHostname: -\r\nDestinationPort: 5353\r\nDestinationPortName: -"
     status: "info"
     tags:
@@ -1290,9 +1291,6 @@ tests:
           log_provider: Microsoft-Windows-Sysmon
           log_version: '3'
           version: 1.5.0
-          labels:
-            - technique_id=T1047
-            - technique_name=Windows Management Instrumentation
         category_uid: 1
         category_name: System Activity
         module:
@@ -1353,6 +1351,10 @@ tests:
           type: Unknown
         class_name: Module Activity
         status: Success
+        attacks:
+          - technique:
+              uid: T1047
+              name: Windows Management Instrumentation
     message: "Image loaded:\r\nRuleName: technique_id=T1047,technique_name=Windows Management Instrumentation\r\nUtcTime: 2026-09-15 19:15:18.024\r\nProcessGuid: {04D75546-2F24-359A-7D89-77EF083C9B7A}\r\nProcessId: 5756\r\nImage: C:\\Program Files\\Huntress\\HuntressAgent.exe\r\nImageLoaded: C:\\Windows\\System32\\wbem\\wmiutils.dll\r\nFileVersion: 10.0.14393.4169 (rs1_release.210107-1130)\r\nDescription: WMI\r\nProduct: Microsoft® Windows® Operating System\r\nCompany: Microsoft Corporation\r\nOriginalFileName: wmiutils.dll\r\nHashes: SHA1=A46DDC1EB4C9D2507D83A0FF53556F679A9DBA24,MD5=5179B0DEF3AB5CAC3BA02316AF1B6B40,SHA256=FA4112CB0D1A133C41FD001F958F0BE930BB49072BF97A3D765AEA8DB841ABC4,IMPHASH=EE3767E8CDC80CCB91A8FC0A7407A4A9\r\nSigned: true\r\nSignature: Microsoft Windows\r\nSignatureStatus: Valid\r\nUser: NT AUTHORITY\\SYSTEM"
     status: "info"
     tags:
@@ -1651,9 +1653,6 @@ tests:
           log_provider: Microsoft-Windows-Sysmon
           log_version: '3'
           version: 1.5.0
-          labels:
-            - technique_id=T1055.001
-            - technique_name=Dynamic-link Library Injection
         process:
           uid: ac2c8155-8b8d-f6d7-a58a-40e3aec4faa1
           integrity: Unknown
@@ -1706,6 +1705,10 @@ tests:
           type: Unknown
         class_name: Process Activity
         status: Success
+        attacks:
+          - technique:
+              uid: T1055.001
+              name: Dynamic-link Library Injection
     message: "Process accessed:\r\nRuleName: technique_id=T1055.001,technique_name=Dynamic-link Library Injection\r\nUtcTime: 2026-09-15 19:18:58.878\r\nSourceProcessGUID: {6DFD4602-CC3F-525D-91DA-942BF2F44203}\r\nSourceProcessId: 7736\r\nSourceThreadId: 5716\r\nSourceImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe\r\nTargetProcessGUID: {AC2C8155-8B8D-F6D7-A58A-40E3AEC4FAA1}\r\nTargetProcessId: 3848\r\nTargetImage: C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgentPatcher.exe\r\nGrantedAccess: 0x1410\r\nCallTrace: C:\\Windows\\SYSTEM32\ntdll.dll+a68f4|C:\\Windows\\System32\\wow64.dll+124f4|C:\\Windows\\System32\\wow64.dll+6e75|C:\\Windows\\System32\\wow64cpu.dll+1d07|C:\\Windows\\System32\\wow64.dll+1bf87|C:\\Windows\\System32\\wow64.dll+cba0|C:\\Windows\\SYSTEM32\ntdll.dll+78b80|C:\\Windows\\SYSTEM32\ntdll.dll+7874e|C:\\Windows\\SYSTEM32\ntdll.dll+6f33c(wow64)|C:\\Windows\\System32\\KERNELBASE.dll+c76d8(wow64)|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+4812ab|C:\\Program Files (x86)\\example2orgserversfe72b5-6.0.1901\\NinjaRMMAgent.exe+2b296e|UNKNOWN(000000007E0B42C9)\r\nSourceUser: NT AUTHORITY\\SYSTEM\r\nTargetUser: NT AUTHORITY\\SYSTEM"
     status: "info"
     tags:
@@ -1819,9 +1822,6 @@ tests:
           log_provider: Microsoft-Windows-Sysmon
           log_version: '2'
           version: 1.5.0
-          labels:
-            - technique_id=T1574.010
-            - technique_name=Services File Permissions Weakness
         category_uid: 1
         category_name: System Activity
         message: File created
@@ -1863,6 +1863,10 @@ tests:
           type: Unknown
         class_name: File System Activity
         status: Success
+        attacks:
+          - technique:
+              uid: T1574.010
+              name: Services File Permissions Weakness
     message: "File created:\r\nRuleName: technique_id=T1574.010,technique_name=Services File Permissions Weakness\r\nUtcTime: 2026-09-15 19:19:09.459\r\nProcessGuid: {7E7B91BC-A965-5DC7-AA94-AFFD753150AE}\r\nProcessId: 1036\r\nImage: C:\\Windows\\System32\\svchost.exe\r\nTargetFilename: C:\\Windows\\System32\\LogFiles\\Sum\\Svctmp.log\r\nCreationUtcTime: 2025-07-10 00:36:43.600\r\nUser: NT AUTHORITY\\SYSTEM"
     status: "info"
     tags:
@@ -1979,7 +1983,7 @@ tests:
         message: Registry object added or deleted
         actor:
           process:
-            uid: '3320'
+            uid: 'dc682858-8dd7-7855-87d3-6a46673abc2b'
             file:
               path: C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.26080.3-0\MsMpEng.exe
               type_id: 1
@@ -2126,7 +2130,7 @@ tests:
         message: Registry value set
         actor:
           process:
-            uid: '1456'
+            uid: '0f98219d-b516-4189-8c29-aec5bf56e7cf'
             file:
               path: C:\Windows\system32\wbem\WmiApSrv.exe
               type_id: 1

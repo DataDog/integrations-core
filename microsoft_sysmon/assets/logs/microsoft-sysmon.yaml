@@ -866,7 +866,7 @@ pipeline:
           lookupTable: "1,Process Create\n2,File creation time changed\n3,Network connection detected\n4,Sysmon service state changed\n5,Process terminated\n6,Driver loaded\n7,Image loaded\n8,CreateRemoteThread detected\n9,RawAccessRead detected\n10,Process accessed\n11,File created\n12,Registry object added or deleted\n13,Registry value set\n14,Registry object renamed\n15,File stream created\n16,Sysmon configuration change\n17,Pipe Created\n18,Pipe Connected\n19,WmiEventFilter activity detected\n20,WmiEventConsumer activity detected\n21,WmiEventConsumerToFilter activity detected\n22,Dns query\n23,File Delete archived\n24,Clipboard changed\n25,Process Tampering\n26,File Delete logged\n27,File Block Executable\n28,File Block Shredding\n29,File Executable Detected"
           defaultLookup:
         - type: grok-parser
-          name: Parse `Event.EventData.Data.RuleName` to `ocsf.attack_ev.technique.uid`, `ocsf.metadata.labels`
+          name: Parse `Event.EventData.Data.RuleName` to `ocsf.attack_ev.technique.uid`, `ocsf.attack_ev.technique.name`, `ocsf.metadata.labels`
           enabled: true
           source: Event.EventData.Data.RuleName
           samples:
@@ -875,10 +875,15 @@ pipeline:
             - "T1099"
             - "T1060,RunKey"
             - "Context,DeviceConnectedOrUpdated"
+            - "technique_id=T1571,technique_name=Non-Standard Port"
+            - "technique_id=T1055.001,technique_name=Dynamic-link Library Injection"
+            - "technique_id=T1047"
           grok:
             supportRules: ""
             matchRules: |
               absent %{regex("-"):}
+              labeled_technique_with_name technique_id=%{regex("T[0-9]{4}(\\.[0-9]{3})?"):ocsf.attack_ev.technique.uid},technique_name=%{data:ocsf.attack_ev.technique.name}
+              labeled_technique technique_id=%{regex("T[0-9]{4}(\\.[0-9]{3})?"):ocsf.attack_ev.technique.uid}
               technique_with_labels %{regex("T[0-9]{4}(\\.[0-9]{3})?"):ocsf.attack_ev.technique.uid},%{data:ocsf.metadata.labels:array(",")}
               technique_only %{regex("T[0-9]{4}(\\.[0-9]{3})?"):ocsf.attack_ev.technique.uid}
               labels %{data:ocsf.metadata.labels:array(",")}
@@ -5151,14 +5156,6 @@ pipeline:
               targets:
                 name: ocsf.actor.process.file.type
                 id: ocsf.actor.process.file.type_id
-            - type: schema-remapper
-              name: Map `Event.EventData.Data.ProcessId` to `ocsf.actor.process.uid`
-              sources:
-                - Event.EventData.Data.ProcessId
-              target: ocsf.actor.process.uid
-              preserveSource: true
-              overrideOnConflict: false
-              targetFormat: string
             - type: schema-remapper
               name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
               sources:
