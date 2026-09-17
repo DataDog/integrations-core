@@ -295,4 +295,5 @@ Maintain a consistent style: technical and professional. Do not start lines or p
 
 Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation,
 comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline
-literals or roles.
+literals or roles. Existing uses are legacy, not a style precedent. Update them only when the surrounding prose is
+otherwise in scope.

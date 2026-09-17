@@ -169,6 +169,7 @@ async def test_assert_called_once_with_passes_on_single_exact_match(fake: FakeAs
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -236,6 +237,7 @@ async def test_assert_called_with_passes_on_exact_match(fake: FakeAsyncGitHubCli
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -370,6 +372,14 @@ MIRROR_CALLS = [
         'download_artifact',
         lambda f, tmp: f.download_artifact('https://x/zip', tmp / 'out'),
         {'archive_download_url': 'https://x/zip'},
+    ),
+    ('get_ref', lambda f, _: f.get_ref('o', 'r', 'heads/main'), {'ref': 'heads/main'}),
+    ('create_ref', lambda f, _: f.create_ref('o', 'r', 'refs/heads/x', 'abc123'), {'sha': 'abc123'}),
+    ('get_content', lambda f, _: f.get_content('o', 'r', 'release.json'), {'path': 'release.json'}),
+    (
+        'create_or_update_file_contents',
+        lambda f, _: f.create_or_update_file_contents('o', 'r', 'release.json', message='m', content='e30K'),
+        {'content': 'e30K'},
     ),
 ]
 

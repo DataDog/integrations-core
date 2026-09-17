@@ -263,7 +263,7 @@ __pycache__ = false
   "datadog-prefect",
 ]
 
-# Explicitely add the platforms supported by an integration for those where the manifest has been
+# Explicitly add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.

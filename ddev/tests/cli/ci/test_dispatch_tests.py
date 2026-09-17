@@ -6,17 +6,24 @@
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
+from functools import partial
 from typing import TYPE_CHECKING, Any
 from unittest.mock import ANY
 
 import pytest
 
+from ddev.cli.application import Application
+from ddev.cli.ci.dispatch_tests import attach_datadog_log_handler
+from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
 from ddev.monitoring import MonitoringRuntime
+from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
 from ddev.utils.github_async.models import PullRequest
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, listed_pull_request, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
+from tests.helpers.datadog import FakeLogSubmitter
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
 
 if TYPE_CHECKING:
@@ -390,7 +397,7 @@ def test_a_dry_run_of_a_commit_needs_no_token(ddev, planned, resolved_changes, m
     result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
 
     assert result.exit_code == 0, result.output
-    assert 'Dry run: nothing was dispatched.' in result.output
+    assert 'Dry run: nothing was dispatched' in result.output
 
 
 def test_a_dry_run_of_a_pull_request_needs_a_token(ddev, planned, mocker):
@@ -427,7 +434,7 @@ def test_an_empty_plan_is_not_dispatched(ddev, fake_async_github, resolved_chang
     result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha')
 
     assert result.exit_code == 0, result.output
-    assert 'No affected target to test.' in result.output
+    assert 'Nothing to test' in result.output
     fake_async_github.assert_not_called('create_workflow_dispatch')
 
 
@@ -442,7 +449,7 @@ def test_pytest_args_are_shown_in_the_plan(ddev, github, planned):
 @pytest.mark.parametrize(
     ('extra_options', 'asserted_output'),
     [
-        (['--dry-run'], 'Dry run: nothing was dispatched.'),
+        (['--dry-run'], 'Dry run: nothing was dispatched'),
         ([*HEAD_LOOKUP_OPTIONS], 'No open pull request matches the requested revision'),
     ],
     ids=['dry-run', 'no-open-pull-request'],
@@ -505,7 +512,7 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
     )
 
     assert result.exit_code == 0, result.output
-    assert 'No affected target to test.' in result.output
+    assert 'Nothing to test' in result.output
     # An empty plan is a valid outcome, so the run it belongs to is still identified on disk.
     assert (tmp_path / 'run.json').exists()
     [record] = sink.records
@@ -513,6 +520,84 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
     assert record.fields['head_sha'] == 'a-sha'
     assert record.fields['team'] == 'platform'
     assert record.fields['component'] == 'planner'
+
+
+@pytest.mark.usefixtures('resolved_changes')
+@pytest.mark.parametrize(
+    ('level_options', 'visible', 'hidden'),
+    [
+        ((), ('planning batches', 'planning skipped a broken target'), ('planning detail',)),
+        (('--log-level', 'Warning'), ('planning skipped a broken target',), ('planning detail', 'planning batches')),
+    ],
+    ids=['default-info', 'mixed-case-warning'],
+)
+def test_log_level_gates_console_and_datadog_output_together(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    level_options: tuple[str, ...],
+    visible: tuple[str, ...],
+    hidden: tuple[str, ...],
+):
+    submitter = FakeLogSubmitter()
+
+    def make_datadog_handler(app: Application, monitoring: MonitoringRuntime, *, level: int) -> DatadogLogHandler:
+        datadog = DatadogLogHandler(api_key='test-api-key', submitter=submitter, level=level)
+        datadog.setFormatter(dispatcher_datadog_formatter(ci={}))
+        monitoring.add_log_handler(datadog)
+        return datadog
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.logger.debug('planning detail')
+        monitor.logger.info('planning batches')
+        monitor.logger.warning('planning skipped a broken target')
+        return []
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.attach_datadog_log_handler', make_datadog_handler)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run', *level_options)
+
+    assert result.exit_code == 0, result.output
+    delivered = {log['message'] for log in submitter.logs}
+    for message in visible:
+        assert message in result.output
+        assert message in delivered
+    for message in hidden:
+        assert message not in result.output
+        assert message not in delivered
+
+
+def test_log_level_is_bounded_to_a_known_severity(ddev: CliRunner):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run', '--log-level', 'chatty')
+
+    assert result.exit_code == 2
+    assert "Invalid value for '--log-level'" in result.output
+
+
+def test_attach_datadog_log_handler_delivers_at_the_requested_level(
+    config_file: ConfigFileWithOverrides, mocker: MockerFixture
+):
+    config_file.model.orgs['default']['api_key'] = 'test-api-key'
+    config_file.save()
+    app = Application(lambda code: None, 0, False, False)
+    app.config_file.path = config_file.path
+    app.config_file.load()
+    submitter = FakeLogSubmitter()
+    mocker.patch('ddev.monitoring.datadog.DatadogLogHandler', partial(DatadogLogHandler, submitter=submitter))
+
+    monitoring = MonitoringRuntime()
+    handler = attach_datadog_log_handler(app, monitoring, level=logging.WARNING)
+    assert handler is not None
+    monitor = monitoring.component('dispatcher')
+    monitor.logger.info('Polling workflow')
+    monitor.logger.warning('Artifact download failed', run_id=123)
+
+    monitoring.close()
+    handler.close()
+
+    [log] = submitter.logs
+    assert log['message'] == 'Artifact download failed'
+    assert log['status'] == 'warning'
 
 
 @pytest.mark.usefixtures('resolved_changes')
@@ -550,12 +635,14 @@ def test_console_visibility_does_not_change_structured_events(
     assert 'repo=' not in result.output
     assert 'head_sha=' not in result.output
     assert 'team=' not in result.output
-    [event] = json_handler.events
+    [event] = [item for item in json_handler.events if item['event'] == 'planning batches']
     assert event['repo'] == 'DataDog/integrations-core'
     assert event['head_sha'] == 'a-sha'
     assert event['team'] == 'platform'
     assert event['component'] == 'planner'
-    assert event['event'] == 'planning batches'
+    [finished] = [item for item in json_handler.events if item['event'] == 'Dispatcher run finished']
+    assert finished['outcome'] == 'no-op'
+    assert finished['cancelled'] is False
 
 
 PULL_REQUEST_RUN_MANIFEST = {

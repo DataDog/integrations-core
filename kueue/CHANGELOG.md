@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 / 2026-09-17
+
+***Changed***:
+
+* Enable collection of histogram buckets as distribution metrics by default. ([#25196](https://github.com/DataDog/integrations-core/pull/25196))
+
+***Added***:
+
+* Add events for Kueue Workloads that cannot reserve quota. ([#25236](https://github.com/DataDog/integrations-core/pull/25236))
+
 ## 1.1.0 / 2026-08-05
 
 ***Added***:
