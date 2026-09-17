@@ -103,7 +103,6 @@ VM_SIMPLE_PROPERTIES = [
     "config.cpuAllocation.overheadLimit",
     "config.memoryAllocation.limit",
     "config.memoryAllocation.overheadLimit",
-    "summary.config.numCpu",
     "summary.config.memorySizeMB",
     "summary.config.numEthernetCards",
     "summary.config.numVirtualDisks",
@@ -140,6 +139,17 @@ HOST_PROPERTIES = HOST_SIMPLE_PROPERTIES
 VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
 ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
+
+# Always fetched, regardless of `collect_property_metrics` -- downstream consumers need these
+# counts continuously, so collection must not be opt-in. Keep them out of *_SIMPLE_PROPERTIES:
+# `get_infrastructure` nests those under `properties`, breaking the flat lookup when the option is on.
+VM_CPU_COUNT_PROPERTY = "summary.config.numCpu"
+HOST_CPU_COUNT_PROPERTY = "summary.hardware.numCpuCores"
+
+CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE = {
+    'vm': VM_CPU_COUNT_PROPERTY,
+    'host': HOST_CPU_COUNT_PROPERTY,
+}
 
 
 OBJECT_PROPERTIES_TO_METRIC_NAME = {
