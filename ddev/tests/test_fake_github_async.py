@@ -361,6 +361,11 @@ MIRROR_CALLS = [
     ),
     ('update_check_run', lambda f, _: f.update_check_run('o', 'r', 9, status='in_progress'), {'check_run_id': 9}),
     (
+        'list_workflow_runs',
+        lambda f, _: first_page(f.list_workflow_runs('o', 'r', 'wf.yml', branch='feature')),
+        {'workflow_id': 'wf.yml', 'branch': 'feature'},
+    ),
+    (
         'list_workflow_run_artifacts',
         lambda f, _: first_page(f.list_workflow_run_artifacts('o', 'r', 42)),
         {'run_id': 42},

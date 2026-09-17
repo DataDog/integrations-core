@@ -133,6 +133,23 @@ def test_dispatch_workflow_return_run_details_sends_flag_and_returns_json(github
     assert payload['inputs'] == {'pr_number': '123', 'head_sha': 'deadbeef'}
 
 
+@pytest.mark.parametrize(
+    ('head_repo', 'expected'),
+    [
+        pytest.param({'full_name': 'DataDog/integrations-core'}, False, id='same-repository'),
+        pytest.param({'full_name': 'someone/integrations-core'}, True, id='fork'),
+        pytest.param(None, True, id='deleted-head-repository'),
+    ],
+)
+def test_pull_request_is_from_fork(github_manager, mocker, head_repo, expected):
+    response = mocker.MagicMock()
+    response.json.return_value = {'head': {'sha': 'abc', 'ref': 'feature', 'repo': head_repo}}
+    api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
+
+    assert github_manager.pull_request_is_from_fork(1) is expected
+    assert api_get.call_args.args[0].endswith('/pulls/1')
+
+
 @pytest.mark.parametrize('status_code', [401, 403])
 def test_authentication_error_has_actionable_token_guidance(
     github_manager: GitHubManager, mocker: MockerFixture, status_code: int

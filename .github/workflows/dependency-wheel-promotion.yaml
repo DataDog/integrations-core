@@ -161,7 +161,7 @@ jobs:
           ${{ env.PROMOTION_COMMENT_MARKER }}
           Wheels promoted to stable storage for commit `${{ inputs.head_sha }}` by @${{ github.actor }} in this [workflow run](${{ env.RUN_URL }}).
 
-          `dependency-wheel-promotion` is green for that commit. Pushing again sends the check back to pending, and the new head has to be promoted before merging.
+          `dependency-wheel-promotion` is green for that commit. Pushing another dependency change starts this over, since resolution has to run again for the new inputs. Other pushes keep the check green, because the wheels these lockfiles pin are already promoted.
 
           <sub>Full process: [Dependency Updates](${{ env.DOCS_URL }}).</sub>
 
