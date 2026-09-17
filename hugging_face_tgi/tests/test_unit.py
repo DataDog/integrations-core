@@ -9,16 +9,22 @@ from datadog_checks.hugging_face_tgi import HuggingFaceTgiCheck
 
 from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    assert HuggingFaceTgiCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('payload.txt'))
+    mock_http_response(file_path=get_fixture_path("payload.txt"))
 
-    check = HuggingFaceTgiCheck('hugging_face_tgi', {}, [instance])
+    check = HuggingFaceTgiCheck("hugging_face_tgi", {}, [instance])
     dd_run_check(check)
 
     for metric, metric_type in TEST_METRICS.items():
         aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
-        aggregator.assert_metric_has_tag(metric, 'test:tag')
+        aggregator.assert_metric_has_tag(metric, "test:tag")
 
     for metric, tag in RENAMED_LABELS.items():
         aggregator.assert_metric_has_tag(metric, tag)
@@ -30,17 +36,17 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
+        match="InstanceConfig`:\nopenmetrics_endpoint\n  Field required",
     ):
-        check = HuggingFaceTgiCheck('hugging_face_tgi', {}, [{}])
+        check = HuggingFaceTgiCheck("hugging_face_tgi", {}, [{}])
         dd_run_check(check)
 
 
 def test_custom_validation(dd_run_check):
-    endpoint = 'hugging_face_tgi:2112/metrics'
+    endpoint = "hugging_face_tgi:2112/metrics"
     with pytest.raises(
         Exception,
-        match='openmetrics_endpoint: {} is incorrectly configured'.format(endpoint),
+        match="openmetrics_endpoint: {} is incorrectly configured".format(endpoint),
     ):
-        check = HuggingFaceTgiCheck('hugging_face_tgi', {}, [{'openmetrics_endpoint': endpoint}])
+        check = HuggingFaceTgiCheck("hugging_face_tgi", {}, [{"openmetrics_endpoint": endpoint}])
         dd_run_check(check)
