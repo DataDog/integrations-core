@@ -250,6 +250,23 @@ def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote
     c.get_tls_context.return_value.load_verify_locations.assert_called_once_with(cadata=b'intermediate')
 
 
+def test_load_intermediate_certs_skips_when_shared_fetch_is_unavailable(instance_remote_ok):
+    c = TLSCheck('tls', {}, [instance_remote_ok])
+    c.get_tls_context = MagicMock(return_value=MagicMock())
+    access_description = MagicMock(
+        access_method=AuthorityInformationAccessOID.CA_ISSUERS,
+        access_location=MagicMock(value='http://issuer.test/ca.der'),
+    )
+    cert = MagicMock()
+    cert.extensions.get_extension_for_oid.return_value = MagicMock(value=[access_description])
+
+    with patch('datadog_checks.tls.tls_remote.load_der_x509_certificate', return_value=cert):
+        with patch('datadog_checks.tls.tls_remote.fetch_intermediate_cert', None):
+            c.checker.load_intermediate_certs(b'leaf')
+
+    c.get_tls_context.assert_not_called()
+
+
 @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
 def test_fetch_intermediate_certs(aggregator, instance_remote_fetch_intermediate_certs):
     c = TLSCheck('tls', {}, [instance_remote_fetch_intermediate_certs])

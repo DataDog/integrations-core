@@ -11,10 +11,18 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.http import DEFAULT_AIA_CHASING_MAX_DEPTH, create_ssl_context, fetch_intermediate_cert
+from datadog_checks.base.utils.http import create_ssl_context
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
+
+try:
+    from datadog_checks.base.utils.http import fetch_intermediate_cert
+except ImportError:
+    fetch_intermediate_cert = None
+
+
+DEFAULT_AIA_CHASING_MAX_DEPTH = 5
 
 
 class TLSRemoteCheck(object):
@@ -200,6 +208,12 @@ class TLSRemoteCheck(object):
         if max_depth is None:
             max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
         if max_depth <= 0:
+            return
+        if fetch_intermediate_cert is None:
+            self.log.error(
+                'Skipping intermediate certificate discovery because the installed base package does not support '
+                'credential-free AIA fetching'
+            )
             return
 
         try:
