@@ -2170,6 +2170,20 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, 
     assert args_list.count('http://localhost:80/api/Spaces-1/environments') == 5
 
 
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_default_page_size(get_current_datetime, dd_run_check, mock_http_get, instance):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+
+    dd_run_check(check)
+
+    # An instance that does not set paginated_limit pages every endpoint at the shipped default.
+    # This fails if spec.yaml and the generated config models ever disagree about that value.
+    takes = {call[1]['params']['take'] for call in mock_http_get.call_args_list if 'take' in call[1].get('params', {})}
+    assert takes == {300}
+
+
 @pytest.mark.parametrize(
     ('paginated_limit'),
     [pytest.param(30, id='high limit'), pytest.param(2, id='low limit')],

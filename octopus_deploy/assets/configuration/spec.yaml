@@ -241,9 +241,13 @@ files:
         example: {}
     - name: paginated_limit
       description: |
-          Sets the number of items API calls should return at a time. Default is 30.
+          Sets the number of items API calls should return at a time. Default is 300.
+
+          Octopus endpoints cost about the same to serve whether they return 30 rows or 300, so a
+          small page size mostly multiplies the number of round trips. Lower this if your Octopus
+          server is memory constrained or sits behind a proxy with a small response limit.
       value:
-        example: 30
+        example: 300
         type: integer
       required: false
       fleet_configurable: false
