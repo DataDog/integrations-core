@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2026-06-09 / Agent 7.81.0
+
+***Added***:
+
+* Added metrics external_dns.controller.last_reconcile & external_dns.controller.consecutive.soft.errors ([#23671](https://github.com/DataDog/integrations-core/pull/23671))
+
 ## 6.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

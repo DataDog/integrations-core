@@ -60,7 +60,8 @@
                                 "table_id": "16644"
                             }
                         ],
-                        "toast_table": "pg_toast_16644"
+                        "toast_table": "pg_toast_16644",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -121,7 +122,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16681"
+                        "toast_table": "pg_toast_16681",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -182,7 +184,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16693"
+                        "toast_table": "pg_toast_16693",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -243,7 +246,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16711"
+                        "toast_table": "pg_toast_16711",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -299,7 +303,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16762"
+                        "toast_table": "pg_toast_16762",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -360,7 +365,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16699"
+                        "toast_table": "pg_toast_16699",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -421,7 +427,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16723"
+                        "toast_table": "pg_toast_16723",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -513,7 +520,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16735"
+                        "toast_table": "pg_toast_16735",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -552,7 +560,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "f"
                     }
                 ]
             }
@@ -613,7 +622,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16657"
+                        "toast_table": "pg_toast_16657",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -674,7 +684,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16717"
+                        "toast_table": "pg_toast_16717",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -735,7 +746,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16745"
+                        "toast_table": "pg_toast_16745",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -796,7 +808,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16669"
+                        "toast_table": "pg_toast_16669",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -867,7 +880,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16634"
+                        "toast_table": "pg_toast_16634",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -928,7 +942,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16687"
+                        "toast_table": "pg_toast_16687",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -989,7 +1004,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16675"
+                        "toast_table": "pg_toast_16675",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1050,7 +1066,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16729"
+                        "toast_table": "pg_toast_16729",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1111,7 +1128,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16754"
+                        "toast_table": "pg_toast_16754",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1172,7 +1190,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16705"
+                        "toast_table": "pg_toast_16705",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1233,7 +1252,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16663"
+                        "toast_table": "pg_toast_16663",
+                        "relkind": "r"
                     }
                 ]
             }

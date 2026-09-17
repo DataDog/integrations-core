@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import random
-from contextlib import ExitStack
-from typing import Generator
+from collections.abc import AsyncIterator
+from contextlib import ExitStack, asynccontextmanager
+from typing import Any, Generator
 
 import pytest
 import vcr
 from datadog_checks.dev.tooling.utils import set_root
+from pytest_mock import MockerFixture
 
 from ddev.cli.application import Application
 from ddev.cli.terminal import Terminal
@@ -24,6 +26,7 @@ from ddev.utils.platform import Platform
 
 from .helpers import APPLICATION, LOCAL_REPO_BRANCH, PLATFORM
 from .helpers.git import ClonedRepo
+from .helpers.github_async import FakeAsyncGitHubClient
 from .helpers.runner import CliRunner
 
 # Rewrite assertions on the assertions helper module
@@ -76,6 +79,29 @@ def github_manager(local_repo, config_file, terminal) -> GitHubManager:
         token=config_file.model.github.token,
         status=terminal.status,
     )
+
+
+@pytest.fixture
+def fake_async_github(mocker: MockerFixture) -> FakeAsyncGitHubClient:
+    """Patch `async_github_client` to yield a `FakeAsyncGitHubClient` and stub the token."""
+    fake = FakeAsyncGitHubClient()
+
+    @asynccontextmanager
+    async def fake_context(
+        token: str,
+        default_timeout: float = 30.0,
+        transport: Any = None,
+        logger: Any = None,
+    ) -> AsyncIterator[FakeAsyncGitHubClient]:
+        yield fake
+
+    # Patch both import sites: the deep module name (for `from ...client import async_github_client`)
+    # and the package-level name (for `from ddev.utils.github_async import async_github_client`,
+    # which production code uses inside method bodies). Removing either leaves one import style unmocked.
+    mocker.patch('ddev.utils.github_async.client.async_github_client', fake_context)
+    mocker.patch('ddev.utils.github_async.async_github_client', fake_context)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': 'ghp_test'})
+    return fake
 
 
 @pytest.fixture
@@ -133,6 +159,25 @@ def temp_dir(tmp_path) -> Path:
     path = Path(tmp_path, 'temp')
     path.mkdir()
     return path
+
+
+@pytest.fixture
+def step_summary(tmp_path, monkeypatch) -> Path:
+    """Redirect the GitHub Actions job summary to a temporary file and return it.
+
+    Request this in any test that reaches code calling `write_step_summary`. Without it, such a test
+    inherits the real `GITHUB_STEP_SUMMARY` when the suite runs inside a workflow and appends its
+    output to the job's own summary panel.
+    """
+    summary_file = Path(tmp_path, 'step-summary.md')
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY', str(summary_file))
+    return summary_file
+
+
+@pytest.fixture
+def without_step_summary(monkeypatch) -> None:
+    """Unset `GITHUB_STEP_SUMMARY`, for tests covering the no-summary-available path."""
+    monkeypatch.delenv('GITHUB_STEP_SUMMARY', raising=False)
 
 
 @pytest.fixture(scope='session', autouse=True)

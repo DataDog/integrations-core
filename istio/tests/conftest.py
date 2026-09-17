@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import platform
+import time
+from contextlib import ExitStack
 from copy import deepcopy
 
 import pytest
@@ -11,15 +14,15 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
-
-
 HERE = get_here()
 VERSION = os.environ.get("ISTIO_VERSION")
+MODE = os.environ.get("ISTIO_MODE", "sidecar")
 opj = os.path.join
+
+ZTUNNEL_METRICS_SERVICE = "ztunnel-metrics"
+ZTUNNEL_METRICS_PORT = 15020
+WAYPOINT_METRICS_PORT = 15090
+ISTIOD_METRICS_PORT = 15014
 
 
 @pytest.fixture
@@ -29,52 +32,181 @@ def instance_openmetrics_v2(dd_get_state):
     return openmetrics_v2
 
 
-def setup_istio():
+def _istio_release_suffix():
+    system = platform.system()
+    machine = platform.machine().lower()
+    if system == "Darwin":
+        return "osx-arm64" if machine in ("arm64", "aarch64") else "osx-amd64"
+    if machine in ("aarch64", "arm64"):
+        return "linux-arm64"
+    return "linux-amd64"
+
+
+def _download_istio():
+    suffix = _istio_release_suffix()
     run_command(
         [
             "curl",
             "-o",
             "istio.tar.gz",
             "-L",
-            "https://github.com/istio/istio/releases/download/{version}/istio-{version}-linux.tar.gz".format(
-                version=VERSION
+            "https://github.com/istio/istio/releases/download/{version}/istio-{version}-{suffix}.tar.gz".format(
+                version=VERSION, suffix=suffix
             ),
         ]
     )
     run_command(["tar", "xf", "istio.tar.gz"])
-    run_command(["kubectl", "create", "ns", "istio-system"])
-    # Istio directory name
-    istio = "istio-{}".format(VERSION)
-    # Install demo profile
-    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "demo_profile.yaml")])
-    # Wait for istio deployments
+    return "istio-{}".format(VERSION)
+
+
+def setup_istio():
+    istio = _download_istio()
+    istioctl = opj(istio, "bin", "istioctl")
+    run_command([istioctl, "install", "--set", "profile=demo", "--skip-confirmation"])
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
     )
-    # Enable sidecar injection
     run_command(["kubectl", "label", "namespace", "default", "istio-injection=enabled"])
-    # Install sample application
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
-
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
     os.remove("istio.tar.gz")
 
 
+def setup_istio_ambient():
+    istio = _download_istio()
+    istioctl = opj(istio, "bin", "istioctl")
+    run_command([istioctl, "install", "--set", "profile=ambient", "--skip-confirmation"])
+    run_command(
+        ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
+    )
+    run_command(
+        [
+            "kubectl",
+            "wait",
+            "pods",
+            "-l",
+            "app=ztunnel",
+            "--for=condition=Ready",
+            "-n",
+            "istio-system",
+            "--timeout=300s",
+        ]
+    )
+    # Expose ztunnel's stats endpoint via a Service so the port-forward target name is stable
+    # (the underlying DaemonSet's pod name has a random suffix that would break port-forward
+    # teardown name lookup in CI). kubectl expose does not support DaemonSets, so apply a
+    # Service manifest directly.
+    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "ztunnel_service.yaml")])
+    run_command(["kubectl", "label", "namespace", "default", "istio.io/dataplane-mode=ambient", "--overwrite"])
+    run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
+    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "-n", "default", "--timeout=300s"])
+    run_command(
+        [
+            "kubectl",
+            "apply",
+            "-f",
+            "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml",
+        ]
+    )
+    run_command([istioctl, "waypoint", "apply", "-n", "default", "--name", "waypoint", "--wait"])
+    run_command(
+        [
+            "kubectl",
+            "run",
+            "traffic-gen",
+            "--image=curlimages/curl",
+            "--restart=Always",
+            "--",
+            "sh",
+            "-c",
+            "while true; do curl -s productpage:9080/productpage > /dev/null; sleep 1; done",
+        ]
+    )
+    run_command(
+        ["kubectl", "wait", "pod", "traffic-gen", "-n", "default", "--for=condition=Ready", "--timeout=120s"],
+        check=True,
+    )
+    # ztunnel has no shell/curl; poll its /stats/prometheus from traffic-gen via the ztunnel-metrics Service.
+    _wait_for_ztunnel_traffic()
+    os.remove("istio.tar.gz")
+
+
+def _wait_for_ztunnel_traffic(timeout_seconds=300, interval_seconds=3):
+    """Block until ztunnel records at least one TCP connection."""
+    metrics_url = "{service}.istio-system.svc:{port}/stats/prometheus".format(
+        service=ZTUNNEL_METRICS_SERVICE, port=ZTUNNEL_METRICS_PORT
+    )
+    deadline = time.monotonic() + timeout_seconds
+    last_stderr = ""
+    last_stdout = ""
+    while time.monotonic() < deadline:
+        result = run_command(
+            ["kubectl", "exec", "-n", "default", "traffic-gen", "--", "curl", "-sm", "5", metrics_url],
+            capture=True,
+        )
+        if result.code == 0 and _ztunnel_has_traffic(result.stdout):
+            return
+        # curl -sm 5 exits 0 for HTTP 4xx/5xx (no -f), so capture stdout when traffic is missing
+        # but the request itself succeeded — otherwise the eventual timeout has no clue why.
+        if result.code == 0:
+            last_stdout = result.stdout.strip()[:200]
+        elif result.stderr:
+            last_stderr = result.stderr.strip()
+        time.sleep(interval_seconds)
+    raise RuntimeError(
+        "ztunnel did not record TCP traffic within {}s (last exec stderr: {}, last stdout excerpt: {})".format(
+            timeout_seconds, last_stderr or "<none>", last_stdout or "<none>"
+        )
+    )
+
+
+def _ztunnel_has_traffic(metrics_text):
+    """Return True if `istio_tcp_connections_opened_total` reports any non-zero sample."""
+    for line in metrics_text.splitlines():
+        if not line.startswith("istio_tcp_connections_opened_total"):
+            continue
+        value = line.rsplit(" ", 1)[-1]
+        try:
+            if float(value) > 0:
+                return True
+        except ValueError:
+            # Best-effort parse: malformed samples (or future OpenMetrics exemplar suffixes)
+            # are skipped. Worst case the loop hits the outer timeout instead of returning True.
+            continue
+    return False
+
+
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
-    with kind_run(conditions=[setup_istio]) as kubeconfig:
+    setup = setup_istio_ambient if MODE == "ambient" else setup_istio
+    with kind_run(conditions=[setup]) as kubeconfig:
         with ExitStack() as stack:
-            if VERSION == '1.13.3':
-                istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 15014, 'deployment', 'istiod')
+            if MODE == "ambient":
+                ztunnel_host, ztunnel_port = stack.enter_context(
+                    port_forward(kubeconfig, 'istio-system', ZTUNNEL_METRICS_PORT, 'service', ZTUNNEL_METRICS_SERVICE)
                 )
-
+                waypoint_host, waypoint_port = stack.enter_context(
+                    port_forward(kubeconfig, 'default', WAYPOINT_METRICS_PORT, 'deployment', 'waypoint')
+                )
+                istiod_host, istiod_port = stack.enter_context(
+                    port_forward(kubeconfig, 'istio-system', ISTIOD_METRICS_PORT, 'deployment', 'istiod')
+                )
+                instance = {
+                    "istio_mode": "ambient",
+                    "ztunnel_endpoint": "http://{}:{}/stats/prometheus".format(ztunnel_host, ztunnel_port),
+                    "waypoint_endpoint": "http://{}:{}/stats/prometheus".format(waypoint_host, waypoint_port),
+                    "istiod_endpoint": "http://{}:{}/metrics".format(istiod_host, istiod_port),
+                    "use_openmetrics": "true",
+                }
+                dd_save_state("istio_instance", instance)
+                yield instance
+            else:
+                istiod_host, istiod_port = stack.enter_context(
+                    port_forward(kubeconfig, 'istio-system', ISTIOD_METRICS_PORT, 'deployment', 'istiod')
+                )
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
                 instance = {'istiod_endpoint': istiod_endpoint, 'use_openmetrics': 'false'}
-
-                # save this instance to use for openmetrics_v2 instance, since the endpoint is different each run
                 dd_save_state("istio_instance", instance)
-
                 yield instance

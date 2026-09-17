@@ -75,6 +75,7 @@ def dd_environment():
         WaitFor(bucket_stats),
         WaitFor(load_sample_bucket),
         WaitFor(create_syncgw_database),
+        WaitFor(gamesim_primary_index_ready),
     ]
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
@@ -215,10 +216,15 @@ def load_sample_bucket():
         if task["sample"] == "gamesim-sample":
             task_id = task["taskId"]
 
+    # No matching task in the install response — the bucket is likely loading
+    # under a task we can't observe. WaitFor will retry; on the retry the install
+    # POST takes the already-loaded shortcut, and gamesim_primary_index_ready is
+    # the authoritative gate that blocks until the bundled GSI is online.
+    if task_id is None:
+        return False
+
     while True:
         # Loop until the task ID is gone, meaning the task is done.
-        task_is_done = False
-
         r = requests.get(
             '{}/pools/default/tasks'.format(URL),
             auth=(USER, PASSWORD),
@@ -226,16 +232,35 @@ def load_sample_bucket():
         r.raise_for_status()
         result = r.json()
 
-        for task in result:
-            if task.get("task_id", "") == task_id:
-                task_is_done = True
-
-        if task_is_done:
+        task_still_running = any(task.get("task_id") == task_id for task in result)
+        if not task_still_running:
             break
 
         time.sleep(1)
 
     return True
+
+
+def gamesim_primary_index_ready():
+    """Wait until every gamesim_primary keyspace reports initial_build_progress == 100."""
+    r = requests.get(
+        '{}/api/v1/stats'.format(INDEX_STATS_URL),
+        auth=(USER, PASSWORD),
+    )
+    r.raise_for_status()
+
+    data = r.json()
+    matches = [
+        stats
+        for keyspace, stats in data.items()
+        if keyspace != "indexer"
+        and keyspace.split(":")[0] == "gamesim-sample"
+        and keyspace.split(":")[-1] == "gamesim_primary"
+    ]
+    if not matches:
+        print("gamesim_primary not yet visible; keyspaces seen: {}".format(list(data.keys())))
+        return False
+    return all(s.get("initial_build_progress") == 100 for s in matches)
 
 
 def create_syncgw_database():

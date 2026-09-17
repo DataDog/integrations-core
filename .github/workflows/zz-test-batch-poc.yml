@@ -1,0 +1,158 @@
+# Proof of concept for the Dispatcher's per-batch workflow (AI-7128).
+#
+# It exercises the parts of the contract that fail silently in production, and nothing else:
+# the job names the Dispatcher correlates on, and the artifact name the gatherer looks for. Test
+# execution is deliberately absent; the jobs write placeholder reports instead. The real workflow
+# replaces this once a full round trip has been observed, so `workflow_dispatch` here is the only
+# trigger and the name is prefixed to keep it out of the way of `test-batch.yml`.
+#
+# `workflow_dispatch` requires the file to exist on the default branch, which is why this is merged
+# before anything can dispatch it.
+name: ZZ Test Batch POC
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_id:
+        description: "Logical batch identity, e.g. batch-01"
+        required: true
+        type: string
+      checkout_sha:
+        description: "Ref the batch tests, refs/pull/<n>/merge for a pull request"
+        required: true
+        type: string
+      integrations:
+        description: "JSON array of the target names in this batch"
+        required: false
+        default: "[]"
+        type: string
+      job_list:
+        description: "The batch's jobs, as JSON or as gzip+base64 of that JSON"
+        required: true
+        type: string
+
+# Nothing here needs a token: the placeholder reports are generated locally and the checkout is
+# public. The real workflow runs a pull request's code, so it stays at no permissions too.
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  expand:
+    name: expand
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.decode.outputs.matrix }}
+      count: ${{ steps.decode.outputs.count }}
+    steps:
+      - name: Decode the job list
+        id: decode
+        env:
+          JOB_LIST: ${{ inputs.job_list }}
+          BATCH_ID: ${{ inputs.batch_id }}
+          INTEGRATIONS: ${{ inputs.integrations }}
+        run: |
+          set -euo pipefail
+
+          # Accepts both encodings: the runner sends raw JSON today and gzip+base64 once AI-7126
+          # lands. Raw JSON cannot carry a full batch, so the compressed form is what production
+          # will use.
+          if printf '%s' "$JOB_LIST" | base64 -d 2>/dev/null | gzip -dc > jobs.json 2>/dev/null; then
+            echo "encoding: gzip+base64"
+          else
+            printf '%s' "$JOB_LIST" > jobs.json
+            echo "encoding: raw json"
+          fi
+
+          count=$(python3 -c 'import json; print(len(json.load(open("jobs.json"))))')
+          echo "batch: ${BATCH_ID}"
+          echo "jobs: ${count}"
+          echo "payload chars: ${#JOB_LIST}"
+          echo "decoded bytes: $(wc -c < jobs.json)"
+          echo "integrations: $(python3 -c 'import json,os; print(len(json.loads(os.environ["INTEGRATIONS"])))')"
+
+          {
+            echo "matrix=$(cat jobs.json)"
+            echo "count=${count}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Summarize the batch
+        env:
+          BATCH_ID: ${{ inputs.batch_id }}
+          CHECKOUT_SHA: ${{ inputs.checkout_sha }}
+        run: |
+          {
+            echo "### ${BATCH_ID}"
+            echo
+            echo "- jobs: ${{ steps.decode.outputs.count }}"
+            echo "- checkout: \`${CHECKOUT_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  run:
+    needs: expand
+    # Correlation is by name: `BatchJobResult.correlate` joins on `job.name` and the gatherer raises
+    # when a plan job has no workflow job, so this must be the plan's name verbatim.
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner_labels }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.expand.outputs.matrix) }}
+    steps:
+      - name: Report the job spec
+        env:
+          SPEC: ${{ toJson(matrix) }}
+        run: printf '%s\n' "$SPEC"
+
+      - name: Write placeholder reports
+        env:
+          TARGET: ${{ matrix.target }}
+          ENVIRONMENT: ${{ matrix.environment }}
+          UNIT_TESTS: ${{ matrix.unit_tests }}
+          E2E_TESTS: ${{ matrix.e2e_tests }}
+          COVERAGE: ${{ matrix.coverage }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          env_label="${ENVIRONMENT:-none}"
+
+          # The gatherer rglobs `test-*.xml` and `coverage*.xml`, and parses the JUnit files, so the
+          # placeholders have to be well-formed rather than empty.
+          write_junit() {
+            cat > "reports/test-$1-${env_label}.xml" <<XML
+          <?xml version="1.0" encoding="utf-8"?>
+          <testsuites>
+            <testsuite name="$1" tests="1" failures="0" errors="0" skipped="0" time="0.01">
+              <testcase classname="${TARGET}.tests.test_placeholder" name="test_$1_placeholder" time="0.01" />
+            </testsuite>
+          </testsuites>
+          XML
+          }
+
+          [[ "$UNIT_TESTS" == "true" ]] && write_junit unit
+          [[ "$E2E_TESTS" == "true" ]] && write_junit e2e
+
+          # `coverage` is false for a minimum-base-package job, which runs without `--cov`. Its
+          # absence must not read as a lost artifact.
+          if [[ "$COVERAGE" == "true" ]]; then
+            cat > reports/coverage.xml <<XML
+          <?xml version="1.0" ?>
+          <coverage version="7.0" timestamp="0" lines-valid="1" lines-covered="1" line-rate="1.0">
+            <packages />
+          </coverage>
+          XML
+          fi
+
+          ls -la reports
+
+      # One artifact per job, named exactly `BatchJob.artifact_name()`. Two artifacts, or any other
+      # name, leaves the batch green with empty reports.
+      - name: Upload the job's reports
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: reports
+          if-no-files-found: error

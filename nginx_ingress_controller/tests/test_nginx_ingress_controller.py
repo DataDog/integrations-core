@@ -66,6 +66,10 @@ def test_nginx_ingress_controller(aggregator, instance, mock_data):
         aggregator.assert_metric(NAMESPACE + metric)
 
     # By default, the integration does not collect histogram metrics due to high label cardinality
+    aggregator.assert_metric(NAMESPACE + '.controller.connect.duration.count', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.connect.duration.sum', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.header.duration.count', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.header.duration.sum', count=0)
     aggregator.assert_metric(NAMESPACE + '.controller.response.duration.count', count=0)
     aggregator.assert_metric(NAMESPACE + '.controller.response.duration.sum', count=0)
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.count', count=0)
@@ -89,6 +93,10 @@ def test_with_histograms(aggregator, mock_data):
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(NAMESPACE + metric)
 
+    aggregator.assert_metric(NAMESPACE + '.controller.connect.duration.count')
+    aggregator.assert_metric(NAMESPACE + '.controller.connect.duration.sum')
+    aggregator.assert_metric(NAMESPACE + '.controller.header.duration.count')
+    aggregator.assert_metric(NAMESPACE + '.controller.header.duration.sum')
     aggregator.assert_metric(NAMESPACE + '.controller.response.duration.count')
     aggregator.assert_metric(NAMESPACE + '.controller.response.duration.sum')
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.count')

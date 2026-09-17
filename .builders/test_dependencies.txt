@@ -1,2 +1,4 @@
+-r images/runner_dependencies.txt
+
 pytest==8.0.2
 mypy==1.13.0

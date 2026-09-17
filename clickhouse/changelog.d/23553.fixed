@@ -1,1 +1,0 @@
-Skip emitting empty storage_health payloads when every parts-and-merges collection is empty.

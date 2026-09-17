@@ -29,6 +29,7 @@ files:
             value:
               example: "http://%%host%%:7979/metrics"
               type: string
+            fleet_configurable: false
           - name: tags
             description: |
               List of tags to attach to every metric, event and service check emitted by this integration.
@@ -41,3 +42,4 @@ files:
               example:
                 - "externaldns-pod:%%host%%"
             enabled: true
+            fleet_configurable: false

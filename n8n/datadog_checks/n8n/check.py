@@ -2,58 +2,55 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from urllib.parse import urljoin
+from functools import cached_property
+from typing import Any
+from urllib.parse import urljoin, urlparse
+
+from requests.exceptions import RequestException
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.n8n.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 from .config_models import ConfigMixin
 
-DEFAULT_READY_ENDPOINT = '/healthz/readiness'
+DEFAULT_READY_PATH = '/healthz/readiness'
 
 
 class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, instances=None):
-        super(N8nCheck, self).__init__(
-            name,
-            init_config,
-            instances,
-        )
-        self.openmetrics_endpoint = self.instance["openmetrics_endpoint"]
-        self.tags = self.instance.get('tags', [])
-        self._ready_endpoint = DEFAULT_READY_ENDPOINT
-
-    def get_default_config(self):
+    def get_default_config(self) -> dict[str, Any]:
         return {
             'metrics': [METRIC_MAP],
             'rename_labels': RENAME_LABELS_MAP,
             'raw_metric_prefix': 'n8n_',
         }
 
-    def _check_n8n_readiness(self):
-        endpoint = urljoin(self.openmetrics_endpoint, self._ready_endpoint)
-        response = self.http.get(endpoint)
+    @cached_property
+    def _readiness_endpoint(self) -> str:
+        parsed = urlparse(self.config.openmetrics_endpoint)
+        base = f'{parsed.scheme}://{parsed.netloc}'
+        return urljoin(base, DEFAULT_READY_PATH)
 
-        # Determine metric value and status_code tag
-        if response.status_code is None:
-            self.log.warning("The readiness endpoint did not return a status code")
-            metric_value = 0
-            metric_tags = self.tags + ['status_code:null']
-        elif response.status_code == 200:
-            # Ready - submit 1
-            metric_value = 1
-            metric_tags = self.tags + [f'status_code:{response.status_code}']
-        else:
-            # Not ready - submit 0
-            metric_value = 0
-            metric_tags = self.tags + [f'status_code:{response.status_code}']
+    def _check_n8n_readiness(self) -> None:
+        endpoint = self._readiness_endpoint
+        tags = list(self.config.tags or ())
 
-        # Submit metric with appropriate value and status_code tag
-        self.gauge('readiness.check', metric_value, tags=metric_tags)
+        try:
+            response = self.http.get(endpoint)
+        except RequestException as e:
+            self.log.warning("Could not reach n8n readiness endpoint %s: %s", endpoint, e)
+            self.gauge('readiness.check', 0, tags=tags + ['status_code:none'])
+            return
 
-    def check(self, instance):
-        super().check(instance)
+        is_ready = 200 <= response.status_code < 300
+        self.gauge(
+            'readiness.check',
+            1 if is_ready else 0,
+            tags=tags + [f'status_code:{response.status_code}'],
+        )
+
+    def check(self, instance: dict[str, Any]) -> None:
         self._check_n8n_readiness()
+        super().check(instance)

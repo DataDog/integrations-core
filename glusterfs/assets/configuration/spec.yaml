@@ -15,6 +15,7 @@ files:
       value:
         type: string
         example: <datadog-agent>/embedded/sbin/gstatus
+        require_trusted_provider: true
     - template: init_config/default
   - template: instances
     options:

@@ -6,18 +6,14 @@ from __future__ import annotations
 import json
 import re
 import time
+from typing import TYPE_CHECKING
 
 import psycopg
 from psycopg.rows import dict_row
 
+from .column_statistics import PostgresColumnStatisticsCollector
 from .schemas import PostgresSchemaCollector
-
-try:
-    import datadog_agent  # type: ignore
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from typing import TYPE_CHECKING
+from .util import collection_interval_gcd
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -30,7 +26,8 @@ from .util import payload_pg_version
 
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
 # the pg_extension table. Schema names and roles are retrieved from their re-
-# spective catalog tables.
+# spective catalog tables. Extensions are installed per logical database, so
+# each row records the database the query ran against.
 PG_EXTENSION_INFO_QUERY = """
 SELECT
 e.oid::text AS id,
@@ -38,7 +35,8 @@ e.extname AS name,
 r.rolname AS owner,
 ns.nspname AS schema_name,
 e.extrelocatable AS relocatable,
-e.extversion AS version
+e.extversion AS version,
+current_database() AS logical_database
 FROM pg_extension e
 LEFT JOIN pg_namespace ns on e.extnamespace = ns.oid
      JOIN pg_roles r ON e.extowner = r.oid;
@@ -80,6 +78,8 @@ class PostgresMetadata(DBMAsyncJob):
     Collects database metadata. Supports:
         1. cloud metadata collection for resource creations
         2. collection of pg_settings
+        3. schema collection
+        4. column statistics collection
     """
 
     def __init__(self, check: PostgreSql, config: InstanceConfig):
@@ -88,20 +88,23 @@ class PostgresMetadata(DBMAsyncJob):
         # Extensions currently doesn't have a separate collection interval option
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
+        self.column_statistics_collection_interval = config.collect_column_statistics.collection_interval
 
-        # by default, send resources every 10 minutes
-        self.collection_interval = min(
+        self.collection_interval = collection_interval_gcd(
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,
+            self.column_statistics_collection_interval,
         )
 
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / float(self.collection_interval),
             run_sync=config.collect_settings.run_sync,
-            enabled=config.collect_settings.enabled or config.collect_schemas.enabled,
-            dbms="postgres",
+            enabled=config.collect_settings.enabled
+            or config.collect_schemas.enabled
+            or config.collect_column_statistics.enabled,
+            dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="database-metadata",
@@ -112,18 +115,26 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
+        self._collect_column_statistics_enabled = config.collect_column_statistics.enabled and config.dbm
+        self._column_statistics_collector = (
+            PostgresColumnStatisticsCollector(check, self._cancel_event)
+            if self._collect_column_statistics_enabled
+            else None
+        )
         self._compiled_patterns_cache = {}
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
+        self._last_column_statistics_query_time = 0
         self.column_buffer_size = 100_000
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._schema_collector = None
+        self._column_statistics_collector = None
         self._compiled_patterns_cache = None
 
     def _dbtags(self, db, *extra_tags):
@@ -161,8 +172,8 @@ class PostgresMetadata(DBMAsyncJob):
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "agent_version": datadog_agent.get_version(),
-                "dbms": "postgres",
+                "agent_version": self._check.agent_version,
+                "dbms": self._check.dbms,
                 "kind": "pg_extension",
                 "collection_interval": self.pg_extensions_collection_interval,
                 "dbms_version": payload_pg_version(self._check.version),
@@ -198,8 +209,8 @@ class PostgresMetadata(DBMAsyncJob):
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "agent_version": datadog_agent.get_version(),
-                "dbms": "postgres",
+                "agent_version": self._check.agent_version,
+                "dbms": self._check.dbms,
                 "kind": "pg_settings",
                 "collection_interval": self.pg_settings_collection_interval,
                 "dbms_version": payload_pg_version(self._check.version),
@@ -216,12 +227,16 @@ class PostgresMetadata(DBMAsyncJob):
         ):
             self._collect_postgres_schemas()
 
+        if (
+            self._collect_column_statistics_enabled
+            and time.time() - self._last_column_statistics_query_time > self.column_statistics_collection_interval
+        ):
+            self._collect_column_statistics()
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        started = self._schema_collector.collect_schemas()
-        if not started:
-            # TODO: Emit health event for over-long collection
-            self._log.warning("Previous schema collection still in progress, skipping this collection")
+        self._last_schemas_query_time = time.time()
+        self._schema_collector.collect_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
@@ -268,3 +283,10 @@ class PostgresMetadata(DBMAsyncJob):
                 self._log.debug("Loaded %s rows from pg_settings", rows)
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
                 return [dict(row) for row in rows]
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_column_statistics(self):
+        try:
+            self._column_statistics_collector.collect_column_statistics(self._tags_no_db)
+        finally:
+            self._last_column_statistics_query_time = time.time()

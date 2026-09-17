@@ -114,7 +114,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the `ddtrace` package if it isn't installed yet:
@@ -193,7 +193,7 @@ This will display detailed information about any errors or issues with tracing.
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Python library.
@@ -211,7 +211,7 @@ This will display detailed information about any errors or issues with tracing.
 **Notes**:
 
 <!-- partial
-{{% site-region region="us3,us5,eu,gov,ap1" %}}
+{{% site-region region="us3,us5,eu,gov,gov2,ap1" %}}
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
 partial -->
 
@@ -292,7 +292,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Node.js library.
@@ -367,7 +367,7 @@ This will display detailed information about any errors or issues with tracing.
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. Install the Datadog APM Node.js library.
@@ -443,7 +443,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
      -p 127.0.0.1:8125:8125/udp \
      -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
      -e DD_APM_ENABLED=true \
-     gcr.io/datadoghq/agent:latest
+     registry.datadoghq.com/agent:latest
    ```
 
 2. [Install the Datadog APM PHP library][16].
@@ -453,7 +453,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 **Notes**:
 
 <!-- partial
-{{% site-region region="us3,us5,eu,gov,ap1" %}}
+{{% site-region region="us3,us5,eu,gov,gov2,ap1" %}}
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
 partial -->
 

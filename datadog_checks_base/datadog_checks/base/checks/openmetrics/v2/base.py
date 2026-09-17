@@ -1,16 +1,26 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import ChainMap
-from contextlib import contextmanager
+from __future__ import annotations
 
+from collections import ChainMap
+from collections.abc import Mapping
+from contextlib import contextmanager
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .scraper import OpenMetricsScraper
+
+if TYPE_CHECKING:
+    from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
 
 class OpenMetricsBaseCheckV2(AgentCheck):
@@ -32,6 +42,14 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
+    METRICS_MAP: tuple[MetricsMapping, ...] = ()
+    """YAML files with metric name mappings to load automatically.
+
+    When empty (default), looks for ``metrics.yaml`` next to the check module,
+    falling back to ``metrics.yml`` if the former is absent. When set, only the
+    declared files are loaded (with predicates controlling conditional loading).
+    """
+
     # Allow tracing for openmetrics integrations
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -45,12 +63,18 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         When overriding, make sure to call this (the parent's) __init__ first!
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
+            filter_option_text='metrics / exclude_metrics'
+        )
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]
 
         # All configured scrapers keyed by the endpoint
         self.scrapers = {}
+
+        # Cache for file-based metrics loaded from METRICS_MAP; None means not yet loaded
+        self._file_metrics: list[_RawMetricsConfig] | None = None
 
         self.check_initializations.append(self.configure_scrapers)
 
@@ -74,6 +98,18 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                 except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        # Use the actual configured scraper endpoint keys rather than the raw instance field, so
+        # integrations that synthesize ``scraper_configs`` from options such as ``agent_endpoint``
+        # (e.g. Cilium) still report drops against the endpoint that was scraped.
+        self.metric_limit_issue_reporter.handle(
+            self,
+            self.scrapers.keys(),
+            reached_limit,
+            observed_count,
+            limit,
+        )
 
     def configure_scrapers(self):
         """
@@ -105,13 +141,94 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             scraper.set_dynamic_tags(*tags)
 
     def get_config_with_defaults(self, config):
-        return ChainMap(config, self.get_default_config())
+        """Combine instance config with class defaults and file-based metric mappings.
 
-    def get_default_config(self):
+        Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
+        otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
+        silently skipped.
+
+        The instance config wins option by option, except ``rename_labels``: the instance's renames
+        are merged into the check's declared ones entry by entry, with the instance winning on a key
+        collision. A ``ChainMap`` resolves keys shallowly, so without the merge an instance that sets
+        ``rename_labels`` at all would shadow the class default wholesale and silently drop renames
+        the check depends on. The trade-off is that ``rename_labels: {}`` cannot opt out of them.
+        """
+        defaults = dict(self.get_default_config())
+        if file_metrics := self._load_file_based_metrics(config):
+            defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
+
+        default_renames = defaults.get('rename_labels')
+        instance_renames = config.get('rename_labels')
+        if isinstance(default_renames, Mapping) and isinstance(instance_renames, Mapping):
+            config = {**config, 'rename_labels': {**default_renames, **instance_renames}}
+
+        return ChainMap(config, defaults)
+
+    def get_default_config(self) -> dict:
+        """Return instance-level default scraper configuration values.
+
+        The returned dict can be mutated by the framework before being wrapped
+        in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
+        state leakage between check executions.
+
+        A ``rename_labels`` default is merged with the instance's renames; every other default is
+        replaced outright. See ``get_config_with_defaults``.
+        """
         return {}
 
     def refresh_scrapers(self):
         pass
+
+    def _load_file_based_metrics(self, config: Mapping) -> list[_RawMetricsConfig]:
+        """Load metric mappings from YAML files declared in ``METRICS_MAP``.
+
+        Results are cached for the lifetime of the check instance. Predicates
+        are evaluated once against the first ``config`` supplied; ``METRICS_MAP``
+        is a class-level declaration and the instance config does not change
+        between runs, so subsequent calls always receive the same effective
+        configuration.
+
+        Falls back to convention-based discovery of ``metrics.yaml`` or
+        ``metrics.yml`` (in that order) when ``METRICS_MAP`` is empty.
+
+        Permanent load failures (malformed YAML, unreadable files) are raised
+        once on the first call; the cache is sealed beforehand so subsequent
+        scrapes do not retry and re-raise the same error. A failure on any
+        single file in a multi-file ``METRICS_MAP`` discards results from
+        files loaded earlier in the same call: the cache lands as ``[]``, not
+        as a partial mapping.
+        """
+        if self._file_metrics is not None:
+            return self._file_metrics
+
+        self._file_metrics = []
+        package_dir = self._get_package_dir()
+        if not self.METRICS_MAP:
+            for candidate in (Path("metrics.yaml"), Path("metrics.yml")):
+                resolved = package_dir / candidate
+                if resolved.is_file():
+                    self._file_metrics = [self._load_metrics_file(resolved)]
+                    break
+        else:
+            self._file_metrics = [
+                self._load_metrics_file(package_dir / source.path)
+                for source in self.METRICS_MAP
+                if source.should_load(config)
+            ]
+
+        return self._file_metrics
+
+    def _load_metrics_file(self, file_path: Path) -> _RawMetricsConfig:
+        try:
+            with open(file_path) as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise ConfigurationError(f"Failed to parse metrics file {file_path}: {e}") from e
+        except OSError as e:
+            raise ConfigurationError(f"Failed to read metrics file {file_path}: {e}") from e
+        if not isinstance(data, dict):
+            raise ConfigurationError(f"Metrics file {file_path} must contain a YAML mapping, got {type(data).__name__}")
+        return data
 
     @contextmanager
     def adopt_namespace(self, namespace):

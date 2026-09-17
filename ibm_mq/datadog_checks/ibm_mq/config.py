@@ -82,6 +82,7 @@ class IBMMQConfig:
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
         self.collect_statistics_metrics = is_affirmative(instance.get('collect_statistics_metrics', False))  # type: bool
+        self.filter_queue_statistics_metrics = is_affirmative(instance.get('filter_queue_statistics_metrics', False))  # type: bool
         self.collect_reset_queue_metrics = is_affirmative(instance.get('collect_reset_queue_metrics', True))
         self.collect_connection_metrics = is_affirmative(instance.get('collect_connection_metrics', True))
         self.add_description_tags = is_affirmative(instance.get('add_description_tags', False))  # type: bool

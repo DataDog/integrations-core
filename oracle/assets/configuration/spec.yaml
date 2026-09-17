@@ -1,4 +1,5 @@
 name: Oracle Database
+fleet_configurable: true
 files:
 - name: oracle.yaml
   options:
@@ -59,6 +60,7 @@ files:
         type: string
         require_trusted_provider: true
         example: <DRIVER_PATH>.jar
+      fleet_configurable: false
     - name: jdbc_truststore_path
       description: |
         The JDBC truststore file path.
@@ -67,6 +69,7 @@ files:
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: jdbc_truststore_type
       description: |
         The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
@@ -74,10 +77,21 @@ files:
         Note: This option is required if connecting with TCPS through JDBC.
       value:
         type: string
+      fleet_configurable: false
     - name: jdbc_truststore_password
       description: |
         The password for the truststore when connecting through JDBC.
       value:
         type: string
+      fleet_configurable: false
+    - name: dbm
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable Database Monitoring.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - template: instances/db
     - template: instances/default

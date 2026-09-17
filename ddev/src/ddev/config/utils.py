@@ -7,7 +7,14 @@ from tomlkit.toml_document import TOMLDocument
 from ddev.utils.fs import Path
 
 SCRUBBED_VALUE = '*****'
-SCRUBBED_GLOBS = ('github.token', 'pypi.auth', 'trello.token', 'orgs.*.api_key', 'orgs.*.app_key')
+SCRUBBED_GLOBS = (
+    'github.token',
+    'pypi.auth',
+    'trello.token',
+    'orgs.*.api_key',
+    'orgs.*.app_key',
+    'ai.anthropic_api_key',
+)
 
 
 def save_toml_document(document: TOMLDocument, path: Path):
@@ -23,17 +30,25 @@ def load_toml_data(path: Path) -> dict:
     return tomlkit.loads(path.read_text())
 
 
-def scrub_config(config: dict):
-    if 'token' in config.get('github', {}):
-        config['github']['token'] = SCRUBBED_VALUE
+def _scrub_path(config: dict, path: str) -> None:
+    parts = path.split('.')
+    nodes = [config]
+    for part in parts[:-1]:
+        next_nodes: list[dict] = []
+        for node in nodes:
+            if not isinstance(node, dict):
+                continue
+            if part == '*':
+                next_nodes.extend(node.values())
+            elif part in node:
+                next_nodes.append(node[part])
+        nodes = next_nodes
+    leaf = parts[-1]
+    for node in nodes:
+        if isinstance(node, dict) and leaf in node:
+            node[leaf] = SCRUBBED_VALUE
 
-    if 'auth' in config.get('pypi', {}):
-        config['pypi']['auth'] = SCRUBBED_VALUE
 
-    if 'token' in config.get('trello', {}):
-        config['trello']['token'] = SCRUBBED_VALUE
-
-    for data in config.get('orgs', {}).values():
-        for key in ('api_key', 'app_key'):
-            if key in data:
-                data[key] = SCRUBBED_VALUE
+def scrub_config(config: dict) -> None:
+    for glob in SCRUBBED_GLOBS:
+        _scrub_path(config, glob)

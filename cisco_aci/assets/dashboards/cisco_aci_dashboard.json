@@ -1,1522 +1,3943 @@
 {
-    "title": "Cisco ACI - Overview",
-    "description": "",
-    "widgets": [
-        {
-            "id": 1525427820254164,
+  "title": "Cisco ACI Overview",
+  "description": "## Cisco ACI Dashboard\n\nMonitor the health, capacity, and traffic of your Cisco ACI fabric end-to-end \u2014 APIC controllers, pods, leaf and spine switches, fabric ports, tenants, EPGs, and applications.",
+  "widgets": [
+    {
+      "id": 1525427820254164,
+      "definition": {
+        "title": "Overview",
+        "background_color": "gray",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 939490896296942,
             "definition": {
-                "title": "Overview",
-                "background_color": "gray",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 939490896296942,
-                        "definition": {
-                            "type": "image",
-                            "url": "/static/images/logos/cisco-aci_large.svg",
-                            "sizing": "contain",
-                            "margin": "md",
-                            "has_background": false,
-                            "has_border": false,
-                            "vertical_align": "center",
-                            "horizontal_align": "center"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2544884479345034,
-                        "definition": {
-                            "type": "note",
-                            "content": "**Cisco ACI Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your Cisco ACI environment, allowing you to effortlessly monitor the status of your fabric, tenants, EPGs, and so on. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Datadog's blog post on [Monitoring data centers and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
-                            "background_color": "white",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "top",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
-                            "height": 4
-                        }
-                    }
-                ]
+              "type": "image",
+              "url": "/static/images/logos/cisco-aci_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
             },
             "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 6,
-                "height": 9
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
             }
-        },
-        {
-            "id": 8073559146636168,
-            "definition": {
-                "title": "Health Overview",
-                "background_color": "vivid_purple",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 5679074543367742,
-                        "definition": {
-                            "title": "Leafs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {},
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:leaf} by {device_id}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "count_nonzero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6149327972947806,
-                        "definition": {
-                            "title": "Spines",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {},
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:spine} by {device_id}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "count_nonzero(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 2542134220658730,
-                        "definition": {
-                            "title": "Monitors overview",
-                            "type": "manage_status",
-                            "display_format": "countsAndList",
-                            "color_preference": "text",
-                            "hide_zero_counts": true,
-                            "show_status": true,
-                            "last_triggered_format": "relative",
-                            "query": "cisco-aci",
-                            "sort": "status,asc",
-                            "count": 50,
-                            "start": 0,
-                            "summary_type": "monitors",
-                            "show_priority": false,
-                            "show_last_triggered": false
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 6,
-                "y": 0,
-                "width": 6,
-                "height": 6
-            }
-        },
-        {
-            "id": 218778768743004,
-            "definition": {
-                "title": "APIC Controller",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 2,
-                        "definition": {
-                            "title": "Tenant Utilization",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.capacity.apic.tenant.utilized{*}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_aci.capacity.apic.tenant.limit{*}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / query2 * 100",
-                                            "number_format": {
-                                                "unit": {
-                                                    "label": "%",
-                                                    "type": "custom_unit_label"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3,
-                        "definition": {
-                            "title": "Switch Utilization",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.capacity.apic.fabric_node.utilized{*}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_aci.capacity.apic.fabric_node.limit{*}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / query2 * 100",
-                                            "number_format": {
-                                                "unit": {
-                                                    "label": "%",
-                                                    "type": "custom_unit_label"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4,
-                        "definition": {
-                            "title": "EPG Utilization",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.capacity.apic.endpoint_group.utilized{*}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_aci.capacity.apic.endpoint_group.limit{*}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / query2 * 100",
-                                            "number_format": {
-                                                "unit": {
-                                                    "label": "%",
-                                                    "type": "custom_unit_label"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 6,
-                "y": 6,
-                "width": 6,
-                "height": 3
-            }
-        },
-        {
-            "id": 5807304798323574,
-            "definition": {
-                "title": "Tenants (Logical Infrastructure)",
-                "background_color": "vivid_green",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 8,
-                        "definition": {
-                            "title": "Tenant Health",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "style": {
-                                        "palette": "dog_classic"
-                                    },
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.tenant.health{$tenant} by {tenant}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "custom_links": [],
-                            "style": {}
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 12,
-                        "definition": {
-                            "title": "Tenant Faults",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.tenant.fault_counter{$tenant} by {tenant}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 9,
-                        "definition": {
-                            "title": "Bandwidth by Tenant (egress)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "vertical",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {tenant}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "warm",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": false
-                            },
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7114376680227872,
-                        "definition": {
-                            "title": "Bandwidth by Tenant (ingress)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "vertical",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.tenant.ingress_bytes.unicast.rate{$tenant} by {tenant}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": false
-                            },
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 2,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 9,
-                "width": 12,
-                "height": 6
-            }
-        },
-        {
-            "id": 5938183313879842,
-            "definition": {
-                "title": "EPGs (Endpoint Groups)",
-                "background_color": "green",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 16,
-                        "definition": {
-                            "title": "Total EPGs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.tenant.egress_pkts.unicast.rate{$tenant} by {endpoint_group}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "count_not_null(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 17,
-                        "definition": {
-                            "title": "Top 10 EPGs by traffic",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "style": {
-                                        "palette": "purple"
-                                    },
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {endpoint_group,tenant}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:cisco_aci.tenant.ingress_bytes.unicast.rate{$tenant} by {endpoint_group,tenant}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "top(query1, 10, 'mean', 'desc') + top(query2, 10, 'mean', 'desc')"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "custom_links": [],
-                            "style": {}
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 5,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 19,
-                        "definition": {
-                            "title": "Top 10 EPG Ports by traffic",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "style": {
-                                        "palette": "orange"
-                                    },
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.fabric.port.egr_bytes.unicast{$tenant} by {node_id,port,endpoint_group}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:cisco_aci.fabric.port.ingr_bytes.unicast{$tenant} by {node_id,port,endpoint_group}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "exclude_null(query1) + exclude_null(query2)"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "custom_links": [],
-                            "style": {}
-                        },
-                        "layout": {
-                            "x": 7,
-                            "y": 0,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 18,
-                        "definition": {
-                            "title": "Applications",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.tenant.ingress_pkts.flood.cum{$tenant} by {application}",
-                                            "aggregator": "last"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "count_not_null(query1)"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 20,
-                        "definition": {
-                            "title": "Top 10 EPGs by IP",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "style": {
-                                        "palette": "dog_classic"
-                                    },
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {ip,application,endpoint_group}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "custom_links": [],
-                            "style": {}
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 2,
-                            "width": 5,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 15,
-                "width": 12,
-                "height": 5
-            }
-        },
-        {
-            "id": 1574813195262928,
-            "definition": {
-                "title": "Fabric (Physical Infrastructure)",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7,
-                        "definition": {
-                            "title": "Fabric Switch Health (by pod, role)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "hostmap",
-                            "requests": {
-                                "fill": {
-                                    "q": "avg:cisco_aci.fabric.node.health.cur{$pod} by {host}"
-                                }
-                            },
-                            "no_metric_hosts": false,
-                            "no_group_hosts": true,
-                            "group": [
-                                "fabric_pod_id",
-                                "apic_role"
-                            ],
-                            "scope": [
-                                "$pod"
-                            ],
-                            "style": {
-                                "palette": "green_to_orange",
-                                "palette_flip": false
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 13,
-                        "definition": {
-                            "title": "Faults by switch",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 + query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.fabric.port.fault_counter.warn{$pod} by {node_id,fabric_pod_id}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:cisco_aci.fabric.port.fault_counter.crit{$pod} by {node_id,fabric_pod_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 10,
-                        "definition": {
-                            "title": "Bandwidth by Switch (egress)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "vertical",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.fabric.port.egr_total.bytes.rate{$pod} by {node_id,fabric_pod_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "warm",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4676643676192110,
-                        "definition": {
-                            "title": "Bandwidth by Switch (ingress)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "vertical",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:cisco_aci.fabric.port.ingr_total.bytes.rate{$pod} by {node_id,fabric_pod_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 2,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 6,
-                "is_column_break": true
-            }
-        },
-        {
-            "id": 5069185858105160,
-            "definition": {
-                "title": "Leafs",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 1547034477646386,
-                        "definition": {
-                            "title": "Avg CPU %",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:leaf} by {device_id,fabric_pod_id,node_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1671869305900852,
-                        "definition": {
-                            "title": "Avg Memory %",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.node.mem.avg{apic_role:leaf} by {device_id,fabric_pod_id,node_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2991165436190176,
-                        "definition": {
-                            "title": "Interfaces",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.egr_total.bytes.rate{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query5",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.rate{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.egr_total.bytes.cum{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query3",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.cum{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query4",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.fault_counter.crit{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "RATE OF PACKETS OUT",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "RATE OF PACKETS IN",
-                                            "formula": "query5"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "total bytes out",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "total bytes in",
-                                            "formula": "query3"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "critical faults",
-                                            "formula": "query4"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 12,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 6,
-                "width": 12,
-                "height": 8
-            }
-        },
-        {
-            "id": 3250638514666220,
-            "definition": {
-                "title": "Spines",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 3145200399718776,
-                        "definition": {
-                            "title": "Avg CPU %",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:spine} by {device_id,fabric_pod_id,node_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3332653863183974,
-                        "definition": {
-                            "title": "Avg Memory %",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.node.mem.avg{apic_role:spine} by {device_id,fabric_pod_id,node_id}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1813163214351510,
-                        "definition": {
-                            "title": "Interfaces",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.egr_total.bytes.rate{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query5",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.rate{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.egr_total.bytes.cum{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query3",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.cum{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query4",
-                                            "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.fault_counter.crit{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "RATE OF PACKETS OUT",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "RATE OF PACKETS IN",
-                                            "formula": "query5"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "total bytes out",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "total bytes in",
-                                            "formula": "query3"
-                                        },
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "critical faults",
-                                            "formula": "query4"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 12,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 14,
-                "width": 12,
-                "height": 8
-            }
-        },
-        {
-          "id": 2956975389292306,
-          "definition": {
-            "title": "Faults",
-            "background_color": "vivid_purple",
-            "show_title": true,
-            "type": "group",
-            "layout_type": "ordered",
-            "widgets": []
           },
-          "layout": {
-            "x": 0,
-            "y": 34,
-            "width": 12,
-            "height": 1
+          {
+            "id": 2544884479345034,
+            "definition": {
+              "type": "note",
+              "content": "**Cisco ACI Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your Cisco ACI environment, allowing you to effortlessly monitor the status of your fabric, tenants, EPGs, and so on. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Datadog's blog post on [Monitoring data centers and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 5679074543367742,
+            "definition": {
+              "title": "Leafs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:leaf} by {device_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 6149327972947806,
+            "definition": {
+              "title": "Spines",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:spine} by {device_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 8,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2542134220658730,
+            "definition": {
+              "title": "Monitors overview",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "cisco-aci",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 3
+            }
           }
-        },
-        {
-          "id": 987022990164424,
-          "definition": {
-            "title": "",
-            "title_size": "16",
-            "title_align": "left",
-            "requests": [
-              {
-                "response_format": "event_list",
-                "query": {
-                  "data_source": "logs_stream",
-                  "query_string": "source:cisco-aci",
-                  "indexes": [],
-                  "storage": "hot"
-                },
-                "columns": [
-                  {
-                    "field": "status_line",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "timestamp",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "host",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "status",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "content",
-                    "width": "compact"
-                  },
-                  {
-                    "field": "@cisco_aci.ack",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "@cisco_aci.cause",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "@cisco_aci.code",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "@cisco_aci.occur",
-                    "width": "auto"
-                  },
-                  {
-                    "field": "@cisco_aci.severity",
-                    "width": "auto"
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 12
+      }
+    },
+    {
+      "id": 218778768743004,
+      "definition": {
+        "title": "APIC Controller",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2,
+            "definition": {
+              "title": "Tenant Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.capacity.apic.tenant.utilized{*}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_aci.capacity.apic.tenant.limit{*}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2 * 100",
+                      "number_format": {
+                        "unit": {
+                          "label": "%",
+                          "type": "custom_unit_label"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3,
+            "definition": {
+              "title": "Switch Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.capacity.apic.fabric_node.utilized{*}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_aci.capacity.apic.fabric_node.limit{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2 * 100",
+                      "number_format": {
+                        "unit": {
+                          "label": "%",
+                          "type": "custom_unit_label"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4,
+            "definition": {
+              "title": "EPG Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.capacity.apic.endpoint_group.utilized{*}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_aci.capacity.apic.endpoint_group.limit{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2 * 100",
+                      "number_format": {
+                        "unit": {
+                          "label": "%",
+                          "type": "custom_unit_label"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778185117766123,
+            "definition": {
+              "title": "Fabric Node Utilization %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.fabric_node.utilized{$tenant,$pod}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.fabric_node.limit{$tenant,$pod}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778185117766122,
+            "definition": {
+              "title": "Endpoint Utilization %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.endpoint.utilized{$tenant,$pod}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.endpoint.limit{$tenant,$pod}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778185117766121,
+            "definition": {
+              "title": "Bridge Domain Utilization %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.bridge_domain.utilized{$tenant,$pod}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.bridge_domain.limit{$tenant,$pod}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778185117766124,
+            "definition": {
+              "title": "Private Network Utilization %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.private_network.utilized{$tenant,$pod}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.private_network.limit{$tenant,$pod}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 1778185117766159,
+      "definition": {
+        "title": "Capacity Headroom (Top Utilized Resources)",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1778185117766150,
+            "definition": {
+              "title": "Top 10 APIC \u2014 Bridge Domain Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.bridge_domain.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
                   }
-                ]
-              }
-            ],
-            "type": "list_stream"
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
           },
-          "layout": {
-            "x": 0,
-            "y": 0,
-            "width": 12,
-            "height": 7
+          {
+            "id": 1778185117766151,
+            "definition": {
+              "title": "Top 10 APIC \u2014 Endpoint Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.endpoint.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766152,
+            "definition": {
+              "title": "Top 10 APIC \u2014 EPG Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.endpoint_group.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766153,
+            "definition": {
+              "title": "Top 10 Leaf \u2014 Multicast Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.multicast.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766154,
+            "definition": {
+              "title": "Top 10 Leaf \u2014 VRF Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.vrf.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766155,
+            "definition": {
+              "title": "Top 10 Leaf \u2014 IPv6 Endpoint Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.ipv6_endpoint.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766156,
+            "definition": {
+              "title": "Top 10 Leaf \u2014 IPv4 Endpoint Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.ipv4_endpoint.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766157,
+            "definition": {
+              "title": "Top 10 Leaf \u2014 Endpoint Group Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.endpoint_group.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766158,
+            "definition": {
+              "title": "Tenant Util %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.tenant.utilized{$tenant,$pod}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.apic.tenant.limit{$tenant,$pod}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
           }
-        }
-    ],
-    "template_variables": [
-        {
-            "name": "tenant",
-            "prefix": "tenant",
-            "available_values": [
-                "her"
-            ],
-            "default": "*"
-        },
-        {
-            "name": "pod",
-            "prefix": "fabric_pod_id",
-            "available_values": [],
-            "default": "*"
-        }
-    ],
-    "layout_type": "ordered",
-    "notify_list": [],
-    "reflow_type": "fixed"
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 13
+      }
+    },
+    {
+      "id": 1574813195262928,
+      "definition": {
+        "title": "Fabric (Physical Infrastructure)",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7,
+            "definition": {
+              "title": "Fabric Switch Health (by pod, role)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "hostmap",
+              "requests": {
+                "fill": {
+                  "q": "avg:cisco_aci.fabric.node.health.cur{$pod} by {host}"
+                }
+              },
+              "no_metric_hosts": false,
+              "no_group_hosts": true,
+              "group": [
+                "fabric_pod_id",
+                "apic_role"
+              ],
+              "scope": [
+                "$pod"
+              ],
+              "style": {
+                "palette": "green_to_orange",
+                "palette_flip": false
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 13,
+            "definition": {
+              "title": "Faults by switch",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.fabric.port.fault_counter.warn{$pod} by {node_id,fabric_pod_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:cisco_aci.fabric.port.fault_counter.crit{$pod} by {node_id,fabric_pod_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 10,
+            "definition": {
+              "title": "Bandwidth by Switch (egress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.fabric.port.egr_total.bytes.rate{$pod} by {node_id,fabric_pod_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4676643676192110,
+            "definition": {
+              "title": "Bandwidth by Switch (ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.fabric.port.ingr_total.bytes.rate{$pod} by {node_id,fabric_pod_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1778185117766135,
+            "definition": {
+              "title": "Bottom 10 Switches \u2014 Lowest Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.health.cur{$tenant,$pod} by {node_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766136,
+            "definition": {
+              "title": "Top 10 Switches \u2014 Critical Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.fault_counter.crit{$tenant,$pod} by {node_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766137,
+            "definition": {
+              "title": "Top 10 Switches \u2014 Warning Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.fault_counter.warn{$tenant,$pod} by {node_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766138,
+            "definition": {
+              "title": "Top 10 Switches \u2014 Egress Buffer Drops",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.egr_drop_pkts.buffer{$tenant,$pod} by {node_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766139,
+            "definition": {
+              "title": "Top 10 Switches \u2014 Egress Error Drops",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.egr_drop_pkts.errors{$tenant,$pod} by {node_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 9,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766140,
+            "definition": {
+              "title": "Fabric Total Bandwidth (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress (B/s)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress (B/s)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.egr_total.bytes.rate{$tenant,$pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.ingr_total.bytes.rate{$tenant,$pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 9,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 30,
+        "width": 12,
+        "height": 14,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 5069185858105160,
+      "definition": {
+        "title": "Leafs",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1547034477646386,
+            "definition": {
+              "title": "Avg CPU %",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:leaf} by {device_id,fabric_pod_id,node_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1671869305900852,
+            "definition": {
+              "title": "Avg Memory %",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.mem.avg{apic_role:leaf} by {device_id,fabric_pod_id,node_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2991165436190176,
+            "definition": {
+              "title": "Interfaces",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.egr_total.bytes.rate{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.rate{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.egr_total.bytes.cum{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.cum{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.fault_counter.crit{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RATE OF PACKETS OUT",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RATE OF PACKETS IN",
+                      "formula": "query5"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "total bytes out",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "total bytes in",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "critical faults",
+                      "formula": "query4"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 1778185117766141,
+            "definition": {
+              "title": "Top 10 Leafs \u2014 CPU %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.cpu.avg{$tenant,$pod} by {node_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766142,
+            "definition": {
+              "title": "Top 10 Leafs \u2014 Memory %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.mem.avg{$tenant,$pod} by {node_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766143,
+            "definition": {
+              "title": "Top 10 Leafs \u2014 Bridge Domain Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.bridge_domain.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766144,
+            "definition": {
+              "title": "Top 10 Leafs \u2014 IPv4 Endpoint Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.ipv4_endpoint.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766145,
+            "definition": {
+              "title": "Top 10 Leafs \u2014 VLAN Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.vlan.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 11,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766146,
+            "definition": {
+              "title": "Top 10 Leafs \u2014 Policy CAM Util",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.capacity.leaf.policy_cam.utilized{$tenant,$pod} by {node_id}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 11,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 44,
+        "width": 12,
+        "height": 16
+      }
+    },
+    {
+      "id": 3250638514666220,
+      "definition": {
+        "title": "Spines",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3145200399718776,
+            "definition": {
+              "title": "Avg CPU %",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.cpu.avg{apic_role:spine} by {device_id,fabric_pod_id,node_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3332653863183974,
+            "definition": {
+              "title": "Avg Memory %",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.mem.avg{apic_role:spine} by {device_id,fabric_pod_id,node_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1813163214351510,
+            "definition": {
+              "title": "Interfaces",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.egr_total.bytes.rate{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.rate{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.egr_total.bytes.cum{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.cum{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.fault_counter.crit{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RATE OF PACKETS OUT",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RATE OF PACKETS IN",
+                      "formula": "query5"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "total bytes out",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "total bytes in",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "critical faults",
+                      "formula": "query4"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 1778185117766147,
+            "definition": {
+              "title": "Top 10 Spines \u2014 CPU %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.cpu.avg{$tenant,$pod} by {node_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766148,
+            "definition": {
+              "title": "Top 10 Spines \u2014 Memory %",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.node.mem.avg{$tenant,$pod} by {node_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766149,
+            "definition": {
+              "title": "Top 10 Spines \u2014 Critical Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.node.fault_counter.crit{$tenant,$pod} by {node_id}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 7,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 60,
+        "width": 12,
+        "height": 12
+      }
+    },
+    {
+      "id": 1778185117766160,
+      "definition": {
+        "title": "Fabric Port Detail (Per-Switch-Port)",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1778185117766161,
+            "definition": {
+              "title": "Top 10 Ports \u2014 Critical Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.fault_counter.crit{$tenant,$pod} by {node_id,port}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766162,
+            "definition": {
+              "title": "Top 10 Ports \u2014 Warning Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.fault_counter.warn{$tenant,$pod} by {node_id,port}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766163,
+            "definition": {
+              "title": "Ports UP / DOWN over time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "default_zero(count_nonzero(query1))",
+                      "alias": "Ports UP",
+                      "style": {
+                        "palette": "green",
+                        "palette_index": 1
+                      }
+                    },
+                    {
+                      "formula": "default_zero(count_not_null(query1) - count_nonzero(query1))",
+                      "alias": "Ports DOWN",
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 1
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.fabric.port.status{$tenant,$pod} by {node_id,port}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766164,
+            "definition": {
+              "title": "Top 10 Ports \u2014 Egress Buffer Drops",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.egr_drop_pkts.buffer{$tenant,$pod} by {node_id,port}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766165,
+            "definition": {
+              "title": "Top 10 Ports \u2014 Egress Error Drops",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.egr_drop_pkts.errors{$tenant,$pod} by {node_id,port}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766166,
+            "definition": {
+              "title": "Port Total Bandwidth (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress (B/s)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress (B/s)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.egr_total.bytes.rate{$tenant,$pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.ingr_total.bytes.rate{$tenant,$pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766167,
+            "definition": {
+              "title": "Port Multicast Bytes (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress Multicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress Multicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.egr_bytes.multicast{$tenant,$pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.ingr_bytes.multicast{$tenant,$pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1778185117766168,
+            "definition": {
+              "title": "Port Flood Bytes (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress Flood",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress Flood",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.egr_bytes.flood{$tenant,$pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.port.ingr_bytes.flood{$tenant,$pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 72,
+        "width": 12,
+        "height": 12
+      }
+    },
+    {
+      "id": 1778185117766169,
+      "definition": {
+        "title": "Pod-Level Traffic (Aggregated)",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1778185117766170,
+            "definition": {
+              "title": "Pod Total Bandwidth (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.pod.egr_total.bytes.rate{$tenant,$pod} by {pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.pod.ingr_total.bytes.rate{$tenant,$pod} by {pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766171,
+            "definition": {
+              "title": "Pod Multicast Bytes (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress Multicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress Multicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.pod.egr_bytes.multicast{$tenant,$pod} by {pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.fabric.pod.ingr_bytes.multicast{$tenant,$pod} by {pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 84,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 5807304798323574,
+      "definition": {
+        "title": "Tenants (Logical Infrastructure)",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8,
+            "definition": {
+              "title": "Tenant Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.tenant.health{$tenant} by {tenant}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 12,
+            "definition": {
+              "title": "Tenant Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.tenant.fault_counter{$tenant} by {tenant}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 9,
+            "definition": {
+              "title": "Bandwidth by Tenant (egress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {tenant}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": false
+              },
+              "custom_links": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7114376680227872,
+            "definition": {
+              "title": "Bandwidth by Tenant (ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.tenant.ingress_bytes.unicast.rate{$tenant} by {tenant}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": false
+              },
+              "custom_links": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1778185117766125,
+            "definition": {
+              "title": "Bottom 10 Tenants \u2014 Lowest Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.tenant.health{$tenant,$pod} by {tenant}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766126,
+            "definition": {
+              "title": "Top 10 Tenants \u2014 Critical Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.fault_counter{$tenant,$pod} by {tenant}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766127,
+            "definition": {
+              "title": "Top 10 Tenants \u2014 Egress Drops",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.egress_pkts.drop.cum{$tenant,$pod} by {tenant}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 5,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766128,
+            "definition": {
+              "title": "Top 10 Tenants \u2014 Ingress Drops",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.ingress_pkts.drop.cum{$tenant,$pod} by {tenant}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766129,
+            "definition": {
+              "title": "Tenant Multicast Traffic (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress Multicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress Multicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.egress_bytes.multicast.rate{$tenant,$pod}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.ingress_bytes.multicast.rate{$tenant,$pod}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 9,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766130,
+            "definition": {
+              "title": "Tenant Unicast Bytes (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress Unicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress Unicast",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant,$pod} by {tenant}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.ingress_bytes.unicast.rate{$tenant,$pod} by {tenant}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1778185117766131,
+            "definition": {
+              "title": "Tenant Unicast Packets (Egress vs Ingress)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Egress Packets"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Ingress Packets"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.egress_pkts.unicast.rate{$tenant,$pod} by {tenant}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.ingress_pkts.unicast.rate{$tenant,$pod} by {tenant}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 89,
+        "width": 12,
+        "height": 17
+      }
+    },
+    {
+      "id": 5938183313879842,
+      "definition": {
+        "title": "EPGs (Endpoint Groups)",
+        "background_color": "green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 16,
+            "definition": {
+              "title": "Total EPGs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.tenant.egress_pkts.unicast.rate{$tenant} by {endpoint_group}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_not_null(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 17,
+            "definition": {
+              "title": "Top 10 EPGs by traffic",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {endpoint_group,tenant}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:cisco_aci.tenant.ingress_bytes.unicast.rate{$tenant} by {endpoint_group,tenant}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "top(query1, 10, 'mean', 'desc') + top(query2, 10, 'mean', 'desc')"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 19,
+            "definition": {
+              "title": "Top 10 EPG Ports by traffic",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "orange"
+                  },
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.fabric.port.egr_bytes.unicast{$tenant} by {node_id,port,endpoint_group}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_aci.fabric.port.ingr_bytes.unicast{$tenant} by {node_id,port,endpoint_group}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "exclude_null(query1) + exclude_null(query2)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 18,
+            "definition": {
+              "title": "Applications",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.tenant.ingress_pkts.flood.cum{$tenant} by {application}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_not_null(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 20,
+            "definition": {
+              "title": "Top 10 EPGs by IP",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic"
+                  },
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_aci.tenant.egress_bytes.unicast.rate{$tenant} by {ip,application,endpoint_group}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 1778185117766132,
+            "definition": {
+              "title": "Bottom 10 EPGs \u2014 Lowest Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.tenant.application.endpoint.health{$tenant,$pod} by {tenant,application,endpoint_group}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766133,
+            "definition": {
+              "title": "Top 10 EPGs \u2014 Critical Faults",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:cisco_aci.tenant.application.endpoint.fault_counter{$tenant,$pod} by {tenant,application,endpoint_group}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1778185117766134,
+            "definition": {
+              "title": "Bottom 10 Applications \u2014 Lowest Health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:cisco_aci.tenant.application.health{$tenant,$pod} by {tenant,application}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 106,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 8634681346092436,
+      "definition": {
+        "title": "Events",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 987022990164424,
+            "definition": {
+              "title": "",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:cisco-aci",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "status",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    },
+                    {
+                      "field": "@cisco_aci.ack",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@cisco_aci.cause",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@cisco_aci.code",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@cisco_aci.occur",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@cisco_aci.severity",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 7
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 115,
+        "width": 12,
+        "height": 8
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "tenant",
+      "prefix": "tenant",
+      "available_values": [
+        "her"
+      ],
+      "default": "*"
+    },
+    {
+      "name": "pod",
+      "prefix": "fabric_pod_id",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
 }

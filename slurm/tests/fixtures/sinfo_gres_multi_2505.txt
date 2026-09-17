@@ -1,0 +1,1 @@
+rtx-pro|up|slurm-mixed-gpu-001|4/0/0/4|978944|N/A|2.96|969522|0|mixed|none|cu130,driver-580.159.03,gpu,rtx-pro|2|274176|gpu:tesla:2(S:0-1),gpu:kepler:2(S:0-1)|gpu:tesla:1(IDX:0),gpu:kepler:0(IDX:N/A)

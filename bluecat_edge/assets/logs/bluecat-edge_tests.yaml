@@ -63,10 +63,10 @@ tests:
         appliedPolicyId: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
         authority:
          -
-          recordType: "SOA"
           domainName: "."
           parsed: true
           rData: "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+          recordType: "SOA"
         drsId: "87a16e58-11d3-4d45-a574-af92520d3b99"
         id: "1768799730903712CBD65A6B0963C276D07800E643DBG"
         identity:
@@ -76,9 +76,9 @@ tests:
          -
           criteria:
             queryDomain: "amazon.in"
-          name: "Local Policy"
-          id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
           eventType: "block"
+          id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+          name: "Local Policy"
         queryClassId: 1
         queryProtocol: "UDP"
         siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f48"

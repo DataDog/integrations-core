@@ -1,0 +1,157 @@
+name: HPE Aruba EdgeConnect
+fleet_configurable: true
+files:
+- name: hpe_aruba_edgeconnect.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: orchestrator_ip
+      fleet_configurable: true
+      required: true
+      description: Hostname or IP address of the HPE Aruba EdgeConnect Orchestrator.
+      value:
+        type: string
+        example: 10.0.0.1
+
+    - name: orchestrator_username
+      fleet_configurable: true
+      required: true
+      description: |
+        Username for the Orchestrator. If no appliance-specific credentials are provided,
+        this username is used as the default for appliances.
+      value:
+        type: string
+
+    - name: orchestrator_password
+      fleet_configurable: true
+      required: true
+      secret: true
+      description: |
+        Password for the Orchestrator. If no appliance-specific credentials are provided,
+        this password is used as the default for appliances.
+      value:
+        type: string
+
+    - name: namespace
+      fleet_configurable: true
+      description: Namespace to use for NDM device metadata. Defaults to "default".
+      value:
+        type: string
+        example: default
+        default: default
+    - name: appliance_ips
+      fleet_configurable: true
+      description: |
+          HPE Aruba EdgeConnect appliance IP filters. CIDR entries match any appliance IP within the block.
+          If no filters are configured, all discovered appliances are included.
+          Use `include` to specify which appliances to poll and `exclude` to skip individual appliances.
+          `exclude` takes precedence over `include`.
+      value:
+        type: object
+        properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+
+        example:
+          include:
+            - 10.0.0.0/24
+            - 192.168.1.5
+          exclude:
+            - 10.0.0.99
+    - name: max_concurrency
+      fleet_configurable: true
+      description: Maximum number of appliances to poll concurrently.
+      value:
+        type: integer
+        minimum: 1
+        default: 50
+        example: 50
+    - name: max_backfill_minutes
+      fleet_configurable: true
+      description: |
+        How many minutes of historical data to recover for each appliance after the Agent has been
+        offline. If the Agent stops collecting for a while (for example, during a restart or an
+        outage), this controls how far back in time it looks when it starts up again.
+
+        For example, with the default of 5, the Agent collects at most the last 5 minutes
+        of data per appliance after coming back online. Anything older than that is skipped, and
+        collection resumes normally from the most recent point.
+      value:
+        type: integer
+        minimum: 1
+        default: 5
+        example: 5
+    - name: appliance_credentials_overrides
+      fleet_configurable: true
+      description: |
+        Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed
+        CIDR block, the associated username and password are used instead of the main credentials.
+        If multiple CIDR blocks match, the Agent uses the first match. Each entry must specify all three
+        fields: `cidr`, `username`, and `password`.
+      value:
+        type: array
+        items:
+          type: object
+          required:
+            - cidr
+            - username
+            - password
+          properties:
+            - name: cidr
+              type: string
+            - name: username
+              type: string
+            - name: password
+              type: string
+              secret: true
+        example:
+          - cidr: 10.0.0.0/24
+            username: admin
+            password: secret
+    - template: instances/http
+      overrides:
+        persist_connections.value.default: true
+        persist_connections.value.example: true
+        persist_connections.description: |
+          Connections are always persisted to use cookies and connection pooling for improved performance.
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60
+        min_collection_interval.value.display_default: 60
+        min_collection_interval.description: |
+          Changes the collection interval of the check. For more information, see
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
+          The default is 60 seconds. Statistics are only available at one-minute intervals, 
+          so more frequent runs do not collect additional data.
+
+    - name: send_ndm_metadata
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
+      value:
+        type: boolean
+        example: False
+        default: False
+    - name: collect_events
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable collection of HPE Aruba EdgeConnect alarm events.
+      value:
+        type: boolean
+        example: False
+        default: False
+  - template: logs
+    example:
+    - type: tcp
+      port: 10514
+      service: hpe_aruba_edgeconnect
+      source: hpe_aruba_edgeconnect

@@ -63,9 +63,11 @@ files:
         example:
           - https://%%host%%:2379/metrics
           - http://%%host%%:2379/metrics
+      fleet_configurable: false
     - name: ssl_verify
       required: true
       description: Used to verify self signed certificates.
       value:
         type: boolean
         example: false
+      fleet_configurable: false

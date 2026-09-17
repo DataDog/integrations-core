@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.utils import get_active_env
@@ -110,9 +111,11 @@ def setup_cilium():
     )
     if result.stderr:
         raise Exception(result.stderr)
-    pods = result.stdout.split(" ")
+    cilium_pods = result.stdout.split()
+    if not cilium_pods:
+        raise AssertionError("No Cilium pods found")
 
-    for pod in pods:
+    for pod in cilium_pods:
         result = run_command(
             [
                 "kubectl",
@@ -121,7 +124,7 @@ def setup_cilium():
                 "cilium",
                 "-c",
                 "cilium-agent",
-                pod.strip(),
+                pod,
                 "--",
                 "cilium",
                 "endpoint",
@@ -131,6 +134,52 @@ def setup_cilium():
         )
         if result.stderr:
             raise Exception(result.stderr)
+
+    WaitFor(
+        wait_for_cilium_metric_families,
+        attempts=60,
+        wait=2,
+        args=(
+            cilium_pods,
+            [
+                "cilium_forward_bytes_total",
+                "cilium_forward_count_total",
+                "cilium_endpoint_regeneration_time_stats_seconds",
+                "cilium_policy_regeneration_time_stats_seconds",
+            ],
+        ),
+    )()
+
+
+def wait_for_cilium_metric_families(pods, families):
+    missing = []
+    for pod in pods:
+        for family in families:
+            result = run_command(
+                [
+                    "kubectl",
+                    "exec",
+                    "-n",
+                    "cilium",
+                    "-c",
+                    "cilium-agent",
+                    pod,
+                    "--",
+                    "cilium",
+                    "metrics",
+                    "list",
+                    "--match-pattern",
+                    family,
+                ],
+                capture=True,
+            )
+            if result.code != 0:
+                raise Exception(result.stderr or result.stdout)
+            if family not in result.stdout:
+                missing.append("{} on {}".format(family, pod))
+
+    if missing:
+        raise AssertionError("Cilium metric families are not available yet: {}".format(", ".join(missing)))
 
 
 def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):

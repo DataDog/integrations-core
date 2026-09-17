@@ -3,10 +3,9 @@
 ## Overview
 
 <div class="alert alert-warning">
-This integration is in maintenance mode. It can only work with Python 2.
+This integration is deprecated and is no longer shipped with current Agent releases.
 It is not included with the Agent newer than v7.37. Agent 6 bugfix releases will continue to include it.
 </div>
-
 
 This check collects TokuMX metrics, including:
 
@@ -20,7 +19,8 @@ This check collects TokuMX metrics, including:
 
 ### Installation
 
-The TokuMX check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
+The TokuMX check was included in [Datadog Agent][1] packages through Agent 7.37 and is included in Agent 6. No additional installation is
+needed on those Agents.
 
 ### Configuration
 
@@ -69,7 +69,7 @@ For more details about creating and managing users in MongoDB, see the [MongoDB 
 To configure this check for an Agent running on a host:
 
 1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-   See the [sample tokumx.d/conf.yaml][4] for all available configuration options:
+   See the [legacy sample tokumx.d/conf.yaml][4] for all available configuration options:
 
    ```yaml
    init_config:
@@ -127,7 +127,7 @@ Need help? Contact [Datadog support][10].
 [1]: /account/settings/agent/latest
 [2]: https://docs.mongodb.com/manual/security/
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/tokumx/datadog_checks/tokumx/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/7.37.0/tokumx/datadog_checks/tokumx/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

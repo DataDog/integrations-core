@@ -150,6 +150,11 @@ instances:
     #
     # empty_default_hostname: true
 
+    ## @param infrastructure_mode - string - optional - default: full
+    ## The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
+    #
+    # infrastructure_mode: full
+
     ## @param collected_task_types - list of strings - optional - default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
     ## Which Proxmox task types to collect.
     ##

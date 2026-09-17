@@ -81,6 +81,7 @@ files:
                   port: <PORT_1>
                 - server: <SERVER_2>
                   port: <PORT_2>
+            fleet_configurable: false
           - name: connection_load_balance
             fleet_configurable: true
             description: |
@@ -105,6 +106,7 @@ files:
             value:
               type: boolean
               example: false
+            fleet_configurable: false
           - template: instances/tls
           - template: instances/default
           - template: instances/db

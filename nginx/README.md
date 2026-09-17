@@ -215,9 +215,9 @@ _Available for Agent versions >6.0_
 ```conf
 http {
 	#recommended log format
-	log_format nginx '\$remote_addr - \$remote_user [\$time_local] '
-                  '"\$request" \$status \$body_bytes_sent \$request_time '
-                  '"\$http_referer" "\$http_user_agent"';
+	log_format nginx '$remote_addr - $remote_user [$time_local] '
+                  '"$request" $status $body_bytes_sent $request_time '
+                  '"$http_referer" "$http_user_agent"';
 
 	access_log /var/log/nginx/access.log;
 }
@@ -262,13 +262,15 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-To collect metrics, set the following parameters and values in an [Autodiscovery template][11]. You can do this with Kubernetes Annotations (shown below) on your NGINX pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
+To collect metrics, set the following parameters and values with one of the Kubernetes Autodiscovery options below. You can also use a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
 
 | Parameter            | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `["nginx"]`                                                                |
 | `<INIT_CONFIG>`      | `[{}]`                                                                     |
 | `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:18080/nginx_status"}]`             |
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -312,6 +314,29 @@ metadata:
   labels:
     name: nginx
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <NGINX_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: nginx
+        containerName: nginx
+        initConfig: {}
+        instances:
+          - nginx_status_url: "http://%%host%%:81/nginx_status/"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][24].
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
@@ -467,3 +492,4 @@ Additional helpful documentation, links, and articles:
 [21]: https://www.datadoghq.com/blog/how-to-monitor-nginx
 [22]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [23]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[24]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

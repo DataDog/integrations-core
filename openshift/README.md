@@ -159,6 +159,33 @@ The OpenShift check does not include any Service Checks.
 
 ## Troubleshooting
 
+### Missing cluster quota metrics
+
+In an OpenShift cluster, most of the Agent and Cluster Agent reported metrics are the same as in other Kubernetes clusters. The only OpenShift-specific metrics are the ones listed above starting with `openshift.*`. These correspond to the optional [OpenShift `ClusterResourceQuota` objects][19] that you can deploy in your clusters. If you use native [Kubernetes `ResourceQuotas` objects][20], those are reported by the `kubernetes_state_core` (KSM) check as `kubernetes_state.resourcequota.*` metrics.
+
+These OpenShift metrics are reported per *active* `ClusterResourceQuota` as part of the Cluster Agent's [`kubernetes_apiserver` check][1]. For a `ClusterResourceQuota` to be active, it must be able to identify an OpenShift project (Kubernetes namespace) with the matching label or annotation selectors.
+
+You can confirm that these resources exist by running `oc get clusterresourcequotas`. Then, run `oc describe clusterresourcequotas <NAME>` to check whether a quota is active. An active quota looks like:
+
+```
+$ oc describe clusterresourcequota example-cluster-quota
+Name: example-cluster-quota
+Created: 2 weeks ago
+Labels: <none>
+Annotations: <none>
+Namespace Selector: []
+Label Selector:
+AnnotationSelector: map[example-annotation:value]
+Resource Used Hard
+-------- ---- ----
+pods      1     10
+secrets   9     20
+```
+
+In the example above, metrics for this quota are reported only for pod and secret usage. As you apply quotas to [different resources][21] like CPU, storage, ConfigMaps, the corresponding usage metrics are reported.
+
+If your `ClusterResourceQuota` describe output does not show any resources or their Used/Hard values, the quota is not actively applied by its selectors. No data is reported for these non-active quotas.
+
 Need help? Contact [Datadog support][14].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
@@ -179,3 +206,6 @@ Need help? Contact [Datadog support][14].
 [16]: https://github.com/DataDog/helm-charts/blob/main/examples/datadog/agent_on_openshift_values.yaml
 [17]: https://github.com/DataDog/datadog-operator/blob/main/examples/datadogagent/datadog-agent-on-openshift.yaml
 [18]: https://docs.datadoghq.com/containers/kubernetes/apm
+[19]: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/building_applications/quotas#setting-quotas-across-multiple-projects
+[20]: https://kubernetes.io/docs/concepts/policy/resource-quotas/
+[21]: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/building_applications/quotas#quotas-resources-managed_quotas-setting-per-project

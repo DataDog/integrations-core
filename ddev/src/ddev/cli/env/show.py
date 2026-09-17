@@ -72,7 +72,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
         app.display_table('Available', available_columns, show_lines=True, force_ascii=force_ascii)
     # Display information about a specific environment
     else:
-        from ddev.e2e.agent import get_agent_interface
+        from ddev.e2e.agent import create_agent_interface
 
         integration = app.repo.integrations.get(intg_name)
         env_data = storage.get(integration.name, environment)
@@ -82,7 +82,7 @@ def show(app: Application, *, intg_name: str | None, environment: str | None, fo
 
         metadata = env_data.read_metadata()
         agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-        agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
+        agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
         app.display_pair('Agent type', agent_type)
         app.display_pair('Agent ID', agent.get_id())

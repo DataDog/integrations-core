@@ -276,17 +276,16 @@ ZTUNNEL_METRICS = {
     'istio_dns_upstream_failures_total': 'dns.upstream_failures.total',
     'istio_dns_upstream_request_duration_seconds': 'dns.upstream_request_duration_seconds',
     'istio_on_demand_dns_total': 'on_demand_dns.total',
-    # In-pod proxy management metrics (unstable)
-    'istio_active_proxy_count_total': 'active_proxy_count.total',
-    'istio_pending_proxy_count_total': 'pending_proxy_count.total',
-    'istio_proxies_started_total': 'proxies_started.total',
-    'istio_proxies_stopped_total': 'proxies_stopped.total',
+    # In-pod proxy management metrics (unstable). Ztunnel exposes these under the
+    # workload_manager_* family, not istio_*.
+    'workload_manager_active_proxy_count': 'active_proxy_count',
+    'workload_manager_pending_proxy_count': 'pending_proxy_count',
+    'workload_manager_proxies_started_total': 'proxies_started.total',
+    'workload_manager_proxies_stopped_total': 'proxies_stopped.total',
     # XDS metrics (unstable)
     'istio_xds_connection_terminations_total': 'xds.connection_terminations.total',
-    # Connection metrics (unstable)
-    'istio_connection_opens_total': 'connection.opens.total',
-    'istio_connection_closes_total': 'connection.closes.total',
-    'istio_connection_termination_total': 'connection.termination.total',
+    'istio_xds_message_total': 'xds.message.total',
+    'istio_xds_message_bytes_total': 'xds.message_bytes.total',
 }
 
 
@@ -498,12 +497,28 @@ NON_CONFORMING_METRICS = [
 # Helper function that will strip _total from both the raw metric name and the metric name
 def construct_metrics_config(metric_map):
     metrics = []
+
+    # Metrics where both gauge (X) and counter (X_total) exist must use native_dynamic
+    # to avoid the OpenMetrics V2 parser locking to the wrong type after stripping _total.
+    dynamic_metrics = {
+        name
+        for name in metric_map
+        if not name.endswith('_total')
+        and '{}_total'.format(name) in metric_map
+        and '{}_total'.format(name) not in NON_CONFORMING_METRICS
+    }
+
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name.endswith('_total') and raw_metric_name not in NON_CONFORMING_METRICS:
-            raw_metric_name = raw_metric_name[:-6]
+            base_name = raw_metric_name[:-6]
+            if base_name in dynamic_metrics:
+                continue
+            raw_metric_name = base_name
             metric_name = metric_name[:-6]
 
         config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in dynamic_metrics:
+            config[raw_metric_name]['type'] = 'native_dynamic'
         metrics.append(config)
 
     return metrics

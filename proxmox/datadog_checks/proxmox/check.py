@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from typing import Any
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
@@ -15,6 +16,7 @@ from .constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
     EVENT_TYPE_TO_TITLE,
+    INFRA_MODE_METRIC,
     NODE_RESOURCE,
     OK_STATUS,
     PERF_METRIC_NAME,
@@ -138,7 +140,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_value = resource.get(metric_name)
             metric_method = self.count if metric_name in RESOURCE_COUNT_METRICS else self.gauge
             if metric_value is not None:
-                metric_method(f'{metric_name_remapped}', metric_value, tags=tags, hostname=hostname)
+                metric_tags = tags
+                infra_mode = self.config.infrastructure_mode
+                if metric_name_remapped == INFRA_MODE_METRIC and hostname and infra_mode != 'full':
+                    metric_tags = list(tags) + [f'infra_mode:{infra_mode}']
+                metric_method(f'{metric_name_remapped}', metric_value, tags=metric_tags, hostname=hostname)
 
     def _get_vm_hostname(self, vm_id, vm_name, node):
         try:
@@ -251,6 +257,31 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_method = self.count if metric_type == 'derive' else self.gauge
             metric_method(metric_name_remapped, metric_value, tags=tags, hostname=hostname)
 
+    def _submit_vcpu_metric(
+        self,
+        resource: dict[str, Any],
+        resource_type: str,
+        resource_id: str,
+        point_tags: list[str],
+        hostname: str | None,
+    ) -> None:
+        # Containers are excluded: an unlimited container reports the host's whole thread count.
+        if resource_type not in (VM_RESOURCE, NODE_RESOURCE):
+            return
+
+        maxcpu = resource.get('maxcpu')
+        if maxcpu is None:
+            self.log.debug(
+                "Skipping vCPU metric for %s %s: `maxcpu` missing from the /cluster/resources payload",
+                resource_type,
+                resource_id,
+            )
+            return
+
+        # `point_tags`, not the resource's own `tags`: those go to external host tags, which never
+        # reach the metric payload.
+        self.gauge(f'{resource_type}.cpu.max', maxcpu, tags=point_tags, hostname=hostname)
+
     def _collect_resource_metrics(self):
         self.log.debug("Collecting resource metrics.")
         resources_response = self.http.get(f"{self.config.proxmox_server}/cluster/resources")
@@ -296,7 +327,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
             hostname = None
 
-            if (resource_type_remapped == VM_RESOURCE or resource_type_remapped == NODE_RESOURCE) and status == 0:
+            if resource_type_remapped in (VM_RESOURCE, NODE_RESOURCE) and status == 0:
                 # don't collect information about powered off VMs and nodes
                 self.log.debug("Skipping resource %s as it is powered off.", resource_name)
                 continue
@@ -317,12 +348,14 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 self.log.debug("skipping resource %s: %s as it is not collected by filters")
                 continue
 
+            full_tags = self.base_tags + list(resource_tags)
+
             tags = []
             if hostname is None:
-                tags = self.base_tags + list(resource_tags)
+                tags = full_tags
             else:
                 self.log.debug("Adding external tags for resource %s", resource_name)
-                external_tags.append((hostname, {self.__NAMESPACE__: self.base_tags + list(resource_tags)}))
+                external_tags.append((hostname, {self.__NAMESPACE__: full_tags}))
 
             resource_val['tags'] = tags
             self.log.debug("Created resource: %s", resource_val)
@@ -331,8 +364,10 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.gauge(
                 f'{resource_type_remapped}.count',
                 1,
-                tags=self.base_tags + list(resource_tags),
+                tags=full_tags,
             )
+
+            self._submit_vcpu_metric(resource, resource_type_remapped, resource_id, full_tags, hostname)
 
             if resource_type_remapped != "pool":
                 # pools don't have a status attribute

@@ -9,6 +9,12 @@ HEALTH_METRICS = ["nutanix.health.up"]
 # Host storage_* metric names — derived so test guards stay in sync with the production map.
 HOST_STORAGE_METRICS: frozenset[str] = frozenset(f"nutanix.{HOST_STATS_METRICS[k]}" for k in HOST_STORAGE_STAT_KEYS)
 
+ALERT_METRICS_OPTIONAL = [
+    "nutanix.alert.open",
+    "nutanix.alert.acknowledged",
+    "nutanix.alert.resolved",
+]
+
 CLUSTER_STATS_METRICS_REQUIRED = [
     "nutanix.cluster.aggregate_hypervisor.memory_usage",
     "nutanix.cluster.controller.avg_io_latency",

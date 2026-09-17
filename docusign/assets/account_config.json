@@ -1,0 +1,23 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "oauth",
+      "oauth2_authorization_code": {
+        "authorization_server": {
+          "authorization_endpoint": "https://account.docusign.com/oauth/auth"
+        },
+        "authorization_request": {
+          "scopes": ["signature", "impersonation"]
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "tags",
+      "label": "Tags",
+      "editable": true,
+      "tags": {}
+    }
+  ]
+}

@@ -34,6 +34,12 @@ STATS_METRICS = {
         ('avg_query', ('pgbouncer.stats.avg_query', GAUGE)),  # < 1.8
         ('avg_xact_time', ('pgbouncer.stats.avg_transaction_time', GAUGE)),  # >= 1.8
         ('avg_query_time', ('pgbouncer.stats.avg_query_time', GAUGE)),  # >= 1.8
+        ('total_client_parse_count', ('pgbouncer.stats.client_parse_count_per_second', RATE)),  # >= 1.24
+        ('total_server_parse_count', ('pgbouncer.stats.server_parse_count_per_second', RATE)),  # >= 1.24
+        ('total_bind_count', ('pgbouncer.stats.bind_count_per_second', RATE)),  # >= 1.24
+        ('avg_client_parse_count', ('pgbouncer.stats.avg_client_parse_count', GAUGE)),  # >= 1.24
+        ('avg_server_parse_count', ('pgbouncer.stats.avg_server_parse_count', GAUGE)),  # >= 1.24
+        ('avg_bind_count', ('pgbouncer.stats.avg_bind_count', GAUGE)),  # >= 1.24
     ],
     'query': """SHOW STATS""",
 }
@@ -71,6 +77,7 @@ CLIENTS_METRICS = {
         ('request_time', ('pgbouncer.clients.request_time', GAUGE)),
         ('wait', ('pgbouncer.clients.wait', GAUGE)),  # >= 1.8
         ('wait_us', ('pgbouncer.clients.wait_us', GAUGE)),  # >= 1.8
+        ('prepared_statements', ('pgbouncer.clients.prepared_statements', GAUGE)),  # >= 1.21
     ],
     'query': """SHOW CLIENTS""",
 }
@@ -80,6 +87,7 @@ SERVERS_METRICS = {
     'metrics': [
         ('connect_time', ('pgbouncer.servers.connect_time', GAUGE)),
         ('request_time', ('pgbouncer.servers.request_time', GAUGE)),
+        ('prepared_statements', ('pgbouncer.servers.prepared_statements', GAUGE)),  # >= 1.21
     ],
     'query': """SHOW SERVERS""",
 }

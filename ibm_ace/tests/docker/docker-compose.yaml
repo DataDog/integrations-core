@@ -19,7 +19,8 @@ services:
     - ./policy.descriptor:/home/aceuser/initial-config/policy/policy.descriptor
     - ./setdbparms.txt:/home/aceuser/initial-config/setdbparms/setdbparms.txt
     depends_on:
-    - ibm-ace-mq
+      ibm-ace-mq:
+        condition: service_healthy
   ibm-ace-mq:
     container_name: ibm-ace-mq
     image: ibmcom/mq:${IBM_MQ_VERSION}
@@ -28,3 +29,9 @@ services:
     - LICENSE=accept
     ports:
     - 11414:1414
+    healthcheck:
+      test: ["CMD", "chkmqready"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s

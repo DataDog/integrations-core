@@ -71,28 +71,28 @@ tests:
     custom:
       allapplications:
        -
-        id: 989025
-        label: "Some APIs"
         category:
           id: 1
           label: "Application Development and Testing"
+        id: 989025
+        label: "Some APIs"
       categories:
        -
         deprecated: true
-        integration: false
         id: 23
+        integration: false
         label: "Search Engines"
         type: "content"
        -
         deprecated: false
-        integration: false
         id: 148
+        integration: false
         label: "Application"
         type: "application"
        -
         deprecated: false
-        integration: false
         id: 190
+        integration: false
         label: "Search Engines and Portals"
         type: "content"
       cisco:
@@ -179,8 +179,8 @@ tests:
       policycategories:
        -
         deprecated: false
-        integration: false
         id: 190
+        integration: false
         label: "Search Engines and Portals"
         type: "content"
       querytype: "A"
@@ -328,34 +328,34 @@ tests:
     custom:
       allapplications:
        -
-        id: 992107
-        label: "test.com"
         category:
           id: 47
           label: "Media"
+        id: 992107
+        label: "test.com"
       categories:
        -
         deprecated: true
-        integration: false
         id: 17
+        integration: false
         label: "Movies"
         type: "content"
        -
         deprecated: true
-        integration: false
         id: 26
+        integration: false
         label: "Television"
         type: "content"
        -
         deprecated: false
-        integration: false
         id: 148
+        integration: false
         label: "Application"
         type: "application"
        -
         deprecated: false
-        integration: false
         id: 194
+        integration: false
         label: "Streaming Video"
         type: "content"
       cisco:
@@ -434,8 +434,8 @@ tests:
       policycategories:
        -
         deprecated: false
-        integration: false
         id: 194
+        integration: false
         label: "Streaming Video"
         type: "content"
       querytype: "A"
@@ -574,28 +574,28 @@ tests:
     custom:
       allapplications:
        -
-        id: 987820
-        label: "Social Media Platform"
         category:
           id: 33
           label: "Social Networking"
+        id: 987820
+        label: "Social Media Platform"
       categories:
        -
         deprecated: true
-        integration: false
         id: 20
+        integration: false
         label: "Photo Sharing"
         type: "content"
        -
         deprecated: false
-        integration: false
         id: 24
+        integration: false
         label: "Social Networking"
         type: "content"
        -
         deprecated: false
-        integration: false
         id: 148
+        integration: false
         label: "Application"
         type: "application"
       cisco:
@@ -672,8 +672,8 @@ tests:
       policycategories:
        -
         deprecated: false
-        integration: false
         id: 24
+        integration: false
         label: "Social Networking"
         type: "content"
       querytype: "A"
@@ -852,20 +852,20 @@ tests:
       categories:
        -
         deprecated: true
-        integration: false
         id: 23
+        integration: false
         label: "Search Engines"
         type: "content"
        -
         deprecated: false
-        integration: false
         id: 148
+        integration: false
         label: "Application"
         type: "application"
        -
         deprecated: false
-        integration: false
         id: 190
+        integration: false
         label: "Search Engines and Portals"
         type: "content"
       cisco:
@@ -991,8 +991,8 @@ tests:
       policycategories:
        -
         deprecated: false
-        integration: false
         id: 190
+        integration: false
         label: "Search Engines and Portals"
         type: "content"
       port: 443
@@ -1218,20 +1218,20 @@ tests:
       categories:
        -
         deprecated: true
-        integration: false
         id: 23
+        integration: false
         label: "Search Engines"
         type: "content"
        -
         deprecated: false
-        integration: false
         id: 148
+        integration: false
         label: "Application"
         type: "application"
        -
         deprecated: false
-        integration: false
         id: 190
+        integration: false
         label: "Search Engines and Portals"
         type: "content"
       cisco:
@@ -1357,8 +1357,8 @@ tests:
       policycategories:
        -
         deprecated: false
-        integration: false
         id: 190
+        integration: false
         label: "Search Engines and Portals"
         type: "content"
       port: 443

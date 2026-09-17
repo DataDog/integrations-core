@@ -2,6 +2,12 @@ name: Daily Flaky Tests (every 8 hours)
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip committing the test-results badge."
+        required: false
+        default: false
+        type: boolean
   schedule:
   # 4 AM, 12 PM, 8 PM UTC
   - cron: "0 4,12,20 * * *"
@@ -32,6 +38,8 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts in test-target.yml
+       id-token: write
 
   publish-test-results:
     needs:
@@ -46,4 +54,6 @@ jobs:
       pull-requests: write # Needed for test-results-master
 
     uses: ./.github/workflows/test-results-master.yml
+    with:
+      dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit

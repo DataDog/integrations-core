@@ -1,1 +1,0 @@
-Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance.

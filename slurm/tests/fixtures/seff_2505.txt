@@ -1,0 +1,11 @@
+Job ID: 317
+Cluster: slurm
+User/Group: steven.yuen/steven.yuen
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 12
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 00:01:00 core-walltime
+Job Wall-clock time: 00:00:05
+Memory Utilized: 776.00 KB
+Memory Efficiency: 0.00% of 89.25 GB (7.44 GB/core)

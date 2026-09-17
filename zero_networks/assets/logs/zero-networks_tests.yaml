@@ -35,8 +35,8 @@ tests:
         auditType: 1
         destinationEntitiesList:
          -
-          name: "Test User"
           id: "c05d5f20-89a3-4948-bcc6-8cc6e2aab3fe"
+          name: "Test User"
         details: "{\"publicIp\":\"163.116.212.44\",\"tokenTtl\":\"2025-01-07T08:35:30.000Z\",\"idp\":1,\"role\":1}"
         enforcementSource: 4
         isoTimestamp: "2024-12-31T08:35:30.990Z"

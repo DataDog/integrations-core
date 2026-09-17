@@ -1,0 +1,11 @@
+services:
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "8000:8000"
+      - "8081:8081"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/dynamo_frontend_metrics.txt:/usr/share/caddy/frontend_metrics
+      - ../fixtures/dynamo_worker_metrics.txt:/usr/share/caddy/worker_metrics

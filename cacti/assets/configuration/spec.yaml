@@ -20,6 +20,7 @@ files:
             value:
               example: 3306
               type: integer
+            fleet_configurable: false
           - name: mysql_user
             fleet_configurable: true
             required: true
@@ -37,6 +38,7 @@ files:
             value:
               example: cacti
               type: string
+            fleet_configurable: false
           - name: rrd_path
             fleet_configurable: true
             required: true
@@ -76,6 +78,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: rrd_whitelist
             description: |
               The `rrd_whitelist` is a path to a text file that has a list of file patterns,
@@ -85,6 +88,7 @@ files:
               example: <RRD_WHITELIST_FILE_PATH>
               type: string
               require_trusted_provider: true
+            fleet_configurable: false
           - template: instances/default
       - template: logs
         example:

@@ -1,7 +1,183 @@
 id: dnsfilter
 tests:
-  -
-    sample: |-
+- sample: |-
+    {
+      "local_user_id": 4568300,
+      "code": "NOERROR",
+      "policy_id": 1259000,
+      "application_category_id": 8,
+      "local_user_name": "John",
+      "server_address": "10.0.0.2",
+      "result": "allowed",
+      "collection_id": 12500,
+      "protocol": "udp",
+      "application_name": "Hao123",
+      "agenttype": "agent",
+      "collections": [
+        12500,
+        12580
+      ],
+      "method_name": "Category",
+      "mac_address": "c0b883203abc",
+      "responsetime": 0,
+      "request_address": "10.0.0.1",
+      "id": 2800,
+      "categories": [
+        40
+      ],
+      "local_user_login": "ASSETTAG-EID\\John",
+      "agent_type_raw": "windows",
+      "agentid": "69290bde-69c4-4205-b320-56a8712b9abc",
+      "scheduled_policy_id": 56611,
+      "method": 20,
+      "categories_names": [
+        "Content Servers"
+      ],
+      "fqdn": "gum.criteo.com",
+      "question_type": "A",
+      "network_name": "Your First Network",
+      "policy_name": "Your First Policy",
+      "server_id": 212800,
+      "local_ipv4_address": "172.0.0.1",
+      "application_id": 572,
+      "scheduled_policy_name": "test-DD",
+      "domain": "criteo.com",
+      "agentname": "AssetTag-EID",
+      "collections_names": [
+        "testing collection",
+        "Blocked Requests"
+      ],
+      "networkid": 8397000,
+      "time": "2025-05-23 05:20:24.085",
+      "threat": false,
+      "local_ipv6_address": "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+      "application_category_name": "Portal",
+      "region": "BOM",
+      "collection_name": "testing collection"
+    }
+  result:
+    custom:
+      agent_type_raw: windows
+      agentid: 69290bde-69c4-4205-b320-56a8712b9abc
+      agentname: AssetTag-EID
+      agenttype: agent
+      application_category_id: 8
+      application_category_name: Portal
+      application_id: 572
+      application_name: Hao123
+      categories:
+      - 40
+      categories_names:
+      - Content Servers
+      code: NOERROR
+      collection_id: 12500
+      collection_name: testing collection
+      collections:
+      - 12500
+      - 12580
+      collections_names:
+      - testing collection
+      - Blocked Requests
+      dns:
+        flags:
+          rcode: NOERROR
+        question:
+          name: criteo.com
+          type: A
+      domain: criteo.com
+      evt:
+        outcome: allowed
+      fqdn: gum.criteo.com
+      id: 2800
+      local_ipv4_address: 172.0.0.1
+      local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_user_id: 4568300
+      local_user_login: ASSETTAG-EID\John
+      local_user_name: John
+      mac_address: c0b883203abc
+      method: 20
+      method_name: Category
+      network:
+        client:
+          geoip: {}
+          ip: 10.0.0.1
+      network_name: Your First Network
+      networkid: 8397000
+      ocsf:
+        action: Allowed
+        action_id: 1
+        activity_id: 1
+        activity_name: Query
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Outbound
+          direction_id: 2
+          protocol_name: udp
+        disposition: Allowed
+        disposition_id: 1
+        dst_endpoint:
+          ip: 10.0.0.2
+          uid: '212800'
+        duration: 0
+        firewall_rule:
+          name: Content Servers
+          uid: '40'
+        is_alert: false
+        metadata:
+          event_code: Category
+          original_time: '2025-05-23 05:20:24.085'
+          product:
+            name: DNSFilter
+            vendor_name: DNSFilter
+          profiles:
+          - security_control
+          uid: '2800'
+          version: 1.5.0
+        query:
+          hostname: gum.criteo.com
+          type: A
+        rcode: NoError
+        rcode_id: 0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          hostname: AssetTag-EID
+          intermediate_ips:
+          - 10.0.0.1
+          ip: 172.0.0.1
+          mac: c0b883203abc
+          name: AssetTag-EID
+          owner:
+            name: John
+            uid: '4568300'
+          uid: 69290bde-69c4-4205-b320-56a8712b9abc
+        status: Success
+        status_code: NOERROR
+        status_id: 1
+        time: 1747977624085
+      policy_id: 1259000
+      policy_name: Your First Policy
+      protocol: udp
+      question_type: A
+      region: BOM
+      request_address: 10.0.0.1
+      responsetime: 0
+      result: allowed
+      scheduled_policy_id: 56611
+      scheduled_policy_name: test-DD
+      server_address: 10.0.0.2
+      server_id: 212800
+      status: info
+      threat: false
+      time: '2025-05-23 05:20:24.085'
+      timestamp: 1747977624085
+      usr:
+        id: 4568300
+        name: John
+    message: |-
       {
         "local_user_id" : 4568300,
         "code" : "NOERROR",
@@ -46,117 +222,178 @@ tests:
         "region" : "BOM",
         "collection_name" : "testing collection"
       }
-    result:
-      custom:
-        agent_type_raw: "windows"
-        agentid: "69290bde-69c4-4205-b320-56a8712b9abc"
-        agentname: "AssetTag-EID"
-        agenttype: "agent"
-        application_category_id: 8
-        application_category_name: "Portal"
-        application_id: 572
-        application_name: "Hao123"
-        categories:
-        - 40
-        categories_names:
-        - "Content Servers"
-        collection_id: 12500
-        collection_name: "testing collection"
-        collections:
-        - 12500
-        - 12580
-        collections_names:
-        - "testing collection"
-        - "Blocked Requests"
-        dns:
-          flags:
-            rcode: "NOERROR"
-          question:
-            name: "criteo.com"
-            type: "A"
-        evt:
-          outcome: "allowed"
-        fqdn: "gum.criteo.com"
-        id: 2800
-        local_ipv4_address: "172.0.0.1"
-        local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
-        local_user_login: "ASSETTAG-EID\\John"
-        mac_address: "c0b883203abc"
-        method: 20
-        method_name: "Category"
-        network:
-          client:
-            geoip: {}
-            ip: "10.0.0.1"
-        network_name: "Your First Network"
-        networkid: 8397000
-        policy_id: 1259000
-        policy_name: "Your First Policy"
-        protocol: "udp"
-        region: "BOM"
-        responsetime: 0
-        scheduled_policy_id: 56611
-        scheduled_policy_name: "test-DD"
-        server_address: "10.0.0.2"
-        server_id: 212800
-        status: "info"
-        threat: false
-        time: "2025-05-23 05:20:24.085"
-        timestamp: 1747977624085
-        usr:
-          id: 4568300
-          name: "John"
-      message: |-
-        {
-          "local_user_id" : 4568300,
-          "code" : "NOERROR",
-          "policy_id" : 1259000,
-          "application_category_id" : 8,
-          "local_user_name" : "John",
-          "server_address" : "10.0.0.2",
-          "result" : "allowed",
-          "collection_id" : 12500,
-          "protocol" : "udp",
-          "application_name" : "Hao123",
-          "agenttype" : "agent",
-          "collections" : [ 12500, 12580 ],
-          "method_name" : "Category",
-          "mac_address" : "c0b883203abc",
-          "responsetime" : 0,
-          "request_address" : "10.0.0.1",
-          "id" : 2800,
-          "categories" : [ 40 ],
-          "local_user_login" : "ASSETTAG-EID\\John",
-          "agent_type_raw" : "windows",
-          "agentid" : "69290bde-69c4-4205-b320-56a8712b9abc",
-          "scheduled_policy_id" : 56611,
-          "method" : 20,
-          "categories_names" : [ "Content Servers" ],
-          "fqdn" : "gum.criteo.com",
-          "question_type" : "A",
-          "network_name" : "Your First Network",
-          "policy_name" : "Your First Policy",
-          "server_id" : 212800,
-          "local_ipv4_address" : "172.0.0.1",
-          "application_id" : 572,
-          "scheduled_policy_name" : "test-DD",
-          "domain" : "criteo.com",
-          "agentname" : "AssetTag-EID",
-          "collections_names" : [ "testing collection", "Blocked Requests" ],
-          "networkid" : 8397000,
-          "time" : "2025-05-23 05:20:24.085",
-          "threat" : false,
-          "local_ipv6_address" : "fdfe:9042:c53d:0:84bd:853e:965f:babc",
-          "application_category_name" : "Portal",
-          "region" : "BOM",
-          "collection_name" : "testing collection"
-        }
+    status: info
+    tags:
+    - source:LOGS_SOURCE
+    timestamp: 1747977624085
+- sample: |-
+    {
+      "local_user_id" : 4532000,
+      "code" : "NOERROR",
+      "policy_id" : 1249100,
+      "application_category_id" : 8,
+      "local_user_name" : "admin",
+      "server_address" : "10.0.0.2",
+      "result" : "blocked",
+      "collection_id" : 12500,
+      "protocol" : "udp",
+      "application_name" : "Hao123",
+      "agenttype" : "agent",
+      "collections" : [ 12500, 12580 ],
+      "method_name" : "Security",
+      "mac_address" : "00505692e336",
+      "responsetime" : 0,
+      "request_address" : "10.0.0.1",
+      "id" : 2100,
+      "categories" : [ 52 ],
+      "local_user_login" : "WIN11-50-8-1\\admin",
+      "agent_type_raw" : "windows",
+      "agentid" : "2b63f879-3439-43e5-86b6-d46f0f12cabc",
+      "scheduled_policy_id" : 56600,
+      "method" : 36,
+      "categories_names" : [ "Phishing" ],
+      "fqdn" : "www.cricketbettingpro.com",
+      "question_type" : "A",
+      "network_name" : "Your First Network",
+      "policy_name" : "Your First Policy",
+      "server_id" : 212800,
+      "local_ipv4_address" : "10.50.8.1",
+      "application_id" : 570,
+      "scheduled_policy_name" : "test-DD",
+      "domain" : "cricketbettingpro.com",
+      "agentname" : "WIN11-50-8-1",
+      "collections_names" : [ "testing collection", "Blocked Requests" ],
+      "networkid" : 8305000,
+      "time" : "2025-04-22 08:38:53.161",
+      "threat" : true,
+      "local_ipv6_address" : "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+      "application_category_name" : "Portal",
+      "region" : "BOM",
+      "collection_name" : "testing collection"
+    }
+  result:
+    custom:
+      agent_type_raw: "windows"
+      agentid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+      agentname: "WIN11-50-8-1"
+      agenttype: "agent"
+      application_category_id: 8
+      application_category_name: "Portal"
+      application_id: 570
+      application_name: "Hao123"
+      categories:
+       - 52
+      categories_names:
+       - "Phishing"
+      code: "NOERROR"
+      collection_id: 12500
+      collection_name: "testing collection"
+      collections:
+       - 12500
+       - 12580
+      collections_names:
+       - "testing collection"
+       - "Blocked Requests"
+      dns:
+        flags:
+          rcode: "NOERROR"
+        question:
+          name: "cricketbettingpro.com"
+          type: "A"
+      domain: "cricketbettingpro.com"
+      evt:
+        outcome: "blocked"
+      fqdn: "www.cricketbettingpro.com"
+      id: 2100
+      local_ipv4_address: "10.50.8.1"
+      local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
+      local_user_id: 4532000
+      local_user_login: "WIN11-50-8-1\\admin"
+      local_user_name: "admin"
+      mac_address: "00505692e336"
+      method: 36
+      method_name: "Security"
+      network:
+        client:
+          geoip: {}
+          ip: "10.0.0.1"
+      network_name: "Your First Network"
+      networkid: 8305000
+      ocsf:
+        action: "Denied"
+        action_id: 2
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+          protocol_name: "udp"
+        disposition: "Blocked"
+        disposition_id: 2
+        dst_endpoint:
+          ip: "10.0.0.2"
+          uid: "212800"
+        duration: 0
+        firewall_rule:
+          name: "Phishing"
+          uid: "52"
+        is_alert: true
+        metadata:
+          event_code: "Security"
+          original_time: "2025-04-22 08:38:53.161"
+          product:
+            name: "DNSFilter"
+            vendor_name: "DNSFilter"
+          profiles:
+           - "security_control"
+          uid: "2100"
+          version: "1.5.0"
+        query:
+          hostname: "www.cricketbettingpro.com"
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Medium"
+        severity_id: 3
+        src_endpoint:
+          hostname: "WIN11-50-8-1"
+          intermediate_ips:
+           - "10.0.0.1"
+          ip: "10.50.8.1"
+          mac: "00505692e336"
+          name: "WIN11-50-8-1"
+          owner:
+            name: "admin"
+            uid: "4532000"
+          uid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+        status: "Failure"
+        status_code: "NOERROR"
+        status_id: 2
+        time: 1745311133161
+      policy_id: 1249100
+      policy_name: "Your First Policy"
+      protocol: "udp"
+      question_type: "A"
+      region: "BOM"
+      request_address: "10.0.0.1"
+      responsetime: 0
+      result: "blocked"
+      scheduled_policy_id: 56600
+      scheduled_policy_name: "test-DD"
+      server_address: "10.0.0.2"
+      server_id: 212800
       status: "info"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1747977624085
-  - 
-    sample: |-
+      threat: true
+      time: "2025-04-22 08:38:53.161"
+      timestamp: 1745311133161
+      usr:
+        id: 4532000
+        name: "admin"
+    message: |-
       {
         "local_user_id" : 4532000,
         "code" : "NOERROR",
@@ -201,117 +438,178 @@ tests:
         "region" : "BOM",
         "collection_name" : "testing collection"
       }
-    result:
-      custom:
-        agent_type_raw: "windows"
-        agentid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
-        agentname: "WIN11-50-8-1"
-        agenttype: "agent"
-        application_category_id: 8
-        application_category_name: "Portal"
-        application_id: 570
-        application_name: "Hao123"
-        categories:
-        - 52
-        categories_names:
-        - "Phishing"
-        collection_id: 12500
-        collection_name: "testing collection"
-        collections:
-        - 12500
-        - 12580
-        collections_names:
-        - "testing collection"
-        - "Blocked Requests"
-        dns:
-          flags:
-            rcode: "NOERROR"
-          question:
-            name: "cricketbettingpro.com"
-            type: "A"
-        evt:
-          outcome: "blocked"
-        fqdn: "www.cricketbettingpro.com"
-        id: 2100
-        local_ipv4_address: "10.50.8.1"
-        local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
-        local_user_login: "WIN11-50-8-1\\admin"
-        mac_address: "00505692e336"
-        method: 36
-        method_name: "Security"
-        network:
-          client:
-            geoip: {}
-            ip: "10.0.0.1"
-        network_name: "Your First Network"
-        networkid: 8305000
-        policy_id: 1249100
-        policy_name: "Your First Policy"
-        protocol: "udp"
-        region: "BOM"
-        responsetime: 0
-        scheduled_policy_id: 56600
-        scheduled_policy_name: "test-DD"
-        server_address: "10.0.0.2"
-        server_id: 212800
-        status: "info"
-        threat: true
-        time: "2025-04-22 08:38:53.161"
-        timestamp: 1745311133161
-        usr:
-          id: 4532000
-          name: "admin"
-      message: |-
-        {
-          "local_user_id" : 4532000,
-          "code" : "NOERROR",
-          "policy_id" : 1249100,
-          "application_category_id" : 8,
-          "local_user_name" : "admin",
-          "server_address" : "10.0.0.2",
-          "result" : "blocked",
-          "collection_id" : 12500,
-          "protocol" : "udp",
-          "application_name" : "Hao123",
-          "agenttype" : "agent",
-          "collections" : [ 12500, 12580 ],
-          "method_name" : "Security",
-          "mac_address" : "00505692e336",
-          "responsetime" : 0,
-          "request_address" : "10.0.0.1",
-          "id" : 2100,
-          "categories" : [ 52 ],
-          "local_user_login" : "WIN11-50-8-1\\admin",
-          "agent_type_raw" : "windows",
-          "agentid" : "2b63f879-3439-43e5-86b6-d46f0f12cabc",
-          "scheduled_policy_id" : 56600,
-          "method" : 36,
-          "categories_names" : [ "Phishing" ],
-          "fqdn" : "www.cricketbettingpro.com",
-          "question_type" : "A",
-          "network_name" : "Your First Network",
-          "policy_name" : "Your First Policy",
-          "server_id" : 212800,
-          "local_ipv4_address" : "10.50.8.1",
-          "application_id" : 570,
-          "scheduled_policy_name" : "test-DD",
-          "domain" : "cricketbettingpro.com",
-          "agentname" : "WIN11-50-8-1",
-          "collections_names" : [ "testing collection", "Blocked Requests" ],
-          "networkid" : 8305000,
-          "time" : "2025-04-22 08:38:53.161",
-          "threat" : true,
-          "local_ipv6_address" : "fdfe:9042:c53d:0:84bd:853e:965f:babc",
-          "application_category_name" : "Portal",
-          "region" : "BOM",
-          "collection_name" : "testing collection"
-        }
-      status: "info"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1745311133161
-  - 
-    sample: |-
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1745311133161
+- sample: |-
+    {
+      "local_user_id" : 4532000,
+      "code" : "NOERROR",
+      "policy_id" : 1249100,
+      "application_category_id" : 8,
+      "local_user_name" : "admin",
+      "server_address" : "10.0.0.2",
+      "result" : "allowed",
+      "collection_id" : 12500,
+      "protocol" : "udp",
+      "application_name" : "Hao123",
+      "agenttype" : "agent",
+      "collections" : [ 12500, 12580 ],
+      "method_name" : "Security Category",
+      "mac_address" : "00505692e123",
+      "responsetime" : 451,
+      "request_address" : "10.0.0.1",
+      "id" : 8200,
+      "categories" : [ 83 ],
+      "local_user_login" : "WIN11-50-8-1\\admin",
+      "agent_type_raw" : "windows",
+      "agentid" : "2b63f879-3439-43e5-86b6-d46f0f12cabc",
+      "scheduled_policy_id" : 56600,
+      "method" : 22,
+      "categories_names" : [ "Suspicious & Deceptive" ],
+      "fqdn" : "www.chalmerset.byethost6.com",
+      "question_type" : "HTTPS",
+      "network_name" : "Your First Network",
+      "policy_name" : "Your First Policy",
+      "server_id" : 212800,
+      "local_ipv4_address" : "10.50.8.1",
+      "application_id" : 570,
+      "scheduled_policy_name" : "test-DD",
+      "domain" : "byethost6.com",
+      "agentname" : "WIN11-50-8-1",
+      "collections_names" : [ "testing collection", "Blocked Requests" ],
+      "networkid" : 8305000,
+      "time" : "2025-04-22 08:39:23.988",
+      "threat" : true,
+      "local_ipv6_address" : "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+      "application_category_name" : "Portal",
+      "region" : "BOM",
+      "collection_name" : "testing collection"
+    }
+  result:
+    custom:
+      agent_type_raw: "windows"
+      agentid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+      agentname: "WIN11-50-8-1"
+      agenttype: "agent"
+      application_category_id: 8
+      application_category_name: "Portal"
+      application_id: 570
+      application_name: "Hao123"
+      categories:
+       - 83
+      categories_names:
+       - "Suspicious & Deceptive"
+      code: "NOERROR"
+      collection_id: 12500
+      collection_name: "testing collection"
+      collections:
+       - 12500
+       - 12580
+      collections_names:
+       - "testing collection"
+       - "Blocked Requests"
+      dns:
+        flags:
+          rcode: "NOERROR"
+        question:
+          name: "byethost6.com"
+          type: "HTTPS"
+      domain: "byethost6.com"
+      evt:
+        outcome: "allowed"
+      fqdn: "www.chalmerset.byethost6.com"
+      id: 8200
+      local_ipv4_address: "10.50.8.1"
+      local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
+      local_user_id: 4532000
+      local_user_login: "WIN11-50-8-1\\admin"
+      local_user_name: "admin"
+      mac_address: "00505692e123"
+      method: 22
+      method_name: "Security Category"
+      network:
+        client:
+          geoip: {}
+          ip: "10.0.0.1"
+      network_name: "Your First Network"
+      networkid: 8305000
+      ocsf:
+        action: "Allowed"
+        action_id: 1
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+          protocol_name: "udp"
+        disposition: "Allowed"
+        disposition_id: 1
+        dst_endpoint:
+          ip: "10.0.0.2"
+          uid: "212800"
+        duration: 451
+        firewall_rule:
+          name: "Suspicious & Deceptive"
+          uid: "83"
+        is_alert: true
+        metadata:
+          event_code: "Security Category"
+          original_time: "2025-04-22 08:39:23.988"
+          product:
+            name: "DNSFilter"
+            vendor_name: "DNSFilter"
+          profiles:
+           - "security_control"
+          uid: "8200"
+          version: "1.5.0"
+        query:
+          hostname: "www.chalmerset.byethost6.com"
+          type: "HTTPS"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Medium"
+        severity_id: 3
+        src_endpoint:
+          hostname: "WIN11-50-8-1"
+          intermediate_ips:
+           - "10.0.0.1"
+          ip: "10.50.8.1"
+          mac: "00505692e123"
+          name: "WIN11-50-8-1"
+          owner:
+            name: "admin"
+            uid: "4532000"
+          uid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+        status: "Success"
+        status_code: "NOERROR"
+        status_id: 1
+        time: 1745311163988
+      policy_id: 1249100
+      policy_name: "Your First Policy"
+      protocol: "udp"
+      question_type: "HTTPS"
+      region: "BOM"
+      request_address: "10.0.0.1"
+      responsetime: 451
+      result: "allowed"
+      scheduled_policy_id: 56600
+      scheduled_policy_name: "test-DD"
+      server_address: "10.0.0.2"
+      server_id: 212800
+      status: "warning"
+      threat: true
+      time: "2025-04-22 08:39:23.988"
+      timestamp: 1745311163988
+      usr:
+        id: 4532000
+        name: "admin"
+    message: |-
       {
         "local_user_id" : 4532000,
         "code" : "NOERROR",
@@ -356,117 +654,188 @@ tests:
         "region" : "BOM",
         "collection_name" : "testing collection"
       }
-    result:
-      custom:
-        agent_type_raw: "windows"
-        agentid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
-        agentname: "WIN11-50-8-1"
-        agenttype: "agent"
-        application_category_id: 8
-        application_category_name: "Portal"
-        application_id: 570
-        application_name: "Hao123"
-        categories:
-        - 83
-        categories_names:
-        - "Suspicious & Deceptive"
-        collection_id: 12500
-        collection_name: "testing collection"
-        collections:
-        - 12500
-        - 12580
-        collections_names:
-        - "testing collection"
-        - "Blocked Requests"
-        dns:
-          flags:
-            rcode: "NOERROR"
-          question:
-            name: "byethost6.com"
-            type: "HTTPS"
-        evt:
-          outcome: "allowed"
-        fqdn: "www.chalmerset.byethost6.com"
-        id: 8200
-        local_ipv4_address: "10.50.8.1"
-        local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
-        local_user_login: "WIN11-50-8-1\\admin"
-        mac_address: "00505692e123"
-        method: 22
-        method_name: "Security Category"
-        network:
-          client:
-            geoip: {}
-            ip: "10.0.0.1"
-        network_name: "Your First Network"
-        networkid: 8305000
-        policy_id: 1249100
-        policy_name: "Your First Policy"
-        protocol: "udp"
-        region: "BOM"
-        responsetime: 451
-        scheduled_policy_id: 56600
-        scheduled_policy_name: "test-DD"
-        server_address: "10.0.0.2"
-        server_id: 212800
-        status: "warning"
-        threat: true
-        time: "2025-04-22 08:39:23.988"
-        timestamp: 1745311163988
-        usr:
-          id: 4532000
-          name: "admin"
-      message: |-
-        {
-          "local_user_id" : 4532000,
-          "code" : "NOERROR",
-          "policy_id" : 1249100,
-          "application_category_id" : 8,
-          "local_user_name" : "admin",
-          "server_address" : "10.0.0.2",
-          "result" : "allowed",
-          "collection_id" : 12500,
-          "protocol" : "udp",
-          "application_name" : "Hao123",
-          "agenttype" : "agent",
-          "collections" : [ 12500, 12580 ],
-          "method_name" : "Security Category",
-          "mac_address" : "00505692e123",
-          "responsetime" : 451,
-          "request_address" : "10.0.0.1",
-          "id" : 8200,
-          "categories" : [ 83 ],
-          "local_user_login" : "WIN11-50-8-1\\admin",
-          "agent_type_raw" : "windows",
-          "agentid" : "2b63f879-3439-43e5-86b6-d46f0f12cabc",
-          "scheduled_policy_id" : 56600,
-          "method" : 22,
-          "categories_names" : [ "Suspicious & Deceptive" ],
-          "fqdn" : "www.chalmerset.byethost6.com",
-          "question_type" : "HTTPS",
-          "network_name" : "Your First Network",
-          "policy_name" : "Your First Policy",
-          "server_id" : 212800,
-          "local_ipv4_address" : "10.50.8.1",
-          "application_id" : 570,
-          "scheduled_policy_name" : "test-DD",
-          "domain" : "byethost6.com",
-          "agentname" : "WIN11-50-8-1",
-          "collections_names" : [ "testing collection", "Blocked Requests" ],
-          "networkid" : 8305000,
-          "time" : "2025-04-22 08:39:23.988",
-          "threat" : true,
-          "local_ipv6_address" : "fdfe:9042:c53d:0:84bd:853e:965f:babc",
-          "application_category_name" : "Portal",
-          "region" : "BOM",
-          "collection_name" : "testing collection"
-        }
-      status: "warn"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1745311163988
-  - 
-    sample: |-
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1745311163988
+- sample: |-
+    {
+      "local_user_id": 4682000,
+      "code": "NOERROR",
+      "policy_id": 1259000,
+      "application_category_id": 8,
+      "local_user_name": "John",
+      "server_address": "10.0.0.2",
+      "result": "blocked",
+      "collection_id": 12500,
+      "protocol": "tcp",
+      "application_name": "Hao123",
+      "agenttype": "agent",
+      "collections": [
+        12500,
+        12580
+      ],
+      "method_name": "Category",
+      "mac_address": "c0b88320cabc",
+      "responsetime": 301,
+      "request_address": "10.0.0.1",
+      "id": 2600,
+      "categories": [
+        24
+      ],
+      "local_user_login": "ASSETTAG-EID\\John",
+      "agent_type_raw": "windows",
+      "agentid": "ca652fb5-f2e9-499d-8f8d-466aa8db5abc",
+      "scheduled_policy_id": 56600,
+      "method": 39,
+      "categories_names": [
+        "Parked Sites & Domains"
+      ],
+      "fqdn": "wwwassuranceretraite.fr",
+      "question_type": "AAAA",
+      "network_name": "Your First Network",
+      "policy_name": "Your First Policy",
+      "server_id": 212800,
+      "local_ipv4_address": "192.169.190.1",
+      "application_id": 570,
+      "scheduled_policy_name": "test-DD",
+      "domain": "wwwassuranceretraite.fr",
+      "agentname": "AssetTag-EID",
+      "collections_names": [
+        "testing collection",
+        "Blocked Requests"
+      ],
+      "networkid": 8397500,
+      "time": "2025-05-19 11:54:37.118",
+      "threat": false,
+      "local_ipv6_address": "fdfe:9042:c53d:0:84bd:853e:965f:babc",
+      "application_category_name": "Portal",
+      "region": "BOM",
+      "collection_name": "testing collection"
+    }
+  result:
+    custom:
+      agent_type_raw: windows
+      agentid: ca652fb5-f2e9-499d-8f8d-466aa8db5abc
+      agentname: AssetTag-EID
+      agenttype: agent
+      application_category_id: 8
+      application_category_name: Portal
+      application_id: 570
+      application_name: Hao123
+      categories:
+      - 24
+      categories_names:
+      - Parked Sites & Domains
+      code: NOERROR
+      collection_id: 12500
+      collection_name: testing collection
+      collections:
+      - 12500
+      - 12580
+      collections_names:
+      - testing collection
+      - Blocked Requests
+      dns:
+        flags:
+          rcode: NOERROR
+        question:
+          name: wwwassuranceretraite.fr
+          type: AAAA
+      domain: wwwassuranceretraite.fr
+      evt:
+        outcome: blocked
+      fqdn: wwwassuranceretraite.fr
+      id: 2600
+      local_ipv4_address: 192.169.190.1
+      local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_user_id: 4682000
+      local_user_login: ASSETTAG-EID\John
+      local_user_name: John
+      mac_address: c0b88320cabc
+      method: 39
+      method_name: Category
+      network:
+        client:
+          geoip: {}
+          ip: 10.0.0.1
+      network_name: Your First Network
+      networkid: 8397500
+      ocsf:
+        action: Denied
+        action_id: 2
+        activity_id: 1
+        activity_name: Query
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Outbound
+          direction_id: 2
+          protocol_name: tcp
+        disposition: Blocked
+        disposition_id: 2
+        dst_endpoint:
+          ip: 10.0.0.2
+          uid: '212800'
+        duration: 301
+        firewall_rule:
+          name: Parked Sites & Domains
+          uid: '24'
+        is_alert: false
+        metadata:
+          event_code: Category
+          original_time: '2025-05-19 11:54:37.118'
+          product:
+            name: DNSFilter
+            vendor_name: DNSFilter
+          profiles:
+          - security_control
+          uid: '2600'
+          version: 1.5.0
+        query:
+          hostname: wwwassuranceretraite.fr
+          type: AAAA
+        rcode: NoError
+        rcode_id: 0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          hostname: AssetTag-EID
+          intermediate_ips:
+          - 10.0.0.1
+          ip: 192.169.190.1
+          mac: c0b88320cabc
+          name: AssetTag-EID
+          owner:
+            name: John
+            uid: '4682000'
+          uid: ca652fb5-f2e9-499d-8f8d-466aa8db5abc
+        status: Failure
+        status_code: NOERROR
+        status_id: 2
+        time: 1747655677118
+      policy_id: 1259000
+      policy_name: Your First Policy
+      protocol: tcp
+      question_type: AAAA
+      region: BOM
+      request_address: 10.0.0.1
+      responsetime: 301
+      result: blocked
+      scheduled_policy_id: 56600
+      scheduled_policy_name: test-DD
+      server_address: 10.0.0.2
+      server_id: 212800
+      status: info
+      threat: false
+      time: '2025-05-19 11:54:37.118'
+      timestamp: 1747655677118
+      usr:
+        id: 4682000
+        name: John
+    message: |-
       {
         "local_user_id" : 4682000,
         "code" : "NOERROR",
@@ -511,112 +880,7 @@ tests:
         "region" : "BOM",
         "collection_name" : "testing collection"
       }
-    result:
-      custom:
-        agent_type_raw: "windows"
-        agentid: "ca652fb5-f2e9-499d-8f8d-466aa8db5abc"
-        agentname: "AssetTag-EID"
-        agenttype: "agent"
-        application_category_id: 8
-        application_category_name: "Portal"
-        application_id: 570
-        application_name: "Hao123"
-        categories:
-        - 24
-        categories_names:
-        - "Parked Sites & Domains"
-        collection_id: 12500
-        collection_name: "testing collection"
-        collections:
-        - 12500
-        - 12580
-        collections_names:
-        - "testing collection"
-        - "Blocked Requests"
-        dns:
-          flags:
-            rcode: "NOERROR"
-          question:
-            name: "wwwassuranceretraite.fr"
-            type: "AAAA"
-        evt:
-          outcome: "blocked"
-        fqdn: "wwwassuranceretraite.fr"
-        id: 2600
-        local_ipv4_address: "192.169.190.1"
-        local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
-        local_user_login: "ASSETTAG-EID\\John"
-        mac_address: "c0b88320cabc"
-        method: 39
-        method_name: "Category"
-        network:
-          client:
-            geoip: {}
-            ip: "10.0.0.1"
-        network_name: "Your First Network"
-        networkid: 8397500
-        policy_id: 1259000
-        policy_name: "Your First Policy"
-        protocol: "tcp"
-        region: "BOM"
-        responsetime: 301
-        scheduled_policy_id: 56600
-        scheduled_policy_name: "test-DD"
-        server_address: "10.0.0.2"
-        server_id: 212800
-        status: "info"
-        threat: false
-        time: "2025-05-19 11:54:37.118"
-        timestamp: 1747655677118
-        usr:
-          id: 4682000
-          name: "John"
-      message: |-
-        {
-          "local_user_id" : 4682000,
-          "code" : "NOERROR",
-          "policy_id" : 1259000,
-          "application_category_id" : 8,
-          "local_user_name" : "John",
-          "server_address" : "10.0.0.2",
-          "result" : "blocked",
-          "collection_id" : 12500,
-          "protocol" : "tcp",
-          "application_name" : "Hao123",
-          "agenttype" : "agent",
-          "collections" : [ 12500, 12580 ],
-          "method_name" : "Category",
-          "mac_address" : "c0b88320cabc",
-          "responsetime" : 301,
-          "request_address" : "10.0.0.1",
-          "id" : 2600,
-          "categories" : [ 24 ],
-          "local_user_login" : "ASSETTAG-EID\\John",
-          "agent_type_raw" : "windows",
-          "agentid" : "ca652fb5-f2e9-499d-8f8d-466aa8db5abc",
-          "scheduled_policy_id" : 56600,
-          "method" : 39,
-          "categories_names" : [ "Parked Sites & Domains" ],
-          "fqdn" : "wwwassuranceretraite.fr",
-          "question_type" : "AAAA",
-          "network_name" : "Your First Network",
-          "policy_name" : "Your First Policy",
-          "server_id" : 212800,
-          "local_ipv4_address" : "192.169.190.1",
-          "application_id" : 570,
-          "scheduled_policy_name" : "test-DD",
-          "domain" : "wwwassuranceretraite.fr",
-          "agentname" : "AssetTag-EID",
-          "collections_names" : [ "testing collection", "Blocked Requests" ],
-          "networkid" : 8397500,
-          "time" : "2025-05-19 11:54:37.118",
-          "threat" : false,
-          "local_ipv6_address" : "fdfe:9042:c53d:0:84bd:853e:965f:babc",
-          "application_category_name" : "Portal",
-          "region" : "BOM",
-          "collection_name" : "testing collection"
-        }
-      status: "info"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1747655677118
+    status: info
+    tags:
+    - source:LOGS_SOURCE
+    timestamp: 1747655677118

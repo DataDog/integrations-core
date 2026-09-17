@@ -96,7 +96,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Kubernetes Deployment example
 
-Add pod annotations under `.spec.template.metadata` for a Deployment:
+Choose one of the following Kubernetes Autodiscovery configurations for the Deployment:
+
+###### Kubernetes annotations
 
 ```yaml
 apiVersion: apps/v1
@@ -121,6 +123,32 @@ spec:
       containers:
         - name: haproxy
 ```
+###### DatadogInstrumentation CRD
+
+Target the HAProxy Deployment shown in the annotation example:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: haproxy
+  config:
+    checks:
+      - integration: haproxy
+        containerName: haproxy
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:<PORT>/metrics"
+            use_openmetrics: "true"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -254,7 +282,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][13].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][13].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent v7.36 or earlier)
 
@@ -300,6 +330,29 @@ spec:
   containers:
     - name: haproxy
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: haproxy
+  config:
+    checks:
+      - integration: haproxy
+        containerName: haproxy
+        initConfig: {}
+        instances:
+          - url: "https://%%host%%/admin?stats"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 ##### Log collection
 
@@ -435,3 +488,4 @@ Need help? Contact [Datadog support][20].
 [28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631
 [29]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
 [30]: https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -120,16 +120,16 @@ tests:
         emailAddressCount: 0
         entities:
          -
+          entityId: "B159820E-5BB3-49F2-AD98-75A4F2046547"
+          entityType: "host"
           entityValue:
-            name: "assettag-eid"
             guid: "B159820E-5BB3-49F2-AD98-75A4F2046547"
             ips:
              - "10.10.10.10"
+            name: "assettag-eid"
+          managementScopeGroupId: "de4f892d-d1ed-450f-a8c1-4d838768f054"
           provenance:
            - "Alert"
-          managementScopeGroupId: "de4f892d-d1ed-450f-a8c1-4d838768f054"
-          entityType: "host"
-          entityId: "B159820E-5BB3-49F2-AD98-75A4F2046547"
           relatedIndicatorIds:
            - 1
            - 2
@@ -141,87 +141,87 @@ tests:
       incidentId: "IC-12773-20240730-00000"
       indicators:
        -
-        provenance:
-         - "Alert"
         field: "detectionName"
         filterIds:
          - "15d9a461-14c4-444b-9d17-7b258894b816"
         id: 1
-        type: "detection_name"
-        relatedEntities:
-         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
-        value: "TROJ.Win32.TRX.XXPE50FLM011"
-       -
         provenance:
          - "Alert"
+        relatedEntities:
+         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
+        type: "detection_name"
+        value: "TROJ.Win32.TRX.XXPE50FLM011"
+       -
         field: "fileHash"
         filterIds:
          - "15d9a461-14c4-444b-9d17-7b258894b816"
         id: 2
-        type: "file_sha1"
-        relatedEntities:
-         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
-        value: "609A2BB1984FF9DBBFDBC8A88E1A57FC7691E6E6"
-       -
         provenance:
          - "Alert"
+        relatedEntities:
+         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
+        type: "file_sha1"
+        value: "609A2BB1984FF9DBBFDBC8A88E1A57FC7691E6E6"
+       -
         field: "fileName"
         filterIds:
          - "15d9a461-14c4-444b-9d17-7b258894b816"
         id: 3
-        type: "filename"
-        relatedEntities:
-         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
-        value: "inv.exe"
-       -
         provenance:
          - "Alert"
+        relatedEntities:
+         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
+        type: "filename"
+        value: "inv.exe"
+       -
         field: "fullPath"
         filterIds:
          - "15d9a461-14c4-444b-9d17-7b258894b816"
         id: 4
-        type: "fullpath"
-        relatedEntities:
-         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
-        value: "full\\path"
-       -
         provenance:
          - "Alert"
+        relatedEntities:
+         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
+        type: "fullpath"
+        value: "full\\path"
+       -
         field: "actResult"
         filterIds:
          - "15d9a461-14c4-444b-9d17-7b258894b816"
         id: 5
-        type: "text"
-        relatedEntities:
-         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
-        value: "Quarantine successfully"
-       -
         provenance:
          - "Alert"
+        relatedEntities:
+         - "B159820E-5BB3-49F2-AD98-75A4F2052282"
+        type: "text"
+        value: "Quarantine successfully"
+       -
         field: "processUser"
         filterIds:
          - "15d9a461-14c4-444b-9d17-7b258894b816"
         id: 6
-        type: "user_account"
+        provenance:
+         - "Alert"
         relatedEntities:
          - "B159820E-5BB3-49F2-AD98-75A4F2052282"
+        type: "user_account"
         value: "Crest"
       investigationResult: "No Findings"
       investigationStatus: "New"
       matchedRules:
        -
-        name: "Predictive Machine Learning Detection - Blocked"
         id: "b52ebb2a-b7b0-4521-b0c9-1a04715c9871"
         matchedFilters:
          -
-          matchedDateTime: "2024-07-30T06:24:52.000Z"
-          name: "Predictive Machine Learning Detection - Blocked"
           id: "15d9a461-14c4-444b-9d17-7b258894b816"
+          matchedDateTime: "2024-07-30T06:24:52.000Z"
           matchedEvents:
            -
             matchedDateTime: "2024-07-30T06:24:52.000Z"
             type: "PRODUCT_EVENT_LOG"
             uuid: "966495ba-1cde-491b-a62c-fd62f4ebb80b"
+          name: "Predictive Machine Learning Detection - Blocked"
+        name: "Predictive Machine Learning Detection - Blocked"
       model: "Unknown Threat Detection and Mitigation via Predictive Machine Learning"
       modelId: "5727ebf9-9e6a-47f3-b27f-4129763f7688"
       modelType: "preset"
@@ -533,17 +533,7 @@ tests:
       event_type: "EVENT_PROCESS"
       filters:
        -
-        riskLevel: "low"
-        mitreTacticIds:
-         - "TA0002"
-         - "TA0003"
-         - "TA0004"
-        mitreTechniqueIds:
-         - "T1053"
-         - "T1053.005"
-        name: "Creation of Scheduled Task"
         description: "A scheduled task was created via command-line"
-        id: "F1507"
         highlightedObjects:
          -
           field: "objectCmd"
@@ -553,6 +543,16 @@ tests:
           field: "processCmd"
           type: "command_line"
           value: "system32\\msiexec.exe /V"
+        id: "F1507"
+        mitreTacticIds:
+         - "TA0002"
+         - "TA0003"
+         - "TA0004"
+        mitreTechniqueIds:
+         - "T1053"
+         - "T1053.005"
+        name: "Creation of Scheduled Task"
+        riskLevel: "low"
         type: "preset"
       ingestedDateTime: "2024-07-30T16:22:16Z"
       oat_event_severity: "Info"
@@ -894,14 +894,7 @@ tests:
       entityType: "endpoint"
       filters:
        -
-        riskLevel: "medium"
-        mitreTacticIds:
-         - "TA0002"
-        mitreTechniqueIds:
-         - "T1204.002"
-        name: "Malicious Software"
         description: "A malicious software was detected on an endpoint."
-        id: "F2140"
         highlightedObjects:
          -
           field: "fileHash"
@@ -934,6 +927,13 @@ tests:
           type: "ip"
           value:
            - "10.10.10.10"
+        id: "F2140"
+        mitreTacticIds:
+         - "TA0002"
+        mitreTechniqueIds:
+         - "T1204.002"
+        name: "Malicious Software"
+        riskLevel: "medium"
         type: "preset"
       ingestedDateTime: "2024-07-31T05:00:49Z"
       network:
@@ -1160,19 +1160,19 @@ tests:
       entityType: "endpoint"
       filters:
        -
-        riskLevel: "info"
-        mitreTacticIds:
-         - "TA0002"
-        mitreTechniqueIds:
-         - "T1560.002"
-        name: "Service Execution via Service Control Manager"
         description: "Service Control Manager (services.exe) has executed a process"
-        id: "F4231"
         highlightedObjects:
          -
           field: "objectPort"
           type: "port"
           value: 443
+        id: "F4231"
+        mitreTacticIds:
+         - "TA0002"
+        mitreTechniqueIds:
+         - "T1560.002"
+        name: "Service Execution via Service Control Manager"
+        riskLevel: "info"
         type: "custom"
       ingestedDateTime: "2020-06-01T02:12:56Z"
       network:
@@ -1383,19 +1383,19 @@ tests:
       entityType: "endpoint"
       filters:
        -
-        riskLevel: "info"
-        mitreTacticIds:
-         - "TA0002"
-        mitreTechniqueIds:
-         - "T1560.002"
-        name: "Service Execution via Service Control Manager"
         description: "Service Control Manager (services.exe) has executed a process"
-        id: "F4231"
         highlightedObjects:
          -
           field: "objectPort"
           type: "port"
           value: 443
+        id: "F4231"
+        mitreTacticIds:
+         - "TA0002"
+        mitreTechniqueIds:
+         - "T1560.002"
+        name: "Service Execution via Service Control Manager"
+        riskLevel: "info"
         type: "custom"
       ingestedDateTime: "2020-06-01T02:12:56Z"
       network:

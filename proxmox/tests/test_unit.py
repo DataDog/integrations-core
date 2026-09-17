@@ -16,6 +16,7 @@ from datadog_checks.proxmox import ProxmoxCheck
 from .common import (
     ALL_EVENTS,
     ALL_METRICS,
+    BASE_TAGS,
     CONTAINER_PERF_METRICS,
     NO_CONTAINER_EVENTS,
     NODE_PERF_METRICS,
@@ -26,6 +27,8 @@ from .common import (
     STORAGE_PERF_METRICS,
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
+    cluster_resources_with_offline_node,
+    cluster_resources_with_vm_maxcpu,
 )
 
 
@@ -40,7 +43,7 @@ def test_api_up(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -414,6 +417,152 @@ def test_resource_metrics(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
 
 
+@pytest.mark.parametrize(
+    ('metric', 'value', 'hostname', 'resource_tags'),
+    [
+        pytest.param(
+            'proxmox.vm.cpu.max',
+            2,
+            'debian',
+            [
+                'proxmox_type:vm',
+                'proxmox_name:VM 100',
+                'proxmox_id:qemu/100',
+                'proxmox_node:ip-122-82-3-112',
+            ],
+            id='vm',
+        ),
+        pytest.param(
+            'proxmox.node.cpu.max',
+            72,
+            'ip-122-82-3-112',
+            [
+                'proxmox_type:node',
+                'proxmox_type:host',
+                'proxmox_name:ip-122-82-3-112',
+                'proxmox_id:node/ip-122-82-3-112',
+            ],
+            id='node',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_vcpu_count_metric(dd_run_check, aggregator, instance, metric, value, hostname, resource_tags):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(metric, value, hostname=hostname, tags=BASE_TAGS + resource_tags)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_skip_containers(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # lxc/111 reports its host's full 72 threads as `maxcpu`.
+    aggregator.assert_metric('proxmox.container.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.container.count', at_least=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_skip_powered_off_vm(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # qemu/101 is stopped but still carries maxcpu=2.
+    aggregator.assert_metric(
+        'proxmox.vm.cpu.max',
+        count=0,
+        tags=BASE_TAGS
+        + [
+            'proxmox_type:vm',
+            'proxmox_name:VM 101',
+            'proxmox_id:qemu/101',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+    )
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_offline_node(),
+                    )
+                }
+            },
+            id='offline_node',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_count', 'expected_value'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(None),
+                    )
+                }
+            },
+            0,
+            None,
+            id='maxcpu_absent',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(0),
+                    )
+                }
+            },
+            1,
+            0,
+            id='maxcpu_zero',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_distinguish_absent_maxcpu_from_zero(
+    dd_run_check, aggregator, instance, expected_count, expected_value
+):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    if expected_value is None:
+        aggregator.assert_metric('proxmox.vm.cpu.max', count=expected_count)
+    else:
+        aggregator.assert_metric('proxmox.vm.cpu.max', expected_value, count=expected_count)
+    aggregator.assert_metric('proxmox.vm.count', at_least=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_respect_resource_filters(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['resource_filters'] = [
+        {'type': 'exclude', 'resource': 'vm', 'property': 'resource_name', 'patterns': ['VM 100']},
+    ]
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=1)
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_perf_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -574,6 +723,34 @@ def test_events(get_current_datetime, dd_run_check, aggregator, instance, collec
         aggregator.assert_event(**event)
 
     assert len(aggregator.events) == len(expected_events)
+
+
+@pytest.mark.parametrize(
+    ('infrastructure_mode', 'expected_count'),
+    [
+        pytest.param('basic', 2, id='basic mode adds infra_mode tag'),
+        pytest.param('full', 0, id='full mode does not add infra_mode tag'),
+        pytest.param(None, 0, id='unset mode does not add infra_mode tag'),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_infra_mode_tag(dd_run_check, aggregator, instance, infrastructure_mode, expected_count):
+    instance = copy.deepcopy(instance)
+    if infrastructure_mode is not None:
+        instance['infrastructure_mode'] = infrastructure_mode
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag_prefix('proxmox.cpu', 'infra_mode:', count=expected_count)
+
+    # assert that no container metrics have an infra_mode tag
+    for metric in aggregator.metrics('proxmox.cpu'):
+        if 'proxmox_type:container' in metric.tags:
+            assert not any(t.startswith('infra_mode:') for t in metric.tags)
+    # assert only the cpu metric has an infra_mode tag
+    for metric_name in ALL_METRICS:
+        if metric_name != 'proxmox.cpu':
+            aggregator.assert_metric_has_tag_prefix(metric_name, 'infra_mode:', count=0)
 
 
 @pytest.mark.parametrize(

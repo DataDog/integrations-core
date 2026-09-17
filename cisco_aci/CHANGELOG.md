@@ -2,7 +2,39 @@
 
 <!-- towncrier release notes start -->
 
-## 4.14.2 / 2026-04-28
+## 6.0.0 / 2026-09-02
+
+***Changed***:
+
+* [Cisco ACI] Stop passing hostname when emitting metrics ([#24707](https://github.com/DataDog/integrations-core/pull/24707))
+
+***Added***:
+
+* [Cisco ACI] Add new endpoint to process APIC interfaces to enable topology ([#24193](https://github.com/DataDog/integrations-core/pull/24193))
+
+## 5.1.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+## 5.0.1 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 5.0.0 / 2026-05-14 / Agent 7.80.0
+
+***Removed***:
+
+* Remove tenant faults as events, faults are now only sent as logs. ([#23350](https://github.com/DataDog/integrations-core/pull/23350))
+
+***Added***:
+
+* Get health score from healthInst if fvOverallHealth isn't enabled. ([#21988](https://github.com/DataDog/integrations-core/pull/21988))
+
+## 4.14.2 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

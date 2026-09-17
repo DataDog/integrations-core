@@ -20,7 +20,7 @@ from . import defaults, validators
 
 
 SECURE_FIELD_NAMES = frozenset(
-    ['sacct_path', 'scontrol_path', 'sdiag_path', 'sinfo_path', 'squeue_path', 'sshare_path']
+    ['sacct_path', 'scontrol_path', 'sdiag_path', 'seff_path', 'sinfo_path', 'squeue_path', 'sshare_path']
 )
 
 
@@ -58,9 +58,11 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    resolve_scontrol_host_pids: Optional[bool] = None
     sacct_path: Optional[str] = None
     scontrol_path: Optional[str] = None
     sdiag_path: Optional[str] = None
+    seff_path: Optional[str] = None
     service: Optional[str] = None
     sinfo_collection_level: Optional[int] = None
     sinfo_path: Optional[str] = None

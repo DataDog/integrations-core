@@ -82,7 +82,8 @@ This setup is designed for integration testing. The n8n instance will:
 
 ## Notes
 
-- The container uses the latest official n8n Docker image
+- The container uses the official `n8nio/n8n` image at the version selected via the `N8N_VERSION` environment variable (forwarded by `hatch.toml`'s test matrix). The default in `docker-compose.yaml` is `1.118.1`.
+- Queue mode is enabled with a Redis container and a separate `n8n-worker` service that exposes its own `/metrics` endpoint on host port `5680` (the default `5679` collides with the n8n 2.x task runner broker).
 - Data is persisted in a Docker volume named `n8n_data`
 - The health check waits up to 30 seconds for n8n to start before marking it as healthy
 

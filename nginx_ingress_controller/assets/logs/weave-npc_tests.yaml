@@ -20,9 +20,9 @@ tests:
          -
           image: "evns/rpi-utilities"
           imagePullPolicy: "Always"
-          terminationMessagePolicy: "File"
-          terminationMessagePath: "/dev/termination-log"
           name: "dns-update"
+          terminationMessagePath: "/dev/termination-log"
+          terminationMessagePolicy: "File"
         dnsPolicy: "ClusterFirst"
         nodeName: "k8s-slave-2"
         priority: 0
@@ -35,24 +35,24 @@ tests:
         conditions:
          -
           lastTransitionTime: "2018-12-07T18:45:00Z"
+          status: "True"
           type: "Initialized"
-          status: "True"
          -
-          reason: "ContainersNotReady"
           lastTransitionTime: "2018-12-07T18:45:00Z"
           message: "containers with unready status: [dns-update]"
+          reason: "ContainersNotReady"
+          status: "False"
           type: "Ready"
-          status: "False"
          -
-          reason: "ContainersNotReady"
           lastTransitionTime: "2018-12-07T18:45:00Z"
           message: "containers with unready status: [dns-update]"
-          type: "ContainersReady"
+          reason: "ContainersNotReady"
           status: "False"
+          type: "ContainersReady"
          -
           lastTransitionTime: "2018-12-07T18:45:00Z"
-          type: "PodScheduled"
           status: "True"
+          type: "PodScheduled"
         hostIP: "192.168.0.102"
         phase: "Pending"
         qosClass: "BestEffort"

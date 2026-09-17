@@ -2,7 +2,89 @@
 
 <!-- towncrier release notes start -->
 
-## 6.6.0 / 2026-04-15
+## 7.3.0 / 2026-09-02
+
+***Added***:
+
+* Add ClickHouse 26.3 support ([#24302](https://github.com/DataDog/integrations-core/pull/24302))
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+* Add the hosting type, the connection mode and the cluster node inventory to the ``database_instance`` metadata payload. ([#24889](https://github.com/DataDog/integrations-core/pull/24889))
+
+***Fixed***:
+
+* Add MarkCacheBytes to SystemMetrics query mapping for ClickHouse 25.x+ compatibility, where the metric was moved from system.asynchronous_metrics to system.metrics. ([#23677](https://github.com/DataDog/integrations-core/pull/23677))
+* Fix a crash on Altinity FIPS builds whose version string includes a non-numeric suffix (e.g. ``25.3.8.30001.altinityfips``). ([#24807](https://github.com/DataDog/integrations-core/pull/24807))
+* Fixes a duplicate query for Clickhouse server version. ([#24916](https://github.com/DataDog/integrations-core/pull/24916))
+* Fan out over the cluster the instance actually belongs to in single endpoint mode, instead of assuming it is named ``default``, and read local system tables when no cluster can be resolved. ([#24920](https://github.com/DataDog/integrations-core/pull/24920))
+* Manage the DBM async jobs through the ``DatabaseCheck`` registry. ([#24934](https://github.com/DataDog/integrations-core/pull/24934))
+* Cache the Agent version instead of resolving it for every payload. ([#25024](https://github.com/DataDog/integrations-core/pull/25024))
+
+## 7.2.1 / 2026-09-10
+
+***Fixed***:
+
+* Fix a crash on Altinity FIPS builds whose version string includes a non-numeric suffix (e.g. ``25.3.8.30001.altinityfips``). ([#24807](https://github.com/DataDog/integrations-core/pull/24807))
+
+## 7.2.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Add async insert buffer snapshot collection for DBM, piggybacked into the query samples job. ([#24517](https://github.com/DataDog/integrations-core/pull/24517))
+* Add collection of asynchronous insert flush health from ``system.asynchronous_insert_log`` for DBM. ([#24549](https://github.com/DataDog/integrations-core/pull/24549))
+* Add ClickHouse node-level data across DBM checks: a `server_node` field on query metrics, node identity on query samples, completions, and errors (`@clickhouse.clickhouse_node`), and a `clickhouse_node` tag on parts/merges and view-refresh metrics. ([#24633](https://github.com/DataDog/integrations-core/pull/24633))
+* Add a `clickhouse_cluster` tag to ClickHouse DBM metrics and events. ([#24711](https://github.com/DataDog/integrations-core/pull/24711))
+* Add a `hosting_type` tag identifying whether the ClickHouse instance is ClickHouse Cloud or self-hosted. ([#24736](https://github.com/DataDog/integrations-core/pull/24736))
+
+***Fixed***:
+
+* Collect standard system table metrics per node via clusterAllReplicas in single endpoint mode so per-node counters no longer produce phantom failures (e.g. clickhouse.query.failed.count). ([#24266](https://github.com/DataDog/integrations-core/pull/24266))
+* Fixes query completions payload always reporting a null service. ([#24632](https://github.com/DataDog/integrations-core/pull/24632))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
+## 7.1.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix the `database_hostname` tag and metadata to always report the resolved database host instead of the `reported_hostname` override. ([#24247](https://github.com/DataDog/integrations-core/pull/24247))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24268](https://github.com/DataDog/integrations-core/pull/24268))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24272](https://github.com/DataDog/integrations-core/pull/24272))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24276](https://github.com/DataDog/integrations-core/pull/24276))
+
+## 7.0.0 / 2026-06-09 / Agent 7.81.0
+
+***Changed***:
+
+* Update the list of supported ClickHouse versions and relevant metrics to the latest. ([#21294](https://github.com/DataDog/integrations-core/pull/21294))
+
+***Added***:
+
+* Add CPU time metrics (cpu_us, cpu_wait_us) to ClickHouse query metrics, query completions, and query errors. ([#23882](https://github.com/DataDog/integrations-core/pull/23882))
+* Add ClickHouse schema collection: catalog payload (databases, tables, views, columns) under collect_schemas with include/exclude regex filters for databases and tables. ([#23899](https://github.com/DataDog/integrations-core/pull/23899))
+* Add ClickHouse schema metrics: per-table size gauges and per-view refresh status gauges under schema_metrics. ([#23900](https://github.com/DataDog/integrations-core/pull/23900))
+
+***Fixed***:
+
+* Fix ClickHouse check to honor the reported_hostname config option and fall back to the agent hostname when connecting via localhost or 127.0.0.1. ([#23756](https://github.com/DataDog/integrations-core/pull/23756))
+* Store advanced-queries metric definitions as JSON loaded on first check run. ([#23829](https://github.com/DataDog/integrations-core/pull/23829))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 6.7.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add parts and merges monitoring (DBM): per-table gauges for parts, merges, mutations, and replication queue health, plus a per-cycle row-level event payload for the DBM Storage Health timeline view. ([#23361](https://github.com/DataDog/integrations-core/pull/23361))
+
+***Fixed***:
+
+* Fix SSL certificate verification being ignored when `verify: false` is set. The shared connection pool was created without TLS settings, causing `verify=False` to be silently ignored when clickhouse-connect skips its own TLS pool creation for a pre-supplied pool manager. ([#23450](https://github.com/DataDog/integrations-core/pull/23450))
+* Skip emitting empty storage_health payloads when every parts-and-merges collection is empty. ([#23553](https://github.com/DataDog/integrations-core/pull/23553))
+
+## 6.6.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

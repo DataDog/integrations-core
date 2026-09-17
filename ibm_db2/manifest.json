@@ -16,6 +16,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
+      "Supported OS::AIX",
       "Category::Data Stores",
       "Category::Log Collection",
       "Offering::Integration"

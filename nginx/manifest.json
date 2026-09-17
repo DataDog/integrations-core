@@ -15,6 +15,7 @@
     "classifier_tags": [
       "Category::Configuration & Deployment",
       "Category::Log Collection",
+      "Category::SIEM",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",

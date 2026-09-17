@@ -1,0 +1,25 @@
+# This file contains a mapping of DataDog Github teams to JIRA projects.
+# The DEFAULT_JIRA_PROJECT value is interpreted as "AGNTR".
+# Note that keys must be quoted because the '@' symbol is reserved in YAML.
+'@datadog/agent-build': ABLD
+'@datadog/agent-integrations': AI
+'@datadog/container-ecosystems': AGENTONB
+'@datadog/container-integrations': CONTINT
+'@datadog/container-platform': CONTP
+'@datadog/data-observability': DO
+'@datadog/data-streams-monitoring': DSMON
+'@datadog/database-monitoring': DBMON
+'@datadog/database-monitoring-agent': DBMON
+'@datadog/documentation': DOCS
+'@datadog/ebpf-platform': EBPF
+'@datadog/logs-backend': LOGSI
+'@datadog/logs-core': LB
+'@datadog/logs-integrations-reviewers': AI
+'@datadog/ml-observability': MLOS
+'@datadog/ndm-integrations': NDINT
+'@datadog/network-device-monitoring-core': NDMC
+'@datadog/network-path': NETPATH
+'@datadog/new-workloads': NWL
+'@datadog/opentelemetry': OTAGENT
+'@datadog/saas-integrations': WEBINT
+'@datadog/windows-products': WINA

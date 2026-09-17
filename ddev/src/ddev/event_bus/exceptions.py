@@ -17,11 +17,12 @@ class HookName(StrEnum):
     ON_FINALIZE = auto()
     ON_MESSAGE_RECEIVED = auto()
     ON_SUCCESS = auto()
+    ON_ERROR = auto()
 
 
 class ProcessorQueueError(Exception):
     """
-    Exception raised when a processor queue is not initialized.
+    Exception raised when a processor has not been registered in an event bus.
     """
 
     pass

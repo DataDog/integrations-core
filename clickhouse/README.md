@@ -4,9 +4,15 @@
 
 This check monitors [ClickHouse][1] through the Datadog Agent.
 
+Enable [Database Monitoring][11] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, query explain plans, query errors, and parts and merges observability.
+
+**Note**: Database Monitoring for ClickHouse is in Preview and requires Datadog Agent v7.78 or later. Customers who participate in the preview will not be charged for usage incurred during the preview period.
+
 **Minimum Agent version:** 7.16.0
 
 ## Setup
+
+<div class="alert alert-info">This page describes the standard ClickHouse Agent integration. If you are looking for the Database Monitoring product for ClickHouse, see <a href="https://docs.datadoghq.com/database_monitoring/setup_clickhouse/" target="_blank">Database Monitoring for ClickHouse</a>.</div>
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
@@ -32,6 +38,10 @@ To configure this check for an Agent running on a host:
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 *Note*: This integration uses the official `clickhouse-connect` client to connect over HTTP.
+
+*Note*: If your ClickHouse Cloud service sits behind a single load-balanced endpoint, set `single_endpoint_mode: true`. This tells the Agent (version 7.83.0 or later) to query system-table metrics across all nodes behind that endpoint using `clusterAllReplicas()`, tagging each resulting series with `clickhouse_node` so you can still distinguish per-node data.
+
+Without this setting, the Agent may hit a different node on each collection cycle. For cumulative per-node counters like `clickhouse.query.failed.count`, that inconsistency produces inaccurate values, since the counter isn't being read from the same source each time.
 
 2. [Restart the Agent][5].
 
@@ -106,7 +116,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][10].
 
 
-[1]: https://clickhouse.yandex
+[1]: https://clickhouse.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/datadog_checks/clickhouse/data/conf.yaml.example
@@ -116,3 +126,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/database_monitoring/setup_clickhouse/

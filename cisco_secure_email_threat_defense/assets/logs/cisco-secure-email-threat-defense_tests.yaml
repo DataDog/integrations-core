@@ -114,24 +114,24 @@ tests:
           publicApiClientId: ""
           techniques:
           -
-            severity: "high"
             description: "http://ihaveabad.dffd/"
+            severity: "high"
             type: "Malicious URL"
           -
-            severity: "medium"
             description: "Sender domain crestdata.ai rarely communicates with recipient domain onmicrosoft.com"
+            severity: "medium"
             type: "Rare sender domain for recipient domain"
           -
-            severity: "medium"
             description: "Message segment 'http://ihaveabad.dffd/ https://sdfsd.cdf/ -- *Disclaimer:* The information contained in this electronic message and any attachments to this message are intended for the exclusive use of the addressee(s) and may contain confidential or privileged information. ' requests user to click a link"
+            severity: "medium"
             type: "Link visit request"
           -
-            severity: "medium"
             description: "Message segment 'If you are not the intended recipient, please notify the sender at Crest Data Systems immediately and destroy all copies of this message and any attachments.' contains a request for contact"
+            severity: "medium"
             type: "Request for contact details"
           -
-            severity: "medium"
             description: "Sender address rrr@abc.com is rarely seen"
+            severity: "medium"
             type: "Rare sender address"
           -
             description: "Email is between internal entities"
@@ -302,12 +302,12 @@ tests:
           publicApiClientId: ""
           techniques:
           -
-            severity: "high"
             description: "http://www.sfsf.cer/"
+            severity: "high"
             type: "Malicious URL"
           -
-            severity: "high"
             description: "http://www.didi.cer/"
+            severity: "high"
             type: "Malicious URL"
           -
             description: "Sender test.user@abc.com communicates frequently with recipient xyz@abc.in"

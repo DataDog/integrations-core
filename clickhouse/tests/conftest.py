@@ -14,46 +14,48 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    conditions = []
+    config = get_instance_config()
 
-    for i in range(6):
-        conditions.append(CheckEndpoints(['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)]))
-        conditions.append(
-            CheckDockerLogs(
-                'clickhouse-0{}'.format(i + 1), 'Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log'
-            )
-        )
+    conditions = [
+        CheckDockerLogs(
+            identifier='clickhouse',
+            patterns='Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log',
+            wait=5,
+        ),
+        CheckEndpoints(endpoints=['http://{}:{}'.format(config['server'], config['port'])], wait=5),
+        WaitFor(
+            func=ping_clickhouse(config['server'], config['port'], config['username'], config['password']),
+            wait=5,
+        ),
+    ]
 
     conditions.append(
         WaitFor(
-            ping_clickhouse(
-                common.CONFIG['server'],
-                common.CONFIG['port'],
-                common.CONFIG['username'],
-                common.CONFIG['password'],
-            )
-        )
-    )
-
-    conditions.append(
-        WaitFor(
-            ping_clickhouse(
+            func=ping_clickhouse(
                 common.TLS_CONFIG['server'],
                 common.TLS_CONFIG['port'],
                 common.TLS_CONFIG['username'],
                 common.TLS_CONFIG['password'],
                 secure=True,
-            )
+            ),
+            wait=5,
         )
     )
 
-    with docker_run(common.COMPOSE_FILE_PATH, conditions=conditions, sleep=10, attempts=2):
-        yield common.CONFIG
+    compose_file, mount_logs = common.get_compose_file()
+    with docker_run(compose_file, conditions=conditions, sleep=10, attempts=2, mount_logs=mount_logs):
+        yield config
 
 
 @pytest.fixture
 def instance():
-    return deepcopy(common.CONFIG)
+    config = get_instance_config()
+    if common.is_legacy(common.CLICKHOUSE_VERSION):
+        config['use_advanced_queries'] = False
+    else:
+        config['use_legacy_queries'] = False
+
+    return config
 
 
 @pytest.fixture
@@ -63,7 +65,7 @@ def tls_instance():
 
 def ping_clickhouse(host, port, username, password, secure=False):
     def _ping_clickhouse():
-        client = clickhouse_connect.get_client(
+        client = get_clickhouse_client(
             host=host,
             port=port,
             username=username,
@@ -74,3 +76,18 @@ def ping_clickhouse(host, port, username, password, secure=False):
         return client.ping()
 
     return _ping_clickhouse
+
+
+def get_clickhouse_client(host, port, username, password, secure=False, verify=False):
+    return clickhouse_connect.get_client(
+        host=host,
+        port=port,
+        username=username,
+        password=password,
+        secure=secure,
+        verify=verify,
+    )
+
+
+def get_instance_config() -> dict:
+    return deepcopy(common.CONFIG)

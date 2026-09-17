@@ -9,9 +9,17 @@ This integration ingests the following logs:
 - Telephony
 - Offline Enrollment
 
+**Note**: The Administrator and Offline Enrollment log endpoints and dashboards are being deprecated. Update any custom assets using these endpoints to use the Activity Logs endpoint instead to avoid service disruption.
+
 The Cisco Duo integration seamlessly collects multi-factor authentication (MFA) and secure access logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into fraud authentication events, authentication activity timeline, locations of accessed, authentication devices, and many more through the out-of-the-box dashboards.
 
 ## Setup
+
+<!-- partial
+{{< site-region region="gov" >}}
+<div class="alert alert-warning">This integration does not support Duo Federal accounts (<code>duofederal.com</code> domains). Only standard Duo accounts (<code>duosecurity.com</code> domains) are supported.</div>
+{{< /site-region >}}
+partial -->
 
 ### Configuration
 

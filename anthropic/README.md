@@ -90,7 +90,7 @@ docker run -d \
   -p 127.0.0.1:8125:8125/udp \
   -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
   -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
+  registry.datadoghq.com/agent:latest
 ```
 
 2. If you haven't already, install the `ddtrace` package:

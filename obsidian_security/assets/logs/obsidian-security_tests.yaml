@@ -273,22 +273,22 @@ tests:
       obsidian_security_alert:
         actors:
          -
-          temporalProperties:
-            lastActive: "2025-09-19T18:51:59Z"
-            lastObserved: "2025-09-22T02:57:05.132Z"
-            created: "2023-11-20T05:26:27Z"
-            activityStatus: "INACTIVE"
-          isDeleted: false
-          entitySubType: "atoz.User"
           __typename: "Account"
-          name: "Ginny"
-          tenantId: "api-sfefe.atozsecurity.com"
+          entitySubType: "atoz.User"
           id: "abbAbaAA-Nxw98NTyCwJy76alRuW_RkM0Pf-cQhio="
+          isDeleted: false
+          name: "Ginny"
+          nativeId: "ABVEDEGE2435ASGEG"
           services:
            -
             name: "atoz"
             serviceId: "atoz"
-          nativeId: "ABVEDEGE2435ASGEG"
+          temporalProperties:
+            activityStatus: "INACTIVE"
+            created: "2023-11-20T05:26:27Z"
+            lastActive: "2025-09-19T18:51:59Z"
+            lastObserved: "2025-09-22T02:57:05.132Z"
+          tenantId: "api-sfefe.atozsecurity.com"
         alertExtraData:
           asn: 11111
           city: "Tarva"
@@ -371,14 +371,14 @@ tests:
          - "atoz.ai"
         relatedTenantObjects:
          -
-          isProduction: true
           isIdp: true
-          tenantId: "api-sfefe.atozsecurity.com"
+          isProduction: true
           name: "atoz 1"
+          platform: "atoz"
           sensitivity:
             displayName: "Higher"
           serviceId: "atoz"
-          platform: "atoz"
+          tenantId: "api-sfefe.atozsecurity.com"
         relatedTenants:
          - "api-sfefe.atozsecurity.com"
         service:
@@ -395,28 +395,28 @@ tests:
         severity: "MEDIUM"
         targets:
          -
-          isDeleted: false
-          entitySubType: "atoz.Integration"
           __typename: "Application"
-          name: "Workspace Login"
-          tenantId: "api-sfefe.atozsecurity.com"
+          entitySubType: "atoz.Integration"
           id: "SasnZts_rw_F4ZPa_y5u3gIftgPXmaOFEw_GrW_qSMY="
-          services:
-           -
-            name: "atoz"
-            serviceId: "atoz"
-          nativeId: "DIC5HTN857AN3PML57YV"
-         -
           isDeleted: false
-          entitySubType: "atoz.Phone"
-          __typename: "Other"
-          name: "Ginny"
-          tenantId: "api-sfefe.atozsecurity.com"
-          id: "fI-cqNPQItxYc9Aejr8PAoiRqmRZ3Z-nZUBB0qcVo-Y="
+          name: "Workspace Login"
+          nativeId: "DIC5HTN857AN3PML57YV"
           services:
            -
             name: "atoz"
             serviceId: "atoz"
+          tenantId: "api-sfefe.atozsecurity.com"
+         -
+          __typename: "Other"
+          entitySubType: "atoz.Phone"
+          id: "fI-cqNPQItxYc9Aejr8PAoiRqmRZ3Z-nZUBB0qcVo-Y="
+          isDeleted: false
+          name: "Ginny"
+          services:
+           -
+            name: "atoz"
+            serviceId: "atoz"
+          tenantId: "api-sfefe.atozsecurity.com"
         taxonomy:
           behavior: "MALICIOUS"
           tactic:
@@ -784,49 +784,49 @@ tests:
       obsidian_security_event:
         activeConnections:
          -
-          tenant_id: "A01ababab"
-          instance_id: "123232421421412421"
-          create_time: "2025-09-15T09:40:28.906729Z"
-          org_id: "absjfnewkjfnwe"
-          service_id: "ser.1"
-          name: "Workspace 1"
           active: true
-          state: "RUNNING"
+          create_time: "2025-09-15T09:40:28.906729Z"
           created_by: "505284034950787989"
+          instance_id: "123232421421412421"
           last_run_times:
             activity: "2025-10-03T09:50:00Z"
             state: "2025-10-03T00:42:00Z"
+          name: "Workspace 1"
+          org_id: "absjfnewkjfnwe"
+          service_id: "ser.1"
+          state: "RUNNING"
+          tenant_id: "A01ababab"
         actors:
          -
-          temporalProperties:
-            created: "2023-03-24T05:25:13Z"
-            activityStatus: "UNKNOWN"
-          isDeleted: false
-          entitySubType: "atoz.User"
           __typename: "Account"
+          entitySubType: "atoz.User"
+          id: "asfne12fs_Ad-RfSHHp_2wFNX9GLvWIRldD199rfKEM="
+          isDeleted: false
           name: "Yagami Light"
-          tenantId: "A01ababab"
+          nativeId: "123243551231242412412"
           rawRefs:
-            creation_time: "2023-03-24T05:25:13.000+00:00"
-            is_admin: true
-            archived: false
-            emailDomain: "testdata.io"
-            last_login_time: "2023-12-07T05:25:25.000Z"
-            isEnrolledIn2Sv: false
             alt_email:
              - "yagami.light@abc.com"
              - "yagami.light@testdata.io.test-atoz-a.com"
-            name: "Yagami Light"
-            ip_whitelisted: false
-            id: "123243551231242412412"
+            archived: false
+            creation_time: "2023-03-24T05:25:13.000+00:00"
             email: "yagami.light@testdata.io"
+            emailDomain: "testdata.io"
+            id: "123243551231242412412"
+            ip_whitelisted: false
+            isEnrolledIn2Sv: false
+            is_admin: true
+            last_login_time: "2023-12-07T05:25:25.000Z"
+            name: "Yagami Light"
             suspended: false
-          id: "asfne12fs_Ad-RfSHHp_2wFNX9GLvWIRldD199rfKEM="
           services:
            -
             name: "atoz"
             serviceId: "atoz"
-          nativeId: "123243551231242412412"
+          temporalProperties:
+            activityStatus: "UNKNOWN"
+            created: "2023-03-24T05:25:13Z"
+          tenantId: "A01ababab"
         api: "activity_token"
         datetime: "2025-09-21T06:54:42.748Z"
         eventFrequency: "COMMON"
@@ -846,10 +846,10 @@ tests:
            -
             name: "NetAcuity"
             raw:
-              threat_level: ""
               is_crawler: false
-              is_tor: false
               is_proxy: true
+              is_tor: false
+              threat_level: ""
           vpnProxyDescription: "cloud"
           vpnProxyType: "hosting"
         location:
@@ -872,66 +872,66 @@ tests:
         status: "SUCCESS"
         targets:
          -
-          temporalProperties:
-            created: "2023-03-24T05:25:13Z"
-            activityStatus: "UNKNOWN"
-          isDeleted: false
-          entitySubType: "atoz.User"
           __typename: "Account"
+          entitySubType: "atoz.User"
+          id: "asfne12fs_Ad-RfSHHp_1aAAA9GLvWIRldD199rfKEM="
+          isDeleted: false
           name: "Yagami Light"
-          tenantId: "A01ababab"
+          nativeId: "123243551231242123123"
           rawRefs:
-            creation_time: "2023-03-24T05:25:13.000+00:00"
-            is_admin: true
-            emailDomain: "testdata.io"
-            last_login_time: "2023-12-07T05:25:25.000Z"
-            isEnrolledIn2Sv: false
             alt_email:
              - "yagami.light@abc.com"
              - "yagami.light@testdata.io.test-atoz-a.com"
-            name: "Yagami Light"
-            ip_whitelisted: false
-            id: "123243551231242412412"
+            creation_time: "2023-03-24T05:25:13.000+00:00"
             email: "yagami.light@testdata.io"
+            emailDomain: "testdata.io"
+            id: "123243551231242412412"
+            ip_whitelisted: false
+            isEnrolledIn2Sv: false
+            is_admin: true
+            last_login_time: "2023-12-07T05:25:25.000Z"
+            name: "Yagami Light"
             suspended: false
-          id: "asfne12fs_Ad-RfSHHp_1aAAA9GLvWIRldD199rfKEM="
           services:
            -
             name: "atoz"
             serviceId: "atoz"
-          nativeId: "123243551231242123123"
+          temporalProperties:
+            activityStatus: "UNKNOWN"
+            created: "2023-03-24T05:25:13Z"
+          tenantId: "A01ababab"
          -
-          isDeleted: false
-          entitySubType: "atoz.Application"
           __typename: "Application"
-          name: "123243533453463475475"
-          tenantId: "A01ababab"
-          rawRefs:
-            name: "123243533453463475475"
-            client_id: "123243533453463475475"
+          entitySubType: "atoz.Application"
           id: "l3VCHrAqZZ5g-jE_IJE1TBVHdoE492gPg79X_sniAzg="
+          isDeleted: false
+          name: "123243533453463475475"
+          nativeId: "123243533453463475475"
+          rawRefs:
+            client_id: "123243533453463475475"
+            name: "123243533453463475475"
           services:
            -
             name: "atoz"
             serviceId: "atoz"
-          nativeId: "123243533453463475475"
-         -
-          isDeleted: false
-          entitySubType: "atoz.OauthToken"
-          __typename: "Other"
-          name: "atoz.OauthToken"
           tenantId: "A01ababab"
+         -
+          __typename: "Other"
+          entitySubType: "atoz.OauthToken"
+          id: "A1a-AaaAaAaAqSeTtzNnhf-gkY_RcxrQt1cpHk96XGU="
+          isDeleted: false
+          name: "atoz.OauthToken"
           rawRefs:
             clientId: "123243533453463475475"
             id: "123243533453463475475123243551231242412412"
             scopes:
              - "https://www.atozapis.com/auth/calendar.readonly"
             userKey: "123243551231242412412"
-          id: "A1a-AaaAaAaAqSeTtzNnhf-gkY_RcxrQt1cpHk96XGU="
           services:
            -
             name: "atoz"
             serviceId: "atoz"
+          tenantId: "A01ababab"
         tenantId: "A01ababab"
       status: "Ok"
     message: |-

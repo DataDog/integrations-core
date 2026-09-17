@@ -1,0 +1,38 @@
+{
+  "id": "labFlaky",
+  "versionId": "10000000-0000-0000-0000-000000000004",
+  "name": "Lab Flaky",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab/flaky",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "11111111-0000-0000-0000-000000000004",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lab-flaky-aaaa-bbbb-cccc-000000000004"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "if (Math.random() < 0.3) { throw new Error('flaky lab failure'); } return [{json: {ok: true, scenario: 'flaky'}}];"
+      },
+      "id": "22222222-0000-0000-0000-000000000004",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Code", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

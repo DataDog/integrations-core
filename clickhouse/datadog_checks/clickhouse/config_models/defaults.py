@@ -60,8 +60,16 @@ def instance_tls_verify():
     return False
 
 
+def instance_use_advanced_queries():
+    return True
+
+
 def instance_use_global_custom_queries():
     return 'true'
+
+
+def instance_use_legacy_queries():
+    return True
 
 
 def instance_username():

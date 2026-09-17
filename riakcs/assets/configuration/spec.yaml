@@ -24,21 +24,25 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: host
       description: Hostname or IP address of your RiakCS node.
       value:
         type: string
         display_default: localhost
+      fleet_configurable: false
     - name: port
       description: Port used by your RiakCS node.
       value:
         type: integer
         display_default: 8080
+      fleet_configurable: false
     - name: s3_root
       description: The S3 hostname.
       value:
         type: string
         display_default: s3.amazonaws.com
+      fleet_configurable: false
     - name: metrics
       description: |
         For RiackCS v2.1+, the default metrics collected by this integration includes S3 API metrics and memory stats,
@@ -64,4 +68,5 @@ files:
           type: string
         example:
         - <METRIC_NAME>
+      fleet_configurable: false
     - template: instances/default

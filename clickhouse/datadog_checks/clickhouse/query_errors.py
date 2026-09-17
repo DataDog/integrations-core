@@ -9,11 +9,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from clickhouse_connect.driver.exceptions import Error
 
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
@@ -41,6 +36,8 @@ SELECT
     result_rows,
     result_bytes,
     memory_usage,
+    ProfileEvents['OSCPUVirtualTimeMicroseconds'] as cpu_us,
+    ProfileEvents['OSCPUWaitMicroseconds'] as cpu_wait_us,
     query_start_time_microseconds,
     event_time_microseconds,
     query_id,
@@ -178,6 +175,8 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                     result_rows_count,
                     result_bytes,
                     memory_usage,
+                    cpu_us,
+                    cpu_wait_us,
                     query_start_time_microseconds,
                     event_time_microseconds,
                     query_id,
@@ -200,7 +199,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
-                    'hostname': server_node or '',
+                    'clickhouse_node': server_node or '',
                     'query': query_text or '',
                     'user': str(user) if user else '',
                     'query_type': query_type or '',
@@ -219,6 +218,8 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                     'result_rows': result_rows_count or 0,
                     'result_bytes': result_bytes or 0,
                     'memory_usage': memory_usage or 0,
+                    'cpu_us': int(cpu_us) if cpu_us else 0,
+                    'cpu_wait_us': int(cpu_wait_us) if cpu_wait_us else 0,
                     'query_start_time_microseconds': self.to_microseconds(query_start_time_microseconds),
                     'event_time_microseconds': event_time_int,
                     'query_id': query_id or '',
@@ -284,11 +285,13 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 'result_rows': row.get('result_rows', 0),
                 'result_bytes': row.get('result_bytes', 0),
                 'memory_usage': row.get('memory_usage', 0),
+                'cpu_us': row.get('cpu_us', 0),
+                'cpu_wait_us': row.get('cpu_wait_us', 0),
                 'query_start_time_microseconds': row.get('query_start_time_microseconds', 0),
                 'event_time_microseconds': row.get('event_time_microseconds', 0),
                 'initial_query_id': row.get('initial_query_id', ''),
                 'is_initial_query': row.get('is_initial_query', True),
-                'hostname': row.get('hostname', ''),
+                'clickhouse_node': row.get('clickhouse_node', ''),
                 'exception': row.get('exception', ''),
                 'exception_code': row.get('exception_code', 0),
                 'stack_trace': row.get('stack_trace', ''),
@@ -308,7 +311,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
         payload = {
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'ddsource': 'clickhouse',
             'dbm_type': 'query_error',
             'collection_interval': self._collection_interval,

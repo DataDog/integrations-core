@@ -74,6 +74,7 @@ files:
         value:
           type: boolean
           example: false
+        fleet_configurable: false
       - name: spark_proxy_enabled
         description: If you have enabled the Spark UI proxy, set this to `true`
         fleet_configurable: true
@@ -106,6 +107,7 @@ files:
         value:
           type: string
           example: /metrics/json
+        fleet_configurable: false
       - name: executor_level_metrics
         description: Enable collection of more granular executor metrics.
         fleet_configurable: true
@@ -138,6 +140,7 @@ files:
           type: boolean
           display_default: false
           example: true
+        fleet_configurable: false
       - name: disable_spark_stage_metrics
         description: |
           Enable to stop collecting Spark stage metrics.
@@ -158,6 +161,7 @@ files:
           type: integer
           display_default: 3
           example: 3
+        fleet_configurable: false
       - template: instances/http
         overrides:
           auth_token.description: |

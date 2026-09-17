@@ -51,7 +51,8 @@
     },
     "dashboards": {
       "OpenTelemetry Dashboard": "assets/dashboards/otel_host_metrics_dashboard.json",
-      "OpenTelemetry Collector Metrics Dashboard": "assets/dashboards/otel_collector_metrics_dashboard.json"
+      "OpenTelemetry Collector Metrics Dashboard": "assets/dashboards/otel_collector_metrics_dashboard.json",
+      "OpenTelemetry Hostname Configuration Issues Dashboard": "assets/dashboards/otel_host_configuration_issues_dashboard.json"
     },
     "monitors": {
       "Refused Spans": "assets/monitors/otel_refused_spans.json"

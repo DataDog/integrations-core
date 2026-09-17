@@ -3,7 +3,7 @@
   "app_uuid": "16ad3243-233b-4a1e-a523-98a35c29162b",
   "app_id": "proofpoint-tap",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -31,6 +31,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]

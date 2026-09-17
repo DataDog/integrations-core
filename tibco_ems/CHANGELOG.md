@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.1 / 2026-08-05
+
+***Fixed***:
+
+* Aggregate metrics per (destination, user, component_type, conn) ([#24685](https://github.com/DataDog/integrations-core/pull/24685))
+
+## 2.6.0 / 2026-06-09 / Agent 7.81.0
+
+***Added***:
+
+* Add new config ``use_ssl`` to connect via SSL instead of TCP. ([#23732](https://github.com/DataDog/integrations-core/pull/23732))
+
 ## 2.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

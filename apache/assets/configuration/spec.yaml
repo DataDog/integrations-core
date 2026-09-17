@@ -57,3 +57,4 @@ files:
       value:
         example: http://%%host%%/server-status?auto
         type: string
+      fleet_configurable: false

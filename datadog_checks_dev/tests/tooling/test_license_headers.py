@@ -4,9 +4,15 @@
 
 import pathlib
 
+import mock
 import pytest
 
-from datadog_checks.dev.tooling.license_headers import parse_license_header, validate_license_headers
+from datadog_checks.dev.tooling.constants import set_root
+from datadog_checks.dev.tooling.license_headers import (
+    build_get_previous,
+    parse_license_header,
+    validate_license_headers,
+)
 from datadog_checks.dev.tooling.utils import get_license_header
 
 
@@ -290,6 +296,41 @@ def _make_get_previous(d: dict = None):
         return d.get(path)
 
     return _fake_get_previous
+
+
+def test_build_get_previous_resolves_base_ref_lazily_and_only_once(tmp_path, restore_root):
+    set_root(tmp_path)
+    with mock.patch(
+        "datadog_checks.dev.tooling.license_headers.get_base_ref", return_value="origin/master"
+    ) as get_base_ref:
+        with mock.patch("datadog_checks.dev.tooling.license_headers.git_show_file", return_value=None):
+            get_previous = build_get_previous()
+            # The base ref is not resolved until a file actually needs a lookup.
+            get_base_ref.assert_not_called()
+
+            for name in ("a.py", "b.py", "c.py"):
+                get_previous(tmp_path / name)
+
+    # Resolved a single time across every lookup, so the command can reuse one instance across checks.
+    get_base_ref.assert_called_once()
+
+
+def test_validate_license_headers_resolves_base_ref_once_per_run(tmp_path, restore_root):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+    for name in ("a.py", "b.py", "c.py"):
+        _write_string_to_file(check_path / name, f"{get_license_header()}\n\nimport os\n")
+
+    set_root(check_path)
+    with mock.patch(
+        "datadog_checks.dev.tooling.license_headers.get_base_ref", return_value="origin/master"
+    ) as get_base_ref:
+        with mock.patch("datadog_checks.dev.tooling.license_headers.git_show_file", return_value=None) as git_show_file:
+            validate_license_headers(check_path)
+
+    # Base ref is resolved a single time even though three files are scanned.
+    get_base_ref.assert_called_once()
+    assert git_show_file.call_count == 3
 
 
 def test_validate_license_headers_honors_gitignore_file_on_check_path(tmp_path):

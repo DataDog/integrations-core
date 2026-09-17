@@ -137,12 +137,12 @@ tests:
        -
         environment:
           id: "77624dgsj50-34ef-4fe8-bf56-375fcb8c69eb"
-        name: "saroy49757@mposhop.com"
-        id: "9c6acf81-2d00-412a-b62c-fccbe74crgw730a"
         href: "https://api.pingone.com.au/v1/environments/77624d50-34ef-4fe8-bf56-375fcb8geruc69eb/users/9c6acf81-2d00-412a-b62c-fccbe74ctew730a"
-        type: "USER"
+        id: "9c6acf81-2d00-412a-b62c-fccbe74crgw730a"
+        name: "saroy49757@mposhop.com"
         population:
           id: "312d7495-f0ff-4d10-b579-954f1wtg66464ca"
+        type: "USER"
       usr:
         id: "9c6awertcf81-2d00-412a-b62c-fccbe74cegrw730a"
         name: "saroy49757@mposhop.com"

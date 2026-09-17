@@ -2,7 +2,85 @@
 
 <!-- towncrier release notes start -->
 
-## 15.16.1 / 2026-04-28
+## 15.21.0 / 2026-09-02
+
+***Added***:
+
+* Add Data Observability async job for executing monitor queries delivered via Remote Configuration. ([#24798](https://github.com/DataDog/integrations-core/pull/24798))
+* Add the ``mysql.uptime`` metric, reporting the number of seconds the server has been up. ([#24802](https://github.com/DataDog/integrations-core/pull/24802))
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+
+***Fixed***:
+
+* Pin ``explain_json_format_version`` to 1 so that collected execution plans keep the version 1 JSON format on MySQL 9.5 and later, where version 2 became the default. ([#24294](https://github.com/DataDog/integrations-core/pull/24294))
+* Recommend the REFERENCES privilege in the MySQL schema collection insufficient-privileges warning and in the shipped sample configuration. ([#24739](https://github.com/DataDog/integrations-core/pull/24739))
+* Fix a crash in the query activity job when statement instruments have ``TIMED = NO`` and a thread has more than one ``events_statements_current`` row. ([#24843](https://github.com/DataDog/integrations-core/pull/24843))
+* Manage the DBM async jobs through the ``DatabaseCheck`` registry. ([#24936](https://github.com/DataDog/integrations-core/pull/24936))
+* Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#24999](https://github.com/DataDog/integrations-core/pull/24999))
+* Cache the Agent version instead of resolving it for every payload. ([#25022](https://github.com/DataDog/integrations-core/pull/25022))
+
+## 15.20.0 / 2026-08-24
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+## 15.19.0 / 2026-08-05
+
+***Added***:
+
+* Add the `binlog_size_metrics` option to skip binary log size collection. ([#24082](https://github.com/DataDog/integrations-core/pull/24082))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+***Fixed***:
+
+* Fix MySQL query metrics inflation when new digest variants share a normalized query signature. ([#24194](https://github.com/DataDog/integrations-core/pull/24194))
+* Standardize how the integration declares its Database Monitoring platform identifier, and bump the minimum ``datadog-checks-base`` version to 37.42.0. ([#24649](https://github.com/DataDog/integrations-core/pull/24649))
+
+## 15.18.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` metrics by submitting them as monotonic counts instead of gauges, so they correctly reflect per-interval operations rather than cumulative `performance_schema` lifetime totals. ([#24125](https://github.com/DataDog/integrations-core/pull/24125))
+* Fix MariaDB multi-channel replication reporting 0 channels by using `SHOW ALL REPLICAS STATUS` when no specific channel is configured. ([#24178](https://github.com/DataDog/integrations-core/pull/24178))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24269](https://github.com/DataDog/integrations-core/pull/24269))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24273](https://github.com/DataDog/integrations-core/pull/24273))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24277](https://github.com/DataDog/integrations-core/pull/24277))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 15.17.2 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 15.17.1 / 2026-06-09
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 15.17.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Collect additional statement metrics for sort operations, temporary table usage, and join strategies from events_statements_summary_by_digest. ([#23365](https://github.com/DataDog/integrations-core/pull/23365))
+* Add metadata lock blocking detection to activity query for MySQL 8.0+. ([#23505](https://github.com/DataDog/integrations-core/pull/23505))
+* Add collection of global wait event metrics from performance_schema for DBM-enabled instances. ([#23562](https://github.com/DataDog/integrations-core/pull/23562))
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23272](https://github.com/DataDog/integrations-core/pull/23272))
+* Use parameterized queries for table names in schema collection. ([#23366](https://github.com/DataDog/integrations-core/pull/23366))
+* Use parameterized queries for replication channel configuration to safely handle special characters in channel names. ([#23581](https://github.com/DataDog/integrations-core/pull/23581))
+* Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled. ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
+* Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance. ([#23607](https://github.com/DataDog/integrations-core/pull/23607))
+
+## 15.16.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

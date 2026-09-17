@@ -38,17 +38,17 @@ tests:
         name: "session.create"
       fields:
        -
-        value: "session"
         key: "X-Access-Type"
+        value: "session"
        -
-        value: "73.32.206.162, 73.32.206.162, 10.200.20.47"
         key: "X-Forwarded-For"
+        value: "73.32.206.162, 73.32.206.162, 10.200.20.47"
        -
-        value: "-"
         key: "X-Session-Uuid"
+        value: "-"
        -
-        value: "f13c572a7254d3192a667afe3bbb2567:1111168df2b47c17e291"
         key: "X-Request-Uuid"
+        value: "f13c572a7254d3192a667afe3bbb2567:1111168df2b47c17e291"
       id: "22ccc11034484fff8c9673b411111111"
       is_failure: false
       operation: "Create"

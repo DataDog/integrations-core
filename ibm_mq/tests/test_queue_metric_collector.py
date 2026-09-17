@@ -6,12 +6,46 @@ import logging
 
 import pymqi
 import pytest
+from dateutil import tz
 from mock import Mock, patch
 
 from datadog_checks.ibm_mq.collectors import QueueMetricCollector
 from datadog_checks.ibm_mq.config import IBMMQConfig
+from datadog_checks.ibm_mq.stats.queue_stats import QueueStats
+
+from . import common
 
 pytestmark = pytest.mark.unit
+
+
+def test_filtered_queues_none_without_queue_patterns_or_regex(instance, get_check):
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+    collector.discover_queues(Mock())
+    assert collector.filtered_queues is None
+
+
+def test_filtered_queues_tracks_monitored_queues_queue_patterns(instance):
+    instance['queue_patterns'] = ['pattern']
+    instance['auto_discover_queues'] = False
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+    collector._discover_queues = Mock(return_value=['pattern_queue'])
+    queue_manager = Mock()
+    collector.discover_queues(queue_manager)
+    assert collector.filtered_queues == {'pattern_queue', common.QUEUE}
+
+
+def test_filtered_queues_tracks_monitored_queues_queue_regex(instance):
+    instance['queue_regex'] = [r'^pat.*$']
+    instance['auto_discover_queues'] = False
+    instance['queues'] = []
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+    collector._discover_queues = Mock(return_value=['pattern_queue', 'other_queue'])
+    queue_manager = Mock()
+    collector.discover_queues(queue_manager)
+    assert collector.filtered_queues == {'pattern_queue'}
 
 
 def test_pattern_preceedes_autodiscovery(instance):
@@ -152,6 +186,56 @@ def test_discover_queues_disconnects_on_exception(
         setattr(pcf_mock, side_effect_attr, Mock(side_effect=error))
         collector.discover_queues(queue_manager)
         assert pcf_mock.disconnect.called
+
+
+def test_collect_queue_metrics_survives_disconnect_failure(instance, get_check):
+    instance['auto_discover_queues'] = False
+    instance['queues'] = ['QUEUE.ONE', 'QUEUE.TWO']
+
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+    queue_manager = Mock()
+
+    collector.queue_manager_stats = Mock()
+    collector.queue_stats = Mock(return_value=[])
+    collector.get_pcf_queue_status_metrics = Mock()
+    collector.get_pcf_queue_reset_metrics = Mock()
+
+    pcf_mock = Mock()
+    pcf_mock.disconnect.side_effect = pymqi.MQMIError(2, 2009)
+    with patch('datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock):
+        collector.collect_queue_metrics(queue_manager)
+
+    assert collector.queue_stats.call_count == 2
+    processed_queues = {call.args[1] for call in collector.queue_stats.call_args_list}
+    assert processed_queues == {'QUEUE.ONE', 'QUEUE.TWO'}
+
+
+def test_collect_queue_metrics_reuses_single_pcf_connection_per_queue(instance, get_check):
+    # Regression test for the PCFExecute open/disconnect tripling this PR fixes: queue_stats,
+    # get_pcf_queue_status_metrics, and get_pcf_queue_reset_metrics must all share the single
+    # PCFExecute opened by collect_queue_metrics instead of each opening/closing their own.
+    instance['auto_discover_queues'] = False
+    instance['queues'] = ['QUEUE.ONE', 'QUEUE.TWO', 'QUEUE.THREE']
+
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+    queue_manager = Mock()
+
+    collector.queue_manager_stats = Mock()
+
+    pcf_mock = Mock()
+    pcf_mock.MQCMD_INQUIRE_Q.return_value = []
+    pcf_mock.MQCMD_INQUIRE_Q_STATUS.return_value = []
+    pcf_mock.MQCMD_RESET_Q_STATS.return_value = []
+    with patch(
+        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', return_value=pcf_mock
+    ) as PCFExecute:
+        collector.collect_queue_metrics(queue_manager)
+
+    # One PCFExecute (and one disconnect) per queue, not one per PCF command (3 per queue).
+    assert PCFExecute.call_count == 3
+    assert pcf_mock.disconnect.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -307,3 +391,36 @@ def test_queue_description_tags(
         else:
             desc_tags = [t for t in enriched_tags if t.startswith('queue_desc:')]
             assert len(desc_tags) == 0
+
+
+def _raw_queue_statistics_message(queue_names):
+    blocks = []
+    for name in queue_names:
+        blocks.append(
+            {
+                pymqi.CMQC.MQCA_Q_NAME: name.encode('utf-8'),
+                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_LOCAL,
+                pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED,
+            }
+        )
+    return {
+        pymqi.CMQCFC.MQCAMO_START_DATE: b'2020-01-01',
+        pymqi.CMQCFC.MQCAMO_START_TIME: b'12.00.00',
+        pymqi.CMQCFC.MQGACF_Q_STATISTICS_DATA: blocks,
+    }
+
+
+@pytest.mark.parametrize(
+    'filter_on, filtered_names, expected_queue_names',
+    [
+        (True, {'QUEUE.A'}, ['QUEUE.A']),
+        (True, {'QUEUE.B'}, ['QUEUE.B']),
+        (True, set(), []),
+        (False, {'QUEUE.A'}, ['QUEUE.A', 'QUEUE.B']),
+        (True, None, ['QUEUE.A', 'QUEUE.B']),
+    ],
+)
+def test_queue_stats_respects_filter_flag_and_names(filter_on, filtered_names, expected_queue_names):
+    raw = _raw_queue_statistics_message(['QUEUE.A', 'QUEUE.B'])
+    stats = QueueStats(raw, filtered_names, timezone=tz.UTC, filter_queue_statistics_metrics=filter_on)
+    assert [q.name for q in stats.queues] == expected_queue_names
