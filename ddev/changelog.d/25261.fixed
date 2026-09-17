@@ -1,0 +1,1 @@
+Make `GitHubAuthenticationError` a standalone exception instead of an `httpx.HTTPStatusError` subclass, so broad `except httpx.HTTPError` handlers cannot swallow the central handling of GitHub authentication failures; handlers that need the HTTP context find the original failure on `http_status_error`.
