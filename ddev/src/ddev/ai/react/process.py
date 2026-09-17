@@ -5,7 +5,7 @@
 import asyncio
 
 from ddev.ai.agent.build import AgentRuntime
-from ddev.ai.agent.exceptions import AgentError
+from ddev.ai.agent.exceptions import AgentError, FlowStopRequested
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
@@ -173,6 +173,10 @@ class ReActProcess:
 
                 for tc, result in tool_call_results:
                     await self._callbacks.fire_tool_call(self._scope, tc, result, iterations)
+
+                stop_reason = next((result.stop_reason for _, result in tool_call_results if result.stop_reason), None)
+                if stop_reason is not None:
+                    raise FlowStopRequested(stop_reason)
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 

@@ -10,7 +10,7 @@ import pytest
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
-from ddev.ai.agent.exceptions import AgentConnectionError, AgentError
+from ddev.ai.agent.exceptions import AgentConnectionError, AgentError, FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
@@ -347,6 +347,40 @@ async def test_partial_batch_failure_only_affects_raising_tool(fake_tool: FakeTo
     assert results["tc_01"].data == "contents"
     assert results["tc_02"].success is False
     assert "RuntimeError" in (results["tc_02"].error or "")
+
+
+# ---------------------------------------------------------------------------
+# Flow stop requests
+# ---------------------------------------------------------------------------
+
+
+async def test_stop_reason_result_raises_flow_stop_requested(fake_tool: FakeToolFactory) -> None:
+    """A tool result carrying stop_reason must end the run instead of being sent back to the agent,
+    so an unreachable goal stops the whole flow rather than looping forever."""
+    tc = make_tool_call("tc_01", "stop_flow")
+    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=[tc]), make_response(StopReason.END_TURN)])
+    stop_flow = fake_tool("stop_flow", result=ToolResult(success=True, stop_reason="the PRD endpoint doesn't exist"))
+
+    with pytest.raises(FlowStopRequested, match="the PRD endpoint doesn't exist"):
+        await make_process(agent, registry=ToolRegistry([stop_flow])).start("Build the check")
+
+    # The tool call is still reported before the loop ends, but no further turn is sent.
+    assert len(agent.send_calls) == 1
+
+
+async def test_stop_reason_takes_priority_over_other_parallel_results(fake_tool: FakeToolFactory) -> None:
+    """A stop request dispatched alongside ordinary tool calls in the same turn still ends the run."""
+    tool_calls = [make_tool_call("tc_01", "read_file"), make_tool_call("tc_02", "stop_flow")]
+    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=tool_calls)])
+    registry = ToolRegistry(
+        [
+            fake_tool("read_file"),
+            fake_tool("stop_flow", result=ToolResult(success=True, stop_reason="blocked")),
+        ]
+    )
+
+    with pytest.raises(FlowStopRequested, match="blocked"):
+        await make_process(agent, registry=registry).start("Build the check")
 
 
 # ---------------------------------------------------------------------------

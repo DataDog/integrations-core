@@ -35,3 +35,7 @@ class AgentAPIError(AgentError):
     def __init__(self, status_code: int, message: str) -> None:
         super().__init__(message)
         self.status_code = status_code
+
+
+class FlowStopRequested(AgentError):
+    """An agent asked the ReAct loop to end the run instead of continuing."""
