@@ -578,6 +578,7 @@ class TestAIAChasing:
         [
             pytest.param('', id='empty'),
             pytest.param('/caf\u00c3\u00a9.der', id='non-ascii'),
+            pytest.param('/first.der, /second.der', id='duplicate'),
         ],
     )
     def test_load_intermediate_certs_rejects_invalid_redirect(self, location: str):
@@ -594,6 +595,39 @@ class TestAIAChasing:
 
         session.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
         response.close.assert_called_once_with()
+        assert certs == []
+
+    def test_load_intermediate_certs_skips_redirect_when_disabled(self):
+        http = RequestsWrapper({'allow_redirects': False}, {})
+        certs = []
+        response = aia_response(build_cert())
+        response.is_redirect = True
+        response.headers = {'location': '/intermediate.der'}
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
+
+        session.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
+        response.iter_content.assert_not_called()
+        response.close.assert_called_once_with()
+        assert certs == []
+
+    def test_load_intermediate_certs_rejects_sixth_redirect(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        response = aia_response(b'')
+        response.is_redirect = True
+        response.headers = {'location': '/next.der'}
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
+
+        assert session.get.call_count == 6
+        assert response.close.call_count == 6
         assert certs == []
 
     def test_load_intermediate_certs_follows_safe_redirect(self):

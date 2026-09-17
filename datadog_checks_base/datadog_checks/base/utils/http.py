@@ -104,6 +104,7 @@ AIA_TLS_CONFIG_FIELDS = frozenset(
 )
 AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
 MAX_AIA_CERT_SIZE = 64 * 1024
+MAX_AIA_REDIRECTS = 5
 DEFAULT_AIA_CHASING_MAX_DEPTH = 5
 
 PROXY_SETTINGS_DISABLED = {
@@ -317,16 +318,24 @@ def _fetch_aia_content(
     while _is_safe_aia_url(uri, logger):
         response = session.get(uri, **request_options)
         try:
-            if follow_redirects and response.is_redirect:
+            if response.is_redirect:
+                if not follow_redirects:
+                    return None
+
                 location = response.headers.get('location')
-                if not location or not location.isascii():
+                if (
+                    not location
+                    or not location.isascii()
+                    or not location.isprintable()
+                    or any(character.isspace() for character in location)
+                ):
                     logger.debug(
                         'Skipping intermediate certificate redirect from `%s` with invalid Location header', uri
                     )
                     return None
-                if redirect_count >= requests.models.DEFAULT_REDIRECT_LIMIT:
+                if redirect_count >= MAX_AIA_REDIRECTS:
                     raise requests.exceptions.TooManyRedirects(
-                        f'Exceeded {requests.models.DEFAULT_REDIRECT_LIMIT} redirects.', response=response
+                        f'Exceeded {MAX_AIA_REDIRECTS} redirects.', response=response
                     )
                 uri = urljoin(uri, location)
                 redirect_count += 1
