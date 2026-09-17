@@ -197,7 +197,7 @@ def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
     if scheme not in ('http', 'https') or not host or any(character.isspace() for character in host):
         return None
 
-    port = explicit_port or (443 if scheme == 'https' else 80)
+    port = explicit_port if explicit_port is not None else (443 if scheme == 'https' else 80)
     if not 1 <= port <= 65535:
         return None
 

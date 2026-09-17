@@ -501,6 +501,8 @@ def test_report_and_resolve_bridge_failures_are_best_effort():
         pytest.param('not a URL', id='not-a-url'),
         pytest.param('http://alice:s3cr3t@?token=secret', id='credentials-without-host'),
         pytest.param('http://example.test:invalid/metrics?token=secret', id='invalid-port'),
+        pytest.param('http://example.test:0/metrics', id='http-zero-port'),
+        pytest.param('https://example.test:0/metrics', id='https-zero-port'),
     ],
 )
 def test_missing_or_invalid_endpoint_is_ignored_without_leaking_secrets(endpoint: str | None):
