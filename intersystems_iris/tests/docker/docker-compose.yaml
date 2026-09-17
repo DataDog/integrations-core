@@ -7,8 +7,7 @@
 #   http://<host>:52773/api/monitor/metrics
 # unauthenticated by default.
 #
-# Community Edition licenses expire ~13 months after the build's release date,
-# so pin IRIS_VERSION to a current tag and refresh periodically.
+# IRIS_VERSION is pinned in hatch.toml.
 #
 # The iris_interop_* families are runtime-gated: they only appear once an
 # interop-enabled namespace has a running production. init/iris-init.sh (wired
@@ -18,7 +17,7 @@
 
 services:
   iris:
-    image: "intersystems/iris-community:${IRIS_VERSION:-2026.1}"
+    image: "intersystems/iris-community:${IRIS_VERSION}"
     command: ["--after", "/opt/irisinit/iris-init.sh"]
     volumes:
       - "./init:/opt/irisinit:ro"
