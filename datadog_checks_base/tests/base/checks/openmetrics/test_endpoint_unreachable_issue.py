@@ -9,8 +9,10 @@ from unittest import mock
 
 import pytest
 import requests
+from requests.exceptions import ProxyError as RequestsProxyError
 from urllib3.connectionpool import HTTPConnectionPool
 from urllib3.exceptions import MaxRetryError, NewConnectionError
+from urllib3.exceptions import ProxyError as Urllib3ProxyError
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks import AgentCheck
@@ -31,7 +33,8 @@ SECOND_ENDPOINT = 'http://10.0.0.9:9102/metrics'
 SECOND_ISSUE_ID = f'{ISSUE_ID_PREFIX}:645abf3bffe9c583'
 ENVOY_ISSUE_ID = f'{ISSUE_ID_PREFIX}:2d001d82e5465988'
 DEFAULT_NAMESPACE_ISSUE_ID = f'{ISSUE_ID_PREFIX}:a8006c4341ad9679'
-CANONICAL_ERROR_MESSAGE = f'[Errno {errno.EHOSTUNREACH}] No route to host'
+CANONICAL_ERROR_MESSAGE = 'No route to host'
+WSAEHOSTUNREACH = 10065
 
 
 class Namespace:
@@ -86,6 +89,16 @@ def unreachable_connection_error(endpoint: str = RAW_ENDPOINT) -> requests.Conne
     connection_error.__cause__ = os_error
     retry_error = MaxRetryError(pool, '/metrics', reason=connection_error)
     return requests.ConnectionError(f'GET {endpoint} failed', retry_error)
+
+
+def unreachable_proxy_error(endpoint: str = RAW_ENDPOINT) -> RequestsProxyError:
+    pool = HTTPConnectionPool('proxy.example', port=8080)
+    os_error = OSError(errno.EHOSTUNREACH, 'No route to host')
+    connection_error = NewConnectionError(pool, 'Failed to establish a new connection')
+    connection_error.__cause__ = os_error
+    proxy_error = Urllib3ProxyError('Unable to connect to proxy', connection_error)
+    retry_error = MaxRetryError(pool, endpoint, reason=proxy_error)
+    return RequestsProxyError(retry_error)
 
 
 def create_response(endpoint: str, status_code: int = 200) -> requests.Response:
@@ -309,14 +322,44 @@ def test_remediation_does_not_interpolate_an_unsafe_check_name(check_name: str):
     assert 'agent check' not in step
 
 
-def test_report_uses_flattened_errno_text_as_narrow_fallback():
+def test_report_does_not_classify_errno_text_in_the_request_url():
     check = create_check()
-    error = RuntimeError(f'scrape failed: [Errno {errno.EHOSTUNREACH}] No route to host')
+    endpoint = f'http://example.test/[Errno {errno.EHOSTUNREACH}]/metrics'
+    error = requests.ConnectionError(
+        f'GET {endpoint} failed',
+        OSError(errno.ECONNREFUSED, 'Connection refused'),
+    )
 
-    EndpointUnreachableIssueReporter.report(check, 'https://example.test/metrics', error)
+    EndpointUnreachableIssueReporter.report(check, endpoint, error)
+
+    check.report_issue.assert_not_called()
+
+
+def test_report_does_not_attribute_an_unreachable_proxy_to_the_endpoint():
+    check = create_check()
+
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_proxy_error())
+
+    check.report_issue.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ('error_code', 'winerror'),
+    [
+        pytest.param(WSAEHOSTUNREACH, None, id='winsock-errno'),
+        pytest.param(errno.EINVAL, WSAEHOSTUNREACH, id='winerror'),
+    ],
+)
+def test_report_classifies_windows_host_unreachable_error(error_code: int, winerror: int | None):
+    check = create_check()
+    error = OSError(error_code, 'A socket operation was attempted to an unreachable host')
+    if winerror is not None:
+        error.winerror = winerror
+
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, requests.ConnectionError(error))
 
     check.report_issue.assert_called_once()
-    assert check.report_issue.call_args.kwargs['extra']['error_kind'] == 'no_route_to_host'
+    assert check.report_issue.call_args.kwargs['extra']['error_message'] == CANONICAL_ERROR_MESSAGE
 
 
 def test_exception_graph_walks_context_and_is_cycle_safe():
@@ -339,6 +382,10 @@ def test_exception_graph_walks_context_and_is_cycle_safe():
         pytest.param(TimeoutError(errno.ETIMEDOUT, 'Connection timed out'), id='timeout'),
         pytest.param(socket.gaierror(socket.EAI_NONAME, 'Name or service not known'), id='dns'),
         pytest.param(RuntimeError('[Errno 111] Connection refused'), id='unrelated-errno-text'),
+        pytest.param(
+            RuntimeError(f'[Errno {errno.EHOSTUNREACH}] No route to host'),
+            id='flattened-host-unreachable-text',
+        ),
         pytest.param(RuntimeError('unrelated scrape error'), id='unrelated-error'),
     ],
 )

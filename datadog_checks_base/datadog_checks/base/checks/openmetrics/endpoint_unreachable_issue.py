@@ -15,6 +15,9 @@ from threading import Lock
 from typing import TYPE_CHECKING
 from urllib.parse import urlsplit, urlunsplit
 
+from requests.exceptions import ProxyError as RequestsProxyError
+from urllib3.exceptions import ProxyError as Urllib3ProxyError
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -23,7 +26,10 @@ if TYPE_CHECKING:
 ISSUE_NAME = 'OpenMetrics Endpoint Unreachable'
 ISSUE_TYPE = 'openmetrics_endpoint_unreachable'
 ISSUE_ID_PREFIX = 'openmetrics-endpoint-unreachable'
-ERROR_MESSAGE = f'[Errno {errno.EHOSTUNREACH}] No route to host'
+ERROR_MESSAGE = 'No route to host'
+WSAEHOSTUNREACH = getattr(errno, 'WSAEHOSTUNREACH', 10065)
+HOST_UNREACHABLE_ERRNOS = frozenset((errno.EHOSTUNREACH, WSAEHOSTUNREACH))
+PROXY_ERROR_TYPES = (RequestsProxyError, Urllib3ProxyError)
 SAFE_CHECK_NAME = compile(r'[A-Za-z0-9][A-Za-z0-9_.-]*\Z')
 
 REMEDIATION_SUMMARY = (
@@ -211,8 +217,7 @@ def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
 def _is_unreachable(error: BaseException) -> bool:
     pending = deque([error])
     seen: set[int] = set()
-    messages: list[str] = []
-    errno_match = False
+    host_unreachable = False
 
     while pending:
         current = pending.popleft()
@@ -220,22 +225,19 @@ def _is_unreachable(error: BaseException) -> bool:
             continue
         seen.add(id(current))
 
-        try:
-            message = str(current)
-        except Exception:
-            message = current.__class__.__name__
-        if message:
-            messages.append(message)
+        if isinstance(current, PROXY_ERROR_TYPES):
+            # urllib3 uses ProxyError while connecting to the proxy, so the unreachable host is not the endpoint.
+            return False
 
-        if isinstance(current, OSError) and current.errno == errno.EHOSTUNREACH:
-            errno_match = True
+        if isinstance(current, OSError) and (
+            current.errno in HOST_UNREACHABLE_ERRNOS or getattr(current, 'winerror', None) == WSAEHOSTUNREACH
+        ):
+            host_unreachable = True
 
         linked = (current.__cause__, current.__context__, getattr(current, 'reason', None), *current.args)
         pending.extend(value for value in linked if isinstance(value, BaseException))
 
-    flattened = ': '.join(messages) or error.__class__.__name__
-    fallback = f'[Errno {errno.EHOSTUNREACH}]' in flattened
-    return errno_match or fallback
+    return host_unreachable
 
 
 def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: str) -> str:
