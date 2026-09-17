@@ -364,14 +364,14 @@ files:
           SNMP v3 specific configuration.
         value:
           type: string
-        fleet_configurable: false
+        fleet_configurable: true
       - name: context_name
         description: |
           Name of your context (optional SNMP v3-only parameter).
           SNMP v3 specific configuration.
         value:
           type: string
-        fleet_configurable: false
+        fleet_configurable: true
       - name: use_global_metrics
         description: |
           Whether or not `global_metrics` should be included for this instance.
