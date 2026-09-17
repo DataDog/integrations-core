@@ -545,14 +545,28 @@ def test_v2_check_reports_no_route_error_before_preserving_outer_error(datadog_a
     assert issue['extra']['endpoint'] == SANITIZED_ENDPOINT
 
 
-def test_v2_ignored_connection_error_still_reports_issue(datadog_agent):
+def test_v2_ignored_connection_error_does_not_report_issue(datadog_agent):
     check = create_v2_check(ignore_connection_errors=True)
     check.scrapers[RAW_ENDPOINT].send_request = mock.Mock(side_effect=unreachable_connection_error())
 
     check.check(None)
 
+    assert not datadog_agent._sent_reported_issues
+
+
+def test_v2_ignored_connection_error_resolves_an_existing_issue(datadog_agent):
+    check = create_v2_check()
+    scraper = check.scrapers[RAW_ENDPOINT]
+    scraper.send_request = mock.Mock(side_effect=unreachable_connection_error())
+    with pytest.raises(requests.ConnectionError):
+        check.check(None)
     [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
-    assert issue['id'] == ISSUE_ID
+
+    scraper.ignore_connection_errors = True
+    check.check(None)
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+    assert len(datadog_agent._sent_reported_issues['openmetrics_test']) == 1
 
 
 def test_v2_cancel_resolves_issue_for_an_unscheduled_stale_endpoint(datadog_agent):
