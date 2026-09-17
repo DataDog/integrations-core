@@ -6,6 +6,8 @@ import json
 import logging
 import re
 import shlex
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
 import click
@@ -431,6 +433,25 @@ class _AgentBumpPrError(Exception):
     """
 
 
+@contextmanager
+def _bump_pr_recovery(context: str, recovery: str = '') -> Iterator[None]:
+    """Run one datadog-agent API step, converting its failures to recovery instructions.
+
+    `GitHubAuthenticationError` propagates untouched so the central handler aborts with the
+    actionable token message, like in every other command. Any other GitHub/HTTP failure raises
+    `_AgentBumpPrError` whose body is `{context}: {error}`, followed by `recovery` when given.
+    """
+    try:
+        yield
+    except GitHubAuthenticationError:
+        raise
+    except (httpx.HTTPError, ValidationError) as e:
+        message = f'{context}: {e}'
+        if recovery:
+            message = f'{message}\n{recovery}'
+        raise _AgentBumpPrError(message) from e
+
+
 def _open_datadog_agent_bump_pr(
     app: Application, git: GitRepository, target_branch: str, new_tag: str, effective_ref: str
 ) -> None:
@@ -475,10 +496,9 @@ def _open_datadog_agent_bump_pr(
         f'against `{agent_base_branch}`...'
     )
     try:
-        pr_url = asyncio.run(run())
-    except GitHubAuthenticationError:
-        raise
-    except (_AgentBumpPrError, httpx.HTTPError, ValidationError) as e:
+        with _bump_pr_recovery('a datadog-agent API request failed'):
+            pr_url = asyncio.run(run())
+    except _AgentBumpPrError as e:
         app.abort(
             f'The datadog-agent bump PR could not be created:\n{e}\n'
             f'The tag `{new_tag}` was not pushed. Fix the problem above and rerun the command, or rerun '
@@ -555,7 +575,14 @@ async def _create_agent_bump_pr(
         # The head branch is left over from a previous run; reuse it. The pin commit below either
         # lands on it or fails with a 409 when a previous run already committed the pin, which the
         # recovery instructions below cover.
-    try:
+    # GitHub may have applied the commit while reporting the failure, so the recovery must not
+    # assume either way.
+    with _bump_pr_recovery(
+        f'head branch `{head_branch}` was created on datadog-agent, '
+        f'but the pin commit for `{commit_sha}` may not have been made on it',
+        f'Check `{head_branch}`: if `{RELEASE_JSON_PATH}` there does not pin `{commit_sha}`, '
+        f'commit the pin to `{head_branch}` first, then open the PR:\n{gh_command}',
+    ):
         await client.create_or_update_file_contents(
             DATADOG_AGENT_OWNER,
             DATADOG_AGENT_REPO,
@@ -565,34 +592,26 @@ async def _create_agent_bump_pr(
             sha=current.data.sha,
             branch=head_branch,
         )
-    except GitHubAuthenticationError:
-        raise
-    except (httpx.HTTPError, ValidationError) as e:
-        # GitHub may have applied the commit while reporting the failure, so the recovery must not
-        # assume either way.
-        raise _AgentBumpPrError(
-            f'head branch `{head_branch}` was created on datadog-agent, but the pin commit for '
-            f'`{commit_sha}` may not have been made on it: {e}\n'
-            f'Check `{head_branch}`: if `{RELEASE_JSON_PATH}` there does not pin `{commit_sha}`, '
-            f'commit the pin to `{head_branch}` first, then open the PR:\n{gh_command}'
-        ) from e
     retry_policy = RetryPolicy(should_retry=any_of(on_pre_send_transport_error, on_status(*RETRYABLE_SERVER_STATUSES)))
-    try:
-        pr = await client.create_pull_request(
-            DATADOG_AGENT_OWNER,
-            DATADOG_AGENT_REPO,
-            title=title,
-            head=head_branch,
-            base=base_branch,
-            body=body,
-            retry=retry_policy,
-        )
-    except GitHubAuthenticationError:
-        raise
-    except (httpx.HTTPError, ValidationError) as e:
-        # A 422 can be GitHub reporting a duplicate of a retried create whose first attempt
-        # actually went through, so resolve it to the existing PR instead of failing.
-        if isinstance(e, httpx.HTTPStatusError) and e.response.status_code == 422:  # noqa: PLR2004
+    with _bump_pr_recovery(
+        f'the pin commit was made on `{head_branch}`, but the PR could not be created',
+        f'Open it manually:\n{gh_command}',
+    ):
+        try:
+            pr = await client.create_pull_request(
+                DATADOG_AGENT_OWNER,
+                DATADOG_AGENT_REPO,
+                title=title,
+                head=head_branch,
+                base=base_branch,
+                body=body,
+                retry=retry_policy,
+            )
+        except httpx.HTTPStatusError as e:
+            # A 422 can be GitHub reporting a duplicate of a retried create whose first attempt
+            # actually went through, so resolve it to the existing PR instead of failing.
+            if e.response.status_code != 422:  # noqa: PLR2004
+                raise
             try:
                 pulls = await client.list_pull_requests(
                     DATADOG_AGENT_OWNER, DATADOG_AGENT_REPO, head=f'{DATADOG_AGENT_OWNER}:{head_branch}'
@@ -602,10 +621,7 @@ async def _create_agent_bump_pr(
             else:
                 if pulls.data:
                     return pulls.data[0].html_url
-        raise _AgentBumpPrError(
-            f'the pin commit was made on `{head_branch}`, but the PR could not be created: {e}\n'
-            f'Open it manually:\n{gh_command}'
-        ) from e
+            raise
     return pr.data.html_url
 
 
