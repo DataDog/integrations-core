@@ -15,6 +15,7 @@ from requests.exceptions import RequestException
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.openmetrics.endpoint_unreachable_issue import EndpointUnreachableIssueReporter
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -90,6 +91,10 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         We take care of instance-level customization at initialization time.
         """
         self.refresh_scrapers()
+        self.endpoint_unreachable_issue_reporter.resolve_stale(
+            self,
+            ((scraper.endpoint, scraper.namespace) for scraper in tuple(self.scrapers.values())),
+        )
 
         for endpoint, scraper in self.scrapers.items():
             self.log.debug('Scraping OpenMetrics endpoint: %s', endpoint)
@@ -112,6 +117,48 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             observed_count,
             limit,
         )
+
+    def cancel(self) -> None:
+        try:
+            tracked_issues_drained = self.endpoint_unreachable_issue_reporter.cancel(self)
+            if self._uses_process_isolation() and not tracked_issues_drained:
+                # The isolated child owns runtime reporter state. The parent can only reconstruct endpoints present
+                # directly in configuration; endpoints discovered or transformed at runtime remain best-effort.
+                defaults = None
+                endpoint_namespaces = set()
+                configs = [*self.scraper_configs, self.instance]
+                for config in configs:
+                    if not config:
+                        continue
+                    if self.__NAMESPACE__:
+                        namespace = self.__NAMESPACE__
+                    elif 'namespace' in config:
+                        namespace = config.get('namespace')
+                    else:
+                        if defaults is None:
+                            defaults = self.get_default_config()
+                        namespace = defaults.get('namespace', '')
+
+                    for key, endpoint in config.items():
+                        if (
+                            isinstance(key, str)
+                            and key.endswith('_endpoint')
+                            and isinstance(endpoint, str)
+                            and endpoint
+                        ):
+                            endpoint_namespaces.add((endpoint, str(namespace)))
+
+                for endpoint, namespace in endpoint_namespaces:
+                    self.endpoint_unreachable_issue_reporter.resolve(self, endpoint, namespace)
+        except Exception:
+            self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
+        finally:
+            super().cancel()
+
+    def _uses_process_isolation(self) -> bool:
+        instance = self.instance or {}
+        init_config = self.init_config or {}
+        return is_affirmative(instance.get('process_isolation', init_config.get('process_isolation', False)))
 
     def configure_scrapers(self):
         """

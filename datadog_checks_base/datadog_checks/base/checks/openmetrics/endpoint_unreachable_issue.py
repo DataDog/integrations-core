@@ -11,10 +11,13 @@ from dataclasses import dataclass
 from ipaddress import ip_address
 from re import compile
 from shlex import quote
+from threading import Lock
 from typing import TYPE_CHECKING
 from urllib.parse import urlsplit, urlunsplit
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from datadog_checks.base.checks import AgentCheck
 
 ISSUE_NAME = 'OpenMetrics Endpoint Unreachable'
@@ -37,6 +40,24 @@ class EndpointDetails:
     path: str
 
 
+@dataclass(frozen=True)
+class TrackedIssue:
+    issue_id: str
+    endpoint: str
+    namespace: str
+
+
+class ReporterState:
+    def __init__(self) -> None:
+        self.lock = Lock()
+        self.cancelled = False
+        self.issues: dict[str, TrackedIssue] = {}
+
+
+STATE_ATTRIBUTE = '_openmetrics_endpoint_unreachable_issue_state'
+STATE_INITIALIZATION_LOCK = Lock()
+
+
 class EndpointUnreachableIssueReporter:
     @staticmethod
     def report(check: AgentCheck, endpoint: str | None, error: BaseException, namespace: str = '') -> None:
@@ -52,6 +73,11 @@ class EndpointUnreachableIssueReporter:
 
             namespace = str(namespace)
             issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
+            state = _state(check)
+            with state.lock:
+                if state.cancelled:
+                    return
+
             check.report_issue(
                 id=issue_id,
                 issue_name=ISSUE_NAME,
@@ -76,6 +102,16 @@ class EndpointUnreachableIssueReporter:
                 remediation=_remediation(check.name, details),
                 tags=[f'integration:{check.name}', 'openmetrics', 'endpoint-unreachable'],
             )
+
+            with state.lock:
+                if state.cancelled:
+                    resolve_after_cancel = True
+                else:
+                    state.issues[issue_id] = TrackedIssue(issue_id, endpoint, namespace)
+                    resolve_after_cancel = False
+
+            if resolve_after_cancel:
+                _resolve_issue_id(check, issue_id)
         except Exception:
             _debug(check, 'Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True)
 
@@ -89,9 +125,55 @@ class EndpointUnreachableIssueReporter:
 
             namespace = str(namespace)
             issue_id = _issue_id(check.hostname, check.name, endpoint, namespace)
-            check.resolve_issue(issue_id)
+            state = _state(check)
+            with state.lock:
+                tracked_issue = state.issues.get(issue_id)
+
+            if not _resolve_issue_id(check, issue_id):
+                return
+
+            with state.lock:
+                if state.issues.get(issue_id) is tracked_issue:
+                    state.issues.pop(issue_id, None)
         except Exception:
             _debug(check, 'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
+
+    @staticmethod
+    def resolve_stale(check: AgentCheck, active_endpoint_namespaces: Iterable[tuple[str, str]]) -> None:
+        """Resolve tracked issues whose exact endpoint context is no longer active."""
+        try:
+            active = {(endpoint, str(namespace)) for endpoint, namespace in active_endpoint_namespaces}
+            state = _state(check)
+            with state.lock:
+                stale_issues = tuple(
+                    issue for issue in state.issues.values() if (issue.endpoint, issue.namespace) not in active
+                )
+
+            for issue in stale_issues:
+                if not _resolve_issue_id(check, issue.issue_id):
+                    continue
+                with state.lock:
+                    if state.issues.get(issue.issue_id) is issue:
+                        state.issues.pop(issue.issue_id, None)
+        except Exception:
+            _debug(check, 'Failed to resolve stale OpenMetrics endpoint-unreachable issues', exc_info=True)
+
+    @staticmethod
+    def cancel(check: AgentCheck) -> bool:
+        """Mark the check cancelled and best-effort resolve every exactly tracked issue."""
+        try:
+            state = _state(check)
+            with state.lock:
+                state.cancelled = True
+                tracked_issues = tuple(state.issues.values())
+                state.issues.clear()
+
+            for issue in tracked_issues:
+                _resolve_issue_id(check, issue.issue_id)
+            return bool(tracked_issues)
+        except Exception:
+            _debug(check, 'Failed to cancel OpenMetrics endpoint-unreachable issue reporting', exc_info=True)
+            return False
 
 
 def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
@@ -160,6 +242,29 @@ def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: str) -> 
     identity = json.dumps((hostname, check_name, endpoint, namespace), separators=(',', ':'))
     digest = hashlib.sha256(identity.encode('utf-8')).hexdigest()[:16]
     return f'{ISSUE_ID_PREFIX}:{digest}'
+
+
+def _state(check: AgentCheck) -> ReporterState:
+    # Read the instance dict directly so mocks and custom checks cannot synthesize this private attribute.
+    state = vars(check).get(STATE_ATTRIBUTE)
+    if state is not None:
+        return state
+
+    with STATE_INITIALIZATION_LOCK:
+        state = vars(check).get(STATE_ATTRIBUTE)
+        if state is None:
+            state = ReporterState()
+            setattr(check, STATE_ATTRIBUTE, state)
+        return state
+
+
+def _resolve_issue_id(check: AgentCheck, issue_id: str) -> bool:
+    try:
+        check.resolve_issue(issue_id)
+    except Exception:
+        _debug(check, 'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
+        return False
+    return True
 
 
 def _debug(check: AgentCheck, message: str, *, exc_info: bool = False) -> None:

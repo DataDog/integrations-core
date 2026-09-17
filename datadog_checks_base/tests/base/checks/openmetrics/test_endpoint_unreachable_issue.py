@@ -397,6 +397,46 @@ def test_resolve_uses_the_same_raw_endpoint_identity():
     check.resolve_issue.assert_called_once_with(ISSUE_ID)
 
 
+def test_cancel_drains_exact_reported_issue_and_suppresses_late_reports():
+    check = create_check()
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    issue_id = check.report_issue.call_args.kwargs['id']
+
+    EndpointUnreachableIssueReporter.cancel(check)
+    EndpointUnreachableIssueReporter.report(
+        check,
+        SECOND_ENDPOINT,
+        unreachable_connection_error(SECOND_ENDPOINT),
+        namespace='demo',
+    )
+
+    check.resolve_issue.assert_called_once_with(issue_id)
+    check.report_issue.assert_called_once()
+
+
+def test_successful_resolve_removes_tracked_issue_before_cancel():
+    check = create_check()
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    issue_id = check.report_issue.call_args.kwargs['id']
+
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    EndpointUnreachableIssueReporter.cancel(check)
+
+    check.resolve_issue.assert_called_once_with(issue_id)
+
+
+def test_failed_resolve_leaves_tracked_issue_for_cancellation_retry():
+    check = create_check()
+    check.resolve_issue.side_effect = [RuntimeError('resolve bridge failure'), None]
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    issue_id = check.report_issue.call_args.kwargs['id']
+
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    EndpointUnreachableIssueReporter.cancel(check)
+
+    assert check.resolve_issue.call_args_list == [mock.call(issue_id), mock.call(issue_id)]
+
+
 def test_namespace_is_normalized_for_identity_and_emitted_context():
     check = create_check()
     namespace = Namespace('demo')
@@ -515,6 +555,97 @@ def test_v2_ignored_connection_error_still_reports_issue(datadog_agent):
     assert issue['id'] == ISSUE_ID
 
 
+def test_v2_cancel_resolves_issue_for_an_unscheduled_stale_endpoint(datadog_agent):
+    check = create_v2_check()
+    check.scrapers[RAW_ENDPOINT].send_request = mock.Mock(side_effect=unreachable_connection_error())
+    with pytest.raises(requests.ConnectionError):
+        check.check(None)
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_v2_cancel_resolves_process_isolated_namespaced_endpoint_from_config(datadog_agent):
+    class NamespacedCheck(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'envoy'
+
+    instance = {
+        'openmetrics_endpoint': RAW_ENDPOINT,
+        'metrics': [],
+        'process_isolation': True,
+    }
+    check = NamespacedCheck('envoy', {}, [instance])
+    child_check = NamespacedCheck(
+        'envoy', {}, [{key: value for key, value in instance.items() if key != 'process_isolation'}]
+    )
+    EndpointUnreachableIssueReporter.report(child_check, RAW_ENDPOINT, unreachable_connection_error(), 'envoy')
+    [issue] = datadog_agent._sent_reported_issues['envoy']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_v2_cancel_uses_default_config_namespace_for_process_isolation_fallback(datadog_agent):
+    class DefaultNamespaceCheck(OpenMetricsBaseCheckV2):
+        def get_default_config(self) -> dict:
+            return {'namespace': 'default-demo'}
+
+    child_instance = {'openmetrics_endpoint': RAW_ENDPOINT, 'metrics': []}
+    parent_instance = {**child_instance, 'process_isolation': True}
+    check = DefaultNamespaceCheck('openmetrics_test', {}, [parent_instance])
+    child_check = DefaultNamespaceCheck('openmetrics_test', {}, [child_instance])
+    child_check.configure_scrapers()
+    child_check.scrapers[RAW_ENDPOINT].send_request = mock.Mock(side_effect=unreachable_connection_error())
+    with pytest.raises(requests.ConnectionError):
+        child_check.check(None)
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_v2_cancel_uses_raw_generated_endpoint_for_process_isolation_fallback(datadog_agent):
+    instance = {
+        'agent_endpoint': RAW_ENDPOINT,
+        'namespace': 'demo',
+        'process_isolation': True,
+    }
+    check = OpenMetricsBaseCheckV2('openmetrics_test', {}, [instance])
+    child_check = OpenMetricsBaseCheckV2(
+        'openmetrics_test', {}, [{'agent_endpoint': RAW_ENDPOINT, 'namespace': 'demo'}]
+    )
+    EndpointUnreachableIssueReporter.report(child_check, RAW_ENDPOINT, unreachable_connection_error(), 'demo')
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_v2_refresh_resolves_reported_issue_for_removed_dynamic_endpoint(datadog_agent):
+    check = create_v2_check()
+    check.scrapers[RAW_ENDPOINT].send_request = mock.Mock(side_effect=unreachable_connection_error())
+    with pytest.raises(requests.ConnectionError):
+        check.check(None)
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    replacement_scraper = mock.Mock()
+    replacement_scraper.endpoint = SECOND_ENDPOINT
+    replacement_scraper.namespace = 'demo'
+    check.refresh_scrapers = mock.Mock(
+        side_effect=lambda: setattr(check, 'scrapers', {SECOND_ENDPOINT: replacement_scraper})
+    )
+
+    check.check(None)
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+    replacement_scraper.scrape.assert_called_once_with()
+
+
 @pytest.mark.parametrize('status_code', [pytest.param(200, id='success'), pytest.param(500, id='http-error')])
 def test_v2_response_resolves_route_issue_before_status_handling(status_code, datadog_agent):
     check = create_v2_check()
@@ -560,6 +691,105 @@ def test_v1_poll_reports_no_route_error_and_preserves_exception(datadog_agent):
     assert exc_info.value is error
     [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
     assert issue['id'] == ISSUE_ID
+
+
+def test_v1_cancel_resolves_issue_for_an_unscheduled_stale_endpoint(datadog_agent):
+    check, scraper_config = create_v1_check()
+    check.send_request = mock.Mock(side_effect=unreachable_connection_error())
+    with pytest.raises(requests.ConnectionError):
+        check.poll(scraper_config)
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_v1_cancel_resolves_exact_issue_after_runtime_endpoint_mutation(datadog_agent):
+    check, scraper_config = create_v1_check()
+    scraper_config['prometheus_url'] = SECOND_ENDPOINT
+    check.send_request = mock.Mock(side_effect=unreachable_connection_error(SECOND_ENDPOINT))
+    with pytest.raises(requests.ConnectionError):
+        check.poll(scraper_config)
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_v1_cancel_uses_runtime_config_endpoint_for_process_isolation_fallback(datadog_agent):
+    instance = {
+        'prometheus_url': RAW_ENDPOINT,
+        'namespace': 'demo',
+        'metrics': ['*'],
+        'process_isolation': True,
+    }
+    check = OpenMetricsBaseCheck('openmetrics_test', {}, [instance])
+    check.config_map[RAW_ENDPOINT]['prometheus_url'] = SECOND_ENDPOINT
+    child_check = OpenMetricsBaseCheck(
+        'openmetrics_test',
+        {},
+        [{**instance, 'prometheus_url': SECOND_ENDPOINT, 'process_isolation': False}],
+    )
+    EndpointUnreachableIssueReporter.report(
+        child_check,
+        SECOND_ENDPOINT,
+        unreachable_connection_error(SECOND_ENDPOINT),
+        'demo',
+    )
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+def test_report_racing_with_cancel_is_immediately_resolved_and_not_retained(datadog_agent):
+    check, scraper_config = create_v1_check()
+    original_report_issue = check.report_issue
+
+    def report_then_cancel(**kwargs: object) -> None:
+        original_report_issue(**kwargs)
+        check.cancel()
+
+    check.report_issue = report_then_cancel
+    check.send_request = mock.Mock(side_effect=unreachable_connection_error())
+
+    with pytest.raises(requests.ConnectionError):
+        check.poll(scraper_config)
+    [issue] = datadog_agent._sent_reported_issues['openmetrics_test']
+    check.cancel()
+
+    assert datadog_agent._sent_resolved_issues == [issue['id']]
+
+
+@pytest.mark.parametrize('version', ['v1', 'v2'])
+def test_cancel_always_calls_super_after_suppressing_issue_cleanup_errors(version: str):
+    if version == 'v1':
+        check, _ = create_v1_check()
+    else:
+        check = create_v2_check()
+    check.endpoint_unreachable_issue_reporter = mock.Mock()
+    check.endpoint_unreachable_issue_reporter.cancel.side_effect = RuntimeError('reporter cleanup failure')
+
+    with mock.patch.object(AgentCheck, 'cancel') as super_cancel:
+        check.cancel()
+
+    check.endpoint_unreachable_issue_reporter.cancel.assert_called_once_with(check)
+    super_cancel.assert_called_once_with()
+
+
+@pytest.mark.parametrize('version', ['v1', 'v2'])
+def test_cancel_does_not_suppress_base_cleanup_errors(version: str):
+    if version == 'v1':
+        check, _ = create_v1_check()
+    else:
+        check = create_v2_check()
+
+    with mock.patch.object(AgentCheck, 'cancel', side_effect=RuntimeError('base cleanup failure')):
+        with pytest.raises(RuntimeError, match='base cleanup failure'):
+            check.cancel()
 
 
 @pytest.mark.parametrize('status_code', [pytest.param(200, id='success'), pytest.param(500, id='http-error')])

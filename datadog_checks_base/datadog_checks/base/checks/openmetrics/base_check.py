@@ -6,6 +6,7 @@ from copy import deepcopy
 import requests
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -155,6 +156,26 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             observed_count,
             limit,
         )
+
+    def cancel(self) -> None:
+        try:
+            tracked_issues_drained = self.endpoint_unreachable_issue_reporter.cancel(self)
+            instance = self.instance or {}
+            init_config = self.init_config or {}
+            process_isolation = is_affirmative(
+                instance.get('process_isolation', init_config.get('process_isolation', False))
+            )
+            if process_isolation and not tracked_issues_drained:
+                for config in tuple(self.config_map.values()):
+                    self.endpoint_unreachable_issue_reporter.resolve(
+                        self,
+                        config.get('prometheus_url'),
+                        config.get('namespace', ''),
+                    )
+        except Exception:
+            self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
+        finally:
+            super().cancel()
 
     def get_scraper_config(self, instance):
         """
