@@ -49,9 +49,16 @@ def creds(delivery):
     return rq.UploadCredentials(delivery.base_url, delivery.upload_id, 'test-api-key', 'test-app-key', None)
 
 
-def descriptor(columns=(('value', 'text', 'string'),), include_schema=False, agent_hostname=AGENT_HOSTNAME):
+def descriptor(
+    columns=(('value', 'text', 'string'),),
+    include_schema=False,
+    agent_hostname=AGENT_HOSTNAME,
+    format_version=None,
+):
     return rq.RemoteQueryUploadDescriptor(
-        format_version=rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+        format_version=format_version
+        if format_version is not None
+        else rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
         include_schema=include_schema,
         agent_hostname=agent_hostname,
         columns=[
@@ -590,6 +597,140 @@ def test_source_pages_reject_tokens_that_would_corrupt_the_csv_record():
     with pytest.raises(rq.RemoteQueryFailure) as failure:
         rq.frame_csv_record([b'"ok"', b'with\rraw-cr'])
     assert failure.value.code == 'unsupported_value'
+
+
+# ---------------------------------------------------------------------------
+# Native COPY CSV records (postgres-copy-csv-v1)
+# ---------------------------------------------------------------------------
+
+
+def test_descriptor_accepts_exactly_the_two_active_source_formats():
+    # Both active cell grammars register under their own format literal; a third is closed
+    # out, so a producer cannot invent an uncoordinated grammar.
+    assert rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSIONS == (
+        rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+        rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
+    )
+    native = descriptor(format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION)
+    assert rq.descriptor_request_bytes(native).startswith(b'{"format_version":"postgres-copy-csv-v1"')
+    with pytest.raises(ValidationError):
+        descriptor(format_version='csv-json-cell-v2')
+
+
+def native_field(text):
+    """One native CSV field: quoted text with internal quotes doubled (FORCE_QUOTE *)."""
+    return '"{}"'.format(text.replace('"', '""')).encode('utf-8')
+
+
+def native_csv_record(*fields):
+    """One native COPY CSV record over LF, computed independently of the producer."""
+    if len(fields) == 1:
+        return native_field(fields[0]) + b'\n'
+    return b','.join(native_field(field) for field in fields) + b'\n'
+
+
+def make_native_writer(delivery, creds, uploads, columns=(('value', 'text', 'string'),), **kwargs):
+    return make_writer(
+        delivery,
+        creds,
+        uploads,
+        descriptor(columns=columns, format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION, **kwargs),
+    )
+
+
+def test_native_records_stream_verbatim_as_the_source_page(delivery, creds):
+    """A native record's bytes are the page's bytes: the writer never re-frames them."""
+    columns = (('null_value', 'text', 'string'), ('text_value', 'text', 'string'))
+    record = b'\\N,' + native_field('He said "Hi"') + b'\n'
+    uploads = Uploads()
+    writer = make_native_writer(delivery, creds, uploads, columns=columns)
+    writer.add_native_record(record)
+    result = writer.finish()
+
+    (page, payload) = uploads.pages[0]
+    assert payload == record
+    assert page.batch_index == 0
+    assert page.record_offset == 0
+    assert page.source_bytes == len(record)
+    assert page.rows == 1
+    assert page.sha256_hex == hashlib.sha256(record).hexdigest()
+    assert result['pageCount'] == 1
+    assert uploads.descriptor_bodies[0].startswith(b'{"format_version":"postgres-copy-csv-v1"')
+
+
+def test_native_record_final_bound_pins_the_conservative_formula():
+    key_bound = len(b'"value"') + len(b'"payload"')
+    record = b'"abc","de"\n'
+    # Clean record: framing constants, the record's own bytes, and one redaction-marker slot
+    # per column (the record's LF terminator itself counts as one control byte).
+    clean_expected = 1 + key_bound + 2 * 2 + (len(record) + 5 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * 2)
+    assert rq.postgres_copy_csv_record_final_bound(record, key_bound=key_bound, columns=2) == clean_expected
+    # Escape growth: each raw backslash doubles and each control byte grows to at most a
+    # six-byte \uXXXX escape, so a real tab inside the text adds five bytes beyond the
+    # record's own five-byte LF-terminator slot.
+    dirty = b'"a\tb","de"\n'
+    dirty_expected = 1 + key_bound + 2 * 2 + (
+        len(dirty) + 5 * 2 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * 2
+    )
+    assert rq.postgres_copy_csv_record_final_bound(dirty, key_bound=key_bound, columns=2) == dirty_expected
+    # The array factor scales the whole value term for array-bearing descriptors.
+    scaled = rq.postgres_copy_csv_record_final_bound(
+        record, key_bound=key_bound, columns=2, array_factor=rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR
+    )
+    value_term = len(record) + 5 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * 2
+    assert scaled == 1 + key_bound + 2 * 2 + value_term * rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR
+    assert rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR == 4
+
+
+def test_native_pages_split_before_the_conservative_final_bound(delivery, creds):
+    """Records split pages by the same conservative final-JSON bound as canonical tokens."""
+    columns = (('value', 'text', 'string'),)
+    key_bound = len(b'"value"')
+    first = native_csv_record('a' * 8)
+    second = native_csv_record('b' * 8)
+    record_bound = rq.postgres_copy_csv_record_final_bound(second, key_bound=key_bound, columns=1)
+    # The budget holds the bare envelope plus exactly one record's bound: the second record
+    # opens the second page without either page exceeding the bound.
+    delivery = bounded_delivery(
+        delivery, maxSchemaBytes=1, maxFileBytes=envelope_bound(delivery, 0) + record_bound
+    )
+    uploads = Uploads()
+    writer = make_native_writer(delivery, creds, uploads, columns=columns)
+    writer.add_native_record(first)
+    writer.add_native_record(second)
+    result = writer.finish()
+
+    assert [page.batch_index for page, _ in uploads.pages] == [0, 1]
+    assert [page.rows for page, _ in uploads.pages] == [1, 1]
+    assert uploads.pages[0][1] == first
+    assert uploads.pages[1][1] == second
+    assert result['pageCount'] == 2
+
+
+def test_native_record_without_a_record_terminator_fails_closed(delivery, creds):
+    uploads = Uploads()
+    writer = make_native_writer(delivery, creds, uploads)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        writer.add_native_record(b'"not complete"')
+    assert failure.value.code == 'unsupported_value'
+    assert uploads.pages == []
+
+
+def test_writer_rejects_records_from_the_other_cell_grammar(delivery, creds):
+    """The descriptor's format selects the cell grammar, so a record of the wrong grammar
+    fails closed instead of corrupting the page."""
+    uploads = Uploads()
+    native_writer = make_native_writer(delivery, creds, uploads)
+    token_cell = rq.EncodedCell(b'1', 1)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        native_writer.add_row([token_cell])
+    assert failure.value.code == 'unsupported_value'
+
+    token_writer = make_writer(delivery, creds, uploads)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        token_writer.add_native_record(b'"1"\n')
+    assert failure.value.code == 'unsupported_value'
+    assert uploads.pages == []
 
 
 def test_string_cell_tokens_emit_valid_non_ascii_as_raw_utf8():

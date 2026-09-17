@@ -6,11 +6,7 @@ import hashlib
 import json
 import logging
 import socket
-import uuid as uuid_module
 from contextlib import contextmanager
-from datetime import date, datetime, timedelta, timezone
-from datetime import time as dt_time
-from decimal import Decimal
 from types import SimpleNamespace
 
 import psycopg.errors as psycopg_errors
@@ -20,9 +16,7 @@ from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 from datadog_checks.postgres.remote_query import (
-    RawJsonNumber,
-    RawJsonNumberLoader,
-    RawTextLoader,
+    NativeCopyRecordAssembler,
     StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
     iter_agent_resolve_events,
@@ -35,8 +29,6 @@ UPLOAD_ID = 'upload-01k'
 # The Agent-reported hostname every fake check carries, stamped into every page envelope.
 AGENT_HOSTNAME = 'rq-proof-agent-a'
 BASE_URL = 'https://dd.datad0g.com/api/unstable/its-agent-intake'
-
-BYTEA_OID = remote_query.BYTEA_OID
 
 
 # ---------------------------------------------------------------------------
@@ -51,20 +43,13 @@ class FakeColumn:
         self._fmod = type_modifier
 
 
-class FakeAdapters:
-    def __init__(self):
-        self.registered_loaders = []
-
-    def register_loader(self, oid_or_name, loader):
-        self.registered_loaders.append((oid_or_name, loader))
-
-
-class FakeControlCursor:
-    """Plain cursor for BEGIN/SET LOCAL/ROLLBACK and the schema lookup."""
+class FakePlainCursor:
+    """Plain cursor: control statements, the vendor-type lookup, and the COPY stream."""
 
     def __init__(self, pool):
         self.pool = pool
         self.executed = []
+        self.copy_statements = []
 
     def execute(self, query, params=None):
         self.executed.append((query, params))
@@ -82,37 +67,54 @@ class FakeControlCursor:
                 rows.append((key[0], key[1], vendor_data_type))
         return rows
 
+    @contextmanager
+    def copy(self, sql):
+        self.copy_statements.append(sql)
+        yield FakeCopy(self.pool)
+
+
+class FakeCopy:
+    """psycopg COPY TO STDOUT double: raw reads whose block granularity is test-controlled."""
+
+    def __init__(self, pool):
+        self.pool = pool
+        self.reads = 0
+        self._blocks = iter(pool.copy_blocks) if pool.block_provider is None else pool.block_provider()
+
+    def read(self):
+        self.reads += 1
+        if self.pool.copy_error is not None and (
+            self.pool.copy_error_at is None or self.reads >= self.pool.copy_error_at
+        ):
+            raise self.pool.copy_error
+        try:
+            block = next(self._blocks)
+        except StopIteration:
+            block = b''
+        if self.pool.read_log is not None:
+            self.pool.read_log.append(('read', len(block)))
+        return block
+
 
 class FakeServerCursor:
-    """Named server-side cursor: one execute, bounded fetchmany batches."""
+    """Named server-side cursor: one DECLARE for the result description, never a fetch.
+
+    The customer query's values must be evaluated exactly once, by the COPY alone, so a
+    fetch on this cursor fails the test outright instead of silently evaluating the query
+    a second time.
+    """
 
     def __init__(self, pool):
         self.pool = pool
         self.description = pool.description
-        self.adapters = FakeAdapters()
         self.executed = []
-        self.fetch_sizes = []
         self.closed = False
-        self._rows = iter(pool.rows) if not pool.row_provider else pool.row_provider()
 
     def execute(self, query, params=None):
         self.executed.append((query, params))
 
     def fetchmany(self, size):
-        self.fetch_sizes.append(size)
-        if self.pool.fetch_error is not None and (
-            self.pool.fetch_error_at is None or len(self.fetch_sizes) >= self.pool.fetch_error_at
-        ):
-            raise self.pool.fetch_error
-        batch = []
-        for _ in range(size):
-            try:
-                batch.append(next(self._rows))
-            except StopIteration:
-                break
-        if self.pool.fetch_log is not None:
-            self.pool.fetch_log.append(('fetch', len(batch)))
-        return batch
+        raise AssertionError('the descriptor cursor must never be fetched: the COPY is the only execution')
 
     def close(self):
         self.closed = True
@@ -125,7 +127,7 @@ class FakeConnection:
     @contextmanager
     def cursor(self, name=None):
         if name is None:
-            cursor = FakeControlCursor(self.pool)
+            cursor = FakePlainCursor(self.pool)
         else:
             cursor = FakeServerCursor(self.pool)
         self.pool.cursors.append(cursor)
@@ -138,24 +140,31 @@ class FakePool:
     def __init__(
         self,
         rows=None,
+        copy_blocks=None,
+        block_provider=None,
         description=None,
         closed=False,
         vendor_types=None,
-        fetch_error=None,
-        fetch_error_at=None,
-        row_provider=None,
-        fetch_log=None,
+        copy_error=None,
+        copy_error_at=None,
+        read_log=None,
     ):
-        self.rows = rows or []
+        # Plain result rows are framed into one-record COPY blocks — the database, not the
+        # producer, frames native CSV — while copy_blocks and block_provider give tests
+        # exact control over block granularity (split records, batched records, streaming).
+        if rows is not None:
+            assert copy_blocks is None and block_provider is None
+            copy_blocks = [native_record(*row) for row in rows]
+        self.copy_blocks = list(copy_blocks) if copy_blocks is not None else []
+        self.block_provider = block_provider
         self.description = description or [FakeColumn('value', 23)]
         self.closed = closed
         # The descriptor always resolves vendor types, so the default covers the default
         # int4 description; tests with custom descriptions pass their own catalog entries.
         self.vendor_types = vendor_types if vendor_types is not None else {(23, -1): 'integer'}
-        self.fetch_error = fetch_error
-        self.fetch_error_at = fetch_error_at
-        self.row_provider = row_provider
-        self.fetch_log = fetch_log
+        self.copy_error = copy_error
+        self.copy_error_at = copy_error_at
+        self.read_log = read_log
         self.requested_dbnames = []
         self.cursors = []
 
@@ -386,10 +395,10 @@ def instrument_postgres_fakes(monkeypatch, clock):
     """Advance the mutable clock inside each fake at its phase's boundary.
 
     Each advance lands wholly inside the producer phase that brackets it, so the emitted
-    buckets pin the brackets: connection acquisition, BEGIN, SET LOCAL, and the vendor-type
-    lookup are database setup, fetchmany is database fetch, put_source_page is page upload,
-    finalize_run is finalize, and the ROLLBACK teardown (outside every phase) is the otherMs
-    remainder.
+    buckets pin the brackets: connection acquisition, BEGIN, the SET LOCAL pins, the
+    vendor-type lookup, the DECLARE, and the COPY dispatch are database setup, copy.read
+    is database fetch, put_source_page is page upload, finalize_run is finalize, and the
+    ROLLBACK teardown (outside every phase) is the otherMs remainder.
     """
 
     original_get_connection = FakePool.get_connection
@@ -402,29 +411,39 @@ def instrument_postgres_fakes(monkeypatch, clock):
 
     monkeypatch.setattr(FakePool, 'get_connection', timed_get_connection)
 
-    original_control_execute = FakeControlCursor.execute
+    original_control_execute = FakePlainCursor.execute
 
     def timed_control_execute(self, query, params=None):
         clock.advance_seconds(0.25)
         return original_control_execute(self, query, params)
 
-    monkeypatch.setattr(FakeControlCursor, 'execute', timed_control_execute)
+    monkeypatch.setattr(FakePlainCursor, 'execute', timed_control_execute)
 
-    original_server_execute = FakeServerCursor.execute
+    original_declare_execute = FakeServerCursor.execute
 
-    def timed_server_execute(self, query, params=None):
+    def timed_declare_execute(self, query, params=None):
         clock.advance_seconds(0.5)
-        return original_server_execute(self, query, params)
+        return original_declare_execute(self, query, params)
 
-    monkeypatch.setattr(FakeServerCursor, 'execute', timed_server_execute)
+    monkeypatch.setattr(FakeServerCursor, 'execute', timed_declare_execute)
 
-    original_fetchmany = FakeServerCursor.fetchmany
+    original_copy = FakePlainCursor.copy
 
-    def timed_fetchmany(self, size):
+    @contextmanager
+    def timed_copy(self, sql):
+        clock.advance_seconds(0.5)
+        with original_copy(self, sql) as copy:
+            yield copy
+
+    monkeypatch.setattr(FakePlainCursor, 'copy', timed_copy)
+
+    original_read = FakeCopy.read
+
+    def timed_read(self):
         clock.advance_seconds(0.375)
-        return original_fetchmany(self, size)
+        return original_read(self)
 
-    monkeypatch.setattr(FakeServerCursor, 'fetchmany', timed_fetchmany)
+    monkeypatch.setattr(FakeCopy, 'read', timed_read)
 
     original_put_source_page = FakeUploadClient.put_source_page
 
@@ -489,30 +508,38 @@ def assembled_pages(fake_client):
     return {call.batch_index: call.payload for call in fake_client.put_page_calls}
 
 
-def row_object_bound(row):
-    """The conservative final-JSON bound of one row object, computed independently.
+def native_field(value):
+    """The expected native COPY CSV field for one value, computed independently.
 
-    Mirrors the intake envelope arithmetic without reusing the producer's implementation:
-    braces and commas, each descriptor key plus its colon, and each scalar string or number
-    leaf at its own token length or the fixed redaction marker, whichever is larger.
+    ``FORCE_QUOTE *`` quotes every non-null value — with internal quotes doubled — and
+    NULL is the sole unquoted field, the two-character \\N marker.
     """
-    bound = 2 + (len(row) - 1)  # braces plus the commas between columns
-    for name, value in row.items():
-        bound += len(json.dumps(name, ensure_ascii=False).encode('utf-8')) + 1
-        bound += rq.redactable_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
-    return bound
+    if value is None:
+        return '\\N'
+    if isinstance(value, bool):
+        value = 't' if value else 'f'
+    elif isinstance(value, bytes):
+        value = '\\x' + value.hex()
+    return '"{}"'.format(str(value).replace('"', '""'))
 
 
-def csv_field(token):
-    """The expected CSV field for one canonical token, computed independently of the producer."""
-    if b'"' in token or b',' in token or b'\n' in token:
-        return b'"' + token.replace(b'"', b'""') + b'"'
-    return token
+def native_record(*values):
+    """The expected native COPY CSV record for one row of values."""
+    return (','.join(native_field(value) for value in values) + '\n').encode('utf-8')
 
 
-def csv_record(tokens):
-    """The expected framed CSV record for one row of canonical tokens."""
-    return b','.join(csv_field(token) for token in tokens) + b'\n'
+def native_record_row_bound(record, names, array_factor=1):
+    """The conservative final-JSON bound of one native record's row object, independently.
+
+    Mirrors the writer's native bound without reusing it: the framing constants, the
+    canonical key tokens, the record's own bytes plus its JSON-escape growth, and one
+    redaction-marker slot per column; an array-bearing column scales the value term.
+    """
+    key_bound = sum(len(json.dumps(name, ensure_ascii=False).encode('utf-8')) for name in names)
+    controls = len(record) - len(record.translate(None, bytes(range(0x20))))
+    growth = record.count(b'\\') + 5 * controls
+    value_bound = (len(record) + growth + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * len(names)) * array_factor
+    return 1 + key_bound + 2 * len(names) + value_bound
 
 
 # ---------------------------------------------------------------------------
@@ -1225,11 +1252,12 @@ def test_producer_writes_exact_source_page_csv_and_descriptor(monkeypatch):
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    # The source page is pure CSV records of canonical cell tokens: no final JSON envelope
-    # is built or uploaded here; intake assembles it from the registered descriptor.
-    assert page == b'1\n'
+    # The source page is the native COPY record verbatim — the server's own CSV framing,
+    # every field quoted — and no final JSON envelope is built or uploaded here; intake
+    # assembles it from the registered descriptor.
+    assert page == b'"1"\n'
     assert json.loads(fake.descriptor_bodies[0]) == {
-        'format_version': 'csv-json-cell-v1',
+        'format_version': 'postgres-copy-csv-v1',
         'include_schema': False,
         'agent_hostname': AGENT_HOSTNAME,
         'columns': [{'column_name': 'value', 'vendor_data_type': 'integer', 'logical_type': 'integer'}],
@@ -1268,21 +1296,34 @@ def test_producer_executes_query_exactly_once_in_read_only_transaction_with_time
 
     assert_success(events)
     control = pool.cursors[0]
-    server = pool.cursors[1]
-    assert isinstance(server, FakeServerCursor)
-    # The query is executed exactly once, verbatim, through the named cursor; it is not
-    # wrapped in a probe and not executed twice.
-    assert server.executed == [('SELECT 1 AS value', None)]
-    assert server.fetch_sizes  # rows were fetched in bounded batches
-    # BEGIN READ ONLY, transaction-local statement timeout, one descriptor vendor-type
-    # lookup, then ROLLBACK at the end. SET statements do not accept bind parameters, so
-    # the validated timeout is inlined.
+    described = pool.cursors[1]
+    stream = pool.cursors[2]
+    assert isinstance(described, FakeServerCursor)
+    assert isinstance(stream, FakePlainCursor)
+    # The query text appears exactly twice: as the never-fetched DECLARE's body — which
+    # only plans the query and yields its description, evaluating no value — and as the
+    # single COPY's body, which evaluates the query once. It is not wrapped in a probe
+    # and not executed twice.
+    assert described.executed == [('SELECT 1 AS value', None)]
+    assert stream.copy_statements == [remote_query.native_copy_sql('SELECT 1 AS value')]
+    # BEGIN READ ONLY, the transaction-local statement timeout, the five native-text
+    # session pins, one descriptor vendor-type lookup, then ROLLBACK at the end. SET
+    # statements do not accept bind parameters, so the validated timeout is inlined.
     executed = [entry[0] for entry in control.executed]
     assert executed[:2] == ['BEGIN READ ONLY', 'SET LOCAL statement_timeout = 5000']
+    # The native-text session pins, spelled independently of the producer's constant:
+    # timestamptz in UTC, ISO dates, postgres intervals, hex bytea, shortest floats.
+    assert executed[2:7] == [
+        "SET LOCAL TimeZone = 'UTC'",
+        "SET LOCAL DateStyle = 'ISO, MDY'",
+        "SET LOCAL IntervalStyle = 'postgres'",
+        "SET LOCAL bytea_output = 'hex'",
+        'SET LOCAL extra_float_digits = 1',
+    ]
     assert executed[-1] == 'ROLLBACK'
-    assert len(executed) == 4 and 'pg_catalog.format_type' in executed[2]
+    assert len(executed) == 9 and 'pg_catalog.format_type' in executed[7]
     assert control.executed[1][1] is None
-    assert server.closed
+    assert described.closed
 
 
 def test_producer_caps_instance_timeout_at_the_producer_wall(monkeypatch):
@@ -1334,9 +1375,10 @@ def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypa
     # expire at the delivered wall, which is exactly the case the old replacement semantics
     # silently allowed to run past its parent budget. The leading constant values cover every
     # clock read before the page-close guard (started_at, statement-timeout resolution, the
-    # setup/fetch/encode phase brackets, and the per-row guards) so the wall still expires at
-    # the page-close guard, after the row was produced and the page assembled.
-    clock = iter([100.0] * 12 + [101.5] * 50)
+    # setup/encode phase brackets, the copy-read brackets, and the per-block and per-record
+    # guards) so the wall still expires at the page-close guard, after the record was
+    # produced and the page assembled.
+    clock = iter([100.0] * 13 + [101.5] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(clock))
 
     events = collect_events(request, check, client=fake)
@@ -1374,7 +1416,7 @@ def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wal
 def test_producer_rolls_back_transaction_on_failure(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,), (2,)], fetch_error=ValueError('fetch broke'))
+    pool = FakePool(rows=[(1,), (2,)], copy_error=ValueError('copy broke'))
     fake = FakeUploadClient()
 
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
@@ -1420,19 +1462,19 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
     producer = final['executionDiagnostics']['producer']
     assert final['executionDiagnostics']['contractVersion'] == 1
     assert producer == {
-        'totalMs': 3250,
-        # Connection acquisition, BEGIN, SET LOCAL, the cursor execute, the vendor-type
-        # lookup, and the descriptor registration are setup.
-        'databaseSetupMs': 1375,
-        # Two bounded fetchmany calls (the row batch and the empty one).
-        'databaseFetchMs': 750,
-        # Real encode work with this clock runs in well under a millisecond.
+        'totalMs': 5375,
+        # Connection acquisition, BEGIN, the statement timeout, the five session pins, the
+        # DECLARE, the vendor-type lookup, and the COPY dispatch are setup.
+        'databaseSetupMs': 3125,
+        # Three copy.read calls (the two records and the empty end-of-stream read).
+        'databaseFetchMs': 1125,
+        # Real record-assembly work with this clock runs in well under a millisecond.
         'encodeAndPageBuildMs': 0,
         'pageUploadMs': 625,
         'finalizeMs': 250,
         # The ROLLBACK teardown runs outside every phase and lands in the remainder.
         'otherMs': 250,
-        'timeToFirstPageMs': 2750,
+        'timeToFirstPageMs': 4875,
         'pageCount': 1,
         'rowCount': 2,
         'byteCount': len(assembled_pages(fake)[0]),
@@ -1504,10 +1546,10 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     ).encode('utf-8')
     # Intake stamps the schema into every final page, so the producer's bound carries the
     # schema-bearing envelope: maxFileBytes here fits that envelope plus exactly the longer
-    # row, so both rows never fit one page and the second row forces a second page.
+    # native record, so both records never fit one page and the second forces a second page.
     request['resultDelivery']['limits']['maxFileBytes'] = (
         len(prefix_bytes(schema_json=schema_json))
-        + row_object_bound({'city': 'Beautiful city of lights', 'country': 'France'})
+        + native_record_row_bound(native_record('Beautiful city of lights', 'France'), ['city', 'country'])
         + len(rq.PAGE_SUFFIX)
     )
     fake = FakeUploadClient()
@@ -1517,10 +1559,8 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     assert_success(events)
     pages = assembled_pages(fake)
     assert list(pages) == [0, 1]
-    assert pages[0] == csv_record([json.dumps('New York').encode('utf-8'), json.dumps('USA').encode('utf-8')])
-    assert pages[1] == csv_record(
-        [json.dumps('Beautiful city of lights').encode('utf-8'), json.dumps('France').encode('utf-8')]
-    )
+    assert pages[0] == native_record('New York', 'USA')
+    assert pages[1] == native_record('Beautiful city of lights', 'France')
     assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
     assert [call.record_offset for call in fake.put_page_calls] == [0, 1]
     descriptor = json.loads(fake.descriptor_bodies[0])
@@ -1596,9 +1636,8 @@ def test_producer_rejects_duplicate_result_column_names_before_row_data(monkeypa
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'duplicate_columns', 'value')
-    # No row data was fetched or written: the run fails before any page bytes.
-    server = pool.cursors[1]
-    assert server.fetch_sizes == []
+    # No row data was streamed or written: the run fails before the COPY is even dispatched.
+    assert len(pool.cursors) == 2
     assert fake.put_page_calls == []
 
 
@@ -1638,8 +1677,8 @@ def test_producer_fails_closed_on_unresolvable_vendor_types(monkeypatch, include
     events = collect_events(valid_request(include_schema=include_schema), make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'schema_unavailable')
-    server = pool.cursors[1]
-    assert server.fetch_sizes == []
+    # The COPY is never dispatched: no cursor beyond the descriptor's DECLARE was opened.
+    assert len(pool.cursors) == 2
     assert fake.put_page_calls == []
     assert fake.descriptor_bodies == []
 
@@ -1689,10 +1728,10 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-# One row ('aaaa',) over a single text column: a 23-byte final bound and a 9-byte framed
-# source record.
-BOUND_ROW = {'payload': 'aaaa'}
-ROW_RECORD = csv_record([b'"aaaa"'])
+# One native text row ('aaaa',) over a single text column: a 7-byte source record whose
+# final-JSON row bound carries it plus the column's key and marker slots.
+BOUND_NAMES = ['payload']
+BOUND_RECORD = native_record('aaaa')
 
 
 def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
@@ -1700,7 +1739,7 @@ def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    row_bound = row_object_bound(BOUND_ROW)
+    row_bound = native_record_row_bound(BOUND_RECORD, BOUND_NAMES)
     request = bounded_request()
     request['resultDelivery']['limits']['maxFileBytes'] = (
         prefix_len + row_bound + 1 + row_bound + len(rq.PAGE_SUFFIX) + extra_bound_bytes
@@ -1712,8 +1751,8 @@ def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
 def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    # maxRowBytes bounds one framed source record: the 9-byte record for ('aaaa',) cannot fit 8.
-    request = bounded_request(maxRowBytes=len(ROW_RECORD) - 1)
+    # maxRowBytes bounds one native source record: the 7-byte record for ('aaaa',) cannot fit 6.
+    request = bounded_request(maxRowBytes=len(BOUND_RECORD) - 1)
     pool = FakePool(rows=[('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'})
     fake = FakeUploadClient()
 
@@ -1723,36 +1762,35 @@ def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch)
     assert fake.put_page_calls == []
 
 
-def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
+def test_page_upload_streams_before_the_copy_is_exhausted(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     order_log = []
     request = bounded_request(maxPages=128, maxResultBytes=64 * 1024)
 
-    def row_provider():
+    def block_provider():
         for _index in range(500):
-            yield ('aaaa',)
+            yield native_record('aaaa')
         order_log.append(('exhausted',))
 
     pool = FakePool(
-        rows=None,
         description=[FakeColumn('payload', 25)],
         vendor_types={(25, -1): 'text'},
-        row_provider=row_provider,
-        fetch_log=order_log,
+        block_provider=block_provider,
+        read_log=order_log,
     )
     fake = FakeUploadClient(put_log=order_log)
 
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    # Pages are uploaded while rows are still being fetched: the producer never buffers
-    # the complete result before uploading, only one bounded source page at a time.
+    # Pages are uploaded while the COPY stream is still being read: the producer never
+    # buffers the complete result before uploading, only one bounded source page at a time.
     first_put = next(index for index, entry in enumerate(order_log) if entry[0] == 'put')
-    later_fetch = next(
-        index for index, entry in enumerate(order_log[first_put:], start=first_put) if entry[0] == 'fetch'
+    later_read = next(
+        index for index, entry in enumerate(order_log[first_put:], start=first_put) if entry[0] == 'read' and entry[1]
     )
-    assert later_fetch > first_put
+    assert later_read > first_put
     exhausted = next(index for index, entry in enumerate(order_log) if entry[0] == 'exhausted')
     assert exhausted > first_put
     # Pages are contiguous zero-based and every row is declared exactly once across the
@@ -1766,11 +1804,11 @@ def test_page_upload_streams_before_cursor_is_exhausted(monkeypatch):
     assert receipt['totalBytes'] == sum(call.source_bytes for call in fake.put_page_calls)
 
 
-def test_descriptor_is_registered_before_the_first_row_fetch(monkeypatch):
+def test_descriptor_is_registered_before_the_first_source_record(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     order_log = []
-    pool = FakePool(rows=[(1,)], fetch_log=order_log)
+    pool = FakePool(rows=[(1,)], read_log=order_log)
     fake = FakeUploadClient(put_log=order_log)
     original_register = fake.register_descriptor
 
@@ -1783,149 +1821,81 @@ def test_descriptor_is_registered_before_the_first_row_fetch(monkeypatch):
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     assert_success(events)
-    # One registration, before any result row is read and before any page is uploaded.
+    # One registration, before any result record is read and before any page is uploaded.
     assert order_log[0] == 'descriptor'
     assert order_log.count('descriptor') == 1
-    assert order_log[1] == ('fetch', 1)
+    assert order_log[1] == ('read', len(native_record(1)))
     assert order_log[-1][0] == 'put'
 
 
 # ---------------------------------------------------------------------------
-# PostgreSQL value contract (pinned, cross-language)
+# Native COPY CSV record assembly (record-complete regardless of block granularity)
 # ---------------------------------------------------------------------------
 
 
-def encode_value(value, top_type_oid=None, in_array=False):
-    token, _bound = remote_query._encode_cell_token(value, top_type_oid=top_type_oid, in_array=in_array)
-    return token
+def assembled_records(blocks, max_row_bytes=1024):
+    assembler = NativeCopyRecordAssembler(max_row_bytes)
+    records = []
+    for block in blocks:
+        records.extend(assembler.feed(block))
+    assembler.finish()
+    return records
 
 
-@pytest.mark.parametrize(
-    'value, expected',
-    [
-        (None, b'null'),
-        (True, b'true'),
-        (False, b'false'),
-        # Integral numerics keep their exact database digits.
-        (1, b'1'),
-        (-42, b'-42'),
-        (9223372036854775807, b'9223372036854775807'),
-        # Arbitrary-precision numerics keep the exact database text: no float round-trip.
-        (Decimal('1.5000'), b'1.5000'),
-        (Decimal('12345678901234567890.123456789'), b'12345678901234567890.123456789'),
-        (Decimal('-0.000001'), b'-0.000001'),
-        # Non-finite numerics become the documented strings.
-        (Decimal('NaN'), b'"NaN"'),
-        (Decimal('Infinity'), b'"Infinity"'),
-        (Decimal('-Infinity'), b'"-Infinity"'),
-        # Exact server text for float4/float8 (raw text loader output).
-        (RawJsonNumber('0.1'), b'0.1'),
-        (RawJsonNumber('100000'), b'100000'),  # not '100000.0'
-        (RawJsonNumber('1e+16'), b'1e+16'),
-        (RawJsonNumber('-0'), b'-0'),
-        (RawJsonNumber('NaN'), b'"NaN"'),
-        (RawJsonNumber('Infinity'), b'"Infinity"'),
-        (RawJsonNumber('-Infinity'), b'"-Infinity"'),
-        # Fallback float path: finite repr, non-finite documented strings.
-        (0.1, b'0.1'),
-        (100000.0, b'100000.0'),
-        (float('nan'), b'"NaN"'),
-        (float('inf'), b'"Infinity"'),
-        (float('-inf'), b'"-Infinity"'),
-        # Text/enum/UUID families become JSON strings.
-        ('plain', b'"plain"'),
-        ('with "quotes" and \\backslash', b'"with \\"quotes\\" and \\\\backslash"'),
-        ('héllo', '"héllo"'.encode('utf-8')),
-        ('a\nb\tc', b'"a\\nb\\tc"'),
-        (uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'), b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"'),
-        # inet/cidr/interval keep their exact server text (raw text loader output).
-        ('192.168.1.5', b'"192.168.1.5"'),
-        ('192.168.1.0/24', b'"192.168.1.0/24"'),
-        ('1 year 2 mons 3 days 04:05:06', b'"1 year 2 mons 3 days 04:05:06"'),
-        # Temporal families become documented ISO-8601 strings.
-        (date(2026, 8, 28), b'"2026-08-28"'),
-        (dt_time(12, 34, 56, 123456), b'"12:34:56.123456"'),
-        (dt_time(12, 34, 56, tzinfo=timezone.utc), b'"12:34:56+00:00"'),
-        (datetime(2026, 8, 28, 12, 34, 56, 123456), b'"2026-08-28T12:34:56.123456"'),
-        # timestamptz is canonicalized to UTC with a Z suffix, independent of session TZ.
-        (
-            datetime(2026, 8, 28, 14, 34, 56, 123456, tzinfo=timezone(timedelta(hours=2))),
-            b'"2026-08-28T12:34:56.123456Z"',
-        ),
-        # json/jsonb become nested JSON values; arbitrary-precision numbers survive.
-        ({'a': [1, None, True]}, b'{"a":[1,null,true]}'),
-        ({'price': Decimal('1.10')}, b'{"price":1.10}'),
-        # Arrays become JSON arrays with recursive element conversion.
-        (['x', None, ['y', b'\x00']], b'["x",null,["y","AA=="]]'),
-        ([RawJsonNumber('0.1'), RawJsonNumber('NaN')], b'[0.1,"NaN"]'),
-        ([Decimal('1.5000'), 2, None], b'[1.5000,2,null]'),
-        # bytea becomes a base64 string.
-        # Ranges and extension types keep their documented string form.
-        ('[1,5)', b'"[1,5)"'),
-        ('(1,2)', b'"(1,2)"'),
-    ],
-)
-def test_value_contract_encodes_each_family(value, expected):
-    assert encode_value(value) == expected
+def test_record_assembler_yields_one_record_per_block():
+    assert assembled_records([native_record(1), native_record(2)]) == [native_record(1), native_record(2)]
 
 
-def test_value_contract_bytea_is_base64_only_for_the_bytea_oid():
-    assert encode_value(b'\x00\xff\x80', top_type_oid=BYTEA_OID) == b'"AP+A"'
-    # A binary buffer from any other column fails closed instead of silently stringifying.
-    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
-        encode_value(b'\x00\xff\x80', top_type_oid=25)
-    assert excinfo.value.code == 'unsupported_value'
+def test_record_assembler_yields_every_record_inside_one_batched_block():
+    blocks = [native_record(1) + native_record(2) + native_record(3)]
+    assert assembled_records(blocks) == [native_record(1), native_record(2), native_record(3)]
 
 
-@pytest.mark.parametrize('value', [timedelta(days=1), object(), {1}])
-def test_value_contract_fails_closed_on_unconvertible_values(value):
-    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
-        encode_value(value)
-    assert excinfo.value.code == 'unsupported_value'
+def test_record_assembler_reassembles_a_record_split_across_blocks():
+    record = native_record('a,b', 'He said "Hi"')
+    middle = len(record) // 2
+    assert assembled_records([record[:middle], record[middle:]]) == [record]
 
 
-@pytest.mark.parametrize('value', [RawJsonNumber('1.5.2'), RawJsonNumber(''), RawJsonNumber('abc')])
-def test_value_contract_fails_closed_on_non_json_numeric_text(value):
-    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
-        encode_value(value)
-    assert excinfo.value.code == 'unsupported_value'
+def test_record_assembler_keeps_embedded_newlines_and_crlf_inside_one_record():
+    # CR/LF inside quoted fields are data, not terminators: the record stays whole.
+    record = native_record(None, 'line1\nline2', 'a\r\nb')
+    assert assembled_records([record]) == [record]
+    # Even when the embedded newline straddles two blocks.
+    split = record.index(b'\n')
+    assert assembled_records([record[:split], record[split:]]) == [record]
 
 
-@pytest.mark.parametrize(
-    'value, expected_bound',
-    [
-        # Booleans and null are never scanned: their exact token bounds stay exact.
-        (None, 4),
-        (True, 4),
-        (False, 5),
-        # Short integer, decimal, and float tokens reserve the twelve-byte marker intake
-        # substitutes for a matched number leaf.
-        (42, 12),
-        (-42, 12),
-        (Decimal('1.5000'), 12),
-        (RawJsonNumber('0.1'), 12),
-        (0.1, 12),
-        # A number longer than the marker keeps its own token bytes.
-        (9223372036854775807, 19),
-        (Decimal('12345678901234567890.123456789'), 30),
-        # A short string leaf bounds to the twelve-byte redaction marker; a longer one keeps
-        # its own token length.
-        ('x', 12),
-        (uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'), 38),
-        # Nested containers bound structurally: each string or number leaf can grow to the
-        # marker, while booleans and null keep their exact tokens.
-        ({'k': 'x'}, 27),
-        ({'k': 42}, 27),
-        (['x', 'yy'], 2 + 12 + 1 + 12),
-        ([1, RawJsonNumber('0.1')], 2 + 12 + 1 + 12),
-        ([True, None], 2 + 4 + 1 + 4),
-        # Non-finite numerics are strings, so they bound like string leaves.
-        (float('nan'), 12),
-    ],
-)
-def test_cell_final_bounds_account_for_the_redaction_marker(value, expected_bound):
-    _token, bound = remote_query._encode_cell_token(value, top_type_oid=None, in_array=True)
-    assert bound == expected_bound
+def test_record_assembler_keeps_null_empty_and_literal_marker_distinguishable():
+    # The three native spellings stay distinct bytes: unquoted \N (NULL), quoted empty
+    # string, and a quoted literal \N text.
+    record = native_record(None, '', '\\N')
+    assert record == b'\\N,"","\\N"\n'
+    assert assembled_records([record]) == [record]
+
+
+def test_record_assembler_fails_closed_when_the_stream_ends_mid_record():
+    assembler = NativeCopyRecordAssembler(1024)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        list(assembler.feed(b'"abc'))
+        assembler.finish()
+    assert failure.value.code == 'query_failed'
+
+
+def test_record_assembler_fails_closed_when_a_partial_record_exceeds_max_row_bytes():
+    # The unterminated tail already exceeds the budget: fail now instead of buffering an
+    # unbounded record.
+    assembler = NativeCopyRecordAssembler(4)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        list(assembler.feed(b'"aaaaaa'))
+    assert failure.value.code == 'row_too_large'
+    # A complete record exactly at the budget still passes.
+    assert assembled_records([b'"ab"\n'], max_row_bytes=4) == [b'"ab"\n']
+
+
+# ---------------------------------------------------------------------------
+# Descriptor logical types
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1973,233 +1943,140 @@ def test_logical_type_mapping_is_deterministic(type_oid, vendor_data_type, expec
     assert remote_query.logical_type_for_column(column, vendor_data_type) == expected
 
 
-def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
+# ---------------------------------------------------------------------------
+# Native COPY source wire (pinned)
+# ---------------------------------------------------------------------------
+
+
+def test_native_copy_sql_pins_the_frozen_wire_options():
+    # The frozen native wire: COPY of the validated query, CSV format, the two-byte \N
+    # NULL marker as the sole unquoted field, and quoting forced for every column.
+    assert remote_query.native_copy_sql('SELECT 1 AS value') == (
+        "COPY (SELECT 1 AS value) TO STDOUT WITH (FORMAT CSV, NULL '\\N', FORCE_QUOTE *)"
+    )
+
+
+def test_producer_emits_native_copy_records_verbatim(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    columns = [
-        FakeColumn('null_value', 25),
-        FakeColumn('bool_value', 16),
-        FakeColumn('int_value', 20),
-        FakeColumn('numeric_value', 1700),
-        FakeColumn('float_value', 701),
-        FakeColumn('text_value', 25),
-        FakeColumn('uuid_value', 2950),
-        FakeColumn('bytea_value', 17),
-        FakeColumn('timestamp_value', 1114),
-        FakeColumn('timestamptz_value', 1184),
-        FakeColumn('date_value', 1082),
-        FakeColumn('interval_value', 1186),
-        FakeColumn('json_value', 114),
-        FakeColumn('array_value', 1009),
-    ]
-    row = (
-        None,
-        True,
-        42,
-        Decimal('12345678901234567890.123456789'),
-        RawJsonNumber('0.1'),
-        'héllo "quoted"',
-        uuid_module.UUID('8b6fb1b5-94dd-447b-95a4-91f4ef118f4b'),
-        b'\x00\xff\x80',
-        datetime(2026, 8, 28, 12, 34, 56, 123456),
-        datetime(2026, 8, 28, 14, 34, 56, 123456, tzinfo=timezone(timedelta(hours=2))),
-        date(2026, 8, 28),
-        '1 mon 2 days 03:04:05',
-        {'nested': [1, None, True], 'price': Decimal('1.10')},
-        ['x', None, ['y', b'\x00\xff']],
+    # One record covering the native families' raw text: NULL, empty string, a literal
+    # \N, booleans, an integer, a quoted value with commas and quotes, and a multibyte
+    # string. The page must carry the records byte for byte: the producer never decodes,
+    # re-encodes, or re-frames a value.
+    record = native_record(None, '', '\\N', True, False, 42, 'a,b', 'He said "Hi"', 'héllo')
+    pool = FakePool(
+        copy_blocks=[record],
+        description=[
+            FakeColumn('null_value', 25),
+            FakeColumn('empty_value', 25),
+            FakeColumn('literal_marker', 25),
+            FakeColumn('true_value', 16),
+            FakeColumn('false_value', 16),
+            FakeColumn('int_value', 23),
+            FakeColumn('comma_value', 25),
+            FakeColumn('quote_value', 25),
+            FakeColumn('utf8_value', 25),
+        ],
+        vendor_types={
+            (25, -1): 'text',
+            (16, -1): 'boolean',
+            (23, -1): 'integer',
+        },
     )
-    vendor_types = {
-        (25, -1): 'text',
-        (16, -1): 'boolean',
-        (20, -1): 'bigint',
-        (1700, -1): 'numeric',
-        (701, -1): 'double precision',
-        (2950, -1): 'uuid',
-        (17, -1): 'bytea',
-        (1114, -1): 'timestamp without time zone',
-        (1184, -1): 'timestamp with time zone',
-        (1082, -1): 'date',
-        (1186, -1): 'interval',
-        (114, -1): 'json',
-        (1009, -1): 'text[]',
-    }
-    pool = FakePool(rows=[row], description=columns, vendor_types=vendor_types)
     fake = FakeUploadClient()
 
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
-    # Every cell rides the page as its exact canonical JSON token, CSV-framed: the token
-    # pins null versus empty string, exact numeric lexemes, non-finite strings, temporal
-    # strings, base64 binary, nested JSON, and arrays.
-    tokens = [
-        b'null',
-        b'true',
-        b'42',
-        b'12345678901234567890.123456789',
-        b'0.1',
-        '"héllo \\"quoted\\""'.encode('utf-8'),
-        b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"',
-        b'"AP+A"',
-        b'"2026-08-28T12:34:56.123456"',
-        b'"2026-08-28T12:34:56.123456Z"',
-        b'"2026-08-28"',
-        b'"1 mon 2 days 03:04:05"',
-        b'{"nested":[1,null,true],"price":1.10}',
-        b'["x",null,["y","AP8="]]',
-    ]
-    assert page == csv_record(tokens)
+    assert page == record
     descriptor = json.loads(fake.descriptor_bodies[0])
-    assert [
-        (column['column_name'], column['vendor_data_type'], column['logical_type']) for column in descriptor['columns']
-    ] == [
-        ('null_value', 'text', 'string'),
-        ('bool_value', 'boolean', 'boolean'),
-        ('int_value', 'bigint', 'integer'),
-        ('numeric_value', 'numeric', 'decimal'),
-        ('float_value', 'double precision', 'float'),
-        ('text_value', 'text', 'string'),
-        ('uuid_value', 'uuid', 'string'),
-        ('bytea_value', 'bytea', 'binary'),
-        ('timestamp_value', 'timestamp without time zone', 'temporal'),
-        ('timestamptz_value', 'timestamp with time zone', 'temporal'),
-        ('date_value', 'date', 'temporal'),
-        ('interval_value', 'interval', 'temporal'),
-        ('json_value', 'json', 'json'),
-        ('array_value', 'text[]', 'json'),
+    assert descriptor['format_version'] == 'postgres-copy-csv-v1'
+    assert [(column['column_name'], column['logical_type']) for column in descriptor['columns']] == [
+        ('null_value', 'string'),
+        ('empty_value', 'string'),
+        ('literal_marker', 'string'),
+        ('true_value', 'boolean'),
+        ('false_value', 'boolean'),
+        ('int_value', 'integer'),
+        ('comma_value', 'string'),
+        ('quote_value', 'string'),
+        ('utf8_value', 'string'),
     ]
 
 
-# ---------------------------------------------------------------------------
-# Cursor-scoped exact-text loaders
-# ---------------------------------------------------------------------------
-
-
-def test_raw_json_number_loader_keeps_exact_server_text():
-    loader = RawJsonNumberLoader(701)
-    value = loader.load(b'0.1')
-    assert isinstance(value, RawJsonNumber)
-    assert value == '0.1'
-    assert loader.load(b'NaN') == 'NaN'
-    assert loader.load(b'-Infinity') == '-Infinity'
-
-
-def test_raw_text_loader_keeps_exact_server_text():
-    loader = RawTextLoader(1186)
-    value = loader.load(b'1 year 2 mons')
-    assert type(value) is str
-    assert value == '1 year 2 mons'
-
-
-def test_exact_json_loaders_preserve_arbitrary_precision_numbers():
-    json_loader = remote_query.ExactJsonLoader(114)
-    jsonb_loader = remote_query.ExactJsonbLoader(3802)
-    parsed = json_loader.load(b'{"price": 1.10, "big": 123456789012345678901234567890}')
-    assert parsed['price'] == Decimal('1.10')
-    assert str(parsed['price']) == '1.10'
-    assert parsed['big'] == 123456789012345678901234567890
-    assert jsonb_loader.load(b'[1.5000, null, "x"]') == [Decimal('1.5000'), None, 'x']
-
-
-def test_register_exact_loaders_scopes_to_the_query_cursor():
-    adapters = FakeAdapters()
-    cursor = SimpleNamespace(adapters=adapters)
-
-    remote_query.register_exact_loaders(cursor)
-
-    registered = dict(adapters.registered_loaders)
-    assert set(registered) == {'float4', 'float8', 'interval', 'inet', 'cidr', 'json', 'jsonb'} | set(
-        remote_query.RANGE_TYPE_NAMES
-    )
-    assert registered['float4'] is RawJsonNumberLoader
-    assert registered['float8'] is RawJsonNumberLoader
-    assert registered['interval'] is RawTextLoader
-    assert registered['inet'] is RawTextLoader
-    assert registered['cidr'] is RawTextLoader
-    assert registered['int4range'] is RawTextLoader
-    assert registered['numrange'] is RawTextLoader
-    assert registered['tstzmultirange'] is RawTextLoader
-    assert registered['json'] is remote_query.ExactJsonLoader
-    assert registered['jsonb'] is remote_query.ExactJsonbLoader
-
-
-def test_psycopg_array_loading_uses_the_cursor_scoped_loaders():
-    # Real psycopg array loading resolves element loaders through the adapters map of the
-    # loading context, so float8[] elements keep their exact server text too.
-    import psycopg.postgres as pg_postgres
-    from psycopg.adapt import AdaptersMap
-    from psycopg.types.array import ArrayLoader
-
-    adapters = AdaptersMap(pg_postgres.adapters)
-    adapters.register_loader('float8', RawJsonNumberLoader)
-    adapters.register_loader('bytea', remote_query.RawTextLoader)  # any raw-text loader is fine for wiring
-    context = SimpleNamespace(adapters=adapters, connection=None)
-    float8_array_oid = pg_postgres.types['float8'].array_oid
-    loader = type('Float8ArrayLoader', (ArrayLoader,), {'base_oid': 701})(float8_array_oid, context)
-
-    values = loader.load(b'{0.1,NaN,100000,-0}')
-
-    assert values == ['0.1', 'NaN', '100000', '-0']
-    assert all(isinstance(value, RawJsonNumber) for value in values)
-
-
-# ---------------------------------------------------------------------------
-# Upload client HTTP contract
-# ---------------------------------------------------------------------------
-
-
-class CredsRecordingUploadClient(FakeUploadClient):
-    """FakeUploadClient that also records the credentials each upload call received."""
-
-    def __init__(self):
-        super().__init__()
-        self.seen_creds = []
-
-    def register_descriptor(self, creds, body):
-        self.seen_creds.append(creds)
-        return super().register_descriptor(creds, body)
-
-    def put_source_page(self, creds, page, body):
-        self.seen_creds.append(creds)
-        return super().put_source_page(creds, page, body)
-
-    def finalize_run(self, creds):
-        self.seen_creds.append(creds)
-        return super().finalize_run(creds)
-
-    def abort(self, creds):
-        self.seen_creds.append(creds)
-        return super().abort(creds)
-
-
-@pytest.mark.parametrize(
-    'carrier',
-    [None, {'traceId': '1234567890123456789', 'parentId': '9876543210987654321', 'samplingPriority': 2}],
-)
-def test_stream_threads_the_request_trace_context_into_upload_credentials(monkeypatch, carrier):
-    """The validated request carrier reaches the upload credentials unchanged: present
-    context rides on every upload call, absent context (mixed versions) leaves the
-    credentials without one."""
+def test_producer_scales_the_page_bound_for_array_columns(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    fake = CredsRecordingUploadClient()
-    request = valid_request()
-    if carrier is not None:
-        request['traceContext'] = carrier
+    # An array column's decoded JSON array can grow beyond its native text (per-element
+    # quotes, booleans, redaction markers), so its records carry the scaled bound: with a
+    # budget that fits one scaled bound but not two, the second record opens a second page.
+    names = ['array_value']
+    record = native_record('{t,f}')
+    assert native_record_row_bound(record, names, rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR) > (
+        2 * native_record_row_bound(record, names)
+    )
+    request = bounded_request()
+    request['resultDelivery']['limits']['maxFileBytes'] = (
+        len(prefix_bytes())
+        + native_record_row_bound(record, names, rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR)
+        + len(rq.PAGE_SUFFIX)
+    )
+    pool = FakePool(
+        copy_blocks=[record, record],
+        description=[FakeColumn('array_value', 1000)],
+        vendor_types={(1000, -1): 'boolean[]'},
+    )
+    fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    expected_context = rq.RemoteQueryTraceContext.model_validate(carrier) if carrier is not None else None
-    # The descriptor registration, the page PUT, and the run finalize all saw the same
-    # threaded context.
-    assert [creds.trace_context for creds in fake.seen_creds] == [
-        expected_context,
-        expected_context,
-        expected_context,
+    pages = assembled_pages(fake)
+    assert list(pages) == [0, 1]
+    assert pages[0] == record
+    assert pages[1] == record
+    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
+        {'column_name': 'array_value', 'vendor_data_type': 'boolean[]', 'logical_type': 'json'}
     ]
+
+
+def test_producer_scales_the_page_bound_for_embedded_escape_growth(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    # Records whose text needs JSON escaping (backslashes, control characters) carry a
+    # larger bound than their clean length: two records of equal clean budget cannot share
+    # a page sized for one of them plus its escape growth.
+    names = ['payload']
+    clean = native_record('x' * 3)
+    escaped = native_record('a\tb')
+    assert len(clean) == len(escaped)
+    assert native_record_row_bound(escaped, names) > native_record_row_bound(clean, names)
+    request = bounded_request()
+    # The budget fits exactly both records at the clean bound — so a producer that bounded
+    # by clean length alone would keep them on one page — but the escaped record's JSON-escape
+    # growth headroom pushes it past the budget and onto its own page.
+    clean_bound = native_record_row_bound(clean, names)
+    request['resultDelivery']['limits']['maxFileBytes'] = (
+        len(prefix_bytes()) + clean_bound + 1 + clean_bound + len(rq.PAGE_SUFFIX)
+    )
+    request['resultDelivery']['limits']['maxSchemaBytes'] = 1
+    pool = FakePool(
+        copy_blocks=[clean, escaped],
+        description=[FakeColumn('payload', 25)],
+        vendor_types={(25, -1): 'text'},
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(request, make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    pages = assembled_pages(fake)
+    # The clean record fits the budget; the escaped record needs its growth headroom and
+    # opens its own page.
+    assert list(pages) == [0, 1]
+    assert pages[0] == clean
+    assert pages[1] == escaped
 
 
 # ---------------------------------------------------------------------------
@@ -2212,7 +2089,8 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request(
-        maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq.PAGE_SUFFIX), maxSchemaBytes=1
+        maxFileBytes=prefix_len + native_record_row_bound(BOUND_RECORD, BOUND_NAMES) + len(rq.PAGE_SUFFIX),
+        maxSchemaBytes=1,
     )
     pool = FakePool(
         rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
@@ -2317,21 +2195,22 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
         'rowsEmitted': 1,
         'pagesEmitted': 1,
         'bytesEmitted': first_page_bytes,
-        'elapsedMs': 3625,
+        'elapsedMs': 5750,
     }
     assert error['executionDiagnostics'] == {
         'contractVersion': 1,
         'producer': {
-            'totalMs': 3625,
-            'databaseSetupMs': 1375,
-            'databaseFetchMs': 750,
+            'totalMs': 5750,
+            'databaseSetupMs': 3125,
+            # Three copy.read calls: the two records and the empty end-of-stream read.
+            'databaseFetchMs': 1125,
             'encodeAndPageBuildMs': 0,
             # Both upload walls are kept: the acknowledged page and the failed attempt's.
             'pageUploadMs': 1250,
             # finalizeMs is absent: finalize never ran. uploadAttemptCount/RetryCount are
             # absent too: the injected client makes no HTTP attempts.
             'otherMs': 250,
-            'timeToFirstPageMs': 2375,
+            'timeToFirstPageMs': 4500,
             'pageCount': 1,
             'rowCount': 1,
             'byteCount': first_page_bytes,
@@ -2379,9 +2258,10 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The leading zeros cover every clock read before the page-close guard (started_at,
-    # statement-timeout resolution, the setup/fetch/encode phase brackets, and the per-row
-    # guards) so the wall still expires at the page-close guard, after the row was produced.
-    values = iter([0.0] * 12 + [10.0] * 50)
+    # statement-timeout resolution, the setup/encode phase brackets, the copy-read brackets,
+    # and the per-block and per-record guards) so the wall still expires at the page-close
+    # guard, after the record was produced and the page assembled.
+    values = iter([0.0] * 13 + [10.0] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
 
     events = collect_events(request, make_check(pool=pool), client=FakeUploadClient())
@@ -2397,7 +2277,8 @@ def test_stream_maps_server_statement_cancellation_to_timeout(monkeypatch):
     import psycopg.errors as psycopg_errors
 
     pool = FakePool(
-        rows=[(1,)], fetch_error=psycopg_errors.QueryCanceled('canceling statement due to statement timeout')
+        rows=[(1,)],
+        copy_error=psycopg_errors.QueryCanceled('canceling statement due to statement timeout'),
     )
 
     events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
@@ -2413,7 +2294,7 @@ def test_stream_maps_unexpected_execution_failure_to_fixed_query_failed(monkeypa
     echo it."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)], fetch_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
+    pool = FakePool(rows=[(1,)], copy_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
     fake = FakeUploadClient()
 
     caplog.set_level(logging.DEBUG)

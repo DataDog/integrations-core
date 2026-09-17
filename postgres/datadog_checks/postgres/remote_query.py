@@ -4,16 +4,23 @@
 
 """Remote query source-page producer for the Postgres integration.
 
-Executes one validated query through a named (server-side) cursor, normalizes PostgreSQL
-values into the pinned cross-language JSON contract, and streams them as record-complete CSV
-source pages to its-agent-intake. The adapter describes the result once and registers one
-immutable descriptor (column names, vendor types, logical types) before any result row is
-read; the shared source-page writer frames, bounds, and uploads each page. Intake decodes,
-redacts, and writes the final JSON pages, so this module no longer constructs a final JSON
-envelope and no longer claims source bytes or checksums are final artifact metadata. Bulk
-page bytes never traverse the native emit bridge, AgentSecure, PAR, or AP action output;
-the emit callback carries only ``metadata``/``final``/``error`` events, and the final event
-carries only the compact run receipt.
+Executes one validated query once through the database-native ``COPY ... TO STDOUT`` CSV
+path and streams the native records as record-complete source pages to its-agent-intake:
+the server frames every non-null field as quoted CSV text (``FORCE_QUOTE *``) with NULL as
+the sole unquoted ``\\N`` field, so embedded commas, quotes, CR/LF, empty strings, a
+literal ``\\N``, and NULL stay distinguishable in the raw bytes and no value is decoded,
+re-encoded, or re-framed in Python. The adapter describes the result once — from a
+never-fetched named (server-side) cursor DECLARE inside the same read-only transaction,
+so the customer query's values are evaluated exactly once, by the COPY alone — and
+registers one immutable descriptor (column names, vendor types, logical types) before any
+result record is read; the shared source-page writer bounds, buffers, and uploads each
+page, and intake decodes the native text by the descriptor, applies optional redaction,
+and writes the final JSON pages. Session output settings that shape native text (time
+zone, date style, interval style, bytea output, float digits) are pinned
+transaction-locally, so the records are a pure function of the values. Bulk page bytes
+never traverse the native emit bridge, AgentSecure, PAR, or AP action output; the emit
+callback carries only ``metadata``/``final``/``error`` events, and the final event carries
+only the compact run receipt.
 
 Two operations dispatch through the single Agent entry point by their ``operation`` field:
 ``produce_json_pages`` runs the producer, and ``resolve_target`` answers the Agent's
@@ -26,22 +33,15 @@ reachability alone.
 
 from __future__ import annotations
 
-import base64
 import json
 import logging
-import math
 import time
 import uuid
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
-from datetime import time as dt_time
-from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Protocol
 
 import psycopg.errors as psycopg_errors
-import psycopg.types.json as psycopg_json
-from psycopg.types.string import TextLoader
 from pydantic import ValidationError
 
 from datadog_checks.base.utils import remote_queries as rq
@@ -68,10 +68,6 @@ REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
     )
 )
 
-# Rows fetched per bounded batch from the server-side cursor. A producer detail, not a
-# server-owned limit.
-REMOTE_QUERY_FETCH_BATCH_ROWS = 500
-
 
 @dataclass(frozen=True)
 class ResultColumn:
@@ -92,256 +88,6 @@ class StaticPostgresCheckRegistry:
 
 class PostgresCheckRegistry(Protocol):
     def iter_postgres_checks(self) -> Iterable['PostgreSql']: ...
-
-
-# ---------------------------------------------------------------------------
-# PostgreSQL value contract (pinned, cross-language)
-#
-#   PostgreSQL family        JSON representation
-#   NULL                    null
-#   boolean                 JSON boolean
-#   integral numerics       JSON number with the exact database text
-#   finite numeric/float4/8  JSON number with the exact database text
-#   non-finite numerics     string: "NaN", "Infinity", or "-Infinity"
-#   text/enum/UUID/inet     JSON string (inet/cidr keep their exact server text)
-#   date/time/timestamp     documented ISO-8601 strings; timestamptz in UTC with a "Z" suffix
-#   interval                documented PostgreSQL interval string (exact server text)
-#   json / jsonb            nested JSON value (arbitrary-precision numbers preserved)
-#   arrays                  JSON array with recursive element conversion
-#   bytea                   base64 string (schema identifies bytea)
-#   ranges/extensions       documented string form (unknown types arrive as their text)
-#
-# Fail closed on anything that cannot be converted deliberately: never silently stringify
-# via a driver default.
-
-
-class RawJsonNumber(str):
-    """A PostgreSQL numeric whose exact server text is emitted as a JSON number token.
-
-    Subclasses ``str`` so any generic serialization path still yields the value as a string
-    rather than corrupting it; the page encoder recognizes the type and emits the text
-    verbatim (rejecting the non-finite spellings, which must be JSON strings).
-    """
-
-
-class RawJsonNumberLoader(TextLoader):
-    """Load float4/float8 as their exact server text instead of a parsed float.
-
-    PostgreSQL float output is already a shortest-roundtrip decimal text, so keeping it raw
-    preserves the exact database representation without any float round-trip.
-    """
-
-    def load(self, data: Any) -> Any:
-        value = super().load(data)
-        if not isinstance(value, str):
-            # SQL_ASCII databases yield bytes from the text loader; numeric text is ASCII.
-            value = bytes(value).decode('utf-8')
-        return RawJsonNumber(value)
-
-
-class RawTextLoader(TextLoader):
-    """Load interval/inet/cidr/ranges as their exact server text (the documented string forms).
-
-    psycopg's object loaders are lossy or non-contractual for these families: interval would
-    collapse into a timedelta (losing year/month components), inet would grow a
-    psycopg-added prefix length, and ranges would become psycopg Range objects instead of
-    the documented string form. The contract keeps the server's own string spelling.
-    """
-
-    def load(self, data: Any) -> Any:
-        value = super().load(data)
-        if not isinstance(value, str):
-            value = bytes(value).decode('utf-8')
-        return value
-
-
-def _json_loads_exact(data: Any) -> Any:
-    # parse_float=Decimal keeps arbitrary-precision numbers inside json/jsonb as their exact
-    # text instead of rounding through a float.
-    return json.loads(data, parse_float=Decimal)
-
-
-class ExactJsonLoader(psycopg_json.JsonLoader):
-    _loads = staticmethod(_json_loads_exact)
-
-
-class ExactJsonbLoader(psycopg_json.JsonbLoader):
-    _loads = staticmethod(_json_loads_exact)
-
-
-# Range and multirange type names known to psycopg's builtin registry; older psycopg or
-# PostgreSQL builds may not know every one, and missing names are simply skipped.
-RANGE_TYPE_NAMES = (
-    'int4range',
-    'int8range',
-    'numrange',
-    'daterange',
-    'tsrange',
-    'tstzrange',
-    'int4multirange',
-    'int8multirange',
-    'nummultirange',
-    'datemultirange',
-    'tsmultirange',
-    'tstzmultirange',
-)
-
-
-def register_exact_loaders(cursor: Any) -> None:
-    """Register cursor-scoped loaders that keep exact server text for lossy families.
-
-    Registration is scoped to the named query cursor only, so the shared pooled connection's
-    behavior for the rest of the check is untouched. Arrays of these types load their
-    elements through the same cursor adapters, so array elements keep exact text too.
-    """
-    adapters = cursor.adapters
-    adapters.register_loader('float4', RawJsonNumberLoader)
-    adapters.register_loader('float8', RawJsonNumberLoader)
-    adapters.register_loader('interval', RawTextLoader)
-    adapters.register_loader('inet', RawTextLoader)
-    adapters.register_loader('cidr', RawTextLoader)
-    for range_type_name in RANGE_TYPE_NAMES:
-        try:
-            adapters.register_loader(range_type_name, RawTextLoader)
-        except KeyError:
-            LOGGER.debug('psycopg type registry does not know %s', range_type_name)
-    adapters.register_loader('json', ExactJsonLoader)
-    adapters.register_loader('jsonb', ExactJsonbLoader)
-
-
-BYTEA_OID = 17
-
-# A JSON number per RFC 8259: no leading zeros, optional fraction and exponent. Server
-# numeric text must already satisfy this; anything else fails closed.
-
-
-def _encode_datetime_text(value: datetime) -> str:
-    if value.tzinfo is None:
-        return value.isoformat()
-    # Timestamptz is canonicalized to UTC so the page does not depend on the session
-    # TimeZone, and the zero offset is spelled "Z" per the v1 contract example.
-    utc_value = value.astimezone(timezone.utc)
-    text = utc_value.isoformat()
-    if text.endswith('+00:00'):
-        text = text[:-6] + 'Z'
-    return text
-
-
-def _encode_bytea(out: bytearray, value: bytes) -> None:
-    out += b'"'
-    out += base64.b64encode(value)
-    out += b'"'
-
-
-def _encode_cell_token(value: Any, *, top_type_oid: int | None, in_array: bool) -> tuple[bytes, int]:
-    """Encode one normalized PostgreSQL value as ``(canonical JSON token, final bound)``.
-
-    The token is the pinned value contract's encoding, unchanged. The bound is the
-    conservative final-JSON size after redaction: any scalar string or number leaf —
-    including dict keys, conservatively — either keeps its token or is replaced by the fixed
-    ``[REDACTED]`` marker, whichever is longer; booleans and nulls are never scanned and
-    keep their exact token bounds.
-    ``top_type_oid`` is the described column OID for row cells (used to accept bytea
-    precisely); inside arrays and json values binary buffers can only come from bytea, so
-    ``in_array`` licenses them there. Everything unrecognized fails closed.
-    """
-    if value is None:
-        return b'null', 4
-    if isinstance(value, bool):
-        token = b'true' if value else b'false'
-        return token, len(token)
-    if isinstance(value, RawJsonNumber):
-        text = str(value)
-        if text in rq.NON_FINITE_NUMERIC_TEXT:
-            return rq.string_cell_token(text)
-        out = bytearray()
-        rq.encode_raw_number_text(out, text)
-        return bytes(out), rq.redactable_leaf_final_bound(out)
-    if isinstance(value, int):
-        out = bytearray()
-        rq.encode_raw_number_text(out, str(value))
-        return bytes(out), rq.redactable_leaf_final_bound(out)
-    if isinstance(value, Decimal):
-        if value.is_finite():
-            out = bytearray()
-            rq.encode_decimal(out, value)
-            return bytes(out), rq.redactable_leaf_final_bound(out)
-        return rq.string_cell_token('NaN' if value.is_nan() else ('Infinity' if value > 0 else '-Infinity'))
-    if isinstance(value, float):
-        if math.isfinite(value):
-            out = bytearray()
-            rq.encode_float(out, value)
-            return bytes(out), rq.redactable_leaf_final_bound(out)
-        return rq.string_cell_token('NaN' if math.isnan(value) else ('Infinity' if value > 0 else '-Infinity'))
-    if isinstance(value, str):
-        return rq.string_cell_token(value)
-    if isinstance(value, (bytes, bytearray, memoryview)):
-        if top_type_oid != BYTEA_OID and not in_array:
-            raise rq.RemoteQueryFailure(
-                'unsupported_value',
-                'Binary value from a non-bytea column (type oid {}) cannot be converted.'.format(top_type_oid),
-            )
-        out = bytearray()
-        _encode_bytea(out, bytes(value))
-        return bytes(out), rq.redactable_leaf_final_bound(out)
-    if isinstance(value, datetime):
-        return rq.string_cell_token(_encode_datetime_text(value))
-    if isinstance(value, date):
-        return rq.string_cell_token(value.isoformat())
-    if isinstance(value, dt_time):
-        return rq.string_cell_token(value.isoformat())
-    if isinstance(value, uuid.UUID):
-        return rq.string_cell_token(str(value))
-    if isinstance(value, (list, tuple)):
-        parts: list[bytes] = [b'[']
-        bound = 2
-        for index, item in enumerate(value):
-            if index:
-                parts.append(b',')
-                bound += 1
-            token, item_bound = _encode_cell_token(item, top_type_oid=None, in_array=True)
-            parts.append(token)
-            bound += item_bound
-        parts.append(b']')
-        return b''.join(parts), bound
-    if isinstance(value, dict):
-        parts = [b'{']
-        bound = 2
-        first = True
-        for key, item in value.items():
-            if not isinstance(key, str):
-                raise rq.RemoteQueryFailure('unsupported_value', 'JSON object keys must be strings.')
-            if not first:
-                parts.append(b',')
-                bound += 1
-            first = False
-            key_token = rq.canonical_json_bytes(key)
-            parts.append(key_token)
-            parts.append(b':')
-            bound += rq.redactable_leaf_final_bound(key_token) + 1
-            token, item_bound = _encode_cell_token(item, top_type_oid=None, in_array=True)
-            parts.append(token)
-            bound += item_bound
-        parts.append(b'}')
-        return b''.join(parts), bound
-    raise rq.RemoteQueryFailure(
-        'unsupported_value',
-        'PostgreSQL value of type {} has no conversion in the JSON contract.'.format(type(value).__name__),
-    )
-
-
-def encode_row(row: Sequence[Any], columns: Sequence[ResultColumn]) -> list[rq.EncodedCell]:
-    """Encode one result row as one canonical cell token per described column.
-
-    The row-object JSON document is never built: intake assembles the final rows from these
-    cell tokens in descriptor order.
-    """
-    if len(row) != len(columns):
-        raise rq.RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
-    return [
-        rq.EncodedCell(*_encode_cell_token(value, top_type_oid=column.type_oid, in_array=False))
-        for column, value in zip(columns, row)
-    ]
 
 
 # ---------------------------------------------------------------------------
@@ -430,11 +176,11 @@ def resolve_vendor_types(control_cursor: Any, columns: Sequence[ResultColumn]) -
     return type_map
 
 
-# Descriptor logical types for the built-in OID families the value contract converts. Any
-# array family (a vendor type rendered with an ``[]`` suffix) carries a JSON array; custom
-# types, domains, and extensions have no stable cross-vendor family, so they map to
-# ``vendor`` — their values still must pass the fail-closed value contract, and ``vendor``
-# never widens it.
+# Descriptor logical types for the built-in OID families. Any array family (a vendor type
+# rendered with an ``[]`` suffix) carries a JSON array, decoded by intake from the element
+# type the vendor name carries; custom types, domains, and extensions have no stable
+# cross-vendor family, so they map to ``vendor`` — intake falls back to the family's
+# documented string form, never a guess from contents.
 POSTGRES_LOGICAL_TYPE_BY_OID = {
     16: 'boolean',  # bool
     17: 'binary',  # bytea
@@ -483,8 +229,10 @@ def build_upload_descriptor(
     """Build the immutable source-page descriptor from the described result columns.
 
     The vendor type names always come from ``pg_catalog.format_type`` — schema or not —
-    because the descriptor is registered once, before any result row is read, and intake
-    stamps the schema (when requested) into every final page from it.
+    because the descriptor is registered once, before any result record is read, and intake
+    stamps the schema (when requested) into every final page from it. The format version
+    selects the native COPY CSV cell grammar, so intake decodes the source pages by these
+    column types instead of canonical JSON tokens.
     """
     descriptor_columns = []
     for column in columns:
@@ -497,7 +245,7 @@ def build_upload_descriptor(
             )
         )
     return rq.RemoteQueryUploadDescriptor(
-        format_version=rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+        format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
         include_schema=request.include_schema,
         agent_hostname=agent_hostname,
         columns=descriptor_columns,
@@ -505,7 +253,104 @@ def build_upload_descriptor(
 
 
 # ---------------------------------------------------------------------------
-# Producer: one validated query execution through a named server-side cursor
+# Native COPY CSV source wire (postgres-copy-csv-v1)
+# ---------------------------------------------------------------------------
+
+# The frozen native wire: the customer query is evaluated exactly once, by a single
+# ``COPY ... TO STDOUT``. ``FORCE_QUOTE *`` makes every non-null field quoted — including
+# empty strings, numerics, booleans, and a literal backslash-N text — and ``NULL '\\N'``
+# makes NULL the sole unquoted field, so NULL, empty string, and a literal ``\\N`` stay
+# distinguishable in the raw bytes and quote provenance survives to intake. Standard
+# PostgreSQL CSV escaping doubles quotes inside quoted fields, and commas and CR/LF ride
+# raw inside them; records end with one LF, so a record's terminator is the first LF that
+# closes every quoted field (an even number of quotes since the record's start).
+POSTGRES_COPY_SQL_OPTIONS = "FORMAT CSV, NULL '\\N', FORCE_QUOTE *"
+
+# Session output settings pinned transaction-locally so the native COPY text is a pure
+# function of the values, never of the pooled session's ambient configuration:
+# timestamptz renders in UTC, dates and timestamps in ISO style, intervals in the
+# documented postgres spelling, bytea in hex, and float4/float8 in the server's shortest
+# round-trip text. All are USERSET GUCs, so ``SET LOCAL`` works for every non-superuser,
+# and ``SET LOCAL`` scopes each change to this read-only transaction: the closing ROLLBACK
+# restores the pooled connection's session state untouched.
+POSTGRES_COPY_SESSION_SETTINGS = (
+    "SET LOCAL TimeZone = 'UTC'",
+    "SET LOCAL DateStyle = 'ISO, MDY'",
+    "SET LOCAL IntervalStyle = 'postgres'",
+    "SET LOCAL bytea_output = 'hex'",
+    'SET LOCAL extra_float_digits = 1',
+)
+
+
+def native_copy_sql(query: str) -> str:
+    """The one COPY statement that evaluates the validated query and emits its native CSV."""
+    return 'COPY ({}) TO STDOUT WITH ({})'.format(query, POSTGRES_COPY_SQL_OPTIONS)
+
+
+NATIVE_RECORD_TERMINATOR = b'\n'
+NATIVE_FIELD_QUOTE = b'"'
+
+
+class NativeCopyRecordAssembler:
+    """Accumulate raw COPY blocks into complete native CSV records.
+
+    libpq delivers ``COPY TO STDOUT`` data as whole ``CopyData`` messages, but their
+    granularity is not a record contract: psycopg's own row parsing is the text format's
+    (tab-split, backslash-escaped) and does not understand CSV, so records are assembled
+    here from the raw byte stream alone. A record is complete exactly at the first LF that
+    closes every quoted field — with ``FORCE_QUOTE *`` every non-null field's quotes pair
+    and escaped quotes double, so an even running quote count marks every field boundary —
+    which keeps embedded commas, quotes, and CR/LF inside fields while records stay whole.
+    Only one partial record is ever buffered, bounded by ``max_row_bytes``.
+    """
+
+    def __init__(self, max_row_bytes: int):
+        self._max_row_bytes = max_row_bytes
+        self._pending = bytearray()
+        self._scan_from = 0
+        self._open_quotes = 0
+
+    def feed(self, block: bytes | bytearray | memoryview) -> Iterator[bytes]:
+        """Fold one COPY block in and yield every complete record it terminates."""
+        self._pending += block
+        while True:
+            terminator = self._pending.find(NATIVE_RECORD_TERMINATOR, self._scan_from)
+            if terminator < 0:
+                break
+            # Quotes since the record's start decide whether this LF closes the record or
+            # rides inside a quoted field.
+            self._open_quotes ^= self._pending.count(NATIVE_FIELD_QUOTE, self._scan_from, terminator) & 1
+            self._scan_from = terminator + 1
+            if self._open_quotes:
+                continue
+            record = bytes(self._pending[: terminator + 1])
+            del self._pending[: terminator + 1]
+            self._open_quotes = 0
+            self._scan_from = 0
+            yield record
+        # Quotes between the last LF and the block's end belong to the still-open record.
+        end = len(self._pending)
+        if self._scan_from < end:
+            self._open_quotes ^= self._pending.count(NATIVE_FIELD_QUOTE, self._scan_from, end) & 1
+            self._scan_from = end
+        # A partial record already beyond maxRowBytes can only complete beyond it: fail now
+        # instead of buffering an unbounded record.
+        if end > self._max_row_bytes:
+            raise rq.RemoteQueryFailure(
+                'row_too_large',
+                'A single native record exceeds maxRowBytes ({} > {} bytes).'.format(end, self._max_row_bytes),
+            )
+
+    def finish(self) -> None:
+        """Fail closed unless the stream ended exactly at a record boundary."""
+        if self._pending:
+            raise rq.RemoteQueryFailure(
+                'query_failed', 'The COPY stream ended before the open native record was complete.'
+            )
+
+
+# ---------------------------------------------------------------------------
+# Producer: one validated query execution through the native COPY CSV path
 # ---------------------------------------------------------------------------
 
 
@@ -519,22 +364,25 @@ def produce_remote_query(
     stats: rq.RemoteQueryRunStats,
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> dict[str, Any]:
-    """Execute the validated query once and return the compact run receipt.
+    """Execute the validated query once, natively, and return the compact run receipt.
 
-    The query runs exactly once, through a named server-side cursor declared inside the
-    existing read-only transaction with the effective statement timeout applied — the
-    smaller of the instance-configured ``remote_queries.timeout_ms`` and the remaining
+    The query's values are evaluated exactly once: a named server-side cursor DECLAREs it
+    inside the existing read-only transaction with the effective statement timeout applied
+    — the smaller of the instance-configured ``remote_queries.timeout_ms`` and the remaining
     run-wide wall, where the wall is the delivered ``limits.timeout_ms`` that no instance
-    setting may lengthen; it is never wrapped in a probe and never executed twice. Bounded
-    row batches are fetched from the same cursor and encoded one row of canonical cell tokens
-    at a time; the vendor-type lookup and descriptor registration both precede the first
-    fetch, so no result row is read before intake knows the page shape.
+    setting may lengthen — but is never fetched, so the DECLARE only plans and its
+    description yields the column metadata; the single ``COPY (query) TO STDOUT`` then
+    evaluates the query and streams its native CSV records. Session output settings are
+    pinned in the same transaction, the vendor-type lookup and descriptor registration both
+    precede the first record, and the shared source-page writer bounds, buffers, and
+    uploads the native records without re-querying.
 
-    Producer phases: connection acquisition through descriptor registration is database
-    setup, each ``fetchmany`` call is a database fetch, the row loop is encode and page
-    build (with any upload ``add_row`` triggers nested inside it), and page uploads and
-    finalize are accounted by the shared source-page writer. Everything else — timeout
-    resolution, the pre-fetch guards, transaction teardown — lands in ``otherMs``.
+    Producer phases: connection acquisition through descriptor registration and the COPY
+    dispatch is database setup, each ``copy.read`` call is a database fetch, record
+    assembly and page buffering are encode and page build (with any upload triggers nested
+    inside it), and page uploads and finalize are accounted by the shared source-page
+    writer. Everything else — timeout resolution, the pre-read guards, transaction
+    teardown — lands in ``otherMs``.
     """
     delivery = request.result_delivery
     limits = delivery.limits
@@ -543,9 +391,6 @@ def produce_remote_query(
     # replace or lengthen the wall.
     deadline = started_at + limits.timeout_ms / 1000
     statement_timeout_ms = _resolve_statement_timeout_ms(check, deadline)
-    # Keep a batch of permitted-size rows within a page-sized encoded budget.
-    # Driver allocations still need headroom; row size is checked after decoding.
-    fetch_rows = max(1, min(REMOTE_QUERY_FETCH_BATCH_ROWS, limits.max_file_bytes // limits.max_row_bytes))
     timings = timings if timings is not None else rq.NULL_PRODUCER_TIMINGS
 
     def guard() -> None:
@@ -554,10 +399,10 @@ def produce_remote_query(
 
     cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
     # The setup phase spans pool connection acquisition through descriptor registration and
-    # ends at the first fetch; the connection and cursor contexts outlive the phase, so
-    # it is entered and exited explicitly. The inline exit marks the boundary before the
-    # row loop; the spanning ``finally`` re-exits it (idempotently) so a setup interrupted
-    # mid-flight still reports its partial wall.
+    # the COPY dispatch, and ends before the first data read; the connection and cursor
+    # contexts outlive the phase, so it is entered and exited explicitly. The inline exit
+    # marks the boundary before the record loop; the spanning ``finally`` re-exits it
+    # (idempotently) so a setup interrupted mid-flight still reports its partial wall.
     setup_phase = timings.enter_phase('database_setup')
     try:
         with check.db_pool.get_connection(execution_dbname) as conn:
@@ -570,13 +415,17 @@ def produce_remote_query(
                     # is a validated positive int resolved from the instance override and the
                     # remaining wall, never raw text.
                     control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
-                    with conn.cursor(name=cursor_name) as server_cursor:
-                        register_exact_loaders(server_cursor)
-                        server_cursor.execute(request.query)
-                        columns = described_columns(server_cursor)
+                    for session_setting in POSTGRES_COPY_SESSION_SETTINGS:
+                        control.execute(session_setting)
+                    with conn.cursor(name=cursor_name) as described_cursor:
+                        # The DECLARE plans the query and yields its result description —
+                        # including for zero-row results — without fetching: no value is
+                        # evaluated here, only by the COPY below.
+                        described_cursor.execute(request.query)
+                        columns = described_columns(described_cursor)
                         validate_columns(columns, limits.max_columns)
                         # The descriptor needs every vendor type name, schema or not: it is
-                        # registered once, before any result row is read.
+                        # registered once, before any result record is read.
                         type_map = resolve_vendor_types(control, columns)
                         descriptor = build_upload_descriptor(request, columns, type_map, check.hostname)
                         # The executing check's Agent-reported hostname: the descriptor carries it
@@ -584,22 +433,27 @@ def produce_remote_query(
                         # never socket.gethostname().
                         writer = rq.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings)
                         guard()
-                        # Setup ends here: the first fetch below is its own phase.
-                        timings.exit_phase(setup_phase)
-                        try:
-                            with timings.phase('encode_and_page_build'):
-                                while True:
-                                    with timings.phase('database_fetch'):
-                                        rows = server_cursor.fetchmany(fetch_rows)
-                                    if not rows:
-                                        break
-                                    for row in rows:
-                                        guard()
-                                        writer.add_row(encode_row(row, columns))
-                            return writer.finish()
-                        finally:
-                            # Release the page even if encoding or cursor iteration fails.
-                            writer.discard()
+                        with conn.cursor() as stream_cursor:
+                            with stream_cursor.copy(native_copy_sql(request.query)) as copy:
+                                # Setup ends here: the first copy.read below is its own phase.
+                                timings.exit_phase(setup_phase)
+                                try:
+                                    with timings.phase('encode_and_page_build'):
+                                        assembler = NativeCopyRecordAssembler(limits.max_row_bytes)
+                                        while True:
+                                            with timings.phase('database_fetch'):
+                                                block = copy.read()
+                                            if not block:
+                                                break
+                                            guard()
+                                            for record in assembler.feed(block):
+                                                guard()
+                                                writer.add_native_record(record)
+                                        assembler.finish()
+                                    return writer.finish()
+                                finally:
+                                    # Release the page even if record assembly or the copy fails.
+                                    writer.discard()
                 finally:
                     if in_transaction:
                         try:

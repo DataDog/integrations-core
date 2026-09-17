@@ -75,10 +75,21 @@ REMOTE_QUERY_ARTIFACT_VERSION = 1
 PAGE_SUFFIX = b']}'
 
 
-# The provisional private row wire, selected by the descriptor's format version: CSV records
-# whose fields are canonical JSON value tokens. Intake pins the same version; the producer
-# cannot invent encoding rules.
+# The two active source-page cell grammars, selected per upload by the descriptor's
+# ``format_version``: canonical JSON value tokens framed as CSV (``csv-json-cell-v1``)
+# and PostgreSQL-native ``COPY ... TO STDOUT`` CSV text (``postgres-copy-csv-v1``). Intake
+# decodes by the same closed pair; a producer cannot invent a third grammar or mix them
+# within one upload.
 REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION = 'csv-json-cell-v1'
+POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION = 'postgres-copy-csv-v1'
+REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSIONS = (
+    REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+    POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
+)
+
+RemoteQueryDescriptorFormat = Literal[
+    REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION, POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION
+]
 
 # The source page's private media type: one record-complete CSV body per page index.
 REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE = 'application/vnd.datadog.remote-query.rows+csv;version=1'
@@ -202,12 +213,14 @@ class RemoteQueryUploadDescriptor(BaseModel):
 
     Intake persists the descriptor and stamps the schema (when requested) into every final
     page from it. ``agent_hostname`` is the executing check's Agent-reported identity, threaded
-    from the check instance, never the delivery or the machine's socket name.
+    from the check instance, never the delivery or the machine's socket name. The
+    ``format_version`` selects the source-page cell grammar — canonical JSON tokens or
+    PostgreSQL-native COPY CSV — and intake dispatches its decode on the same value.
     """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    format_version: Literal['csv-json-cell-v1']
+    format_version: RemoteQueryDescriptorFormat
     include_schema: StrictBool
     agent_hostname: StrictStr = Field(min_length=1, max_length=255)
     columns: tuple[RemoteQueryDescriptorColumn, ...] = Field(min_length=1)
@@ -803,10 +816,12 @@ def page_prefix(
 
 
 # A framed CSV record is at most twice its final-JSON row bound minus a positive constant:
-# a cell field at worst doubles the token's quotes and adds two framing quotes, while every
-# column contributes at least a three-byte key token to the row bound. A page whose final
-# bound fits maxFileBytes therefore holds source bytes strictly below twice maxFileBytes, so
-# the cap below is a defensive split trigger that valid operation can never reach; it keeps
+# a canonical-token cell at worst doubles the token's quotes and adds two framing quotes,
+# while every column contributes at least a three-byte key token to the row bound; a
+# native COPY CSV record is bounded by its own final-JSON row bound outright, since the
+# bound counts the record's own bytes plus framing constants. A page whose final bound
+# fits maxFileBytes therefore holds source bytes strictly below twice maxFileBytes, so the
+# cap below is a defensive split trigger that valid operation can never reach; it keeps
 # retry memory bounded even if that proof ever breaks.
 REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR = 2
 
@@ -841,15 +856,84 @@ def frame_csv_record(tokens: Sequence[bytes]) -> bytes:
     return ''.join(sink.pieces).encode('utf-8')
 
 
+# ---------------------------------------------------------------------------
+# PostgreSQL-native COPY CSV record bounds (postgres-copy-csv-v1)
+# ---------------------------------------------------------------------------
+
+# In the native grammar every non-null field is quoted with internal quotes doubled, NULL
+# is the sole unquoted field (the two-byte \N marker), and every record ends with one LF;
+# commas and CR/LF can appear raw inside quoted fields. Intake decodes the native text by
+# the descriptor's column types, applies optional SDS, and writes the final JSON row
+# object, so the producer bounds that final row from the record bytes alone.
+
+# The JSON-escape growth of native text: a raw backslash doubles (``\\``) and a control
+# character grows at most to a six-byte ``\uXXXX`` escape (five extra bytes; the short
+# escapes for \n and friends grow less). CSV-doubled quotes are already two bytes per
+# character in the native record and stay two bytes as escaped JSON quotes, so quotes add
+# no growth. The record's own LF terminator is a control byte, so it is counted too.
+POSTGRES_COPY_CSV_ESCAPE_SCAN = re.compile(rb'[\x00-\x1f\\]')
+POSTGRES_COPY_CSV_CONTROL_BYTES = bytes(range(0x20))
+
+# Decoding an array field into a JSON array grows beyond the native text per element, not
+# per column: elements that arrive unquoted (timestamps, booleans, numerics) gain
+# per-element JSON quotes, a boolean element becomes true/false (five bytes from one),
+# and SDS can replace any tiny string or number element with the twelve-byte redaction
+# marker. The worst family growth stays below four times the native record's bytes, so
+# array-bearing descriptors scale the value bound by four.
+POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR = 4
+
+
+def postgres_copy_csv_escape_growth(record: bytes) -> int:
+    """The JSON-escape growth of one native record's text; zero for the common clean record.
+
+    The scan first separates clean records (no backslash, no control byte) from records
+    that need a precise count, so the common record pays one failed regex search and never
+    allocates; a record containing NULL's ``\\N`` marker or escaped text takes the counting
+    path, whose over-count of framing bytes (the terminator's five, one per NULL marker)
+    only widens the bound.
+    """
+    if POSTGRES_COPY_CSV_ESCAPE_SCAN.search(record) is None:
+        return 0
+    controls = len(record) - len(record.translate(None, POSTGRES_COPY_CSV_CONTROL_BYTES))
+    backslashes = record.count(b'\\')
+    return backslashes + 5 * controls
+
+
+def postgres_copy_csv_record_final_bound(
+    record: bytes, *, key_bound: int, columns: int, array_factor: int = 1
+) -> int:
+    """The conservative final-JSON bytes of one native COPY CSV record's row object.
+
+    Intake builds one JSON row object per record — every descriptor key with its colon, the
+    comma separators, and one value token per column decoded from the native text — so the
+    bound is the framing constants plus the record's own bytes, its JSON-escape growth, and
+    one redaction-marker slot per column (a scalar string or number leaf either keeps its
+    token or is replaced by the fixed marker, whichever is longer). Every scalar family is
+    covered by the native bytes: numeric and boolean tokens never exceed their native text
+    by more than a marker slot, string families are the native text plus escape growth, and
+    bytea's final base64 is shorter than its native hex.
+
+    ``array_factor`` is :data:`POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR` when the descriptor
+    carries an array column: array decoding grows per element, so the whole value term is
+    scaled instead of counted per column.
+    """
+    value_bound = (
+        len(record) + postgres_copy_csv_escape_growth(record) + len(REMOTE_QUERY_REDACTED_MARKER_TOKEN) * columns
+    ) * array_factor
+    return 1 + key_bound + 2 * columns + value_bound
+
+
 class SourcePageWriter:
     """Keep one record-complete source page in RAM through its retries; never the full result.
 
-    The writer registers the upload descriptor once before any row is read, frames complete
-    CSV records, splits pages before the conservative final-JSON bound reaches
-    ``maxFileBytes``, and retries a whole source page byte-identically. Stats and the compact
-    receipt accumulate from intake's returned final metadata, never from local source sizes.
-    The Agent admits one execution at a time; each adapter must call discard in its finally
-    block so query/encoding failures also release the active page.
+    The writer registers the upload descriptor once before any record is read, buffers
+    complete CSV records — canonical-token records framed from ``add_row`` cells, or
+    database-native records handed to ``add_native_record`` verbatim — splits pages before
+    the conservative final-JSON bound reaches ``maxFileBytes``, and retries a whole source
+    page byte-identically. Stats and the compact receipt accumulate from intake's returned
+    final metadata, never from local source sizes. The Agent admits one execution at a
+    time; each adapter must call discard in its finally block so query/encoding failures
+    also release the active page.
     """
 
     def __init__(
@@ -901,6 +985,13 @@ class SourcePageWriter:
         # Each row object repeats every descriptor key, so the canonical key tokens' UTF-8
         # bytes are part of the bound.
         self._key_bound = sum(len(canonical_json_bytes(column.column_name)) for column in descriptor.columns)
+        # Array-bearing native descriptors scale their per-record value bound: array
+        # decoding grows per element, not per column.
+        self._native_array_factor = (
+            POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR
+            if any(column.vendor_data_type.endswith('[]') for column in descriptor.columns)
+            else 1
+        )
         self._source_page_cap = REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR * limits.max_file_bytes
         self._records: list[bytes] | None = None
         self._record_bounds: list[int] = []
@@ -915,17 +1006,49 @@ class SourcePageWriter:
         verify_descriptor_response(response, creds.upload_id, descriptor, request_body)
 
     def add_row(self, cells: Sequence[EncodedCell]) -> None:
-        """Frame and buffer one row's cells; split the page before the final bound overflows."""
+        """Frame and buffer one row's canonical tokens; split the page before the final bound overflows."""
+        if self._descriptor.format_version != REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION:
+            raise RemoteQueryFailure(
+                'unsupported_value', 'Canonical cell tokens require a csv-json-cell-v1 descriptor.'
+            )
         if len(cells) != len(self._descriptor.columns):
             raise RemoteQueryFailure('query_failed', 'Result row width does not match the described columns.')
         record = frame_csv_record([cell.token for cell in cells])
+        row_bound = 1 + self._key_bound + 2 * len(cells) + sum(cell.final_bound for cell in cells)
+        self._append_record(record, row_bound)
+
+    def add_native_record(self, record: bytes) -> None:
+        """Buffer one complete native COPY CSV record; split the page before the final bound overflows.
+
+        postgres-copy-csv-v1 producers accumulate database-native CSV records — complete,
+        LF-terminated records the server already framed — and hand each over verbatim: the
+        bytes intake receives are exactly the bytes ``COPY ... TO STDOUT`` produced, and the
+        producer never decodes, re-encodes, or re-frames a value. The conservative final-JSON
+        bound is computed from the descriptor and the record bytes alone, mirroring the
+        decode-and-redact intake performs from the same two.
+        """
+        if self._descriptor.format_version != POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION:
+            raise RemoteQueryFailure(
+                'unsupported_value', 'Native COPY CSV records require a postgres-copy-csv-v1 descriptor.'
+            )
+        if not record.endswith(b'\n'):
+            raise RemoteQueryFailure('unsupported_value', 'A native source record is not record-complete.')
+        row_bound = postgres_copy_csv_record_final_bound(
+            record,
+            key_bound=self._key_bound,
+            columns=len(self._descriptor.columns),
+            array_factor=self._native_array_factor,
+        )
+        self._append_record(record, row_bound)
+
+    def _append_record(self, record: bytes, row_bound: int) -> None:
+        """Buffer one complete framed record under the conservative final-JSON page bound."""
         limits = self._delivery.limits
         if len(record) > limits.max_row_bytes:
             raise RemoteQueryFailure(
                 'row_too_large',
                 'A single record exceeds maxRowBytes ({} > {} bytes).'.format(len(record), limits.max_row_bytes),
             )
-        row_bound = 1 + self._key_bound + 2 * len(cells) + sum(cell.final_bound for cell in cells)
         if self._records is None:
             self._begin_page()
         while True:
