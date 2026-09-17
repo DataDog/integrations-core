@@ -111,6 +111,11 @@ def github_credentials(config_file):
 
 
 @pytest.fixture
+def list_open_prs(mocker):
+    return mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
+
+
+@pytest.fixture
 def basic_git(mocker):
     mock_git = mocker.create_autospec(GitRepository)
     # We're patching the creation of the GitRepository class.
@@ -148,15 +153,12 @@ def _assert_tag_pushed(git, result, tag, ref=ORIGIN_REF):
     assert expected_prompt in result.output
 
 
-def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, github_credentials):
+def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, list_open_prs):
     mock_pr = mocker.MagicMock()
     mock_pr.number = 1234
     mock_pr.title = 'Fix thing'
     mock_pr.html_url = 'https://example.invalid/pr/1234'
-    list_prs = mocker.patch(
-        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
-        return_value=[mock_pr],
-    )
+    list_open_prs.return_value = [mock_pr]
 
     result = _run_tag(ddev, '--final', input='y\n')
 
@@ -164,25 +166,20 @@ def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, github_
     assert '#1234 Fix thing' in result.output
     assert 'Open PRs found targeting 7.56.x' in result.output
     assert 'Open PRs found targeting 7.56.x. Create and push this tag anyway: 7.56.0?' in result.output
-    list_prs.assert_called_once_with('7.56.x')
+    list_open_prs.assert_called_once_with('7.56.x')
     assert git.method_calls.count(c.tag('7.56.0', message='7.56.0', ref=ORIGIN_REF)) == 1
     assert git.method_calls.count(c.push('7.56.0')) == 1
 
 
-def test_tag_skip_open_pr_check(ddev, git, mocker, github_credentials):
-    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
-
+def test_tag_skip_open_pr_check(ddev, git, list_open_prs):
     result = _run_tag(ddev, '--final', '--skip-open-pr-check', input='y\n')
 
     _assert_tag_pushed(git, result, '7.56.0')
-    list_prs.assert_not_called()
+    list_open_prs.assert_not_called()
 
 
-def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, github_credentials):
-    mocker.patch(
-        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
-        side_effect=Exception('API error'),
-    )
+def test_tag_github_api_error_degrades_gracefully(ddev, git, list_open_prs):
+    list_open_prs.side_effect = Exception('API error')
 
     result = _run_tag(ddev, '--final', input='y\n')
 
@@ -190,12 +187,8 @@ def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, github_cred
     assert 'unable to check for open PRs' in result.output
 
 
-def test_tag_open_pr_authentication_failure_aborts_before_tagging(ddev, git, mocker, github_credentials):
-    error = GitHubAuthenticationError.from_http_status_error(_http_status_error(403, 'forbidden'))
-    mocker.patch(
-        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
-        side_effect=error,
-    )
+def test_tag_open_pr_authentication_failure_aborts_before_tagging(ddev, git, list_open_prs):
+    list_open_prs.side_effect = GitHubAuthenticationError.from_http_status_error(_http_status_error(403, 'forbidden'))
 
     result = _run_tag(ddev, '--final', input='y\n')
 
@@ -559,6 +552,10 @@ AGENT_RELEASE_JSON = (
 )
 
 AGENT_BASE_COMMIT_SHA = 'a' * 40
+GH_PR_CREATE_COMMAND = (
+    'gh pr create --repo DataDog/datadog-agent --base 7.56.x --head integrations-core/bump-7.56.0 '
+    "--title 'Bump integrations-core to 7.56.0'"
+)
 
 
 def _mock_release_json(fake_async_github, release_json=AGENT_RELEASE_JSON):
@@ -586,15 +583,13 @@ def _committed_agent_pin(fake_async_github):
 
 
 @pytest.fixture
-def agent_pr(basic_git, mocker, github_credentials, fake_async_github):
-    """The full pin-PR environment: the real `_open_datadog_agent_bump_pr`, valid GitHub
-    credentials, and a datadog-agent `release.json` that still pins the branch name."""
-    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=False)
+def agent_pr(git, mocker, github_credentials, fake_async_github):
+    """The full pin-PR environment on top of the standard `git` fixture: the real
+    `_open_datadog_agent_bump_pr`, valid GitHub credentials, and a datadog-agent `release.json`
+    that still pins the branch name."""
     mocker.patch('ddev.cli.release.branch.tag._open_datadog_agent_bump_pr', REAL_OPEN_DATADOG_AGENT_BUMP_PR)
     _mock_release_json(fake_async_github)
-    basic_git.current_branch.return_value = '7.56.x'
-    basic_git.tags.return_value = EXAMPLE_TAGS[:]
-    return basic_git
+    return git
 
 
 @pytest.mark.parametrize(
@@ -668,25 +663,59 @@ def test_agent_pr_skipped_when_pin_already_matches(ddev, agent_pr, fake_async_gi
     assert f'already pins `{RESOLVED_COMMIT_SHA}`' in result.output
 
 
-@pytest.mark.parametrize('status_code', [500, 422], ids=['server-error', 'non-duplicate-422'])
-def test_agent_pr_creation_failure_prints_gh_command(ddev, agent_pr, fake_async_github, status_code):
-    """A PR-creation failure happens after the head branch and pin commit exist, so only the PR
-    is missing: the abort must carry the `gh` command that opens it. A 422 with no existing PR
-    (e.g. no commits between base and head) is not a duplicate, so it fails the same way."""
-    fake_async_github.mock_response('create_pull_request', _http_status_error(status_code, method='POST'))
+@pytest.mark.parametrize(
+    ('fail', 'expected_recovery'),
+    [
+        pytest.param(
+            lambda fake: fake.mock_response('get_ref', _http_status_error(404, 'Not Found')),
+            (
+                'the `7.56.x` branch could not be found on datadog-agent',
+                'token has no access to DataDog/datadog-agent',
+                'Rerun the command once the branch exists',
+            ),
+            id='release-branch-missing-on-agent',
+        ),
+        pytest.param(
+            lambda fake: fake.mock_response('create_or_update_file_contents', _http_status_error(500, method='PUT')),
+            (
+                'head branch `integrations-core/bump-7.56.0` was created on datadog-agent',
+                'may not have been made',
+                'commit the pin to `integrations-core/bump-7.56.0` first',
+                GH_PR_CREATE_COMMAND,
+            ),
+            id='pin-commit-failure',
+        ),
+        pytest.param(
+            lambda fake: fake.mock_response('create_pull_request', _http_status_error(500, method='POST')),
+            ('the PR could not be created', GH_PR_CREATE_COMMAND),
+            id='pr-creation-failure',
+        ),
+        pytest.param(
+            lambda fake: fake.mock_response('create_pull_request', _http_status_error(422, method='POST')),
+            ('the PR could not be created', GH_PR_CREATE_COMMAND),
+            id='pr-creation-422-without-existing-pr',
+        ),
+    ],
+)
+def test_agent_pr_failure_aborts_before_tagging_with_recovery(
+    ddev, agent_pr, fake_async_github, fail, expected_recovery
+):
+    """Any GitHub failure while creating the bump PR aborts before the tag is pushed, carrying
+    the failure-specific recovery instructions: the `gh` command wherever the PR is the only
+    missing piece. The 422 with no existing PR (e.g. no commits between base and head) is not a
+    duplicate, so it fails like any other creation error."""
+    fail(fake_async_github)
 
     result = _run_final_tag(ddev)
 
     assert result.exit_code == 1, result.output
     agent_pr.tag.assert_not_called()
     agent_pr.push.assert_not_called()
-    assert 'could not be created' in result.output
+    assert 'The datadog-agent bump PR could not be created' in result.output
     assert 'The tag `7.56.0` was not pushed' in result.output
-    assert (
-        'gh pr create --repo DataDog/datadog-agent --base 7.56.x --head integrations-core/bump-7.56.0 '
-        "--title 'Bump integrations-core to 7.56.0'" in result.output
-    )
     assert '--skip-pr-creation' in result.output
+    for substring in expected_recovery:
+        assert substring in result.output
 
 
 def test_agent_pr_creation_uses_http_retries(ddev, agent_pr, fake_async_github):
@@ -700,21 +729,6 @@ def test_agent_pr_creation_uses_http_retries(ddev, agent_pr, fake_async_github):
     assert retry.should_retry(_http_status_error(503, method='POST'))
     assert not retry.should_retry(_http_status_error(404, method='POST'))
     assert retry.attempts >= 2
-
-
-def test_agent_pr_reports_when_release_branch_missing_on_agent(ddev, agent_pr, fake_async_github):
-    """A 404 resolving the base branch means the Agent release branch isn't cut yet, or the
-    token cannot see the repo, not a bug. The abort must say the tag was not pushed."""
-    fake_async_github.mock_response('get_ref', _http_status_error(404, 'Not Found'))
-
-    result = _run_final_tag(ddev)
-
-    assert result.exit_code == 1, result.output
-    agent_pr.tag.assert_not_called()
-    assert 'the `7.56.x` branch could not be found on datadog-agent' in result.output
-    assert 'token has no access to DataDog/datadog-agent' in result.output
-    assert 'Rerun the command once the branch exists' in result.output
-    assert 'The tag `7.56.0` was not pushed' in result.output
 
 
 @pytest.mark.parametrize(
@@ -738,22 +752,6 @@ def test_agent_pr_malformed_release_json_aborts_before_tagging(ddev, agent_pr, f
     assert 'not the expected JSON shape' in result.output
     assert f'pinning `INTEGRATIONS_CORE_VERSION` to `{RESOLVED_COMMIT_SHA}`' in result.output
     fake_async_github.assert_not_called('create_or_update_file_contents')
-
-
-def test_agent_pr_pin_commit_failure_reports_head_branch_state(ddev, agent_pr, fake_async_github):
-    """The head branch already exists when the pin commit is attempted, so its failure message
-    must report that branch rather than a generic hint that ignores it."""
-    fake_async_github.mock_response('create_or_update_file_contents', _http_status_error(500, method='PUT'))
-
-    result = _run_final_tag(ddev)
-
-    assert result.exit_code == 1, result.output
-    agent_pr.tag.assert_not_called()
-    assert 'integrations-core/bump-7.56.0` was created on datadog-agent' in result.output
-    assert 'may not have been made' in result.output
-    assert 'commit the pin to `integrations-core/bump-7.56.0` first' in result.output
-    assert 'gh pr create --repo DataDog/datadog-agent' in result.output
-    assert 'The tag `7.56.0` was not pushed' in result.output
 
 
 def test_agent_pr_duplicate_creation_reports_existing_pr(ddev, agent_pr, fake_async_github):
