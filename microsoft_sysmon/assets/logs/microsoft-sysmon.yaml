@@ -730,12 +730,6 @@ pipeline:
         query: '@Event.System.Provider.Name:"Microsoft-Windows-Sysmon"'
       processors:
         - type: string-builder-processor
-          name: Add product name
-          enabled: true
-          template: "Windows Event Log"
-          target: ocsf.metadata.product.name
-          replaceMissing: false
-        - type: string-builder-processor
           name: Add product vendor
           enabled: true
           template: "Microsoft"
@@ -1282,21 +1276,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -1814,21 +1808,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -2219,21 +2213,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -2946,21 +2940,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -3536,21 +3530,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -3793,21 +3787,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -4210,21 +4204,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -4610,21 +4604,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
@@ -4811,21 +4805,21 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
-                  name: High
-                  id: 4
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@Event.System.Level:3 OR (-@Event.System.Level:* @level:(Warning OR warning OR WARNING))"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
+                    query: "@Event.System.Level:2 OR (-@Event.System.Level:* @level:(Error OR error OR ERROR))"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@Event.System.Level:1 OR (-@Event.System.Level:* @level:(Critical OR critical OR CRITICAL))"
+                  name: Critical
+                  id: 5
                 - filter:
                     query: "*"
                   name: Informational
