@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import time
 from unittest.mock import patch
 
@@ -13,7 +14,10 @@ from datadog_checks.slurm.constants import SACCT_PARAMS
 from .common import (
     DEFAULT_SINFO_PATH,
     SACCT_MAP,
+    SCONTROL_IDLE_STDERR,
     SCONTROL_MAP,
+    SCONTROL_MISSING_SPOOLDIR_STDERR,
+    SCONTROL_UNREADABLE_SPOOLDIR_STDERR,
     SDIAG_MAP,
     SINFO_1_F,
     SINFO_1_T,
@@ -21,6 +25,7 @@ from .common import (
     SINFO_2_T,
     SINFO_3_F,
     SINFO_3_T,
+    SINFO_CONTROLLER_DOWN_STDERR,
     SINFO_LEVEL_2_MAP,
     SINFO_MAP,
     SLURM_VERSION,
@@ -526,3 +531,66 @@ def test_sacct_running_job_skips_none_avgcpu(instance, aggregator):
     aggregator.assert_metric('slurm.sacct.slurm_job_avgcpu', count=0)
     aggregator.assert_metric('slurm.sacct.job.duration', value=12, count=1)
     aggregator.assert_metric('slurm.sacct.job.info', value=1, count=1)
+
+
+def command_records(caplog, level, command):
+    """Log records emitted at `level` that name the given slurm command."""
+    return [r for r in caplog.records if r.levelno == level and command in r.getMessage()]
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_given_idle_node_logs_debug_instead_of_error(mock_get_subprocess_output, instance, caplog):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [("", SCONTROL_IDLE_STDERR, 1)]
+
+    check.check(None)
+
+    assert not command_records(caplog, logging.ERROR, 'scontrol')
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_given_missing_spool_dir_warns_once_across_runs(mock_get_subprocess_output, instance, caplog):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [
+        ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
+        ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
+    ]
+
+    check.check(None)
+    check.check(None)
+
+    assert len(command_records(caplog, logging.WARNING, 'scontrol')) == 1
+    assert not command_records(caplog, logging.ERROR, 'scontrol')
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_given_unreadable_spool_dir_still_logs_error(mock_get_subprocess_output, instance, caplog):
+    # EACCES prints the same "no job steps" line as an idle node, so it must not be
+    # mistaken for one. The check would otherwise collect nothing and say nothing.
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [("", SCONTROL_UNREADABLE_SPOOLDIR_STDERR, 1)]
+
+    check.check(None)
+
+    assert command_records(caplog, logging.ERROR, 'scontrol')
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_sinfo_given_unreachable_controller_still_logs_error(mock_get_subprocess_output, instance, caplog):
+    # Commands with no benign-failure classifier must keep reporting every non-zero exit.
+    instance['collect_sinfo_stats'] = True
+    instance['sinfo_collection_level'] = 1
+    instance['collect_gpu_stats'] = False
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.side_effect = [
+        ("", "", 0),
+        ("", SINFO_CONTROLLER_DOWN_STDERR, 1),
+        ("", SINFO_CONTROLLER_DOWN_STDERR, 1),
+    ]
+
+    check.check(None)
+
+    assert command_records(caplog, logging.ERROR, 'sinfo')

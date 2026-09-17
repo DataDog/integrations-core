@@ -49,7 +49,6 @@ on:
   workflow_run:
     workflows:
       - 'Validate skip QA label'
-      - 'Measure Disk Usage'
     types: [completed]
 
 permissions:

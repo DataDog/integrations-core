@@ -1,1 +1,0 @@
-Collect per-database autodiscovery metrics in a single pass over the discovered databases to reduce connection pool churn.

@@ -1,26 +1,33 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the TaskRunReporter processor.
-
-Mostly ordering and idempotence — create once, edit thereafter, reject anything stale — plus what a
-failed write does, which is to keep the report and never fail the run.
-"""
+"""Report ordering, publication failures, and terminal updates."""
 
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import replace
 
 import httpx
 import pytest
 
-from ddev.cli.ci.tests import pr_comment
+from ddev.cli.ci.tests import pr_comment, task_run_reporter
 from ddev.cli.ci.tests.messages import UpdatePRComment
-from ddev.cli.ci.tests.pr_comment import CANCELLED_HEADING, CANCELLED_WITHOUT_RESULTS_NOTE, COMMENT_MARKER
+from ddev.cli.ci.tests.pr_comment import (
+    CANCELLED_NOTE,
+    CANCELLED_WITHOUT_RESULTS_NOTE,
+    COMMENT_MARKER,
+    FAILED_HEADING,
+    SHUTDOWN_HEADINGS,
+    STOPPED_NOTE,
+    STOPPED_WITHOUT_RESULTS_NOTE,
+)
 from ddev.cli.ci.tests.progress import JobAttemptProgress, JobProgress, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
+from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
@@ -34,6 +41,7 @@ from tests.cli.ci.tests.helpers import (
     uniform_progress,
 )
 from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 OWNER = "DataDog"
 REPO = "integrations-core"
@@ -57,8 +65,34 @@ def _failing_update(revision: int, *, done: bool = False) -> UpdatePRComment:
     return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=failing_progress(done=done))
 
 
-def _reporter(client: FakeAsyncGitHubClient, *, pr_number: int | None = PR_NUMBER) -> TaskRunReporter:
-    return TaskRunReporter("run-reporter", client, RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number))
+def _reporter(
+    client: FakeAsyncGitHubClient,
+    *,
+    pr_number: int | None = PR_NUMBER,
+    handler: logging.Handler | None = None,
+) -> TaskRunReporter:
+    return TaskRunReporter(
+        "run-reporter",
+        client,
+        RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number),
+        monitor=make_monitor('run-reporter', handler=handler),
+    )
+
+
+SHUTDOWN_WITHOUT_RESULTS_NOTES = {
+    ShutdownKind.CANCELLED: CANCELLED_WITHOUT_RESULTS_NOTE,
+    ShutdownKind.FAILED: STOPPED_WITHOUT_RESULTS_NOTE,
+    ShutdownKind.TIMED_OUT: STOPPED_WITHOUT_RESULTS_NOTE,
+}
+
+
+def _shutdown_request(kind: ShutdownKind) -> ShutdownRequest:
+    """A representative request for *kind*, carrying the reason a failed stop has to report."""
+    if kind is ShutdownKind.CANCELLED:
+        return ShutdownRequest.cancelled()
+    if kind is ShutdownKind.FAILED:
+        return ShutdownRequest.failed(RuntimeError("a batch response failed validation"))
+    return ShutdownRequest.timed_out(RuntimeError("the run reached its time limit"))
 
 
 def _marked_comment(comment_id: int = 77, note: str = "ours") -> IssueComment:
@@ -265,17 +299,19 @@ def test_concurrent_revisions_are_serialized():
 # ---------------------------------------------------------------------------
 
 
-def test_no_pr_number_renders_to_the_log_and_calls_no_api(caplog: pytest.LogCaptureFixture):
+def test_no_pr_number_renders_to_the_log_and_calls_no_api():
     """Master pushes, the nightly cron and merge-queue runs have no PR; the graph stays the same."""
     client = FakeAsyncGitHubClient()
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level("INFO"):
-        asyncio.run(_reporter(client, pr_number=None).process_message(_update(0, done=True)))
+    asyncio.run(_reporter(client, pr_number=None, handler=handler).process_message(_update(0, done=True)))
 
     client.assert_not_called("create_issue_comment")
     client.assert_not_called("update_issue_comment")
     client.assert_not_called("list_issue_comments")
-    assert f"Dispatcher tests complete: {TOTAL_JOBS}/{TOTAL_JOBS} jobs" in caplog.text
+    assert any(
+        f"Dispatcher tests complete: {TOTAL_JOBS}/{TOTAL_JOBS} jobs" in event['event'] for event in handler.events
+    )
 
 
 def test_a_run_without_a_pull_request_still_retains_its_report():
@@ -287,6 +323,23 @@ def test_a_run_without_a_pull_request_still_retains_its_report():
     assert not reporter.pr_comment_failed
     assert reporter.latest_body is not None
     assert jobs_reported(reporter.latest_body) == TOTAL_JOBS
+
+
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+def test_a_stopped_run_without_a_pull_request_still_retains_a_terminal_report(kind: ShutdownKind):
+    """Without a PR, the terminal report and gathered results remain available to the run summary."""
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client, pr_number=None)
+    asyncio.run(reporter.process_message(_update(1)))
+
+    asyncio.run(reporter.publish_shutdown(_shutdown_request(kind)))
+
+    client.assert_not_called("create_issue_comment")
+    client.assert_not_called("update_issue_comment")
+    client.assert_not_called("list_issue_comments")
+    assert reporter.latest_body is not None
+    assert SHUTDOWN_HEADINGS[kind] in reporter.latest_body
+    assert jobs_reported(reporter.latest_body) == 1  # the snapshot survived, only the frame is terminal
 
 
 # ---------------------------------------------------------------------------
@@ -354,7 +407,7 @@ def test_a_failed_write_keeps_the_report_rather_than_losing_it():
     assert jobs_reported(reporter.latest_body) == TOTAL_JOBS
 
 
-def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.LogCaptureFixture):
+def test_a_rejected_token_is_reported_without_failing_the_run():
     """A credentials problem is a reporting problem, and reporting never fails the run.
 
     Its own message is the fix instruction, so that is what gets logged rather than a generic failure.
@@ -366,13 +419,13 @@ def test_a_rejected_token_is_reported_without_failing_the_run(caplog: pytest.Log
         response=httpx.Response(401),
     )
     client.mock_response("create_issue_comment", error)
-    reporter = _reporter(client)
+    handler = RecordingJsonHandler()
+    reporter = _reporter(client, handler=handler)
 
-    with caplog.at_level("ERROR"):
-        asyncio.run(reporter.process_message(_update(1)))
+    asyncio.run(reporter.process_message(_update(1)))
 
     assert len(client.calls_to("create_issue_comment")) == 1
-    assert "rejected the credentials" in caplog.text
+    assert any("rejected the credentials" in event['event'] for event in handler.events)
     assert reporter.pr_comment_failed
     assert reporter.latest_body is not None
 
@@ -592,15 +645,15 @@ def test_a_rejection_shrinking_cannot_fix_is_not_answered_with_a_shorter_body(er
     assert reporter.pr_comment_failed
 
 
-def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log(caplog: pytest.LogCaptureFixture):
+def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log():
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _spam_error())
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level("ERROR"):
-        asyncio.run(_reporter(client).process_message(_update(1)))
+    asyncio.run(_reporter(client, handler=handler).process_message(_update(1)))
 
-    assert "PR comment write failed" in caplog.text
-    assert "too long" not in caplog.text
+    assert any("PR comment write failed" in event['event'] for event in handler.events)
+    assert all("too long" not in event['event'] for event in handler.events)
 
 
 # ---------------------------------------------------------------------------
@@ -715,29 +768,25 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
     assert not reporter.pr_comment_failed
 
 
-async def test_a_cancelled_run_is_reported_even_with_nothing_gathered():
-    """The comment is the only place a reader learns the run happened.
-
-    Posting nothing when a run is cancelled before any batch reports is indistinguishable from a job
-    that hung, which is the state a reader would otherwise keep waiting on.
-    """
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+async def test_a_stopped_run_is_reported_even_with_nothing_gathered(kind: ShutdownKind):
+    """An early shutdown still publishes a terminal notice."""
     client = FakeAsyncGitHubClient()
     reporter = _reporter(client)
 
-    await reporter.publish_cancelled()
+    await reporter.publish_shutdown(_shutdown_request(kind))
 
     created = client.last_call("create_issue_comment")
-    assert CANCELLED_HEADING in created.kwargs["body"]
+    assert SHUTDOWN_HEADINGS[kind] in created.kwargs["body"]
+    assert SHUTDOWN_WITHOUT_RESULTS_NOTES[kind] in created.kwargs["body"]
+    # The gathered-results note would promise a section this body does not have.
+    gathered_note = CANCELLED_NOTE if kind is ShutdownKind.CANCELLED else STOPPED_NOTE
+    assert gathered_note not in created.kwargs["body"]
 
 
-async def test_a_cancelled_report_that_never_landed_says_so_on_the_run_page():
-    """The run page is the only place left to say the pull request was not updated.
-
-    `_report_cancellation` gathers this with `return_exceptions`, so a write that raises is absorbed
-    and never reaches the caller. `RateLimitWaitAbandoned` is the one to expect, because cancelling
-    shortens the limiter's wait so a GitHub pause fails fast instead of outliving the process. With
-    the failure recorded only after the write, the summary would claim the comment was current.
-    """
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+async def test_a_shutdown_report_that_never_landed_says_so_on_the_run_page(kind: ShutdownKind):
+    """A failed terminal write remains visible to the run-summary publisher."""
     client = FakeAsyncGitHubClient()
     reporter = _reporter(client)
     await reporter.process_message(_update(1))
@@ -745,56 +794,65 @@ async def test_a_cancelled_report_that_never_landed_says_so_on_the_run_page():
         client.mock_response(method, RateLimitWaitAbandoned(2.0, 58.0))
 
     with pytest.raises(RateLimitWaitAbandoned):
-        await reporter.publish_cancelled()
+        await reporter.publish_shutdown(_shutdown_request(kind))
 
     assert reporter.pr_comment_failed
 
 
-async def test_nothing_supersedes_a_cancelled_report():
-    """A batch finishing as the run is cancelled must not put the report back to "still running".
-
-    Batches report concurrently, so a revision can be rendered after the cancellation notice went
-    out. Leaving that to call order would have the last word on the pull request claim the run is
-    still going, on a run that has already been cancelled.
-    """
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+async def test_nothing_supersedes_a_shutdown_report(kind: ShutdownKind):
+    """A later progress revision cannot overwrite a terminal report."""
     client = FakeAsyncGitHubClient()
     reporter = _reporter(client)
     await reporter.process_message(_update(1))
-    await reporter.publish_cancelled()
+    await reporter.publish_shutdown(_shutdown_request(kind))
 
     await reporter.process_message(_update(2))
 
     assert reporter.latest_body is not None
-    assert CANCELLED_HEADING in reporter.latest_body
-    assert CANCELLED_HEADING in client.last_call("update_issue_comment").kwargs["body"]
+    assert SHUTDOWN_HEADINGS[kind] in reporter.latest_body
+    assert SHUTDOWN_HEADINGS[kind] in client.last_call("update_issue_comment").kwargs["body"]
 
 
-async def test_a_cancelled_run_reports_what_it_had_gathered():
-    """A partial report is worth keeping, so cancelling renders the snapshot rather than discarding it.
-
-    The heading alone cannot tell the two cancelled bodies apart, since the no-results notice carries
-    it too. The job count is what identifies the snapshot behind a body, so that is what says the
-    partial results survived instead of being replaced by the notice.
-    """
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+async def test_a_stopped_run_reports_what_it_had_gathered(kind: ShutdownKind):
+    """Shutdown preserves gathered results instead of substituting an empty notice."""
     client = FakeAsyncGitHubClient()
     reporter = _reporter(client)
     await reporter.process_message(_update(1))
 
-    await reporter.publish_cancelled()
+    await reporter.publish_shutdown(_shutdown_request(kind))
 
     assert reporter.latest_body is not None
-    assert CANCELLED_HEADING in reporter.latest_body
+    assert SHUTDOWN_HEADINGS[kind] in reporter.latest_body
     assert jobs_reported(reporter.latest_body) == 1
-    assert CANCELLED_WITHOUT_RESULTS_NOTE not in reporter.latest_body
+    assert SHUTDOWN_WITHOUT_RESULTS_NOTES[kind] not in reporter.latest_body
+
+
+async def test_a_fatal_reason_survives_the_fallback_tiers():
+    """A failed report retains its cause through both size fallbacks before publication succeeds."""
+    client = FakeAsyncGitHubClient()
+    client.mock_response("update_issue_comment", _too_long_error(), once=True)
+    client.mock_response("update_issue_comment", _too_long_error(), once=True)
+    reporter = _reporter(client)
+    # Failures *and* an unavailable result, so the three tiers render genuinely different bodies.
+    await reporter.process_message(_tiered_update(1, done=True))
+
+    request = ShutdownRequest.failed(RuntimeError("a batch response failed validation"))
+    await reporter.publish_shutdown(request)
+
+    calls = client.calls_to("update_issue_comment")
+    assert len(calls) == 3  # refused twice, landed on the third
+    bodies = [call.kwargs["body"] for call in calls]
+    sizes = [len(body.encode("utf-8")) for body in bodies]
+    assert sizes[2] < sizes[1] < sizes[0]
+    assert all(FAILED_HEADING in body for body in bodies)
+    assert all("a batch response failed validation" in body for body in bodies)
+    assert not reporter.pr_comment_failed
 
 
 async def test_a_write_that_raises_still_leaves_the_report_behind():
-    """The report is what the run found; whether it reached GitHub is a separate fact.
-
-    `_write` only catches HTTP failures, and `RateLimitWaitAbandoned` is a `TimeoutError`, so it goes
-    straight through. The cancellation path sets a small `max_wait_seconds` to make that happen, which
-    is exactly when the run summary is the only place left to publish from.
-    """
+    """An interrupted write must retain the report and record publication failure."""
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", RateLimitWaitAbandoned(waited_seconds=0.0, remaining_seconds=61.0))
     reporter = _reporter(client)
@@ -802,8 +860,49 @@ async def test_a_write_that_raises_still_leaves_the_report_behind():
     with pytest.raises(RateLimitWaitAbandoned):
         await reporter.process_message(_update(3))
 
+    assert reporter.pr_comment_failed
     assert reporter.latest_body is not None
-    # The revision advanced with the retained body, so the earlier snapshot that follows is refused
-    # and the only write attempted is the one that failed.
+    # An older update must not replace the retained report.
     await reporter.process_message(_update(2))
     assert len(client.calls_to("create_issue_comment")) == 1
+
+
+async def test_a_shutdown_report_waiting_on_the_report_lock_expires_without_cancelling_the_writer(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A terminal lock timeout must leave the active writer and subsequent publication usable."""
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client)
+    write_started = asyncio.Event()
+    release_write = asyncio.Event()
+    create_comment = client.create_issue_comment
+
+    async def blocked_create_comment(owner: str, repo: str, pr_number: int, body: str) -> GitHubResponse[IssueComment]:
+        write_started.set()
+        await release_write.wait()
+        return await create_comment(owner, repo, pr_number, body)
+
+    monkeypatch.setattr(client, "create_issue_comment", blocked_create_comment)
+    progress_write = asyncio.create_task(reporter.process_message(_update(1)))
+    try:
+        await asyncio.wait_for(write_started.wait(), timeout=2)
+        retained = reporter.latest_body, reporter.pr_comment_failed
+
+        with monkeypatch.context() as patcher:
+            patcher.setattr(task_run_reporter, "SHUTDOWN_WRITE_TIMEOUT", 0.02)
+            # The outer deadline must fail the test if the reporter's own timeout stops working.
+            async with asyncio.timeout(2):
+                with pytest.raises(TimeoutError):
+                    await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
+
+        assert (reporter.latest_body, reporter.pr_comment_failed) == retained
+        release_write.set()
+        await asyncio.wait_for(progress_write, timeout=2)
+        assert not reporter.pr_comment_failed
+
+        await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
+        body = client.last_call("update_issue_comment").kwargs["body"]
+        assert SHUTDOWN_HEADINGS[ShutdownKind.CANCELLED] in body
+    finally:
+        release_write.set()
+        await asyncio.gather(progress_write, return_exceptions=True)

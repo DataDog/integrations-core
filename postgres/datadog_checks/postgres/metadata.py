@@ -235,10 +235,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        started = self._schema_collector.collect_schemas()
-        if not started:
-            # TODO: Emit health event for over-long collection
-            self._log.warning("Previous schema collection still in progress, skipping this collection")
+        self._last_schemas_query_time = time.time()
+        self._schema_collector.collect_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):

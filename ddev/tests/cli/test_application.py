@@ -3,12 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import logging
+
 import click
 import httpx
 import pytest
 
 from ddev.cli import ddev as ddev_command
-from ddev.cli.application import Application, DdevGroup
+from ddev.cli.application import Application, AppLoggingHandler, DdevGroup
+from ddev.config.constants import VerbosityLevels
 from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property
 from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.runner import CliRunner
@@ -264,3 +267,28 @@ def test_github_authentication_error_uses_registered_cli_handler(ddev: CliRunner
     assert 'GitHub denied the requested operation (HTTP 403)' in result.output
     assert 'ddev config set github.token' in result.output
     assert 'Traceback' not in result.output
+
+
+@pytest.mark.parametrize(
+    ('verbosity', 'expected'),
+    [
+        (VerbosityLevels.ERROR - 1, []),
+        (VerbosityLevels.ERROR, ['error event']),
+        (VerbosityLevels.WARNING, ['warning event', 'error event']),
+        (VerbosityLevels.INFO, ['info event', 'warning event', 'error event']),
+        (VerbosityLevels.DEBUG, ['DEBUG: debug event', 'info event', 'warning event', 'error event']),
+    ],
+    ids=['silent', 'error', 'warning', 'info', 'debug'],
+)
+def test_app_logging_handler_uses_application_verbosity_and_formatting(
+    verbosity: int, expected: list[str], capsys: pytest.CaptureFixture[str]
+):
+    app = Application(lambda code: None, verbosity, False, False)
+    logger = logging.Logger('test-app', level=logging.DEBUG)
+    logger.addHandler(AppLoggingHandler(app))
+    for level in ('debug', 'info', 'warning', 'error'):
+        getattr(logger, level)('%s event', level)
+
+    captured = capsys.readouterr()
+    assert captured.err.splitlines() == expected
+    assert captured.out == ''

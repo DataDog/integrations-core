@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import logging
+from functools import partial
 
 import pytest
 
@@ -11,12 +11,17 @@ from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.units import (
     TargetDefinition,
     TestUnit,
-    expand_test_units,
     normalize_job_name,
     resolve_platforms,
 )
+from ddev.cli.ci.tests.batching.units import (
+    expand_test_units as _expand_test_units,
+)
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import env
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
+
+expand_test_units = partial(_expand_test_units, monitor=make_monitor('planner'))
 
 
 @pytest.mark.parametrize(
@@ -26,7 +31,7 @@ from tests.cli.ci.tests.helpers import env
         pytest.param('My Integration', 'My Integration', id="allowed-unchanged"),
     ],
 )
-def test_normalize_job_name(raw, expected):
+def test_normalize_job_name(raw: str, expected: str):
     assert normalize_job_name(raw) == expected
 
 
@@ -43,12 +48,12 @@ def test_normalize_job_name(raw, expected):
         pytest.param([], ["AIX"], [PlatformName.LINUX], id="only-untestable-os-defaults-linux"),
     ],
 )
-def test_resolve_platforms(platform_override, supported_os, expected):
+def test_resolve_platforms(platform_override: list[str], supported_os: list[str], expected: list[PlatformName]):
     assert resolve_platforms(platform_override, supported_os, target="postgres") == expected
 
 
 @pytest.mark.parametrize("value", ["solaris", "Windows Server"])
-def test_resolve_platforms_rejects_an_unknown_platform_in_the_override(value):
+def test_resolve_platforms_rejects_an_unknown_platform_in_the_override(value: list[str]):
     with pytest.raises(PlanningError, match="Unsupported platform for `postgres`"):
         resolve_platforms([value], [], target="postgres")
 
@@ -103,18 +108,19 @@ def test_expand_rejects_a_target_with_no_environments():
         expand_test_units([TargetDefinition("postgres")])
 
 
-def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers(caplog):
+def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers():
     target = TargetDefinition(
         "sqlserver",
         platforms=(PlatformName.LINUX, PlatformName.WINDOWS),
         environments=(env("py3.13-linux", platform=PlatformName.LINUX),),
     )
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
-        units = expand_test_units([target])
+    units = expand_test_units([target], monitor=make_monitor('planner', handler=handler))
 
     assert [unit.platform for unit in units] == [PlatformName.LINUX]
-    assert "sqlserver runs on windows but no environment tests it" in caplog.text
+    [event] = handler.events
+    assert event['event'] == "sqlserver runs on windows but no environment tests it"
 
 
 def test_expand_environment_named_after_its_target_does_not_repeat_in_the_name():
@@ -127,6 +133,25 @@ def test_expand_carries_the_environment_python_version():
     targets = [TargetDefinition("postgres", environments=(env("py3.11", python_version="3.11"),))]
 
     assert expand_test_units(targets)[0].environment.python_version == "3.11"
+
+
+def test_expand_carries_minimum_base_package_support_to_every_unit():
+    targets = [
+        TargetDefinition(
+            "postgres",
+            environments=(env("py3.11"), env("py3.12")),
+            supports_minimum_base_package=True,
+        ),
+        TargetDefinition("ddev", environments=(env("py3.11"),)),
+    ]
+
+    units = expand_test_units(targets)
+
+    assert [(unit.target, unit.supports_minimum_base_package) for unit in units] == [
+        ("ddev", False),
+        ("postgres", True),
+        ("postgres", True),
+    ]
 
 
 def test_expand_multi_label_runner_is_a_single_selection():

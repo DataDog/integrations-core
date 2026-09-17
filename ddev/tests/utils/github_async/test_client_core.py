@@ -7,11 +7,13 @@ from typing import Any
 
 import httpx
 import pytest
+from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
-from ddev.utils.github_async.client import QUERY_MASK, failure_reason, with_query_masked
-from ddev.utils.github_async.retry import NO_RETRY
-from tests.utils.github_async.helpers import TOKEN, json_response, make_client
+from ddev.utils.github_async.client import QUERY_MASK, SHUTDOWN_REQUEST_TIMEOUT, failure_reason, with_query_masked
+from ddev.utils.github_async.retry import NO_RETRY, RetryPolicies
+from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
+from tests.utils.github_async.helpers import TOKEN, json_response, make_client, recording_transport
 from tests.utils.github_async.payloads import artifact, workflow_run_payload
 
 BASE = "https://api.github.com"
@@ -80,14 +82,68 @@ async def test_context_manager_closes_on_exit() -> None:
     assert inner.is_closed
 
 
+async def test_client_view_uses_its_limiter_and_preserves_request_configuration():
+    events: list[RateLimitEvent] = []
+    polling = InstrumentedAsyncLimiter(AsyncLimiter(10), on_event=events.append, name="polling")
+    artifacts = InstrumentedAsyncLimiter(AsyncLimiter(10), on_event=events.append, name="artifacts")
+    transport, calls = recording_transport(
+        [json_response(workflow_run_payload()), httpx.Response(503), json_response(workflow_run_payload())]
+    )
+    async with async_github_client(
+        token=TOKEN,
+        rate_limiter=polling,
+        default_timeout=7,
+        retry_policies=RetryPolicies(safe=NO_RETRY, mutating=NO_RETRY),
+        transport=transport,
+    ) as client:
+        view = client.with_rate_limit(artifacts)
+        await client.get_workflow_run("o", "r", 42)
+        with pytest.raises(httpx.HTTPStatusError):
+            await view.get_workflow_run("o", "r", 42)
+        assert len(calls) == 2
+        result = await view.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+    assert [event.name for event in events if isinstance(event, BucketEvent)] == ["polling", "artifacts", "artifacts"]
+    for request in calls:
+        assert request.headers["authorization"] == f"Bearer {TOKEN}"
+        assert request.headers["x-github-api-version"] == GITHUB_API_VERSION
+        assert request.extensions["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), 7)
+
+
+async def test_client_view_borrows_the_owners_connection_lifetime():
+    async with async_github_client(
+        token=TOKEN, transport=httpx.MockTransport(lambda _: json_response(workflow_run_payload()))
+    ) as client:
+        view = client.with_rate_limit(InstrumentedAsyncLimiter(AsyncLimiter(10)))
+        await view.aclose()
+        assert (await client.get_workflow_run("o", "r", 42)).data.id == 42
+        assert (await view.get_workflow_run("o", "r", 42)).data.id == 42
+
+    with pytest.raises(RuntimeError, match="client has been closed"):
+        await view.get_workflow_run("o", "r", 42)
+
+
 @pytest.mark.parametrize(
-    ("call_kwargs", "expected"),
+    ("call_kwargs", "shutting_down", "expected"),
     [
-        pytest.param({"timeout": 2.0}, 2.0, id="per-request-override"),
-        pytest.param({}, 5.0, id="constructor-default"),
+        pytest.param({"timeout": 2.0}, False, 2.0, id="per-request-override"),
+        pytest.param({}, False, 5.0, id="constructor-default"),
+        # Shutting down caps whatever the caller asked for, so a stalled cleanup call fails in time
+        # for the next one to be tried at all.
+        pytest.param({}, True, SHUTDOWN_REQUEST_TIMEOUT, id="shutdown-caps-the-default"),
+        pytest.param({"timeout": 60.0}, True, SHUTDOWN_REQUEST_TIMEOUT, id="shutdown-caps-a-longer-timeout"),
+        pytest.param(
+            {"timeout": SHUTDOWN_REQUEST_TIMEOUT / 2},
+            True,
+            SHUTDOWN_REQUEST_TIMEOUT / 2,
+            id="shutdown-keeps-a-shorter-timeout",
+        ),
     ],
 )
-async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, float], expected: float) -> None:
+async def test_request_timeout_forwarded_to_transport(
+    call_kwargs: dict[str, float], shutting_down: bool, expected: float
+) -> None:
     captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -95,6 +151,8 @@ async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, flo
         return json_response(workflow_run_payload())
 
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
+    if shutting_down:
+        client.enter_shutdown_mode()
     await client.get_workflow_run("o", "r", 42, **call_kwargs)
 
     assert captured["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), expected)

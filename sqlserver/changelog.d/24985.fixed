@@ -1,1 +1,0 @@
-Move the check onto the shared ``DatabaseCheck`` async job registry and cancellation lifecycle so async jobs stop and release their resources when the Agent unschedules the check.

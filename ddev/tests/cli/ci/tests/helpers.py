@@ -9,6 +9,8 @@ import asyncio
 import re
 from collections.abc import Iterable, Sequence
 
+from pydantic import ValidationError
+
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import (
@@ -56,6 +58,7 @@ def make_unit(
     platform: PlatformName = PlatformName.LINUX,
     runner_labels: tuple[str, ...] = DEFAULT_RUNNER_LABELS,
     environment: ResolvedEnvironment | None = None,
+    supports_minimum_base_package: bool = True,
 ) -> TestUnit:
     return TestUnit(
         target=target,
@@ -63,6 +66,7 @@ def make_unit(
         platform=platform,
         runner_labels=runner_labels,
         environment=environment if environment is not None else env(target, platform),
+        supports_minimum_base_package=supports_minimum_base_package,
     )
 
 
@@ -77,6 +81,8 @@ def make_job(
     unit_tests: bool = True,
     e2e_tests: bool = False,
     agent_image: str | None = None,
+    minimum_base_package: bool = False,
+    coverage: bool = True,
 ) -> BatchJob:
     return BatchJob(
         name=name,
@@ -88,6 +94,8 @@ def make_job(
         unit_tests=unit_tests,
         e2e_tests=e2e_tests,
         agent_image=agent_image,
+        minimum_base_package=minimum_base_package,
+        coverage=coverage,
     )
 
 
@@ -102,6 +110,21 @@ def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
     )
 
 
+def invalid_response_error() -> ValidationError:
+    """A jobs-response validation error for an unsupported step status."""
+    return ValidationError.from_exception_data(
+        title="WorkflowJobsList",
+        line_errors=[
+            {
+                "type": "enum",
+                "loc": ("jobs", 0, "steps", 1, "status"),
+                "input": "paused",
+                "ctx": {"expected": "'queued', 'in_progress', 'completed' or 'pending'"},
+            }
+        ],
+    )
+
+
 def jobs(target: str, count: int) -> list[BatchJob]:
     # Each job carries a distinct environment, as production jobs within an integration do, so
     # names and artifact identities are unique within the target.
@@ -112,7 +135,7 @@ class FakeManifest:
     def __init__(self, classifier_tags: Sequence[str] = ()):
         self._classifier_tags = list(classifier_tags)
 
-    def get(self, pointer, default=None):
+    def get(self, pointer: str, default: object = None) -> object:
         if pointer == "/tile/classifier_tags":
             return list(self._classifier_tags)
         return default
@@ -126,11 +149,17 @@ class FakeIntegration:
         is_testable: bool = True,
         display_name: str | None = None,
         classifier_tags: Sequence[str] = (),
+        is_package: bool = True,
+        is_integration: bool = True,
+        minimum_base_package_version: str | None = "37.0.0",
     ):
         self.name = name
         self.is_testable = is_testable
         self.display_name = display_name or name
         self.manifest = FakeManifest(classifier_tags)
+        self.is_package = is_package
+        self.is_integration = is_integration
+        self.minimum_base_package_version = minimum_base_package_version
 
 
 class FakeRegistry:
@@ -196,10 +225,20 @@ TOTAL_JOBS = 10
 
 
 def batch_job(
-    target: str = "redis", environment: str = "py3.12", platform: PlatformName = PlatformName.LINUX
+    target: str = "redis",
+    environment: str = "py3.12",
+    platform: PlatformName = PlatformName.LINUX,
+    *,
+    minimum_base_package: bool = False,
 ) -> BatchJob:
-    """A job as the renderer sees it. Only target, environment and platform reach the output."""
-    return make_job(f"{target}-{environment}-{platform}", target=target, environment=environment, platform=platform)
+    """A job as the renderer sees it: only its identity fields reach the output."""
+    return make_job(
+        f"{target}-{environment}-{platform}",
+        target=target,
+        environment=environment,
+        platform=platform,
+        minimum_base_package=minimum_base_package,
+    )
 
 
 def failing_report(*test_names: str) -> JUnitReport:
@@ -244,8 +283,16 @@ def attempt(
     )
 
 
-def job_progress(*attempts: JobAttemptProgress, target: str = "redis", environment: str = "py3.12") -> JobProgress:
-    return JobProgress(job=batch_job(target=target, environment=environment), attempts=attempts)
+def job_progress(
+    *attempts: JobAttemptProgress,
+    target: str = "redis",
+    environment: str = "py3.12",
+    minimum_base_package: bool = False,
+) -> JobProgress:
+    return JobProgress(
+        job=batch_job(target=target, environment=environment, minimum_base_package=minimum_base_package),
+        attempts=attempts,
+    )
 
 
 def batch_progress(

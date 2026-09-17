@@ -11,7 +11,7 @@ clickhouse-connect==1.6.0
 cm-client==45.0.4
 confluent-kafka==2.13.2
 cryptography==50.0.0
-ddtrace==4.12.2
+ddtrace==4.13.2
 dnspython==2.8.0
 fastavro==1.12.2
 foundationdb==6.3.25
@@ -44,7 +44,7 @@ pyopenssl==26.4.0
 pysnmp-mibs==0.1.6
 pysnmp==7.1.22
 pysocks==1.7.1
-python-binary-memcached==0.32.0; sys_platform != 'win32'
+python-binary-memcached==0.32.0
 python-dateutil==2.9.0.post0
 python3-gearman==0.1.0; sys_platform != 'win32'
 pyvmomi==8.0.3.0.1

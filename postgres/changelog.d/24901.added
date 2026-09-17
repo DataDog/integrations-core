@@ -1,1 +1,0 @@
-Add an `aurora_role` tag with writer and reader values to PostgreSQL metrics emitted from Aurora instances.
