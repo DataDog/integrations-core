@@ -9,15 +9,18 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.vllm import check as vllm_check
 from datadog_checks.vllm import vLLMCheck
+from datadog_checks.vllm.metrics import GPU_METRIC_MAP
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
 @pytest.fixture(autouse=True)
-def enable_gpu_monitoring():
-    with mock.patch.object(vllm_check, 'is_gpu_monitoring_enabled', return_value=True):
+def enable_gpu_monitoring(datadog_agent):
+    # Patching the one key on the stub's config dict keeps the real
+    # is_affirmative(get_config('gpu.enabled')) lookup in the path. Depends on the
+    # datadog_agent fixture because its reset() rebinds _config.
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
         yield
 
 
@@ -69,11 +72,13 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
     datadog_agent.assert_metadata("test:123", version_metadata)
 
 
-def test_check_succeeds_without_version_endpoint(dd_run_check, aggregator, instance):
+@pytest.mark.parametrize('version_response', [{'status_code': 404}, {'content': 'not json'}], ids=['404', 'bad_body'])
+def test_check_succeeds_without_version_endpoint(dd_run_check, aggregator, datadog_agent, instance, version_response):
     check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
     mock_responses = [
         MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
-        MockResponse(status_code=404),
+        MockResponse(**version_response),
     ]
 
     with mock.patch('requests.Session.get', side_effect=mock_responses):
@@ -81,23 +86,25 @@ def test_check_succeeds_without_version_endpoint(dd_run_check, aggregator, insta
 
     aggregator.assert_metric('vllm.num_requests.running')
     aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.OK)
+    datadog_agent.assert_metadata_count(0)
 
 
-def test_new_metrics_are_not_collected_without_gpu_monitoring(dd_run_check, aggregator, instance):
+def test_new_metrics_are_not_collected_without_gpu_monitoring(dd_run_check, aggregator, datadog_agent, instance):
     mock_responses = [
         MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
     with (
-        mock.patch.object(vllm_check, 'is_gpu_monitoring_enabled', return_value=False),
+        mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}),
         mock.patch('requests.Session.get', side_effect=mock_responses),
     ):
         check = vLLMCheck("vLLM", {}, [instance])
         dd_run_check(check)
 
     aggregator.assert_metric('vllm.num_requests.running')
-    aggregator.assert_metric('vllm.request.queue_time.seconds.count', count=0)
+    for suffix in GPU_METRIC_MAP.values():
+        aggregator.assert_metric(f'vllm.{suffix}', count=0)
 
 
 def _get_version_metadata(raw_version):

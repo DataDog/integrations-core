@@ -1,19 +1,19 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from requests import RequestException
+from requests import HTTPError, RequestException
 
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative  # noqa: F401
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative
 
 from .metrics import GPU_METRIC_MAP, METRIC_MAP, RAY_GPU_METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
-def is_gpu_monitoring_enabled():
+def is_gpu_monitoring_enabled() -> bool:
     return is_affirmative(datadog_agent.get_config('gpu.enabled'))
 
 
@@ -38,14 +38,17 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
         try:
             response = self.http.get(endpoint)
             response.raise_for_status()
-            data = response.json()
-        except (RequestException, ValueError) as e:
+            version = response.json().get("version", "")
+        except HTTPError as e:
             # Some vLLM-compatible metric endpoints, including Dynamo's system status server,
             # expose /metrics without exposing vLLM's optional /version route.
-            self.log.debug("Unable to collect vLLM version metadata from %s: %s", endpoint, e)
+            self.log.debug("No vLLM version endpoint at %s: %s", endpoint, e)
+            return
+        except (RequestException, ValueError, AttributeError) as e:
+            # AttributeError covers a body that parses but is not a JSON object.
+            self.log.warning("Unable to collect vLLM version metadata from %s: %s", endpoint, e)
             return
 
-        version = data.get("version", "")
         version_split = version.split(".")
         if len(version_split) >= 3:
             major = version_split[0]

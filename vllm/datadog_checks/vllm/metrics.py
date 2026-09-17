@@ -71,19 +71,8 @@ RAY_METRIC_MAP = {
     'ray_vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
 }
 
-RAY_GPU_METRIC_MAP = {
-    'ray_vllm:estimated_flops_per_gpu': 'estimated_flops_per_gpu',
-    'ray_vllm:external_prefix_cache_hits': 'external_prefix_cache.hits',
-    'ray_vllm:external_prefix_cache_queries': 'external_prefix_cache.queries',
-    'ray_vllm:prompt_tokens_cached': 'prompt_tokens.cached',
-    'ray_vllm:request_decode_time_seconds': 'request.decode_time.seconds',
-    'ray_vllm:request_prefill_kv_computed_tokens': 'request.prefill_kv_computed_tokens',
-    'ray_vllm:request_prefill_time_seconds': 'request.prefill_time.seconds',
-    'ray_vllm:request_queue_time_seconds': 'request.queue_time.seconds',
-    'ray_vllm:spec_decode_num_accepted_tokens': 'spec_decode.num_accepted_tokens',
-    'ray_vllm:spec_decode_num_accepted_tokens_per_pos': 'spec_decode.num_accepted_tokens_per_pos',
-    'ray_vllm:spec_decode_num_draft_tokens': 'spec_decode.num_draft_tokens',
-}
+# Same families as GPU_METRIC_MAP, exposed with the ray_vllm: prefix when vLLM runs as a library.
+RAY_GPU_METRIC_MAP = {name.replace('vllm:', 'ray_vllm:', 1): metric for name, metric in GPU_METRIC_MAP.items()}
 
 RENAME_LABELS_MAP = {
     'version': 'python_version',
