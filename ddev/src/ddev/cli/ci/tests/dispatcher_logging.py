@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
+from datetime import datetime, timedelta, timezone
 from typing import Any
+from urllib.parse import quote, urlencode
 
 import structlog
 from structlog.typing import EventDict
@@ -18,6 +20,12 @@ from ddev.monitoring.logger import REDACTED, is_secret_field, redact_value
 SERVICE = 'ddev'
 SOURCE = 'dispatcher'
 TAGS = 'team:agent-integrations'
+
+LOGS_URL = 'https://app.datadoghq.com/logs'
+# Absolute window around render time, so the link stays useful after the reader's default Log Explorer
+# view has moved on: 4 h covers the 185-minute workflow timeout, 5 min allows late logs to land.
+LOGS_LOOKBACK = timedelta(hours=4)
+LOGS_LEAD = timedelta(minutes=5)
 
 RESERVED_EVENT_FIELDS = frozenset(
     {
@@ -62,6 +70,24 @@ def ci_attributes() -> dict[str, str]:
     if (job_id := os.getenv('GITHUB_JOB_ID')) and repository:
         attributes['ci.job.url'] = f'{server}/{repository}/actions/job/{job_id}'
     return {key: value for key, value in attributes.items() if value}
+
+
+def get_dispatcher_logs_url(*, now: datetime | None = None) -> str | None:
+    """Link to the Datadog logs of the current Dispatcher run, or None without `GITHUB_RUN_ID`.
+
+    Scoped to the run's `ci.pipeline.id`, `service` and `source`, so it cannot pull in unrelated logs.
+    """
+    run_id = os.getenv('GITHUB_RUN_ID')
+    if not run_id:
+        return None
+    current = datetime.now(timezone.utc) if now is None else now
+    params = {
+        'query': f'service:{SERVICE} source:{SOURCE} @ci.pipeline.id:{run_id}',
+        'from_ts': round((current - LOGS_LOOKBACK).timestamp() * 1000),
+        'to_ts': round((current + LOGS_LEAD).timestamp() * 1000),
+        'live': 'false',
+    }
+    return f'{LOGS_URL}?{urlencode(params, quote_via=quote)}'
 
 
 def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None) -> dict[str, str]:

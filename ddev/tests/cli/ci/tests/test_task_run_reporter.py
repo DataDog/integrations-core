@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import replace
+from datetime import datetime, timezone
 
 import httpx
 import pytest
@@ -70,12 +72,14 @@ def _reporter(
     *,
     pr_number: int | None = PR_NUMBER,
     handler: logging.Handler | None = None,
+    clock: Callable[[], datetime] | None = None,
 ) -> TaskRunReporter:
     return TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number),
         monitor=make_monitor('run-reporter', handler=handler),
+        clock=clock,
     )
 
 
@@ -736,10 +740,12 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
     disagreeing with ours. Simulated by a server that accepts only the smallest tier.
     """
     message = _tiered_update(1, done=True)
+    # One render instant shared with the reporter, so the bodies below and the ones it sends match.
+    now = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
     tiers = [
-        pr_comment.render_comment(message.progress),
-        pr_comment.render_compact_comment(message.progress),
-        pr_comment.render_minimal_comment(message.progress),
+        pr_comment.render_comment(message.progress, now=now),
+        pr_comment.render_compact_comment(message.progress, now=now),
+        pr_comment.render_minimal_comment(message.progress, now=now),
     ]
     # Every tier is within our own limit, so nothing here is caught before it is sent.
     assert all(len(tier.encode("utf-8")) <= pr_comment.COMMENT_BODY_LIMIT for tier in tiers)
@@ -759,7 +765,7 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
         return await original(owner, repo, issue_number, body, timeout)
 
     monkeypatch.setattr(client, "create_issue_comment", stricter_github)
-    reporter = _reporter(client)
+    reporter = _reporter(client, clock=lambda: now)
 
     asyncio.run(reporter.process_message(message))
 

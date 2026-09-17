@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Render progress and optional shutdown context as the shared Dispatcher PR report.
 
-The footer adds the commit and workflow URL from the environment.
+The footer adds the commit, workflow URL, and run logs link from the environment.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ import re
 from functools import partial
 from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.dispatcher_logging import get_dispatcher_logs_url
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
@@ -21,6 +22,7 @@ from ddev.utils.github_async import COMMENT_BODY_LIMIT
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from datetime import datetime
 
     from ddev.cli.ci.tests.progress import (
         BatchProgress,
@@ -116,33 +118,44 @@ def _size(text: str) -> int:
     return len(text.encode("utf-8"))
 
 
-def render_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def render_comment(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+) -> str:
     """First of three tiers, budgeted in bytes against the client's own limit so the two cannot drift.
 
     The message's ``revision`` is deliberately not rendered: internal ordering metadata, already logged.
+    `now` fixes the footer's log-link window, so tiers from one snapshot render identically.
     """
     return _render(
-        progress, (partial(_failures, detail=True), _unavailable, _retried), shows_unavailable=True, shutdown=shutdown
+        progress,
+        (partial(_failures, detail=True), _unavailable, _retried),
+        shows_unavailable=True,
+        shutdown=shutdown,
+        now=now,
     )
 
 
-def render_compact_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def render_compact_comment(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+) -> str:
     """Second tier: the failures keep their detail, the secondary sections go.
 
     Which tests failed is why anyone opens the comment; a retried-job list is one line per retry and can
     be the largest section in a flaky run.
     """
-    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False, shutdown=shutdown)
+    return _render(progress, (partial(_failures, detail=True),), shows_unavailable=False, shutdown=shutdown, now=now)
 
 
-def render_minimal_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def render_minimal_comment(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+) -> str:
     """Last tier: batches, totals and a line per failed job, without naming the failed tests.
 
     The per-test lists are the dominant cost — 2.1 kB for a job with 40 failures against ~150 bytes for
     its summary line — so dropping them is what makes this fit. Only the batch table is unbudgeted, and
     it would need ~464 batches to exhaust the limit on its own.
     """
-    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False, shutdown=shutdown)
+    return _render(progress, (partial(_failures, detail=False),), shows_unavailable=False, shutdown=shutdown, now=now)
 
 
 def _render(
@@ -151,6 +164,7 @@ def _render(
     *,
     shows_unavailable: bool,
     shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
 ) -> str:
     """Assemble a body from the header, whichever *sections* this tier keeps, and the footer.
 
@@ -158,7 +172,7 @@ def _render(
     neither point at a section that is not here nor stay silent about results it dropped.
     """
     header = _header(progress, shows_unavailable=shows_unavailable, shutdown=shutdown)
-    footer = _footer(progress, shutdown=shutdown)
+    footer = _footer(progress, shutdown=shutdown, now=now)
 
     # The header and footer always survive; the detail sections compete for what is left. Two
     # newlines join every block, so each section costs its own length plus that separator.
@@ -174,11 +188,11 @@ def _render(
     return "\n\n".join([header, *built, footer])
 
 
-def render_shutdown_notice(request: ShutdownRequest) -> str:
+def render_shutdown_notice(request: ShutdownRequest, *, now: datetime | None = None) -> str:
     """Render a terminal notice when no progress snapshot exists."""
     blocks = [COMMENT_MARKER, SHUTDOWN_HEADINGS[request.kind], SHADOW_NOTICE]
     blocks.append(_shutdown_alert(request, without_results=True))
-    blocks.append(_footer(None, shutdown=request))
+    blocks.append(_footer(None, shutdown=request, now=now))
     return "\n\n".join(blocks)
 
 
@@ -550,25 +564,38 @@ def _shutdown_reason(request: ShutdownRequest) -> str:
     return f"{delimiter} {reason} {delimiter}"
 
 
-def _footer(progress: DispatcherProgress | None, *, shutdown: ShutdownRequest | None = None) -> str:
+def _footer(
+    progress: DispatcherProgress | None,
+    *,
+    shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
+) -> str:
     """Whether this is the last word, and where the run that produced it lives.
 
     No status emoji on a finished run: the outcome is the heading's job, and a ✅ here read as "all
     good" on a run that had failed. What a reader cannot get anywhere else in the comment is which
     commit was tested and where Dispatcher itself ran, so that is what this says.
     """
+    links = _footer_links(now=now)
     if shutdown is None and (progress is None or not progress.done):
-        note = "⏳ Dispatcher running"
-        if run_url := get_workflow_run_url():
-            note += f' — <a href="{html.escape(run_url, quote=True)}">GitHub Run</a>'
-        return f"<sub>\n{note}.\n</sub>"
+        parts = ["⏳ Dispatcher running", *links]
+        return f"<sub>\n{' · '.join(parts)}.\n</sub>"
 
     note = "Dispatcher finished" if shutdown is None else f"Dispatcher {shutdown.kind.value}"
     if sha := get_commit_sha():
         note += f" on <code>{html.escape(sha)}</code>"
+    parts = [note, *links]
+    return f"<sub>\n{' · '.join(parts)}.\n</sub>"
+
+
+def _footer_links(now: datetime | None = None) -> list[str]:
+    """Links to the run's GitHub page and Datadog logs, omitted when the environment cannot identify them."""
+    links = []
     if run_url := get_workflow_run_url():
-        note += f" — <a href=\"{html.escape(run_url, quote=True)}\">GitHub Run</a>"
-    return f"<sub>\n{note}.\n</sub>"
+        links.append(f'<a href="{html.escape(run_url, quote=True)}">GitHub Run</a>')
+    if logs_url := get_dispatcher_logs_url(now=now):
+        links.append(f'<a href="{html.escape(logs_url, quote=True)}">Dispatcher Logs</a>')
+    return links
 
 
 def _jobs(progress: DispatcherProgress) -> Iterator[JobProgress]:
