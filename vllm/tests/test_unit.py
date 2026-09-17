@@ -13,6 +13,12 @@ from datadog_checks.vllm import vLLMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    assert vLLMCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
     check = vLLMCheck("vLLM", {}, [instance])
@@ -23,7 +29,7 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
+    with mock.patch("requests.Session.get", side_effect=mock_responses):
         dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -47,7 +53,7 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
         MockResponse(file_path=get_fixture_path("vllm_version.json")),
     ]
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
+    with mock.patch("requests.Session.get", side_effect=mock_responses):
         dd_run_check(check)
 
     for metric in METRICS_MOCK:
@@ -73,6 +79,46 @@ def _get_version_metadata(raw_version):
     }
 
 
+def test_submit_version_metadata_skipped_when_metadata_collection_disabled(datadog_agent, mock_http_response, instance):
+    datadog_agent._config["enable_metadata_collection"] = False
+    mock_http_response(json_data={"version": "1.2.3"})
+    check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
+
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_submit_version_metadata_with_too_few_parts_is_ignored(datadog_agent, mock_http_response, instance):
+    mock_http_response(json_data={"version": "1.2"})
+    check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
+
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_submit_version_metadata_with_extra_parts_uses_first_three(datadog_agent, mock_http_response, instance):
+    mock_http_response(json_data={"version": "1.2.3.4"})
+    check = vLLMCheck("vLLM", {}, [instance])
+    check.check_id = "test:123"
+
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata(
+        "test:123",
+        {
+            "version.scheme": "semver",
+            "version.major": "1",
+            "version.minor": "2",
+            "version.patch": "3",
+            "version.raw": "1.2.3",
+        },
+    )
+
+
 def test_emits_critical_openemtrics_service_check_when_service_is_down(
     dd_run_check, aggregator, instance, mock_http_response
 ):
@@ -81,7 +127,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     """
     mock_http_response(status_code=404)
     check = vLLMCheck("vllm", {}, [instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
