@@ -11,7 +11,7 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.dev import EnvVars, TempDir, docker_run
+from datadog_checks.dev import EnvVars, TempDir, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.gitlab import GitlabCheck
@@ -87,18 +87,21 @@ def dd_environment():
             requests.get(GITLAB_URL)
         sleep(2)
 
-        yield {
-            'init_config': {},
-            'instances': [
-                {
-                    'openmetrics_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
-                    'gitaly_server_endpoint': GITLAB_GITALY_PROMETHEUS_ENDPOINT,
-                    'gitlab_url': GITLAB_URL,
-                    'disable_ssl_validation': True,
-                    'tags': CUSTOM_TAGS,
-                }
-            ],
-        }
+        yield (
+            {
+                'init_config': {},
+                'instances': [
+                    {
+                        'openmetrics_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+                        'gitaly_server_endpoint': GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+                        'gitlab_url': GITLAB_URL,
+                        'disable_ssl_validation': True,
+                        'tags': CUSTOM_TAGS,
+                    }
+                ],
+            },
+            get_e2e_discovery_metadata(),
+        )
 
 
 @pytest.fixture()
