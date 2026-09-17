@@ -215,7 +215,7 @@ def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
                     'order': 5,
                     'text': (
                         'The issue resolves automatically after the endpoint becomes reachable. To verify from the '
-                        'same reporting Agent or Cluster Check Runner, run: agent check -- openmetrics_test'
+                        'same reporting Agent or Cluster Check Runner, run: agent check openmetrics_test'
                     ),
                 },
             ],
@@ -316,14 +316,14 @@ def test_remediation_does_not_treat_a_scoped_ipv6_host_as_a_pod_ip(endpoint: str
 
 
 @pytest.mark.parametrize('check_name', ['openmetrics; echo PWNED', '--help'])
-def test_remediation_shell_quotes_the_check_name(check_name: str):
+def test_remediation_does_not_interpolate_an_unsafe_check_name(check_name: str):
     check = create_check(name=check_name)
 
     EndpointUnreachableIssueReporter.report(check, SANITIZED_ENDPOINT, unreachable_connection_error())
 
     step = check.report_issue.call_args.kwargs['remediation']['steps'][4]['text']
-    command = step.split('run: ', 1)[1]
-    assert shlex.split(command) == ['agent', 'check', '--', check.name]
+    assert check_name not in step
+    assert 'agent check' not in step
 
 
 def test_report_uses_flattened_errno_text_as_narrow_fallback():

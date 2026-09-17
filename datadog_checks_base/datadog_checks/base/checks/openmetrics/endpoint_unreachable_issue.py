@@ -9,6 +9,7 @@ import json
 from collections import deque
 from dataclasses import dataclass
 from ipaddress import ip_address
+from re import compile
 from shlex import quote
 from typing import TYPE_CHECKING
 from urllib.parse import urlsplit, urlunsplit
@@ -20,6 +21,7 @@ ISSUE_NAME = 'OpenMetrics Endpoint Unreachable'
 ISSUE_TYPE = 'openmetrics_endpoint_unreachable'
 ISSUE_ID_PREFIX = 'openmetrics-endpoint-unreachable'
 ERROR_MESSAGE = f'[Errno {errno.EHOSTUNREACH}] No route to host'
+SAFE_CHECK_NAME = compile(r'[A-Za-z0-9][A-Za-z0-9_.-]*\Z')
 
 REMEDIATION_SUMMARY = (
     'Restore network reachability from the reporting Agent or Cluster Check Runner to this OpenMetrics endpoint, '
@@ -185,6 +187,17 @@ def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | l
             f'kubectl get pods -A -o wide --field-selector=status.podIP={quote(target_ip)}'
         )
 
+    if SAFE_CHECK_NAME.fullmatch(check_name):
+        verification_step = (
+            'The issue resolves automatically after the endpoint becomes reachable. To verify from the same reporting '
+            f'Agent or Cluster Check Runner, run: agent check {check_name}'
+        )
+    else:
+        verification_step = (
+            'The issue resolves automatically after the endpoint becomes reachable. Re-run this integration check '
+            'from the same reporting Agent or Cluster Check Runner.'
+        )
+
     return {
         'summary': REMEDIATION_SUMMARY,
         'steps': [
@@ -215,10 +228,7 @@ def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | l
             },
             {
                 'order': 5,
-                'text': (
-                    'The issue resolves automatically after the endpoint becomes reachable. To verify from the same '
-                    f'reporting Agent or Cluster Check Runner, run: agent check -- {quote(check_name)}'
-                ),
+                'text': verification_step,
             },
         ],
     }
