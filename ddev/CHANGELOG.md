@@ -2,6 +2,73 @@
 
 <!-- towncrier release notes start -->
 
+## 19.0.0 / 2026-09-17
+
+***Removed***:
+
+* Remove the `--dependency-sizes` option and GitHub artifact fetching from `ddev size status`. Fall back to the other wheels storage tier when the preferred one (set via `--wheels-storage`) does not have a wheel. ([#23831](https://github.com/DataDog/integrations-core/pull/23831))
+
+***Added***:
+
+* Add deterministic Dispatcher test batch planning, with each job carrying the Python version it runs under and the Agent image its E2E tests run against. The internal ``max_jobs_per_batch`` option moves from ``[dispatcher]`` to ``[dispatcher.batching]``. ([#24687](https://github.com/DataDog/integrations-core/pull/24687))
+* Report the type of each changed file from `GitRepository.changed_files`, and allow comparing two refs. ([#24776](https://github.com/DataDog/integrations-core/pull/24776))
+* Add the Dispatcher pull-request updater task, which renders each progress snapshot into one PR comment, falls back to smaller comment tiers when GitHub refuses the body, and publishes the final report to the GitHub Actions run summary. ([#24822](https://github.com/DataDog/integrations-core/pull/24822))
+* Include the target branch in backport PR titles (`[Backport <branch>] <subject>`). ([#24868](https://github.com/DataDog/integrations-core/pull/24868))
+* Include a comment on the source PR listing each failed base when a backport fails. ([#24872](https://github.com/DataDog/integrations-core/pull/24872))
+* Add `--to-dd-org` and `--to-dd-key` to `ddev size diff` to send per-module size deltas to Datadog as `datadog.agent_integrations.size_diff`, and report the deltas as a comment on pull requests. ([#24895](https://github.com/DataDog/integrations-core/pull/24895))
+* Add the `ddev ci dispatch-tests` command and the Dispatcher that runs a batching plan. ([#24935](https://github.com/DataDog/integrations-core/pull/24935))
+* Add a retry strategy to the async GitHub client for failures that are not rate limiting. ([#24963](https://github.com/DataDog/integrations-core/pull/24963))
+* Report a cancelled Dispatcher run on its pull request and cancel the workflow runs it dispatched. ([#25042](https://github.com/DataDog/integrations-core/pull/25042))
+* Add a `--minimum-base-package` option to `ddev ci dispatch-tests` that plans a minimum-base-package job alongside each test job. ([#25074](https://github.com/DataDog/integrations-core/pull/25074))
+* Add a shutdown mode to the async GitHub client that caps request timeouts and stops retrying. ([#25076](https://github.com/DataDog/integrations-core/pull/25076))
+* Tell processors when a stop is requested so they can shorten work in flight. ([#25078](https://github.com/DataDog/integrations-core/pull/25078))
+* Add pull request file endpoints to the async GitHub client. ([#25082](https://github.com/DataDog/integrations-core/pull/25082))
+* Handle the shutdown signals in the event bus so every orchestrator winds down cleanly. ([#25088](https://github.com/DataDog/integrations-core/pull/25088))
+* Add ``--pytest-args`` to ``ddev ci dispatch-tests``, forwarded to each batch workflow. ([#25112](https://github.com/DataDog/integrations-core/pull/25112))
+* Add a shared monitoring runtime for Dispatcher context, console logging, and metric sinks. ([#25159](https://github.com/DataDog/integrations-core/pull/25159))
+* Add structured Datadog log delivery for Dispatcher operations. ([#25176](https://github.com/DataDog/integrations-core/pull/25176))
+* Add a buffered Datadog log handler to the monitoring runtime. ([#25179](https://github.com/DataDog/integrations-core/pull/25179))
+* Export the resolved Dispatcher run to a manifest that a later invocation can reuse for planning. ([#25190](https://github.com/DataDog/integrations-core/pull/25190))
+* Show a per-platform totals table and pivot the per-module table by platform in the ``ddev size diff`` markdown output and PR comment. ([#25195](https://github.com/DataDog/integrations-core/pull/25195))
+* Allow `ddev validate all` to write its formatted pull request comment to a file. ([#25243](https://github.com/DataDog/integrations-core/pull/25243))
+
+***Fixed***:
+
+* Speed up package installs in E2E ``start_commands`` by pointing the Agent container's apt mirror at the generic Ubuntu archive instead of a region-pinned mirror. ([#24733](https://github.com/DataDog/integrations-core/pull/24733))
+* Rename ``TaskPullRequestUpdater`` to ``TaskRunReporter`` and ``PullRequestUpdaterOptions`` to ``RunReporterOptions``, since the task also reports on runs that have no pull request. ([#24931](https://github.com/DataDog/integrations-core/pull/24931))
+* Bump stamina from 23.2.0 to 26.1.0. ([#24960](https://github.com/DataDog/integrations-core/pull/24960))
+* Fix a message submitted from a worker thread being lost, leaving the event bus running until its timeout. ([#24962](https://github.com/DataDog/integrations-core/pull/24962))
+* Wait for sync processors to finish and retire the bus thread pool when the run ends. ([#24978](https://github.com/DataDog/integrations-core/pull/24978))
+* Abandon a batch's gathering when the event bus is shutting down. ([#24980](https://github.com/DataDog/integrations-core/pull/24980))
+* Ignore CI targets and target environments whose names contain characters outside the set used by real integrations, so that a directory name or `hatch.toml` matrix value taken from a pull request cannot inject shell commands or `$GITHUB_ENV` entries into CI jobs. ([#24991](https://github.com/DataDog/integrations-core/pull/24991))
+* Report a message dropped and a processor skipped once the bus is stopping. ([#25002](https://github.com/DataDog/integrations-core/pull/25002))
+* Send check-run status and conclusion as the enums the GitHub API declares. ([#25046](https://github.com/DataDog/integrations-core/pull/25046))
+* Stop passing ``--explicit-package-bases`` when type checking ddev, so mypy resolves first-party imports instead of silently treating them as ``Any``. ([#25051](https://github.com/DataDog/integrations-core/pull/25051))
+* Draw the Dispatcher pull-request comment progress bar with pixel images instead of block characters. ([#25083](https://github.com/DataDog/integrations-core/pull/25083))
+* Resolve a pull request's changed files through the GitHub API instead of local git, and split the pull request endpoints into the two schemas GitHub returns, so a listed pull request can no longer stand in for a full one. ([#25095](https://github.com/DataDog/integrations-core/pull/25095))
+* Send a batch's job list to the test workflow as gzip and base64. ([#25096](https://github.com/DataDog/integrations-core/pull/25096))
+* Reject a `per_page` outside GitHub's accepted range of 1..100 in the async GitHub client. ([#25100](https://github.com/DataDog/integrations-core/pull/25100))
+* ``ddev ci dispatch-tests`` sends each batch the commit and branch its results belong to and whether the tested head lives in a fork, no longer opens the batch's check run itself, and rejects a plan naming an unknown runner. ([#25115](https://github.com/DataDog/integrations-core/pull/25115))
+* Discover Dispatcher test environments from ``hatch.toml`` without executing Hatch. ([#25129](https://github.com/DataDog/integrations-core/pull/25129))
+* Resolve Dispatcher pull requests from workflow head metadata and preserve expected-head validation. ([#25133](https://github.com/DataDog/integrations-core/pull/25133))
+* Mark Dispatcher pull request reports as informational during shadow mode. ([#25136](https://github.com/DataDog/integrations-core/pull/25136))
+* Retry interrupted license archive downloads and make license validation tests independent of live HTTP requests. ([#25142](https://github.com/DataDog/integrations-core/pull/25142))
+* Include short help in ddev size so it fits in the terminal ([#25146](https://github.com/DataDog/integrations-core/pull/25146))
+* Give Dispatcher artifact requests a configurable API allowance separate from polling while sharing GitHub backpressure. ([#25148](https://github.com/DataDog/integrations-core/pull/25148))
+* Report Dispatcher run links and job progress before artifact collection, using a separate API allowance for collection. ([#25150](https://github.com/DataDog/integrations-core/pull/25150))
+* Accept pending GitHub Actions step statuses and unify Dispatcher shutdown reporting and cleanup, preserving original failures and secondary diagnostics. ([#25156](https://github.com/DataDog/integrations-core/pull/25156))
+* Stop passing hatch's verbosity to the ``uv pip install`` commands ddev injects, so CI environment creation no longer dumps uv's resolver DEBUG output. ([#25170](https://github.com/DataDog/integrations-core/pull/25170))
+* Improve Dispatcher test job names and CI Visibility tags. ([#25175](https://github.com/DataDog/integrations-core/pull/25175))
+* Link running Dispatcher comments to their workflow run. ([#25178](https://github.com/DataDog/integrations-core/pull/25178))
+* Order the disk usage diff details table by largest size change first instead of alphabetically. ([#25206](https://github.com/DataDog/integrations-core/pull/25206))
+* Fix Dispatcher validation and clarify resolved run identity fields. ([#25220](https://github.com/DataDog/integrations-core/pull/25220))
+* Require a tests directory for `ddev test` to run pytest for an integration, while lint, formatting, and environment listing remain available with only a `hatch.toml`. ([#25222](https://github.com/DataDog/integrations-core/pull/25222))
+* Prevent repository instruction files from selecting Dispatcher test targets. ([#25227](https://github.com/DataDog/integrations-core/pull/25227))
+* Define a shared Dispatcher monitoring field contract for logs, test tags, and metrics. ([#25235](https://github.com/DataDog/integrations-core/pull/25235))
+* Propagate Dispatcher monitoring attributes to test batch jobs. ([#25238](https://github.com/DataDog/integrations-core/pull/25238))
+* Improve Test Batch summaries with links to their Dispatcher context. ([#25239](https://github.com/DataDog/integrations-core/pull/25239))
+* Fix Dispatcher reports that showed queued batches after jobs started. ([#25242](https://github.com/DataDog/integrations-core/pull/25242))
+
 ## 18.0.0 / 2026-08-14
 
 ***Changed***:

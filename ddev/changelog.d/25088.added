@@ -1,1 +1,0 @@
-Handle the shutdown signals in the event bus so every orchestrator winds down cleanly.
