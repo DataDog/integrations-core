@@ -427,6 +427,57 @@ def test_resolve_uses_the_same_raw_endpoint_identity():
     check.resolve_issue.assert_called_once_with(ISSUE_ID)
 
 
+def test_resolve_crosses_the_bridge_once_until_the_issue_is_reported_again():
+    check = create_check()
+
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+
+    assert check.resolve_issue.call_args_list == [mock.call(ISSUE_ID), mock.call(ISSUE_ID)]
+
+
+def test_failed_untracked_resolve_is_retried():
+    check = create_check()
+    check.resolve_issue.side_effect = [RuntimeError('resolve bridge failure'), None]
+
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+
+    assert check.resolve_issue.call_args_list == [mock.call(ISSUE_ID), mock.call(ISSUE_ID)]
+
+
+@pytest.mark.parametrize('initialize_state', [False, True], ids=['no-state', 'empty-state'])
+def test_resolve_stale_does_not_consume_endpoints_when_no_issues_are_tracked(initialize_state: bool):
+    check = create_check()
+    iterations = 0
+
+    if initialize_state:
+        EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+        check.resolve_issue.reset_mock()
+
+    def active_endpoints():
+        nonlocal iterations
+        iterations += 1
+        yield RAW_ENDPOINT, 'demo'
+
+    EndpointUnreachableIssueReporter.resolve_stale(check, active_endpoints())
+
+    assert iterations == 0
+    check.resolve_issue.assert_not_called()
+
+
+def test_endpoint_returning_after_stale_resolution_is_reconciled_again():
+    check = create_check()
+    EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
+
+    EndpointUnreachableIssueReporter.resolve_stale(check, ())
+    EndpointUnreachableIssueReporter.resolve(check, RAW_ENDPOINT, namespace='demo')
+
+    assert check.resolve_issue.call_args_list == [mock.call(ISSUE_ID), mock.call(ISSUE_ID)]
+
+
 def test_cancel_drains_exact_reported_issue_and_suppresses_late_reports():
     check = create_check()
     EndpointUnreachableIssueReporter.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')

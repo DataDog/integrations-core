@@ -93,7 +93,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.refresh_scrapers()
         self.endpoint_unreachable_issue_reporter.resolve_stale(
             self,
-            ((scraper.endpoint, scraper.namespace) for scraper in tuple(self.scrapers.values())),
+            ((scraper.endpoint, scraper.namespace) for scraper in self.scrapers.values()),
         )
 
         for endpoint, scraper in self.scrapers.items():

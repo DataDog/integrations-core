@@ -58,6 +58,8 @@ class ReporterState:
         self.lock = Lock()
         self.cancelled = False
         self.issues: dict[str, TrackedIssue] = {}
+        # The last successful bridge operation for these IDs was a resolve.
+        self.reconciled: set[str] = set()
 
 
 STATE_ATTRIBUTE = '_openmetrics_endpoint_unreachable_issue_state'
@@ -110,6 +112,7 @@ class EndpointUnreachableIssueReporter:
             )
 
             with state.lock:
+                state.reconciled.discard(issue_id)
                 if state.cancelled:
                     resolve_after_cancel = True
                 else:
@@ -134,6 +137,8 @@ class EndpointUnreachableIssueReporter:
             state = _state(check)
             with state.lock:
                 tracked_issue = state.issues.get(issue_id)
+                if tracked_issue is None and issue_id in state.reconciled:
+                    return
 
             if not _resolve_issue_id(check, issue_id):
                 return
@@ -141,19 +146,24 @@ class EndpointUnreachableIssueReporter:
             with state.lock:
                 if state.issues.get(issue_id) is tracked_issue:
                     state.issues.pop(issue_id, None)
+                state.reconciled.add(issue_id)
         except Exception:
             _debug(check, 'Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True)
 
     @staticmethod
     def resolve_stale(check: AgentCheck, active_endpoint_namespaces: Iterable[tuple[str, str]]) -> None:
-        """Resolve tracked issues whose exact endpoint context is no longer active."""
+        """Resolve tracked issues that are no longer active without creating state for checks that never reported."""
         try:
-            active = {(endpoint, str(namespace)) for endpoint, namespace in active_endpoint_namespaces}
-            state = _state(check)
+            state = _existing_state(check)
+            if state is None:
+                return
             with state.lock:
-                stale_issues = tuple(
-                    issue for issue in state.issues.values() if (issue.endpoint, issue.namespace) not in active
-                )
+                tracked_issues = tuple(state.issues.values())
+            if not tracked_issues:
+                return
+
+            active = {(endpoint, str(namespace)) for endpoint, namespace in active_endpoint_namespaces}
+            stale_issues = tuple(issue for issue in tracked_issues if (issue.endpoint, issue.namespace) not in active)
 
             for issue in stale_issues:
                 if not _resolve_issue_id(check, issue.issue_id):
@@ -161,6 +171,7 @@ class EndpointUnreachableIssueReporter:
                 with state.lock:
                     if state.issues.get(issue.issue_id) is issue:
                         state.issues.pop(issue.issue_id, None)
+                    state.reconciled.discard(issue.issue_id)
         except Exception:
             _debug(check, 'Failed to resolve stale OpenMetrics endpoint-unreachable issues', exc_info=True)
 
@@ -246,14 +257,19 @@ def _issue_id(hostname: str, check_name: str, endpoint: str, namespace: str) -> 
     return f'{ISSUE_ID_PREFIX}:{digest}'
 
 
-def _state(check: AgentCheck) -> ReporterState:
+def _existing_state(check: AgentCheck) -> ReporterState | None:
     # Read the instance dict directly so mocks and custom checks cannot synthesize this private attribute.
     state = vars(check).get(STATE_ATTRIBUTE)
+    return state if isinstance(state, ReporterState) else None
+
+
+def _state(check: AgentCheck) -> ReporterState:
+    state = _existing_state(check)
     if state is not None:
         return state
 
     with STATE_INITIALIZATION_LOCK:
-        state = vars(check).get(STATE_ATTRIBUTE)
+        state = _existing_state(check)
         if state is None:
             state = ReporterState()
             setattr(check, STATE_ATTRIBUTE, state)
