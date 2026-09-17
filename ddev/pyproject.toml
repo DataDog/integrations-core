@@ -39,6 +39,7 @@ dependencies = [
     "pluggy",
     "rich>=12.5.1",
     "stamina==26.1.0",
+    "structlog==26.1.0",
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",

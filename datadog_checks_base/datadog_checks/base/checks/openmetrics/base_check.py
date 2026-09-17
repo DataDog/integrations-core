@@ -9,6 +9,7 @@ from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tracing import traced_class
 
+from .metric_limit_issue import MetricLimitIssueReporter
 from .mixins import OpenMetricsScraperMixin
 
 STANDARD_FIELDS = [
@@ -88,6 +89,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             default_namespace = legacy_kwargs_in_args[1]
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
+            filter_option_text='metrics / ignore_metrics'
+        )
         self.config_map = {}
         self._http_handlers = {}
         self.default_instances = default_instances
@@ -140,6 +144,15 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             )
 
         self.process(scraper_config)
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        self.metric_limit_issue_reporter.handle(
+            self,
+            (self.instance.get('prometheus_url'),),
+            reached_limit,
+            observed_count,
+            limit,
+        )
 
     def get_scraper_config(self, instance):
         """

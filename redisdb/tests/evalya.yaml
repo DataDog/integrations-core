@@ -21,7 +21,8 @@ tasks:
 
   # Full metric-coverage fixture: master/replica behind an info-proxy that adds
   # the fields OSS Redis can't emit (managed-service, cluster, sentinel,
-  # RediSearch). Presents on 6379 like a standalone. See ./proxy and its README.
+  # RediSearch), plus a built-in workload that keeps rate/counter metrics moving.
+  # Presents on 6379 like a standalone. See ./proxy and its README.
   - id: redis-full
     task: ./compose/full-coverage.compose@info-proxy
     labels:
@@ -38,18 +39,3 @@ tasks:
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  # Opt-in workload that drives redis-full's counters non-zero (see activity-gen.sh).
-  # Kept out of redis-full so the fixture stays quiescent by default; add it with
-  # `with: [redis-full, activity-gen]`.
-  - id: activity-gen
-    image: "redis:${REDIS_VERSION:-7.4}"
-    labels:
-      # Published so other repos (e.g. semantic-core FTF) can OCI-federate this
-      # workload instead of vendoring a copy of the script.
-      evalya.io/publish: "true"
-    command: ["sh", "/opt/activity-gen.sh"]
-    volumes:
-      - ./activity-gen.sh:/opt/activity-gen.sh:ro
-    with:
-      - redis-full

@@ -1,0 +1,1 @@
+Add `proxmox.vm.cpu.max` and `proxmox.node.cpu.max` to report the vCPU count of each virtual machine and the logical processor count of each node.

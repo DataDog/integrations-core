@@ -277,6 +277,22 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     )
 
 
+def test_when_no_committed_offset_then_consumer_metrics_are_skipped(check, kafka_instance, dd_run_check, aggregator):
+    # Given: a partition with no committed offset, which librdkafka can surface as a negative
+    # logical offset (e.g. -1001 OFFSET_INVALID, or -2 OFFSET_BEGINNING) rather than a real offset.
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", -2)])]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
+    dd_run_check(kafka_consumer_check)
+
+    # Then: the partition is skipped rather than reporting a negative offset and inflated lag
+    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
+
+
 def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()
     kafka_instance["collect_consumer_group_state"] = True
