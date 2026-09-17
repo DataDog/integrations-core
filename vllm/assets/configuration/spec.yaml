@@ -2,14 +2,6 @@ name: vLLM
 fleet_configurable: true
 files:
 - name: vllm.yaml
-  discovery:
-    strategies:
-    - template: discovery/openmetrics_from_ports
-      overrides:
-        port_hints:
-        - 8000
-        - 9090
-        - 8081
   options:
   - template: init_config
     options:
@@ -23,17 +15,3 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the vLLM's Prometheus metrics. For more information refer to:
           https://docs.vllm.ai/en/stable/serving/metrics.html
-- name: auto_conf.yaml
-  options:
-  - template: ad_identifiers
-    overrides:
-      value.example:
-      - vllm-openai
-      - dynamo-vllm-runtime
-  - template: auto_conf/cel_selector
-    overrides:
-      cel_selector.example:
-        processes:
-        - process.cmdline.contains('vllm.entrypoints.openai.api_server')
-        - process.cmdline.contains('dynamo.vllm')
-  - template: auto_conf/discovery

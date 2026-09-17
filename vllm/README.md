@@ -17,9 +17,6 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-When [GPU monitoring][8] is enabled, the Agent discovers vLLM endpoints automatically and no manual
-configuration is required. Configure the check manually to monitor vLLM without GPU monitoring.
-
 1. Edit the `vllm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vllm performance data. See the [sample vllm.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
@@ -33,11 +30,6 @@ configuration is required. Configure the check manually to monitor vLLM without 
 ### Metrics
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
-
-The `vllm.estimated_flops_per_gpu`, `vllm.external_prefix_cache`, `vllm.prompt_tokens.cached`,
-`vllm.request.decode_time`, `vllm.request.prefill_kv_computed_tokens`, `vllm.request.prefill_time`,
-`vllm.request.queue_time`, and `vllm.spec_decode` metrics are collected only when [GPU monitoring][8]
-is enabled.
 
 ### Events
 
@@ -70,7 +62,6 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/vllm/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/vllm/assets/service_checks.json
-[8]: https://docs.datadoghq.com/gpu_monitoring/
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/docker/log/?tab=containerinstallation#installation
 [11]: https://docs.datadoghq.com/containers/docker/log/?tab=hostagent#installation

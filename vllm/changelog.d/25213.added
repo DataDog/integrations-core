@@ -1,1 +1,1 @@
-Add GPU Monitoring-gated automatic discovery and inference metrics for standalone and Dynamo-hosted vLLM.
+Add additional vLLM inference metrics.

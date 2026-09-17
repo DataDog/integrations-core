@@ -1,20 +1,9 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from requests import HTTPError, RequestException
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative
-
-from .metrics import GPU_METRIC_MAP, METRIC_MAP, RAY_GPU_METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
-
-
-def is_gpu_monitoring_enabled() -> bool:
-    return is_affirmative(datadog_agent.get_config('gpu.enabled'))
+from .metrics import METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
@@ -23,32 +12,22 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'vllm'
 
     def get_default_config(self):
-        metrics = [METRIC_MAP, RAY_METRIC_MAP]
-        if is_gpu_monitoring_enabled():
-            metrics.extend([GPU_METRIC_MAP, RAY_GPU_METRIC_MAP])
-
         return {
-            'metrics': metrics,
+            'metrics': [
+                METRIC_MAP,
+                RAY_METRIC_MAP,
+            ],
             "rename_labels": RENAME_LABELS_MAP,
         }
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
         endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/version")
-        try:
-            response = self.http.get(endpoint)
-            response.raise_for_status()
-            version = response.json().get("version", "")
-        except HTTPError as e:
-            # Some vLLM-compatible metric endpoints, including Dynamo's system status server,
-            # expose /metrics without exposing vLLM's optional /version route.
-            self.log.debug("No vLLM version endpoint at %s: %s", endpoint, e)
-            return
-        except (RequestException, ValueError, AttributeError) as e:
-            # AttributeError covers a body that parses but is not a JSON object.
-            self.log.warning("Unable to collect vLLM version metadata from %s: %s", endpoint, e)
-            return
+        response = self.http.get(endpoint)
+        response.raise_for_status()
 
+        data = response.json()
+        version = data.get("version", "")
         version_split = version.split(".")
         if len(version_split) >= 3:
             major = version_split[0]
