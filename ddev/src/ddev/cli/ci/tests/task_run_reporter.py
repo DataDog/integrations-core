@@ -21,7 +21,7 @@ from ddev.cli.ci.tests.pr_comment import (
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.event_bus.shutdown import ShutdownRequest
 from ddev.monitoring import ComponentMonitor
-from ddev.utils.github_errors import GitHubBodyTooLongError
+from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
 
 if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import UpdatePRComment
@@ -185,7 +185,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     error,
                     len(rendered),
                 )
-            except httpx.HTTPError as error:
+            except (GitHubAuthenticationError, httpx.HTTPError) as error:
                 if self._forget_unusable_comment(error):
                     # The next pass creates a comment we own, rather than re-editing one we do not.
                     continue
@@ -226,17 +226,20 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return comment.id
         return None
 
-    def _forget_unusable_comment(self, error: httpx.HTTPError) -> bool:
+    def _forget_unusable_comment(self, error: GitHubAuthenticationError | httpx.HTTPError) -> bool:
         """Discard an inaccessible comment and return whether to try a replacement."""
-        if self._comment_id is None or not isinstance(error, httpx.HTTPStatusError):
+        if self._comment_id is None:
             return False
-        if error.response.status_code not in UNUSABLE_COMMENT_STATUSES:
+        status_error = error.http_status_error if isinstance(error, GitHubAuthenticationError) else error
+        if not isinstance(status_error, httpx.HTTPStatusError):
+            return False
+        if status_error.response.status_code not in UNUSABLE_COMMENT_STATUSES:
             return False
 
         self._logger.warning(
             "Cannot edit comment %s (%s); creating a new one",
             self._comment_id,
-            error.response.status_code,
+            status_error.response.status_code,
         )
         self._unusable_comment_ids.add(self._comment_id)
         self._comment_id = None

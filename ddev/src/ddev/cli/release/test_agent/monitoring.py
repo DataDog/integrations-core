@@ -20,7 +20,6 @@ from rich.tree import Tree
 
 from ddev.cli.release.test_agent.validation import REPO_NAME, REPO_OWNER
 from ddev.utils.github_async import async_github_client
-from ddev.utils.github_errors import GitHubAuthenticationError
 
 if TYPE_CHECKING:
     from ddev.cli.release.test_agent.dispatch import DispatchedWorkflow
@@ -162,8 +161,6 @@ async def monitor_workflows(
         nonlocal state
         try:
             state = await collect_monitor_state(client, workflows)
-        except GitHubAuthenticationError:
-            raise
         except httpx.HTTPError:
             pass
         return state

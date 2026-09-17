@@ -129,7 +129,10 @@ def _spam_error() -> httpx.HTTPStatusError:
 def _auth_error(status_code: int) -> GitHubAuthenticationError:
     """What the real client raises for 401 and 403, rather than a bare `HTTPStatusError`."""
     request = httpx.Request("PATCH", "https://api.github.com/")
-    return GitHubAuthenticationError("boom", request=request, response=httpx.Response(status_code, request=request))
+    http_status_error = httpx.HTTPStatusError(
+        "boom", request=request, response=httpx.Response(status_code, request=request)
+    )
+    return GitHubAuthenticationError("boom", http_status_error=http_status_error)
 
 
 # ---------------------------------------------------------------------------
@@ -415,8 +418,11 @@ def test_a_rejected_token_is_reported_without_failing_the_run():
     client = FakeAsyncGitHubClient()
     error = GitHubAuthenticationError(
         "GitHub rejected the credentials",
-        request=httpx.Request("POST", "https://api.github.com/"),
-        response=httpx.Response(401),
+        http_status_error=httpx.HTTPStatusError(
+            "denied",
+            request=httpx.Request("POST", "https://api.github.com/"),
+            response=httpx.Response(401),
+        ),
     )
     client.mock_response("create_issue_comment", error)
     handler = RecordingJsonHandler()

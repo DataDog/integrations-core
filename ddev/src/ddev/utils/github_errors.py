@@ -65,19 +65,25 @@ class GitHubUnexpectedRedirectError(httpx.HTTPStatusError):
         )
 
 
-class GitHubAuthenticationError(httpx.HTTPStatusError):
-    """A GitHub HTTP failure caused by invalid authentication or insufficient permissions."""
+class GitHubAuthenticationError(Exception):
+    """A GitHub HTTP failure caused by invalid authentication or insufficient permissions.
 
-    def __init__(self, message: str, *, request: httpx.Request, response: httpx.Response) -> None:
-        super().__init__(message, request=request, response=response)
+    Deliberately not an `httpx` exception: the CLI handles it centrally (registered in
+    `ddev/cli/__init__.py`), and staying outside the `httpx` hierarchy means broad
+    `except httpx.HTTPError` handlers cannot swallow it. Code that needs the HTTP context finds
+    the original failure on `http_status_error`.
+    """
+
+    def __init__(self, message: str, *, http_status_error: httpx.HTTPStatusError) -> None:
+        super().__init__(message)
+        self.http_status_error = http_status_error
 
     @classmethod
     def from_http_status_error(cls, error: httpx.HTTPStatusError) -> GitHubAuthenticationError:
-        """Build an authentication error while retaining the original HTTP context."""
+        """Build an authentication error while retaining the original HTTP failure."""
         return cls(
             github_authentication_error_message(error.response.status_code),
-            request=error.request,
-            response=error.response,
+            http_status_error=error,
         )
 
 

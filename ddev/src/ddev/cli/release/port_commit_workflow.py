@@ -440,8 +440,6 @@ def _resolve_pr(
     import httpx
     from pydantic import ValidationError
 
-    from ddev.utils.github_errors import GitHubAuthenticationError
-
     if not app.config.github.token:
         app.abort(
             missing_token_message
@@ -455,8 +453,6 @@ def _resolve_pr(
     app.display_info(f'Resolving PR #{pr_number} via GitHub...')
     try:
         pr = asyncio.run(_fetch_pr(app.config.github.token, owner, repo, pr_number))
-    except GitHubAuthenticationError:
-        raise
     except httpx.HTTPStatusError as exc:
         status = exc.response.status_code
         if status == 404:

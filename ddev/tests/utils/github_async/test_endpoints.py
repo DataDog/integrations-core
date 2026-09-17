@@ -771,7 +771,7 @@ async def test_endpoint_authentication_error_is_actionable(case: EndpointCase, s
     with pytest.raises(GitHubAuthenticationError, match="ddev config set github.token") as exc_info:
         await case.call(client)
 
-    assert exc_info.value.response.status_code == status_code
+    assert exc_info.value.http_status_error.response.status_code == status_code
 
 
 @pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=[case.id for case in ENDPOINT_CALLS])

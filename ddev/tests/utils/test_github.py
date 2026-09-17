@@ -137,6 +137,8 @@ def test_dispatch_workflow_return_run_details_sends_flag_and_returns_json(github
 def test_authentication_error_has_actionable_token_guidance(
     github_manager: GitHubManager, mocker: MockerFixture, status_code: int
 ) -> None:
+    """The error carries the actionable token message, and stays outside the `httpx` hierarchy
+    so no broad `except httpx.HTTPError` handler can swallow the central handling."""
     request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/1')
     response = httpx.Response(status_code, request=request)
     github_manager.__dict__['client'] = mocker.Mock(get=mocker.Mock(return_value=response))
@@ -144,10 +146,10 @@ def test_authentication_error_has_actionable_token_guidance(
     with pytest.raises(GitHubAuthenticationError) as exc_info:
         github_manager.get_pr_head(1)
 
-    assert isinstance(exc_info.value, httpx.HTTPStatusError)
-    assert isinstance(exc_info.value, httpx.HTTPError)
-    assert exc_info.value.response is response
-    assert exc_info.value.request is request
+    assert not isinstance(exc_info.value, httpx.HTTPStatusError)
+    assert not isinstance(exc_info.value, httpx.HTTPError)
+    assert exc_info.value.http_status_error.response is response
+    assert exc_info.value.http_status_error.request is request
     assert f'HTTP {status_code}' in str(exc_info.value)
     assert 'ddev config set github.token' in str(exc_info.value)
 

@@ -25,7 +25,7 @@ from ddev.utils.github_async.retry import (
     on_status,
     on_transport_error,
 )
-from ddev.utils.github_errors import GitHubUnexpectedRedirectError
+from ddev.utils.github_errors import GitHubAuthenticationError, GitHubUnexpectedRedirectError
 from tests.utils.github_async.helpers import ENDPOINT_CALLS, TOKEN, json_response, recording_transport
 from tests.utils.github_async.payloads import (
     full_pull_request_payload,
@@ -177,24 +177,35 @@ async def test_the_client_defaults_can_be_replaced_wholesale() -> None:
 
 
 @pytest.mark.parametrize(
-    "response",
+    ("response", "expected_error"),
     [
-        pytest.param(httpx.Response(401), id="unauthenticated"),
-        pytest.param(httpx.Response(403), id="permission_denied"),
-        pytest.param(httpx.Response(403, headers={"retry-after": "5", "x-ratelimit-remaining": "0"}), id="rate_limit"),
-        pytest.param(httpx.Response(302, headers={"location": "https://elsewhere.example"}), id="redirect"),
+        pytest.param(httpx.Response(401), GitHubAuthenticationError, id="unauthenticated"),
+        pytest.param(httpx.Response(403), GitHubAuthenticationError, id="permission_denied"),
+        pytest.param(
+            httpx.Response(403, headers={"retry-after": "5", "x-ratelimit-remaining": "0"}),
+            httpx.HTTPStatusError,
+            id="rate_limit",
+        ),
+        pytest.param(
+            httpx.Response(302, headers={"location": "https://elsewhere.example"}),
+            httpx.HTTPStatusError,
+            id="redirect",
+        ),
     ],
 )
-async def test_the_client_refuses_to_replay_what_replaying_cannot_fix(response: httpx.Response) -> None:
+async def test_the_client_refuses_to_replay_what_replaying_cannot_fix(
+    response: httpx.Response, expected_error: type[Exception]
+) -> None:
     """Even asked to retry everything, these stay single attempts.
 
     Each would only reach the same outcome more slowly: bad credentials, a pause the limiter already
-    owns, or a redirect, which is an answer.
+    owns, or a redirect, which is an answer. Bad credentials surface as `GitHubAuthenticationError`
+    for the central CLI handler rather than as a plain HTTP status error.
     """
     transport, calls = recording_transport([response])
     client = AsyncGitHubClient(token=TOKEN, transport=transport, max_rate_limit_retries=0)
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(expected_error):
         await client.get_workflow_run("o", "r", 42, retry=RETRY_EVERYTHING)
 
     assert len(calls) == 1

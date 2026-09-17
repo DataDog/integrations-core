@@ -280,7 +280,6 @@ def resolve_pull_request_run(
 
     from ddev.cli.ci.tests.changes import ChangeResolutionError
     from ddev.utils.github_async import async_github_client
-    from ddev.utils.github_errors import GitHubAuthenticationError
 
     client_logger = None
     if monitor is not None:
@@ -326,8 +325,6 @@ def resolve_pull_request_run(
 
     try:
         return asyncio.run(resolve())
-    except GitHubAuthenticationError as error:
-        app.abort(str(error))
     except ChangeResolutionError as error:
         app.abort(str(error))
     except (httpx.HTTPError, ValidationError) as error:

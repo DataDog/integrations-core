@@ -204,7 +204,7 @@ async def test_authentication_error_is_actionable_and_not_retried(status_code: i
         await client._rate_limited_request("GET", "/x")
 
     assert len(calls) == 1
-    assert exc_info.value.response.status_code == status_code
+    assert exc_info.value.http_status_error.response.status_code == status_code
     assert "ddev config set github.token" in str(exc_info.value)
 
 
