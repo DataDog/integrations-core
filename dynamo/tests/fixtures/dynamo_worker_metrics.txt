@@ -1,0 +1,269 @@
+# Synthesized fixture — NOT a live capture. See dynamo_frontend_metrics.txt for the full rationale.
+#
+# Transcribed from ai-dynamo/dynamo @ fb7169ed65d9586c16a13c837564df568e61a25e (v1.4.2),
+# lib/runtime/src/metrics/prometheus_names.rs.
+#
+# Label names use the auto-injected form the runtime actually emits — dynamo_component,
+# dynamo_namespace, dynamo_endpoint (see the `labels` module in prometheus_names.rs) — not the
+# bare component/namespace/endpoint spellings. The OpenMetrics check turns label names into tag
+# names verbatim, so anything built off this file must target the dynamo_-prefixed keys.
+#
+# Sample values are synthetic.
+# HELP dynamo_component_requests_total component.requests.count
+# TYPE dynamo_component_requests_total counter
+dynamo_component_requests_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_request_bytes_total component.request_bytes.count
+# TYPE dynamo_component_request_bytes_total counter
+dynamo_component_request_bytes_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_response_bytes_total component.response_bytes.count
+# TYPE dynamo_component_response_bytes_total counter
+dynamo_component_response_bytes_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_inflight_requests component.inflight_requests
+# TYPE dynamo_component_inflight_requests gauge
+dynamo_component_inflight_requests{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_request_duration_seconds component.request_duration.seconds
+# TYPE dynamo_component_request_duration_seconds histogram
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_request_duration_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_request_duration_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
+# HELP dynamo_component_errors_total component.errors.count
+# TYPE dynamo_component_errors_total counter
+dynamo_component_errors_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_cancellation_total component.cancellation.count
+# TYPE dynamo_component_cancellation_total counter
+dynamo_component_cancellation_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_network_transit_seconds component.network_transit.seconds
+# TYPE dynamo_component_network_transit_seconds histogram
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_network_transit_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_network_transit_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_network_transit_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
+# HELP dynamo_component_time_to_first_response_seconds component.time_to_first_response.seconds
+# TYPE dynamo_component_time_to_first_response_seconds histogram
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_time_to_first_response_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_time_to_first_response_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_time_to_first_response_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
+# HELP dynamo_component_queue_depth component.queue_depth
+# TYPE dynamo_component_queue_depth gauge
+dynamo_component_queue_depth{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_queue_capacity component.queue_capacity
+# TYPE dynamo_component_queue_capacity gauge
+dynamo_component_queue_capacity{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_enqueue_rejected_total component.enqueue_rejected.count
+# TYPE dynamo_component_enqueue_rejected_total counter
+dynamo_component_enqueue_rejected_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_permit_wait_seconds component.permit_wait.seconds
+# TYPE dynamo_component_permit_wait_seconds histogram
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.05"} 6
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.1"} 9
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.25"} 12
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.5"} 15
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="1.0"} 18
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="2.5"} 21
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="5.0"} 24
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="10.0"} 27
+dynamo_component_permit_wait_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="+Inf"} 30
+dynamo_component_permit_wait_seconds_count{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 30
+dynamo_component_permit_wait_seconds_sum{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 5.4
+# HELP dynamo_component_pool_active_tasks component.pool_active_tasks
+# TYPE dynamo_component_pool_active_tasks gauge
+dynamo_component_pool_active_tasks{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_pool_capacity component.pool_capacity
+# TYPE dynamo_component_pool_capacity gauge
+dynamo_component_pool_capacity{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_uptime_seconds component.uptime_seconds
+# TYPE dynamo_component_uptime_seconds gauge
+dynamo_component_uptime_seconds{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_tasks_issued_total component.tasks_issued.count
+# TYPE dynamo_component_tasks_issued_total counter
+dynamo_component_tasks_issued_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_tasks_started_total component.tasks_started.count
+# TYPE dynamo_component_tasks_started_total counter
+dynamo_component_tasks_started_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_tasks_success_total component.tasks_success.count
+# TYPE dynamo_component_tasks_success_total counter
+dynamo_component_tasks_success_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_tasks_cancelled_total component.tasks_cancelled.count
+# TYPE dynamo_component_tasks_cancelled_total counter
+dynamo_component_tasks_cancelled_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_tasks_failed_total component.tasks_failed.count
+# TYPE dynamo_component_tasks_failed_total counter
+dynamo_component_tasks_failed_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_tasks_rejected_total component.tasks_rejected.count
+# TYPE dynamo_component_tasks_rejected_total counter
+dynamo_component_tasks_rejected_total{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 42
+# HELP dynamo_component_total_blocks component.kv_cache.total_blocks
+# TYPE dynamo_component_total_blocks gauge
+dynamo_component_total_blocks{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_gpu_cache_usage_percent component.kv_cache.gpu_cache_usage_percent
+# TYPE dynamo_component_gpu_cache_usage_percent gauge
+dynamo_component_gpu_cache_usage_percent{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 0.314
+# HELP dynamo_component_kv_cache_hit_rate component.kv_cache.hit_rate
+# TYPE dynamo_component_kv_cache_hit_rate gauge
+dynamo_component_kv_cache_hit_rate{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 0.314
+# HELP trtllm_kv_cache_hit_rate component.kv_cache.hit_rate (TensorRT-LLM engine-native name)
+# TYPE trtllm_kv_cache_hit_rate gauge
+trtllm_kv_cache_hit_rate{dynamo_component="tensorrt_llm",dynamo_endpoint="generate",dynamo_namespace="dynamo",engine_type="trtllm",model="Qwen/Qwen3-0.6B",model_name="Qwen/Qwen3-0.6B"} 0.42
+# Admission-control and KV-router families are configuration-dependent.
+# HELP dynamo_rejection_request_total Requests rejected because the worker is at capacity
+# TYPE dynamo_rejection_request_total counter
+dynamo_rejection_request_total 42
+# HELP dynamo_component_kv_cache_events_applied Total number of KV cache events applied to the index
+# TYPE dynamo_component_kv_cache_events_applied counter
+dynamo_component_kv_cache_events_applied{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",event_type="stored",status="ok"} 42
+# HELP dynamo_component_router_requests_started_total Requests admitted by the router scheduler
+# TYPE dynamo_component_router_requests_started_total counter
+dynamo_component_router_requests_started_total{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 42
+# HELP dynamo_component_router_requests_total Total requests processed by the router
+# TYPE dynamo_component_router_requests_total counter
+dynamo_component_router_requests_total{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 42
+# HELP dynamo_component_router_time_to_first_token_seconds Time to first token observed at the router
+# TYPE dynamo_component_router_time_to_first_token_seconds histogram
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0022"} 6
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0047"} 9
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.01"} 12
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.022"} 15
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.047"} 18
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.1"} 21
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.22"} 24
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.47"} 27
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1"} 30
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2.2"} 33
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="4.7"} 36
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="10"} 39
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="22"} 42
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="48"} 45
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="100"} 48
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="220"} 51
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="480"} 54
+dynamo_component_router_time_to_first_token_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 57
+dynamo_component_router_time_to_first_token_seconds_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 57
+dynamo_component_router_time_to_first_token_seconds_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 5.4
+# HELP dynamo_component_router_inter_token_latency_seconds Average inter-token latency observed at the router
+# TYPE dynamo_component_router_inter_token_latency_seconds histogram
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0019"} 6
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0035"} 9
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0067"} 12
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.013"} 15
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.024"} 18
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.045"} 21
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.084"} 24
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.16"} 27
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.3"} 30
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.56"} 33
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1.1"} 36
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2"} 39
+dynamo_component_router_inter_token_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 42
+dynamo_component_router_inter_token_latency_seconds_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 42
+dynamo_component_router_inter_token_latency_seconds_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 5.4
+# HELP dynamo_component_router_input_sequence_tokens Input sequence length in tokens observed at the router
+# TYPE dynamo_component_router_input_sequence_tokens histogram
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="100"} 6
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="210"} 9
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="430"} 12
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="870"} 15
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1800"} 18
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="3600"} 21
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="7400"} 24
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="15000"} 27
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="31000"} 30
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="63000"} 33
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="130000"} 36
+dynamo_component_router_input_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 39
+dynamo_component_router_input_sequence_tokens_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 39
+dynamo_component_router_input_sequence_tokens_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 13534.0
+# HELP dynamo_component_router_output_sequence_tokens Output sequence length in tokens observed at the router
+# TYPE dynamo_component_router_output_sequence_tokens histogram
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="100"} 6
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="210"} 9
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="430"} 12
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="880"} 15
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1800"} 18
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="3700"} 21
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="7600"} 24
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="16000"} 27
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="32000"} 30
+dynamo_component_router_output_sequence_tokens_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 33
+dynamo_component_router_output_sequence_tokens_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 33
+dynamo_component_router_output_sequence_tokens_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 13664.0
+# HELP dynamo_component_router_kv_hit_rate Predicted KV cache hit rate at routing time
+# TYPE dynamo_component_router_kv_hit_rate histogram
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.05"} 6
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.1"} 9
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.15"} 12
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.2"} 15
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.25"} 18
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.3"} 21
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.35"} 24
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.4"} 27
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.45"} 30
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.5"} 33
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.55"} 36
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.6"} 39
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.65"} 42
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.7"} 45
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.75"} 48
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.8"} 51
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.85"} 54
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.9"} 57
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.95"} 60
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1"} 63
+dynamo_component_router_kv_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 66
+dynamo_component_router_kv_hit_rate_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 66
+dynamo_component_router_kv_hit_rate_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 12.5
+# HELP dynamo_component_router_non_max_overlap_selections_total Prefill selections with less KV cache overlap than another eligible worker
+# TYPE dynamo_component_router_non_max_overlap_selections_total counter
+dynamo_component_router_non_max_overlap_selections_total{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 42
+# HELP dynamo_component_router_overlap_blocks_lost Effective KV cache overlap blocks lost by non-max-overlap selections
+# TYPE dynamo_component_router_overlap_blocks_lost histogram
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="0.25"} 3
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="0.5"} 6
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="1"} 9
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="2"} 12
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="4"} 15
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="8"} 18
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="16"} 21
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="32"} 24
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="64"} 27
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="128"} 30
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="256"} 33
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="512"} 36
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="1024"} 39
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="2048"} 42
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="4096"} 45
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="8192"} 48
+dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="+Inf"} 51
+dynamo_component_router_overlap_blocks_lost_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 51
+dynamo_component_router_overlap_blocks_lost_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 42.0

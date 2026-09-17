@@ -13,10 +13,10 @@ HEAD_SHA = 'head-sha-aaa'
 def listed_pull_request(
     number: int = PR_NUMBER,
     head_sha: str = HEAD_SHA,
-    base_ref: str = 'a-target-branch',
+    base_branch: str = 'a-target-branch',
     state: str = 'open',
     head_repo: str | None = 'DataDog/integrations-core',
-    head_ref: str = 'hs/a-branch',
+    head_branch: str = 'hs/a-branch',
 ) -> PullRequestSimple:
     """List endpoints omit diff totals, so they cannot stand in for the full form."""
     return PullRequestSimple(
@@ -24,11 +24,11 @@ def listed_pull_request(
         html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
         state=state,
         head={
-            'ref': head_ref,
+            'ref': head_branch,
             'sha': head_sha,
             'repo': {'full_name': head_repo} if head_repo is not None else None,
         },
-        base={'ref': base_ref, 'sha': 'base-sha-bbb'},
+        base={'ref': base_branch, 'sha': 'base-sha-bbb'},
     )
 
 

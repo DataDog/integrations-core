@@ -128,25 +128,31 @@ jobs:
         run: |
           section() {
             local title=$1 file=$2 outcome=$3
-            printf '<details>\n<summary><strong>%s</strong></summary>\n\n' "$title"
             if [ -f "$file" ]; then
-              tail -n +3 "$file"
-            elif [ "$outcome" = "success" ]; then
-              printf 'No integration or dependency changed size.\n'
-            else
+              cat "$file"
+              printf '\n'
+            elif [ "$outcome" != "success" ]; then
               printf ':warning: The %s measurement failed, so no size difference is available. ' "${title,,}"
-              printf 'See [the workflow run](%s).\n' "$RUN_URL"
+              printf 'See [the workflow run](%s).\n\n' "$RUN_URL"
             fi
-            printf '\n</details>\n\n'
           }
 
           mkdir -p pr-comment
+          sections=$(mktemp)
+          {
+            section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
+            section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
+          } > "$sections"
+
           {
             printf '<!-- pr-comment:measure-disk-usage -->\n\n'
             printf '## Disk usage change\n\n'
             printf 'Commit `%s` compared against `%s`.\n\n' "${SHA:0:7}" "${BASE_SHA:0:7}"
-            section 'Uncompressed' diff_uncompressed.md "$UNCOMPRESSED_OUTCOME"
-            section 'Compressed' diff_compressed.md "$COMPRESSED_OUTCOME"
+            if grep -q ':warning:' "$sections" || grep -qE '[+-][0-9]' "$sections"; then
+              cat "$sections"
+            else
+              printf 'No integration or dependency changed size.\n'
+            fi
           } > pr-comment/body.md
 
       - name: Get token via dd-octo-sts

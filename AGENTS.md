@@ -114,6 +114,18 @@ New integrations must not include a `manifest.json`. Instead, add the following 
 
 ## Development Workflow
 
+### Dispatcher Run Identity
+
+Use the same identity names across Dispatcher models, manifests, CLI options, workflow inputs, and monitoring fields:
+
+- `checkout_sha` is the immutable commit checked out and tested. For a pull request, this is GitHub's synthetic merge commit.
+- `head_sha` and `head_branch` identify the pull request source. For a master push, they identify the pushed commit and `master`.
+- `base_sha` and `base_branch` identify the pull request target metadata reported by GitHub. They are unset for a master push.
+
+For a synthetic merge, `checkout_sha^1` is the target commit GitHub used to build the merge and `checkout_sha^2` is `head_sha`. Do not assume `checkout_sha^1 == base_sha`: GitHub's recorded pull request base snapshot may lag the target commit used for a newly generated synthetic merge.
+
+Use `head_branch` and `base_branch` within the Dispatcher. Reserve `ref` for external GitHub API fields and values that may identify something other than a branch.
+
 ### Worktrees
 
 **Applicable to:** any git worktree other than the primary checkout.
@@ -252,7 +264,7 @@ Before writing a `.changed` entry, stop and confirm the change is genuinely brea
 echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/changelog.d/23700.added
 
 # Bug fix for sqlserver in PR #23701
-echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
+echo 'Fix a bug where `tempdb` is wrongly excluded from database files metrics.' > sqlserver/changelog.d/23701.fixed
 ```
 
 ## Review Guidelines
@@ -280,3 +292,8 @@ When a new file is added, make sure to make it available through the navigation 
 ### Style
 
 Maintain a consistent style: technical and professional. Do not start lines or paragraphs with an inline code span.
+
+Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation,
+comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline
+literals or roles. Existing uses are legacy, not a style precedent. Update them only when the surrounding prose is
+otherwise in scope.

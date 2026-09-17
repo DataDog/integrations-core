@@ -9,7 +9,7 @@ import dataclasses
 from typing import TYPE_CHECKING, Protocol
 
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
-from ddev.cli.ci.tests.messages import MINIMUM_BASE_PACKAGE_PREFIX, BatchJob
+from ddev.cli.ci.tests.messages import BatchJob
 from ddev.e2e.agent_images import AgentImageError, get_agent_image
 
 if TYPE_CHECKING:
@@ -71,9 +71,16 @@ def _minimum_base_package_replica(job: BatchJob) -> BatchJob | None:
     if not job.unit_tests:
         return None
 
+    # Keep the integration first so standard and MBP jobs are easy to scan together.
+    environment_suffix = f" ({job.environment})"
+    if job.environment and job.name.endswith(environment_suffix):
+        name = f"{job.name[: -len(environment_suffix)]} (MBP){environment_suffix}"
+    else:
+        name = f"{job.name} (MBP)"
+
     return dataclasses.replace(
         job,
-        name=f"{MINIMUM_BASE_PACKAGE_PREFIX}{job.name}",
+        name=name,
         e2e_tests=False,
         agent_image=None,
         minimum_base_package=True,
