@@ -131,3 +131,28 @@ def test_calculate_elapsed_time_valid_dst(datestamp, timestamp, timestamp_dst, t
         )
         == expected
     )
+
+
+@pytest.mark.parametrize(
+    'patterns,name,expected',
+    [
+        pytest.param(['YMQU.*'], 'YMQU.TO.CAWILY', True, id='trailing_star_prefix_match'),
+        pytest.param(['YMQU.*'], 'ZMQU.TO.CAWILY', False, id='trailing_star_no_match'),
+        pytest.param(['FOO.BAR'], 'FOO.BAR', True, id='exact_literal_match'),
+        pytest.param(['FOO.BAR'], 'FOO.BAZ', False, id='exact_literal_no_match'),
+        # A trailing '*' with no dot (QEAMU*) is a valid MQ prefix and must match QEAMUFOO...
+        pytest.param(['QEAMU*'], 'QEAMUFOO', True, id='dotless_prefix_matches'),
+        # ...while the dotted form (QEAMU.*) must NOT match QEAMUFOO.
+        pytest.param(['QEAMU.*'], 'QEAMUFOO', False, id='dotted_prefix_does_not_match_dotless'),
+        pytest.param(['*'], 'ANY.CHANNEL', True, id='lone_star_matches_all'),
+        pytest.param([], 'FOO.BAR', False, id='empty_list_matches_nothing'),
+        pytest.param(None, 'FOO.BAR', False, id='none_matches_nothing'),
+        pytest.param([b'YMQU.*'], 'YMQU.TO.CAWILY', True, id='bytes_pattern'),
+        pytest.param(['A.*', 'B.BAR'], 'B.BAR', True, id='multiple_patterns_literal'),
+        pytest.param(['A.*', 'B.*'], 'C.QUX', False, id='multiple_patterns_no_match'),
+    ],
+)
+def test_mq_pattern_matcher(patterns, name, expected):
+    from datadog_checks.ibm_mq.utils import mq_pattern_matcher
+
+    assert mq_pattern_matcher(patterns)(name) is expected
