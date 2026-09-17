@@ -8,6 +8,8 @@ import hashlib
 import json
 from collections import deque
 from dataclasses import dataclass
+from ipaddress import ip_address
+from shlex import quote
 from typing import TYPE_CHECKING
 from urllib.parse import urlsplit, urlunsplit
 
@@ -166,22 +168,35 @@ def _debug(check: AgentCheck, message: str, *, exc_info: bool = False) -> None:
 
 
 def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | list[dict[str, int | str]]]:
+    try:
+        target_address = ip_address(details.host)
+        if getattr(target_address, 'scope_id', None) is not None:
+            raise ValueError
+        target_ip = str(target_address)
+    except ValueError:
+        target_step = (
+            'Confirm the endpoint target still exists. If it came from Autodiscovery, inspect and correct stale '
+            'configuration. Run: agent configcheck'
+        )
+    else:
+        target_step = (
+            f'If {target_ip} is a Kubernetes Pod IP, confirm it still belongs to a live pod. If no live pod owns it, '
+            'inspect agent configcheck and fix stale Autodiscovery. To list matching pods, run: '
+            f'kubectl get pods -A -o wide --field-selector=status.podIP={quote(target_ip)}'
+        )
+
     return {
         'summary': REMEDIATION_SUMMARY,
         'steps': [
             {
                 'order': 1,
-                'text': (
-                    f'If {details.host} is a Kubernetes Pod IP, confirm it still belongs to a live pod. '
-                    f'Run: kubectl get pods -A -o wide --field-selector=status.podIP={details.host}. '
-                    'If no live pod owns it, Run: agent configcheck and fix stale Autodiscovery.'
-                ),
+                'text': target_step,
             },
             {
                 'order': 2,
                 'text': (
                     'Test from the reporting Agent or Cluster Check Runner network namespace. '
-                    f"Run: curl -sv --connect-timeout 5 '{details.sanitized}'."
+                    f'Run: curl -sv --connect-timeout 5 {quote(details.sanitized)}'
                 ),
             },
             {
@@ -201,8 +216,8 @@ def _remediation(check_name: str, details: EndpointDetails) -> dict[str, str | l
             {
                 'order': 5,
                 'text': (
-                    f'From the same reporting Agent or Cluster Check Runner, run: agent check {check_name}. '
-                    'The issue resolves automatically after the endpoint becomes reachable.'
+                    'The issue resolves automatically after the endpoint becomes reachable. To verify from the same '
+                    f'reporting Agent or Cluster Check Runner, run: agent check -- {quote(check_name)}'
                 ),
             },
         ],

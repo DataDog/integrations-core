@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import errno
+import shlex
 import socket
 from io import BytesIO
 from unittest import mock
@@ -184,16 +185,16 @@ def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
                 {
                     'order': 1,
                     'text': (
-                        'If 10.0.0.8 is a Kubernetes Pod IP, confirm it still belongs to a live pod. '
-                        'Run: kubectl get pods -A -o wide --field-selector=status.podIP=10.0.0.8. '
-                        'If no live pod owns it, Run: agent configcheck and fix stale Autodiscovery.'
+                        'If 10.0.0.8 is a Kubernetes Pod IP, confirm it still belongs to a live pod. If no live pod '
+                        'owns it, inspect agent configcheck and fix stale Autodiscovery. To list matching pods, run: '
+                        'kubectl get pods -A -o wide --field-selector=status.podIP=10.0.0.8'
                     ),
                 },
                 {
                     'order': 2,
                     'text': (
                         'Test from the reporting Agent or Cluster Check Runner network namespace. '
-                        "Run: curl -sv --connect-timeout 5 'http://10.0.0.8:9102/metrics'."
+                        'Run: curl -sv --connect-timeout 5 http://10.0.0.8:9102/metrics'
                     ),
                 },
                 {
@@ -213,8 +214,8 @@ def test_report_submits_complete_sanitized_issue_for_nested_no_route_error():
                 {
                     'order': 5,
                     'text': (
-                        'From the same reporting Agent or Cluster Check Runner, run: agent check openmetrics_test. '
-                        'The issue resolves automatically after the endpoint becomes reachable.'
+                        'The issue resolves automatically after the endpoint becomes reachable. To verify from the '
+                        'same reporting Agent or Cluster Check Runner, run: agent check -- openmetrics_test'
                     ),
                 },
             ],
@@ -259,6 +260,70 @@ def test_report_emits_canonical_error_without_url_leakage_or_corruption(
     emitted_issue = repr(issue)
     assert endpoint not in emitted_issue
     assert url_secret not in emitted_issue
+
+
+@pytest.mark.parametrize(
+    'endpoint',
+    [
+        pytest.param("http://10.0.0.8/'; echo PWNED; #'", id='single-quote'),
+        pytest.param('http://10.0.0.8/$(echo PWNED)', id='command-substitution'),
+        pytest.param('http://10.0.0.8/metrics;echo${IFS}PWNED', id='semicolon'),
+    ],
+)
+def test_remediation_shell_quotes_the_endpoint(endpoint: str):
+    check = create_check()
+
+    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+
+    issue = check.report_issue.call_args.kwargs
+    sanitized_endpoint = issue['extra']['endpoint']
+    curl_step = issue['remediation']['steps'][1]['text']
+    command = curl_step.split('Run: ', 1)[1]
+    assert shlex.split(command) == ['curl', '-sv', '--connect-timeout', '5', sanitized_endpoint]
+
+
+def test_remediation_does_not_put_an_unvalidated_host_in_a_kubectl_command():
+    endpoint = 'http://10.0.0.8;id;/metrics'
+    check = create_check()
+
+    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+
+    step = check.report_issue.call_args.kwargs['remediation']['steps'][0]['text']
+    assert 'kubectl' not in step
+    assert step.endswith('Run: agent configcheck')
+
+
+@pytest.mark.parametrize(
+    ('endpoint', 'unsafe_text'),
+    [
+        pytest.param('http://[fe80::1%25$(id)]/metrics', '$(id)', id='command-substitution'),
+        pytest.param(
+            'http://[fe80::1%25eth0,metadata.name=x]/metrics',
+            'metadata.name=x',
+            id='field-selector',
+        ),
+    ],
+)
+def test_remediation_does_not_treat_a_scoped_ipv6_host_as_a_pod_ip(endpoint: str, unsafe_text: str):
+    check = create_check()
+
+    EndpointUnreachableIssueReporter.report(check, endpoint, unreachable_connection_error(endpoint))
+
+    step = check.report_issue.call_args.kwargs['remediation']['steps'][0]['text']
+    assert 'kubectl' not in step
+    assert unsafe_text not in step
+    assert step.endswith('Run: agent configcheck')
+
+
+@pytest.mark.parametrize('check_name', ['openmetrics; echo PWNED', '--help'])
+def test_remediation_shell_quotes_the_check_name(check_name: str):
+    check = create_check(name=check_name)
+
+    EndpointUnreachableIssueReporter.report(check, SANITIZED_ENDPOINT, unreachable_connection_error())
+
+    step = check.report_issue.call_args.kwargs['remediation']['steps'][4]['text']
+    command = step.split('run: ', 1)[1]
+    assert shlex.split(command) == ['agent', 'check', '--', check.name]
 
 
 def test_report_uses_flattened_errno_text_as_narrow_fallback():
