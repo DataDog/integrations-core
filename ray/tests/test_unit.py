@@ -5,15 +5,28 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.ray import RayCheck
+from datadog_checks.ray.metrics import METRIC_MAP
 
 from .common import HEAD_METRICS, MOCKED_HEAD_INSTANCE, MOCKED_WORKER_INSTANCE, WORKER_METRICS, mock_http_responses
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    assert RayCheck.DEFAULT_METRIC_LIMIT == 0
+
+
+def test_get_default_config_uses_metric_map():
+    check = RayCheck("ray", {}, [MOCKED_HEAD_INSTANCE])
+    assert check.get_default_config() == {"metrics": [METRIC_MAP]}
+
 
 @pytest.mark.parametrize(
-    'instance, metrics',
+    "instance, metrics",
     [
-        pytest.param(MOCKED_HEAD_INSTANCE, HEAD_METRICS, id='head'),
-        pytest.param(MOCKED_WORKER_INSTANCE, WORKER_METRICS, id='worker'),
+        pytest.param(MOCKED_HEAD_INSTANCE, HEAD_METRICS, id="head"),
+        pytest.param(MOCKED_WORKER_INSTANCE, WORKER_METRICS, id="worker"),
     ],
 )
 def test_check(dd_run_check, aggregator, mocker, check, instance, metrics):
