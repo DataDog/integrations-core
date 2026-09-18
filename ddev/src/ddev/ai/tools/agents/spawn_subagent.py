@@ -83,7 +83,12 @@ class SpawnSubagentTool(BaseSpawnTool[SpawnSubagentInput]):
             subagent_id, label, tool_input.system_prompt, tool_input.prompt, tool_input.tools
         )
         if outcome.error is not None:
-            return ToolResult(success=False, error=f"Subagent {label!r} {outcome.error}")
+            return ToolResult(
+                success=False,
+                error=f"Subagent {label!r} {outcome.error}",
+                total_input_tokens=outcome.input_tokens,
+                total_output_tokens=outcome.output_tokens,
+            )
         return ToolResult(
             success=True,
             data=outcome.text,
