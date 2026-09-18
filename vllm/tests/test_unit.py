@@ -11,7 +11,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.vllm import vLLMCheck
 
-from .common import METRICS_MOCK, get_fixture_path
+from .common import GPU_METRICS_MOCK, METRICS_MOCK, get_fixture_path
 
 
 def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
@@ -60,6 +60,30 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
 
     version_metadata = _get_version_metadata("0.4.3")
     datadog_agent.assert_metadata("test:123", version_metadata)
+
+
+@pytest.mark.parametrize(
+    ('instance_fixture', 'fixture_file'),
+    [('instance', 'vllm_metrics.txt'), ('ray_instance', 'ray_vllm_metrics.txt')],
+)
+def test_gpu_metrics_are_not_collected_without_gpu_monitoring(
+    dd_run_check, aggregator, datadog_agent, request, instance_fixture, fixture_file
+):
+    mock_responses = [
+        MockResponse(file_path=get_fixture_path(fixture_file)),
+        MockResponse(file_path=get_fixture_path("vllm_version.json")),
+    ]
+
+    with (
+        mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}),
+        mock.patch('requests.Session.get', side_effect=mock_responses),
+    ):
+        check = vLLMCheck("vLLM", {}, [request.getfixturevalue(instance_fixture)])
+        dd_run_check(check)
+
+    aggregator.assert_metric('vllm.num_requests.running')
+    for metric in GPU_METRICS_MOCK:
+        aggregator.assert_metric(metric, count=0)
 
 
 def _get_version_metadata(raw_version):

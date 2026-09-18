@@ -39,7 +39,7 @@ vllm.request.params.best_of.sum,count,,,,Histogram of the best_of request parame
 vllm.request.params.n.bucket,count,,,,Histogram of the n request parameter.,0,vllm,,,
 vllm.request.params.n.count,count,,,,Histogram of the n request parameter.,0,vllm,,,
 vllm.request.params.n.sum,count,,,,Histogram of the n request parameter.,0,vllm,,,
-vllm.request.prefill_kv_computed_tokens.bucket,count,,,,New KV tokens computed during prefill histogram buckets.,0,vllm,,,
+vllm.request.prefill_kv_computed_tokens.bucket,count,,,,Histogram buckets for new KV tokens computed during prefill.,0,vllm,,,
 vllm.request.prefill_kv_computed_tokens.count,count,,,,Number of prefill KV token observations.,0,vllm,,,
 vllm.request.prefill_kv_computed_tokens.sum,count,,item,,Total new KV tokens computed during prefill.,0,vllm,,,
 vllm.request.prefill_time.seconds.bucket,count,,,,Request prefill-time histogram buckets.,0,vllm,,,
