@@ -109,7 +109,10 @@ REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE = 'final_page_too_large'
 # so the receipt carries no final object key, byte count, or checksum. It echoes exactly the
 # accepted page's identity (``upload_id``, ``batch_index``, ``record_offset``,
 # ``source_rows``) plus ``status: accepted``; final metadata reaches the producer only
-# through the run's finalized totals.
+# through the run's finalized totals. The handoff succeeds on HTTP 202 exactly — acceptance
+# into bounded processing, not final completion — so any other successful status fails
+# closed instead of being parsed as a receipt.
+REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE = 202
 REMOTE_QUERY_PAGE_RECEIPT_STATUS = 'accepted'
 REMOTE_QUERY_PAGE_RECEIPT_KEYS = frozenset(('upload_id', 'batch_index', 'record_offset', 'source_rows', 'status'))
 
@@ -1637,8 +1640,9 @@ class RequestsUploadClient:
 
         The buffered page is streamed as the request body with stable declared source
         metadata; every bounded retry rewinds the buffer and resends byte-identical content
-        for the same page index. Intake answers HTTP 202 once the page is admitted and
-        started; its defensive ``final_page_too_large`` rejection surfaces
+        for the same page index. The handoff succeeds on HTTP 202 exactly — intake admits and
+        starts the page there — and any other successful status fails closed; its defensive
+        ``final_page_too_large`` rejection surfaces
         as its own failure code so the writer can split the buffered records and retry the
         same index.
         """
@@ -1650,7 +1654,7 @@ class RequestsUploadClient:
         # declared as a stable Content-Length for one non-chunked request body.
         headers['Content-Length'] = str(page.source_bytes)
         url = '{}/uploads/{}/pages/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, page.batch_index)
-        _status, response_body = upload_with_retry(
+        status, response_body = upload_with_retry(
             'PUT',
             url,
             headers,
@@ -1662,6 +1666,8 @@ class RequestsUploadClient:
             deadline=creds.wall_deadline,
             timings=self._timings,
         )
+        if status != REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE:
+            raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload answered HTTP {}.'.format(status))
         return parse_json_object_response(response_body, 'page upload')
 
     def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> Mapping[str, Any]:

@@ -1550,6 +1550,28 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
     assert receipt == acceptance_receipt(2, 7, 1)
 
 
+def test_http_page_handoff_requires_http_202(monkeypatch, creds):
+    """The pinned page handoff is HTTP 202 exactly: an HTTP 200 carrying an otherwise-valid
+    acceptance receipt is not the acceptance contract and fails closed, so a non-202
+    success can never advance the producer on an unverified handoff."""
+    import requests
+
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append(1)
+        return SimpleNamespace(status_code=200, content=json.dumps(acceptance_receipt(0, 7, 1)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    page = source_page(b'x')
+    with pytest.raises(rq.RemoteQueryFailure) as failure, io.BytesIO(b'x') as body:
+        rq.RequestsUploadClient().put_source_page(creds, page, body)
+    assert failure.value.code == 'invalid_receipt'
+    assert not failure.value.retryable
+    # The wrong-status success fails on its own response; it is not retried.
+    assert len(calls) == 1
+
+
 def test_http_final_page_too_large_surfaces_as_its_own_code(monkeypatch, creds):
     import requests
 

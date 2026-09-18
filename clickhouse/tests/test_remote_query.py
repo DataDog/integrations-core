@@ -1002,14 +1002,7 @@ def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
         'format_version': 'csv-json-cell-v1',
         'include_schema': False,
         'agent_hostname': AGENT_HOSTNAME,
-        'columns': [
-            {
-                'column_name': 'value',
-                'vendor_data_type': 'UInt8',
-                'logical_type': 'integer',
-                'array_element_delimiter': None,
-            }
-        ],
+        'columns': [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}],
     }
 
 
@@ -1132,14 +1125,7 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
     assert (call.batch_index, call.record_offset, call.rows, call.source_bytes) == (0, 0, 0, 0)
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
-    assert descriptor['columns'] == [
-        {
-            'column_name': 'value',
-            'vendor_data_type': 'UInt8',
-            'logical_type': 'integer',
-            'array_element_delimiter': None,
-        }
-    ]
+    assert descriptor['columns'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}]
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
     assert final['upload_receipt']['totalBytes'] == 0
@@ -1376,18 +1362,8 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
     assert descriptor['columns'] == [
-        {
-            'column_name': 'city',
-            'vendor_data_type': 'String',
-            'logical_type': 'string',
-            'array_element_delimiter': None,
-        },
-        {
-            'column_name': 'country',
-            'vendor_data_type': 'String',
-            'logical_type': 'string',
-            'array_element_delimiter': None,
-        },
+        {'column_name': 'city', 'vendor_data_type': 'String', 'logical_type': 'string', 'array_element_delimiter': None},
+        {'column_name': 'country', 'vendor_data_type': 'String', 'logical_type': 'string', 'array_element_delimiter': None},
     ]
     assert event_metadata(events[0])['includeSchema'] is True
 
@@ -1410,18 +1386,8 @@ def test_producer_descriptor_carries_clickhouse_type_strings_and_logical_types(m
     # The descriptor's vendor data types are the exact ClickHouse type strings from the
     # stream header, with wrappers peeled for the logical types.
     assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {
-            'column_name': 'count',
-            'vendor_data_type': 'Nullable(UInt64)',
-            'logical_type': 'integer',
-            'array_element_delimiter': None,
-        },
-        {
-            'column_name': 'name',
-            'vendor_data_type': 'LowCardinality(String)',
-            'logical_type': 'string',
-            'array_element_delimiter': None,
-        },
+        {'column_name': 'count', 'vendor_data_type': 'Nullable(UInt64)', 'logical_type': 'integer', 'array_element_delimiter': None},
+        {'column_name': 'name', 'vendor_data_type': 'LowCardinality(String)', 'logical_type': 'string', 'array_element_delimiter': None},
         {'column_name': 'flag', 'vendor_data_type': 'Bool', 'logical_type': 'boolean', 'array_element_delimiter': None},
     ]
     assert page == csv_record([b'null', b'"x"', b'true'])
@@ -2406,12 +2372,7 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
     # any page is uploaded.
     (descriptor_body,) = fake.descriptor_bodies
     assert json.loads(descriptor_body)['columns'] == [
-        {
-            'column_name': 'value',
-            'vendor_data_type': 'UInt8',
-            'logical_type': 'integer',
-            'array_element_delimiter': None,
-        }
+        {'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}
     ]
     # One complete page uploaded as one direct PUT: exact whole-page identity, rows exact.
     (page_call,) = fake.put_page_calls
