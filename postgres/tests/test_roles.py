@@ -9,7 +9,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
 from datadog_checks.postgres.version_utils import V13, V15
 
-from .utils import _get_superconn, requires_over_14, run_one_check
+from .utils import _get_superconn, requires_over_14, requires_over_15, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -69,6 +69,10 @@ def role_catalog(roles_instance):
                 ALTER VIEW dd_role_obs.item_view OWNER TO dd_role_obs_owner;
                 CREATE VIEW dd_role_obs.invoker_view AS SELECT id FROM dd_role_obs.items;
                 ALTER VIEW dd_role_obs.invoker_view OWNER TO dd_role_obs_owner;
+                CREATE VIEW dd_role_obs.invoker_view_on AS SELECT id FROM dd_role_obs.items;
+                ALTER VIEW dd_role_obs.invoker_view_on OWNER TO dd_role_obs_owner;
+                CREATE VIEW dd_role_obs.invoker_view_one AS SELECT id FROM dd_role_obs.items;
+                ALTER VIEW dd_role_obs.invoker_view_one OWNER TO dd_role_obs_owner;
                 CREATE MATERIALIZED VIEW dd_role_obs.item_summary AS
                     SELECT count(*) AS item_count FROM dd_role_obs.items;
                 ALTER MATERIALIZED VIEW dd_role_obs.item_summary OWNER TO dd_role_obs_owner;
@@ -94,6 +98,10 @@ def role_catalog(roles_instance):
                 BEGIN
                     IF current_setting('server_version_num')::integer >= 150000 THEN
                         EXECUTE 'ALTER VIEW dd_role_obs.invoker_view SET (security_invoker = true)';
+                        -- Postgres stores reloptions verbatim, so each accepted boolean
+                        -- spelling shows up differently in pg_class.reloptions.
+                        EXECUTE 'ALTER VIEW dd_role_obs.invoker_view_on SET (security_invoker = on)';
+                        EXECUTE 'ALTER VIEW dd_role_obs.invoker_view_one SET (security_invoker = 1)';
                         EXECUTE 'ALTER DEFAULT PRIVILEGES FOR ROLE dd_role_obs_owner '
                             'GRANT USAGE ON SCHEMAS TO dd_role_obs_reader WITH GRANT OPTION';
                     END IF;
@@ -358,6 +366,33 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         and dependency['referenced_object_name'] == 'items'
         for dependency in privilege_event['object_dependencies']
     )
+
+
+@requires_over_15
+def test_collect_roles_security_invoker_boolean_spellings(integration_check, roles_instance, role_catalog, aggregator):
+    """A view created with `security_invoker = on` or `= 1` must be reported as security invoker.
+
+    Postgres keeps the literal text in pg_class.reloptions instead of normalizing it, so reading
+    the option by exact string comparison misreports the security model of such views.
+    """
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    privilege_event = next(
+        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    )
+
+    assert {
+        obj['object_name']: obj['security_invoker']
+        for obj in privilege_event['objects']
+        if obj['schema_name'] == 'dd_role_obs' and obj['object_type'] == 'view'
+    } == {
+        'item_view': False,
+        'invoker_view': True,
+        'invoker_view_on': True,
+        'invoker_view_one': True,
+    }
 
 
 def test_collect_roles_disabled(integration_check, roles_instance, aggregator):

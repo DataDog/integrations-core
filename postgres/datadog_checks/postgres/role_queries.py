@@ -337,7 +337,14 @@ FROM (
            relation.oid::bigint AS object_oid,
            owner.rolname::text AS owner_name,
            false AS is_security_definer,
-           COALESCE('security_invoker=true' = ANY(relation.reloptions), false) AS security_invoker,
+           COALESCE(
+               (
+                   SELECT option_value::boolean
+                   FROM pg_catalog.pg_options_to_table(relation.reloptions)
+                   WHERE option_name = 'security_invoker'
+               ),
+               false
+           ) AS security_invoker,
            relation.relacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_class AS relation
     JOIN pg_catalog.pg_namespace AS namespace
