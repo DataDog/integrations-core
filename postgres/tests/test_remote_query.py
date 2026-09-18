@@ -16,7 +16,6 @@ from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 from datadog_checks.postgres.remote_query import (
-    NativeCopyRecordAssembler,
     StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
     iter_agent_resolve_events,
@@ -533,20 +532,6 @@ def native_field(value):
 def native_record(*values):
     """The expected native COPY CSV record for one row of values."""
     return (','.join(native_field(value) for value in values) + '\n').encode('utf-8')
-
-
-def native_record_row_bound(record, names, array_factor=1):
-    """The conservative final-JSON bound of one native record's row object, independently.
-
-    Mirrors the writer's native bound without reusing it: the framing constants, the
-    canonical key tokens, the record's own bytes plus its JSON-escape growth, and one
-    redaction-marker slot per column; an array-bearing column scales the value term.
-    """
-    key_bound = sum(len(json.dumps(name, ensure_ascii=False).encode('utf-8')) for name in names)
-    controls = len(record) - len(record.translate(None, bytes(range(0x20))))
-    growth = record.count(b'\\') + 5 * controls
-    value_bound = (len(record) + growth + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * len(names)) * array_factor
-    return 1 + key_bound + 2 * len(names) + value_bound
 
 
 # ---------------------------------------------------------------------------
@@ -1544,20 +1529,17 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
 # ---------------------------------------------------------------------------
 
 
-def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch):
+def test_producer_splits_pages_by_the_source_page_target(monkeypatch):
+    """Native pages close at the record boundary that reaches the internal source-page
+    target: the schema-bearing envelope no longer bounds the producer's page sizing —
+    intake stays authoritative for the transformed final page — so records split purely by
+    source bytes, schema or not."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     columns = [
         FakeColumn('city', 1043, 255),
         FakeColumn('country', 1043, 255),
     ]
-    pool = FakePool(
-        rows=[('New York', 'USA'), ('Beautiful city of lights', 'France')],
-        description=columns,
-        vendor_types={(1043, 255): 'character varying(255)'},
-    )
-    request = bounded_request(query='SELECT city, country FROM cities ORDER BY city')
-    request['includeSchema'] = True
     schema_json = json.dumps(
         [
             {'column_name': 'city', 'vendor_data_type': 'character varying(255)'},
@@ -1565,13 +1547,18 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
         ],
         separators=(',', ':'),
     ).encode('utf-8')
-    # Intake stamps the schema into every final page, so the producer's bound carries the
-    # schema-bearing envelope: maxFileBytes here fits that envelope plus exactly the longer
-    # native record, so both records never fit one page and the second forces a second page.
-    request['resultDelivery']['limits']['maxFileBytes'] = (
-        len(prefix_bytes(schema_json=schema_json))
-        + native_record_row_bound(native_record('Beautiful city of lights', 'France'), ['city', 'country'])
-        + len(rq.PAGE_SUFFIX)
+    # The budget fits the schema-bearing envelope plus a little slack: its source-page
+    # target (4/5 of it, 268 bytes) sits below one wide record, so every record closes its
+    # own page whatever the schema-bearing envelope weighs.
+    budget = len(prefix_bytes(schema_json=schema_json)) + len(rq.PAGE_SUFFIX) + 2
+    first = native_record('a' * 300, 'USA')  # 309 bytes >= the 268-byte target
+    second = native_record('b' * 300, 'France')
+    request = bounded_request(maxFileBytes=budget, maxRowBytes=budget)
+    request['includeSchema'] = True
+    pool = FakePool(
+        copy_blocks=[first, second],
+        description=columns,
+        vendor_types={(1043, 255): 'character varying(255)'},
     )
     fake = FakeUploadClient()
 
@@ -1580,26 +1567,11 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     assert_success(events)
     pages = assembled_pages(fake)
     assert list(pages) == [0, 1]
-    assert pages[0] == native_record('New York', 'USA')
-    assert pages[1] == native_record('Beautiful city of lights', 'France')
+    assert pages[0] == first
+    assert pages[1] == second
     assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
     assert [call.record_offset for call in fake.put_page_calls] == [0, 1]
-    descriptor = json.loads(fake.descriptor_bodies[0])
-    assert descriptor['include_schema'] is True
-    assert descriptor['columns'] == [
-        {
-            'column_name': 'city',
-            'vendor_data_type': 'character varying(255)',
-            'logical_type': 'string',
-            'array_element_delimiter': None,
-        },
-        {
-            'column_name': 'country',
-            'vendor_data_type': 'character varying(255)',
-            'logical_type': 'string',
-            'array_element_delimiter': None,
-        },
-    ]
+    assert json.loads(fake.descriptor_bodies[0])['include_schema'] is True
     assert event_metadata(events[0])['includeSchema'] is True
 
 
@@ -1775,32 +1747,35 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-# One native text row ('aaaa',) over a single text column: a 7-byte source record whose
-# final-JSON row bound carries it plus the column's key and marker slots.
+# One wide native text row per page: a 170-byte source record over a single text column,
+# which closes its own page under a 200-byte maxFileBytes (its 160-byte source-page target).
 BOUND_NAMES = ['payload']
-BOUND_RECORD = native_record('aaaa')
+BOUND_RECORD = native_record('a' * 167)  # 170 bytes
 
 
-def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
-    """A budget that fits exactly two bound rows in one page (minus the extra bytes)."""
+def two_row_boundary_request(monkeypatch):
+    """A budget whose source-page target closes exactly one wide record per page."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    row_bound = native_record_row_bound(BOUND_RECORD, BOUND_NAMES)
-    request = bounded_request()
-    request['resultDelivery']['limits']['maxFileBytes'] = (
-        prefix_len + row_bound + 1 + row_bound + len(rq.PAGE_SUFFIX) + extra_bound_bytes
+    return bounded_request(maxFileBytes=200, maxRowBytes=200, maxSchemaBytes=1, maxPages=128, maxResultBytes=64 * 1024)
+
+
+def wide_row_pool():
+    """A pool whose two wide rows each close their own page under the boundary request."""
+    return FakePool(
+        rows=[('a' * 167,), ('a' * 167,)],
+        description=[FakeColumn('payload', 25)],
+        vendor_types={(25, -1): 'text'},
     )
-    request['resultDelivery']['limits']['maxSchemaBytes'] = 1
-    return request
 
 
 def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    # maxRowBytes bounds one native source record: the 7-byte record for ('aaaa',) cannot fit 6.
+    # maxRowBytes bounds one native source record: the 170-byte record for the wide row
+    # cannot fit 169.
     request = bounded_request(maxRowBytes=len(BOUND_RECORD) - 1)
-    pool = FakePool(rows=[('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'})
+    pool = FakePool(rows=[('a' * 167,)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'})
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
@@ -1880,64 +1855,63 @@ def test_descriptor_is_registered_before_the_first_source_record(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def assembled_records(blocks, max_row_bytes=1024):
-    assembler = NativeCopyRecordAssembler(max_row_bytes)
-    records = []
-    for block in blocks:
-        records.extend(assembler.feed(block))
-    assembler.finish()
-    return records
+def test_producer_frames_native_records_across_block_boundaries(monkeypatch):
+    """The producer feeds raw COPY blocks to the shared writer, which carries the framing
+    state across block boundaries: a record split between blocks, records batched into one
+    block, and embedded commas, quotes, and newlines all arrive as one whole, verbatim
+    source page."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    first = native_record('a,b', 'He said "Hi"', 'line1\nline2')
+    second = native_record(None, '', '\\N')
+
+    def block_provider():
+        middle = len(first) // 2
+        yield first[:middle]
+        yield first[middle:] + second[:4]
+        yield second[4:]
+
+    pool = FakePool(
+        block_provider=block_provider,
+        description=[FakeColumn('a', 25), FakeColumn('b', 25), FakeColumn('c', 25)],
+        vendor_types={(25, -1): 'text'},
+    )
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    pages = assembled_pages(fake)
+    assert list(pages) == [0]
+    assert pages[0] == first + second
+    (call,) = fake.put_page_calls
+    assert call.rows == 2
+    assert call.source_bytes == len(first) + len(second)
+    assert call.sha256_hex == hashlib.sha256(first + second).hexdigest()
 
 
-def test_record_assembler_yields_one_record_per_block():
-    assert assembled_records([native_record(1), native_record(2)]) == [native_record(1), native_record(2)]
+def test_producer_fails_closed_when_the_copy_stream_ends_mid_record(monkeypatch):
+    """A COPY stream that ends inside a record never produces a page for it: the run fails
+    closed after the read-only transaction rolls back."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
 
+    def block_provider():
+        yield b'"abc'
+        yield b''
 
-def test_record_assembler_yields_every_record_inside_one_batched_block():
-    blocks = [native_record(1) + native_record(2) + native_record(3)]
-    assert assembled_records(blocks) == [native_record(1), native_record(2), native_record(3)]
+    pool = FakePool(
+        block_provider=block_provider,
+        description=[FakeColumn('a', 25)],
+        vendor_types={(25, -1): 'text'},
+    )
+    fake = FakeUploadClient()
 
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
-def test_record_assembler_reassembles_a_record_split_across_blocks():
-    record = native_record('a,b', 'He said "Hi"')
-    middle = len(record) // 2
-    assert assembled_records([record[:middle], record[middle:]]) == [record]
-
-
-def test_record_assembler_keeps_embedded_newlines_and_crlf_inside_one_record():
-    # CR/LF inside quoted fields are data, not terminators: the record stays whole.
-    record = native_record(None, 'line1\nline2', 'a\r\nb')
-    assert assembled_records([record]) == [record]
-    # Even when the embedded newline straddles two blocks.
-    split = record.index(b'\n')
-    assert assembled_records([record[:split], record[split:]]) == [record]
-
-
-def test_record_assembler_keeps_null_empty_and_literal_marker_distinguishable():
-    # The three native spellings stay distinct bytes: unquoted \N (NULL), quoted empty
-    # string, and a quoted literal \N text.
-    record = native_record(None, '', '\\N')
-    assert record == b'\\N,"","\\N"\n'
-    assert assembled_records([record]) == [record]
-
-
-def test_record_assembler_fails_closed_when_the_stream_ends_mid_record():
-    assembler = NativeCopyRecordAssembler(1024)
-    with pytest.raises(rq.RemoteQueryFailure) as failure:
-        list(assembler.feed(b'"abc'))
-        assembler.finish()
-    assert failure.value.code == 'query_failed'
-
-
-def test_record_assembler_fails_closed_when_a_partial_record_exceeds_max_row_bytes():
-    # The unterminated tail already exceeds the budget: fail now instead of buffering an
-    # unbounded record.
-    assembler = NativeCopyRecordAssembler(4)
-    with pytest.raises(rq.RemoteQueryFailure) as failure:
-        list(assembler.feed(b'"aaaaaa'))
-    assert failure.value.code == 'row_too_large'
-    # A complete record exactly at the budget still passes.
-    assert assembled_records([b'"ab"\n'], max_row_bytes=4) == [b'"ab"\n']
+    assert_failed_event(events, 'query_failed', 'open native record')
+    assert fake.put_page_calls == []
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
 
 
 # ---------------------------------------------------------------------------
@@ -2154,101 +2128,9 @@ def test_producer_describes_a_domain_over_array_without_a_delimiter(monkeypatch)
     ]
 
 
-def test_producer_scales_the_page_bound_for_array_columns(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # An array column's decoded JSON array can grow beyond its native text (per-element
-    # quotes, booleans, redaction markers), so its records carry the scaled bound: with a
-    # budget that fits one scaled bound but not two, the second record opens a second page.
-    names = ['array_value']
-    record = native_record('{t,f}')
-    assert native_record_row_bound(record, names, rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR) > (
-        2 * native_record_row_bound(record, names)
-    )
-    request = bounded_request()
-    request['resultDelivery']['limits']['maxFileBytes'] = (
-        len(prefix_bytes())
-        + native_record_row_bound(record, names, rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR)
-        + len(rq.PAGE_SUFFIX)
-    )
-    pool = FakePool(
-        copy_blocks=[record, record],
-        description=[FakeColumn('array_value', 1000)],
-        vendor_types={(1000, -1): ('boolean[]', ',')},
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_success(events)
-    pages = assembled_pages(fake)
-    assert list(pages) == [0, 1]
-    assert pages[0] == record
-    assert pages[1] == record
-    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {
-            'column_name': 'array_value',
-            'vendor_data_type': 'boolean[]',
-            'logical_type': 'json',
-            'array_element_delimiter': ',',
-        }
-    ]
-
-
-def test_producer_scales_the_page_bound_for_embedded_escape_growth(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # Records whose text needs JSON escaping (backslashes, control characters) carry a
-    # larger bound than their clean length: two records of equal clean budget cannot share
-    # a page sized for one of them plus its escape growth.
-    names = ['payload']
-    clean = native_record('x' * 3)
-    escaped = native_record('a\tb')
-    assert len(clean) == len(escaped)
-    assert native_record_row_bound(escaped, names) > native_record_row_bound(clean, names)
-    request = bounded_request()
-    # The budget fits exactly both records at the clean bound — so a producer that bounded
-    # by clean length alone would keep them on one page — but the escaped record's JSON-escape
-    # growth headroom pushes it past the budget and onto its own page.
-    clean_bound = native_record_row_bound(clean, names)
-    request['resultDelivery']['limits']['maxFileBytes'] = (
-        len(prefix_bytes()) + clean_bound + 1 + clean_bound + len(rq.PAGE_SUFFIX)
-    )
-    request['resultDelivery']['limits']['maxSchemaBytes'] = 1
-    pool = FakePool(
-        copy_blocks=[clean, escaped],
-        description=[FakeColumn('payload', 25)],
-        vendor_types={(25, -1): 'text'},
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    assert_success(events)
-    pages = assembled_pages(fake)
-    # The clean record fits the budget; the escaped record needs its growth headroom and
-    # opens its own page.
-    assert list(pages) == [0, 1]
-    assert pages[0] == clean
-    assert pages[1] == escaped
-
-
-# ---------------------------------------------------------------------------
-# Failure, timeout, and cancellation flows
-# ---------------------------------------------------------------------------
-
-
 def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    request = bounded_request(
-        maxFileBytes=prefix_len + native_record_row_bound(BOUND_RECORD, BOUND_NAMES) + len(rq.PAGE_SUFFIX),
-        maxSchemaBytes=1,
-    )
-    pool = FakePool(
-        rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
-    )
+    request = two_row_boundary_request(monkeypatch)
+    pool = wide_row_pool()
     fake = FakeUploadClient()
 
     events = collect_events(request, make_check(pool=pool), client=fake)
@@ -2282,10 +2164,8 @@ def test_stream_fails_closed_on_page_receipt_identity_mismatch(monkeypatch):
     only the identity fields (index, offset, rows) must match, and a mismatch fails the run."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
-    pool = FakePool(
-        rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
-    )
+    request = two_row_boundary_request(monkeypatch)
+    pool = wide_row_pool()
     fake = FakeUploadClient(
         put_page_response=lambda page: {
             'batch_index': page.batch_index,
@@ -2317,10 +2197,8 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
     instrument_postgres_fakes(monkeypatch, clock)
     # A two-page boundary whose second page upload fails: the first page is acknowledged
     # and counted, the second attempt's wall is measured but never promoted.
-    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
-    pool = FakePool(
-        rows=[('aaaa',), ('aaaa',)], description=[FakeColumn('payload', 25)], vendor_types={(25, -1): 'text'}
-    )
+    request = two_row_boundary_request(monkeypatch)
+    pool = wide_row_pool()
 
     def fail_second_page(page):
         if page.batch_index == 1:
@@ -2349,22 +2227,24 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
         'rowsEmitted': 1,
         'pagesEmitted': 1,
         'bytesEmitted': first_page_bytes,
-        'elapsedMs': 5750,
+        'elapsedMs': 5375,
     }
     assert error['executionDiagnostics'] == {
         'contractVersion': 1,
         'producer': {
-            'totalMs': 5750,
+            'totalMs': 5375,
             'databaseSetupMs': 3125,
-            # Three copy.read calls: the two records and the empty end-of-stream read.
-            'databaseFetchMs': 1125,
+            # Two copy.read calls: the page closes at the target while the second record
+            # is fed, so its failed upload aborts the record loop before the empty
+            # end-of-stream read.
+            'databaseFetchMs': 750,
             'encodeAndPageBuildMs': 0,
             # Both upload walls are kept: the acknowledged page and the failed attempt's.
             'pageUploadMs': 1250,
             # finalizeMs is absent: finalize never ran. uploadAttemptCount/RetryCount are
             # absent too: the injected client makes no HTTP attempts.
             'otherMs': 250,
-            'timeToFirstPageMs': 4500,
+            'timeToFirstPageMs': 4125,
             'pageCount': 1,
             'rowCount': 1,
             'byteCount': first_page_bytes,

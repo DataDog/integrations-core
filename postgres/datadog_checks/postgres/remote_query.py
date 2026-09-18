@@ -5,7 +5,7 @@
 """Remote query source-page producer for the Postgres integration.
 
 Executes one validated query once through the database-native ``COPY ... TO STDOUT`` CSV
-path and streams the native records as record-complete source pages to its-agent-intake:
+path and streams the native byte blocks as record-complete source pages to its-agent-intake:
 the server frames every non-null field as quoted CSV text (``FORCE_QUOTE *``) with NULL as
 the sole unquoted ``\\N`` field, so embedded commas, quotes, CR/LF, empty strings, a
 literal ``\\N``, and NULL stay distinguishable in the raw bytes and no value is decoded,
@@ -13,8 +13,10 @@ re-encoded, or re-framed in Python. The adapter describes the result once — fr
 never-fetched named (server-side) cursor DECLARE inside the same read-only transaction,
 so the customer query's values are evaluated exactly once, by the COPY alone — and
 registers one immutable descriptor (column names, vendor types, logical types) before any
-result record is read; the shared source-page writer bounds, buffers, and uploads each
-page, and intake decodes the native text by the descriptor, applies optional redaction,
+result record is read; the shared source-page writer frames the native records in one
+bounded buffer — carrying CSV quote parity across COPY block boundaries, closing pages
+at the internal source-page target — and uploads each page, while intake decodes the
+native text by the descriptor, applies optional redaction,
 and writes the final JSON pages. Session output settings that shape native text (time
 zone, date style, interval style, bytea output, float digits) are pinned
 transaction-locally, so the records are a pure function of the values. Bulk page bytes
@@ -369,66 +371,10 @@ def native_copy_sql(query: str) -> str:
     return 'COPY ({}) TO STDOUT WITH ({})'.format(query, POSTGRES_COPY_SQL_OPTIONS)
 
 
-NATIVE_RECORD_TERMINATOR = b'\n'
-NATIVE_FIELD_QUOTE = b'"'
-
-
-class NativeCopyRecordAssembler:
-    """Accumulate raw COPY blocks into complete native CSV records.
-
-    libpq delivers ``COPY TO STDOUT`` data as whole ``CopyData`` messages, but their
-    granularity is not a record contract: psycopg's own row parsing is the text format's
-    (tab-split, backslash-escaped) and does not understand CSV, so records are assembled
-    here from the raw byte stream alone. A record is complete exactly at the first LF that
-    closes every quoted field — with ``FORCE_QUOTE *`` every non-null field's quotes pair
-    and escaped quotes double, so an even running quote count marks every field boundary —
-    which keeps embedded commas, quotes, and CR/LF inside fields while records stay whole.
-    Only one partial record is ever buffered, bounded by ``max_row_bytes``.
-    """
-
-    def __init__(self, max_row_bytes: int):
-        self._max_row_bytes = max_row_bytes
-        self._pending = bytearray()
-        self._scan_from = 0
-        self._open_quotes = 0
-
-    def feed(self, block: bytes | bytearray | memoryview) -> Iterator[bytes]:
-        """Fold one COPY block in and yield every complete record it terminates."""
-        self._pending += block
-        while True:
-            terminator = self._pending.find(NATIVE_RECORD_TERMINATOR, self._scan_from)
-            if terminator < 0:
-                break
-            # Quotes since the record's start decide whether this LF closes the record or
-            # rides inside a quoted field.
-            self._open_quotes ^= self._pending.count(NATIVE_FIELD_QUOTE, self._scan_from, terminator) & 1
-            self._scan_from = terminator + 1
-            if self._open_quotes:
-                continue
-            record = bytes(self._pending[: terminator + 1])
-            del self._pending[: terminator + 1]
-            self._open_quotes = 0
-            self._scan_from = 0
-            yield record
-        # Quotes between the last LF and the block's end belong to the still-open record.
-        end = len(self._pending)
-        if self._scan_from < end:
-            self._open_quotes ^= self._pending.count(NATIVE_FIELD_QUOTE, self._scan_from, end) & 1
-            self._scan_from = end
-        # A partial record already beyond maxRowBytes can only complete beyond it: fail now
-        # instead of buffering an unbounded record.
-        if end > self._max_row_bytes:
-            raise rq.RemoteQueryFailure(
-                'row_too_large',
-                'A single native record exceeds maxRowBytes ({} > {} bytes).'.format(end, self._max_row_bytes),
-            )
-
-    def finish(self) -> None:
-        """Fail closed unless the stream ended exactly at a record boundary."""
-        if self._pending:
-            raise rq.RemoteQueryFailure(
-                'query_failed', 'The COPY stream ended before the open native record was complete.'
-            )
+# The record framing the native CSV needs — locating each record's true LF terminator by
+# quote parity — belongs to the shared source-page writer: libpq block boundaries are not
+# a record contract, so the writer carries the quote parity across blocks and frames
+# records while it buffers them, never materializing one object per row.
 
 
 # ---------------------------------------------------------------------------
@@ -456,12 +402,12 @@ def produce_remote_query(
     description yields the column metadata; the single ``COPY (query) TO STDOUT`` then
     evaluates the query and streams its native CSV records. Session output settings are
     pinned in the same transaction, the vendor-type lookup and descriptor registration both
-    precede the first record, and the shared source-page writer bounds, buffers, and
-    uploads the native records without re-querying.
+    precede the first record, and the shared source-page writer frames the native blocks,
+    buffers one bounded source page, and uploads it without re-querying.
 
     Producer phases: connection acquisition through descriptor registration and the COPY
     dispatch is database setup, each ``copy.read`` call is a database fetch, record
-    assembly and page buffering are encode and page build (with any upload triggers nested
+    framing and page buffering are encode and page build (with any upload triggers nested
     inside it), and page uploads and finalize are accounted by the shared source-page
     writer. Everything else — timeout resolution, the pre-read guards, transaction
     teardown — lands in ``otherMs``.
@@ -521,20 +467,28 @@ def produce_remote_query(
                                 timings.exit_phase(setup_phase)
                                 try:
                                     with timings.phase('encode_and_page_build'):
-                                        assembler = NativeCopyRecordAssembler(limits.max_row_bytes)
                                         while True:
-                                            with timings.phase('database_fetch'):
+                                            # One fetch phase per read, entered and exited
+                                            # explicitly like the setup phase above: the
+                                            # per-record loop is the hot path, and a phase
+                                            # context manager per read costs more than the
+                                            # read itself.
+                                            fetch_phase = timings.enter_phase('database_fetch')
+                                            try:
                                                 block = copy.read()
+                                            finally:
+                                                timings.exit_phase(fetch_phase)
                                             if not block:
                                                 break
                                             guard()
-                                            for record in assembler.feed(block):
-                                                guard()
-                                                writer.add_native_record(record)
-                                        assembler.finish()
+                                            writer.feed_native_copy_block(block)
+                                        # Fail closed unless the COPY stream ended exactly at a
+                                        # record boundary; the final page close and the run
+                                        # finalize below are their own phases.
+                                        writer.finish_native_copy_stream()
                                     return writer.finish()
                                 finally:
-                                    # Release the page even if record assembly or the copy fails.
+                                    # Release the page even if record framing or the copy fails.
                                     writer.discard()
                 finally:
                     if in_transaction:

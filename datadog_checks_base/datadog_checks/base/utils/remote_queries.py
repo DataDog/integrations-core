@@ -6,22 +6,24 @@
 
 Database execution and value normalization belong to integration adapters. The producer
 registers one immutable source-page descriptor per upload and sends record-complete CSV
-source pages; intake decodes, redacts, and writes the final JSON pages, so the producer never
-constructs a final JSON envelope and never claims its source bytes or checksums are final
-artifact metadata. Only metadata and the compact receipt return through the Agent's native
-callback.
+source pages to its-agent-intake: native ``COPY TO STDOUT`` blocks stream through one
+bounded mutable page buffer with single-pass CSV framing — no per-record objects are
+materialized — while canonical-token producers append framed rows to the same buffer.
+Intake decodes, redacts, and writes the final JSON pages, so the producer never constructs
+a final JSON envelope and never claims its source bytes or checksums are final artifact
+metadata. Only metadata and the compact receipt return through the Agent's native callback.
 """
 
 from __future__ import annotations
 
 import csv
 import hashlib
-import io
 import json
 import logging
 import math
 import re
 import time
+from array import array
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -298,9 +300,7 @@ class RemoteQueryUploadDescriptor(BaseModel):
                         'Array columns of the postgres-copy-csv-v1 format require an array_element_delimiter.'
                     )
                 if not is_array and column.array_element_delimiter is not None:
-                    raise ValueError(
-                        'array_element_delimiter must be null for non-array postgres-copy-csv-v1 columns.'
-                    )
+                    raise ValueError('array_element_delimiter must be null for non-array postgres-copy-csv-v1 columns.')
             elif column.array_element_delimiter is not None:
                 raise ValueError('array_element_delimiter must be null for the csv-json-cell-v1 format.')
         return self
@@ -884,12 +884,12 @@ def page_prefix(
 
 # A framed CSV record is at most twice its final-JSON row bound minus a positive constant:
 # a canonical-token cell at worst doubles the token's quotes and adds two framing quotes,
-# while every column contributes at least a three-byte key token to the row bound; a
-# native COPY CSV record is bounded by its own final-JSON row bound outright, since the
-# bound counts the record's own bytes plus framing constants. A page whose final bound
-# fits maxFileBytes therefore holds source bytes strictly below twice maxFileBytes, so the
-# cap below is a defensive split trigger that valid operation can never reach; it keeps
-# retry memory bounded even if that proof ever breaks.
+# while every column contributes at least a three-byte key token to the row bound. The
+# cap below is a defensive split trigger that valid operation can never reach: the
+# source-page target closes every page at the target plus at most one record, and
+# maxRowBytes can never exceed maxFileBytes, so a page stays strictly below
+# target + maxFileBytes < 2 * maxFileBytes. It keeps retry memory bounded even if that
+# proof ever breaks.
 REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR = 2
 
 
@@ -924,83 +924,100 @@ def frame_csv_record(tokens: Sequence[bytes]) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# PostgreSQL-native COPY CSV record bounds (postgres-copy-csv-v1)
+# PostgreSQL-native COPY CSV framing and source-page sizing (postgres-copy-csv-v1)
 # ---------------------------------------------------------------------------
 
 # In the native grammar every non-null field is quoted with internal quotes doubled, NULL
 # is the sole unquoted field (the two-byte \N marker), and every record ends with one LF;
-# commas and CR/LF can appear raw inside quoted fields. Intake decodes the native text by
-# the descriptor's column types, applies optional SDS, and writes the final JSON row
-# object, so the producer bounds that final row from the record bytes alone.
+# commas and CR/LF can appear raw inside quoted fields. The producer never predicts the
+# transformed final JSON bytes of a native record — intake stays authoritative for
+# maxFileBytes and answers an oversized attempt with final_page_too_large, which the
+# writer splits at a recorded record boundary and retries at the same page index — so the
+# producer's own sizing is transport policy only.
 
-# The JSON-escape growth of native text: a raw backslash doubles (``\\``) and a control
-# character grows at most to a six-byte ``\uXXXX`` escape (five extra bytes; the short
-# escapes for \n and friends grow less). CSV-doubled quotes are already two bytes per
-# character in the native record and stay two bytes as escaped JSON quotes, so quotes add
-# no growth. The record's own LF terminator is a control byte, so it is counted too.
-POSTGRES_COPY_CSV_ESCAPE_SCAN = re.compile(rb'[\x00-\x1f\\]')
-POSTGRES_COPY_CSV_CONTROL_BYTES = bytes(range(0x20))
+# The native wire's two framing bytes: every record ends with one LF, and a record's true
+# terminator is the first LF that closes every quoted field — with ``FORCE_QUOTE *`` every
+# non-null field's quotes pair and escaped quotes double, so an even running quote count
+# since the record's start marks every field boundary — which keeps embedded commas,
+# quotes, and CR/LF inside their record while records stay whole.
+POSTGRES_COPY_CSV_RECORD_TERMINATOR = b'\n'
+POSTGRES_COPY_CSV_FIELD_QUOTE = b'"'
 
-# Decoding an array field into a JSON array grows beyond the native text per element, not
-# per column: elements that arrive unquoted (timestamps, booleans, numerics) gain
-# per-element JSON quotes, a boolean element becomes true/false (five bytes from one),
-# and SDS can replace any tiny string or number element with the twelve-byte redaction
-# marker. The worst family growth stays below four times the native record's bytes, so
-# array-bearing descriptors scale the value bound by four.
-POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR = 4
+# The internal source-page target, as a fraction of the final-file limit: the raw source
+# bytes one page request may carry before the writer closes the page at the record
+# boundary that reaches it. 4/5 puts the target at 80 MiB for the normal 100 MiB final-file
+# target: the representative large-result row's decoded JSON grows only a few percent
+# over its native record (per-column keys and separators), so an ordinary page fits
+# without a rejection round trip, while row distributions that grow more — arrays,
+# redaction, narrow rows — stay covered by intake's authoritative rejection path.
+REMOTE_QUERY_SOURCE_PAGE_TARGET_NUM = 4
+REMOTE_QUERY_SOURCE_PAGE_TARGET_DEN = 5
 
 
-def postgres_copy_csv_escape_growth(record: bytes) -> int:
-    """The JSON-escape growth of one native record's text; zero for the common clean record.
+class _SourcePageBody:
+    """A seekable read-only view over the active page buffer's first ``end`` bytes.
 
-    The scan first separates clean records (no backslash, no control byte) from records
-    that need a precise count, so the common record pays one failed regex search and never
-    allocates; a record containing NULL's ``\\N`` marker or escaped text takes the counting
-    path, whose over-count of framing bytes (the terminator's five, one per NULL marker)
-    only widens the bound.
+    ``put_source_page`` receives the live buffer so no whole-page copy exists between the
+    writer and an HTTP attempt: each ``read`` slices the buffer and copies only the chunk
+    requested, and ``seek(0)`` rewinds a whole-page retry to the exact same bytes. The view
+    derives its buffer export per call and holds none between calls, so the writer can
+    compact the buffer as soon as an attempt is complete. ``read`` always returns ``bytes``
+    — a retained chunk must never pin the shared buffer.
     """
-    if POSTGRES_COPY_CSV_ESCAPE_SCAN.search(record) is None:
-        return 0
-    controls = len(record) - len(record.translate(None, POSTGRES_COPY_CSV_CONTROL_BYTES))
-    backslashes = record.count(b'\\')
-    return backslashes + 5 * controls
 
+    __slots__ = ('_buf', '_end', '_pos')
 
-def postgres_copy_csv_record_final_bound(
-    record: bytes, *, key_bound: int, columns: int, array_factor: int = 1
-) -> int:
-    """The conservative final-JSON bytes of one native COPY CSV record's row object.
+    def __init__(self, buf: bytearray, end: int):
+        self._buf = buf
+        self._end = end
+        self._pos = 0
 
-    Intake builds one JSON row object per record — every descriptor key with its colon, the
-    comma separators, and one value token per column decoded from the native text — so the
-    bound is the framing constants plus the record's own bytes, its JSON-escape growth, and
-    one redaction-marker slot per column (a scalar string or number leaf either keeps its
-    token or is replaced by the fixed marker, whichever is longer). Every scalar family is
-    covered by the native bytes: numeric and boolean tokens never exceed their native text
-    by more than a marker slot, string families are the native text plus escape growth, and
-    bytea's final base64 is shorter than its native hex.
+    def read(self, amount: int | None = -1) -> bytes:
+        if amount is None or amount < 0:
+            amount = self._end - self._pos
+        else:
+            amount = max(0, min(amount, self._end - self._pos))
+        data = bytes(memoryview(self._buf)[self._pos : self._pos + amount])
+        self._pos += amount
+        return data
 
-    ``array_factor`` is :data:`POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR` when the descriptor
-    carries an array column: array decoding grows per element, so the whole value term is
-    scaled instead of counted per column.
-    """
-    value_bound = (
-        len(record) + postgres_copy_csv_escape_growth(record) + len(REMOTE_QUERY_REDACTED_MARKER_TOKEN) * columns
-    ) * array_factor
-    return 1 + key_bound + 2 * columns + value_bound
+    def seek(self, offset: int, whence: int = 0) -> int:
+        if whence == 0:
+            self._pos = offset
+        elif whence == 1:
+            self._pos += offset
+        elif whence == 2:
+            self._pos = self._end + offset
+        else:
+            raise ValueError('invalid whence ({!r}, should be 0, 1 or 2).'.format(whence))
+        self._pos = max(0, min(self._pos, self._end))
+        return self._pos
+
+    def tell(self) -> int:
+        return self._pos
+
+    def __iter__(self):
+        # requests streams a body that exposes ``__iter__``; the HTTP sender consumes the
+        # body through ``read`` alone, so iteration itself never happens.
+        raise TypeError('the source-page body is a byte stream, not an iterable.')
 
 
 class SourcePageWriter:
     """Keep one record-complete source page in RAM through its retries; never the full result.
 
-    The writer registers the upload descriptor once before any record is read, buffers
-    complete CSV records — canonical-token records framed from ``add_row`` cells, or
-    database-native records handed to ``add_native_record`` verbatim — splits pages before
-    the conservative final-JSON bound reaches ``maxFileBytes``, and retries a whole source
-    page byte-identically. Stats and the compact receipt accumulate from intake's returned
-    final metadata, never from local source sizes. The Agent admits one execution at a
-    time; each adapter must call discard in its finally block so query/encoding failures
-    also release the active page.
+    The writer registers the upload descriptor once before any record is read and keeps one
+    bounded mutable byte buffer holding exactly the active page's complete records —
+    canonical-token records framed from ``add_row`` cells, or the native ``COPY TO STDOUT``
+    blocks fed to :meth:`feed_native_copy_block` verbatim — plus the record-end offsets that
+    carry the page's row boundaries. The token grammar splits pages by the conservative
+    final-JSON bound; the native grammar closes a page at the record boundary that reaches
+    the internal source-page target and leaves intake authoritative for the transformed
+    final size, splitting a rejected page at a recorded boundary and retrying the same page
+    index without requerying. Every retry sends the same buffered bytes, and the page
+    checksum is fed each record's bytes exactly once. Stats and the compact receipt
+    accumulate from intake's returned final metadata, never from local source sizes. The
+    Agent admits one execution at a time; each adapter must call discard in its finally
+    block so query/encoding failures also release the active page.
     """
 
     def __init__(
@@ -1050,22 +1067,35 @@ class SourcePageWriter:
                 'The repeated schema plus the minimal page envelope exceeds maxFileBytes.',
             )
         # Each row object repeats every descriptor key, so the canonical key tokens' UTF-8
-        # bytes are part of the bound.
+        # bytes are part of the token grammar's conservative row bound.
         self._key_bound = sum(len(canonical_json_bytes(column.column_name)) for column in descriptor.columns)
-        # Array-bearing native descriptors scale their per-record value bound: array
-        # decoding grows per element, not per column.
-        self._native_array_factor = (
-            POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR
-            if any(column.vendor_data_type.endswith('[]') for column in descriptor.columns)
-            else 1
+        self._native_mode = descriptor.format_version == POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION
+        # The internal transport policy: the raw source bytes one page request may carry
+        # before the page closes at the record boundary that reaches it. Intake stays
+        # authoritative for the transformed final page size.
+        self._source_page_target = (
+            limits.max_file_bytes * REMOTE_QUERY_SOURCE_PAGE_TARGET_NUM // REMOTE_QUERY_SOURCE_PAGE_TARGET_DEN
         )
+        # The defensive hard source transport cap (see REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR):
+        # unreachable while the target close holds, kept so retry memory stays bounded even
+        # if that proof ever breaks.
         self._source_page_cap = REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR * limits.max_file_bytes
-        self._records: list[bytes] | None = None
-        self._record_bounds: list[int] = []
+        # One bounded mutable source-page buffer: complete records append verbatim, the
+        # record-end offsets carry the page's row boundaries for close and split, and the
+        # page checksum is fed each record's bytes exactly once.
+        self._buf = bytearray()
+        self._record_ends: array = array('q')
+        self._record_bounds: array | None = None if self._native_mode else array('q')
         self._page_bound = 0
-        self._page_source_bytes = 0
-        self._page_rows = 0
+        self._page_active = False
         self._page_record_offset = 0
+        self._page_sha = hashlib.sha256()
+        self._page_hashed = 0
+        # Native framing state, carried across COPY blocks: the scanned position, the
+        # running quote parity of the still-open record, and where that record begins.
+        self._scan_pos = 0
+        self._quote_parity = 0
+        self._open_start = 0
         # Registration precedes any result row: one byte-identical body per upload, and
         # intake's receipt must exactly confirm the registered descriptor before rows flow.
         request_body = descriptor_request_bytes(descriptor)
@@ -1084,29 +1114,98 @@ class SourcePageWriter:
         row_bound = 1 + self._key_bound + 2 * len(cells) + sum(cell.final_bound for cell in cells)
         self._append_record(record, row_bound)
 
-    def add_native_record(self, record: bytes) -> None:
-        """Buffer one complete native COPY CSV record; split the page before the final bound overflows.
+    def feed_native_copy_block(self, block: bytes | bytearray | memoryview) -> None:
+        """Append one ``COPY TO STDOUT`` block to the active page and close pages at the target.
 
-        postgres-copy-csv-v1 producers accumulate database-native CSV records — complete,
-        LF-terminated records the server already framed — and hand each over verbatim: the
-        bytes intake receives are exactly the bytes ``COPY ... TO STDOUT`` produced, and the
-        producer never decodes, re-encodes, or re-frames a value. The conservative final-JSON
-        bound is computed from the descriptor and the record bytes alone, mirroring the
-        decode-and-redact intake performs from the same two.
+        libpq block boundaries are not a CSV record contract: the block's bytes append
+        verbatim to the active page buffer and are scanned once — a record completes at the
+        first LF that closes every quoted field, an even running quote count since the
+        record's start — with the framing state carried across blocks, so embedded commas,
+        quotes, and CR/LF ride inside their record. Each completed record's end offset is
+        recorded; a page closes at the record boundary that reaches the internal
+        source-page target, and its upload runs inside this call. Only one partial record
+        beyond the last completed record is ever buffered, bounded by ``maxRowBytes``.
         """
         if self._descriptor.format_version != POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION:
             raise RemoteQueryFailure(
-                'unsupported_value', 'Native COPY CSV records require a postgres-copy-csv-v1 descriptor.'
+                'unsupported_value', 'Native COPY blocks require a postgres-copy-csv-v1 descriptor.'
             )
-        if not record.endswith(b'\n'):
-            raise RemoteQueryFailure('unsupported_value', 'A native source record is not record-complete.')
-        row_bound = postgres_copy_csv_record_final_bound(
-            record,
-            key_bound=self._key_bound,
-            columns=len(self._descriptor.columns),
-            array_factor=self._native_array_factor,
-        )
-        self._append_record(record, row_bound)
+        # The record loop below is the producer's hot path, so every value it touches per
+        # record — the framing bytes, the budgets, the guard, the record offsets, the
+        # checksum — is bound once per block; a page close rebinds the two it replaces.
+        max_row_bytes = self._delivery.limits.max_row_bytes
+        record_terminator = POSTGRES_COPY_CSV_RECORD_TERMINATOR
+        field_quote = POSTGRES_COPY_CSV_FIELD_QUOTE
+        target = self._source_page_target
+        cap = self._source_page_cap
+        guard = self._guard
+        record_ends = self._record_ends
+        sha = self._page_sha
+        active = self._page_active
+        buf = self._buf
+        buf += block
+        pos = self._scan_pos
+        parity = self._quote_parity
+        open_start = self._open_start
+        while True:
+            terminator = buf.find(record_terminator, pos)
+            if terminator < 0:
+                break
+            # Quotes since the record's start decide whether this LF closes the record or
+            # rides inside a quoted field.
+            parity ^= buf.count(field_quote, pos, terminator) & 1
+            pos = terminator + 1
+            if parity:
+                continue
+            if pos - open_start > max_row_bytes:
+                raise RemoteQueryFailure(
+                    'row_too_large',
+                    'A single native record exceeds maxRowBytes ({} > {} bytes).'.format(
+                        pos - open_start, max_row_bytes
+                    ),
+                )
+            guard()
+            if not active:
+                self._begin_page()
+                active = True
+            record_ends.append(pos)
+            open_start = pos
+            if pos >= target or pos > cap:
+                consumed = self._close_page()
+                active = self._page_active
+                if consumed:
+                    pos -= consumed
+                    open_start -= consumed
+                buf = self._buf
+                record_ends = self._record_ends
+                sha = self._page_sha
+        # Quotes between the last LF and the block's end belong to the still-open record.
+        end = len(buf)
+        if pos < end:
+            parity ^= buf.count(field_quote, pos, end) & 1
+        self._quote_parity = parity
+        self._scan_pos = end
+        self._open_start = open_start
+        # A partial record already beyond maxRowBytes can only complete beyond it: fail
+        # now instead of buffering an unbounded record.
+        if end - open_start > max_row_bytes:
+            raise RemoteQueryFailure(
+                'row_too_large',
+                'A single native record exceeds maxRowBytes ({} > {} bytes).'.format(end - open_start, max_row_bytes),
+            )
+        # Feed the page checksum the records this block completed: each byte exactly once.
+        hashed_to = record_ends[-1] if record_ends else 0
+        if hashed_to > self._page_hashed:
+            sha.update(memoryview(buf)[self._page_hashed : hashed_to])
+            self._page_hashed = hashed_to
+
+    def finish_native_copy_stream(self) -> None:
+        """Fail closed unless the COPY stream ended exactly at a record boundary."""
+        last_end = self._record_ends[-1] if self._record_ends else 0
+        if len(self._buf) > last_end:
+            raise RemoteQueryFailure(
+                'query_failed', 'The COPY stream ended before the open native record was complete.'
+            )
 
     def _append_record(self, record: bytes, row_bound: int) -> None:
         """Buffer one complete framed record under the conservative final-JSON page bound."""
@@ -1116,43 +1215,52 @@ class SourcePageWriter:
                 'row_too_large',
                 'A single record exceeds maxRowBytes ({} > {} bytes).'.format(len(record), limits.max_row_bytes),
             )
-        if self._records is None:
+        if not self._page_active:
             self._begin_page()
         while True:
-            page_needed = self._page_bound + (1 if self._page_rows else 0) + row_bound
-            if page_needed > limits.max_file_bytes and self._page_rows:
+            rows = len(self._record_ends)
+            page_needed = self._page_bound + (1 if rows else 0) + row_bound
+            if page_needed > limits.max_file_bytes and rows:
                 self._close_page()
-                if self._records is None:
+                # An oversize rejection leaves the uncommitted tail as the active page with
+                # its bound recomputed, so a page begins only when the close consumed it all.
+                if not self._page_active:
                     self._begin_page()
                 continue
             if page_needed > limits.max_file_bytes:
                 raise RemoteQueryFailure('row_too_large', 'A single row plus the page envelope exceeds maxFileBytes.')
             if self._stats.bytes_emitted + page_needed > limits.max_result_bytes:
                 raise RemoteQueryFailure('max_result_bytes_exceeded', 'Result pages exceed maxResultBytes.')
-            if self._page_source_bytes + len(record) > self._source_page_cap and self._page_rows:
+            page_source_bytes = self._record_ends[-1] if rows else 0
+            if page_source_bytes + len(record) > self._source_page_cap and rows:
                 self._close_page()
-                if self._records is None:
+                if not self._page_active:
                     self._begin_page()
                 continue
-            if self._page_source_bytes + len(record) > self._source_page_cap:
+            if page_source_bytes + len(record) > self._source_page_cap:
                 raise RemoteQueryFailure('row_too_large', 'A single record exceeds the source page cap.')
             break
-        if self._page_rows:
+        if rows:
             self._page_bound += 1
         self._page_bound += row_bound
-        self._records.append(record)
         self._record_bounds.append(row_bound)
-        self._page_source_bytes += len(record)
-        self._page_rows += 1
+        self._buf += record
+        self._record_ends.append(len(self._buf))
+        # The page checksum is fed each record's bytes exactly once.
+        self._page_sha.update(record)
+        self._page_hashed = len(self._buf)
 
     def finish(self) -> dict[str, Any]:
         """Close any open page and return the compact receipt from intake's authoritative totals."""
-        if self._records is None and self._descriptor.include_schema and self._stats.pages_emitted == 0:
+        if not self._page_active and self._descriptor.include_schema and self._stats.pages_emitted == 0:
             # Preserve schema discovery for an empty result: one zero-record source page makes
             # intake create the schema-bearing final page with empty ``data``.
             self._begin_page()
-        while self._records is not None:
+        while self._page_active:
             self._close_page()
+        return self._finalize_run()
+
+    def _finalize_run(self) -> dict[str, Any]:
         # Finalize includes its receipt verification and authoritative totals in its own phase.
         with self._timings.phase('finalize'):
             response = self._client.finalize_run(self._creds)
@@ -1167,61 +1275,84 @@ class SourcePageWriter:
 
     def discard(self) -> None:
         """Release the buffered page; safe when no page is open."""
-        self._records = None
-        self._record_bounds = []
+        self._page_active = False
+        self._buf = bytearray()
+        self._record_ends = array('q')
+        if not self._native_mode:
+            self._record_bounds = array('q')
+        self._page_sha = hashlib.sha256()
+        self._page_hashed = 0
+        self._scan_pos = 0
+        self._quote_parity = 0
+        self._open_start = 0
 
     def _begin_page(self) -> None:
         if self._stats.pages_emitted >= self._delivery.limits.max_pages:
             raise RemoteQueryFailure('max_pages_exceeded', 'Page count reached maxPages.')
-        prefix = page_prefix(
-            run_id=self._delivery.run_id,
-            task_id=self._delivery.task_id,
-            record_offset=self._stats.rows_emitted,
-            agent_hostname=self._descriptor.agent_hostname,
-            schema_json=self._schema_json,
-        )
-        # The envelope's record_offset digits grow with the run, so the fit is re-checked for
-        # every page, not only once at construction.
-        if len(prefix) + len(PAGE_SUFFIX) > self._delivery.limits.max_file_bytes:
-            raise RemoteQueryFailure('row_too_large', 'Page envelope exceeds maxFileBytes.')
-        self._records = []
-        self._record_bounds = []
-        self._page_bound = len(prefix) + len(PAGE_SUFFIX)
-        self._page_source_bytes = 0
-        self._page_rows = 0
+        if not self._native_mode:
+            prefix = page_prefix(
+                run_id=self._delivery.run_id,
+                task_id=self._delivery.task_id,
+                record_offset=self._stats.rows_emitted,
+                agent_hostname=self._descriptor.agent_hostname,
+                schema_json=self._schema_json,
+            )
+            # The envelope's record_offset digits grow with the run, so the fit is re-checked for
+            # every page, not only once at construction.
+            if len(prefix) + len(PAGE_SUFFIX) > self._delivery.limits.max_file_bytes:
+                raise RemoteQueryFailure('row_too_large', 'Page envelope exceeds maxFileBytes.')
+            self._page_bound = len(prefix) + len(PAGE_SUFFIX)
+            self._record_bounds = array('q')
         self._page_record_offset = self._stats.rows_emitted
+        self._page_active = True
 
-    def _close_page(self) -> None:
+    def _close_page(self) -> int:
         """Commit the buffered records as one source page at the next sequential index.
 
         One source page maps to one final page at the same index. When intake defensively
         rejects a page as ``final_page_too_large``, the buffered records are split in half and
         the same index is retried with fewer records — without requerying or reordering rows —
-        and the uncommitted tail stays buffered as the active page.
+        and the uncommitted tail stays buffered as the active page. Returns the buffered
+        bytes the acknowledged page consumed; the buffer's remaining bytes are the active
+        page, so a caller scanning the buffer adjusts its offsets by that amount.
         """
         if self._stats.pages_emitted >= self._delivery.limits.max_pages:
             raise RemoteQueryFailure('max_pages_exceeded', 'Page count reached maxPages.')
-        records = self._records
-        bounds = self._record_bounds
+        record_ends = self._record_ends
+        record_bounds = self._record_bounds
         offset = self._page_record_offset
-        count = len(records)
+        total = len(record_ends)
+        page_end = record_ends[-1] if total else 0
+        # Intake's receipts are authoritative for final bytes, so the native grammar's
+        # aggregate check uses them plus the page's own source bytes — a lower bound on its
+        # final JSON, since every row object repeats the descriptor keys over its record.
+        if self._native_mode and self._stats.bytes_emitted + page_end > self._delivery.limits.max_result_bytes:
+            raise RemoteQueryFailure('max_result_bytes_exceeded', 'Result pages exceed maxResultBytes.')
+        count = total
         receipt: Mapping[str, Any]
         while True:
-            body = b''.join(records[:count])
+            page_end = record_ends[count - 1] if count else 0
+            if count == total:
+                sha256_hex = self._page_digest(page_end)
+            else:
+                # A halved retry declares only the prefix it sends: one bounded pass over the
+                # prefix, exceptional retry work rather than ordinary per-page cost.
+                sha256_hex = hashlib.sha256(memoryview(self._buf)[:page_end]).hexdigest()
             metadata = SourcePageUploadMetadata(
                 batch_index=self._stats.pages_emitted,
                 record_offset=offset,
-                source_bytes=len(body),
+                source_bytes=page_end,
                 rows=count,
-                sha256_hex=hashlib.sha256(body).hexdigest(),
+                sha256_hex=sha256_hex,
             )
+            body = _SourcePageBody(self._buf, page_end)
             try:
                 self._guard()
                 # The upload phase covers the whole put_source_page call (every attempt plus
                 # backoff), so a halving retry measures its own upload wall; the receipt
                 # verification below stays in the enclosing phase's bucket.
                 with self._timings.page_upload():
-                    receipt = self._client.put_source_page(self._creds, metadata, io.BytesIO(body))
+                    receipt = self._client.put_source_page(self._creds, metadata, body)
                 verify_source_page_receipt(receipt, metadata)
             except RemoteQueryFailure as failure:
                 if failure.code != REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE or count <= 1:
@@ -1236,15 +1367,38 @@ class SourcePageWriter:
         # Only the acknowledged page enters the upload distribution; a split attempt's wall
         # stays in the cumulative pageUploadMs.
         self._timings.note_page_acknowledged()
-        if count == len(records):
-            self._records = None
-            self._record_bounds = []
-            return
-        # The rejected page was split: the uncommitted tail is the active page now.
-        self._records = records[count:]
-        self._record_bounds = bounds[count:]
-        self._page_record_offset = offset + count
-        self._recompute_page_accounting()
+        acknowledged = record_ends[count - 1] if count else 0
+        # The acknowledged bytes leave the buffer; the uncommitted tail is the active page.
+        del self._buf[:acknowledged]
+        if count == total:
+            self._record_ends = array('q')
+            if record_bounds is not None:
+                self._record_bounds = array('q')
+            self._page_active = False
+        else:
+            self._record_ends = array('q', (end - acknowledged for end in record_ends[count:]))
+            if record_bounds is not None:
+                self._record_bounds = array('q', record_bounds[count:])
+            self._page_record_offset = offset + count
+            if not self._native_mode:
+                self._recompute_page_accounting()
+        # The retained tail's checksum state: one bounded pass over its completed records.
+        self._page_sha = hashlib.sha256()
+        self._page_hashed = self._record_ends[-1] if self._record_ends else 0
+        if self._page_hashed:
+            self._page_sha.update(memoryview(self._buf)[: self._page_hashed])
+        if self._native_mode:
+            # The still-open record's framing state shifts with the buffer.
+            self._scan_pos -= acknowledged
+            self._open_start -= acknowledged
+        return acknowledged
+
+    def _page_digest(self, page_end: int) -> str:
+        """The active page's source checksum, finalized over its last unhashed segment."""
+        if self._page_hashed != page_end:
+            self._page_sha.update(memoryview(self._buf)[self._page_hashed : page_end])
+            self._page_hashed = page_end
+        return self._page_sha.hexdigest()
 
     def _recompute_page_accounting(self) -> None:
         prefix_len = len(
@@ -1259,8 +1413,6 @@ class SourcePageWriter:
         self._page_bound = (
             prefix_len + len(PAGE_SUFFIX) + sum(self._record_bounds) + max(0, len(self._record_bounds) - 1)
         )
-        self._page_source_bytes = sum(len(record) for record in self._records or ())
-        self._page_rows = len(self._record_bounds)
 
 
 def raise_if_timed_out(deadline: float) -> None:

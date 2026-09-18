@@ -61,9 +61,7 @@ def descriptor(
         name, vendor, logical = column[:3]
         delimiter = column[3] if len(column) > 3 else None
         if delimiter is None:
-            column_kwargs.append(
-                {'column_name': name, 'vendor_data_type': vendor, 'logical_type': logical}
-            )
+            column_kwargs.append({'column_name': name, 'vendor_data_type': vendor, 'logical_type': logical})
         else:
             column_kwargs.append(
                 {
@@ -74,9 +72,7 @@ def descriptor(
                 }
             )
     return rq.RemoteQueryUploadDescriptor(
-        format_version=format_version
-        if format_version is not None
-        else rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
+        format_version=format_version if format_version is not None else rq.REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION,
         include_schema=include_schema,
         agent_hostname=agent_hostname,
         columns=[rq.RemoteQueryDescriptorColumn(**kwargs) for kwargs in column_kwargs],
@@ -630,8 +626,9 @@ def test_descriptor_accepts_printable_non_structural_array_element_delimiters(de
     assert column.array_element_delimiter == delimiter
     # Non-array and json-cell columns carry null.
     assert (
-        rq.RemoteQueryDescriptorColumn(column_name='a', vendor_data_type='text', logical_type='string')
-        .array_element_delimiter
+        rq.RemoteQueryDescriptorColumn(
+            column_name='a', vendor_data_type='text', logical_type='string'
+        ).array_element_delimiter
         is None
     )
 
@@ -714,66 +711,110 @@ def make_native_writer(delivery, creds, uploads, columns=(('value', 'text', 'str
     )
 
 
-def test_native_records_stream_verbatim_as_the_source_page(delivery, creds):
-    """A native record's bytes are the page's bytes: the writer never re-frames them."""
-    columns = (('null_value', 'text', 'string'), ('text_value', 'text', 'string'))
-    record = b'\\N,' + native_field('He said "Hi"') + b'\n'
+def feed_native_blocks(writer, blocks):
+    for block in blocks:
+        writer.feed_native_copy_block(block)
+
+
+def native_target_delivery(delivery, max_file_bytes, max_row_bytes):
+    """A native delivery whose source-page target and row budget are both explicit."""
+    return bounded_delivery(
+        delivery, maxSchemaBytes=1, maxFileBytes=max_file_bytes, maxRowBytes=max_row_bytes, maxPages=8
+    )
+
+
+def test_native_blocks_stream_verbatim_as_the_source_page(delivery, creds):
+    """The native blocks' bytes are the page's bytes: the writer never re-frames a value,
+    whether libpq delivered the records batched into one block or split one across blocks."""
+    columns = (
+        ('null_value', 'text', 'string'),
+        ('text_value', 'text', 'string'),
+        ('utf8_value', 'text', 'string'),
+    )
+    first = b'\\N,' + native_field('He said "Hi"') + b',' + native_field('héllo') + b'\n'
+    second = native_csv_record('plain')
     uploads = Uploads()
     writer = make_native_writer(delivery, creds, uploads, columns=columns)
-    writer.add_native_record(record)
+    feed_native_blocks(writer, [first[:5], first[5:], second])
     result = writer.finish()
 
     (page, payload) = uploads.pages[0]
-    assert payload == record
+    assert payload == first + second
     assert page.batch_index == 0
     assert page.record_offset == 0
-    assert page.source_bytes == len(record)
-    assert page.rows == 1
-    assert page.sha256_hex == hashlib.sha256(record).hexdigest()
+    assert page.source_bytes == len(first) + len(second)
+    assert page.rows == 2
+    assert page.sha256_hex == hashlib.sha256(first + second).hexdigest()
     assert result['pageCount'] == 1
     assert uploads.descriptor_bodies[0].startswith(b'{"format_version":"postgres-copy-csv-v1"')
 
 
-def test_native_record_final_bound_pins_the_conservative_formula():
-    key_bound = len(b'"value"') + len(b'"payload"')
-    record = b'"abc","de"\n'
-    # Clean record: framing constants, the record's own bytes, and one redaction-marker slot
-    # per column (the record's LF terminator itself counts as one control byte).
-    clean_expected = 1 + key_bound + 2 * 2 + (len(record) + 5 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * 2)
-    assert rq.postgres_copy_csv_record_final_bound(record, key_bound=key_bound, columns=2) == clean_expected
-    # Escape growth: each raw backslash doubles and each control byte grows to at most a
-    # six-byte \uXXXX escape, so a real tab inside the text adds five bytes beyond the
-    # record's own five-byte LF-terminator slot.
-    dirty = b'"a\tb","de"\n'
-    dirty_expected = 1 + key_bound + 2 * 2 + (
-        len(dirty) + 5 * 2 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * 2
-    )
-    assert rq.postgres_copy_csv_record_final_bound(dirty, key_bound=key_bound, columns=2) == dirty_expected
-    # The array factor scales the whole value term for array-bearing descriptors.
-    scaled = rq.postgres_copy_csv_record_final_bound(
-        record, key_bound=key_bound, columns=2, array_factor=rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR
-    )
-    value_term = len(record) + 5 + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * 2
-    assert scaled == 1 + key_bound + 2 * 2 + value_term * rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR
-    assert rq.POSTGRES_COPY_CSV_ARRAY_BOUND_FACTOR == 4
-
-
-def test_native_pages_split_before_the_conservative_final_bound(delivery, creds):
-    """Records split pages by the same conservative final-JSON bound as canonical tokens."""
-    columns = (('value', 'text', 'string'),)
-    key_bound = len(b'"value"')
-    first = native_csv_record('a' * 8)
-    second = native_csv_record('b' * 8)
-    record_bound = rq.postgres_copy_csv_record_final_bound(second, key_bound=key_bound, columns=1)
-    # The budget holds the bare envelope plus exactly one record's bound: the second record
-    # opens the second page without either page exceeding the bound.
-    delivery = bounded_delivery(
-        delivery, maxSchemaBytes=1, maxFileBytes=envelope_bound(delivery, 0) + record_bound
-    )
+@pytest.mark.parametrize(
+    'split_at',
+    [
+        'before_the_embedded_newline',
+        'on_the_embedded_newline',
+        'inside_a_doubled_quote',
+        'before_the_terminator',
+    ],
+)
+def test_native_records_reassemble_across_block_boundaries(delivery, creds, split_at):
+    """A record split across COPY blocks stays whole: embedded commas, quotes, CR, and LF
+    ride inside their record wherever libpq's block boundary happens to fall."""
+    columns = (('text_value', 'text', 'string'),)
+    record = native_csv_record('a,b', 'He said "Hi"', 'line1\nline2', 'cr\r\nlf')
+    split = {
+        'before_the_embedded_newline': record.index(b'\n'),
+        'on_the_embedded_newline': record.index(b'\n') + 1,
+        'inside_a_doubled_quote': record.index(b'""') + 1,
+        'before_the_terminator': len(record) - 1,
+    }[split_at]
     uploads = Uploads()
     writer = make_native_writer(delivery, creds, uploads, columns=columns)
-    writer.add_native_record(first)
-    writer.add_native_record(second)
+    feed_native_blocks(writer, [record[:split], record[split:]])
+    writer.finish_native_copy_stream()
+    result = writer.finish()
+
+    (page, payload) = uploads.pages[0]
+    assert payload == record
+    assert page.rows == 1
+    assert page.source_bytes == len(record)
+    assert result['pageCount'] == 1
+
+
+def test_native_pages_close_by_source_size_inside_one_block(delivery, creds):
+    """A page closes at the record boundary that reaches the source-page target, even when
+    that boundary falls inside a COPY block: the rest of the block continues into the next
+    page and every record is declared exactly once."""
+    columns = (('value', 'text', 'string'),)
+    records = [native_csv_record(text) for text in ('a' * 56, 'b' * 56, 'c' * 56, 'd' * 56)]
+    # maxFileBytes 170 makes the target 136: the second 59-byte record ends at 118 < 136,
+    # the third at 177 >= 136, so the first page closes inside the block after three records.
+    scoped = native_target_delivery(delivery, max_file_bytes=170, max_row_bytes=170)
+    assert len(records[0]) == 59
+    uploads = Uploads()
+    writer = make_native_writer(scoped, creds, uploads, columns=columns)
+    writer.feed_native_copy_block(b''.join(records))
+    result = writer.finish()
+
+    assert [page.batch_index for page, _ in uploads.pages] == [0, 1]
+    assert [(page.rows, page.record_offset) for page, _ in uploads.pages] == [(3, 0), (1, 3)]
+    assert uploads.pages[0][1] == b''.join(records[:3])
+    assert uploads.pages[1][1] == records[3]
+    # The concatenated acknowledged pages reproduce the COPY byte stream exactly, in order.
+    assert b''.join(payload for _, payload in uploads.pages) == b''.join(records)
+    assert result['pageCount'] == 2
+
+
+def test_native_pages_close_by_source_size_across_blocks(delivery, creds):
+    """Records fed one per block close their own page as soon as one reaches the target."""
+    columns = (('value', 'text', 'string'),)
+    first = native_csv_record('a' * 147)  # 150 bytes >= the 136-byte target
+    second = native_csv_record('b' * 147)
+    scoped = native_target_delivery(delivery, max_file_bytes=170, max_row_bytes=170)
+    uploads = Uploads()
+    writer = make_native_writer(scoped, creds, uploads, columns=columns)
+    feed_native_blocks(writer, [first, second])
     result = writer.finish()
 
     assert [page.batch_index for page, _ in uploads.pages] == [0, 1]
@@ -783,17 +824,124 @@ def test_native_pages_split_before_the_conservative_final_bound(delivery, creds)
     assert result['pageCount'] == 2
 
 
-def test_native_record_without_a_record_terminator_fails_closed(delivery, creds):
+def test_native_buffer_stays_bounded_by_the_page_target(delivery, creds):
+    """Retained memory follows the page capacity, not the total result: after any block,
+    the active page buffer holds less than the target plus one max-row record."""
+    columns = (('value', 'text', 'string'),)
+    scoped = bounded_delivery(delivery, maxSchemaBytes=1, maxFileBytes=170, maxRowBytes=170, maxPages=64)
+    uploads = Uploads()
+    writer = make_native_writer(scoped, creds, uploads, columns=columns)
+    record = native_csv_record('x' * 47)  # 50 bytes: pages close every three records
+    for _ in range(100):
+        writer.feed_native_copy_block(record)
+        assert len(writer._buf) < writer._source_page_target + scoped.limits.max_row_bytes
+    writer.finish_native_copy_stream()
+    result = writer.finish()
+
+    assert result['pageCount'] > 1
+    assert b''.join(payload for _, payload in uploads.pages) == record * 100
+
+
+def test_native_completed_record_exceeding_max_row_bytes_fails_closed(delivery, creds):
     uploads = Uploads()
     writer = make_native_writer(delivery, creds, uploads)
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        writer.add_native_record(b'"not complete"')
-    assert failure.value.code == 'unsupported_value'
+        writer.feed_native_copy_block(native_csv_record('a' * 64))
+    assert failure.value.code == 'row_too_large'
     assert uploads.pages == []
 
 
-def test_writer_rejects_records_from_the_other_cell_grammar(delivery, creds):
-    """The descriptor's format selects the cell grammar, so a record of the wrong grammar
+def test_native_partial_record_exceeding_max_row_bytes_fails_closed(delivery, creds):
+    """An unterminated tail already beyond maxRowBytes can only complete beyond it: fail at
+    the block instead of buffering an unbounded record."""
+    uploads = Uploads()
+    writer = make_native_writer(delivery, creds, uploads)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        writer.feed_native_copy_block(b'"' + b'a' * 64)
+    assert failure.value.code == 'row_too_large'
+    assert uploads.pages == []
+
+
+def test_native_stream_end_mid_record_fails_closed(delivery, creds):
+    """A COPY stream that ends inside a record never produces a page for it."""
+    uploads = Uploads()
+    writer = make_native_writer(delivery, creds, uploads)
+    writer.feed_native_copy_block(b'"abc')
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        writer.finish_native_copy_stream()
+    assert failure.value.code == 'query_failed'
+    writer.discard()
+
+
+def test_native_zero_record_schema_page(delivery, creds):
+    """include_schema=true keeps schema discovery for an empty native result: exactly one
+    zero-record source page, so intake creates the schema-bearing final page."""
+    uploads = Uploads()
+    writer = make_native_writer(delivery, creds, uploads, include_schema=True)
+    result = writer.finish()
+
+    assert result['pageCount'] == 1
+    (page, payload) = uploads.pages[0]
+    assert payload == b''
+    assert page.rows == 0
+    assert page.record_offset == 0
+    assert page.source_bytes == 0
+    assert page.sha256_hex == hashlib.sha256(b'').hexdigest()
+
+
+def test_native_final_page_too_large_splits_and_retries_without_requery(delivery, creds):
+    """Intake's defensive final_page_too_large rejection splits the buffered records in
+    half and retries the same page index with fewer records — a pure re-send of buffered
+    bytes, no re-query — while the uncommitted tail continues as the next page."""
+    columns = (('value', 'text', 'string'),)
+    records = [native_csv_record(text) for text in ('a' * 8, 'b' * 8, 'c' * 8, 'd' * 8)]
+
+    def reject_wide_pages(page):
+        if page.rows > 2:
+            return rq.RemoteQueryFailure(
+                rq.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
+            )
+        return None
+
+    uploads = Uploads(put_failure=reject_wide_pages)
+    writer = make_native_writer(delivery, creds, uploads, columns=columns)
+    feed_native_blocks(writer, records)
+    writer.finish_native_copy_stream()
+    result = writer.finish()
+
+    # The rejected four-record page is split: the same index is retried with fewer records,
+    # and the tail becomes the next page, preserving row order without requerying.
+    assert [(page.batch_index, page.rows) for page, _ in uploads.put_attempts] == [(0, 4), (0, 2), (1, 2)]
+    assert b''.join(payload for _, payload in uploads.pages) == b''.join(records)
+    assert uploads.pages[0][0].record_offset == 0
+    assert uploads.pages[1][0].record_offset == 2
+    assert result['pageCount'] == 2
+    assert result['totalRows'] == 4
+
+
+def test_native_result_cap_uses_receipt_bytes_plus_the_page_source(delivery, creds):
+    """The native grammar's aggregate check uses intake's receipt bytes plus the next page's
+    own source bytes — a lower bound on its final JSON — and fails before that page's upload."""
+    columns = (('value', 'text', 'string'),)
+    record = native_csv_record('a' * 127)  # 130 bytes >= the 120-byte target of maxFileBytes 150
+    scoped = bounded_delivery(
+        delivery, maxSchemaBytes=1, maxFileBytes=150, maxRowBytes=150, maxPages=8, maxResultBytes=259
+    )
+    uploads = Uploads()
+    writer = make_native_writer(scoped, creds, uploads, columns=columns)
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        feed_native_blocks(writer, [record, record])
+        writer.finish_native_copy_stream()
+        writer.finish()
+    assert failure.value.code == 'max_result_bytes_exceeded'
+    # The first page's receipt (130 final bytes) plus the second page's 130 source bytes
+    # exceeds the 259-byte aggregate cap, so only the first page was uploaded.
+    assert [page.rows for page, _ in uploads.pages] == [1]
+    assert uploads.pages[0][1] == record
+
+
+def test_writer_rejects_blocks_from_the_other_cell_grammar(delivery, creds):
+    """The descriptor's format selects the cell grammar, so a block of the wrong grammar
     fails closed instead of corrupting the page."""
     uploads = Uploads()
     native_writer = make_native_writer(delivery, creds, uploads)
@@ -804,9 +952,32 @@ def test_writer_rejects_records_from_the_other_cell_grammar(delivery, creds):
 
     token_writer = make_writer(delivery, creds, uploads)
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        token_writer.add_native_record(b'"1"\n')
+        token_writer.feed_native_copy_block(b'"1"\n')
     assert failure.value.code == 'unsupported_value'
     assert uploads.pages == []
+
+
+def test_source_page_body_streams_chunks_and_never_pins_the_buffer():
+    """The upload body view copies only the chunk each read asks for, reports its exact
+    remaining length through requests' own super_len, rewinds on seek(0), and never holds a
+    buffer export between calls — so the writer can compact the buffer after any read."""
+    import requests
+
+    buf = bytearray(b'0123456789')
+    body = rq._SourcePageBody(buf, 6)
+    assert requests.utils.super_len(body) == 6
+    assert body.read(2) == b'01'
+    assert requests.utils.super_len(body) == 4
+    body.seek(0)
+    assert body.read() == b'012345'
+    body.seek(-2, 2)
+    assert body.tell() == 4
+    assert body.read() == b'45'
+    body.seek(0)
+    chunk = body.read(3)
+    # A retained chunk is a copy, not a view: compacting the shared buffer stays possible.
+    del buf[:6]
+    assert chunk == b'012'
 
 
 def test_string_cell_tokens_emit_valid_non_ascii_as_raw_utf8():
@@ -1202,6 +1373,52 @@ def test_final_page_too_large_on_a_single_record_fails_closed(delivery, creds):
     assert uploads.finalize_calls == 0
 
 
+def test_page_bound_survives_an_oversize_split(delivery, creds):
+    """A page assembled after an oversize split still splits by the retained tail's bound.
+
+    The defensive final_page_too_large rejection halves the buffered page and leaves the
+    uncommitted tail as the active page with its bound recomputed; a later append must
+    still see that bound, so the page it completes respects maxFileBytes instead of
+    leaning on another intake rejection.
+    """
+    rejected = []
+
+    def reject_the_first_page(page):
+        if not rejected:
+            rejected.append(page.batch_index)
+            return rq.RemoteQueryFailure(
+                rq.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
+            )
+        return None
+
+    def row_bound(text):
+        token = json.dumps(text).encode('utf-8')
+        return 1 + len(b'"value"') + 2 + rq.redactable_leaf_final_bound(token)
+
+    small, wide = row_bound('a' * 10), row_bound('b' * 60)
+    # The budget holds the two wide rows plus one small row exactly: the fourth row never
+    # fits the page they opened.
+    scoped = bounded_delivery(
+        delivery,
+        maxFileBytes=envelope_bound(delivery, 0) + wide + wide + small + 2,
+        maxRowBytes=128,
+        maxSchemaBytes=1,
+    )
+    uploads = Uploads(put_failure=reject_the_first_page)
+    writer = make_writer(scoped, creds, uploads)
+    for text in ('a' * 10, 'b' * 60, 'c' * 60, 'd' * 10, 'e' * 10):
+        writer.add_row([string_cell(text)])
+    result = writer.finish()
+
+    # The rejected three-row page is halved, its acknowledged prefix leaves the tail — still
+    # carrying the two wide rows — and the two later small rows split exactly as the budget
+    # prescribes instead of joining one page whose bound exceeds maxFileBytes.
+    assert [(page.batch_index, page.rows) for page, _ in uploads.put_attempts] == [(0, 3), (0, 1), (1, 3), (2, 1)]
+    assert [page.rows for page, _ in uploads.pages] == [1, 3, 1]
+    assert [page.record_offset for page, _ in uploads.pages] == [0, 1, 4]
+    assert result['totalRows'] == 5
+
+
 # ---------------------------------------------------------------------------
 # Failure release
 # ---------------------------------------------------------------------------
@@ -1227,7 +1444,7 @@ def test_failed_upload_releases_the_buffered_page(delivery, creds, failure):
     with pytest.raises(rq.RemoteQueryFailure):
         writer.finish()
     writer.discard()
-    assert writer._records is None
+    assert writer._page_active is False
 
 
 # ---------------------------------------------------------------------------
