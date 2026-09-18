@@ -15,16 +15,18 @@ from unittest.mock import ANY
 import pytest
 
 from ddev.cli.application import Application
+from ddev.cli.ci.dispatch_run import resolve_run
 from ddev.cli.ci.dispatch_tests import attach_datadog_log_handler
 from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
 from ddev.monitoring import MonitoringRuntime
 from ddev.monitoring.datadog import DatadogLogHandler
+from ddev.monitoring.datadog_metrics import DatadogMetricsSink
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
 from ddev.utils.github_async.models import PullRequest
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, listed_pull_request, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
-from tests.helpers.datadog import FakeLogSubmitter
-from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
+from tests.helpers.datadog import FakeLogSubmitter, FakeMetricsSubmitter
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -33,6 +35,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from ddev.cli.application import Application
+    from ddev.cli.ci.dispatch_run import ResolvedRun
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.config.file import ConfigFileWithOverrides
     from ddev.monitoring import ComponentMonitor
@@ -447,29 +450,56 @@ def test_pytest_args_are_shown_in_the_plan(ddev, github, planned):
 
 
 @pytest.mark.parametrize(
-    ('extra_options', 'asserted_output'),
-    [
-        (['--dry-run'], 'Dry run: nothing was dispatched'),
-        ([*HEAD_LOOKUP_OPTIONS], 'No open pull request matches the requested revision'),
-    ],
-    ids=['dry-run', 'no-open-pull-request'],
+    'mode_options',
+    [[], ['--dry-run'], ['--resolve-only']],
+    ids=['executing', 'dry-run', 'resolve-only'],
 )
+def test_metric_delivery_follows_the_dispatch_mode(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+    config_file: ConfigFileWithOverrides,
+    mode_options: list[str],
+):
+    """A mode that dispatches nothing reports no metrics; an executing run delivers them."""
+    config_file.model.orgs['default']['api_key'] = 'test-api-key'
+    config_file.save()
+    submitter = FakeMetricsSubmitter()
+    mocker.patch(
+        'ddev.monitoring.datadog_metrics.DatadogMetricsSink',
+        partial(DatadogMetricsSink, submitter=submitter),
+    )
+
+    def resolve(*args: Any, monitor: ComponentMonitor, **kwargs: Any) -> ResolvedRun | None:
+        monitor.metrics.count('probe')
+        return resolve_run(*args, monitor=monitor, **kwargs)
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.resolve_run', resolve)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=[])
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *mode_options)
+
+    assert result.exit_code == 0, result.output
+    if mode_options:
+        assert submitter.series == []
+    else:
+        assert [series['metric'] for series in submitter.series] == ['agent_integrations.test_dispatcher.probe']
+
+
 def test_early_exit_disables_monitoring(
     ddev: CliRunner,
     github: FakeAsyncGitHubClient,
     planned: MagicMock,
     mocker: MockerFixture,
-    extra_options: list[str],
-    asserted_output: str,
 ):
-    if [*HEAD_LOOKUP_OPTIONS] == extra_options:
-        github.mock_response('list_pull_requests', pulls_page())
+    github.mock_response('list_pull_requests', pulls_page())
 
     sink = RecordingSink()
     monitors: list[ComponentMonitor] = []
 
     def make_runtime(**kwargs: Any) -> MonitoringRuntime:
-        runtime = MonitoringRuntime(metrics_sink=sink, **kwargs)
+        kwargs['metrics_sink'] = sink
+        runtime = MonitoringRuntime(**kwargs)
         monitor = runtime.component('dispatcher')
         monitor.metrics.count('before-exit')
         monitors.append(monitor)
@@ -477,20 +507,24 @@ def test_early_exit_disables_monitoring(
 
     mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
 
-    result = ddev('ci', 'dispatch-tests', *extra_options)
+    result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS)
 
     assert result.exit_code == 0, result.output
-    assert asserted_output in result.output
+    assert 'No open pull request matches the requested revision' in result.output
     [monitor] = monitors
     monitor.metrics.count('after-exit')
     assert [record.name for record in sink.records] == ['before-exit']
 
 
-def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev, resolved_changes, mocker, tmp_path):
+def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(
+    ddev, fake_async_github, resolved_changes, mocker, tmp_path
+):
     sink = RecordingSink()
 
     def make_runtime(**kwargs: Any) -> MonitoringRuntime:
-        return MonitoringRuntime(metrics_sink=sink, **kwargs)
+        kwargs['metrics_sink'] = sink
+        kwargs['metrics_tag_projector'] = projector_for('repo', 'head_sha', 'team', 'component')
+        return MonitoringRuntime(**kwargs)
 
     def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
         monitor.metrics.count('plan')
@@ -504,7 +538,6 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
         'dispatch-tests',
         '--commit',
         'a-sha',
-        '--dry-run',
         '--tags',
         'repo:contributor/other head_sha:sneaky team:platform',
         '--output-dir',
@@ -516,10 +549,12 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(ddev,
     # An empty plan is a valid outcome, so the run it belongs to is still identified on disk.
     assert (tmp_path / 'run.json').exists()
     [record] = sink.records
-    assert record.fields['repo'] == 'DataDog/integrations-core'
-    assert record.fields['head_sha'] == 'a-sha'
-    assert record.fields['team'] == 'platform'
-    assert record.fields['component'] == 'planner'
+    assert record.tags == {
+        'repo': 'DataDog/integrations-core',
+        'head_sha': 'a-sha',
+        'team': 'platform',
+        'component': 'planner',
+    }
 
 
 @pytest.mark.usefixtures('resolved_changes')
@@ -593,11 +628,149 @@ def test_attach_datadog_log_handler_delivers_at_the_requested_level(
     monitor.logger.warning('Artifact download failed', run_id=123)
 
     monitoring.close()
+    # The handler stays caller-owned, so the test drains it the way the entry point does.
     handler.close()
 
     [log] = submitter.logs
     assert log['message'] == 'Artifact download failed'
     assert log['status'] == 'warning'
+
+
+def test_a_failing_datadog_metrics_constructor_leaves_the_dispatcher_usable(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+    config_file: ConfigFileWithOverrides,
+):
+    config_file.model.orgs['default']['api_key'] = 'test-api-key'
+    config_file.save()
+    mocker.patch('ddev.monitoring.datadog_metrics.DatadogMetricsSink', side_effect=RuntimeError('no client'))
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=[])
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+
+    assert result.exit_code == 0, result.output
+    assert 'Datadog metric delivery is unavailable' in result.output
+    assert 'RuntimeError: no client' in result.output
+    assert 'Nothing to test' in result.output
+
+
+def test_sink_failures_are_reported_through_the_dedicated_exporter_component(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+    config_file: ConfigFileWithOverrides,
+):
+    """One HTTP batch carries several components' metrics, so its failures are not any one of theirs."""
+    config_file.model.orgs['default']['api_key'] = 'test-api-key'
+    config_file.save()
+    submitter = FakeMetricsSubmitter()
+    submitter.fail_next(RuntimeError('intake unavailable'), count=100)
+    mocker.patch(
+        'ddev.monitoring.datadog_metrics.DatadogMetricsSink',
+        partial(DatadogMetricsSink, submitter=submitter),
+    )
+    log_submitter = FakeLogSubmitter()
+
+    def make_datadog_handler(app: Application, monitoring: MonitoringRuntime, *, level: int) -> DatadogLogHandler:
+        datadog = DatadogLogHandler(api_key='test-api-key', submitter=log_submitter, level=level)
+        datadog.setFormatter(dispatcher_datadog_formatter(ci={}))
+        monitoring.add_log_handler(datadog)
+        return datadog
+
+    json_handler = RecordingJsonHandler()
+
+    def make_runtime(**kwargs: Any) -> MonitoringRuntime:
+        runtime = MonitoringRuntime(**kwargs)
+        runtime.add_log_handler(json_handler)
+        return runtime
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.metrics.count('planned')
+        return []
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.attach_datadog_log_handler', make_datadog_handler)
+    mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+
+    assert result.exit_code == 0, result.output
+    # The submission fails while the runtime drains the sink, and the report still reaches the
+    # runtime's handlers before they detach.
+    exporter_events = [event for event in json_handler.events if event.get('component') == 'datadog-metrics']
+    assert exporter_events
+    assert all(event['category'] == 'submission' for event in exporter_events)
+    assert any(event['event'].startswith('submitting') for event in exporter_events)
+
+
+def test_the_entry_point_drains_its_datadog_handler_before_the_command_returns(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+):
+    """The attached Datadog handler is the entry point's own, not the runtime's: only the entry
+    point's drain delivers what the run buffered, before the command returns."""
+
+    class DeliversOnCloseHandler(RecordingJsonHandler):
+        """A caller-owned handler whose buffered events only leave it through its own `close`."""
+
+        def __init__(self) -> None:
+            super().__init__()
+            self.delivered: list[dict[str, Any]] = []
+
+        def close(self, timeout: float = 10.0) -> None:
+            self.delivered.extend(self.events)
+
+    handler = DeliversOnCloseHandler()
+
+    def make_datadog_handler(app: Application, monitoring: MonitoringRuntime, *, level: int) -> DeliversOnCloseHandler:
+        handler.setLevel(level)
+        monitoring.add_log_handler(handler)
+        return handler
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.attach_datadog_log_handler', make_datadog_handler)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    delivered = [event for event in handler.delivered if event.get('event') == 'Dispatcher invocation started']
+    assert delivered, 'the run buffered a Dispatcher event the entry point never delivered'
+
+
+def test_command_metrics_project_centralized_tags(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+    config_file: ConfigFileWithOverrides,
+):
+    config_file.model.orgs['default']['api_key'] = 'test-api-key'
+    config_file.save()
+    submitter = FakeMetricsSubmitter()
+    mocker.patch(
+        'ddev.monitoring.datadog_metrics.DatadogMetricsSink',
+        partial(DatadogMetricsSink, submitter=submitter),
+    )
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.metrics.count('planned', environment='py3.13', integration='ntp', blob='unselected')
+        return []
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+
+    assert result.exit_code == 0, result.output
+    [series] = submitter.series
+    assert series['metric'] == 'agent_integrations.test_dispatcher.planned'
+    assert series['type'] == 1
+    tags = series['tags']
+    assert 'dispatcher.batch.job.environment:py3.13' in tags
+    assert 'dispatcher.batch.job.integration:ntp' in tags
+    assert 'git.repository.id_v2:github.com/datadog/integrations-core' in tags
+    assert 'dispatcher.context:pr' in tags
+    assert not any('pr.number' in tag for tag in tags)
+    assert not any('blob' in tag for tag in tags)
 
 
 @pytest.mark.usefixtures('resolved_changes')
