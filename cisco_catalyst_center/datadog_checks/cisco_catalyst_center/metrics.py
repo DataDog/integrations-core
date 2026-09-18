@@ -269,6 +269,10 @@ CLIENT_AGGREGATE_METRIC_NAMES: Final[frozenset[str]] = frozenset(name for _, _, 
 # from a shared shape. Listed here so the metadata.csv coupling test has one place to look.
 DERIVED_METRIC_NAMES: Final[frozenset[str]] = frozenset(
     {
+        # Emitted by the check itself rather than by a collector: 1 when every enabled collector
+        # completed the cycle, 0 when any failed. This is what replaces a `can_connect` service
+        # check, which new integrations in this repository do not ship.
+        'collection.success',
         'device.count',
         'device.stack.member.count',
         'device.stack.member.state',

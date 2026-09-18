@@ -9,7 +9,6 @@ from typing import Callable
 
 import pytest
 
-from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.cisco_catalyst_center import CiscoCatalystCenterCheck
@@ -32,18 +31,18 @@ def _serve(check: CiscoCatalystCenterCheck, payload) -> None:
     check.client.http = ScriptedHttp([payload])
 
 
-def test_check_given_reachable_appliance_reports_can_connect_ok(
+def test_check_given_reachable_appliance_reports_collection_success(
     dd_run_check: Callable[..., None], aggregator: AggregatorStub, check: CiscoCatalystCenterCheck
 ) -> None:
     _serve(check, load_captured('data_network_devices'))
 
     dd_run_check(check)
 
-    aggregator.assert_service_check('cisco_catalyst_center.can_connect', ServiceCheck.OK, count=1)
+    aggregator.assert_metric('cisco_catalyst_center.collection.success', value=1)
     aggregator.assert_metric('cisco_catalyst_center.device.count', value=4)
 
 
-def test_check_given_configured_tags_applies_them_to_metrics_and_service_check(
+def test_check_given_configured_tags_applies_them_to_metrics(
     dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
 ) -> None:
     # `tags` is a standard instance option every integration is expected to honour. Generic tag
@@ -56,11 +55,9 @@ def test_check_given_configured_tags_applies_them_to_metrics_and_service_check(
     dd_run_check(check)
 
     aggregator.assert_metric_has_tags('cisco_catalyst_center.device.health', ['owner:netops', 'lab:devnet'])
-    service_check = aggregator.service_checks('cisco_catalyst_center.can_connect')[0]
-    assert 'owner:netops' in service_check.tags
 
 
-def test_check_given_api_error_reports_can_connect_critical(
+def test_check_given_api_error_reports_collection_failure(
     dd_run_check: Callable[..., None], aggregator: AggregatorStub, check: CiscoCatalystCenterCheck
 ) -> None:
     # A soft 200 is the nastiest case: the HTTP status is fine and only the body says otherwise.
@@ -68,7 +65,7 @@ def test_check_given_api_error_reports_can_connect_critical(
 
     dd_run_check(check)
 
-    aggregator.assert_service_check('cisco_catalyst_center.can_connect', ServiceCheck.CRITICAL, count=1)
+    aggregator.assert_metric('cisco_catalyst_center.collection.success', value=0)
 
 
 def test_check_given_one_failing_collector_still_emits_the_others(
@@ -86,7 +83,7 @@ def test_check_given_one_failing_collector_still_emits_the_others(
     dd_run_check(check)
 
     aggregator.assert_metric('cisco_catalyst_center.device.health', count=4)
-    aggregator.assert_service_check('cisco_catalyst_center.can_connect', ServiceCheck.CRITICAL, count=1)
+    aggregator.assert_metric('cisco_catalyst_center.collection.success', value=0)
 
 
 def test_check_given_api_error_emits_no_device_metrics(

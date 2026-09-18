@@ -137,3 +137,69 @@ def test_collect_interfaces_parses_watt_suffixed_poe_strings(aggregator, instanc
     collect_interfaces(_check(instance), _client(instance, by_view), views=('configuration', 'poE'))
 
     assert metric_values(aggregator, 'cisco_catalyst_center.interface.poe.power_consumed') == [10.5]
+
+
+# The data API's configuration view returns `macAddress` and `description` as null on every
+# interface, and the product brief specifies the intent API as the source for both. The intent
+# API's global interface endpoint returns them in bulk, keyed by the same interface UUIDs.
+INTENT_INTERFACE_PATH = '/dna/intent/api/v1/interface'
+
+# GigabitEthernet1/0/2 exercises all three cases at once: the data API leaves its macAddress
+# null, the intent record's `name` is empty (it uses `portName`), and the two APIs disagree
+# about its VLAN -- data says 101, intent says 1.
+JOINED_INTERFACE = 'GigabitEthernet1/0/2'
+
+
+def _enriching_client(instance, intent_payload=None):
+    return CatalystCenterClient(
+        instance,
+        http=ViewRoutedHttp(
+            CONFIG_ONLY,
+            by_path={INTENT_INTERFACE_PATH: intent_payload or load_captured('intent_interface_global')},
+        ),
+    )
+
+
+def test_collect_interfaces_given_enrichment_fills_the_mac_address_the_data_api_leaves_null(instance):
+    merged = collect_interfaces(
+        _check(instance), _enriching_client(instance), views=('configuration',), enrich_metadata=True
+    )
+
+    record = next(r for r in merged.values() if r.get('name') == JOINED_INTERFACE)
+    assert record['macAddress'] == '52:54:00:07:29:d2'
+
+
+def test_collect_interfaces_given_enrichment_keeps_the_data_api_interface_name(aggregator, instance):
+    # The intent record carries an empty `name` and puts the port in `portName`. Copying its
+    # fields wholesale would blank the interface tag on every interface it matched.
+    collect_interfaces(_check(instance), _enriching_client(instance), views=('configuration',), enrich_metadata=True)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.interface.status', f'interface:{JOINED_INTERFACE}')
+
+
+def test_collect_interfaces_given_enrichment_keeps_the_data_api_vlan(aggregator, instance):
+    # The two APIs disagree on trunk ports: the data API reports the configured access VLAN,
+    # the intent API reports 1. The data API stays authoritative for the tag.
+    collect_interfaces(_check(instance), _enriching_client(instance), views=('configuration',), enrich_metadata=True)
+
+    assert metric_values(
+        aggregator, 'cisco_catalyst_center.interface.status', f'interface:{JOINED_INTERFACE}', 'vlan:101'
+    )
+
+
+def test_collect_interfaces_given_an_interface_missing_from_the_intent_api_still_emits(aggregator, instance):
+    # The intent inventory omits the 8 stack sub-interfaces the data API returns. They have no
+    # metadata to gain, but they must not be dropped from the metrics either.
+    collect_interfaces(_check(instance), _enriching_client(instance), views=('configuration',), enrich_metadata=True)
+
+    aggregator.assert_metric('cisco_catalyst_center.interface.status', count=57)
+
+
+def test_collect_interfaces_given_enrichment_disabled_makes_no_intent_call(instance):
+    # The sweep exists to serve NDM metadata, which is off by default. Nobody who has not asked
+    # for it should pay an extra paginated pass over every interface.
+    client = _enriching_client(instance)
+
+    collect_interfaces(_check(instance), client, views=('configuration',), enrich_metadata=False)
+
+    assert not [r for r in client.http.requests if r['url'].endswith(INTENT_INTERFACE_PATH)]

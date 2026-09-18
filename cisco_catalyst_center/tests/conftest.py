@@ -85,15 +85,23 @@ class ViewRoutedHttp(ScriptedHttp):
     The interfaces endpoint returns a different field set per view, so a collector that reads
     several views issues several calls. Routing on the parameter keeps the test honest about
     which call produced which fields.
+
+    ``by_path`` routes on the request path instead, for collectors that also read a second
+    endpoint. It is checked first, because that endpoint takes no ``view`` parameter and would
+    otherwise fall through to the ``None`` view.
     """
 
-    def __init__(self, by_view: dict[str | None, Any]) -> None:
+    def __init__(self, by_view: dict[str | None, Any], by_path: dict[str, Any] | None = None) -> None:
         super().__init__([])
         self._by_view = by_view
+        self._by_path = by_path or {}
 
     def get(self, url: str, params: dict[str, Any] | None = None, **options: Any) -> _Response:
         params = params or {}
         self.requests.append({'url': url, 'params': params, 'extra_headers': options.get('extra_headers', {})})
+        for path, payload in self._by_path.items():
+            if url.endswith(path):
+                return _Response(payload)
         return _Response(self._by_view[params.get('view')])
 
 

@@ -12,7 +12,6 @@ AUTH_ENDPOINT: Final = '/dna/system/api/v1/auth/token'
 # Assurance data API: bulk, org-level, paginated.
 NETWORK_DEVICES_ENDPOINT: Final = '/dna/data/api/v1/networkDevices'
 INTERFACES_ENDPOINT: Final = '/dna/data/api/v1/interfaces'
-CLIENTS_ENDPOINT: Final = '/dna/data/api/v1/clients'
 CLIENTS_SUMMARY_ANALYTICS_ENDPOINT: Final = '/dna/data/api/v1/clients/summaryAnalytics'
 SITE_HEALTH_SUMMARIES_ENDPOINT: Final = '/dna/data/api/v1/siteHealthSummaries'
 ASSURANCE_EVENTS_ENDPOINT: Final = '/dna/data/api/v1/assuranceEvents'
@@ -29,11 +28,10 @@ L3_TOPOLOGY_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/topology/l3/{topology
 SECURITY_ROGUE_ENDPOINT: Final = '/dna/intent/api/v1/security/rogue/additional/details'
 SECURITY_THREATS_ENDPOINT: Final = '/dna/intent/api/v1/security/threats/details'
 
-DEVICE_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/device-health'
+INTENT_INTERFACES_ENDPOINT: Final = '/dna/intent/api/v1/interface'
 STACK_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/network-device/{device_id}/stack'
 NETWORK_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/network-health'
 CLIENT_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/client-health'
-RELEASE_ENDPOINT: Final = '/dna/intent/api/v1/dnac-release'
 
 TOKEN_LIFETIME_SECONDS: Final = 3600
 
@@ -45,7 +43,6 @@ DEFAULT_PAGE_LIMIT: Final = 500
 ENDPOINT_PAGE_LIMITS: Final[dict[str, int]] = {
     NETWORK_DEVICES_ENDPOINT: 500,
     INTERFACES_ENDPOINT: 500,
-    CLIENTS_ENDPOINT: 500,
     SITE_HEALTH_SUMMARIES_ENDPOINT: 20,
     ASSURANCE_EVENTS_ENDPOINT: 20,
     # Measured live: each of these rejects the 500 default with its own ceiling, and the ceilings
@@ -54,7 +51,17 @@ ENDPOINT_PAGE_LIMITS: Final[dict[str, int]] = {
     VIRTUAL_NETWORK_HEALTH_ENDPOINT: 100,
     FABRIC_SITE_HEALTH_ENDPOINT: 100,
     NETWORK_APPLICATIONS_ENDPOINT: 100,
+    INTENT_INTERFACES_ENDPOINT: 500,
 }
+
+# Interface metadata fields the data API's `configuration` view returns null on every interface
+# but the intent API populates. The product brief names the intent API as the source for all
+# interface metadata; these are the two of its fields the data API cannot supply.
+#
+# An allow-list rather than a wholesale merge, because the intent record also carries `name`
+# (always empty -- it uses `portName`, so copying it would blank the interface tag) and a
+# `vlanId` that reports 1 on trunk ports where the data API reports the configured access VLAN.
+INTENT_INTERFACE_METADATA_FIELDS: Final = ('macAddress', 'description')
 
 # Catalyst Center rejects offset=0 with `2511 Offset can't be less than 1`.
 FIRST_OFFSET: Final = 1
@@ -77,9 +84,44 @@ L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')
 # Values Catalyst Center uses for a topology link that is up.
 TOPOLOGY_LINK_UP_VALUES: Final[frozenset[str]] = frozenset({'up', 'UP', 'Up'})
 
-# `fabricRole` is a list whose casing is inconsistent -- the schema example is
-# `['Border', 'edge']`, mixing both -- so roles are lower-cased before being tagged.
-FABRIC_ROLE_ENDPOINTS_PAGE_LIMIT: Final = 20
+# -- assurance issues -----------------------------------------------------------------
+#
+# Issue priority runs P1 (most severe) to P4. This is the **inverse** of the syslog `severity`
+# scale the assurance *event* endpoint uses, and reading the two tables side by side is how that
+# gets mixed up silently.
+ISSUE_PRIORITY_ALERT_TYPES: Final[dict[str, str]] = {
+    'P1': 'error',
+    'P2': 'error',
+    'P3': 'warning',
+    'P4': 'info',
+}
+
+# Used when `priority` is absent or is not one of the four. Chosen over 'error' so that an
+# unrecognised scale cannot manufacture alerts.
+ISSUE_DEFAULT_ALERT_TYPE: Final = 'info'
+
+# Fields carrying the diagnosis, in the order they read best in an issue body. `suggestedActions`
+# is the remediation hint the brief asks for through a separate `issue-enrichment-details` call;
+# it arrives in the issue record itself, so that call is unnecessary.
+ISSUE_DETAIL_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('summary', 'Summary'),
+    ('description', 'Description'),
+    ('suggestedActions', 'Suggested actions'),
+    ('deviceType', 'Device type'),
+    ('siteName', 'Site'),
+    ('entityId', 'Entity'),
+)
+
+# Kept to the four dimensions the counts already break down by, so a monitor on `issue.count` and
+# a search over the events agree on their dimensions.
+ISSUE_TAG_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('severity', 'severity'),
+    ('priority', 'priority'),
+    ('category', 'category'),
+    ('status', 'status'),
+)
+
+ISSUE_EVENT_TYPE: Final = 'cisco_catalyst_center_issue'
 
 # -- assurance events -----------------------------------------------------------------
 #
