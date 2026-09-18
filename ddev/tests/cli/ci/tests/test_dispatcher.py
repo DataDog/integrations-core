@@ -802,27 +802,28 @@ def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client,
     assert progress["run_id"] == 123
 
     by_event = {event["event"]: event for event in handler.events}
-    dispatched = by_event["Dispatched batch"]
+    dispatched = by_event["Batch batch-01 dispatched as workflow run 123"]
     assert dispatched["batch_id"] == "batch-01"
     assert dispatched["run_id"] == 123
     assert dispatched["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
 
-    completed = by_event["Workflow completed"]
+    completed = by_event["Workflow run 123 completed: success"]
     assert completed["batch_id"] == "batch-01"
     assert completed["run_id"] == 123
     assert completed["workflow_status"] == "completed"
     assert completed["workflow_conclusion"] == "success"
 
     # The gatherer runs in a worker thread: its logs still carry the batch the message described.
-    gathered = by_event["Gathering batch results"]
+    gathered = by_event["Gathering results for batch batch-01"]
     assert gathered["batch_id"] == "batch-01"
     assert gathered["run_id"] == 123
     assert gathered["batch_job_count"] == 1
 
-    comment = by_event["PR comment written"]
+    comment = [event for event in handler.events if event["event"].startswith("PR comment revision")][-1]
     assert comment["message_type"] == "UpdatePRComment"
     assert comment["message_id"]
     assert comment["revision"] > 0
+    assert comment["event"] == f"PR comment revision {comment['revision']} written"
     assert comment["done"] is True
     assert comment["comment_id"] == DEFAULT_COMMENT_ID
     assert comment["published"] is True

@@ -434,7 +434,13 @@ def build_plan(
         plan_integration_count=len({integration for batch in batches for integration in batch.integrations}),
     )
     for batch in batches:
-        monitor.logger.info('Planned batch', **batch_fields(batch))
+        monitor.logger.info(
+            'Planned batch %s (%s %s)',
+            batch.batch_id,
+            batch.jobs_count,
+            'job' if batch.jobs_count == 1 else 'jobs',
+            **batch_fields(batch),
+        )
 
     return batches
 

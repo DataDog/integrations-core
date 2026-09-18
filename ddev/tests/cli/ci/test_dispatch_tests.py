@@ -153,6 +153,7 @@ def test_dispatch_tests_plans_from_testable_target(
     assert result.exit_code == 0, result.output
     assert 'Batches -> 1 (2 jobs)' in result.output
     assert '\n    ntp\n' in result.output
+    assert 'Planned batch batch-01 (2 jobs)' in result.output
 
 
 def test_a_head_belonging_to_no_open_pull_request_dispatches_nothing(ddev, github, planned, tmp_path):

@@ -82,7 +82,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
 
         if not message.batch_jobs:
             # Still terminal and still worth a revision, or it renders as planned forever.
-            self._logger.warning("BatchFinished carried no jobs; nothing to gather")
+            self._logger.warning("Batch %s finished with no jobs to gather", message.batch_id)
 
         # Rejected before gathering: gathering writes into the shared output tree, where a batch that
         # is not in the plan could overwrite the files another batch publishes.
@@ -90,7 +90,11 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             if not self._accepts(message.batch_id):
                 return
 
-        self._logger.info("Gathering batch results", batch_job_count=len(message.batch_jobs))
+        self._logger.info(
+            "Gathering results for batch %s",
+            message.batch_id,
+            batch_job_count=len(message.batch_jobs),
+        )
         gathered = self._gather_results(message)
         if gathered is not None:
             self._publish_results(message, gathered)
@@ -134,7 +138,8 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             update = self._publish_update(message.id)
 
         self._logger.info(
-            "Batch gathered, UpdatePRComment revision %s emitted (done=%s)",
+            "Batch %s results gathered: report revision %s (done=%s)",
+            message.batch_id,
             update.revision,
             update.progress.done,
         )
@@ -220,7 +225,13 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             previous.job_id == workflow_job.id and previous.state is ExecutionState.FINISHED
             for previous in job.attempts
         ):
-            self._logger.info("Job completed", job=job.job.name, job_status=status.value)
+            self._logger.info(
+                "Job %s completed: %s",
+                job.job.name,
+                status.value,
+                job=job.job.name,
+                job_status=status.value,
+            )
         return self._record_attempt(job, attempt, same_run=True)
 
     def _publish_update(self, message_id: str) -> UpdatePRComment:
