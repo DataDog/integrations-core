@@ -1,0 +1,1 @@
+Fix a crash in the statement metrics job when a query contains an embedded null character.

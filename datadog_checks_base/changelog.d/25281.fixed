@@ -1,0 +1,1 @@
+Clarify when ``replace_null_character`` should be set on ``obfuscate_sql_with_metadata``.
