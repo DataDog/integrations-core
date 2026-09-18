@@ -181,9 +181,9 @@ class DatadogLogHandler(logging.Handler):
             raise TypeError('the formatter must produce a JSON object')
         if not isinstance(attributes.get('message'), str):
             raise TypeError('the formatted JSON object must contain a string message')
-        if any(not isinstance(key, str) or not isinstance(value, str) for key, value in attributes.items()):
-            raise TypeError('Datadog log attributes must be strings')
-        return HTTPLogItem(**attributes)
+        # The SDK schema types undeclared log attributes as strings, while the Logs intake accepts
+        # native JSON values; the checks above and the formatter carry the contract instead.
+        return HTTPLogItem(_check_type=False, **attributes)
 
     def _diagnose(self, text: str) -> None:
         """Report delivery failures outside logging, limiting repeated notices."""

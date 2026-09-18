@@ -153,6 +153,7 @@ def test_dispatch_tests_plans_from_testable_target(
     assert result.exit_code == 0, result.output
     assert 'Batches -> 1 (2 jobs)' in result.output
     assert '\n    ntp\n' in result.output
+    assert 'Planned batch batch-01 (2 jobs)' in result.output
 
 
 def test_a_head_belonging_to_no_open_pull_request_dispatches_nothing(ddev, github, planned, tmp_path):
@@ -643,6 +644,56 @@ def test_console_visibility_does_not_change_structured_events(
     [finished] = [item for item in json_handler.events if item['event'] == 'Dispatcher run finished']
     assert finished['outcome'] == 'no-op'
     assert finished['cancelled'] is False
+
+
+@pytest.mark.usefixtures('resolved_changes')
+def test_console_lines_show_operational_context_without_large_payloads(ddev: CliRunner, mocker: MockerFixture):
+    """A console line stays readable on its operational context; the payload behind it stays in
+    the structured event."""
+    json_handler = RecordingJsonHandler()
+
+    def make_runtime(**kwargs: Any) -> MonitoringRuntime:
+        runtime = MonitoringRuntime(**kwargs)
+        runtime.add_log_handler(json_handler)
+        return runtime
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.logger.info(
+            'Batch batch-01 dispatched as workflow run 123',
+            batch_id='batch-01',
+            run_id=123,
+            batch_state='queued',
+            batch_job_count=2,
+            batch_integration_count=2,
+            batch_integrations=['ntp', 'redis'],
+            workflow_url='https://github.com/DataDog/integrations-core/actions/runs/123',
+            artifact_id=456,
+            artifact_name='unit-ntp-py3.13-linux',
+            path='/tmp/artifacts/unit-ntp-py3.13-linux',
+        )
+        return []
+
+    mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    line = next(line for line in result.output.splitlines() if 'dispatched as workflow run 123' in line)
+    assert 'component=planner' in line
+    assert 'batch_id=batch-01' in line
+    assert 'run_id=123' in line
+    assert 'batch_state=queued' in line
+    assert 'batch_job_count=2' in line
+    assert 'batch_integration_count=2' in line
+    assert 'batch_integrations' not in line
+    assert 'https://' not in line
+    assert 'unit-ntp-py3.13-linux' not in line
+
+    [event] = [item for item in json_handler.events if item['event'] == 'Batch batch-01 dispatched as workflow run 123']
+    assert event['batch_integrations'] == ['ntp', 'redis']
+    assert event['workflow_url'] == 'https://github.com/DataDog/integrations-core/actions/runs/123'
+    assert event['artifact_id'] == 456
 
 
 PULL_REQUEST_RUN_MANIFEST = {

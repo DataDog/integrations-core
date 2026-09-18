@@ -181,6 +181,7 @@ def dispatch_tests(
     from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_attributes import (
         PROTECTED_RUN_FIELDS,
+        console_hidden_fields,
         repository_fields,
         run_fields,
         tag_fields,
@@ -195,7 +196,11 @@ def dispatch_tests(
 
     console_handler = AppLoggingHandler(app)
     console_handler.setLevel(output_level)
-    console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags))))
+    # The manifest's console policy keeps human-readable lines to their operational context; the
+    # run identity and caller tags stay hidden on top of it.
+    console_handler.setFormatter(
+        console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags)))
+    )
     monitoring = MonitoringRuntime(console_handler=console_handler, protected_fields=PROTECTED_RUN_FIELDS)
     monitoring.set_run_fields(**{**tag_fields(caller_tags), **repository_fields(owner, repo)})
     datadog_handler = attach_datadog_log_handler(app, monitoring, level=output_level)
@@ -434,7 +439,13 @@ def build_plan(
         plan_integration_count=len({integration for batch in batches for integration in batch.integrations}),
     )
     for batch in batches:
-        monitor.logger.info('Planned batch', **batch_fields(batch))
+        monitor.logger.info(
+            'Planned batch %s (%s %s)',
+            batch.batch_id,
+            batch.jobs_count,
+            'job' if batch.jobs_count == 1 else 'jobs',
+            **batch_fields(batch),
+        )
 
     return batches
 

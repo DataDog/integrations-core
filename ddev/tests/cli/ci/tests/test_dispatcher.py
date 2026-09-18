@@ -23,7 +23,13 @@ import pytest
 from ddev.cli.ci.tests import dispatcher as dispatcher_module
 from ddev.cli.ci.tests import rate_limiting
 from ddev.cli.ci.tests.dispatcher import CANCELLED_RATE_LIMITS, Dispatcher, DispatcherContext, build_dispatcher
-from ddev.cli.ci.tests.dispatcher_attributes import PROTECTED_RUN_FIELDS, log_tag_mapping, message_fields, run_fields
+from ddev.cli.ci.tests.dispatcher_attributes import (
+    PROTECTED_RUN_FIELDS,
+    console_hidden_fields,
+    log_tag_mapping,
+    message_fields,
+    run_fields,
+)
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
@@ -743,7 +749,7 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
     sink = RecordingSink()
     stream = StringIO()
     console_handler = logging.StreamHandler(stream)
-    console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS))
+    console_handler.setFormatter(console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS))
     monitoring = MonitoringRuntime(console_handler=console_handler, metrics_sink=sink)
     monitoring.set_run_fields(**run_fields(CONTEXT))
 
@@ -802,28 +808,80 @@ def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client,
     assert progress["run_id"] == 123
 
     by_event = {event["event"]: event for event in handler.events}
-    dispatched = by_event["Dispatched batch"]
+    dispatched = by_event["Batch batch-01 dispatched as workflow run 123"]
     assert dispatched["batch_id"] == "batch-01"
     assert dispatched["run_id"] == 123
     assert dispatched["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
 
-    completed = by_event["Workflow completed"]
+    completed = by_event["Workflow run 123 completed: success"]
     assert completed["batch_id"] == "batch-01"
     assert completed["run_id"] == 123
     assert completed["workflow_status"] == "completed"
     assert completed["workflow_conclusion"] == "success"
 
     # The gatherer runs in a worker thread: its logs still carry the batch the message described.
-    gathered = by_event["Gathering batch results"]
+    gathered = by_event["Gathering results for batch batch-01 (jobs=1)"]
     assert gathered["batch_id"] == "batch-01"
     assert gathered["run_id"] == 123
     assert gathered["batch_job_count"] == 1
 
-    comment = by_event["PR comment written"]
+    comment = [event for event in handler.events if event["event"].startswith("PR comment written for revision")][-1]
     assert comment["message_type"] == "UpdatePRComment"
     assert comment["message_id"]
     assert comment["revision"] > 0
+    assert (
+        comment["event"] == f"PR comment written for revision {comment['revision']} (finished=1, failed=0, pending=0)"
+    )
     assert comment["done"] is True
     assert comment["comment_id"] == DEFAULT_COMMENT_ID
     assert comment["published"] is True
     assert "batch_id" not in comment
+
+
+def test_batch_scoped_events_resolve_their_planned_batch_and_aggregates_stay_neutral(client, tmp_path, monkeypatch):
+    """Every batch-scoped message sees the integration list of the planned batch its `batch_id`
+    names, on the runner and the gatherer alike; the aggregate report inherits none of them."""
+    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", lambda token, rate_limiter=None, **kwargs: client)
+    job_1 = make_job()
+    job_2 = make_job("job-2", target="redis")
+    client.mock_response(
+        "list_workflow_jobs",
+        WorkflowJobsList(
+            total_count=2,
+            jobs=[
+                WorkflowJob(id=1, run_id=123, name=job_1.name, status="completed", conclusion="success"),
+                WorkflowJob(id=2, run_id=123, name=job_2.name, status="completed", conclusion="success"),
+            ],
+        ),
+    )
+    handler = RecordingJsonHandler()
+    monitoring = MonitoringRuntime(console_handler=handler)
+    monitoring.set_run_fields(**run_fields(CONTEXT))
+
+    dispatcher = build_dispatcher(
+        batches=[make_batch(job_1), make_batch(job_2, batch_id="batch-02")],
+        context=CONTEXT,
+        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
+        token="test-token",
+        artifacts_path=tmp_path / "artifacts",
+        output_path=tmp_path / "results",
+        monitoring=monitoring,
+    )
+
+    dispatcher.run()
+    monitoring.close()
+
+    by_event = {event["event"]: event for event in handler.events}
+    assert by_event["Batch batch-01 dispatched as workflow run 123"]["batch_integrations"] == ["ntp"]
+    assert by_event["Batch batch-02 dispatched as workflow run 123"]["batch_integrations"] == ["redis"]
+    assert by_event["Gathering results for batch batch-01 (jobs=1)"]["batch_integrations"] == ["ntp"]
+    assert by_event["Gathering results for batch batch-02 (jobs=1)"]["batch_integrations"] == ["redis"]
+
+    # A gatherer-side observation while processing a `BatchProgressUpdate`: same resolved batch.
+    progress = by_event["Job job-2 completed: success"]
+    assert progress["batch_id"] == "batch-02"
+    assert progress["batch_integrations"] == ["redis"]
+
+    comment = [event for event in handler.events if event["event"].startswith("PR comment written for revision")][-1]
+    assert "batch_id" not in comment
+    assert "batch_integrations" not in comment
