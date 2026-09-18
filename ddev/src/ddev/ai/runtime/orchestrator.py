@@ -49,6 +49,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
         """
         max_timeout = runtime_variables.get("max_timeout")
+        if max_timeout is not None and not isinstance(max_timeout, str):
+            raise ValueError(f"'max_timeout' must be a scalar value, got {type(max_timeout).__name__}")
         super().__init__(
             logger=logger or logging.getLogger(__name__),
             grace_period=grace_period,

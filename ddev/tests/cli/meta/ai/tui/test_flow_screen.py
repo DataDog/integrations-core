@@ -35,7 +35,7 @@ from .conftest import StaticConfigurationEngine
 
 def _make_flow(name: str = "Test Flow", n_phases: int = 2) -> ResolvedFlow:
     """Create a minimal ResolvedFlow with *n_phases* entries."""
-    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", tools=[])}
+    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=[])}
     phases = {
         f"phase_{i}": PhaseConfig(
             name=f"phase_{i}",
@@ -399,7 +399,7 @@ async def test_phase_config_screen_renders_resolved_task_prompt() -> None:
 
     flow = ResolvedFlow(
         name="Resolved Prompt Flow",
-        agents={"agent_a": AgentConfig.model_construct(provider="anthropic", tools=[])},
+        agents={"agent_a": AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=[])},
         phases={
             "review": PhaseConfig(
                 name="review",

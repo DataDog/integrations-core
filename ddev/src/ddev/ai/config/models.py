@@ -357,10 +357,24 @@ class CheckpointConfig(BaseModel):
         return self
 
 
+def _provider_registry_from(info: ValidationInfo) -> AgentProviderRegistry:
+    """The agent provider registry supplied through validation context."""
+    registry = info.context.get("provider_registry") if info.context is not None else None
+    if registry is None:
+        raise ValueError("Agent provider registry is required")
+    return registry
+
+
 class AgentConfig(BaseModel):
+    """A fully resolved agent definition.
+
+    Either `provider` or `model` may be omitted from the input; the other is then
+    derived from the provider registry, so both are always set on a validated instance.
+    """
+
     model_config = ConfigDict(extra="forbid")
-    provider: str | None = None
-    model: str | None = None
+    provider: str
+    model: str
     max_tokens: int | None = Field(default=None, ge=1)
     tools: list[str] = Field(default_factory=list)
     variables: list[VariableDeclaration] = Field(default_factory=list)
@@ -374,20 +388,27 @@ class AgentConfig(BaseModel):
             raise ValueError(f"Unknown tool names: {sorted(unknown)}")
         return tools
 
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_provider_and_model(cls, data: Any, info: ValidationInfo) -> Any:
+        """Derive whichever of `provider`/`model` was omitted, before the fields are validated."""
+        if not isinstance(data, dict):
+            return data
+        registry = _provider_registry_from(info)
+        provider = data.get("provider")
+        model = data.get("model")
+        if provider is None and model is None:
+            raise ValueError("At least one of 'provider' or 'model' must be set")
+        if provider is None and isinstance(model, str):
+            return {**data, "provider": registry.provider_for_model(model)}
+        if model is None and isinstance(provider, str):
+            return {**data, "model": registry.default_model_for_provider(provider)}
+        return data
+
     @model_validator(mode="after")
-    def resolve_and_validate_provider(self, info: ValidationInfo) -> AgentConfig:
-        provider_registry: AgentProviderRegistry | None = (
-            info.context.get("provider_registry") if info.context is not None else None
-        )
-        if provider_registry is None:
-            raise ValueError("Agent provider registry is required")
-        if self.provider is None:
-            if self.model is None:
-                raise ValueError("At least one of 'provider' or 'model' must be set")
-            self.provider = provider_registry.provider_for_model(self.model)
-        elif self.model is None:
-            self.model = provider_registry.default_model_for_provider(self.provider)
-        provider_registry.validate_config(self)
+    def validate_against_provider(self, info: ValidationInfo) -> AgentConfig:
+        """Let the resolved provider apply its own rules to the finished config."""
+        _provider_registry_from(info).validate_config(self)
         return self
 
 

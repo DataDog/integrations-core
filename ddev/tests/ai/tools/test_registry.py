@@ -172,7 +172,7 @@ def from_names(tool_names: list[str], tmp_path, *, scope: AgentScope = SCOPE) ->
         tool_names,
         scope=scope,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
-        agent_config=AgentConfig.model_construct(tools=tool_names),
+        agent_config=AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=tool_names),
         process_factory=PROCESS_FACTORY,
     )
 
@@ -208,7 +208,9 @@ def test_from_names_spawn_tools_get_runtime_context(name, tool_type, tmp_path):
     tool = registry._tools[name]
     assert isinstance(tool, tool_type)
     assert tool._parent_scope is SCOPE
-    assert tool._agent_config == AgentConfig.model_construct(tools=["read_file", name])
+    assert tool._agent_config == AgentConfig.model_construct(
+        provider="anthropic", model="claude-3-sonnet", tools=["read_file", name]
+    )
     assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
 

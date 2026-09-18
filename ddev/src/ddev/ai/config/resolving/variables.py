@@ -43,9 +43,9 @@ def resolve_variables(
 def _gather_variable_declarations(registry: ResourceRegistry, scheduled_phases: list[PhaseConfig]) -> list[DeclaredVar]:
     declared: list[DeclaredVar] = []
     for phase_config in scheduled_phases:
-        phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
+        phase_src = registry.source_file_for(ResourceKind.PHASE, phase_config.name)
         if phase_config.agent is not None and phase_config.agent in registry.agents:
-            agent_src = registry.entry(ResourceKind.AGENT, phase_config.agent).source_file
+            agent_src = registry.source_file_for(ResourceKind.AGENT, phase_config.agent)
             for v in registry.agents[phase_config.agent].variables:
                 declared.append(DeclaredVar(v.name, v.default, f"agent {phase_config.agent!r}", agent_src))
         for v in phase_config.variables:

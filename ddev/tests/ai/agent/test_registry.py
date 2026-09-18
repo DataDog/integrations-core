@@ -36,7 +36,7 @@ def test_registry_rejects_duplicate_provider_registration():
 
 def test_registry_rejects_unavailable_provider():
     registry = AgentProviderRegistry()
-    config = AgentConfig.model_construct(provider="unknown")
+    config = AgentConfig.model_construct(provider="unknown", model="claude-3-sonnet")
 
     with pytest.raises(ValueError, match="Agent provider 'unknown' is not available"):
         registry.validate_config(config)

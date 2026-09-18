@@ -31,6 +31,7 @@ def discover(dirs: list[Path]) -> Iterator[MarkdownFile | YamlFile | FileError]:
                     continue
                 seen.add(resolved)
                 suffix = path.suffix.lower()
+                result: MarkdownFile | YamlFile | None
                 try:
                     if suffix == ".md":
                         result = parse_markdown(path)
