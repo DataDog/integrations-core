@@ -99,6 +99,22 @@ def test_fake_response_raises_configured_status_error():
 
 
 @pytest.mark.parametrize(
+    ('status_code', 'expected_message'),
+    [
+        (404, '404 Client Error'),
+        (500, '500 Server Error'),
+    ],
+)
+def test_fake_response_derives_status_error_from_status_code(status_code: int, expected_message: str):
+    response = FakeHTTPResponse(status_code=status_code)
+
+    with pytest.raises(HTTPClientStatusError, match=expected_message) as exc_info:
+        response.raise_for_status()
+
+    assert exc_info.value.response is response
+
+
+@pytest.mark.parametrize(
     ('iter_method', 'response_options', 'first_result'),
     [
         pytest.param('iter_content', {'content_chunks': (b'first',)}, b'first', id='content'),

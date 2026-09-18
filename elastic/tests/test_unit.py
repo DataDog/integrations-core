@@ -13,7 +13,6 @@ from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectTimeoutError,
     HTTPClientReadTimeoutError,
-    HTTPClientStatusError,
 )
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
@@ -26,11 +25,8 @@ log = logging.getLogger('test_elastic')
 pytestmark = pytest.mark.unit
 
 
-def _status_error_response(status_code, message):
-    return FakeHTTPResponse(
-        status_code=status_code,
-        status_error=HTTPClientStatusError(message),
-    )
+def _status_error_response(status_code: int) -> FakeHTTPResponse:
+    return FakeHTTPResponse(status_code=status_code)
 
 
 def test__join_url():
@@ -159,7 +155,7 @@ def test_get_template_metrics_raise_exception(aggregator, instance, dd_run_check
     mock_es_endpoints(
         {
             '{}/_cat/templates?format=json'.format(URL): [
-                _status_error_response(403, '403 Client Error'),
+                _status_error_response(403),
             ]
         }
     )
@@ -265,7 +261,7 @@ def test_run_custom_queries_root_data_path(aggregator, instance, dd_run_check, m
 
 
 def test__get_data_throws_authentication_error(instance, fake_http):
-    fake_http.register_response('GET', 'test.com', _status_error_response(400, '400 Client Error'))
+    fake_http.register_response('GET', 'test.com', _status_error_response(400))
     check = ESCheck('elastic', {}, instances=[instance])
 
     with pytest.raises(AuthenticationError):
@@ -273,7 +269,7 @@ def test__get_data_throws_authentication_error(instance, fake_http):
 
 
 def test__get_data_creates_critical_service_alert(aggregator, instance, fake_http):
-    fake_http.register_response('GET', 'test.com', _status_error_response(500, '500 Server Error'))
+    fake_http.register_response('GET', 'test.com', _status_error_response(500))
     check = ESCheck('elastic', {}, instances=[instance])
 
     with pytest.raises(Exception):
@@ -301,7 +297,7 @@ def test__get_data_creates_critical_service_alert(aggregator, instance, fake_htt
     ],
 )
 def test_disable_legacy_sc_tags(aggregator, es_instance, fake_http):
-    fake_http.register_response('GET', 'test.com', _status_error_response(500, '500 Server Error'))
+    fake_http.register_response('GET', 'test.com', _status_error_response(500))
     check = ESCheck('elastic', {}, instances=[es_instance])
 
     with pytest.raises(Exception):

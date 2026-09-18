@@ -9,7 +9,6 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.nvidia_triton import NvidiaTritonCheck
 
 from .common import METRICS_MOCK, get_fixture_path
@@ -53,10 +52,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     fake_http.register_response(
         'GET',
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = NvidiaTritonCheck('nvidia_triton', {}, [instance])

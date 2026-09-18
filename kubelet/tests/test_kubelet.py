@@ -14,7 +14,7 @@ from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import tagger as tagger_stub
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.date import parse_rfc3339
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
 # Skip the whole tests module on Windows
@@ -574,10 +574,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator, fake_http):
     fake_http.register_response(
         'HEAD',
         probes_url,
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
     )
     scrape_requests = _register_scrape_responses(
         fake_http,
@@ -1207,10 +1204,7 @@ def test_report_node_metrics_kubernetes1_18(aggregator, fake_http):
     fake_http.register_response(
         'GET',
         check.node_spec_url,
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options=options,
     )
     check._report_node_metrics(['foo:bar'])

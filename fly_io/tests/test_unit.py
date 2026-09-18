@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
@@ -28,11 +28,7 @@ from .metrics import (
 
 
 def _status_response(status_code: int) -> FakeHTTPResponse:
-    error_kind = 'Client Error' if status_code < 500 else 'Server Error'
-    return FakeHTTPResponse(
-        status_code=status_code,
-        status_error=HTTPClientStatusError(f'{status_code} {error_kind}'),
-    )
+    return FakeHTTPResponse(status_code=status_code)
 
 
 def _invalid_json_response(text: str) -> FakeHTTPResponse:

@@ -94,6 +94,9 @@ class FakeHTTPResponse:
             ((content,) if content else ()) if isinstance(content_chunks, UnsetResponseResult) else content_chunks
         )
         resolved_lines = tuple(resolved_text.splitlines()) if isinstance(lines, UnsetResponseResult) else lines
+        if status_error is None and status_code >= 400:
+            error_kind = 'Client Error' if status_code < 500 else 'Server Error'
+            status_error = HTTPClientStatusError(f'{status_code} {error_kind}')
 
         self.status_code: int = status_code
         self.content: bytes = content

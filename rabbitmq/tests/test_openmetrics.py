@@ -11,7 +11,6 @@ from packaging import version
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.types import ServiceCheck
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
@@ -380,10 +379,7 @@ def test_service_check_critical(aggregator, dd_run_check, fake_http):
     fake_http.register_response(
         'GET',
         metrics_url,
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = _rmq_om_check({'url': 'http://fail'})

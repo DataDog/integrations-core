@@ -9,7 +9,6 @@ from collections.abc import Iterator
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
@@ -73,7 +72,6 @@ def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
 def _not_found_response(url: str) -> FakeHTTPResponse:
     return FakeHTTPResponse(
         status_code=404,
-        status_error=HTTPClientStatusError('404 Client Error'),
         url=url,
     )
 

@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.argo_workflows import ArgoWorkflowsCheck
 from datadog_checks.base.stubs import aggregator as agg
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 
@@ -154,10 +153,7 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     fake_http.register_response(
         'GET',
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])

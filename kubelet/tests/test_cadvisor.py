@@ -99,10 +99,7 @@ def test_detect_cadvisor_404(fake_http):
     fake_http.register_response(
         'HEAD',
         CADVISOR_URL,
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options=options,
     )
     check = KubeletCheck('kubelet', {}, [{}])

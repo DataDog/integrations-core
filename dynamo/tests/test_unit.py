@@ -9,7 +9,6 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.dynamo import DynamoCheck
@@ -79,10 +78,7 @@ def test_emits_critical_openmetrics_service_check_when_service_is_down(
     fake_http.register_response(
         'GET',
         frontend_instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = DynamoCheck("dynamo", {}, [frontend_instance])

@@ -8,7 +8,6 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.celery import CeleryCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -57,10 +56,7 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_ch
     fake_http.register_response(
         'GET',
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = CeleryCheck("celery", {}, [instance])

@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.quarkus import QuarkusCheck
 
@@ -99,10 +98,7 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     fake_http.register_response(
         'GET',
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = QuarkusCheck('quarkus', {}, [instance])

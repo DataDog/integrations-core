@@ -8,7 +8,6 @@ import pytest
 from datadog_checks.appgate_sdp import AppgateSDPCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS_MOCK, get_fixture_path
@@ -41,10 +40,7 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     fake_http.register_response(
         'GET',
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            status_code=404,
-            status_error=HTTPClientStatusError('404 Client Error'),
-        ),
+        FakeHTTPResponse(status_code=404),
         match_options={'stream': True},
     )
     check = AppgateSDPCheck('appgate_sdp', {}, [instance])
