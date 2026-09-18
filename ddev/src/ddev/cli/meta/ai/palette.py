@@ -34,6 +34,7 @@ STATUS_RUNNING = "#86B8DE"
 STATUS_PENDING = "#8F8B94"
 STATUS_DONE = SUCCESS
 STATUS_FAILED = ERROR
+STATUS_CHECKPOINTED = "#6E9480"
 STATUS_CONNECTOR = "#4A4650"
 
 # Per-role identity colors used to tell speakers apart in the log.

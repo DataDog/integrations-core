@@ -17,6 +17,7 @@ from ddev.cli.meta.ai.palette import (
     ROLE_GOAL_REVIEWER,
     ROLE_PHASE,
     SECONDARY,
+    STATUS_CHECKPOINTED,
     STATUS_DONE,
     STATUS_FAILED,
     STATUS_PENDING,
@@ -52,8 +53,11 @@ togo_theme = Theme(
         "status-pending": STATUS_PENDING,
         "status-done": STATUS_DONE,
         "status-failed": STATUS_FAILED,
+        "status-checkpointed": STATUS_CHECKPOINTED,
     },
 )
+
+STATUS_VARIABLE_KEYS = tuple(key for key in togo_theme.variables if key.startswith("status-"))
 
 # Rich's built-in Markdown element styles (``markdown.code``, ``markdown.block_quote``, etc.)
 # default to fully saturated named colors (bright cyan, magenta, yellow) on a literal black

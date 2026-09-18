@@ -26,6 +26,9 @@ from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineG
 if TYPE_CHECKING:
     from ddev.ai.runtime.checkpoints import ResumeState
 
+PIPELINE_LEGEND = "◇ completed in a previous run · skipped on resume"
+CHECKPOINT_UNREADABLE_LEGEND = "✕ checkpoint unreadable · delete it and launch the flow from scratch"
+
 
 class FlowScreen(TogoScreen):
     """Show resolved flow details and controls for launching or resuming execution."""
@@ -50,13 +53,18 @@ class FlowScreen(TogoScreen):
         with Horizontal(id="flow-body"):
             yield from self._compose_overview()
 
-            graph = PipelineGraph(
-                self.flow,
-                {entry.phase: RunStatus.PENDING for entry in self.flow.flow},
-                id="flow-pipeline",
-            )
-            graph.border_title = "Pipeline"
-            yield graph
+            with Vertical(id="flow-pipeline-column"):
+                graph = PipelineGraph(
+                    self.flow,
+                    self._preview_statuses(frozenset()),
+                    id="flow-pipeline",
+                )
+                graph.border_title = "Pipeline"
+                yield graph
+
+                legend = Static(PIPELINE_LEGEND, id="pipeline-legend", classes="desc")
+                legend.display = False
+                yield legend
 
         with Horizontal(id="actions"):
             yield Button("Back", id="back")
@@ -97,6 +105,13 @@ class FlowScreen(TogoScreen):
         """Re-read resume state whenever this screen becomes active again."""
         self._apply_resume_state(self._read_resume_state())
 
+    def _preview_statuses(self, completed: frozenset[str]) -> dict[str, RunStatus]:
+        """Map the flow's phases to preview statuses, marking dependency-closed successes as checkpointed."""
+        return {
+            entry.phase: RunStatus.CHECKPOINTED if entry.phase in completed else RunStatus.PENDING
+            for entry in self.flow.flow
+        }
+
     def _read_resume_state(self) -> ResumeState:
         from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state
 
@@ -104,11 +119,20 @@ class FlowScreen(TogoScreen):
         return flow_resume_state(self.flow, runs_dir)
 
     def _apply_resume_state(self, state: ResumeState) -> None:
-        """Show the Resume button only while a resumable run exists for this flow."""
+        """Drive the Resume button, pipeline preview, and legend from a single resume-state read."""
         try:
             self.query_one("#resume", Button).display = state.is_resumable
+            self.query_one("#flow-pipeline", PipelineGraph).update_statuses(self._preview_statuses(state.completed))
+            self._apply_legend(self.query_one("#pipeline-legend", Static), state)
         except NoMatches:
             pass
+
+    def _apply_legend(self, legend: Static, state: ResumeState) -> None:
+        """Explain the checkpointed glyphs, or report a checkpoint file that could not be read."""
+        unreadable = state.error is not None
+        legend.update(CHECKPOINT_UNREADABLE_LEGEND if unreadable else PIPELINE_LEGEND)
+        legend.set_class(unreadable, "legend-error")
+        legend.display = unreadable or bool(state.completed)
 
     def _confirm_resumable(self) -> bool:
         """Re-read the checkpoint before committing to a resume, resyncing the UI if it went stale."""
