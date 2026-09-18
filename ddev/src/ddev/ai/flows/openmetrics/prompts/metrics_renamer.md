@@ -33,8 +33,7 @@ the exact artifact to produce, its paths, delegation strategy, format, and accep
 
 Derive the integration name and metric prefix from the supplied display name with one rule:
 lowercase it and replace every run of non-alphanumeric characters with one underscore. The
-integration name and metric prefix are identical, except the scaffolding command receives the
-prefix with a trailing dot.
+integration name and metric prefix are identical.
 
 Examples:
 
