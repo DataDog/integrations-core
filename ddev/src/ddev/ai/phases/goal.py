@@ -295,7 +295,12 @@ async def _run_reviewer_once(
     raw_output = result.final_response.text or ""
     parsed = parse_reviewer_verdict(raw_output)
     if parsed is None:
-        retry_result = await reviewer_process.start(GOAL_PARSE_RETRY_PROMPT)
+        try:
+            retry_result = await reviewer_process.start(GOAL_PARSE_RETRY_PROMPT)
+        except FlowStopRequested as e:
+            e.input_tokens += in_tokens
+            e.output_tokens += out_tokens
+            raise
         in_tokens += retry_result.total_input_tokens
         out_tokens += retry_result.total_output_tokens
         context_usage = retry_result.context_usage
