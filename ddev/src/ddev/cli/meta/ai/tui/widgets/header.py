@@ -32,7 +32,9 @@ EXECUTION_STATUS_TEXT = {
     ExecutionStatus.RUNNING: "● running",
     ExecutionStatus.FINISHING: "◌ finishing",
     ExecutionStatus.COMPLETED: "✓ completed",
+    ExecutionStatus.INCOMPLETE: "◌ incomplete",
     ExecutionStatus.FAILED: "✕ failed",
+    ExecutionStatus.OUTCOME_ERROR: "! outcome unavailable",
 }
 
 

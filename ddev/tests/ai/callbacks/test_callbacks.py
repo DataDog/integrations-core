@@ -8,6 +8,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.types import ReActResult
+from ddev.ai.runtime.outcome import RunOutcome
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -189,6 +190,20 @@ async def test_fire_agent_error_swallows_handler_exception(scope: AgentScope) ->
 
     await cb.fire_agent_error(scope, ValueError("original error"))
     assert fired == [True]
+
+
+async def test_run_finished_registered_and_fired() -> None:
+    cb = CallbackSet()
+    received: list[RunOutcome] = []
+    outcome = RunOutcome.model_construct(flow_name="demo")
+
+    @cb.on_run_finished
+    async def handler(run_outcome: RunOutcome) -> None:
+        received.append(run_outcome)
+
+    await Callbacks([cb]).fire_run_finished(outcome)
+
+    assert received == [outcome]
 
 
 # ---------------------------------------------------------------------------

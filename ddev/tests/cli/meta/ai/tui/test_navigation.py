@@ -149,5 +149,6 @@ async def test_execution_screen_mounts_with_placeholder_regions(make_flow, make_
         assert isinstance(pilot.app.screen, MainScreen)
         await pilot.app.push_screen(ExecutionScreen(flow))
         await pilot.pause()
-        assert isinstance(pilot.app.screen, ExecutionScreen)
-        pilot.app.screen.query_one("#pipeline", PipelineGraph)
+        screen = pilot.app.screen
+        assert isinstance(screen, ExecutionScreen)
+        screen.query_one("#pipeline", PipelineGraph)

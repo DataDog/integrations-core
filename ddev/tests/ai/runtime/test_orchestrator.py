@@ -4,6 +4,7 @@
 
 import asyncio
 import logging
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -21,6 +22,15 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.checkpoints import CancelledCheckpoint, CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
+from ddev.ai.runtime.outcome import (
+    FailureKind,
+    PhaseReportStatus,
+    RunOutcome,
+    RunOutcomeBuildError,
+    RunOutcomePersistenceError,
+    RunOutcomeStore,
+    RunVerdict,
+)
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, HookName, OrchestratorHookError
 
@@ -258,11 +268,19 @@ def test_run_executes_phases_in_dependency_order(tmp_path, make_orchestrator):
             return PhaseOutcome(memory_text=f"{self._phase_id} done")
 
     checkpoint_path = tmp_path / "checkpoints.yaml"
+    callback_set = CallbackSet()
+    finished: list[RunOutcome] = []
+
+    @callback_set.on_run_finished
+    async def on_run_finished(outcome: RunOutcome) -> None:
+        finished.append(outcome)
+
     orchestrator, _, _ = make_orchestrator(
         core,
         grace_period=0.1,
         register_phases={"RecordingPhase": RecordingPhase},
         checkpoint_path=checkpoint_path,
+        callbacks=Callbacks([callback_set]),
     )
 
     orchestrator.run()  # must not raise
@@ -273,6 +291,10 @@ def test_run_executes_phases_in_dependency_order(tmp_path, make_orchestrator):
     checkpoints = mgr.read()
     assert checkpoints["a"].status == CheckpointStatus.SUCCESS
     assert checkpoints["b"].status == CheckpointStatus.SUCCESS
+    assert orchestrator.outcome is not None
+    assert orchestrator.outcome.verdict is RunVerdict.SUCCEEDED
+    assert RunOutcomeStore(tmp_path / "run.yaml").read() == orchestrator.outcome
+    assert finished == [orchestrator.outcome]
 
 
 def test_max_timeout_writes_cancelled_checkpoint_for_running_phase(tmp_path, make_orchestrator):
@@ -332,6 +354,179 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
 
     with pytest.raises(FatalProcessingError, match="Phase 'failing' failed"):
         orchestrator.run()
+
+    assert orchestrator.outcome is not None
+    assert orchestrator.outcome.verdict is RunVerdict.FAILED
+    assert orchestrator.outcome.failed_phase == "failing"
+    assert orchestrator.outcome.error_type == "RuntimeError"
+
+
+def test_run_records_normal_incomplete_return_as_timeout(tmp_path, make_orchestrator):
+    core = tmp_path / "timeout_core"
+    write(
+        core / "f.yaml",
+        "- type: phase\n  config:\n    name: slow\n    class: SlowPhase\n"
+        "- type: flow\n  config:\n    name: demo\n"
+        "    flow:\n      - phase: slow\n",
+    )
+
+    class SlowPhase(Phase):
+        async def execute(self, context):
+            await asyncio.sleep(5)
+            return PhaseOutcome(memory_text="too late")
+
+    orchestrator, _, _ = make_orchestrator(
+        core,
+        grace_period=0.05,
+        runtime_variables={"max_timeout": "0.2"},
+        register_phases={"SlowPhase": SlowPhase},
+    )
+
+    orchestrator.run()
+
+    assert orchestrator.outcome is not None
+    assert orchestrator.outcome.verdict is RunVerdict.INCOMPLETE
+    assert orchestrator.outcome.failure_kind is FailureKind.TIMEOUT
+    assert orchestrator.outcome.phases[0].status is PhaseReportStatus.CANCELLED
+    assert orchestrator.outcome.phases[0].cancellation_reason == "Orchestrator exceeded max_timeout of 0.2s"
+
+
+async def test_cancelled_run_does_not_record_outcome(tmp_path, make_orchestrator):
+    core = tmp_path / "cancelled_core"
+    write(
+        core / "f.yaml",
+        "- type: phase\n  config:\n    name: slow\n    class: SlowPhase\n"
+        "- type: flow\n  config:\n    name: demo\n"
+        "    flow:\n      - phase: slow\n",
+    )
+
+    class SlowPhase(Phase):
+        async def execute(self, context):
+            await asyncio.sleep(5)
+            return PhaseOutcome(memory_text="too late")
+
+    orchestrator, _, _ = make_orchestrator(
+        core,
+        grace_period=0.1,
+        register_phases={"SlowPhase": SlowPhase},
+    )
+    task = asyncio.create_task(orchestrator.run_async())
+    await asyncio.sleep(0.05)
+    task.cancel()
+
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert orchestrator.outcome is None
+    assert not (tmp_path / "run.yaml").exists()
+
+
+@pytest.mark.parametrize("failure_point", ["build", "persist"])
+def test_outcome_recording_failure_does_not_mask_run_failure(tmp_path, make_orchestrator, monkeypatch, failure_point):
+    core = tmp_path / "outcome_failure_core"
+    write(
+        core / "f.yaml",
+        "- type: phase\n  config:\n    name: failing\n    class: FailingPhase\n"
+        "- type: flow\n  config:\n    name: demo\n"
+        "    flow:\n      - phase: failing\n",
+    )
+
+    class FailingPhase(Phase):
+        async def execute(self, context):
+            raise RuntimeError("original failure")
+
+    orchestrator, _, _ = make_orchestrator(
+        core,
+        grace_period=0.1,
+        register_phases={"FailingPhase": FailingPhase},
+    )
+    if failure_point == "build":
+        monkeypatch.setattr(
+            orchestrator,
+            "_current_run_checkpoints",
+            MagicMock(side_effect=OSError("checkpoint unreadable")),
+        )
+    else:
+        monkeypatch.setattr(orchestrator._outcome_store, "write", MagicMock(side_effect=OSError("disk full")))
+
+    with pytest.raises(FatalProcessingError, match="original failure") as exc_info:
+        orchestrator.run()
+
+    operation = "build" if failure_point == "build" else "persist"
+    detail = "checkpoint unreadable" if failure_point == "build" else "disk full"
+    assert exc_info.value.__notes__ == [
+        f"Outcome recording also failed: Failed to {operation} the flow outcome: {detail}"
+    ]
+
+
+async def test_outcome_build_failure_after_success_is_reported_distinctly(core_dir, make_orchestrator, monkeypatch):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    orchestrator._started_at = datetime.now(UTC)
+    monkeypatch.setattr(
+        orchestrator,
+        "_current_run_checkpoints",
+        MagicMock(side_effect=OSError("checkpoint unreadable")),
+    )
+
+    with pytest.raises(RunOutcomeBuildError, match="checkpoint unreadable"):
+        await orchestrator._record_outcome(None)
+
+    assert orchestrator.outcome is None
+
+
+async def test_outcome_persistence_failure_retains_and_publishes_outcome(
+    tmp_path, core_dir, make_orchestrator, monkeypatch
+):
+    callback_set = CallbackSet()
+    finished: list[RunOutcome] = []
+
+    @callback_set.on_run_finished
+    async def on_run_finished(outcome: RunOutcome) -> None:
+        finished.append(outcome)
+
+    orchestrator, _, _ = make_orchestrator(core_dir, callbacks=Callbacks([callback_set]))
+    orchestrator._started_at = datetime.now(UTC)
+    monkeypatch.setattr(orchestrator._outcome_store, "write", MagicMock(side_effect=OSError("disk full")))
+
+    with pytest.raises(RunOutcomePersistenceError, match="disk full"):
+        await orchestrator._record_outcome(None)
+
+    assert orchestrator.outcome is not None
+    assert orchestrator.outcome.verdict is RunVerdict.INCOMPLETE
+    assert finished == [orchestrator.outcome]
+    assert not (tmp_path / "run.yaml").exists()
+
+
+def test_current_run_checkpoints_excludes_stale_checkpoint(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    orchestrator._checkpoint_manager.write_phase_checkpoint(
+        "a",
+        make_checkpoint(
+            CheckpointStatus.SUCCESS,
+            {
+                "started_at": "2026-01-01T00:00:00+00:00",
+                "finished_at": "2026-01-01T00:01:00+00:00",
+            },
+        ),
+    )
+
+    checkpoints = orchestrator._current_run_checkpoints(datetime(2026, 1, 2, tzinfo=UTC))
+
+    assert checkpoints == {}
+
+
+async def test_invalid_checkpoint_timestamp_fails_outcome_build(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    orchestrator._started_at = datetime.now(UTC)
+    orchestrator._checkpoint_manager.write_phase_checkpoint(
+        "a",
+        make_checkpoint(CheckpointStatus.SUCCESS, {"finished_at": "not-a-timestamp"}),
+    )
+
+    with pytest.raises(RunOutcomeBuildError, match="invalid finished_at timestamp 'not-a-timestamp'"):
+        await orchestrator._record_outcome(None)
+
+    assert orchestrator.outcome is None
 
 
 # ---------------------------------------------------------------------------

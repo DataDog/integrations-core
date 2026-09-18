@@ -15,7 +15,9 @@ class ExecutionStatus(StrEnum):
     RUNNING = auto()
     FINISHING = auto()
     COMPLETED = auto()
+    INCOMPLETE = auto()
     FAILED = auto()
+    OUTCOME_ERROR = auto()
 
     @property
     def is_active(self) -> bool:
@@ -30,6 +32,7 @@ class RunStatus(StrEnum):
     RUNNING = auto()
     DONE = auto()
     FAILED = auto()
+    CANCELLED = auto()
 
     @property
     def has_started(self) -> bool:
