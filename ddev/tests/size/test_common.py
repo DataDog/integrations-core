@@ -9,6 +9,9 @@ import pytest
 import requests
 
 from ddev.cli.size.utils.common_funcs import (
+    WHEEL_REQUEST_MAX_RETRIES,
+    WHEEL_REQUEST_SESSION,
+    WHEEL_REQUEST_TIMEOUT_SECONDS,
     _matches_gitignore,
     check_python_version,
     compress,
@@ -180,7 +183,7 @@ def test_get_dependencies_sizes():
     mock_response.content = zip_content
     mock_response.__enter__.return_value = mock_response
     mock_response.__exit__.return_value = None
-    with patch("requests.get", return_value=mock_response) as mock_get:
+    with patch.object(WHEEL_REQUEST_SESSION, "get", return_value=mock_response) as mock_get:
         file_data = get_dependencies_sizes(
             MagicMock(),
             ["dependency1"],
@@ -191,7 +194,11 @@ def test_get_dependencies_sizes():
         )
 
     # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
-    mock_get.assert_called_once_with("https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True)
+    mock_get.assert_called_once_with(
+        "https://example.com/dev/dependency1/dependency1-1.1.1-.whl",
+        timeout=WHEEL_REQUEST_TIMEOUT_SECONDS,
+        stream=True,
+    )
 
     assert file_data == [
         {
@@ -710,7 +717,7 @@ def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
     missing = make_wheel_response(missing_status_code)
     found = make_wheel_response(200)
 
-    with patch("requests.get", side_effect=[missing, found]) as mock_get:
+    with patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[missing, found]) as mock_get:
         assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
 
     assert [call.args[0] for call in mock_get.call_args_list] == [
@@ -721,7 +728,7 @@ def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
 
 
 def test_request_wheel_raises_when_no_tier_has_the_wheel():
-    with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
+    with patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
         with pytest.raises(
             requests.HTTPError,
             match=re.escape(
@@ -733,7 +740,9 @@ def test_request_wheel_raises_when_no_tier_has_the_wheel():
 
 
 def test_request_wheel_does_not_retry_on_a_non_missing_error():
-    with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
+    with patch.object(
+        WHEEL_REQUEST_SESSION, "get", side_effect=[make_wheel_response(500), make_wheel_response(200)]
+    ) as mock_get:
         with pytest.raises(requests.HTTPError):
             request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
@@ -743,7 +752,19 @@ def test_request_wheel_does_not_retry_on_a_non_missing_error():
 def test_request_wheel_uses_head_when_requested():
     found = make_wheel_response(200)
 
-    with patch("requests.head", return_value=found) as mock_head:
+    with patch.object(WHEEL_REQUEST_SESSION, "head", return_value=found) as mock_head:
         assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
 
-    mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")
+    mock_head.assert_called_once_with(
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl", timeout=WHEEL_REQUEST_TIMEOUT_SECONDS
+    )
+
+
+def test_wheel_request_session_retries_connection_failures_only():
+    # The wheels storage host resets connections under load; a dropped connection must be
+    # retried, but an HTTP error status must not (that's request_wheel's own tier-fallback job).
+    adapter = WHEEL_REQUEST_SESSION.get_adapter("https://example.com")
+    retry = adapter.max_retries
+
+    assert retry.total == WHEEL_REQUEST_MAX_RETRIES
+    assert not retry.status_forcelist
