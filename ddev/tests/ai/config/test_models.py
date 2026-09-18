@@ -48,14 +48,9 @@ def test_task_goal_consistency_both_set():
         TaskConfig(name="t", prompt="p", goal="g", goal_ref="r")
 
 
-def test_task_max_goal_attempts_without_goal():
+def test_task_max_validation_attempts_below_one():
     with pytest.raises(ValidationError):
-        TaskConfig(name="t", prompt="p", max_goal_attempts=3)
-
-
-def test_task_max_goal_attempts_below_one():
-    with pytest.raises(ValidationError):
-        TaskConfig(name="t", prompt="p", goal="g", max_goal_attempts=0)
+        TaskConfig(name="t", prompt="p", max_validation_attempts=0)
 
 
 def test_task_name_pattern_rejects_invalid():

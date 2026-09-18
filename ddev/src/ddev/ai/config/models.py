@@ -317,7 +317,7 @@ class TaskConfig(BaseModel):
     prompt_ref: str | None = None
     goal: str | None = None
     goal_ref: str | None = None
-    max_goal_attempts: int = 5
+    max_validation_attempts: int = Field(default=5, ge=1)
     clear_context_before: bool = False
     compact_context_before: bool = False
 
@@ -337,11 +337,6 @@ class TaskConfig(BaseModel):
     def goal_consistency(self) -> TaskConfig:
         if self.goal is not None and self.goal_ref is not None:
             raise ValueError("At most one of 'goal' or 'goal_ref' may be set")
-        has_goal = self.goal is not None or self.goal_ref is not None
-        if not has_goal and "max_goal_attempts" in self.model_fields_set:
-            raise ValueError("'max_goal_attempts' may only be set when 'goal' or 'goal_ref' is set")
-        if has_goal and self.max_goal_attempts < 1:
-            raise ValueError("'max_goal_attempts' must be at least 1")
         return self
 
 
