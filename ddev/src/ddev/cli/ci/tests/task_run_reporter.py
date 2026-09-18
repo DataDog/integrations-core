@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Protocol
 
 import httpx
@@ -24,6 +25,8 @@ from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_errors import GitHubBodyTooLongError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ddev.cli.ci.tests.messages import UpdatePRComment
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async import AsyncGitHubClient
@@ -40,7 +43,9 @@ SHUTDOWN_WRITE_TIMEOUT = 4.0
 class CommentRenderer(Protocol):
     """Renders a whole report from a snapshot. Every tier takes the same arguments."""
 
-    def __call__(self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str: ...
+    def __call__(
+        self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+    ) -> str: ...
 
 
 # Smaller renderings to fall back on, largest first, when a body is refused for being too long.
@@ -72,10 +77,14 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         options: RunReporterOptions,
         *,
         monitor: ComponentMonitor,
+        clock: Callable[[], datetime] | None = None,
     ):
         super().__init__(name)
         self._client = client
         self._options = options
+        # Read once per report, so the fallback tiers of one write pass stay byte-identical when the
+        # snapshot has nothing to shed.
+        self._clock: Callable[[], datetime] = clock or (lambda: datetime.now(timezone.utc))
         self._comment_id: int | None = None
         # Exclude rejected comments from subsequent marker lookups.
         self._unusable_comment_ids: set[int] = set()
@@ -106,7 +115,8 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
 
     async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
-        body = render_comment(message.progress)
+        now = self._clock()
+        body = render_comment(message.progress, now=now)
 
         # Serialize revision checks and writes so older updates cannot overwrite newer ones.
         async with self._lock:
@@ -125,7 +135,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 published = True
             else:
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, message.progress)
+                published = await self._write(pr_number, body, message.progress, now=now)
                 self._pr_comment_failed = not published
 
             if message.progress.done and published:
@@ -137,8 +147,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         Timing out before acquiring the lock leaves the retained report unchanged.
         """
         async with asyncio.timeout(SHUTDOWN_WRITE_TIMEOUT), self._lock:
+            now = self._clock()
             progress = self._latest_progress
-            body = render_shutdown_notice(request) if progress is None else render_comment(progress, shutdown=request)
+            body = (
+                render_shutdown_notice(request, now=now)
+                if progress is None
+                else render_comment(progress, shutdown=request, now=now)
+            )
             # Shutdown runs outside message processing, so it carries its own revision and reason.
             with self.monitor.scope(revision=self._latest_revision, shutdown=request.kind.value):
                 self._latest_body = body
@@ -151,7 +166,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return
 
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, progress, shutdown=request)
+                published = await self._write(pr_number, body, progress, shutdown=request, now=now)
                 self._pr_comment_failed = not published
                 if published:
                     self._logger.info("Run reported as %s", request.kind.value, published=True)
@@ -163,6 +178,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         progress: DispatcherProgress | None,
         *,
         shutdown: ShutdownRequest | None = None,
+        now: datetime | None = None,
     ) -> bool:
         """Return whether publication succeeded, using smaller bodies or a replacement comment.
 
@@ -170,7 +186,11 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         """
         rendered = body
         # Render fallback tiers only when needed, skipping duplicate bodies.
-        tiers = (render(progress, shutdown=shutdown) for render in FALLBACK_TIERS) if progress is not None else iter(())
+        tiers = (
+            (render(progress, shutdown=shutdown, now=now) for render in FALLBACK_TIERS)
+            if progress is not None
+            else iter(())
+        )
         for _ in range(MAX_WRITE_PASSES):
             try:
                 await self._submit(pr_number, rendered)

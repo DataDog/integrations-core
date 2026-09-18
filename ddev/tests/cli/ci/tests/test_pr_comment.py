@@ -732,6 +732,11 @@ def test_the_footer_of_a_finished_run_points_at_the_dispatcher_run(monkeypatch):
 
     assert "<code>abcdef1</code>" in footer
     assert '<a href="https://github.com/DataDog/integrations-core/actions/runs/12345">GitHub Run</a>' in footer
+    assert (
+        'href="https://app.datadoghq.com/logs?query=service%3Addev%20source%3Adispatcher%20%40ci.pipeline.id%3A12345'
+        in footer
+    )
+    assert ">Dispatcher Logs</a>." in footer
     assert "✅" not in footer
 
 
@@ -745,33 +750,29 @@ def test_the_footer_says_what_it_can_outside_github_actions(monkeypatch):
 
     assert "Dispatcher finished." in footer
     assert "GitHub Run" not in footer
+    assert "Dispatcher Logs" not in footer
 
 
-@pytest.mark.parametrize(
-    ("run_id", "expected"),
-    [
-        pytest.param(
-            "12345",
-            '⏳ Dispatcher running — <a href="https://github.com/DataDog/integrations-core/actions/runs/12345">'
-            "GitHub Run</a>.",
-            id="linked",
-        ),
-        pytest.param(None, "⏳ Dispatcher running.", id="url-unavailable"),
-    ],
-)
-def test_the_footer_of_an_unfinished_run_identifies_the_dispatcher(
-    run_id: str | None, expected: str, monkeypatch: pytest.MonkeyPatch
-):
-    """The running footer links when possible and still renders when the URL is unavailable."""
-    if run_id is None:
-        monkeypatch.delenv("GITHUB_RUN_ID")
-    else:
-        monkeypatch.setenv("GITHUB_RUN_ID", run_id)
+def test_the_footer_of_an_unfinished_run_identifies_the_dispatcher(monkeypatch: pytest.MonkeyPatch):
+    """The running footer links to the run and its logs, and still renders when neither is available."""
+    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "DataDog/integrations-core")
+    monkeypatch.setenv("GITHUB_RUN_ID", "12345")
     progress = DispatcherProgress(
         batches=(batch_progress("batch-01", job_progress(attempt()), job_progress()),), done=False
     )
 
-    assert render_comment(progress).endswith(f"<sub>\n{expected}\n</sub>")
+    footer = render_comment(progress).rsplit("<sub>", 1)[1]
+    assert footer.startswith(
+        '\n⏳ Dispatcher running · '
+        '<a href="https://github.com/DataDog/integrations-core/actions/runs/12345">GitHub Run</a> · '
+        '<a href="https://app.datadoghq.com/logs?query=service%3Addev%20source%3Adispatcher'
+        '%20%40ci.pipeline.id%3A12345'
+    )
+    assert footer.endswith('">Dispatcher Logs</a>.\n</sub>')
+
+    monkeypatch.delenv("GITHUB_RUN_ID")
+    assert render_comment(progress).endswith("<sub>\n⏳ Dispatcher running.\n</sub>")
 
 
 def test_summary_line_reports_state_and_counts():
