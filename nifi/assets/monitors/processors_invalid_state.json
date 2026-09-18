@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2026-07-14",
+  "last_updated_at": "2026-07-14",
+  "title": "NiFi processors are in an invalid state",
+  "tags": [
+    "integration:nifi"
+  ],
+  "description": "Tracks the number of NiFi processors in an Invalid run status. A processor becomes invalid when its configuration is incomplete or inconsistent (missing required properties, an unsatisfied dependency, or a referenced controller service that is disabled or invalid), and it cannot run until the problem is resolved. This monitor alerts when at least one processor stays invalid for a sustained period, which filters out the transient invalid states that occur briefly while a flow is being deployed or updated.",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nOne or more NiFi processors on {{host.name}} have been in an **Invalid** run state for the entire evaluation window (current count: {{value}}). An invalid processor does not run until the problem is resolved\u2014this typically means it is misconfigured, is missing a required property, or has an unsatisfied dependency (for example, a referenced Controller Service that is itself disabled or invalid).\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nNiFi processors on {{host.name}} have returned to a valid state\u2014`nifi.flow.invalid_count` is back to 0.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nAny FlowFile routed to an invalid processor stops flowing entirely\u2014it queues upstream (or is rejected, depending on the connection's backpressure settings) until the processor is fixed and started. Depending on which processor is affected, this can silently stall part or all of the monitored flow.\n\n---\n\n## Why?\n\nPossible causes:\n* **Missing or incomplete required property**\u2014a property NiFi needs to start the processor was never set.\n* **Unsatisfied dependency**\u2014a referenced Controller Service is itself disabled or invalid.\n* **Invalid property value**\u2014a configured value fails NiFi's own validation for that processor type (for example, malformed expression language, out-of-range setting).\n* **Mid-deployment transient state**\u2014a flow update in progress can briefly leave a processor invalid; this monitor requires the count to stay above zero for the full window specifically to filter that out.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. **Identify the affected instance**\u2014note which `{{host.name}}` is alerting.\n2. **Open the NiFi UI**\u2014use the flow status / processor list to locate the processor(s) marked **Invalid**, then hover the processor's warning icon to read NiFi's specific validation error.\n3. **Pinpoint the exact processor from Datadog**\u2014enabling `collect_processor_metrics` on the NiFi integration emits the per-processor metric `nifi.processor.run_status` (tagged by `processor_name`, where `-1` = Invalid), which identifies the invalid processor without opening the UI.\n4. **Fix and restart**\u2014correct the missing/invalid property or dependency, then start the processor; confirm `nifi.flow.invalid_count` returns to 0.\n\n| Cause | Resolution |\n| ----- | ---------- |\n| Missing/incomplete required property | Set the missing property in the processor's configuration. |\n| Unsatisfied Controller Service dependency | Enable/fix the referenced Controller Service. |\n| Invalid property value | Correct the value to satisfy the processor's validation rules. |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nifi/)\n* [Metrics Explorer](/metric/explorer?exp_metric=nifi.flow.invalid_count&exp_scope=host:{{host.name}}&exp_agg=avg&exp_type=line)\n* [Infrastructure](/infrastructure?filters=host:{{host.name}})\n* [Logs](/logs?query=host:{{host.name}})\n{{/is_recovery}}",
+    "name": "[NiFi] Processors in an invalid state",
+    "options": {
+      "include_tags": true,
+      "new_host_delay": 300,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      }
+    },
+    "priority": null,
+    "query": "min(last_10m):avg:nifi.flow.invalid_count{*} by {host} > 0",
+    "restricted_roles": null,
+    "tags": [
+      "integration:nifi"
+    ],
+    "type": "query alert"
+  }
+}
