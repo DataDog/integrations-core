@@ -1193,6 +1193,10 @@ integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
