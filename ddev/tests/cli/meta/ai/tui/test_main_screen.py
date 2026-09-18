@@ -12,6 +12,23 @@ from rich.text import Text
 
 from ddev.ai.config.errors import ErrorKind, FlowError
 from ddev.ai.config.models import ConfigStatus, FlowResult
+from ddev.ai.runtime.checkpoints import ResumeState
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _write_success_checkpoint(repo_path: Path, flow, phase: str) -> None:
+    """Record *phase* as successful in *flow*'s run directory below *repo_path*."""
+    from ddev.ai.runtime.checkpoints import CheckpointManager
+    from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug
+    from tests.ai.runtime.helpers import make_success_checkpoint
+
+    run_dir = ai_runs_dir(repo_path) / flow_slug(flow)
+    manager = CheckpointManager(run_dir / "checkpoints.yaml")
+    manager.write_phase_checkpoint(phase, make_success_checkpoint(memory_path=f"{phase}_memory.md"))
+
 
 # ---------------------------------------------------------------------------
 # TogoApp: screen stack after mount
@@ -280,7 +297,7 @@ async def test_flow_card_keeps_resumable_footer_with_long_description(make_flow,
     async with app.run_test(size=(120, 50)) as pilot:
         await pilot.pause()
         card = app.screen.query_one("FlowCard")
-        card.resumable = True
+        card.resume_state = ResumeState(frontier=frozenset({"phase_1"}))
         await card.recompose()
         await pilot.pause()
 
@@ -288,6 +305,44 @@ async def test_flow_card_keeps_resumable_footer_with_long_description(make_flow,
         assert str(footer.render()).splitlines() == ["● 2 phases", "↻ resumable run available"]
         assert footer.region.height == 2
         assert footer.region.bottom <= card.content_region.bottom
+
+
+async def test_flow_card_footer_reports_an_unreadable_checkpoint(make_flow, make_togo_app) -> None:
+    """A corrupt checkpoint is surfaced on the tile instead of reading as a clean slate."""
+    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
+
+    flow = make_flow("Corrupt Checkpoint", n_phases=2)
+    app = make_togo_app([flow])
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one(FlowCard)
+        card.resume_state = ResumeState(error="Failed to load checkpoints from checkpoints.yaml: boom")
+        await card.recompose()
+        await pilot.pause()
+
+        footer = str(card.query_one(".flow-card-footer").render())
+        assert footer.splitlines() == ["● 2 phases", "✕ checkpoint unreadable"]
+        assert not card.resumable
+
+
+async def test_flow_card_unreadable_checkpoint_supersedes_resumable_label(make_flow, make_togo_app) -> None:
+    """The footer never claims a resume is available while the checkpoint cannot be read."""
+    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
+
+    flow = make_flow("Corrupt And Frontier", n_phases=2)
+    app = make_togo_app([flow])
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one(FlowCard)
+        card.resume_state = ResumeState(frontier=frozenset({"phase_1"}), error="unreadable")
+        await card.recompose()
+        await pilot.pause()
+
+        footer = str(card.query_one(".flow-card-footer").render())
+        assert "resumable run available" not in footer
+        assert "✕ checkpoint unreadable" in footer
 
 
 async def test_flow_card_click_does_not_navigate_when_text_is_selected(monkeypatch, make_togo_app):
@@ -348,7 +403,6 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
     """Dashboard and flow details discover runs below the configured repository."""
     from textual.widgets import Button
 
-    from ddev.cli.meta.ai.tui.runs import flow_slug
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
     from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
 
@@ -357,19 +411,7 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
     repo_path.mkdir()
     other_cwd.mkdir()
     flow = make_flow("Repo Flow", n_phases=2)
-    run_dir = repo_path / ".ddev" / "ai-runs" / flow_slug(flow)
-    run_dir.mkdir(parents=True)
-    (run_dir / "checkpoints.yaml").write_text(
-        """phase_0:
-  status: success
-  started_at: '2024-01-01T00:00:00'
-  finished_at: '2024-01-01T00:01:00'
-  tokens:
-    total_input: 1
-    total_output: 1
-  memory_path: phase_0_memory.md
-"""
-    )
+    _write_success_checkpoint(repo_path, flow, "phase_0")
     app = make_togo_app([flow])
     app.ddev_app.repo.path = str(repo_path)
     monkeypatch.chdir(other_cwd)
@@ -382,3 +424,63 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
         await pilot.pause()
         assert isinstance(app.screen, FlowScreen)
         assert app.screen.query_one("#resume", Button).display
+
+
+# ---------------------------------------------------------------------------
+# Resumable label refresh
+# ---------------------------------------------------------------------------
+
+
+async def test_flow_card_resumable_label_refreshes_on_screen_resume(tmp_path, make_flow, make_togo_app):
+    """A run started during the session updates its tile without restarting the TUI."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
+
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    flow = make_flow("Repo Flow", n_phases=2)
+    app = make_togo_app([flow])
+    app.ddev_app.repo.path = str(repo_path)
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one(FlowCard)
+        assert not card.resumable
+
+        card.action_select()
+        await pilot.pause()
+        assert isinstance(app.screen, FlowScreen)
+        _write_success_checkpoint(repo_path, flow, "phase_0")
+        app.pop_screen()
+        await pilot.pause()
+
+        assert card.resumable
+        assert "↻ resumable run available" in str(card.query_one(".flow-card-footer").render())
+
+
+async def test_flow_card_resumable_label_clears_when_run_completes(tmp_path, make_flow, make_togo_app):
+    """A run that finishes during the session drops the resumable label from its tile."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
+
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    flow = make_flow("Repo Flow", n_phases=2)
+    _write_success_checkpoint(repo_path, flow, "phase_0")
+    app = make_togo_app([flow])
+    app.ddev_app.repo.path = str(repo_path)
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        card = app.screen.query_one(FlowCard)
+        assert card.resumable
+
+        card.action_select()
+        await pilot.pause()
+        assert isinstance(app.screen, FlowScreen)
+        _write_success_checkpoint(repo_path, flow, "phase_1")
+        app.pop_screen()
+        await pilot.pause()
+
+        assert not card.resumable
+        assert "resumable" not in str(card.query_one(".flow-card-footer").render())

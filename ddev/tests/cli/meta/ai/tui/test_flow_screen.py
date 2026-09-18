@@ -56,29 +56,6 @@ def _make_flow(name: str = "Test Flow", n_phases: int = 2) -> ResolvedFlow:
     )
 
 
-def _make_flow_with_tools(name: str = "Tool Flow") -> ResolvedFlow:
-    """Create a flow whose agent has tools."""
-    agents = {
-        "analyst": AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=["read_file"])
-    }
-    phases = {
-        "analyse": PhaseConfig(
-            name="analyse",
-            agent="analyst",
-            tasks=[TaskConfig(name="read_task", prompt="analyse something")],
-        )
-    }
-    flow = [FlowEntry(phase="analyse")]
-    return ResolvedFlow(
-        name=name,
-        description="Tool flow",
-        agents=agents,
-        phases=phases,
-        flow=flow,
-        variables={},
-    )
-
-
 def _app() -> TogoApp:
     flow = _make_flow()
     ddev_app = SimpleNamespace(
@@ -102,28 +79,45 @@ def _provide_prd(screen, tmp_path: Path) -> str:
     return content
 
 
-def _incomplete_checkpoints_yaml(flow: ResolvedFlow) -> str:
-    """Return YAML with only the first scheduled phase as success."""
-    first_phase = flow.flow[0].phase
-    return f"""{first_phase}:
+def _success_checkpoint_yaml(phase: str) -> str:
+    """Return a success checkpoint block for one phase."""
+    return f"""{phase}:
   status: success
   started_at: '2024-01-01T00:00:00'
   finished_at: '2024-01-01T00:01:00'
   tokens:
     total_input: 100
     total_output: 100
-  memory_path: {first_phase}_memory.md
+  memory_path: {phase}_memory.md
 """
 
 
-def _write_incomplete_run(tmp_path: Path, flow: ResolvedFlow) -> Path:
-    """Create a run dir under tmp_path with an incomplete checkpoints.yaml."""
+def _write_run(tmp_path: Path, flow: ResolvedFlow, checkpoints_yaml: str) -> Path:
+    """Write *checkpoints_yaml* to the run dir for *flow* below tmp_path."""
     from ddev.cli.meta.ai.tui.runs import flow_slug
 
     run_dir = tmp_path / flow_slug(flow)
-    run_dir.mkdir(parents=True)
-    (run_dir / "checkpoints.yaml").write_text(_incomplete_checkpoints_yaml(flow))
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "checkpoints.yaml").write_text(checkpoints_yaml)
     return tmp_path
+
+
+def _write_incomplete_run(tmp_path: Path, flow: ResolvedFlow) -> Path:
+    """Create a run dir under tmp_path with only the first scheduled phase at success."""
+    return _write_run(tmp_path, flow, _success_checkpoint_yaml(flow.flow[0].phase))
+
+
+def _write_complete_run(tmp_path: Path, flow: ResolvedFlow) -> Path:
+    """Create a run dir under tmp_path with every scheduled phase at success."""
+    return _write_run(tmp_path, flow, "".join(_success_checkpoint_yaml(entry.phase) for entry in flow.flow))
+
+
+def _assert_no_resume_state(flow: ResolvedFlow, runs_dir: Path) -> None:
+    """Used to assert *flow* records nothing at all below *runs_dir*."""
+    from ddev.ai.runtime.checkpoints import ResumeState
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state
+
+    assert flow_resume_state(flow, runs_dir=runs_dir) == ResumeState()
 
 
 # ---------------------------------------------------------------------------
@@ -142,83 +136,76 @@ def test_flow_slug_distinguishes_case_sensitive_names() -> None:
     assert lower.startswith("build-")
 
 
-def test_has_resumable_run_no_dir(tmp_path: Path) -> None:
+def test_flow_resume_state_no_dir(tmp_path: Path) -> None:
     """No run dir → not resumable."""
-    from ddev.cli.meta.ai.tui.runs import has_resumable_run
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state
 
     flow = _make_flow()
-    assert not has_resumable_run(flow, runs_dir=tmp_path)
+    assert not flow_resume_state(flow, runs_dir=tmp_path).is_resumable
 
 
-def test_has_resumable_run_incomplete_checkpoints(tmp_path: Path) -> None:
+def test_flow_resume_state_incomplete_checkpoints(tmp_path: Path) -> None:
     """Run dir with incomplete checkpoints → resumable."""
-    from ddev.cli.meta.ai.tui.runs import has_resumable_run
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state
 
     flow = _make_flow(n_phases=2)
     _write_incomplete_run(tmp_path, flow)
-    assert has_resumable_run(flow, runs_dir=tmp_path)
+    state = flow_resume_state(flow, runs_dir=tmp_path)
+    assert state.is_resumable
+    assert state.completed == {flow.flow[0].phase}
 
 
-def test_has_resumable_run_all_phases_complete(tmp_path: Path) -> None:
+def test_flow_resume_state_all_phases_complete(tmp_path: Path) -> None:
     """All scheduled phases at success → not resumable."""
-    from ddev.cli.meta.ai.tui.runs import flow_slug, has_resumable_run
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state
 
     flow = _make_flow(n_phases=2)
-    run_dir = tmp_path / flow_slug(flow)
-    run_dir.mkdir()
-    # Both phases complete
-    checkpoints_yaml = ""
-    for entry in flow.flow:
-        checkpoints_yaml += f"""{entry.phase}:
-  status: success
-  started_at: '2024-01-01T00:00:00'
-  finished_at: '2024-01-01T00:01:00'
-  tokens:
-    total_input: 100
-    total_output: 100
-  memory_path: {entry.phase}_memory.md
-"""
-    (run_dir / "checkpoints.yaml").write_text(checkpoints_yaml)
-    assert not has_resumable_run(flow, runs_dir=tmp_path)
+    _write_complete_run(tmp_path, flow)
+    state = flow_resume_state(flow, runs_dir=tmp_path)
+    assert state.completed == {entry.phase for entry in flow.flow}
+    assert not state.is_resumable
 
 
-def test_has_resumable_run_no_checkpoints_file(tmp_path: Path) -> None:
+def test_flow_resume_state_no_checkpoints_file(tmp_path: Path) -> None:
     """Run dir exists but no checkpoints.yaml → not resumable."""
-    from ddev.cli.meta.ai.tui.runs import flow_slug, has_resumable_run
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+
+    flow = _make_flow()
+    (tmp_path / flow_slug(flow)).mkdir()
+    _assert_no_resume_state(flow, tmp_path)
+
+
+def test_flow_resume_state_unreadable_checkpoints(tmp_path: Path) -> None:
+    """A corrupt checkpoints file reports the reason rather than crashing the grid."""
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state, flow_slug
 
     flow = _make_flow()
     run_dir = tmp_path / flow_slug(flow)
     run_dir.mkdir()
-    assert not has_resumable_run(flow, runs_dir=tmp_path)
+    (run_dir / "checkpoints.yaml").write_text("{ not: valid: yaml")
+
+    state = flow_resume_state(flow, runs_dir=tmp_path)
+    assert not state.is_resumable
+    assert state.error is not None
+    assert "checkpoints.yaml" in state.error
 
 
-def test_has_resumable_run_uses_resolve_resume_state(tmp_path: Path, monkeypatch) -> None:
-    """has_resumable_run must decide via resolve_resume_state, not its own bespoke check.
+def test_flow_resume_state_distinguishes_corrupt_from_clean_slate(tmp_path: Path) -> None:
+    """An unreadable checkpoint is not reported as an absent one."""
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state, flow_slug
 
-    This keeps the "should we show Resume?" decision and the orchestrator's actual
-    skip-already-done-phases decision on the exact same code path, so they can't
-    silently drift apart.
-    """
-    from ddev.cli.meta.ai.tui import runs
+    corrupt = _make_flow(name="Corrupt")
+    run_dir = tmp_path / flow_slug(corrupt)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text("just a string, not a mapping")
 
-    flow = _make_flow(n_phases=2)
-    _write_incomplete_run(tmp_path, flow)
-
-    calls = []
-
-    def _spy(config, checkpoint_manager):
-        calls.append(config)
-        return {flow.flow[0].phase}, {flow.flow[1].phase}
-
-    monkeypatch.setattr(runs, "resolve_resume_state", _spy)
-
-    assert runs.has_resumable_run(flow, runs_dir=tmp_path)
-    assert calls == [flow]
+    assert flow_resume_state(corrupt, runs_dir=tmp_path).error is not None
+    assert flow_resume_state(_make_flow(name="Never Ran"), runs_dir=tmp_path).error is None
 
 
-def test_has_resumable_run_failed_checkpoint(tmp_path: Path) -> None:
+def test_flow_resume_state_failed_checkpoint(tmp_path: Path) -> None:
     """A phase checkpoint with status: failed is resumable (not complete)."""
-    from ddev.cli.meta.ai.tui.runs import flow_slug, has_resumable_run
+    from ddev.cli.meta.ai.tui.runs import flow_resume_state, flow_slug
 
     flow = _make_flow(n_phases=2)
     run_dir = tmp_path / flow_slug(flow)
@@ -236,7 +223,7 @@ def test_has_resumable_run_failed_checkpoint(tmp_path: Path) -> None:
         "    total_output: 0\n"
     )
     # A failed phase means the run is not successfully complete → resumable
-    assert has_resumable_run(flow, runs_dir=tmp_path)
+    assert flow_resume_state(flow, runs_dir=tmp_path).is_resumable
 
 
 # ---------------------------------------------------------------------------
@@ -529,6 +516,54 @@ async def test_resume_button_shown_with_incomplete_run(tmp_path: Path) -> None:
         assert resume_btn.display
 
 
+async def test_resume_button_appears_when_screen_resumes(tmp_path: Path) -> None:
+    """A run that fails while the screen is on the stack reveals Resume on return."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+
+    flow = _make_flow(n_phases=2)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert not flow_screen.query_one("#resume", Button).display
+
+        await pilot.app.push_screen(PhaseConfigScreen(flow, flow.flow[0].phase))
+        await pilot.pause()
+        _write_incomplete_run(tmp_path, flow)
+        pilot.app.pop_screen()
+        await pilot.pause()
+
+        assert pilot.app.screen is flow_screen
+        assert flow_screen.query_one("#resume", Button).display
+
+
+async def test_resume_button_hidden_again_when_run_completes(tmp_path: Path) -> None:
+    """A run that finishes while the screen is on the stack hides Resume on return."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#resume", Button).display
+
+        await pilot.app.push_screen(PhaseConfigScreen(flow, flow.flow[0].phase))
+        await pilot.pause()
+        _write_complete_run(tmp_path, flow)
+        pilot.app.pop_screen()
+        await pilot.pause()
+
+        assert not flow_screen.query_one("#resume", Button).display
+
+
 async def test_phase_config_agent_panel_renders_tools_and_prompt() -> None:
     """PhaseConfigScreen shows agent tools and system prompt inline."""
     from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
@@ -660,6 +695,143 @@ async def test_resume_pushes_execution_screen_with_resume_flag(tmp_path: Path) -
         screen = pilot.app.screen
         assert isinstance(screen, ExecutionScreen)
         assert screen.resume is True
+
+
+async def test_resume_refuses_when_run_completes_while_modal_is_open(tmp_path: Path) -> None:
+    """The dismiss callback re-checks, so a run finished elsewhere cannot start a doomed resume."""
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        await pilot.click("#resume")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, LaunchModal)
+
+        _provide_prd(pilot.app.screen, tmp_path)
+        _write_complete_run(tmp_path, flow)
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert not isinstance(pilot.app.screen, ExecutionScreen)
+        assert pilot.app.screen is flow_screen
+        assert not flow_screen.query_one("#resume", Button).display
+        assert "Nothing left to resume" in " ".join(n.message for n in pilot.app._notifications)
+
+
+async def test_resume_refuses_when_checkpoint_becomes_unreadable_while_modal_is_open(tmp_path: Path) -> None:
+    """A checkpoint corrupted mid-flight reports the remedy instead of a wrapped hook error."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        await pilot.click("#resume")
+        await pilot.pause()
+
+        _provide_prd(pilot.app.screen, tmp_path)
+        (tmp_path / flow_slug(flow) / "checkpoints.yaml").write_text("{ not: valid: yaml")
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert not isinstance(pilot.app.screen, ExecutionScreen)
+        notifications = " ".join(n.message for n in pilot.app._notifications)
+        assert "Cannot resume" in notifications
+        assert "Delete the checkpoint file" in notifications
+        # One line, and the remedy follows a sentence rather than a YAML caret.
+        assert len(notifications.splitlines()) == 1
+        assert notifications.endswith("Delete the checkpoint file and launch from scratch.")
+
+
+# `run_test` disables notifications by default (`notifications=False`), so toasts are never
+# mounted and a message that Textual cannot render raises nothing. These two render for real.
+
+
+async def test_resume_refusal_toast_renders_schema_invalid_checkpoint_text(tmp_path: Path) -> None:
+    """A schema-invalid checkpoint must not take the app down when the refusal toast renders."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50), notifications=True) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#resume", Button).display
+
+        # Valid YAML mapping, invalid checkpoint entry: pydantic reports bracketed fragments
+        # such as "[type=missing, input_value={'status': 'success'}]" that break content markup.
+        (tmp_path / flow_slug(flow) / "checkpoints.yaml").write_text("phase_0:\n  status: success\n")
+
+        flow_screen._do_resume()
+        for _ in range(4):
+            await pilot.pause()
+
+        assert app.is_running
+        assert not flow_screen.query_one("#resume", Button).display
+
+
+async def test_resume_refusal_toast_renders_unparsable_checkpoint_text(tmp_path: Path) -> None:
+    """The YAML-parse variant renders too, and its caret block never reaches the toast."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50), notifications=True) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        (tmp_path / flow_slug(flow) / "checkpoints.yaml").write_text("{ not: valid: yaml")
+
+        flow_screen._do_resume()
+        for _ in range(4):
+            await pilot.pause()
+
+        assert app.is_running
+        message = next(n.message for n in app._notifications)
+        assert "^" not in message
+
+
+async def test_resume_refuses_before_opening_the_modal_when_nothing_to_resume(tmp_path: Path) -> None:
+    """A stale Resume button is refused up front rather than after collecting inputs."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+    flow = _make_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#resume", Button).display
+
+        _write_complete_run(tmp_path, flow)
+        flow_screen._do_resume()
+        await pilot.pause()
+
+        assert not isinstance(pilot.app.screen, LaunchModal)
+        assert not flow_screen.query_one("#resume", Button).display
 
 
 async def test_resume_with_inputs_reopens_modal_and_passes_converted_values(tmp_path: Path) -> None:

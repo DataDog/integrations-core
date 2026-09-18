@@ -38,6 +38,7 @@ from ddev.cli.meta.ai.rendering import (
     render_web_search_line,
 )
 from ddev.cli.meta.ai.tui.app import OrchestratorLike
+from ddev.cli.meta.ai.tui.errors import compact_error_detail
 from ddev.cli.meta.ai.tui.messages import (
     AfterGoalCheck,
     AgentBeforeSend,
@@ -55,7 +56,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseStarted,
     RunErrored,
 )
-from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_phases
+from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_resume_state, flow_slug
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
@@ -68,8 +69,6 @@ if TYPE_CHECKING:
 
 
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
-
-BANNER_ERROR_MAX_CHARS = 200
 
 
 class ExecutionScreen(TogoScreen):
@@ -125,7 +124,7 @@ class ExecutionScreen(TogoScreen):
         self.togo_app.bridge_target = self
         if self.resume:
             runs_dir = self._runs_dir or ai_runs_dir(self.togo_app.ddev_app.repo.path)
-            for phase_id in resume_completed_phases(self.flow, runs_dir):
+            for phase_id in flow_resume_state(self.flow, runs_dir).completed:
                 self._phase_statuses[phase_id] = RunStatus.DONE
                 for task_phase, task_name in self._task_statuses:
                     if task_phase == phase_id:
@@ -233,13 +232,11 @@ class ExecutionScreen(TogoScreen):
             pass
 
     def _compact_error_detail(self, error: BaseException, phase_id: str | None = None) -> str:
-        detail = next((line.strip() for line in str(error).splitlines() if line.strip()), type(error).__name__)
+        detail = str(error) or type(error).__name__
         if phase_id is not None:
             detail = detail.removeprefix(f"Phase '{phase_id}' failed: ")
             detail = detail.removeprefix(f"Phase '{phase_id}': ")
-        if len(detail) > BANNER_ERROR_MAX_CHARS:
-            detail = f"{detail[: BANNER_ERROR_MAX_CHARS - 1].rstrip()}…"
-        return detail
+        return compact_error_detail(detail)
 
     def _show_error_banner(self, message: str) -> None:
         try:
