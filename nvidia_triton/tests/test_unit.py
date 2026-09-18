@@ -9,22 +9,24 @@ from datadog_checks.nvidia_triton import NvidiaTritonCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
 
 def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics, mock_http_response):
     """
     Use static files for the metrics and version tests.
     """
 
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance_metrics])
-    mock_http_response(file_path=get_fixture_path('metrics/metrics'))
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance_metrics])
+    mock_http_response(file_path=get_fixture_path("metrics/metrics"))
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(name=metric)
-        aggregator.assert_metric_has_tag(metric, 'test:test')
+        aggregator.assert_metric_has_tag(metric, "test:test")
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_service_check("nvidia_triton.openmetrics.health", ServiceCheck.OK)
 
 
 def test_emits_critical_openemtrics_service_check_when_service_is_down(
@@ -34,12 +36,12 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
     mock_http_response(status_code=404)
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
     with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.CRITICAL)
+    aggregator.assert_service_check("nvidia_triton.openmetrics.health", ServiceCheck.CRITICAL)
 
 
 def test_emits_critical_api_service_check_when_service_is_down(aggregator, instance, mock_http_response):
@@ -47,26 +49,100 @@ def test_emits_critical_api_service_check_when_service_is_down(aggregator, insta
     If we fail to reach the API endpoint the health service check should report as critical
     """
     mock_http_response(status_code=404)
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
     check._check_server_health()
 
-    aggregator.assert_service_check('nvidia_triton.health.status', ServiceCheck.CRITICAL)
+    aggregator.assert_service_check("nvidia_triton.health.status", ServiceCheck.CRITICAL)
 
 
 def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('info/v2'))
-    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+    mock_http_response(file_path=get_fixture_path("info/v2"))
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
 
-    check.check_id = 'test:123'
+    check.check_id = "test:123"
     check._submit_version_metadata()
-    raw_version = '2.38.0'
+    raw_version = "2.38.0"
 
-    major, minor, patch = raw_version.split('.')
+    major, minor, patch = raw_version.split(".")
     version_metadata = {
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': raw_version,
-        'version.scheme': 'semver',
+        "version.major": major,
+        "version.minor": minor,
+        "version.patch": patch,
+        "version.raw": raw_version,
+        "version.scheme": "semver",
     }
-    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata("test:123", version_metadata)
+
+
+def test_default_metric_limit_is_zero():
+    assert NvidiaTritonCheck.DEFAULT_METRIC_LIMIT == 0
+
+
+def test_default_server_port_is_8000():
+    check = NvidiaTritonCheck("nvidia_triton", {}, [{"openmetrics_endpoint": "http://localhost:9090/metrics"}])
+    assert check.server_port == "8000"
+
+
+def test_submit_version_metadata_skipped_when_metadata_collection_disabled(datadog_agent, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path("info/v2"))
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
+    check.check_id = "test:disabled-collection"
+    datadog_agent._config["enable_metadata_collection"] = False
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_submit_version_metadata_ignores_extra_version_segments(datadog_agent, instance, mock_http_response):
+    mock_http_response(json_data={"version": "1.2.3.4"})
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
+    check.check_id = "test:extra-segment"
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata(
+        "test:extra-segment",
+        {
+            "version.major": "1",
+            "version.minor": "2",
+            "version.patch": "3",
+            "version.raw": "1.2.3",
+            "version.scheme": "semver",
+        },
+    )
+
+
+def test_submit_version_metadata_skips_when_too_few_segments(datadog_agent, instance, mock_http_response):
+    mock_http_response(json_data={"version": "1.2"})
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
+    check.check_id = "test:short-segment"
+    check._submit_version_metadata()
+
+    datadog_agent.assert_metadata_count(0)
+
+
+@pytest.mark.parametrize(
+    "status_code, expect_critical, expect_ok",
+    [
+        (199, False, False),
+        (200, False, True),
+        (201, False, False),
+        (300, False, False),
+        (399, False, False),
+        (400, True, False),
+        (599, True, False),
+        (600, False, False),
+        (700, False, False),
+    ],
+)
+def test_check_server_health_status_code_boundaries(
+    status_code, expect_critical, expect_ok, instance, aggregator, mock_http_response
+):
+    mock_http_response(status_code=status_code)
+    check = NvidiaTritonCheck("nvidia_triton", {}, [instance])
+    check._check_server_health()
+
+    aggregator.assert_service_check(
+        "nvidia_triton.health.status", ServiceCheck.CRITICAL, count=1 if expect_critical else 0
+    )
+    aggregator.assert_service_check("nvidia_triton.health.status", ServiceCheck.OK, count=1 if expect_ok else 0)
+    aggregator.assert_service_check("nvidia_triton.health.status", ServiceCheck.UNKNOWN, count=0 if expect_ok else 1)
