@@ -82,7 +82,7 @@ class FlowScreen(TogoScreen):
     def _compose_agent_summary(self, name: str, config: AgentConfig) -> Iterator[Widget]:
         row = Vertical(classes="flow-agent-row")
         with row:
-            yield Static(f"◆ {name} · {config.model or config.provider}", classes="flow-agent-heading")
+            yield Static(f"◆ {name} · {config.model}", classes="flow-agent-heading")
             if config.tools:
                 yield Static(" · ".join(config.tools), classes="flow-agent-tools")
 

@@ -242,6 +242,8 @@ def get_scalar_value_editor(spec: EditorSpec) -> LaunchValueEditor[str] | Launch
             return BooleanLaunchValueEditor(spec)
         case InputType.PATH:
             return PathLaunchValueEditor(spec)
+        case InputType.OBJECT:
+            raise ValueError(f"{InputType.OBJECT!r} is not a scalar input type")
         case unexpected:
             assert_never(unexpected)
 

@@ -115,7 +115,9 @@ def make_flow() -> Callable[..., ResolvedFlow]:
         inputs: list[FlowInput] | None = None,
         agents: dict[str, AgentConfig] | None = None,
     ) -> ResolvedFlow:
-        flow_agents = agents or {"agent_a": AgentConfig.model_construct(provider="anthropic", tools=[])}
+        flow_agents = agents or {
+            "agent_a": AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=[])
+        }
         agent_name = next(iter(flow_agents))
         phases = {
             f"phase_{i}": PhaseConfig(

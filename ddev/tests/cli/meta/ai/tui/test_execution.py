@@ -40,7 +40,7 @@ def _make_flow(
     """Build a ResolvedFlow matching the given (phase_id, task_names) list."""
     if phases is None:
         phases = DEMO_PHASES
-    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", tools=[])}
+    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=[])}
     phase_configs = {
         phase_id: PhaseConfig(
             name=phase_id,
@@ -63,7 +63,7 @@ def _make_flow(
 
 def _make_dag_flow() -> ResolvedFlow:
     """Build a flow with branching and fan-in dependencies."""
-    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", tools=[])}
+    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=[])}
     phase_ids = ["research", "write_readme", "write_script", "write_tests", "final_review"]
     phase_configs = {
         phase_id: PhaseConfig(

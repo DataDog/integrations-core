@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, overload
 
@@ -125,10 +126,10 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         return self._context_window
 
     @staticmethod
-    def _filter_by_allowed(names: list[str], allowed_tools: list[str] | None) -> list[str]:
+    def _filter_by_allowed(names: Sequence[str], allowed_tools: list[str] | None) -> list[str]:
         """Filter names by allowlist. None means all names."""
         if allowed_tools is None:
-            return names
+            return list(names)
         allowed = set(allowed_tools)
         return [n for n in names if n in allowed]
 

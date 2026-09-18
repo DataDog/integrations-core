@@ -94,6 +94,16 @@ class ResourceRegistry:
         """The single entry for ``(kind, name)``, or ``None`` if absent or conflicting."""
         return self._entries.get((kind, name))
 
+    def source_file_for(self, kind: ResourceKind, name: str) -> Path:
+        """The source file of the entry for ``(kind, name)``.
+
+        Callers use this once they already know the resource exists (e.g. it appeared in a
+        prior resolution pass), so an absent entry indicates a caller bug rather than a
+        reportable condition.
+        """
+        entry = self._entries[(kind, name)]
+        return entry.source_file
+
     @overload
     def lookup(self, kind: Literal[ResourceKind.AGENT], name: str) -> Entry[AgentConfig] | ResourceConflict | None: ...
     @overload
@@ -104,6 +114,8 @@ class ResourceRegistry:
     def lookup(
         self, kind: Literal[ResourceKind.PROMPT, ResourceKind.GOAL, ResourceKind.MEMORY_PROMPT], name: str
     ) -> Entry[str] | ResourceConflict | None: ...
+    @overload
+    def lookup(self, kind: ResourceKind, name: str) -> Entry[Any] | ResourceConflict | None: ...
 
     def lookup(self, kind: ResourceKind, name: str) -> Entry[Any] | ResourceConflict | None:
         """The full state of ``(kind, name)``: valid/broken entry, conflict, or ``None`` if absent."""

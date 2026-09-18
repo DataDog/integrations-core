@@ -36,7 +36,7 @@ def resolve_scheduled_phases(
 def _resolve_scheduled_phase(
     registry: ResourceRegistry, phase_name: str, flow_name: str
 ) -> tuple[PhaseConfig | None, list[FlowError]]:
-    flow_source = registry.entry(ResourceKind.FLOW, flow_name).source_file
+    flow_source = registry.source_file_for(ResourceKind.FLOW, flow_name)
     phase_entry, errors = _resolve_resource_reference(
         registry,
         ResourceKind.PHASE,
@@ -90,7 +90,7 @@ def _validate_phase(
 def _validate_phase_class(
     registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, phase_config: PhaseConfig
 ) -> list[FlowError]:
-    phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
+    phase_src = registry.source_file_for(ResourceKind.PHASE, phase_config.name)
     if not phase_registry.contains(phase_config.class_):
         return [
             FlowError(
@@ -124,7 +124,7 @@ def _validate_phase_class(
 def _validate_phase_agent(registry: ResourceRegistry, phase_config: PhaseConfig) -> list[FlowError]:
     if phase_config.agent is None:
         return []
-    phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
+    phase_src = registry.source_file_for(ResourceKind.PHASE, phase_config.name)
     _, errors = _resolve_resource_reference(
         registry,
         ResourceKind.AGENT,
@@ -153,7 +153,7 @@ def _validate_phase_refs(registry: ResourceRegistry, phase_config: PhaseConfig) 
 
 
 def _check_ref(registry: ResourceRegistry, kind: ResourceKind, ref: str, phase_name: str) -> list[FlowError]:
-    phase_src = registry.entry(ResourceKind.PHASE, phase_name).source_file
+    phase_src = registry.source_file_for(ResourceKind.PHASE, phase_name)
     _, errors = _resolve_resource_reference(
         registry,
         kind,
