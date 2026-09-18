@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
+from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
@@ -91,6 +92,14 @@ class BaseSpawnTool[TInput: BaseToolInput](BaseTool[TInput]):
 
         try:
             result = await process.start(prompt)
+        except FlowStopRequested as e:
+            # The parent decides whether this warrants stopping the whole run.
+            return ChildOutcome(
+                name=name,
+                error=f"asked to stop the flow: {e}",
+                input_tokens=e.input_tokens,
+                output_tokens=e.output_tokens,
+            )
         except Exception as e:
             return ChildOutcome(name=name, error=f"failed: {type(e).__name__}: {e}")
 
