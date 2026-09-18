@@ -370,10 +370,18 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                statement = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
+                # `digest_text` is normalized by the database for rows read from
+                # `events_statements_summary_by_digest`, but rows unioned in from
+                # `prepared_statements_instances` carry raw `sql_text`, which may contain embedded
+                # null characters. Replace them so obfuscation succeeds instead of dropping the row.
+                statement = obfuscate_sql_with_metadata(
+                    row['digest_text'], self._obfuscate_options, replace_null_character=True
+                )
                 obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
+                # Use `repr` so that a query containing control characters cannot make this
+                # handler raise while logging, which would escalate to a job loop crash.
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['digest_text']), e)
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
