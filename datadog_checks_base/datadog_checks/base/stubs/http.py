@@ -6,6 +6,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import timedelta
+from enum import Enum, auto
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
@@ -17,6 +18,13 @@ __all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
 
 JSON_RESULT_UNSET = object()
 SUPPRESSED_AUTH = object()
+
+
+class UnsetResponseResult(Enum):
+    TOKEN = auto()
+
+
+RESPONSE_RESULT_UNSET = UnsetResponseResult.TOKEN
 
 
 def _snapshot_value(value: Any) -> Any:
@@ -64,12 +72,12 @@ class FakeHTTPResponse:
         *,
         status_code: int = 200,
         content: bytes = b'',
-        text: str = '',
+        text: str | UnsetResponseResult = RESPONSE_RESULT_UNSET,
         headers: Mapping[str, str] | None = None,
         json_result: Any = JSON_RESULT_UNSET,
         json_error: Exception | None = None,
-        content_chunks: Iterable[bytes | str] = (),
-        lines: Iterable[bytes | str] = (),
+        content_chunks: Iterable[bytes | str] | UnsetResponseResult = RESPONSE_RESULT_UNSET,
+        lines: Iterable[bytes | str] | UnsetResponseResult = RESPONSE_RESULT_UNSET,
         stream_error: Exception | None = None,
         status_error: HTTPClientStatusError | None = None,
         encoding: str | None = None,
@@ -81,9 +89,15 @@ class FakeHTTPResponse:
         reason: str = '',
         peer_cert: bytes | dict | None = None,
     ) -> None:
+        resolved_text = content.decode(encoding or 'utf-8') if isinstance(text, UnsetResponseResult) else text
+        resolved_content_chunks = (
+            ((content,) if content else ()) if isinstance(content_chunks, UnsetResponseResult) else content_chunks
+        )
+        resolved_lines = tuple(resolved_text.splitlines()) if isinstance(lines, UnsetResponseResult) else lines
+
         self.status_code: int = status_code
         self.content: bytes = content
-        self.text: str = text
+        self.text: str = resolved_text
         self.headers: Mapping[str, str] = HTTPHeaders(headers or {})
         self.encoding: str | None = encoding
         self.elapsed: timedelta = elapsed
@@ -96,8 +110,8 @@ class FakeHTTPResponse:
         self.closed = False
         self._json_result = json_result
         self._json_error = json_error
-        self._content_chunks = tuple(content_chunks)
-        self._lines = tuple(lines)
+        self._content_chunks = tuple(resolved_content_chunks)
+        self._lines = tuple(resolved_lines)
         self._stream_error = stream_error
         self._status_error = status_error
         self._reason = reason

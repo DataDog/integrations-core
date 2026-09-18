@@ -19,12 +19,7 @@ def test_check_appgate_sdp(dd_run_check, aggregator, instance, fake_http):
     fake_http.register_response(
         'GET',
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(
-            content=content,
-            text=content.decode('utf-8'),
-            content_chunks=(content,),
-            lines=content.decode('utf-8').splitlines(),
-        ),
+        FakeHTTPResponse(content=content),
         match_options={'stream': True},
     )
 

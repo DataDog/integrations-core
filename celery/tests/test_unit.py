@@ -18,8 +18,7 @@ from .common import METRICS, get_fixture_path
 def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
     with open(file_path, 'rb') as response_file:
         content = response_file.read()
-    text = content.decode('utf-8')
-    return FakeHTTPResponse(content=content, text=text, lines=text.splitlines())
+    return FakeHTTPResponse(content=content)
 
 
 def test_check(dd_run_check, aggregator, instance, fake_http):

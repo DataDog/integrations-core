@@ -38,7 +38,6 @@ def _status_response(status_code: int) -> FakeHTTPResponse:
 def _invalid_json_response(text: str) -> FakeHTTPResponse:
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
-        text=text,
         json_error=json.JSONDecodeError('Expecting value', text, 0),
     )
 

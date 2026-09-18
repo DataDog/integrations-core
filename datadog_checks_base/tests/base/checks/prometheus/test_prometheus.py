@@ -35,15 +35,20 @@ FIXTURES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 def _text_response(text: str, *, content_type: str = 'text/plain') -> FakeHTTPResponse:
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
-        text=text,
         headers={'Content-Type': content_type},
-        lines=text.splitlines(),
     )
 
 
 def _file_response(file_path: str, *, content_type: str) -> FakeHTTPResponse:
     with open(file_path, 'rb') as fixture:
-        return FakeHTTPResponse(content=fixture.read(), headers={'Content-Type': content_type})
+        return FakeHTTPResponse(
+            content=fixture.read(),
+            # Protobuf is binary and not decodable as UTF-8, so opt out of deriving text from the content.
+            text='',
+            content_chunks=(),
+            lines=(),
+            headers={'Content-Type': content_type},
+        )
 
 
 def _register_prometheus_text(fake_http: FakeHTTPClient, text: str, *, count: int = 1) -> None:

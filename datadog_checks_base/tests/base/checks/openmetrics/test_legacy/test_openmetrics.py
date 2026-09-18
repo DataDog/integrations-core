@@ -48,9 +48,7 @@ OPENMETRICS_CHECK_INSTANCE = {
 def _text_response(text: str, *, content_type: str = text_content_type) -> FakeHTTPResponse:
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
-        text=text,
         headers={'Content-Type': content_type},
-        lines=text.splitlines(),
     )
 
 

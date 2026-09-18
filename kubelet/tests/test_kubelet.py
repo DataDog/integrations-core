@@ -405,9 +405,6 @@ def _text_response(text: str) -> FakeHTTPResponse:
     content = text.encode('utf-8')
     return FakeHTTPResponse(
         content=content,
-        text=text,
-        content_chunks=(content,),
-        lines=text.splitlines(),
         headers={'Content-Type': 'text/plain'},
     )
 

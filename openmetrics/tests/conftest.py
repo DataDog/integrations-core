@@ -26,9 +26,6 @@ def _text_response(payload: str, *, content_type: str | None = None) -> FakeHTTP
     headers = {'Content-Type': content_type} if content_type is not None else None
     return FakeHTTPResponse(
         content=content,
-        text=payload,
-        content_chunks=(content,),
-        lines=payload.splitlines(),
         headers=headers,
     )
 

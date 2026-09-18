@@ -56,9 +56,7 @@ CONFIG = {
 def _openmetrics_response(text: str) -> FakeHTTPResponse:
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
-        text=text,
         headers={'Content-Type': 'text/plain'},
-        lines=text.splitlines(),
     )
 
 

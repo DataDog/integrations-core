@@ -28,6 +28,7 @@ def test_fake_response_returns_only_configured_results():
         peer_cert=b'certificate',
     )
 
+    assert response.text == 'configured text'
     assert response.json(parse_float=str) is json_result
     assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == [b'complete ', b'body']
     assert list(response.iter_lines(chunk_size=1, decode_unicode=True, delimiter='|')) == ['first', 'second']
@@ -36,7 +37,32 @@ def test_fake_response_returns_only_configured_results():
     assert response.headers['x-test'] == 'value'
 
 
-def test_fake_response_does_not_derive_results_from_content_or_headers():
+@pytest.mark.parametrize(
+    ('content', 'encoding', 'expected_text'),
+    [
+        (b'first line\nsecond line', None, 'first line\nsecond line'),
+        (b'caf\xe9', 'latin-1', 'café'),
+    ],
+)
+def test_fake_response_derives_text_and_stream_results_from_content(
+    content: bytes, encoding: str | None, expected_text: str
+):
+    response = FakeHTTPResponse(content=content, encoding=encoding)
+
+    assert response.text == expected_text
+    assert list(response.iter_content()) == [content]
+    assert list(response.iter_lines()) == expected_text.splitlines()
+
+
+def test_fake_response_preserves_explicit_text_and_stream_results():
+    response = FakeHTTPResponse(content=b'body', text='', content_chunks=(), lines=())
+
+    assert response.text == ''
+    assert list(response.iter_content()) == []
+    assert list(response.iter_lines()) == []
+
+
+def test_fake_response_does_not_derive_metadata_or_json_from_content_or_headers():
     response = FakeHTTPResponse(
         content=b'{"items": []}\nsecond line',
         headers={
@@ -45,11 +71,8 @@ def test_fake_response_does_not_derive_results_from_content_or_headers():
         },
     )
 
-    assert response.text == ''
     assert response.encoding is None
     assert response.links == {}
-    assert list(response.iter_content()) == []
-    assert list(response.iter_lines()) == []
     with pytest.raises(ValueError, match='No JSON result'):
         response.json()
 

@@ -149,7 +149,7 @@ INSTANCE_TAG = 'instance:http_outcome_tag'
 
 
 def _mock_response(status_code):
-    return FakeHTTPResponse(content=b'hello', text='hello', status_code=status_code, elapsed=timedelta(seconds=0.5))
+    return FakeHTTPResponse(content=b'hello', status_code=status_code, elapsed=timedelta(seconds=0.5))
 
 
 def _make_check(**extra):

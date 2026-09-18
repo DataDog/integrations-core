@@ -42,12 +42,8 @@ IDENTITY_INFO_TAGS = [
 
 def _text_response(file_path: str | Path) -> FakeHTTPResponse:
     content = Path(file_path).read_bytes()
-    text = content.decode('utf-8')
     return FakeHTTPResponse(
         content=content,
-        text=text,
-        content_chunks=(content,),
-        lines=text.splitlines(),
         headers={'Content-Type': 'text/plain'},
     )
 
