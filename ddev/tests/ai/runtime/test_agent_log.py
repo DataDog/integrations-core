@@ -48,6 +48,7 @@ def read_events(path: Path) -> list[dict]:
 
 PHASE = AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1")
 SUB = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT, phase_id="p1")
+SUMMARY = AgentScope(owner_id="demo-flow", role=AgentRole.RUN_SUMMARY, phase_id=None)
 
 
 async def test_demultiplexes_by_scope_into_separate_files(tmp_path):
@@ -63,6 +64,18 @@ async def test_demultiplexes_by_scope_into_separate_files(tmp_path):
     assert sub_path.exists()
     assert read_events(phase_path)[0]["system_prompt"] == "sys"
     assert read_events(sub_path)[0]["tools"] == ["read_file"]
+
+
+async def test_run_summary_scope_is_logged_without_phase_id(tmp_path):
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    await cb.fire_agent_start(SUMMARY, "summary system prompt", ["read_file"])
+    await cb.fire_agent_finish(SUMMARY, make_result())
+    logger.close()
+
+    events = read_events(tmp_path / "run_summary" / "demo-flow.jsonl")
+    assert [event["event"] for event in events] == ["start", "finish"]
 
 
 async def test_full_sequence_writes_start_and_finish_with_timestamps(tmp_path):

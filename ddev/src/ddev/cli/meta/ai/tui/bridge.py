@@ -35,6 +35,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinalizing,
     RunFinished,
 )
 
@@ -82,6 +83,10 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
     @cb.on_run_finished
     async def _(outcome: RunOutcome) -> None:
         _target().post_message(RunFinished(outcome))
+
+    @cb.on_run_finalizing
+    async def _(outcome: RunOutcome) -> None:
+        _target().post_message(RunFinalizing(outcome))
 
     @cb.on_before_agent_send
     async def _(scope: AgentScope, prompt: str, iteration: int) -> None:
