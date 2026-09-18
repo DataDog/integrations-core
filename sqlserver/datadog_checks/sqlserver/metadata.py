@@ -91,8 +91,9 @@ class SqlserverMetadata(DBMAsyncJob):
         self._last_schemas_collection_time = 0
 
     def shutdown(self) -> None:
-        # The schema collector holds the check too, so dropping it here releases both.
+        # Both schema collectors hold the check, so release them during teardown.
         self._schema_collector = None
+        self._view_collector = None
         self._check = None
 
     def _close_db_conn(self):
