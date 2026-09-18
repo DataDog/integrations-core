@@ -40,6 +40,23 @@ jobs:
         with:
           policy: integrations-core-api-key
 
+      - name: Checkout ddev from master
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master
+          sparse-checkout: |
+            ddev
+            datadog_checks_dev
+          sparse-checkout-cone-mode: false
+          path: ddev-master
+
+      - name: Use ddev from master
+        run: |
+          rm -rf ddev datadog_checks_dev
+          mv ddev-master/ddev ddev
+          mv ddev-master/datadog_checks_dev datadog_checks_dev
+          rm -rf ddev-master
+
       - name: Install ddev
         uses: ./.github/actions/setup-ddev
         with:
