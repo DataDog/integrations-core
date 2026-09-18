@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import logging
 from pathlib import Path
 from typing import Any
@@ -18,7 +19,7 @@ from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
-from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
+from ddev.ai.runtime.checkpoints import CancelledCheckpoint, CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, HookName, OrchestratorHookError
@@ -272,6 +273,35 @@ def test_run_executes_phases_in_dependency_order(tmp_path, make_orchestrator):
     checkpoints = mgr.read()
     assert checkpoints["a"].status == CheckpointStatus.SUCCESS
     assert checkpoints["b"].status == CheckpointStatus.SUCCESS
+
+
+def test_max_timeout_writes_cancelled_checkpoint_for_running_phase(tmp_path, make_orchestrator):
+    core = tmp_path / "timeout_core"
+    write(
+        core / "f.yaml",
+        "- type: phase\n  config:\n    name: waiting\n    class: WaitingPhase\n"
+        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: waiting\n",
+    )
+
+    class WaitingPhase(Phase):
+        async def execute(self, context):
+            await asyncio.Event().wait()
+            return PhaseOutcome(memory_text="unreachable")
+
+    checkpoint_path = tmp_path / "timeout-checkpoints.yaml"
+    orchestrator, _, _ = make_orchestrator(
+        core,
+        grace_period=0.01,
+        runtime_variables={"max_timeout": "0.05"},
+        register_phases={"WaitingPhase": WaitingPhase},
+        checkpoint_path=checkpoint_path,
+    )
+
+    orchestrator.run()
+
+    checkpoint = CheckpointManager(checkpoint_path).read()["waiting"]
+    assert isinstance(checkpoint, CancelledCheckpoint)
+    assert checkpoint.reason == "Orchestrator exceeded max_timeout of 0.05s"
 
 
 def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
