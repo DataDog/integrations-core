@@ -8,7 +8,7 @@ from __future__ import annotations
 import itertools
 import logging
 from collections.abc import Collection, Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from typing import Any
 
 import structlog
@@ -16,7 +16,7 @@ from structlog.stdlib import BoundLogger
 
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.logger import logger_processors
-from ddev.monitoring.metrics import Metrics, MetricsSink
+from ddev.monitoring.metrics import Metrics, MetricsSink, TagProjector
 
 _runtime_names = itertools.count()
 
@@ -56,10 +56,12 @@ class MonitoringRuntime:
         *,
         console_handler: logging.Handler | None = None,
         metrics_sink: MetricsSink | None = None,
+        metrics_tag_projector: TagProjector | None = None,
         protected_fields: Collection[str] = (),
     ) -> None:
         self._closed = False
         self._context = MonitorContext(protected_fields)
+        self._metrics_sink = metrics_sink
         # An unregistered logger isolates handlers from other command invocations, and the
         # NullHandler keeps stdlib from writing to `lastResort` when no console handler was supplied.
         self._stdlib_logger = logging.Logger(f'ddev.monitoring.{next(_runtime_names)}', level=logging.DEBUG)
@@ -73,7 +75,12 @@ class MonitoringRuntime:
             wrapper_class=structlog.stdlib.BoundLogger,
             context_class=dict,
         ).bind()
-        self._metrics = Metrics(self._context, sink=metrics_sink, is_closed=lambda: self._closed)
+        self._metrics = Metrics(
+            self._context,
+            sink=metrics_sink,
+            tag_projector=metrics_tag_projector,
+            is_closed=lambda: self._closed,
+        )
 
     @property
     def context(self) -> MonitorContext:
@@ -94,7 +101,19 @@ class MonitoringRuntime:
         )
 
     def close(self) -> None:
-        """Stop all emissions, detach attached handlers, and leave caller-owned streams open."""
+        """Stop all emissions, then close the owned metrics sink and every attached handler.
+
+        A sink or handler passed to the runtime is owned by it: its `close` is called exactly once,
+        and one failing close never stops the others or escapes.
+        """
         self._closed = True
-        for handler in list(self._stdlib_logger.handlers):
+        handlers = list(self._stdlib_logger.handlers)
+        for handler in handlers:
             self._stdlib_logger.removeHandler(handler)
+        sink, self._metrics_sink = self._metrics_sink, None
+        if sink is not None:
+            with suppress(Exception):
+                sink.close()
+        for handler in handlers:
+            with suppress(Exception):
+                handler.close()

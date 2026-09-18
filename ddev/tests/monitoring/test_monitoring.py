@@ -10,8 +10,10 @@ from io import StringIO
 
 import pytest
 
+import ddev.monitoring.metrics as metrics_module
 from ddev.monitoring import MonitoringRuntime, console_formatter
-from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
+from ddev.monitoring.metrics import MetricKind, MetricRecord
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 PROTECTED = frozenset({'repo', 'commit', 'context'})
 HIDDEN = PROTECTED | {'branch', 'pr_number'}
@@ -46,7 +48,10 @@ def lines(stream: StringIO) -> list[str]:
 def test_component_binding_and_shared_scopes_enrich_logs_and_metrics(
     handler: RecordingJsonHandler, sink: RecordingSink
 ):
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(
+        metrics_sink=sink,
+        metrics_tag_projector=projector_for('repo', 'component', 'operation', 'batch_id'),
+    )
     runtime.add_log_handler(handler)
     runtime.set_run_fields(repo='DataDog/integrations-core')
     monitor = runtime.component('planner').bind(operation='dispatch')
@@ -55,15 +60,19 @@ def test_component_binding_and_shared_scopes_enrich_logs_and_metrics(
         monitor.logger.info('Dispatching %s', 'batch')
         monitor.metrics.count('jobs')
 
-    [event] = handler.events
     [record] = sink.records
-    assert record.fields == {
+    assert record.tags == {
         'repo': 'DataDog/integrations-core',
         'component': 'planner',
         'operation': 'dispatch',
         'batch_id': 'batch-01',
     }
-    assert event == {**record.fields, 'event': 'Dispatching batch', 'level': 'info'}
+    [event] = handler.events
+    assert event == {
+        **record.tags,
+        'event': 'Dispatching batch',
+        'level': 'info',
+    }
 
 
 def test_resolving_run_fields_affects_future_events_not_emitted_ones(handler: RecordingJsonHandler):
@@ -89,7 +98,7 @@ def test_a_scope_is_reset_even_when_the_block_fails(error):
 
 
 def test_a_nested_scope_refines_then_restores_the_enclosing_one(sink: RecordingSink):
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('batch_id', 'job'))
     monitor = runtime.component('test-runner')
 
     with runtime.context.scope({'batch_id': 'batch-01'}):
@@ -98,28 +107,26 @@ def test_a_nested_scope_refines_then_restores_the_enclosing_one(sink: RecordingS
         monitor.metrics.count('outer')
 
     [inner, outer] = sink.records
-    assert inner.fields['batch_id'] == 'batch-01'
-    assert inner.fields['job'] == 'ntp'
-    assert 'job' not in outer.fields
-    assert outer.fields['batch_id'] == 'batch-01'
+    assert inner.tags == {'batch_id': 'batch-01', 'job': 'ntp'}
+    assert outer.tags == {'batch_id': 'batch-01'}
 
 
-def test_a_scope_does_not_cross_runtime_boundaries(sink):
-    first = MonitoringRuntime(metrics_sink=sink)
-    second = MonitoringRuntime(metrics_sink=sink)
+def test_a_scope_does_not_cross_runtime_boundaries(sink: RecordingSink):
+    first = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('batch_id'))
+    second = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('batch_id'))
 
     with first.context.scope({'batch_id': 'batch-01'}):
         first.component('test-runner').metrics.count('scoped')
         second.component('test-runner').metrics.count('unscoped')
 
     [scoped, unscoped] = sink.records
-    assert scoped.fields['batch_id'] == 'batch-01'
-    assert 'batch_id' not in unscoped.fields
+    assert scoped.tags == {'batch_id': 'batch-01'}
+    assert unscoped.tags == {}
     assert 'batch_id' not in second.context.fields
 
 
 def test_concurrent_scopes_do_not_contaminate_each_other(handler, sink):
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('batch_id', 'tag'))
     runtime.add_log_handler(handler)
 
     async def process(batch_id: str):
@@ -136,7 +143,7 @@ def test_concurrent_scopes_do_not_contaminate_each_other(handler, sink):
 
     records = sink.records_named('processed')
     assert len(records) == 2
-    assert {(record.fields['batch_id'], record.tags['tag']) for record in records} == {
+    assert {(record.tags['batch_id'], record.tags['tag']) for record in records} == {
         ('batch-a', 'batch-a'),
         ('batch-b', 'batch-b'),
     }
@@ -144,37 +151,37 @@ def test_concurrent_scopes_do_not_contaminate_each_other(handler, sink):
 
 
 @pytest.mark.parametrize(
-    ('scope', 'emit', 'expected_fields', 'expected_tags'),
+    ('scope', 'emit', 'expected_event_fields', 'expected_tags'),
     [
         (
             {'stage': 'from-scope'},
             lambda monitor: monitor.metrics.count('a record'),
             {'stage': 'from-scope', 'commit': 'actual-head'},
-            {},
+            {'stage': 'from-scope', 'commit': 'actual-head'},
         ),
         (
             {'stage': 'from-scope'},
             lambda monitor: monitor.metrics.count('a record', stage='from-call'),
             {'stage': 'from-call', 'commit': 'actual-head'},
-            {},
+            {'stage': 'from-call', 'commit': 'actual-head'},
         ),
         (
             {'stage': 'from-scope'},
             lambda monitor: monitor.metrics.count('a record', tags={'stage': 'from-tag'}),
             {'stage': 'from-tag', 'commit': 'actual-head'},
-            {'stage': 'from-tag'},
+            {'stage': 'from-tag', 'commit': 'actual-head'},
         ),
         (
             {'commit': 'wrong-head'},
             lambda monitor: monitor.metrics.count('a record'),
             {'commit': 'actual-head'},
-            {},
+            {'commit': 'actual-head', 'stage': 'from-run'},
         ),
         (
             {},
             lambda monitor: monitor.metrics.count('a record', tags={'commit': 'sneaky', 'job': 'ntp'}),
             {'commit': 'actual-head'},
-            {'job': 'ntp'},
+            {'commit': 'actual-head', 'job': 'ntp', 'stage': 'from-run'},
         ),
         (
             {},
@@ -192,8 +199,12 @@ def test_concurrent_scopes_do_not_contaminate_each_other(handler, sink):
         'log-call-cannot-relabel-identity',
     ],
 )
-def test_lower_layers_refine_everything_but_identity(sink, handler, scope, emit, expected_fields, expected_tags):
-    runtime = MonitoringRuntime(metrics_sink=sink, protected_fields=PROTECTED)
+def test_lower_layers_refine_everything_but_identity(sink, handler, scope, emit, expected_event_fields, expected_tags):
+    runtime = MonitoringRuntime(
+        metrics_sink=sink,
+        metrics_tag_projector=projector_for('stage', 'commit', 'job'),
+        protected_fields=PROTECTED,
+    )
     runtime.add_log_handler(handler)
     runtime.set_run_fields(repo='DataDog/integrations-core', commit='actual-head', context='pr', stage='from-run')
     monitor = runtime.component('test-runner')
@@ -203,16 +214,18 @@ def test_lower_layers_refine_everything_but_identity(sink, handler, scope, emit,
 
     if expected_tags is None:
         [event] = handler.events
-        fields = event
+        assert {key: event[key] for key in expected_event_fields} == expected_event_fields
     else:
         [record] = sink.records
-        fields = record.fields
         assert record.tags == expected_tags
-    assert {key: fields[key] for key in expected_fields} == expected_fields
 
 
-def test_context_inspection_agrees_with_emitted_records(sink):
-    runtime = MonitoringRuntime(metrics_sink=sink, protected_fields=PROTECTED)
+def test_context_inspection_agrees_with_emitted_records(sink: RecordingSink):
+    runtime = MonitoringRuntime(
+        metrics_sink=sink,
+        metrics_tag_projector=projector_for('commit', 'stage', 'component'),
+        protected_fields=PROTECTED,
+    )
     runtime.set_run_fields(commit='actual-head', stage='default')
 
     with runtime.context.scope({'commit': 'wrong-head', 'stage': 'scoped'}):
@@ -221,7 +234,89 @@ def test_context_inspection_agrees_with_emitted_records(sink):
 
     [record] = sink.records
     assert fields == {'commit': 'actual-head', 'stage': 'scoped'}
-    assert record.fields == {**fields, 'component': 'test-runner'}
+    assert record.tags == {**fields, 'component': 'test-runner'}
+
+
+def test_without_a_projector_only_explicit_tags_reach_the_record(sink: RecordingSink):
+    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime.set_run_fields(repo='DataDog/integrations-core', stage='planning')
+    monitor = runtime.component('test-runner')
+
+    monitor.metrics.count('jobs', tags={'environment': 'py3.13'})
+    monitor.metrics.gauge('heap', 3)
+
+    [count, gauge] = sink.records
+    assert count.tags == {'environment': 'py3.13'}
+    assert gauge.tags == {}
+
+
+def test_a_projector_selects_tags_from_every_layer_including_explicit_ones(sink: RecordingSink):
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('repo', 'stage', 'environment'))
+    runtime.set_run_fields(repo='DataDog/integrations-core', stage='planning')
+    monitor = runtime.component('test-runner')
+
+    monitor.metrics.count('jobs', tags={'environment': 'py3.13'})
+    monitor.metrics.count('skipped', tags={'stage': 'from-tag', 'blob': 'unselected'})
+
+    [jobs, skipped] = sink.records
+    assert jobs.tags == {'repo': 'DataDog/integrations-core', 'stage': 'planning', 'environment': 'py3.13'}
+    assert skipped.tags == {'repo': 'DataDog/integrations-core', 'stage': 'from-tag'}
+
+
+def test_records_snapshot_their_timestamp_and_tags_at_emission(sink: RecordingSink, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(f'{metrics_module.__name__}.time.time', lambda: 1_700_000_000.9)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('stage'))
+    monitor = runtime.component('test-runner')
+    tags = {'stage': 'planning'}
+
+    monitor.metrics.count('jobs', tags=tags)
+    tags['stage'] = 'changed-after-emission'
+    runtime.set_run_fields(stage='later')
+
+    [record] = sink.records
+    assert record.timestamp == 1_700_000_000
+    assert record.tags == {'stage': 'planning'}
+    with pytest.raises(TypeError):
+        record.tags['stage'] = 'changed'
+
+
+def test_directly_constructed_records_own_their_tags():
+    tags = {'stage': 'planning'}
+    record = MetricRecord(name='jobs', kind=MetricKind.COUNT, value=1, timestamp=1_700_000_000, tags=tags)
+    tags['stage'] = 'changed-after-construction'
+
+    assert record.tags == {'stage': 'planning'}
+    with pytest.raises(TypeError):
+        record.tags['stage'] = 'changed'
+
+
+def test_counts_default_to_a_one_second_window_and_records_carry_units(sink: RecordingSink):
+    runtime = MonitoringRuntime(metrics_sink=sink)
+    monitor = runtime.component('test-runner')
+
+    monitor.metrics.count('batches')
+    monitor.metrics.count('jobs', 3, interval=60, unit='job')
+    monitor.metrics.gauge('elapsed', 4.5, unit='second')
+    monitor.metrics.distribution('job.seconds', 2)
+
+    [batches, jobs, elapsed, seconds] = sink.records
+    assert (batches.interval, batches.unit) == (1, None)
+    assert (jobs.interval, jobs.unit) == (60, 'job')
+    assert (elapsed.interval, elapsed.unit) == (None, 'second')
+    assert seconds.interval is None
+
+
+def test_a_broken_sink_cannot_affect_the_emitting_application():
+    class BrokenSink:
+        def record(self, record):
+            raise RuntimeError('boom')
+
+        def close(self):
+            raise RuntimeError('close boom')
+
+    runtime = MonitoringRuntime(metrics_sink=BrokenSink())
+    runtime.component('test-runner').metrics.count('jobs')
+    runtime.close()
 
 
 def test_console_projection_preserves_the_full_event_for_other_handlers(
@@ -329,6 +424,39 @@ def test_closing_the_runtime_leaves_the_callers_stream_open(stream):
 
     stream.write('still usable\n')
     assert stream.getvalue().endswith('still usable\n')
+
+
+def test_close_owns_the_sink_and_every_attached_handler_and_survives_a_failing_close():
+    class ClosingHandler(logging.Handler):
+        def __init__(self, fail: bool):
+            super().__init__()
+            self.fail = fail
+            self.closed = False
+
+        def emit(self, record: logging.LogRecord) -> None:
+            pass
+
+        def close(self) -> None:
+            if self.fail:
+                raise RuntimeError('close failed')
+            self.closed = True
+            super().close()
+
+    sink = RecordingSink()
+    console = ClosingHandler(fail=False)
+    attached = ClosingHandler(fail=True)
+    later = ClosingHandler(fail=False)
+    runtime = MonitoringRuntime(console_handler=console, metrics_sink=sink)
+    runtime.add_log_handler(attached)
+    runtime.add_log_handler(later)
+
+    runtime.close()
+
+    assert sink.close_count == 1
+    assert console.closed
+    assert later.closed
+    runtime.close()
+    assert sink.close_count == 1
 
 
 def test_component_log_adapter_converts_stdlib_records_to_runtime_events(handler: RecordingJsonHandler):
