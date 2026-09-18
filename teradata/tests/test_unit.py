@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+import re
 
 import mock
 import pytest
@@ -14,12 +15,20 @@ except ImportError:
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.teradata.check import TeradataCheck
+from datadog_checks.teradata.utils import submit_version, tags_normalizer, timestamp_validator
 
 from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY, TABLE_DISK_METRICS
 
+pytestmark = pytest.mark.unit
+
+
+def query_name_from(table_name):
+    """Mirror `_execute_query_raw`'s extraction so query names are never the same object as a source-file literal."""
+    return re.search(r"(DBC.[^\s]+)", "FROM {} WHERE 1=1".format(table_name)).group(1)
+
 
 @pytest.mark.parametrize(
-    'test_instance, expected_tags, conn_params',
+    "test_instance, expected_tags, conn_params",
     [
         pytest.param(
             {
@@ -28,7 +37,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "password": "dd_teradata",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -52,7 +61,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "password": "td_datadog",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:td-internal', 'teradata_port:1125'],
+            ["teradata_server:td-internal", "teradata_port:1125"],
             {
                 "host": "td-internal",
                 "account": "",
@@ -75,7 +84,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "password": "td_datadog",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -100,7 +109,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "password": "td_datadog",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -124,7 +133,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "RG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -148,7 +157,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "auth_data": "dd@localhost@@td_datadog",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -171,7 +180,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "auth_data": "dd@@td_datadog",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -193,7 +202,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "auth_mechanism": "TDNEGO",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -217,7 +226,7 @@ from .common import CHECK_NAME, EXPECTED_TAGS, SERVICE_CHECK_CONNECT, SERVICE_CH
                 "auth_mechanism": "TD2",
                 "database": "AdventureWorksDW",
             },
-            ['teradata_server:localhost', 'teradata_port:1025'],
+            ["teradata_server:localhost", "teradata_port:1025"],
             {
                 "host": "localhost",
                 "account": "",
@@ -239,14 +248,14 @@ def test_connect(test_instance, dd_run_check, aggregator, expected_tags, conn_pa
     check = TeradataCheck(CHECK_NAME, {}, [test_instance])
     conn = mock.MagicMock()
     cursor = conn.cursor()
-    cursor.rowcount = float('+inf')
+    cursor.rowcount = float("+inf")
 
     teradatasql = mock.MagicMock()
     teradatasql.connect.return_value = conn
 
     mocks = [
-        ('datadog_checks.teradata.check.teradatasql', teradatasql),
-        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
+        ("datadog_checks.teradata.check.teradatasql", teradatasql),
+        ("datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR", None),
     ]
 
     with ExitStack() as stack:
@@ -278,8 +287,8 @@ def test_query_errors(dd_run_check, aggregator, instance):
     teradatasql = mock.MagicMock()
 
     mocks = [
-        ('datadog_checks.teradata.check.teradatasql', teradatasql),
-        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
+        ("datadog_checks.teradata.check.teradatasql", teradatasql),
+        ("datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR", None),
     ]
 
     with ExitStack() as stack:
@@ -305,8 +314,8 @@ def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
     teradatasql.connect.return_value = conn
 
     mocks = [
-        ('datadog_checks.teradata.check.teradatasql', teradatasql),
-        ('datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR', None),
+        ("datadog_checks.teradata.check.teradatasql", teradatasql),
+        ("datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR", None),
     ]
 
     with ExitStack() as stack:
@@ -320,55 +329,55 @@ def test_no_rows_returned(dd_run_check, aggregator, instance, caplog):
 
 
 @pytest.mark.parametrize(
-    'config, expected',
+    "config, expected",
     [
-        pytest.param(['DimDate', 'DimSalesReason'], ({'DimDate', 'DimSalesReason'}, set()), id="Tables filter list"),
+        pytest.param(["DimDate", "DimSalesReason"], ({"DimDate", "DimSalesReason"}, set()), id="Tables filter list"),
         pytest.param(
-            {'include': ['DimScenario', 'DimCustomer']},
-            ({'DimScenario', 'DimCustomer'}, set()),
+            {"include": ["DimScenario", "DimCustomer"]},
+            ({"DimScenario", "DimCustomer"}, set()),
             id="Tables filter map: include only",
         ),
         pytest.param(
-            {'exclude': ['DimCustomer', 'DimDepartmentGroup']},
-            (set(), {'DimCustomer', 'DimDepartmentGroup'}),
+            {"exclude": ["DimCustomer", "DimDepartmentGroup"]},
+            (set(), {"DimCustomer", "DimDepartmentGroup"}),
             id="Tables filter map: exclude only",
         ),
         pytest.param(
-            {'include': ['DimCustomer', 'DimDepartmentGroup'], 'exclude': ['DimGeography', 'DimEmployee']},
-            ({'DimCustomer', 'DimDepartmentGroup'}, {'DimGeography', 'DimEmployee'}),
+            {"include": ["DimCustomer", "DimDepartmentGroup"], "exclude": ["DimGeography", "DimEmployee"]},
+            ({"DimCustomer", "DimDepartmentGroup"}, {"DimGeography", "DimEmployee"}),
             id="Tables filter map: include and exclude",
         ),
         pytest.param(
-            {'include': ['DimCurrency', 'DimEmployee'], 'exclude': ['DimCurrency', 'DimCustomer']},
-            ({'DimEmployee'}, {'DimCurrency', 'DimCustomer'}),
+            {"include": ["DimCurrency", "DimEmployee"], "exclude": ["DimCurrency", "DimCustomer"]},
+            ({"DimEmployee"}, {"DimCurrency", "DimCustomer"}),
             id="Tables filter map: exclusion overlap",
         ),
         pytest.param(
             {
-                'include': ['DimDepartmentGroup', 'DimCustomer', 'DimDepartmentGroup'],
-                'exclude': ['DimGeography', 'DimEmployee'],
+                "include": ["DimDepartmentGroup", "DimCustomer", "DimDepartmentGroup"],
+                "exclude": ["DimGeography", "DimEmployee"],
             },
-            ({'DimDepartmentGroup', 'DimCustomer'}, {'DimGeography', 'DimEmployee'}),
+            ({"DimDepartmentGroup", "DimCustomer"}, {"DimGeography", "DimEmployee"}),
             id="Tables filter map: duplicate table in include",
         ),
         pytest.param(
-            {'include': ['DimSalesReason', 'DimScenario'], 'exclude': ['DimGeography', 'DimCustomer', 'DimCustomer']},
-            ({'DimSalesReason', 'DimScenario'}, {'DimGeography', 'DimCustomer'}),
+            {"include": ["DimSalesReason", "DimScenario"], "exclude": ["DimGeography", "DimCustomer", "DimCustomer"]},
+            ({"DimSalesReason", "DimScenario"}, {"DimGeography", "DimCustomer"}),
             id="Tables filter map: duplicate table in exclude",
         ),
         pytest.param([], (set(), set()), id="No tables filter: collect all tables"),
     ],
 )
 def test_tables_filter(cursor_factory, config, expected, instance, dd_run_check, aggregator):
-    instance['tables'] = config
+    instance["tables"] = config
     check = TeradataCheck(CHECK_NAME, {}, [instance])
     with cursor_factory():
         dd_run_check(check)
-    tag_template = 'td_table:{}'
+    tag_template = "td_table:{}"
     for metric in TABLE_DISK_METRICS:
         if isinstance(config, list):
             if not config:
-                aggregator.assert_metric_has_tag_prefix(metric, 'td_table', at_least=1)
+                aggregator.assert_metric_has_tag_prefix(metric, "td_table", at_least=1)
             for include_table in config:
                 aggregator.assert_metric_has_tag(metric, tag_template.format(include_table), at_least=1)
                 aggregator.assert_metric_has_tag(metric, tag_template.format("DimOrganization"), count=0)
@@ -380,3 +389,314 @@ def test_tables_filter(cursor_factory, config, expected, instance, dd_run_check,
             aggregator.assert_metric_has_tag(metric, tag_template.format("DimOrganization"), count=0)
 
     assert check._tables_filter == expected
+
+
+def test_init_queries_use_defaults_when_flags_omitted():
+    check = TeradataCheck(CHECK_NAME, {}, [{"server": "s", "database": "d"}])
+    names = {query.query_data["name"] for query in check._query_manager.queries}
+    assert names == {"disk_space", "amp_usage", "teradata_version"}
+
+
+def test_init_queries_include_optional_when_flags_enabled():
+    instance = {"server": "s", "database": "d", "collect_res_usage_metrics": True, "collect_table_disk_metrics": True}
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    names = {query.query_data["name"] for query in check._query_manager.queries}
+    assert names == {"disk_space", "amp_usage", "teradata_version", "resource_usage", "all_space"}
+
+
+def test_connect_raises_when_import_error_present(instance, caplog):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    import_error = ImportError("teradatasql driver unavailable")
+    with mock.patch("datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR", import_error):
+        with pytest.raises(ImportError):
+            with check.connect():
+                pass
+    assert "Teradata SQL Driver module is unavailable" in caplog.text
+
+
+def test_connect_closes_connection_on_success(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    conn = mock.MagicMock()
+    teradatasql_mock = mock.MagicMock()
+    teradatasql_mock.connect.return_value = conn
+
+    mocks = [
+        ("datadog_checks.teradata.check.teradatasql", teradatasql_mock),
+        ("datadog_checks.teradata.check.TERADATASQL_IMPORT_ERROR", None),
+    ]
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        with check.connect() as yielded_conn:
+            assert yielded_conn == conn
+            assert conn.close.called is False
+
+    assert conn.close.called is True
+
+
+def test_connect_logs_and_reraises_on_connection_exception(instance, caplog, cursor_factory):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    with cursor_factory(exception=True):
+        with pytest.raises(Exception, match="Unable to connect to Teradata"):
+            with check.connect():
+                pass
+    assert "Unable to connect to Teradata." in caplog.text
+
+
+def test_execute_query_raw_rowcount_boundary(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    cursor = mock.MagicMock()
+    cursor.rowcount = 1
+    cursor.fetchall.return_value = []
+    connection = mock.MagicMock()
+    connection.cursor.return_value = cursor
+    check._connection = connection
+
+    result = list(check._execute_query_raw("SELECT * FROM DBC.DiskSpaceV"))
+
+    assert result == []
+    assert check._query_errors == 0
+
+
+def test_execute_query_raw_recovers_from_row_processing_error(instance, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    row = ["bad_row"]
+    cursor = mock.MagicMock()
+    cursor.rowcount = 1
+    cursor.fetchall.return_value = [row]
+    connection = mock.MagicMock()
+    connection.cursor.return_value = cursor
+    check._connection = connection
+    check._queries_processor = mock.Mock(side_effect=ValueError("boom"))
+
+    result = list(check._execute_query_raw("SELECT * FROM DBC.DiskSpaceV"))
+
+    assert result == [row]
+    assert "Unable to process row returned from query" in caplog.text
+
+
+def test_executor_error_handler_increments_and_returns_error(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    error = "teradatasql.Error: boom"
+
+    result = check._executor_error_handler(error)
+
+    assert result == error
+    assert check._query_errors == 1
+
+
+def test_queries_processor_routes_version_query(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    check.initialize_config()
+    check.set_metadata = mock.Mock()
+    query_name = query_name_from("DBC.DBCInfoV")
+
+    result = check._queries_processor(["17.10.03.01"], query_name)
+
+    assert result == ["17.10.03.01"]
+    assert check.set_metadata.called
+
+
+def test_queries_processor_routes_resource_usage_query(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    check.initialize_config()
+    query_name = query_name_from("DBC.ResSpmaView")
+
+    result = check._queries_processor(["not-a-timestamp", 1.0], query_name)
+
+    assert result == []
+    assert check._query_errors == 1
+
+
+def test_queries_processor_skips_special_routes_for_lexically_smaller_name(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    check.initialize_config()
+    check.set_metadata = mock.Mock()
+    query_name = query_name_from("DBC.AAA")
+    row = ["amp", "acct", "db", "tbl"]
+
+    result = check._queries_processor(row, query_name)
+
+    assert result == ["amp", "acct", "db", "tbl"]
+    assert not check.set_metadata.called
+    assert check._query_errors == 0
+
+
+def test_queries_processor_skips_special_routes_for_lexically_larger_name(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    check.initialize_config()
+    check.set_metadata = mock.Mock()
+    query_name = query_name_from("DBC.ZZZ")
+    row = ["amp", "acct", "db", "tbl"]
+
+    result = check._queries_processor(row, query_name)
+
+    assert result == ["amp", "acct", "db", "tbl"]
+    assert not check.set_metadata.called
+    assert check._query_errors == 0
+
+
+def test_queries_processor_all_space_requires_disk_metrics_flag(instance):
+    instance = dict(instance)
+    instance["collect_table_disk_metrics"] = False
+    instance["tables"] = {"exclude": ["ExcludedTable"]}
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.load_configuration_models()
+    check.initialize_config()
+    query_name = query_name_from("DBC.AllSpaceV")
+    row = ["amp", "acct", "db", "ExcludedTable"]
+
+    result = check._queries_processor(row, query_name)
+
+    assert result == ["amp", "acct", "db", "ExcludedTable"]
+
+
+def test_timestamp_validator_rejects_non_int_type(caplog, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    row = [3.5, 100]
+
+    result = timestamp_validator(check, row)
+
+    assert result == []
+    assert "is invalid" in caplog.text
+    assert check._query_errors == 1
+
+
+def test_timestamp_validator_valid_at_upper_boundary(caplog, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    row = [1700000000 - 3600, 1.0]
+
+    with mock.patch("datadog_checks.teradata.utils.time.time", return_value=1700000000):
+        result = timestamp_validator(check, row)
+
+    assert result == row
+    assert caplog.text == ""
+    assert check._query_errors == 0
+
+
+def test_timestamp_validator_invalid_just_past_upper_boundary(caplog, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    row = [1700000000 - 3601, 1.0]
+
+    with mock.patch("datadog_checks.teradata.utils.time.time", return_value=1700000000):
+        result = timestamp_validator(check, row)
+
+    assert result == []
+    assert "Row timestamp is more than 1h in the past" in caplog.text
+    assert check._query_errors == 1
+
+
+def test_timestamp_validator_valid_at_lower_boundary(caplog, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    row = [1700000000 + 600, 1.0]
+
+    with mock.patch("datadog_checks.teradata.utils.time.time", return_value=1700000000):
+        result = timestamp_validator(check, row)
+
+    assert result == row
+    assert caplog.text == ""
+    assert check._query_errors == 0
+
+
+def test_timestamp_validator_invalid_just_past_lower_boundary(caplog, instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    row = [1700000000 + 601, 1.0]
+
+    with mock.patch("datadog_checks.teradata.utils.time.time", return_value=1700000000):
+        result = timestamp_validator(check, row)
+
+    assert result == []
+    assert "Row timestamp is more than 10 min in the future" in caplog.text
+    assert check._query_errors == 1
+
+
+def test_tags_normalizer_flags_empty_amp_for_disk_space(instance):
+    query_name = query_name_from("DBC.DiskSpaceV")
+
+    result = tags_normalizer(["", "acct", "db", "unused"], query_name)
+
+    assert result == ["undefined", "acct", "db", "unused"]
+
+
+def test_tags_normalizer_flags_empty_account_for_disk_space(instance):
+    query_name = query_name_from("DBC.DiskSpaceV")
+
+    result = tags_normalizer(["amp", "", "db", "unused"], query_name)
+
+    assert result == ["amp", "undefined", "db", "unused"]
+
+
+def test_tags_normalizer_flags_empty_table_for_all_space(instance):
+    query_name = query_name_from("DBC.AllSpaceV")
+
+    result = tags_normalizer(["amp", "acct", "db", ""], query_name)
+
+    assert result == ["amp", "acct", "db", "undefined"]
+
+
+def test_tags_normalizer_flags_empty_database_for_all_space(instance):
+    query_name = query_name_from("DBC.AllSpaceV")
+
+    result = tags_normalizer(["amp", "acct", "", "tbl"], query_name)
+
+    assert result == ["amp", "acct", "undefined", "tbl"]
+
+
+def test_tags_normalizer_flags_empty_user_for_amp_usage(instance):
+    query_name = query_name_from("DBC.AMPUsageV")
+
+    result = tags_normalizer(["amp", "acct", "", "tbl"], query_name)
+
+    assert result == ["amp", "acct", "undefined", "tbl"]
+
+
+def test_tags_normalizer_ignores_lexically_smaller_query_name(instance):
+    query_name = query_name_from("DBC.AAA")
+
+    result = tags_normalizer(["", "acct", "db", "tbl"], query_name)
+
+    assert result == ["", "acct", "db", "tbl"]
+
+
+def test_tags_normalizer_ignores_lexically_larger_query_name(instance):
+    query_name = query_name_from("DBC.ZZZ")
+
+    result = tags_normalizer(["", "acct", "db", "tbl"], query_name)
+
+    assert result == ["", "acct", "db", "tbl"]
+
+
+def test_submit_version_uses_first_row_element(instance):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    check.set_metadata = mock.Mock()
+
+    submit_version(check, ["1.2.3.4", "9.9.9.9"])
+
+    check.set_metadata.assert_called_once()
+    assert check.set_metadata.call_args.args[1] == "1.2.3.4"
+
+
+def test_submit_version_recovers_from_processing_error(instance, caplog):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+
+    submit_version(check, [])
+
+    assert "Could not collect version info" in caplog.text
+
+
+def test_submit_version_skips_when_metadata_collection_disabled(instance, caplog):
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    with mock.patch.object(check, "is_metadata_collection_enabled", return_value=False):
+        submit_version(check, [])
+
+    assert caplog.text == ""
