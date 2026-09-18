@@ -6,7 +6,13 @@ import os
 import re
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
+from datadog_checks.base.errors import SkipInstanceError
 
 from .metrics import IB_COUNTERS, RDMA_COUNTERS, STATUS_COUNTERS
 
@@ -31,6 +37,12 @@ class InfinibandCheck(AgentCheck):
     __NAMESPACE__ = 'infiniband'
 
     def __init__(self, name, init_config, instances):
+        # This check ships as part of the GPU monitoring SKU; only run it when GPU
+        # monitoring is on. Raised before any other setup so a disabled instance does
+        # no sysfs work and is skipped by the loader rather than reported as an error.
+        if not is_affirmative(datadog_agent.get_config('gpu.enabled')):
+            raise SkipInstanceError("GPU monitoring (gpu.enabled) is not enabled.")
+
         super(InfinibandCheck, self).__init__(name, init_config, instances)
         self.tags = self.instance.get('tags', [])
         self.base_path = self.instance.get('infiniband_path', '/sys/class/infiniband')

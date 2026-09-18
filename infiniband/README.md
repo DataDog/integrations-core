@@ -21,6 +21,10 @@ Follow the instructions below to install and configure this check for an Agent r
 The InfiniBand check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+### Prerequisites
+
+This check is part of GPU Monitoring and only runs when GPU monitoring is enabled on the Agent. Set `gpu.enabled` to `true` in `datadog.yaml` (or set the `DD_GPU_ENABLED` environment variable to `true`), following the [GPU Monitoring setup instructions][9]. If GPU monitoring is not enabled, the Agent skips this check and no InfiniBand metrics are collected.
+
 ### Configuration
 
 1. To start collecting your InfiniBand performance data, create and edit the `infiniband.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample infiniband.d/conf.yaml][4] for all available configuration options.
@@ -126,3 +130,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/infiniband/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/gpu_monitoring/setup/
