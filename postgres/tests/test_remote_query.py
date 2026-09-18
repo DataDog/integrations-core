@@ -184,11 +184,11 @@ class FakePool:
 
 
 class FakeUploadClient:
-    """Intake-side fake: one descriptor registration, intake-derived page receipts.
+    """Intake-side fake: one descriptor registration, page acceptance receipts, finalize totals.
 
-    The default receipt reports final bytes equal to the declared source bytes (they are
-    different things in reality) and the default finalize returns authoritative totals over
-    the recorded pages, so the producer's stats and compact receipt come from this metadata.
+    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
+    acceptance — and the default finalize returns authoritative totals over the recorded
+    pages, so the producer's stats and compact receipt come from finalization.
     """
 
     def __init__(
@@ -203,6 +203,7 @@ class FakeUploadClient:
         self.descriptor_bodies = []
         self.put_page_calls = []
         self.run_finalize_calls = 0
+        self.finalize_expected_page_counts = []
         self.abort_calls = 0
         self.raise_on_put_page = raise_on_put_page
         self.raise_on_run_finalize = raise_on_run_finalize
@@ -244,17 +245,17 @@ class FakeUploadClient:
                 response = response(page)
         else:
             response = {
+                'upload_id': creds.upload_id,
                 'batch_index': page.batch_index,
-                'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
                 'record_offset': page.record_offset,
-                'bytes': page.source_bytes,
-                'rows': page.rows,
-                'sha256': 'a' * 64,
+                'source_rows': page.rows,
+                'status': 'accepted',
             }
         return response
 
-    def finalize_run(self, creds):
+    def finalize_run(self, creds, expected_page_count):
         self.run_finalize_calls += 1
+        self.finalize_expected_page_counts.append(expected_page_count)
         if self.raise_on_run_finalize is not None:
             raise self.raise_on_run_finalize
         if self.run_finalize_response is not None:
@@ -460,9 +461,9 @@ def instrument_postgres_fakes(monkeypatch, clock):
 
     original_finalize_run = FakeUploadClient.finalize_run
 
-    def timed_finalize_run(self, creds):
+    def timed_finalize_run(self, creds, expected_page_count):
         clock.advance_seconds(0.25)
-        return original_finalize_run(self, creds)
+        return original_finalize_run(self, creds, expected_page_count)
 
     monkeypatch.setattr(FakeUploadClient, 'finalize_run', timed_finalize_run)
 
@@ -1229,6 +1230,8 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert final['stats']['rowsEmitted'] == 2
     assert final['stats']['pagesEmitted'] == 1
     assert 'elapsedMs' in final['stats']
+    # The finalize request declared exactly the accepted page count.
+    assert fake.finalize_expected_page_counts == [1]
     # Event payloads are empty: bulk bytes never cross the emit bridge.
     assert all(event.payload == b'' for event in events)
 
@@ -2157,21 +2160,20 @@ def test_stream_aborts_on_page_upload_failure(monkeypatch):
 
 
 def test_stream_fails_closed_on_page_receipt_identity_mismatch(monkeypatch):
-    """Final bytes and checksum are intake-derived and never compared to the source page;
-    only the identity fields (index, offset, rows) must match, and a mismatch fails the run."""
+    """The acceptance receipt must echo the accepted page's identity exactly — session,
+    index, offset, and source rows; a mismatch fails the run."""
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     request = two_row_boundary_request(monkeypatch)
     pool = wide_row_pool()
     fake = FakeUploadClient(
         put_page_response=lambda page: {
+            'upload_id': UPLOAD_ID,
             'batch_index': page.batch_index,
-            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
             'record_offset': page.record_offset,
-            # Intake-derived values with no source agreement: these are accepted.
-            'bytes': page.source_bytes + 123,
-            'rows': page.rows + 1,
-            'sha256': 'f' * 64,
+            # A row count that disagrees with the accepted page: rejected.
+            'source_rows': page.rows + 1,
+            'status': 'accepted',
         }
     )
 
@@ -2201,12 +2203,11 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
         if page.batch_index == 1:
             raise rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
         return {
+            'upload_id': UPLOAD_ID,
             'batch_index': page.batch_index,
-            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
             'record_offset': page.record_offset,
-            'bytes': page.source_bytes,
-            'rows': page.rows,
-            'sha256': 'a' * 64,
+            'source_rows': page.rows,
+            'status': 'accepted',
         }
 
     fake = FakeUploadClient(put_page_response=fail_second_page)

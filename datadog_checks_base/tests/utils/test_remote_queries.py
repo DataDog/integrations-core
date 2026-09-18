@@ -114,7 +114,12 @@ def envelope_bound(delivery, record_offset, schema_json=None):
 
 
 class Uploads:
-    """A fake intake: registers the descriptor and returns intake-derived page receipts."""
+    """A fake intake: registers the descriptor, accepts source pages, and finalizes the run.
+
+    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
+    acceptance — and finalize returns authoritative totals over the recorded pages, so run
+    stats and the compact receipt come from finalization, never from local sizes.
+    """
 
     def __init__(
         self,
@@ -135,6 +140,7 @@ class Uploads:
         self.put_attempts = []
         self.pages = []
         self.finalize_calls = 0
+        self.finalize_expected_counts = []
         self.abort_calls = 0
 
     def register_descriptor(self, creds, body):
@@ -168,16 +174,16 @@ class Uploads:
         if self.receipt_override is not None:
             return self.receipt_override(page)
         return {
+            'upload_id': creds.upload_id,
             'batch_index': page.batch_index,
-            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
             'record_offset': page.record_offset,
-            'bytes': self.final_bytes_for(page),
-            'rows': page.rows,
-            'sha256': hashlib.sha256('final-metadata-{}'.format(page.batch_index).encode('utf-8')).hexdigest(),
+            'source_rows': page.rows,
+            'status': 'accepted',
         }
 
-    def finalize_run(self, creds):
+    def finalize_run(self, creds, expected_page_count):
         self.finalize_calls += 1
+        self.finalize_expected_counts.append(expected_page_count)
         if self.finalize_response is not None:
             return self.finalize_response
         return {
@@ -210,9 +216,9 @@ class AdvancingUploads(Uploads):
         self._clock['now'] += self._put_source_page_seconds
         return super().put_source_page(creds, page, body)
 
-    def finalize_run(self, creds):
+    def finalize_run(self, creds, expected_page_count):
         self._clock['now'] += self._finalize_seconds
-        return super().finalize_run(creds)
+        return super().finalize_run(creds, expected_page_count)
 
 
 def test_phase_nesting_suspends_the_enclosing_accumulation():
@@ -916,9 +922,10 @@ def test_native_final_page_too_large_splits_and_retries_without_requery(delivery
     assert result['totalRows'] == 4
 
 
-def test_native_result_cap_uses_receipt_bytes_plus_the_page_source(delivery, creds):
-    """The native grammar's aggregate check uses intake's receipt bytes plus the next page's
-    own source bytes — a lower bound on its final JSON — and fails before that page's upload."""
+def test_native_result_cap_uses_the_accepted_source_bytes(delivery, creds):
+    """The native grammar's aggregate check uses the accepted pages' source bytes plus the
+    next page's own — a lower bound on the final JSON, since no final bytes exist before
+    finalization — and fails before that page's upload."""
     columns = (('value', 'text', 'string'),)
     record = native_csv_record('a' * 127)  # 130 bytes >= the 120-byte target of maxFileBytes 150
     scoped = bounded_delivery(
@@ -931,7 +938,7 @@ def test_native_result_cap_uses_receipt_bytes_plus_the_page_source(delivery, cre
         writer.finish_native_copy_stream()
         writer.finish()
     assert failure.value.code == 'max_result_bytes_exceeded'
-    # The first page's receipt (130 final bytes) plus the second page's 130 source bytes
+    # The first page's 130 accepted source bytes plus the second page's 130 source bytes
     # exceeds the 259-byte aggregate cap, so only the first page was uploaded.
     assert [page.rows for page, _ in uploads.pages] == [1]
     assert uploads.pages[0][1] == record
@@ -1092,11 +1099,15 @@ def test_pages_preserve_row_order_offsets_and_source_identity(delivery, creds):
     result = writer.finish()
 
     tokens = [json.dumps(row).encode('utf-8') for row in rows]
+    # Sequential production advances on acceptance: each page uploads only after the
+    # previous page's 202, at the next index and offset, and finalize declares exactly
+    # the accepted count.
     assert [page.batch_index for page, _ in uploads.pages] == [0, 1, 2]
     for index, (page, payload) in enumerate(uploads.pages):
         assert payload == csv_record([tokens[index]])
         assert page.record_offset == index
         assert page.source_bytes == len(payload)
+    assert uploads.finalize_expected_counts == [3]
     assert result == {
         'uploadId': 'upload-1',
         'pageCount': 3,
@@ -1183,7 +1194,7 @@ def test_single_record_exceeding_max_row_bytes_fails_closed(delivery, creds):
 # ---------------------------------------------------------------------------
 
 
-def test_stats_and_receipt_come_from_intake_final_metadata_not_source_sizes(delivery, creds):
+def test_stats_and_receipt_come_from_intake_finalization_not_local_sizes(delivery, creds):
     uploads = Uploads(final_growth=37)
     stats = rq.RemoteQueryRunStats()
     writer = rq.SourcePageWriter(delivery, creds, uploads, descriptor(), lambda: None, stats)
@@ -1193,27 +1204,33 @@ def test_stats_and_receipt_come_from_intake_final_metadata_not_source_sizes(deli
 
     source_bytes = sum(page.source_bytes for page, _ in uploads.pages)
     final_bytes = sum(page.source_bytes + 37 for page, _ in uploads.pages)
-    assert final_bytes != source_bytes  # the receipts genuinely differ from the source sizes
-    # Stats accumulate the receipts' final bytes; the compact receipt repeats intake's totals.
+    assert final_bytes != source_bytes  # finalize's totals genuinely differ from the source sizes
+    # Stats and the compact receipt mirror intake's finalization totals: the producer's own
+    # conservative page accounting is replaced by the authoritative totals, never merged.
     assert stats.bytes_emitted == final_bytes
     assert stats.rows_emitted == 3
     assert stats.pages_emitted == 1
     assert result == {'uploadId': 'upload-1', 'pageCount': 1, 'totalRows': 3, 'totalBytes': final_bytes}
+    # The finalize request declared exactly the accepted page count.
+    assert uploads.finalize_expected_counts == [1]
 
 
-@pytest.mark.parametrize('field,bad', [('batch_index', 1), ('record_offset', -1), ('rows', True), ('key', '')])
-def test_page_receipt_identity_must_match(delivery, creds, field, bad):
+@pytest.mark.parametrize(
+    'field,bad',
+    [
+        ('upload_id', 'other-upload'),
+        ('batch_index', 1),
+        ('record_offset', -1),
+        ('source_rows', True),
+        ('source_rows', 2),
+        ('status', 'processing'),
+    ],
+)
+def test_page_acceptance_receipt_identity_must_match(delivery, creds, field, bad):
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads)
     writer.add_row([string_cell('value-text')])
-    receipt = {
-        'batch_index': 0,
-        'key': 'agent-intake-test/pages/0.json',
-        'record_offset': 0,
-        'bytes': 10,
-        'rows': 1,
-        'sha256': 'a' * 64,
-    }
+    receipt = acceptance_receipt(0, 0, 1)
     uploads.receipt_override = lambda page: {**receipt, field: bad}
     with pytest.raises(rq.RemoteQueryFailure) as failure:
         writer.finish()
@@ -1222,36 +1239,30 @@ def test_page_receipt_identity_must_match(delivery, creds, field, bad):
     assert uploads.finalize_calls == 0
 
 
-@pytest.mark.parametrize('field,bad', [('bytes', 'x'), ('bytes', -1), ('sha256', 'nothex'), ('sha256', 'A' * 64)])
-def test_page_receipt_final_metadata_shape_must_be_valid(field, bad):
-    page = rq.SourcePageUploadMetadata(0, 0, 10, 1)
-    receipt = {
-        'batch_index': 0,
-        'key': 'agent-intake-test/pages/0.json',
-        'record_offset': 0,
-        'bytes': 10,
-        'rows': 1,
-        'sha256': 'a' * 64,
-    }
+@pytest.mark.parametrize('field', ['upload_id', 'batch_index', 'record_offset', 'source_rows', 'status'])
+def test_page_acceptance_receipt_fields_are_required(delivery, creds, field):
+    uploads = Uploads()
+    writer = make_writer(delivery, creds, uploads)
+    writer.add_row([string_cell('value-text')])
+    receipt = acceptance_receipt(0, 0, 1)
+    del receipt[field]
+    uploads.receipt_override = lambda page: receipt
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        rq.verify_source_page_receipt({**receipt, field: bad}, page)
+        writer.finish()
     assert failure.value.code == 'invalid_receipt'
+    assert uploads.finalize_calls == 0
 
 
-def test_page_receipt_final_metadata_needs_no_source_agreement():
-    """Final bytes and checksum are intake-derived: any valid shape is accepted."""
+@pytest.mark.parametrize('key,value', [('key', 'pages/0.json'), ('bytes', 10), ('sha256', 'a' * 64), ('rows', 1)])
+def test_page_acceptance_receipt_allows_no_keys_beyond_the_pinned_five(delivery, creds, key, value):
+    """The removed per-page final metadata is not an accepted alternate receipt: a page
+    response carrying the old final-object key, byte count, checksum, or row count name
+    fails closed instead of being parsed as backward compatibility."""
     page = rq.SourcePageUploadMetadata(0, 0, 10, 1)
-    rq.verify_source_page_receipt(
-        {
-            'batch_index': 0,
-            'key': 'agent-intake-test/pages/0.json',
-            'record_offset': 0,
-            'bytes': 10_000,
-            'rows': 1,
-            'sha256': 'f' * 64,
-        },
-        page,
-    )
+    receipt = {**acceptance_receipt(0, 0, 1), key: value}
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.verify_source_page_receipt(receipt, creds.upload_id, page)
+    assert failure.value.code == 'invalid_receipt'
 
 
 def test_finalize_totals_are_required_and_authoritative():
@@ -1275,6 +1286,7 @@ def test_empty_result_semantics(delivery, creds):
     writer = make_writer(delivery, creds, uploads, include_schema=True)
     result = writer.finish()
     assert result['pageCount'] == 1
+    assert uploads.finalize_expected_counts == [1]  # the zero-record schema page was accepted
     (page, payload) = uploads.pages[0]
     assert payload == b''
     assert page.rows == 0
@@ -1287,10 +1299,14 @@ def test_empty_result_semantics(delivery, creds):
     result = writer.finish()
     assert uploads.pages == []
     assert uploads.finalize_calls == 1
+    assert uploads.finalize_expected_counts == [0]
     assert result == {'uploadId': 'upload-1', 'pageCount': 0, 'totalRows': 0, 'totalBytes': 0}
 
 
-def test_result_cap_boundaries_use_receipt_bytes_plus_the_page_bound(delivery, creds):
+def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds):
+    """The cumulative result cap uses the producer's own conservative page bounds: no
+    per-page final bytes exist before finalization, so each closed page contributes the
+    bound it was split under and the active page its bound with the new row."""
     row_bound = 22
     frame = envelope_bound(delivery, 0) + row_bound  # one "x" row per page exactly
     final_bytes_per_page = 30
@@ -1309,14 +1325,15 @@ def test_result_cap_boundaries_use_receipt_bytes_plus_the_page_bound(delivery, c
             writer.add_row([cell(b'"x"', 12)])
         return writer.finish(), uploads
 
-    # Three committed pages' receipts (90) plus the fourth page's bound fit exactly.
-    result, uploads = run(3 * final_bytes_per_page + frame)
+    # Three closed pages' bounds plus the fourth page's bound fit exactly.
+    result, uploads = run(4 * frame)
     assert result['pageCount'] == 4
+    # The receipt totals still come from intake's finalization, never the conservative bounds.
     assert result['totalBytes'] == 4 * final_bytes_per_page
 
     # One byte less: the fourth page cannot be produced under the result cap.
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        run(3 * final_bytes_per_page + frame - 1)
+        run(4 * frame - 1)
     assert failure.value.code == 'max_result_bytes_exceeded'
 
 
@@ -1424,14 +1441,9 @@ def test_failed_upload_releases_the_buffered_page(delivery, creds, failure):
     if failure == 'upload':
         kwargs['put_failure'] = lambda page: rq.RemoteQueryFailure('upload_failed', 'unavailable')
     else:
-        kwargs['receipt_override'] = lambda page: {
-            'batch_index': page.batch_index,
-            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
-            'record_offset': page.record_offset,
-            'bytes': 10,
-            'rows': page.rows + 1,
-            'sha256': 'a' * 64,
-        }
+        kwargs['receipt_override'] = lambda page: acceptance_receipt(
+            page.batch_index, page.record_offset, page.rows + 1
+        )
     uploads = Uploads(**kwargs)
     writer = make_writer(delivery, creds, uploads)
     writer.add_row([string_cell('a')])
@@ -1453,6 +1465,26 @@ def source_page(payload, batch_index=0, record_offset=7):
         source_bytes=len(payload),
         rows=1,
     )
+
+
+def acceptance_receipt(batch_index, record_offset, source_rows, upload_id='upload-1', status='accepted'):
+    """The pinned page acceptance receipt for one accepted source page."""
+    return {
+        'upload_id': upload_id,
+        'batch_index': batch_index,
+        'record_offset': record_offset,
+        'source_rows': source_rows,
+        'status': status,
+    }
+
+
+def pending_receipt(completed_page_count, expected_page_count, status='processing'):
+    """The pinned 202 finalize pending receipt for one still-processing run."""
+    return {
+        'status': status,
+        'completed_page_count': completed_page_count,
+        'expected_page_count': expected_page_count,
+    }
 
 
 def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, creds):
@@ -1494,19 +1526,7 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
             if trigger == 'lost_response':
                 raise requests.exceptions.ConnectionError('response lost')
             return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
-        return SimpleNamespace(
-            status_code=200,
-            content=json.dumps(
-                {
-                    'batch_index': 2,
-                    'key': 'agent-intake-test/pages/2.json',
-                    'record_offset': 7,
-                    'bytes': 40,
-                    'rows': 1,
-                    'sha256': 'a' * 64,
-                }
-            ).encode(),
-        )
+        return SimpleNamespace(status_code=202, content=json.dumps(acceptance_receipt(2, 7, 1)).encode())
 
     monkeypatch.setattr(requests, 'request', request)
     monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
@@ -1525,7 +1545,9 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
         'X-DD-Source-Page-Rows': '1',
         'X-DD-Record-Offset': '7',
     }
-    assert receipt['bytes'] == 40  # final metadata, never the source size
+    # HTTP 202 is the successful page handoff: the client returns the acceptance receipt
+    # untouched — no final page metadata exists to synthesize.
+    assert receipt == acceptance_receipt(2, 7, 1)
 
 
 def test_http_final_page_too_large_surfaces_as_its_own_code(monkeypatch, creds):
@@ -1566,7 +1588,7 @@ def test_http_terminal_rejections_on_default_mapping_requests_fail_closed(monkey
     assert failure.value.code == 'upload_failed'
     assert not failure.value.retryable
     with pytest.raises(rq.RemoteQueryFailure) as failure:
-        client.finalize_run(creds)
+        client.finalize_run(creds, 0)
     assert failure.value.code == 'upload_failed'
     assert not failure.value.retryable
     assert calls == [
@@ -1605,7 +1627,7 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
     def request(method, url, headers, data, timeout):
         attempts.append(1)
         sent.append(data.read())
-        return SimpleNamespace(status_code=200, content=json.dumps({'key': 'k', 'bytes': 1}).encode())
+        return SimpleNamespace(status_code=202, content=json.dumps(acceptance_receipt(0, 0, 1)).encode())
 
     monkeypatch.setattr(requests, 'request', request)
     monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
@@ -1617,7 +1639,7 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
         creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=100.0
     )
     with io.BytesIO(payload) as body:
-        assert rq.RequestsUploadClient().put_source_page(wall_creds, page, body) == {'key': 'k', 'bytes': 1}
+        assert rq.RequestsUploadClient().put_source_page(wall_creds, page, body) == acceptance_receipt(0, 0, 1)
     assert len(attempts) == 2
     # The killed attempt fails its deadline check before any byte leaves; only the rewound
     # second attempt streams the page.
@@ -1718,26 +1740,25 @@ def test_retry_accounting_includes_failed_attempts_and_backoff_exactly_once(monk
             return SimpleNamespace(
                 status_code=200,
                 content=json.dumps(
-                    {'upload_id': creds.upload_id, 'page_count': 1, 'total_rows': 1, 'total_bytes': stats.bytes_emitted}
+                    {'upload_id': creds.upload_id, 'page_count': 1, 'total_rows': 1, 'total_bytes': 40}
                 ).encode(),
             )
         if len(calls) == 2:
             clock['now'] += 3.0
             return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
         clock['now'] += 7.0
-        # Echo the declared source page metadata so the authoritative receipt verification passes.
+        # Echo the declared source page metadata in the acceptance receipt so the
+        # identity verification passes.
         batch_index = int(url.rsplit('/', 1)[-1])
         return SimpleNamespace(
-            status_code=200,
+            status_code=202,
             content=json.dumps(
-                {
-                    'batch_index': batch_index,
-                    'key': 'agent-intake-test/pages/{}.json'.format(batch_index),
-                    'record_offset': int(headers['X-DD-Record-Offset']),
-                    'bytes': int(headers['X-DD-Source-Page-Bytes']),
-                    'rows': int(headers['X-DD-Source-Page-Rows']),
-                    'sha256': 'a' * 64,
-                }
+                acceptance_receipt(
+                    batch_index,
+                    int(headers['X-DD-Record-Offset']),
+                    int(headers['X-DD-Source-Page-Rows']),
+                    upload_id=creds.upload_id,
+                )
             ).encode(),
         )
 
@@ -1756,11 +1777,13 @@ def test_retry_accounting_includes_failed_attempts_and_backoff_exactly_once(monk
         'uploadId': creds.upload_id,
         'pageCount': 1,
         'totalRows': 1,
-        'totalBytes': stats.bytes_emitted,
+        'totalBytes': 40,
     }
     # The page's upload wall is exactly the failed attempt (3 s) plus the backoff (0.125 s)
     # plus the successful attempt (7 s), each counted once; the descriptor registration and
     # finalize are their own POSTs, so the registration wall lands in the otherMs remainder.
+    # The finalize totals replaced the producer's conservative accounting, so byteCount is
+    # intake's 40, not the page's source or bound bytes.
     assert timings.metadata(stats) == {
         'contractVersion': 1,
         'producer': {
@@ -1771,7 +1794,7 @@ def test_retry_accounting_includes_failed_attempts_and_backoff_exactly_once(monk
             'timeToFirstPageMs': 10625,
             'pageCount': 1,
             'rowCount': 1,
-            'byteCount': stats.bytes_emitted,
+            'byteCount': 40,
             'uploadAttemptCount': 2,
             'uploadRetryCount': 1,
             'pageUploadMinMs': 10125,
@@ -1780,6 +1803,7 @@ def test_retry_accounting_includes_failed_attempts_and_backoff_exactly_once(monk
             'pageUploadMaxMs': 10125,
         },
     }
+    assert stats.bytes_emitted == 40
 
 
 def test_source_page_writer_emits_identical_source_pages_with_and_without_timings(delivery, creds):
@@ -1813,27 +1837,166 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
     monkeypatch.setattr(requests, 'request', request)
     creds = rq.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, creds.app_key, 'test-intake')
     client = rq.RequestsUploadClient()
-    assert client.finalize_run(creds)['upload_id'] == creds.upload_id
+    assert client.finalize_run(creds, 3)['upload_id'] == creds.upload_id
     client.abort(creds)
     assert [call[1] for call in calls] == [
         'https://intake.example/uploads/upload-1/finalize',
         'https://intake.example/uploads/upload-1/abort',
     ]
-    assert all(
-        method == 'POST' and headers['test-drive-test-intake'] == '1' and body == b'{}'
-        for method, _, headers, body in calls
+    # Finalize declares the accepted page count; abort stays an empty body.
+    assert calls[0][3] == b'{"expected_page_count":3}'
+    assert calls[1][3] == b'{}'
+    assert all(method == 'POST' and headers['test-drive-test-intake'] == '1' for method, _, headers, _ in calls)
+
+
+# ---------------------------------------------------------------------------
+# Run finalization: expected page count and pending polling under the run wall
+# ---------------------------------------------------------------------------
+
+
+def finalize_receipt(page_count=1, total_rows=0, total_bytes=0, upload_id='upload-1'):
+    """The pinned authoritative final receipt intake answers on HTTP 200."""
+    return {
+        'upload_id': upload_id,
+        'page_count': page_count,
+        'total_rows': total_rows,
+        'total_bytes': total_bytes,
+    }
+
+
+def test_http_finalize_sends_the_accepted_page_count(monkeypatch, creds):
+    import requests
+
+    bodies = []
+
+    def request(method, url, headers, data, timeout):
+        bodies.append((method, data))
+        return SimpleNamespace(status_code=200, content=json.dumps(finalize_receipt(3, 5, 99)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    assert rq.RequestsUploadClient().finalize_run(creds, 3) == finalize_receipt(3, 5, 99)
+    # The request body is exactly the accepted page count, nothing else.
+    assert bodies == [('POST', b'{"expected_page_count":3}')]
+
+
+def test_http_finalize_polls_pending_until_the_authoritative_receipt(monkeypatch, creds):
+    import requests
+
+    calls = []
+    sleeps = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append((method, data))
+        if len(calls) == 1:
+            return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(1, 3)).encode())
+        if len(calls) == 2:
+            # The completed count may advance between polls while pages are recorded.
+            return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(3, 3)).encode())
+        return SimpleNamespace(status_code=200, content=json.dumps(finalize_receipt(3, 5, 99)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', sleeps.append)
+    scoped = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=rq.time.monotonic() + 60
     )
+    assert rq.RequestsUploadClient().finalize_run(scoped, 3) == finalize_receipt(3, 5, 99)
+    # Every poll replays the identical finalize body under the same wall.
+    assert calls == [('POST', b'{"expected_page_count":3}')] * 3
+    assert sleeps == [
+        rq.REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS,
+        2 * rq.REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS,
+    ]
+
+
+@pytest.mark.parametrize(
+    'pending',
+    [
+        {'status': 'processing', 'completed_page_count': 1, 'expected_page_count': 2},  # wrong expected echo
+        {'status': 'processing', 'completed_page_count': 4, 'expected_page_count': 3},  # beyond the expected count
+        {'status': 'processing', 'completed_page_count': -1, 'expected_page_count': 3},
+        {'status': 'processing', 'completed_page_count': True, 'expected_page_count': 3},
+        {'status': 'processing', 'completed_page_count': 1, 'expected_page_count': '3'},
+        {'status': 'accepted', 'completed_page_count': 1, 'expected_page_count': 3},  # not the pending status
+        {'status': 'processing', 'completed_page_count': 1},  # missing the expected echo
+        {'status': 'processing', 'completed_page_count': 1, 'expected_page_count': 3, 'upload_id': 'upload-1'},
+        'not-an-object',
+    ],
+)
+def test_http_finalize_pending_receipt_is_strictly_verified(monkeypatch, creds, pending):
+    import requests
+
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append(1)
+        body = pending if isinstance(pending, str) else json.dumps(pending)
+        return SimpleNamespace(status_code=202, content=body.encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    scoped = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=rq.time.monotonic() + 60
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.RequestsUploadClient().finalize_run(scoped, 3)
+    assert failure.value.code == 'invalid_receipt'
+    # A malformed pending receipt fails closed on its own poll; nothing is retried.
+    assert len(calls) == 1
+
+
+def test_http_finalize_pending_backoff_is_bounded_under_the_run_wall(monkeypatch, creds):
+    import requests
+
+    attempts = []
+    sleeps = []
+
+    def request(method, url, headers, data, timeout):
+        attempts.append(1)
+        return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(0, 1)).encode())
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', sleeps.append)
+    # A wall of 1000 s against a clock that advances past it: every pending poll sleeps the
+    # bounded doubling backoff capped at the ceiling, and the expired wall refuses to start
+    # the next request instead of extending the deadline.
+    clock = iter([0.0, 1.0, 3.0, 7.0, 15.0, 31.0, 63.0, 127.0, 255.0, 511.0, 1023.0] + [1023.0] * 5)
+    monkeypatch.setattr(rq.time, 'monotonic', lambda: next(clock))
+    scoped = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=1000.0
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.RequestsUploadClient().finalize_run(scoped, 1)
+    assert failure.value.code == 'timeout'
+    assert failure.value.retryable
+    assert len(attempts) == 10
+    assert sleeps == [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 5.0, 5.0, 5.0, 5.0]
+
+
+def test_http_finalize_pending_then_terminal_rejection_fails_closed(monkeypatch, creds):
+    import requests
+
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append(1)
+        if len(calls) == 1:
+            return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(0, 1)).encode())
+        return SimpleNamespace(status_code=409, content=b'{"error":{"code":"already_exists"}}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq.time, 'sleep', lambda _: None)
+    scoped = rq.UploadCredentials(
+        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=rq.time.monotonic() + 60
+    )
+    with pytest.raises(rq.RemoteQueryFailure) as failure:
+        rq.RequestsUploadClient().finalize_run(scoped, 1)
+    assert failure.value.code == 'upload_failed'
+    assert not failure.value.retryable
+    assert len(calls) == 2  # the terminal rejection is not retried; the run aborts
 
 
 def receipt(page):
-    return {
-        'batch_index': page.batch_index,
-        'record_offset': page.record_offset,
-        'bytes': page.source_bytes,
-        'rows': page.rows,
-        'sha256': 'a' * 64,  # intake-derived final checksum: shape-validated, never source metadata
-        'key': f'pages/{page.batch_index}.json',
-    }
+    return acceptance_receipt(page.batch_index, page.record_offset, page.rows)
 
 
 def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_changes(monkeypatch, creds):
@@ -1849,7 +2012,7 @@ def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_chang
             # A transient rejection: the page PUT retries once with the same headers.
             return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
         if method == 'PUT':
-            return SimpleNamespace(status_code=200, content=page_receipt)
+            return SimpleNamespace(status_code=202, content=page_receipt)
         return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
 
     monkeypatch.setattr(requests, 'request', request)
@@ -1863,7 +2026,7 @@ def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_chang
         )
         with io.BytesIO(b'x') as body:
             client.put_source_page(scoped, page, body)
-        client.finalize_run(scoped)
+        client.finalize_run(scoped, 1)
         client.abort(scoped)
         return list(calls)
 

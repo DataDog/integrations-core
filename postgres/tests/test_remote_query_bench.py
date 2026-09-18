@@ -87,15 +87,14 @@ class DiscardUploadClient:
         self.rows += page.rows
         self.source_bytes += page.source_bytes
         return {
+            'upload_id': creds.upload_id,
             'batch_index': page.batch_index,
-            'key': 'agent-intake-test/pages/{}.json'.format(page.batch_index),
             'record_offset': page.record_offset,
-            'bytes': page.source_bytes,
-            'rows': page.rows,
-            'sha256': 'a' * 64,
+            'source_rows': page.rows,
+            'status': 'accepted',
         }
 
-    def finalize_run(self, creds):
+    def finalize_run(self, creds, expected_page_count):
         self.run_finalize_calls += 1
         return {
             'upload_id': creds.upload_id,

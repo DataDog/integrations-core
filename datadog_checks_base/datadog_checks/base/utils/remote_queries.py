@@ -9,9 +9,12 @@ registers one immutable source-page descriptor per upload and sends record-compl
 source pages to its-agent-intake: native ``COPY TO STDOUT`` blocks stream through one
 bounded mutable page buffer with single-pass CSV framing — no per-record objects are
 materialized — while canonical-token producers append framed rows to the same buffer.
-Intake decodes, redacts, and writes the final JSON pages, so the producer never constructs
-a final JSON envelope and never claims its source bytes are final artifact
-metadata. Only metadata and the compact receipt return through the Agent's native callback.
+Intake accepts each page with HTTP 202 and finishes it asynchronously — the producer
+advances at most one page ahead and cannot wait for per-page final metadata that does not
+exist yet — then decodes, redacts, and writes the final JSON pages. The producer never
+constructs a final JSON envelope, never claims its source bytes are final artifact
+metadata, and reads the run's authoritative totals only from intake's finalization.
+Only metadata and the compact receipt return through the Agent's native callback.
 """
 
 from __future__ import annotations
@@ -100,6 +103,24 @@ REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE = 'application/vnd.datadog.remote-query.ro
 # despite the producer's conservative bound. The producer answers by splitting the buffered
 # records and retrying the same page index.
 REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE = 'final_page_too_large'
+
+# The pinned page acceptance receipt: intake answers a page PUT with HTTP 202 once the page
+# has passed ordering admission and started processing — the final page does not exist yet,
+# so the receipt carries no final object key, byte count, or checksum. It echoes exactly the
+# accepted page's identity (``upload_id``, ``batch_index``, ``record_offset``,
+# ``source_rows``) plus ``status: accepted``; final metadata reaches the producer only
+# through the run's finalized totals.
+REMOTE_QUERY_PAGE_RECEIPT_STATUS = 'accepted'
+REMOTE_QUERY_PAGE_RECEIPT_KEYS = frozenset(('upload_id', 'batch_index', 'record_offset', 'source_rows', 'status'))
+
+# The pinned run-finalization contract: the request declares the accepted page count, and
+# intake answers HTTP 202 with exactly these safe progress fields while accepted pages are
+# still being recorded behind the one-page lead. HTTP 200 keeps the existing authoritative
+# final receipt. The pending fields are progress diagnostics only — they never authorize
+# success — so the producer verifies them strictly and keeps polling under its run wall.
+REMOTE_QUERY_FINALIZE_PENDING_STATUS_CODE = 202
+REMOTE_QUERY_FINALIZE_PENDING_STATUS = 'processing'
+REMOTE_QUERY_FINALIZE_PENDING_KEYS = frozenset(('status', 'completed_page_count', 'expected_page_count'))
 
 # The closed descriptor logical-type set: the stable cross-database families intake accepts.
 # ``vendor`` marks supported values without a narrower stable family; it is never a stringify
@@ -556,7 +577,15 @@ class RemoteQueryResolveRequest(BaseModel):
 
 @dataclass
 class RemoteQueryRunStats:
-    """Mutable run accounting shared with the page writer so failures can report partials."""
+    """Mutable run accounting shared with the page writer so failures can report partials.
+
+    While pages are only accepted, the counters hold the producer's own accounting:
+    ``pages_emitted``/``rows_emitted`` count accepted pages and rows, and ``bytes_emitted``
+    accumulates the conservative per-page bound — the token grammar's exact final-JSON
+    bounds, the native grammar's acknowledged source bytes — because no final page bytes
+    exist before finalization. A successful finalization replaces all three counters with
+    intake's authoritative run totals, so success events never report producer estimates.
+    """
 
     rows_emitted: int = 0
     pages_emitted: int = 0
@@ -1012,10 +1041,13 @@ class SourcePageWriter:
     final-JSON bound; the native grammar closes a page at the record boundary that reaches
     the internal source-page target and leaves intake authoritative for the transformed
     final size, splitting a rejected page at a recorded boundary and retrying the same page
-    index without requerying. Every retry sends the same buffered bytes. Stats and the
-    compact receipt accumulate from intake's returned final metadata, never from local
-    source sizes. The Agent admits one execution at a time; each adapter must call discard
-    in its finally block so query/encoding failures also release the active page.
+    index without requerying. Every retry sends the same buffered bytes. Intake accepts each
+    page with HTTP 202 and finishes it asynchronously, so the writer advances to the next
+    page after acceptance — at most one page ahead — and no per-page final metadata exists:
+    run stats keep the producer's conservative accounting until intake's authoritative
+    finalization replaces them with the run totals. The Agent admits one execution at
+    a time; each adapter must call discard in its finally block so query/encoding
+    failures also release the active page.
     """
 
     def __init__(
@@ -1246,11 +1278,18 @@ class SourcePageWriter:
         return self._finalize_run()
 
     def _finalize_run(self) -> dict[str, Any]:
-        # Finalize includes its receipt verification and authoritative totals in its own phase.
+        # Finalize declares the accepted page count and includes its receipt verification
+        # and authoritative totals in its own phase.
         with self._timings.phase('finalize'):
-            response = self._client.finalize_run(self._creds)
+            response = self._client.finalize_run(self._creds, self._stats.pages_emitted)
             verify_run_finalize_response(response, self._creds.upload_id)
             page_count, total_rows, total_bytes = finalize_totals(response)
+        # Intake's finalization is the only authority for the run totals: the producer's
+        # conservative page accounting is replaced, never merged, so the success event's
+        # stats and the compact receipt agree with the finalized totals.
+        self._stats.pages_emitted = page_count
+        self._stats.rows_emitted = total_rows
+        self._stats.bytes_emitted = total_bytes
         return {
             'uploadId': self._creds.upload_id,
             'pageCount': page_count,
@@ -1296,7 +1335,7 @@ class SourcePageWriter:
         rejects a page as ``final_page_too_large``, the buffered records are split in half and
         the same index is retried with fewer records — without requerying or reordering rows —
         and the uncommitted tail stays buffered as the active page. Returns the buffered
-        bytes the acknowledged page consumed; the buffer's remaining bytes are the active
+        bytes the accepted page consumed; the buffer's remaining bytes are the active
         page, so a caller scanning the buffer adjusts its offsets by that amount.
         """
         if self._stats.pages_emitted >= self._delivery.limits.max_pages:
@@ -1306,9 +1345,10 @@ class SourcePageWriter:
         offset = self._page_record_offset
         total = len(record_ends)
         page_end = record_ends[-1] if total else 0
-        # Intake's receipts are authoritative for final bytes, so the native grammar's
-        # aggregate check uses them plus the page's own source bytes — a lower bound on its
-        # final JSON, since every row object repeats the descriptor keys over its record.
+        # No final page bytes exist before finalization, so the native grammar's aggregate
+        # check uses the accepted pages' source bytes plus this page's own — a lower bound
+        # on the final JSON, since every row object repeats the descriptor keys over its
+        # record — and intake's finalization stays authoritative for the true cap.
         if self._native_mode and self._stats.bytes_emitted + page_end > self._delivery.limits.max_result_bytes:
             raise RemoteQueryFailure('max_result_bytes_exceeded', 'Result pages exceed maxResultBytes.')
         count = total
@@ -1329,22 +1369,28 @@ class SourcePageWriter:
                 # verification below stays in the enclosing phase's bucket.
                 with self._timings.page_upload():
                     receipt = self._client.put_source_page(self._creds, metadata, body)
-                verify_source_page_receipt(receipt, metadata)
+                verify_source_page_receipt(receipt, self._creds.upload_id, metadata)
             except RemoteQueryFailure as failure:
                 if failure.code != REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE or count <= 1:
                     raise
                 count //= 2
                 continue
             break
-        # Intake is authoritative for the final page's bytes; stats never use source sizes.
+        # The acceptance advances the producer: intake finishes the page asynchronously
+        # while the next page uploads, and no final page metadata exists yet. Run stats keep
+        # the producer's conservative accounting — the token grammar's exact page bound, the
+        # native grammar's source bytes (a lower bound on the final JSON) — until intake's
+        # authoritative finalization replaces them with the run totals.
+        acknowledged = record_ends[count - 1] if count else 0
         self._stats.pages_emitted += 1
-        self._stats.rows_emitted += receipt['rows']
-        self._stats.bytes_emitted += receipt['bytes']
-        # Only the acknowledged page enters the upload distribution; a split attempt's wall
+        self._stats.rows_emitted += receipt['source_rows']
+        self._stats.bytes_emitted += (
+            acknowledged if self._native_mode else self._page_final_bound(offset, record_bounds[:count])
+        )
+        # Only the accepted page enters the upload distribution; a split attempt's wall
         # stays in the cumulative pageUploadMs.
         self._timings.note_page_acknowledged()
-        acknowledged = record_ends[count - 1] if count else 0
-        # The acknowledged bytes leave the buffer; the uncommitted tail is the active page.
+        # The accepted bytes leave the buffer; the uncommitted tail is the active page.
         del self._buf[:acknowledged]
         if count == total:
             self._record_ends = array('q')
@@ -1364,19 +1410,27 @@ class SourcePageWriter:
             self._open_start -= acknowledged
         return acknowledged
 
-    def _recompute_page_accounting(self) -> None:
+    def _page_final_bound(self, record_offset: int, row_bounds: array) -> int:
+        """The conservative final-JSON bound of one token-grammar page from its row bounds.
+
+        The envelope plus the closing bytes plus every row's bound plus the commas between
+        row objects — the same bound the token grammar uses to split pages below
+        maxFileBytes, so accumulating it over accepted pages bounds the run's final result
+        bytes above what intake can produce for them.
+        """
         prefix_len = len(
             page_prefix(
                 run_id=self._delivery.run_id,
                 task_id=self._delivery.task_id,
-                record_offset=self._page_record_offset,
+                record_offset=record_offset,
                 agent_hostname=self._descriptor.agent_hostname,
                 schema_json=self._schema_json,
             )
         )
-        self._page_bound = (
-            prefix_len + len(PAGE_SUFFIX) + sum(self._record_bounds) + max(0, len(self._record_bounds) - 1)
-        )
+        return prefix_len + len(PAGE_SUFFIX) + sum(row_bounds) + max(0, len(row_bounds) - 1)
+
+    def _recompute_page_accounting(self) -> None:
+        self._page_bound = self._page_final_bound(self._page_record_offset, self._record_bounds)
 
 
 def raise_if_timed_out(deadline: float) -> None:
@@ -1502,7 +1556,7 @@ class UploadClient(Protocol):
         self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO
     ) -> Mapping[str, Any]: ...
 
-    def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]: ...
+    def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> Mapping[str, Any]: ...
 
     def abort(self, creds: UploadCredentials) -> None: ...
 
@@ -1579,11 +1633,12 @@ class RequestsUploadClient:
     def put_source_page(
         self, creds: UploadCredentials, page: SourcePageUploadMetadata, buffer: BinaryIO
     ) -> Mapping[str, Any]:
-        """Upload one record-complete source page and return the parsed final page receipt.
+        """Upload one record-complete source page and return the parsed acceptance receipt.
 
         The buffered page is streamed as the request body with stable declared source
         metadata; every bounded retry rewinds the buffer and resends byte-identical content
-        for the same page index. Intake's defensive ``final_page_too_large`` rejection surfaces
+        for the same page index. Intake answers HTTP 202 once the page is admitted and
+        started; its defensive ``final_page_too_large`` rejection surfaces
         as its own failure code so the writer can split the buffered records and retry the
         same index.
         """
@@ -1609,11 +1664,37 @@ class RequestsUploadClient:
         )
         return parse_json_object_response(response_body, 'page upload')
 
-    def finalize_run(self, creds: UploadCredentials) -> Mapping[str, Any]:
+    def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> Mapping[str, Any]:
+        """Finalize the run with its accepted page count, polling pending until authoritative.
+
+        The request body is exactly ``{"expected_page_count": N}`` — the number of pages
+        intake accepted — and every poll replays it byte for byte. Intake answers HTTP 202
+        with the safe pending progress fields while accepted pages are still being recorded
+        behind the one-page lead, and HTTP 200 with the authoritative final receipt once
+        the expected count is complete. Each pending response is strictly verified and
+        retried with bounded backoff; the polling never extends the run-wide wall, so once
+        the wall expires the next request fails with the retryable wall timeout and the
+        run's existing best-effort abort takes over.
+        """
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        _status, body = upload_with_retry('POST', url, headers, b'{}', self._timeout, deadline=creds.wall_deadline)
-        return parse_json_object_response(body, 'run finalize')
+        request_body = canonical_json_bytes({'expected_page_count': expected_page_count})
+        backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
+        while True:
+            status, response_body = upload_with_retry(
+                'POST', url, headers, request_body, self._timeout, deadline=creds.wall_deadline
+            )
+            if status == 200:
+                return parse_json_object_response(response_body, 'run finalize')
+            if status != REMOTE_QUERY_FINALIZE_PENDING_STATUS_CODE:
+                raise RemoteQueryFailure(
+                    'invalid_receipt', 'its-agent-intake run finalize answered HTTP {}.'.format(status)
+                )
+            verify_finalize_pending_response(
+                parse_json_object_response(response_body, 'run finalize'), expected_page_count
+            )
+            time.sleep(backoff)
+            backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
 
     def abort(self, creds: UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
@@ -1678,34 +1759,66 @@ def verify_descriptor_response(
     verify_descriptor_receipt_field(response, 'sha256', hashlib.sha256(request_bytes).hexdigest())
 
 
-def verify_source_page_receipt(response: Mapping[str, Any], page: SourcePageUploadMetadata) -> None:
-    """Fail closed unless intake's final page receipt matches the source page identity.
+def verify_source_page_receipt(response: Mapping[str, Any], upload_id: str, page: SourcePageUploadMetadata) -> None:
+    """Fail closed unless intake's acceptance receipt matches the page identity exactly.
 
-    ``batch_index``, ``record_offset``, and ``rows`` must match exactly: one source page maps
-    to one final page with the same rows and offset. ``key``, ``bytes``, and ``sha256`` are
-    intake-derived final metadata, so they are validated for shape only — never compared to
-    the source page's own bytes. The final key's exact value is verified
-    downstream by its-agent against intake's authoritative result.
+    ``202 Accepted`` means intake admitted the page and started processing it — the final
+    page, its object key, byte count, and checksum do not exist yet — so the receipt carries
+    no final metadata to verify. It echoes exactly the accepted page's identity —
+    ``upload_id``, ``batch_index``, ``record_offset``, ``source_rows`` — plus
+    ``status: accepted``; a missing, mistyped, mismatched, or unknown field is an invalid
+    receipt, and final metadata reaches the producer only through the run's finalized
+    totals.
     """
     if not isinstance(response, Mapping):
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
-    key = response.get('key')
-    if not isinstance(key, str) or not key:
+    extra_keys = set(response) - REMOTE_QUERY_PAGE_RECEIPT_KEYS
+    if extra_keys:
         raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake page upload response did not carry a usable object key.'
+            'invalid_receipt',
+            'its-agent-intake page upload response carried unknown key(s): {}.'.format(', '.join(sorted(extra_keys))),
+        )
+    reported_upload_id = response.get('upload_id')
+    if not isinstance(reported_upload_id, str) or reported_upload_id != upload_id:
+        raise RemoteQueryFailure(
+            'invalid_receipt', 'its-agent-intake page upload response did not confirm the upload session.'
         )
     verify_page_receipt_field(response, 'batch_index', page.batch_index)
     verify_page_receipt_field(response, 'record_offset', page.record_offset)
-    verify_page_receipt_field(response, 'rows', page.rows)
-    final_bytes = response.get('bytes')
-    if type(final_bytes) is not int or final_bytes < 0:
+    verify_page_receipt_field(response, 'source_rows', page.rows)
+    if response.get('status') != REMOTE_QUERY_PAGE_RECEIPT_STATUS:
         raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake page upload response did not report usable final bytes.'
+            'invalid_receipt', 'its-agent-intake page upload response did not report the page as accepted.'
         )
-    final_sha256 = response.get('sha256')
-    if not isinstance(final_sha256, str) or re.fullmatch(r'[0-9a-f]{64}', final_sha256) is None:
+
+
+def verify_finalize_pending_response(response: Mapping[str, Any], expected_page_count: int) -> None:
+    """Fail closed unless intake's ``202`` pending receipt is exactly the safe progress fields.
+
+    ``status`` must be the pinned ``processing``; ``expected_page_count`` must echo the
+    accepted count this producer declared, and ``completed_page_count`` must be a
+    well-typed count between zero and it. The pending receipt is progress diagnostics
+    only — it never authorizes success — so any unknown key fails closed.
+    """
+    if not isinstance(response, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
+    extra_keys = set(response) - REMOTE_QUERY_FINALIZE_PENDING_KEYS
+    if extra_keys:
         raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake page upload response did not report a valid final sha256.'
+            'invalid_receipt',
+            'its-agent-intake run finalize response carried unknown key(s): {}.'.format(', '.join(sorted(extra_keys))),
+        )
+    if response.get('status') != REMOTE_QUERY_FINALIZE_PENDING_STATUS:
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response did not report processing.')
+    completed = response.get('completed_page_count')
+    if type(completed) is not int or completed < 0 or completed > expected_page_count:
+        raise RemoteQueryFailure(
+            'invalid_receipt', 'its-agent-intake run finalize response did not report a usable completed count.'
+        )
+    reported_expected = response.get('expected_page_count')
+    if type(reported_expected) is not int or reported_expected != expected_page_count:
+        raise RemoteQueryFailure(
+            'invalid_receipt', 'its-agent-intake run finalize response did not echo the expected page count.'
         )
 
 
