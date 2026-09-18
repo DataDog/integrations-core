@@ -1477,6 +1477,7 @@ SPARK_DRIVER_CLUSTER_TAGS = ['spark_cluster:{}'.format('SparkDriver'), 'cluster_
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(os.environ.get('SPARK_PLATFORM') == 'k8s', reason='Docker standalone test')
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_standalone(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
@@ -1513,6 +1514,7 @@ def test_integration_standalone(aggregator, dd_run_check):
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(os.environ.get('SPARK_PLATFORM') == 'k8s', reason='Docker driver test')
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_driver_1(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [INSTANCE_DRIVER_1])
@@ -1549,6 +1551,7 @@ def test_integration_driver_1(aggregator, dd_run_check):
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(os.environ.get('SPARK_PLATFORM') == 'k8s', reason='Docker driver test')
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_driver_2(aggregator, dd_run_check):
     c = SparkCheck('spark', {}, [INSTANCE_DRIVER_2])
