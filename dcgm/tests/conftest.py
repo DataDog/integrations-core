@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
@@ -39,34 +38,26 @@ def check(instance):
     return DcgmCheck('dcgm.', {}, [instance])
 
 
-def _text_response(file_path: str | Path) -> FakeHTTPResponse:
-    content = Path(file_path).read_bytes()
-    return FakeHTTPResponse(
-        content=content,
-        headers={'Content-Type': 'text/plain'},
-    )
-
-
 @pytest.fixture()
-def mock_metrics(fake_http, instance):
-    fake_http.register_response(
-        'GET',
+def mock_metrics(fake_http, fake_http_response, instance):
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        _text_response(Path(__file__).parent / 'fixtures' / 'metrics.txt'),
+        (Path(__file__).parent / 'fixtures' / 'metrics.txt').read_bytes(),
         match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
     )
     yield
     fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_label_remap(fake_http, instance):
+def mock_label_remap(fake_http, fake_http_response, instance):
     for _ in range(2):
-        fake_http.register_response(
-            'GET',
+        fake_http_response(
             instance['openmetrics_endpoint'],
-            _text_response(Path(__file__).parent / 'fixtures' / 'label_remap.txt'),
+            (Path(__file__).parent / 'fixtures' / 'label_remap.txt').read_bytes(),
             match_options={'stream': True},
+            headers={'Content-Type': 'text/plain'},
         )
     yield
     fake_http.assert_all_responses_consumed()

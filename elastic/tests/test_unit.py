@@ -25,10 +25,6 @@ log = logging.getLogger('test_elastic')
 pytestmark = pytest.mark.unit
 
 
-def _status_error_response(status_code: int) -> FakeHTTPResponse:
-    return FakeHTTPResponse(status_code=status_code)
-
-
 def test__join_url():
     instance = {
         "url": "https://localhost:9444/elasticsearch-admin",
@@ -155,7 +151,7 @@ def test_get_template_metrics_raise_exception(aggregator, instance, dd_run_check
     mock_es_endpoints(
         {
             '{}/_cat/templates?format=json'.format(URL): [
-                _status_error_response(403),
+                FakeHTTPResponse(status_code=403),
             ]
         }
     )
@@ -260,16 +256,16 @@ def test_run_custom_queries_root_data_path(aggregator, instance, dd_run_check, m
     aggregator.assert_metric('elasticsearch.custom.count', value=42, count=1)
 
 
-def test__get_data_throws_authentication_error(instance, fake_http):
-    fake_http.register_response('GET', 'test.com', _status_error_response(400))
+def test__get_data_throws_authentication_error(instance, fake_http_response):
+    fake_http_response('test.com', status_code=400)
     check = ESCheck('elastic', {}, instances=[instance])
 
     with pytest.raises(AuthenticationError):
         check._get_data(url='test.com')
 
 
-def test__get_data_creates_critical_service_alert(aggregator, instance, fake_http):
-    fake_http.register_response('GET', 'test.com', _status_error_response(500))
+def test__get_data_creates_critical_service_alert(aggregator, instance, fake_http_response):
+    fake_http_response('test.com', status_code=500)
     check = ESCheck('elastic', {}, instances=[instance])
 
     with pytest.raises(Exception):
@@ -296,8 +292,8 @@ def test__get_data_creates_critical_service_alert(aggregator, instance, fake_htt
         ),
     ],
 )
-def test_disable_legacy_sc_tags(aggregator, es_instance, fake_http):
-    fake_http.register_response('GET', 'test.com', _status_error_response(500))
+def test_disable_legacy_sc_tags(aggregator, es_instance, fake_http_response):
+    fake_http_response('test.com', status_code=500)
     check = ESCheck('elastic', {}, instances=[es_instance])
 
     with pytest.raises(Exception):
@@ -345,26 +341,23 @@ def test_v8_process_stats_data(aggregator, instance, dd_run_check, mock_es_endpo
     )
 
 
-def test__get_index_metrics_empty_key(aggregator, instance, fake_http):
-    fake_http.register_response(
-        'GET',
+def test__get_index_metrics_empty_key(aggregator, instance, fake_http_response):
+    fake_http_response(
         '{}/_cat/indices?format=json&bytes=b'.format(URL),
-        FakeHTTPResponse(
-            json_result=[
-                {
-                    # 'docs.count' is missing
-                    'docs.deleted': '0',
-                    'health': 'yellow',
-                    'index': 'testindex',
-                    'pri': '1',
-                    'pri.store.size': '225',
-                    'rep': '1',
-                    'status': 'open',
-                    'store.size': '225',
-                    'uuid': 'AHSf1ILbSHucwl2X6og55g',
-                },
-            ]
-        ),
+        json_data=[
+            {
+                # 'docs.count' is missing
+                'docs.deleted': '0',
+                'health': 'yellow',
+                'index': 'testindex',
+                'pri': '1',
+                'pri.store.size': '225',
+                'rep': '1',
+                'status': 'open',
+                'store.size': '225',
+                'uuid': 'AHSf1ILbSHucwl2X6og55g',
+            },
+        ],
     )
     check = ESCheck('elastic', {}, instances=[instance])
     # Focus only on index metrics, so mock out index search stats.

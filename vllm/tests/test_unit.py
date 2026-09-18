@@ -8,37 +8,25 @@ from pathlib import Path
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.vllm import vLLMCheck
 
 from .common import GPU_METRICS_MOCK, METRICS_MOCK, get_fixture_path
 
 
-def _text_response(file_path: str | Path) -> FakeHTTPResponse:
-    content = Path(file_path).read_bytes()
-    return FakeHTTPResponse(
-        content=content,
-        headers={'Content-Type': 'text/plain'},
-    )
-
-
-def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, fake_http):
+def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, fake_http, fake_http_response):
     check = vLLMCheck("vLLM", {}, [instance])
     check.check_id = "test:123"
 
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        _text_response(get_fixture_path("vllm_metrics.txt")),
+        Path(get_fixture_path("vllm_metrics.txt")).read_bytes(),
         match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
     )
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'].replace('/metrics', '/version'),
-        FakeHTTPResponse(
-            json_result=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8'))
-        ),
+        json_data=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8')),
     )
 
     dd_run_check(check)
@@ -56,22 +44,19 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance, fake_http
     fake_http.assert_all_responses_consumed()
 
 
-def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_instance, fake_http):
+def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_instance, fake_http, fake_http_response):
     check = vLLMCheck("vLLM", {}, [ray_instance])
     check.check_id = "test:123"
 
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         ray_instance['openmetrics_endpoint'],
-        _text_response(get_fixture_path("ray_vllm_metrics.txt")),
+        Path(get_fixture_path("ray_vllm_metrics.txt")).read_bytes(),
         match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
     )
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         ray_instance['openmetrics_endpoint'].replace('/metrics', '/version'),
-        FakeHTTPResponse(
-            json_result=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8'))
-        ),
+        json_data=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8')),
     )
 
     dd_run_check(check)
@@ -94,23 +79,36 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
     [('instance', 'vllm_metrics.txt'), ('ray_instance', 'ray_vllm_metrics.txt')],
 )
 def test_gpu_metrics_are_not_collected_without_gpu_monitoring(
-    dd_run_check, aggregator, datadog_agent, request, instance_fixture, fixture_file
+    dd_run_check,
+    aggregator,
+    datadog_agent,
+    request,
+    mocker,
+    fake_http,
+    fake_http_response,
+    instance_fixture,
+    fixture_file,
 ):
-    mock_responses = [
-        MockResponse(file_path=get_fixture_path(fixture_file)),
-        MockResponse(file_path=get_fixture_path("vllm_version.json")),
-    ]
+    instance = request.getfixturevalue(instance_fixture)
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        Path(get_fixture_path(fixture_file)).read_bytes(),
+        match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
+    )
+    fake_http_response(
+        instance['openmetrics_endpoint'].replace('/metrics', '/version'),
+        json_data=json.loads(Path(get_fixture_path("vllm_version.json")).read_text(encoding='utf-8')),
+    )
+    mocker.patch.dict(datadog_agent._config, {'gpu.enabled': False})
 
-    with (
-        mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}),
-        mock.patch('requests.Session.get', side_effect=mock_responses),
-    ):
-        check = vLLMCheck("vLLM", {}, [request.getfixturevalue(instance_fixture)])
-        dd_run_check(check)
+    check = vLLMCheck("vLLM", {}, [instance])
+    dd_run_check(check)
 
     aggregator.assert_metric('vllm.num_requests.running')
     for metric in GPU_METRICS_MOCK:
         aggregator.assert_metric(metric, count=0)
+    fake_http.assert_all_responses_consumed()
 
 
 def _get_version_metadata(raw_version):
@@ -124,14 +122,15 @@ def _get_version_metadata(raw_version):
     }
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options={'stream': True},
     )
     check = vLLMCheck("vllm", {}, [instance])

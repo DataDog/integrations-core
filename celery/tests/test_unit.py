@@ -2,29 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.celery import CeleryCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS, get_fixture_path
 
 
-def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
-    with open(file_path, 'rb') as response_file:
-        content = response_file.read()
-    return FakeHTTPResponse(content=content)
-
-
-def test_check(dd_run_check, aggregator, instance, fake_http):
-    fake_http.register_response(
-        'GET',
+def test_check(dd_run_check, aggregator, instance, fake_http, fake_http_response):
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        _openmetrics_response(get_fixture_path('flower_metrics.txt')),
+        Path(get_fixture_path('flower_metrics.txt')).read_bytes(),
         match_options={'stream': True},
     )
 
@@ -49,14 +43,15 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options={'stream': True},
     )
     check = CeleryCheck("celery", {}, [instance])

@@ -8,7 +8,6 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import datadog_agent
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.dynamo import DynamoCheck
@@ -70,15 +69,14 @@ def test_check_collects_mapped_metrics(
 
 
 def test_emits_critical_openmetrics_service_check_when_service_is_down(
-    dd_run_check, aggregator, frontend_instance, fake_http
+    dd_run_check, aggregator, frontend_instance, fake_http, fake_http_response
 ):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         frontend_instance['openmetrics_endpoint'],
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options={'stream': True},
     )
     check = DynamoCheck("dynamo", {}, [frontend_instance])

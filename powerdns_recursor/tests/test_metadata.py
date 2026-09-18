@@ -5,7 +5,6 @@
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
@@ -40,14 +39,14 @@ def test_metadata_unit_timeout(datadog_agent, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_metadata_unit_missing_header(datadog_agent, fake_http):
+def test_metadata_unit_missing_header(datadog_agent, fake_http, fake_http_response):
     check, config_obj = _make_check()
     url = (
         "http://{}:{}/api".format(config_obj.host, config_obj.port)
         if config_obj.version == 4
         else "http://{}:{}/servers/localhost/statistics".format(config_obj.host, config_obj.port)
     )
-    fake_http.register_response('GET', url, FakeHTTPResponse(headers={}))
+    fake_http_response(url, headers={})
 
     check._collect_metadata(config_obj)
 
@@ -56,14 +55,14 @@ def test_metadata_unit_missing_header(datadog_agent, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_metadata_unit_bad_version_header(datadog_agent, fake_http):
+def test_metadata_unit_bad_version_header(datadog_agent, fake_http, fake_http_response):
     check, config_obj = _make_check()
     url = (
         "http://{}:{}/api".format(config_obj.host, config_obj.port)
         if config_obj.version == 4
         else "http://{}:{}/servers/localhost/statistics".format(config_obj.host, config_obj.port)
     )
-    fake_http.register_response('GET', url, FakeHTTPResponse(headers={'Server': 'wrong_stuff'}))
+    fake_http_response(url, headers={'Server': 'wrong_stuff'})
 
     check._collect_metadata(config_obj)
 

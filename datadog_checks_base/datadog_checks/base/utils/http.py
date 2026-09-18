@@ -287,7 +287,8 @@ def _fetch_aia_content(
     while _is_safe_aia_url(uri, logger):
         response = session.get(uri, **request_options)
         try:
-            if response.status_code in AIA_REDIRECT_STATUS_CODES:
+            is_redirect = getattr(response, 'is_redirect', response.status_code in AIA_REDIRECT_STATUS_CODES)
+            if is_redirect:
                 if not follow_redirects:
                     return None
 

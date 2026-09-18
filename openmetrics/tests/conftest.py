@@ -13,21 +13,12 @@ from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPEN
 from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
 
 from datadog_checks.base import ensure_unicode
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import FakeHTTPClient, RecordedRequest
 from datadog_checks.dev import docker_run
 
 from .common import HERE, INSTANCE
 
 TEST_METRICS_ENDPOINT = 'http://localhost:10249/metrics'
-
-
-def _text_response(payload: str, *, content_type: str | None = None) -> FakeHTTPResponse:
-    content = payload.encode('utf-8')
-    headers = {'Content-Type': content_type} if content_type is not None else None
-    return FakeHTTPResponse(
-        content=content,
-        headers=headers,
-    )
 
 
 @pytest.fixture(scope="session")
@@ -66,11 +57,11 @@ def openmetrics_payload(example_metrics_registry):
 
 
 @pytest.fixture
-def prometheus_poll_mock(fake_http, prometheus_payload) -> Iterator[FakeHTTPClient]:
-    fake_http.register_response(
-        'GET',
+def prometheus_poll_mock(fake_http, fake_http_response, prometheus_payload) -> Iterator[FakeHTTPClient]:
+    fake_http_response(
         TEST_METRICS_ENDPOINT,
-        _text_response(prometheus_payload, content_type=PROMETHEUS_CONTENT_TYPE),
+        prometheus_payload,
+        headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
         match_options={'stream': True},
     )
     yield fake_http
@@ -79,11 +70,11 @@ def prometheus_poll_mock(fake_http, prometheus_payload) -> Iterator[FakeHTTPClie
 
 
 @pytest.fixture
-def openmetrics_poll_mock(fake_http, openmetrics_payload) -> Iterator[FakeHTTPClient]:
-    fake_http.register_response(
-        'GET',
+def openmetrics_poll_mock(fake_http, fake_http_response, openmetrics_payload) -> Iterator[FakeHTTPClient]:
+    fake_http_response(
         TEST_METRICS_ENDPOINT,
-        _text_response(openmetrics_payload, content_type=OPENMETRICS_CONTENT_TYPE),
+        openmetrics_payload,
+        headers={'Content-Type': OPENMETRICS_CONTENT_TYPE},
         match_options={'stream': True},
     )
     yield fake_http

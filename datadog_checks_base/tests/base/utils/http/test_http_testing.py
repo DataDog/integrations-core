@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Any
+
 import pytest
 import requests
 
@@ -75,6 +77,47 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
 
     assert check.http.get(url, stream=True) is response
     fake_http.assert_requests([RecordedRequest(method='GET', url=url, options={'stream': True})])
+    fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_response_builds_and_registers_text_response(fake_http_response: Any):
+    url = 'https://example.test/metrics'
+    response = fake_http_response(url, 'first\nsecond', match_options={'stream': True})
+    check = AgentCheck('test', {}, [{}])
+
+    assert check.http.get(url, stream=True) is response
+    assert response.content == b'first\nsecond'
+    assert response.text == 'first\nsecond'
+    assert list(response.iter_content()) == [b'first\nsecond']
+    assert list(response.iter_lines()) == ['first', 'second']
+
+
+@pytest.mark.parametrize(
+    ('payload', 'expected_content'),
+    [
+        ({'items': []}, b'{"items": []}'),
+        (None, b'null'),
+    ],
+)
+def test_fake_http_response_builds_and_registers_json_response(
+    payload: Any, expected_content: bytes, fake_http: FakeHTTPClient, fake_http_response: Any
+):
+    url = 'https://example.test/items'
+    response = fake_http_response(
+        url,
+        method='POST',
+        json_data=payload,
+        status_code=201,
+        match_options={'json': payload},
+        reason='Created',
+    )
+    check = AgentCheck('test', {}, [{}])
+
+    assert check.http.post(url, json=payload) is response
+    assert response.content == expected_content
+    assert response.json() is payload
+    assert response.status_code == 201
+    assert response.reason == 'Created'
     fake_http.assert_all_responses_consumed()
 
 

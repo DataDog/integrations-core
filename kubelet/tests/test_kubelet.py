@@ -12,7 +12,7 @@ import pytest
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import tagger as tagger_stub
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.base.utils.date import parse_rfc3339
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
@@ -401,14 +401,6 @@ def mock_from_file(fname):
         return f.read()
 
 
-def _text_response(text: str) -> FakeHTTPResponse:
-    content = text.encode('utf-8')
-    return FakeHTTPResponse(
-        content=content,
-        headers={'Content-Type': 'text/plain'},
-    )
-
-
 def _metric_responses(
     kube_version: str,
     *,
@@ -420,7 +412,7 @@ def _metric_responses(
 
 
 def _register_scrape_responses(
-    fake_http: FakeHTTPClient,
+    fake_http_response,
     responses: list[tuple[str, str]],
     *,
     runs: int = 1,
@@ -428,10 +420,10 @@ def _register_scrape_responses(
     expected_requests = []
     for _ in range(runs):
         for url, fixture_file in responses:
-            fake_http.register_response(
-                'GET',
+            fake_http_response(
                 url,
-                _text_response(mock_from_file(fixture_file)),
+                mock_from_file(fixture_file),
+                headers={'Content-Type': 'text/plain'},
                 match_options={'stream': True},
             )
             expected_requests.append(RecordedRequest('GET', url, {'stream': True}))
@@ -459,58 +451,73 @@ def test_kubelet_default_options():
     assert isinstance(check.probes_scraper_config, dict)
 
 
-def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger, fake_http):
+def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     _test_kubelet_check_prometheus(
         monkeypatch,
         aggregator,
         tagger,
         fake_http,
+        fake_http_response,
         kube_version=KUBE_1_14,
         instance_tags=["instance:tag"],
     )
 
 
-def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator, tagger, fake_http):
+def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     _test_kubelet_check_prometheus(
-        monkeypatch, aggregator, tagger, fake_http, kube_version=KUBE_1_14, instance_tags=None
+        monkeypatch, aggregator, tagger, fake_http, fake_http_response, kube_version=KUBE_1_14, instance_tags=None
     )
 
 
-def test_kubelet_check_prometheus_instance_tags_pre_1_14(monkeypatch, aggregator, tagger, fake_http):
+def test_kubelet_check_prometheus_instance_tags_pre_1_14(
+    monkeypatch, aggregator, tagger, fake_http, fake_http_response
+):
     _test_kubelet_check_prometheus(
         monkeypatch,
         aggregator,
         tagger,
         fake_http,
+        fake_http_response,
         kube_version=KUBE_PRE_1_14,
         instance_tags=["instance:tag"],
     )
 
 
-def test_kubelet_check_prometheus_no_instance_tags_pre_1_14(monkeypatch, aggregator, tagger, fake_http):
-    _test_kubelet_check_prometheus(
-        monkeypatch, aggregator, tagger, fake_http, kube_version=KUBE_PRE_1_14, instance_tags=None
-    )
-
-
-def test_kubelet_check_prometheus_instance_tags_1_21(monkeypatch, aggregator, tagger, fake_http):
+def test_kubelet_check_prometheus_no_instance_tags_pre_1_14(
+    monkeypatch, aggregator, tagger, fake_http, fake_http_response
+):
     _test_kubelet_check_prometheus(
         monkeypatch,
         aggregator,
         tagger,
         fake_http,
+        fake_http_response,
+        kube_version=KUBE_PRE_1_14,
+        instance_tags=None,
+    )
+
+
+def test_kubelet_check_prometheus_instance_tags_1_21(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
+    _test_kubelet_check_prometheus(
+        monkeypatch,
+        aggregator,
+        tagger,
+        fake_http,
+        fake_http_response,
         kube_version=KUBE_1_21,
         instance_tags=["instance:tag"],
     )
 
 
-def test_kubelet_check_prometheus_no_instance_tags_1_21(monkeypatch, aggregator, tagger, fake_http):
+def test_kubelet_check_prometheus_no_instance_tags_1_21(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     _test_kubelet_check_prometheus(
-        monkeypatch, aggregator, tagger, fake_http, kube_version=KUBE_1_21, instance_tags=None
+        monkeypatch, aggregator, tagger, fake_http, fake_http_response, kube_version=KUBE_1_21, instance_tags=None
     )
 
 
-def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, fake_http, kube_version, instance_tags):
+def _test_kubelet_check_prometheus(
+    monkeypatch, aggregator, tagger, fake_http, fake_http_response, kube_version, instance_tags
+):
     instance = {
         'cadvisor_metrics_endpoint': DUMMY_CADVISOR_URL,
         'kubelet_metrics_endpoint': DUMMY_KUBELET_URL,
@@ -519,7 +526,7 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, fake_http, k
         instance["tags"] = instance_tags
 
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(kube_version, kubelet_url=DUMMY_KUBELET_URL),
         runs=2,
     )
@@ -563,7 +570,7 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, fake_http, k
     fake_http.assert_all_responses_consumed()
 
 
-def test_kubelet_credentials_update(monkeypatch, aggregator, fake_http):
+def test_kubelet_credentials_update(monkeypatch, aggregator, fake_http, fake_http_response):
     instance = {
         'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
         'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
@@ -571,13 +578,9 @@ def test_kubelet_credentials_update(monkeypatch, aggregator, fake_http):
     check = mock_kubelet_check(monkeypatch, [instance], probes_available=None)
 
     probes_url = 'http://127.0.0.1:10255/metrics/probes'
-    fake_http.register_response(
-        'HEAD',
-        probes_url,
-        FakeHTTPResponse(status_code=404),
-    )
+    fake_http_response(probes_url, method='HEAD', status_code=404)
     scrape_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         [
             (instance['cadvisor_metrics_endpoint'], 'kubelet_metrics_1_14.txt'),
             (instance['kubelet_metrics_endpoint'], 'kubelet_metrics_1_14.txt'),
@@ -607,10 +610,10 @@ def test_kubelet_credentials_update(monkeypatch, aggregator, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger, fake_http):
+def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     check = mock_kubelet_check(monkeypatch, [{}])
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(KUBE_1_14),
     )
     monkeypatch.setattr(check, 'rate', mock.Mock())
@@ -649,10 +652,10 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_prometheus_net_summed(monkeypatch, aggregator, tagger, fake_http):
+def test_prometheus_net_summed(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     check = mock_kubelet_check(monkeypatch, [{}])
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(KUBE_1_14),
     )
     monkeypatch.setattr(check, 'rate', mock.Mock())
@@ -691,7 +694,7 @@ def test_prometheus_net_summed(monkeypatch, aggregator, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_prometheus_filtering(monkeypatch, aggregator, fake_http):
+def test_prometheus_filtering(monkeypatch, aggregator, fake_http, fake_http_response):
     # Let's intercept the container_cpu_usage_seconds_total
     # metric to make sure no sample with an empty pod (k8s >= 1.16)
     # or pod_name (k8s < 1.16) label goes through input filtering
@@ -704,7 +707,7 @@ def test_prometheus_filtering(monkeypatch, aggregator, fake_http):
         check = mock_kubelet_check(monkeypatch, [{}])
         expected_requests.extend(
             _register_scrape_responses(
-                fake_http,
+                fake_http_response,
                 _metric_responses(KUBE_POST_1_16),
             )
         )
@@ -722,7 +725,7 @@ def test_prometheus_filtering(monkeypatch, aggregator, fake_http):
         check = mock_kubelet_check(monkeypatch, [{}])
         expected_requests.extend(
             _register_scrape_responses(
-                fake_http,
+                fake_http_response,
                 _metric_responses(KUBE_1_14),
             )
         )
@@ -738,10 +741,10 @@ def test_prometheus_filtering(monkeypatch, aggregator, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_ignore_metrics(monkeypatch, aggregator, fake_http):
+def test_ignore_metrics(monkeypatch, aggregator, fake_http, fake_http_response):
     check = mock_kubelet_check(monkeypatch, [{"ignore_metrics": ["container_network_[Aa-zZ]*_bytes_total"]}])
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(KUBE_1_14),
     )
     check.check({"cadvisor_metrics_endpoint": DUMMY_CADVISOR_URL, "kubelet_metrics_endpoint": ""})
@@ -908,7 +911,7 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
     check.gauge.assert_has_calls(calls, any_order=True)
 
 
-def test_report_container_state_metrics(monkeypatch, tagger, fake_http):
+def test_report_container_state_metrics(monkeypatch, tagger, fake_http, fake_http_response):
     check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     check.kubelet_credentials = KubeletCredentials({})
@@ -919,10 +922,9 @@ def test_report_container_state_metrics(monkeypatch, tagger, fake_http):
         'params': {'verbose': True},
         'stream': True,
     }
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         check.pod_list_url,
-        FakeHTTPResponse(content=mock_from_file('pods_crashed.json').encode('utf-8')),
+        mock_from_file('pods_crashed.json'),
         match_options=options,
     )
     monkeypatch.setattr(check, 'compute_pod_expiration_datetime', mock.Mock(return_value=None))
@@ -984,14 +986,14 @@ def test_report_container_state_metrics(monkeypatch, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_no_tags_no_metrics(monkeypatch, aggregator, tagger, fake_http):
+def test_no_tags_no_metrics(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     # Reset tagger without tags
     tagger.reset()
     tagger.set_tags({})
 
     check = mock_kubelet_check(monkeypatch, [{}])
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(KUBE_1_14),
     )
     check.check({"cadvisor_metrics_endpoint": DUMMY_CADVISOR_URL, "kubelet_metrics_endpoint": ""})
@@ -1051,7 +1053,7 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_static_pods(monkeypatch, aggregator, tagger, fake_http):
+def test_static_pods(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     tagger.reset()
     tagger.set_tags(
         {
@@ -1063,7 +1065,7 @@ def test_static_pods(monkeypatch, aggregator, tagger, fake_http):
 
     check = mock_kubelet_check(monkeypatch, [{}])
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(KUBE_1_14),
     )
     check.check({"cadvisor_metrics_endpoint": DUMMY_CADVISOR_URL, "kubelet_metrics_endpoint": ""})
@@ -1078,7 +1080,7 @@ def test_static_pods(monkeypatch, aggregator, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_pod_expiration(monkeypatch, aggregator, tagger, fake_http):
+def test_pod_expiration(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     check.kubelet_credentials = KubeletCredentials({})
@@ -1095,10 +1097,9 @@ def test_pod_expiration(monkeypatch, aggregator, tagger, fake_http):
         'params': {'verbose': True},
         'stream': True,
     }
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         check.pod_list_url,
-        FakeHTTPResponse(content=mock_from_file('pods_expired.json').encode('utf-8')),
+        mock_from_file('pods_expired.json'),
         match_options=options,
     )
     monkeypatch.setattr(
@@ -1127,7 +1128,7 @@ def test_pod_expiration(monkeypatch, aggregator, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_perform_kubelet_check(monkeypatch, fake_http):
+def test_perform_kubelet_check(monkeypatch, fake_http, fake_http_response):
     check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
     check.kubelet_credentials = KubeletCredentials({})
@@ -1140,10 +1141,10 @@ def test_perform_kubelet_check(monkeypatch, fake_http):
         'params': {'verbose': True},
         'stream': False,
     }
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         check.kube_health_url,
-        FakeHTTPResponse(status_code=200, lines=()),
+        status_code=200,
+        lines=(),
         match_options=options,
     )
 
@@ -1156,7 +1157,7 @@ def test_perform_kubelet_check(monkeypatch, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_report_node_metrics(monkeypatch, fake_http):
+def test_report_node_metrics(monkeypatch, fake_http, fake_http_response):
     check = KubeletCheck('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({})
     check.node_spec_url = "http://localhost:10255/spec"
@@ -1168,10 +1169,9 @@ def test_report_node_metrics(monkeypatch, fake_http):
         'params': {'verbose': True},
         'stream': False,
     }
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         check.node_spec_url,
-        FakeHTTPResponse(json_result={'num_cores': 4, 'memory_capacity': 512}),
+        json_data={'num_cores': 4, 'memory_capacity': 512},
         match_options=options,
     )
     monkeypatch.setattr(check, 'gauge', mock.Mock())
@@ -1187,7 +1187,7 @@ def test_report_node_metrics(monkeypatch, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_report_node_metrics_kubernetes1_18(aggregator, fake_http):
+def test_report_node_metrics_kubernetes1_18(aggregator, fake_http, fake_http_response):
     # Kubernetes >= 1.18 may omit /spec.
     check = KubeletCheck('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
@@ -1201,10 +1201,9 @@ def test_report_node_metrics_kubernetes1_18(aggregator, fake_http):
         'params': {'verbose': True},
         'stream': False,
     }
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         check.node_spec_url,
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options=options,
     )
     check._report_node_metrics(['foo:bar'])
@@ -1214,10 +1213,10 @@ def test_report_node_metrics_kubernetes1_18(aggregator, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_add_labels_to_tags(monkeypatch, aggregator, fake_http):
+def test_add_labels_to_tags(monkeypatch, aggregator, fake_http, fake_http_response):
     check = mock_kubelet_check(monkeypatch, [{}])
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         _metric_responses(KUBE_1_14),
     )
     check.check({"cadvisor_metrics_endpoint": DUMMY_CADVISOR_URL, "kubelet_metrics_endpoint": ""})
@@ -1258,7 +1257,7 @@ def test_report_container_requests_limits(monkeypatch, tagger):
     check.gauge.assert_has_calls(calls, any_order=True)
 
 
-def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger, fake_http):
+def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     instance = {
         "tags": ["instance:tag"],
         'cadvisor_metrics_endpoint': DUMMY_CADVISOR_URL,
@@ -1268,7 +1267,7 @@ def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger, fa
     check = mock_kubelet_check(monkeypatch, [instance], stats_summary_fail=True)
     cadvisor_fixture, kubelet_fixture = METRIC_FIXTURES[KUBE_1_14]
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         [
             (DUMMY_CADVISOR_URL, cadvisor_fixture),
             (DUMMY_KUBELET_URL, kubelet_fixture),
@@ -1532,7 +1531,7 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
     assert pod_tags_by_pvc == empty
 
 
-def test_ignore_namespace_for_volume_metrics(monkeypatch, fake_http):
+def test_ignore_namespace_for_volume_metrics(monkeypatch, fake_http, fake_http_response):
     instance = {
         'cadvisor_metrics_endpoint': DUMMY_CADVISOR_URL,
         'kubelet_metrics_endpoint': DUMMY_KUBELET_URL,
@@ -1541,7 +1540,7 @@ def test_ignore_namespace_for_volume_metrics(monkeypatch, fake_http):
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     cadvisor_fixture, kubelet_fixture = METRIC_FIXTURES[KUBE_1_14]
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         [
             (DUMMY_CADVISOR_URL, cadvisor_fixture),
             (DUMMY_KUBELET_URL, kubelet_fixture),
@@ -1617,7 +1616,7 @@ def test__filter_and_send_gauge_sample_tagger(monkeypatch, aggregator, tagger):
     )
 
 
-def test_probe_metrics(monkeypatch, aggregator, tagger, fake_http):
+def test_probe_metrics(monkeypatch, aggregator, tagger, fake_http, fake_http_response):
     tagger.reset()
     tagger.set_tags(PROBE_TAGS)
 
@@ -1628,7 +1627,7 @@ def test_probe_metrics(monkeypatch, aggregator, tagger, fake_http):
     }
     check = mock_kubelet_check(monkeypatch, [instance], pod_list='pod_list_probes.json', probes_available=True)
     expected_requests = _register_scrape_responses(
-        fake_http,
+        fake_http_response,
         [(DUMMY_PROBES_URL, 'probes.txt')],
     )
     check.check(instance)
@@ -1721,9 +1720,9 @@ def test_probe_metrics(monkeypatch, aggregator, tagger, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_detect_probes(monkeypatch, fake_http):
+def test_detect_probes(monkeypatch, fake_http, fake_http_response):
     probes_url = 'http://kubelet:10250/metrics/probes'
-    fake_http.register_response('HEAD', probes_url, FakeHTTPResponse(status_code=200))
+    fake_http_response(probes_url, method='HEAD', status_code=200)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance], probes_available=None)
     scraper_config = check.get_scraper_config(instance)
@@ -1735,9 +1734,9 @@ def test_detect_probes(monkeypatch, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_detect_probes_cached(monkeypatch, fake_http):
+def test_detect_probes_cached(monkeypatch, fake_http, fake_http_response):
     probes_url = 'http://kubelet:10250/metrics/probes'
-    fake_http.register_response('HEAD', probes_url, FakeHTTPResponse(status_code=200))
+    fake_http_response(probes_url, method='HEAD', status_code=200)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance], probes_available=None)
     scraper_config = check.get_scraper_config(instance)
@@ -1752,9 +1751,9 @@ def test_detect_probes_cached(monkeypatch, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_detect_probes_404(monkeypatch, fake_http):
+def test_detect_probes_404(monkeypatch, fake_http, fake_http_response):
     probes_url = 'http://kubelet:10250/metrics/probes'
-    fake_http.register_response('HEAD', probes_url, FakeHTTPResponse(status_code=404))
+    fake_http_response(probes_url, method='HEAD', status_code=404)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance], probes_available=None)
     scraper_config = check.get_scraper_config(instance)
@@ -1766,9 +1765,9 @@ def test_detect_probes_404(monkeypatch, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_detect_probes_404_cached(monkeypatch, fake_http):
+def test_detect_probes_404_cached(monkeypatch, fake_http, fake_http_response):
     probes_url = 'http://kubelet:10250/metrics/probes'
-    fake_http.register_response('HEAD', probes_url, FakeHTTPResponse(status_code=404))
+    fake_http_response(probes_url, method='HEAD', status_code=404)
     instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance], probes_available=None)
     scraper_config = check.get_scraper_config(instance)

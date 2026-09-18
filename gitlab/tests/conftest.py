@@ -10,7 +10,7 @@ from time import sleep
 import pytest
 import requests
 
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -51,13 +51,6 @@ CONFIG = {
         }
     ],
 }
-
-
-def _openmetrics_response(text: str) -> FakeHTTPResponse:
-    return FakeHTTPResponse(
-        content=text.encode('utf-8'),
-        headers={'Content-Type': 'text/plain'},
-    )
 
 
 @pytest.fixture(scope="session")
@@ -132,7 +125,7 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data(fake_http: FakeHTTPClient):
+def mock_data(fake_http: FakeHTTPClient, fake_http_response):
     fixtures_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
     with open(os.path.join(fixtures_dir, 'readiness_check.json'), 'r') as f:
         readiness_data = json.load(f)
@@ -158,37 +151,37 @@ def mock_data(fake_http: FakeHTTPClient):
             '{}?all=1'.format(GITLAB_READINESS_ENDPOINT) if use_openmetrics else GITLAB_READINESS_ENDPOINT
         )
         for _ in range(runs):
-            fake_http.register_response(
-                'GET',
+            fake_http_response(
                 GITLAB_PROMETHEUS_ENDPOINT,
-                _openmetrics_response(metrics_text),
+                metrics_text,
                 match_options={'stream': True},
+                headers={'Content-Type': 'text/plain'},
             )
             if include_gitaly:
-                fake_http.register_response(
-                    'GET',
+                fake_http_response(
                     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
-                    _openmetrics_response(gitaly_text),
+                    gitaly_text,
                     match_options={'stream': True},
+                    headers={'Content-Type': 'text/plain'},
                 )
             if include_workhorse:
-                fake_openmetrics_http.register_response(
-                    'GET',
+                fake_http_response(
                     GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT,
-                    _openmetrics_response(workhorse_text),
+                    workhorse_text,
                     match_options={'stream': True},
+                    headers={'Content-Type': 'text/plain'},
                 )
             if include_sidekiq:
-                fake_openmetrics_http.register_response(
-                    'GET',
+                fake_http_response(
                     GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT,
-                    _openmetrics_response(sidekiq_text),
+                    sidekiq_text,
                     match_options={'stream': True},
+                    headers={'Content-Type': 'text/plain'},
                 )
             if include_health:
-                fake_http.register_response('GET', readiness_endpoint, FakeHTTPResponse(json_result=readiness_data))
-                fake_http.register_response('GET', GITLAB_LIVENESS_ENDPOINT, FakeHTTPResponse())
-                fake_http.register_response('GET', GITLAB_HEALTH_ENDPOINT, FakeHTTPResponse())
+                fake_http_response(readiness_endpoint, json_data=readiness_data)
+                fake_http_response(GITLAB_LIVENESS_ENDPOINT)
+                fake_http_response(GITLAB_HEALTH_ENDPOINT)
 
         return fake_http
 

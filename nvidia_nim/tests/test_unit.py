@@ -8,36 +8,24 @@ from pathlib import Path
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nvidia_nim import NvidiaNIMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def _text_response(file_path: str | Path) -> FakeHTTPResponse:
-    content = Path(file_path).read_bytes()
-    return FakeHTTPResponse(
-        content=content,
-        headers={'Content-Type': 'text/plain'},
-    )
-
-
-def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, fake_http):
+def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, fake_http, fake_http_response):
     check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     check.check_id = "test:123"
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        _text_response(get_fixture_path("nim_metrics.txt")),
+        Path(get_fixture_path("nim_metrics.txt")).read_bytes(),
         match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
     )
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'].replace('/metrics', '/v1/version'),
-        FakeHTTPResponse(
-            json_result=json.loads(Path(get_fixture_path("nim_version.json")).read_text(encoding='utf-8'))
-        ),
+        json_data=json.loads(Path(get_fixture_path("nim_version.json")).read_text(encoding='utf-8')),
     )
     dd_run_check(check)
 
@@ -62,14 +50,15 @@ def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, fak
     fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_openemtrics_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
+def test_emits_critical_openemtrics_service_check_when_service_is_down(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options={'stream': True},
     )
     check = NvidiaNIMCheck("nvidia_nim", {}, [instance])

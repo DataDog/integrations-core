@@ -8,7 +8,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import FakeHTTPClient, RecordedRequest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
@@ -58,58 +58,41 @@ def instance():
     return INSTANCE
 
 
-def _json_response(file_path: str) -> FakeHTTPResponse:
-    with open(file_path, 'r') as file:
-        return FakeHTTPResponse(json_result=json.load(file))
-
-
-def _openmetrics_response(file_path: str) -> FakeHTTPResponse:
-    with open(file_path, 'rb') as response_file:
-        content = response_file.read()
-    return FakeHTTPResponse(content=content)
-
-
-def _not_found_response(url: str) -> FakeHTTPResponse:
-    return FakeHTTPResponse(
-        status_code=404,
-        url=url,
-    )
-
-
 @pytest.fixture
-def mock_http_get(request, fake_http: FakeHTTPClient) -> Iterator[FakeHTTPClient]:
+def mock_http_get(request, fake_http: FakeHTTPClient, fake_http_response) -> Iterator[FakeHTTPClient]:
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     response_overrides = param.get('response_overrides', {})
     request_set = param.get('request_set', 'full')
     fixtures_dir = os.path.join(get_here(), 'fixtures')
     intended_requests: list[RecordedRequest] = []
 
-    def register_response(
-        url: str,
-        response: FakeHTTPResponse | Exception,
-        *,
-        options: dict[str, object] | None = None,
-    ) -> None:
-        fake_http.register_response('GET', url, response, match_options=options)
-        intended_requests.append(RecordedRequest('GET', url, options or {}))
-
-    register_response(
+    with open(os.path.join(fixtures_dir, 'output.txt'), 'rb') as response_file:
+        openmetrics_content = response_file.read()
+    fake_http_response(
         INSTANCE['openmetrics_endpoint'],
-        _openmetrics_response(os.path.join(fixtures_dir, 'output.txt')),
-        options={'stream': True},
+        openmetrics_content,
+        match_options={'stream': True},
     )
+    intended_requests.append(RecordedRequest('GET', INSTANCE['openmetrics_endpoint'], {'stream': True}))
 
     api_endpoint = INSTANCE['machines_api_endpoint']
     for path, fixture_path, match_options in API_REQUEST_SETS[request_set]:
         url = f'{api_endpoint}{path}'
         response = response_overrides.get(path)
-        if response is None:
-            response = (
-                _not_found_response(url)
-                if fixture_path is None
-                else _json_response(os.path.join(fixtures_dir, 'machines-api', 'GET', fixture_path))
+        if response is not None:
+            fake_http.register_response('GET', url, response, match_options=match_options)
+        elif fixture_path is None:
+            response = fake_http_response(
+                url,
+                status_code=404,
+                match_options=match_options,
             )
-        register_response(url, response, options=match_options)
+            response.url = url
+        else:
+            with open(os.path.join(fixtures_dir, 'machines-api', 'GET', fixture_path), 'r') as response_file:
+                response_data = json.load(response_file)
+            fake_http_response(url, method='GET', json_data=response_data, match_options=match_options)
+        intended_requests.append(RecordedRequest('GET', url, match_options or {}))
 
     yield fake_http
 

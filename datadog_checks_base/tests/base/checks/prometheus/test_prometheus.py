@@ -51,19 +51,19 @@ def _file_response(file_path: str, *, content_type: str) -> FakeHTTPResponse:
         )
 
 
-def _register_prometheus_text(fake_http: FakeHTTPClient, text: str, *, count: int = 1) -> None:
+def _register_prometheus_text(fake_http_response, text: str, *, count: int = 1) -> None:
     for _ in range(count):
-        fake_http.register_response(
-            'GET',
+        fake_http_response(
             FAKE_ENDPOINT,
-            _text_response(text),
+            text,
+            headers={'Content-Type': 'text/plain'},
             match_options=PROMETHEUS_REQUEST_OPTIONS,
         )
 
 
 @contextmanager
-def _registered_prometheus_text(fake_http: FakeHTTPClient, text: str, *, count: int) -> Iterator[None]:
-    _register_prometheus_text(fake_http, text, count=count)
+def _registered_prometheus_text(fake_http, fake_http_response, text: str, *, count: int) -> Iterator[None]:
+    _register_prometheus_text(fake_http_response, text, count=count)
     yield
     fake_http.assert_requests([PROMETHEUS_REQUEST] * count)
     fake_http.assert_all_responses_consumed()
@@ -366,13 +366,18 @@ def test_process_metric_filtered(mocked_prometheus_check):
     check.gauge.assert_not_called()
 
 
-def test_poll_protobuf(bin_data_path, fake_http, mocked_prometheus_check):
+def test_poll_protobuf(bin_data_path, fake_http, fake_http_response, mocked_prometheus_check):
     """Tests poll using the protobuf format"""
     check = mocked_prometheus_check
-    fake_http.register_response(
-        'GET',
+    with open(bin_data_path, 'rb') as fixture:
+        content = fixture.read()
+    fake_http_response(
         FAKE_ENDPOINT,
-        _file_response(bin_data_path, content_type=protobuf_content_type),
+        content,
+        text='',
+        content_chunks=(),
+        lines=(),
+        headers={'Content-Type': protobuf_content_type},
         match_options=PROMETHEUS_REQUEST_OPTIONS,
     )
 
@@ -385,10 +390,10 @@ def test_poll_protobuf(bin_data_path, fake_http, mocked_prometheus_check):
     fake_http.assert_all_responses_consumed()
 
 
-def test_poll_text_plain(fake_http, mocked_prometheus_check, text_data):
+def test_poll_text_plain(fake_http, fake_http_response, mocked_prometheus_check, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    _register_prometheus_text(fake_http, text_data)
+    _register_prometheus_text(fake_http_response, text_data)
 
     response = check.poll(FAKE_ENDPOINT)
     messages = list(check.parse_metric_family(response))
@@ -1320,9 +1325,9 @@ def test_parse_one_summary_with_none_values(p_check):
     assert expected_etcd_metric.__repr__() == current_metric.__repr__()
 
 
-def test_label_joins(fake_http, ksm_text, sorted_tags_check):
+def test_label_joins(fake_http, fake_http_response, ksm_text, sorted_tags_check):
     """Tests label join on text format"""
-    with _registered_prometheus_text(fake_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, fake_http_response, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {
@@ -1663,9 +1668,9 @@ def test_label_joins(fake_http, ksm_text, sorted_tags_check):
         )
 
 
-def test_label_joins_gc(fake_http, ksm_text, sorted_tags_check):
+def test_label_joins_gc(fake_http, fake_http_response, ksm_text, sorted_tags_check):
     """Tests label join GC on text format"""
-    with _registered_prometheus_text(fake_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, fake_http_response, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1712,7 +1717,7 @@ def test_label_joins_gc(fake_http, ksm_text, sorted_tags_check):
         assert 15 == len(check._label_mapping['pod'])
         text_data = ksm_text.replace('dd-agent-62bgh', 'dd-agent-1337')
 
-    _register_prometheus_text(fake_http, text_data)
+    _register_prometheus_text(fake_http_response, text_data)
     check.process(FAKE_ENDPOINT)
     assert 'dd-agent-1337' in check._label_mapping['pod']
     assert 'dd-agent-62bgh' not in check._label_mapping['pod']
@@ -1721,9 +1726,9 @@ def test_label_joins_gc(fake_http, ksm_text, sorted_tags_check):
     fake_http.assert_all_responses_consumed()
 
 
-def test_label_joins_missconfigured(fake_http, ksm_text, sorted_tags_check):
+def test_label_joins_missconfigured(fake_http, fake_http_response, ksm_text, sorted_tags_check):
     """Tests label join missconfigured label is ignored"""
-    with _registered_prometheus_text(fake_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, fake_http_response, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}}
@@ -1767,9 +1772,9 @@ def test_label_joins_missconfigured(fake_http, ksm_text, sorted_tags_check):
         )
 
 
-def test_label_join_not_existing(fake_http, ksm_text, sorted_tags_check):
+def test_label_join_not_existing(fake_http, fake_http_response, ksm_text, sorted_tags_check):
     """Tests label join on non existing matching label is ignored"""
-    with _registered_prometheus_text(fake_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, fake_http_response, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1799,9 +1804,9 @@ def test_label_join_not_existing(fake_http, ksm_text, sorted_tags_check):
         )
 
 
-def test_label_join_metric_not_existing(fake_http, ksm_text, sorted_tags_check):
+def test_label_join_metric_not_existing(fake_http, fake_http_response, ksm_text, sorted_tags_check):
     """Tests label join on non existing metric is ignored"""
-    with _registered_prometheus_text(fake_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, fake_http_response, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}}
@@ -1831,9 +1836,9 @@ def test_label_join_metric_not_existing(fake_http, ksm_text, sorted_tags_check):
         )
 
 
-def test_label_join_with_hostname(fake_http, ksm_text, sorted_tags_check):
+def test_label_join_with_hostname(fake_http, fake_http_response, ksm_text, sorted_tags_check):
     """Tests label join and hostname override on a metric"""
-    with _registered_prometheus_text(fake_http, ksm_text, count=2):
+    with _registered_prometheus_text(fake_http, fake_http_response, ksm_text, count=2):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
         check.label_joins = {'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}}
@@ -1878,9 +1883,9 @@ def test_label_join_with_hostname(fake_http, ksm_text, sorted_tags_check):
         )
 
 
-def test_health_service_check_ok(fake_http, ksm_text):
+def test_health_service_check_ok(fake_http, fake_http_response, ksm_text):
     """Tests endpoint health service check OK"""
-    _register_prometheus_text(fake_http, ksm_text)
+    _register_prometheus_text(fake_http_response, ksm_text)
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True

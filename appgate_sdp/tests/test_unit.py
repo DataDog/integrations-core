@@ -7,18 +7,16 @@ import pytest
 
 from datadog_checks.appgate_sdp import AppgateSDPCheck
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_appgate_sdp(dd_run_check, aggregator, instance, fake_http):
+def test_check_appgate_sdp(dd_run_check, aggregator, instance, fake_http, fake_http_response):
     content = Path(get_fixture_path('appgate_sdp_metrics.txt')).read_bytes()
-    fake_http.register_response(
-        'GET',
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(content=content),
+        content,
         match_options={'stream': True},
     )
 
@@ -36,11 +34,12 @@ def test_check_appgate_sdp(dd_run_check, aggregator, instance, fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
-    fake_http.register_response(
-        'GET',
+def test_emits_critical_service_check_when_service_is_down(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options={'stream': True},
     )
     check = AppgateSDPCheck('appgate_sdp', {}, [instance])

@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.argo_workflows import ArgoWorkflowsCheck
 from datadog_checks.base.stubs import aggregator as agg
-from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 
@@ -86,14 +85,6 @@ V3_6_METRICS = {
 }
 
 
-def _text_response(file_path: str | Path) -> FakeHTTPResponse:
-    content = Path(file_path).read_bytes()
-    return FakeHTTPResponse(
-        content=content,
-        headers={'Content-Type': 'text/plain'},
-    )
-
-
 @pytest.mark.parametrize(
     "fixture_file, description",
     [
@@ -101,12 +92,14 @@ def _text_response(file_path: str | Path) -> FakeHTTPResponse:
         ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
     ],
 )
-def test_check_with_fixtures(dd_run_check, aggregator, instance, fake_http, fixture_file, description):
-    fake_http.register_response(
-        'GET',
+def test_check_with_fixtures(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response, fixture_file, description
+):
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        _text_response(fixture_file),
+        Path(fixture_file).read_bytes(),
         match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
     )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
@@ -149,11 +142,12 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, fake_http, fixt
     fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
-    fake_http.register_response(
-        'GET',
+def test_emits_critical_service_check_when_service_is_down(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
+    fake_http_response(
         instance['openmetrics_endpoint'],
-        FakeHTTPResponse(status_code=404),
+        status_code=404,
         match_options={'stream': True},
     )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
