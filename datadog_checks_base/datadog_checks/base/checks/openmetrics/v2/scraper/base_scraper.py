@@ -13,7 +13,6 @@ from typing import List  # noqa: F401
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics import parser_optimizations
@@ -24,7 +23,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientTimeoutError
 
 
 class OpenMetricsScraper:
@@ -218,7 +217,7 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http = self.check.create_http_client(config)
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
@@ -417,11 +416,12 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        except ConnectionError as e:
+        # A timeout at any phase means the endpoint is unreachable, same as a connection failure.
+        except (HTTPClientConnectionError, HTTPClientTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:
-                raise e
+                raise
 
     def filter_connection_lines(self, line_streamer):
         """
