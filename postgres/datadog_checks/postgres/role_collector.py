@@ -65,25 +65,27 @@ class RoleSnapshotEmitter:
         self._submit = submit
         self._chunk_size = chunk_size
         self._buffers: dict[str, list[dict[str, Any]]] = {name: [] for name in array_names}
+        self._buffered_rows_count = 0
         self.payloads_count = 0
         self.rows_count = 0
 
     def append(self, array_name: str, row: dict[str, Any]) -> None:
         self._buffers[array_name].append(row)
         self.rows_count += 1
-        if self.buffered_rows_count >= self._chunk_size:
+        self._buffered_rows_count += 1
+        if self._buffered_rows_count >= self._chunk_size:
             self._flush(is_last=False)
-
-    @property
-    def buffered_rows_count(self) -> int:
-        return sum(len(rows) for rows in self._buffers.values())
 
     def flush_terminal(self) -> None:
         self._flush(is_last=True)
 
     def discard(self) -> None:
+        self._clear_buffers()
+
+    def _clear_buffers(self) -> None:
         for rows in self._buffers.values():
             rows.clear()
+        self._buffered_rows_count = 0
 
     def _flush(self, is_last: bool) -> None:
         event = dict(self._base_event)
@@ -96,8 +98,7 @@ class RoleSnapshotEmitter:
             event["collection_payloads_count"] = self.payloads_count
 
         self._submit(event)
-        for rows in self._buffers.values():
-            rows.clear()
+        self._clear_buffers()
 
 
 class PostgresRoleCollector:
