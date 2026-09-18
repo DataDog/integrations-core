@@ -18,6 +18,7 @@ from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
@@ -628,6 +629,32 @@ async def test_start_task_adds_tokens_from_flow_stop_requested_before_reraising(
 
     assert phase._total_input_tokens == 120
     assert phase._total_output_tokens == 60
+
+
+async def test_run_goal_validation_adds_tokens_from_flow_stop_requested(flow_dir, monkeypatch, message_queue):
+    """A stop requested during goal validation (by the worker's repair turn or the reviewer) must
+    still count toward the phase's token total, same as a stop from a goal-less task."""
+    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
+
+    async def raise_stop(**kwargs):
+        raise FlowStopRequested("blocked", input_tokens=90, output_tokens=45)
+
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.run_goal_loop", raise_stop)
+    result = ReActResult(
+        final_response=make_response("done"),
+        iterations=1,
+        total_input_tokens=0,
+        total_output_tokens=0,
+        context_usage=None,
+    )
+
+    with pytest.raises(FlowStopRequested):
+        await phase._run_goal_validation(
+            process=None, task=TaskConfig(name="t1", prompt="x", goal="g"), context={}, prompt="TASK", result=result
+        )
+
+    assert phase._total_input_tokens == 90
+    assert phase._total_output_tokens == 45
 
 
 # ---------------------------------------------------------------------------

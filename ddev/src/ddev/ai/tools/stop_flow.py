@@ -13,11 +13,12 @@ class StopFlowInput(BaseToolInput):
     reason: Annotated[
         str,
         Field(
+            min_length=1,
             description=(
                 "Precise explanation of what makes the current task impossible to complete as "
                 "specified, so a human can fix the instructions and rerun. For example: 'the PRD "
                 "requires connecting to an endpoint that does not exist'."
-            )
+            ),
         ),
     ]
 

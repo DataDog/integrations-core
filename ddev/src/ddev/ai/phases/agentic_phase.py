@@ -239,6 +239,8 @@ class AgenticPhase(Phase):
         except GoalValidationError as e:
             self._record_goal_attempt(task, e.attempts, final_valid=False)
             self.__raise_with_tokens(e)
+        except FlowStopRequested as e:
+            self.__raise_with_tokens(e)
 
         self._record_goal_attempt(task, outcome.attempts, final_valid=True)
         self._add_tokens(outcome.total_input_tokens, outcome.total_output_tokens)
