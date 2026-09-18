@@ -617,18 +617,35 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert cp.error == "something went wrong"
 
 
-async def test_start_task_adds_tokens_from_flow_stop_requested_before_reraising(flow_dir, monkeypatch, message_queue):
-    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
+async def test_flow_stop_requested_checkpoint_includes_tokens_spent_before_the_stop(
+    flow_dir, monkeypatch, message_queue
+):
+    """Driven through process_message/on_error like a real run: tokens spent before a stop_flow
+    call must land in the persisted FailedCheckpoint, not just in some private counter that a
+    broken wiring change could leave stranded."""
+    from ddev.event_bus.exceptions import MessageProcessingError
 
-    class RaisingProcess:
-        async def start(self, prompt: str):
-            raise FlowStopRequested("blocked", input_tokens=120, output_tokens=60)
+    mock_agent = MockAgent([])
 
-    with pytest.raises(FlowStopRequested):
-        await phase._start_task(RaisingProcess(), "do it")
+    async def raising_send(content, allowed_tools=None):
+        mock_agent.send_calls.append(content)
+        raise FlowStopRequested("blocked", input_tokens=120, output_tokens=60)
 
-    assert phase._total_input_tokens == 120
-    assert phase._total_output_tokens == 60
+    monkeypatch.setattr(mock_agent, "send", raising_send)
+    phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    trigger = PhaseTrigger(id="start", phase_id=None)
+
+    with pytest.raises(FlowStopRequested) as exc_info:
+        await phase.process_message(trigger)
+
+    await phase.on_error(
+        MessageProcessingError(processor_name="p1", message=trigger, original_exception=exc_info.value)
+    )
+
+    cp = mgr.read()["p1"]
+    assert isinstance(cp, FailedCheckpoint)
+    assert cp.tokens == CheckpointTokenInfo(total_input=120, total_output=60)
+    assert cp.error == "blocked"
 
 
 async def test_run_goal_validation_adds_tokens_from_flow_stop_requested(flow_dir, monkeypatch, message_queue):
