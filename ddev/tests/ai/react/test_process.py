@@ -383,6 +383,21 @@ async def test_stop_reason_takes_priority_over_other_parallel_results(fake_tool:
         await make_process(agent, registry=registry).start("Build the check")
 
 
+async def test_stop_reason_exception_carries_tokens_spent_before_the_stop(fake_tool: FakeToolFactory):
+    tc = make_tool_call("tc_01", "stop_flow")
+    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=[tc], input_tokens=100, output_tokens=50)])
+    stop_flow = fake_tool(
+        "stop_flow",
+        result=ToolResult(success=True, stop_reason="blocked", total_input_tokens=20, total_output_tokens=10),
+    )
+
+    with pytest.raises(FlowStopRequested) as exc_info:
+        await make_process(agent, registry=ToolRegistry([stop_flow])).start("Build the check")
+
+    assert exc_info.value.input_tokens == 120
+    assert exc_info.value.output_tokens == 60
+
+
 # ---------------------------------------------------------------------------
 # MAX_TOKENS truncation while a tool call is pending
 # ---------------------------------------------------------------------------

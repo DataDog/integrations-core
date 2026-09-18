@@ -39,3 +39,8 @@ class AgentAPIError(AgentError):
 
 class FlowStopRequested(AgentError):
     """An agent asked the ReAct loop to end the run instead of continuing."""
+
+    def __init__(self, reason: str, input_tokens: int = 0, output_tokens: int = 0) -> None:
+        super().__init__(reason)
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens

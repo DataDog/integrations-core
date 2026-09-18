@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
@@ -613,6 +614,20 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
     assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
     assert cp.error == "something went wrong"
+
+
+async def test_start_task_adds_tokens_from_flow_stop_requested_before_reraising(flow_dir, monkeypatch, message_queue):
+    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
+
+    class RaisingProcess:
+        async def start(self, prompt: str):
+            raise FlowStopRequested("blocked", input_tokens=120, output_tokens=60)
+
+    with pytest.raises(FlowStopRequested):
+        await phase._start_task(RaisingProcess(), "do it")
+
+    assert phase._total_input_tokens == 120
+    assert phase._total_output_tokens == 60
 
 
 # ---------------------------------------------------------------------------

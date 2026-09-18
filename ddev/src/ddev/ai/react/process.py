@@ -176,7 +176,11 @@ class ReActProcess:
 
                 stop_reason = next((result.stop_reason for _, result in tool_call_results if result.stop_reason), None)
                 if stop_reason is not None:
-                    raise FlowStopRequested(stop_reason)
+                    raise FlowStopRequested(
+                        f"Agent stopped the flow with reason:\n{stop_reason}",
+                        input_tokens=total_input,
+                        output_tokens=total_output,
+                    )
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
