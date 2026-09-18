@@ -253,7 +253,9 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
     :param dict options: Obfuscation options to pass to the obfuscator.
     :param bool replace_null_character: Whether to replace embedded null characters \x00 before obfuscating.
         Note: Setting this parameter to true involves an extra string traversal and copy.
-        Do set this to true if the database allows embedded null characters in text fields, for example SQL Server.
+        Do set this to true whenever the query text is read raw from the database rather than
+        pre-normalized by it, for example SQL Server query text or MySQL
+        `performance_schema.prepared_statements_instances.sql_text`.
         Otherwise obfuscation will fail if the query contains embedded null characters.
     :return: A dict containing the obfuscated query and metadata.
     :rtype: dict
