@@ -127,6 +127,7 @@ def write_cert(path, cert):
 
 def aia_response(content):
     response = mock.MagicMock()
+    response.status_code = 200
     response.is_redirect = False
     response.headers = {}
     response.iter_content.return_value = iter([content])
@@ -714,6 +715,22 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
 
+        assert certs == []
+
+    @pytest.mark.parametrize('status_code', [300, 304])
+    def test_load_intermediate_certs_skips_non_success_response(self, status_code: int):
+        http = RequestsWrapper({}, {})
+        certs = []
+        response = aia_response(build_cert())
+        response.status_code = status_code
+        session = mock.MagicMock()
+        session.get.return_value = response
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
+
+        response.iter_content.assert_not_called()
+        response.close.assert_called_once_with()
         assert certs == []
 
     def test_load_intermediate_certs_skips_http_error_response(self):

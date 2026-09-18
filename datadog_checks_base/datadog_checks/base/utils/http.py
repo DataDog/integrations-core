@@ -342,6 +342,8 @@ def _fetch_aia_content(
                 continue
 
             response.raise_for_status()
+            if not 200 <= response.status_code < 300:
+                return None
             return _read_capped_content(response, uri, logger)
         finally:
             response.close()
