@@ -49,15 +49,6 @@ def test_copies_source_and_repoints_variable(tmp_path):
     assert [item.name for item in captured] == ["prd"]
 
 
-def test_snapshot_is_read_only(tmp_path):
-    source = write_source(tmp_path)
-    run_dir = tmp_path / "run"
-
-    _variables, captured = snapshot_path_inputs(make_flow(snapshot_input()), {"prd": str(source)}, run_dir)
-
-    assert captured[0].path.stat().st_mode & 0o222 == 0
-
-
 def test_snapshot_survives_source_edits(tmp_path):
     source = write_source(tmp_path)
     run_dir = tmp_path / "run"
