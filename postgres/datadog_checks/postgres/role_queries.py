@@ -134,13 +134,6 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
           AND namespace.nspname NOT LIKE 'pg_temp%'
       )
   )
-ORDER BY database_name,
-         owner_name,
-         schema_name,
-         object_type,
-         grantee_name,
-         grantor_name,
-         privilege
 """
 
 
@@ -301,14 +294,6 @@ FROM (
       ON grantor.oid = acl.grantor
     WHERE database.datname = current_database()
 ) AS privileges
-ORDER BY database_name,
-         object_type,
-         schema_name,
-         object_name,
-         column_name,
-         grantee_name,
-         grantor_name,
-         privilege
 """
 
 
@@ -416,7 +401,6 @@ FROM (
       ON owner.oid = database.datdba
     WHERE database.datname = current_database()
 ) AS objects
-ORDER BY database_name, object_type, schema_name, object_name
 """
 
 
@@ -462,11 +446,4 @@ WHERE dependent.relkind IN ('v', 'm')
   AND referenced_namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
   AND referenced_namespace.nspname NOT LIKE 'pg_toast%'
   AND referenced_namespace.nspname NOT LIKE 'pg_temp%'
-ORDER BY database_name,
-         dependent_object_type,
-         dependent_schema_name,
-         dependent_object_name,
-         referenced_object_type,
-         referenced_schema_name,
-         referenced_object_name
 """
