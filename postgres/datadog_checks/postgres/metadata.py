@@ -12,6 +12,7 @@ import psycopg
 from psycopg.rows import dict_row
 
 from .column_statistics import PostgresColumnStatisticsCollector
+from .role_collector import PostgresRoleCollector
 from .schemas import PostgresSchemaCollector
 from .util import collection_interval_gcd
 
@@ -80,6 +81,7 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
         3. schema collection
         4. column statistics collection
+        5. role and privilege collection
     """
 
     def __init__(self, check: PostgreSql, config: InstanceConfig):
@@ -89,12 +91,14 @@ class PostgresMetadata(DBMAsyncJob):
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
         self.column_statistics_collection_interval = config.collect_column_statistics.collection_interval
+        self.roles_collection_interval = config.collect_roles.collection_interval
 
         self.collection_interval = collection_interval_gcd(
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,
             self.column_statistics_collection_interval,
+            self.roles_collection_interval,
         )
 
         super(PostgresMetadata, self).__init__(
@@ -103,7 +107,8 @@ class PostgresMetadata(DBMAsyncJob):
             run_sync=config.collect_settings.run_sync,
             enabled=config.collect_settings.enabled
             or config.collect_schemas.enabled
-            or config.collect_column_statistics.enabled,
+            or config.collect_column_statistics.enabled
+            or config.collect_roles.enabled,
             dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
@@ -121,11 +126,14 @@ class PostgresMetadata(DBMAsyncJob):
             if self._collect_column_statistics_enabled
             else None
         )
+        self._collect_roles_enabled = config.collect_roles.enabled and config.dbm
+        self._role_collector = PostgresRoleCollector(check, self._cancel_event) if self._collect_roles_enabled else None
         self._compiled_patterns_cache = {}
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
         self._last_column_statistics_query_time = 0
+        self._last_roles_query_time = 0
         self.column_buffer_size = 100_000
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
@@ -135,6 +143,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._check = None
         self._schema_collector = None
         self._column_statistics_collector = None
+        self._role_collector = None
         self._compiled_patterns_cache = None
 
     def _dbtags(self, db, *extra_tags):
@@ -233,6 +242,9 @@ class PostgresMetadata(DBMAsyncJob):
         ):
             self._collect_column_statistics()
 
+        if self._collect_roles_enabled and time.time() - self._last_roles_query_time > self.roles_collection_interval:
+            self._collect_postgres_roles()
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
         self._last_schemas_query_time = time.time()
@@ -290,3 +302,10 @@ class PostgresMetadata(DBMAsyncJob):
             self._column_statistics_collector.collect_column_statistics(self._tags_no_db)
         finally:
             self._last_column_statistics_query_time = time.time()
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_postgres_roles(self):
+        try:
+            self._role_collector.collect_roles(self._tags_no_db)
+        finally:
+            self._last_roles_query_time = time.time()
