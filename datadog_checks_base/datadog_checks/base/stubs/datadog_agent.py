@@ -182,6 +182,25 @@ class DatadogAgentStub(object):
     def resolve_issue(self, issue_id):
         self._sent_resolved_issues.append(issue_id)
 
+    def parse_prometheus_metrics(self, raw_text, content_type):
+        from io import StringIO
+
+        from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+        from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+
+        media_type = content_type.split(';')[0] if content_type else ''
+        parse_fn = parse_openmetrics if media_type == 'application/openmetrics-text' else parse_prometheus
+
+        families = []
+        for family in parse_fn(StringIO(raw_text)):
+            samples = []
+            for sample in family.samples:
+                labels = dict(sample.labels)
+                labels['__name__'] = sample.name
+                samples.append({'labels': labels, 'value': sample.value, 'timestamp': sample.timestamp})
+            families.append({'name': family.name, 'type': family.type.upper(), 'samples': samples})
+        return json.encode(families)
+
 
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
