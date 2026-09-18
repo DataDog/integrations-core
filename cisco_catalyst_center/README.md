@@ -60,11 +60,14 @@ identifiers appear in the event body rather than as tags.
 
 ### Service checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+The Cisco Catalyst Center integration does not include any service checks. Use the
+`cisco_catalyst_center.collection.success` metric to alert on collection failures: it is 1 when
+every enabled collector completed a cycle and 0 when any of them failed, and it is submitted on
+failed cycles as well as successful ones.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
 [1]: **LINK_TO_INTEGRATION_SITE**
@@ -74,5 +77,4 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cisco_catalyst_center/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/cisco_catalyst_center/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/

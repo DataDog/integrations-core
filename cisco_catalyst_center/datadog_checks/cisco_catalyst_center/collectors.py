@@ -30,7 +30,14 @@ from .constants import (
     EVENT_TAG_FIELDS,
     EVENT_TYPE,
     FABRIC_SITE_HEALTH_ENDPOINT,
+    INTENT_INTERFACE_METADATA_FIELDS,
+    INTENT_INTERFACES_ENDPOINT,
     INTERFACES_ENDPOINT,
+    ISSUE_DEFAULT_ALERT_TYPE,
+    ISSUE_DETAIL_FIELDS,
+    ISSUE_EVENT_TYPE,
+    ISSUE_PRIORITY_ALERT_TYPES,
+    ISSUE_TAG_FIELDS,
     L3_TOPOLOGY_ENDPOINT_TEMPLATE,
     NETWORK_APPLICATIONS_ENDPOINT,
     NETWORK_DEVICES_ENDPOINT,
@@ -243,12 +250,35 @@ def _merge_views(client: Any, views: tuple[str, ...], max_pages_guard: str) -> d
     return merged
 
 
+def _enrich_metadata(client: Any, merged: dict[str, dict[str, Any]]) -> None:
+    """Fill the interface metadata fields the data API leaves null, from the intent API.
+
+    The product brief sources every NDM interface field from the intent API, but the data API is
+    the only place interface throughput, errors and PoE exist, so the collector reads both and
+    joins them. That join is free: both APIs identify an interface by the same UUID.
+
+    Only :data:`INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record
+    actually carries a value -- see the constant for why a wholesale merge is wrong. Interfaces
+    the intent inventory omits, such as stack sub-interfaces, keep their data API record
+    unchanged rather than being dropped.
+    """
+    for record in client.get_list(INTENT_INTERFACES_ENDPOINT):
+        target = merged.get(record.get('id'))
+        if target is None:
+            continue
+        for field in INTENT_INTERFACE_METADATA_FIELDS:
+            value = record.get(field)
+            if value not in (None, ''):
+                target[field] = value
+
+
 def collect_interfaces(
     check: Any,
     client: Any,
     views: tuple[str, ...],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
+    enrich_metadata: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Collect port health, returning the merged records keyed by interface id.
 
@@ -261,9 +291,14 @@ def collect_interfaces(
         views: Which interface views to request, in merge order. ``configuration`` should come
             first so that later views cannot overwrite the descriptive fields.
         base_tags: Tags applied to every metric.
+        enrich_metadata: Also sweep the intent API for the metadata fields the data API leaves
+            null. Costs one more paginated pass, so it is driven by ``send_ndm_metadata``: the
+            fields it adds are consumed only by the NDM payload.
     """
     base_tags = base_tags or []
     merged = _merge_views(client, views, INTERFACES_ENDPOINT)
+    if enrich_metadata:
+        _enrich_metadata(client, merged)
 
     for record in merged.values():
         tags = base_tags + interface_tags(record, namespace)
@@ -698,12 +733,77 @@ def _count_by(
         check.gauge(metric_name, count, tags=tags + [f'{tag_key}:{value}'])
 
 
-def collect_assurance_issues(check: Any, client: Any, base_tags: list[str] | None = None) -> None:
-    """Collect open assurance issues as counts by severity, priority, category and status.
+def _issue_alert_type(record: dict[str, Any]) -> str:
+    """Map a Catalyst Center issue priority onto a Datadog alert type.
+
+    P1 is the most severe, the inverse of the syslog scale :func:`_event_alert_type` reads. An
+    unrecognised or absent value becomes ``info`` rather than ``error``.
+    """
+    priority = record.get('priority')
+    if not isinstance(priority, str):
+        return ISSUE_DEFAULT_ALERT_TYPE
+    return ISSUE_PRIORITY_ALERT_TYPES.get(priority, ISSUE_DEFAULT_ALERT_TYPE)
+
+
+def _issue_body(record: dict[str, Any]) -> str:
+    """Assemble the diagnosis text, skipping fields the appliance left empty.
+
+    No assurance issue has ever been observed on the sandbox, so the *rendering* of
+    ``suggestedActions`` is the least certain part of this: the published schema names the field
+    but not its type. If it turns out to be structured rather than free text, this is the line to
+    revisit, and a real payload should be captured as a fixture at the same time.
+    """
+    return '\n'.join(f'{label}: {record[field]}' for field, label in ISSUE_DETAIL_FIELDS if record.get(field))
+
+
+def _issue_payload(record: dict[str, Any], base_tags: list[str]) -> dict[str, Any]:
+    """Build one Datadog event from one assurance issue record.
+
+    ``host`` is left unset for the same reason as assurance events: a Catalyst Center device name
+    is not a Datadog hostname. ``aggregation_key`` is the appliance's own issue id, so the
+    successive occurrences of one long-lived issue collapse into a single thread.
+    """
+    occurred = record.get('mostRecentOccurredTime')
+    payload: dict[str, Any] = {
+        'event_type': ISSUE_EVENT_TYPE,
+        'source_type_name': EVENT_SOURCE_TYPE,
+        'msg_title': str(record.get('name') or 'Catalyst Center assurance issue'),
+        'msg_text': _issue_body(record),
+        'alert_type': _issue_alert_type(record),
+        'tags': base_tags + [f'{tag_key}:{record[field]}' for field, tag_key in ISSUE_TAG_FIELDS if record.get(field)],
+    }
+    if isinstance(occurred, int):
+        # The appliance reports epoch milliseconds; the events intake expects seconds.
+        payload['timestamp'] = occurred // 1000
+    if record.get('issueId'):
+        payload['aggregation_key'] = str(record['issueId'])
+    return payload
+
+
+def collect_assurance_issues(
+    check: Any,
+    client: Any,
+    base_tags: list[str] | None = None,
+    reported_through: int | None = None,
+) -> int | None:
+    """Collect open issues as counts, and newly-occurring ones as Datadog events.
+
+    Returns the newest ``mostRecentOccurredTime`` seen, which the caller stores and hands back on
+    the next cycle.
+
+    The counts and the events are deliberately not symmetrical. Counts describe current state, so
+    every open issue is counted on every cycle. Events describe something happening, and an issue
+    stays open and is returned again until it clears -- so submitting one per cycle would turn a
+    single unresolved problem into an unbounded stream. ``reported_through`` is the watermark that
+    holds each occurrence to one event.
+
+    An issue the appliance gives no ``mostRecentOccurredTime`` for cannot be placed against that
+    watermark, so it is reported only while there is no watermark yet. Re-reporting it every cycle
+    instead would reintroduce exactly the stream the watermark exists to prevent.
 
     ``suggestedActions`` arrives in this same response, so the brief's separate
-    ``issue-enrichment-details`` call is unnecessary. Turning individual issues into Datadog
-    events is the ingestion decision the brief leaves open, and is deliberately not done here.
+    ``issue-enrichment-details`` call is unnecessary. It is free text, which no metric tag can
+    carry, so the event body is where it lands.
     """
     tags = base_tags or []
     issues = client.get_list(ASSURANCE_ISSUES_ENDPOINT)
@@ -712,13 +812,20 @@ def collect_assurance_issues(check: Any, client: Any, base_tags: list[str] | Non
     # emitted rather than left as a gap in the graph.
     check.gauge('issue.total.count', len(issues), tags=tags)
 
-    for field, tag_key in (
-        ('severity', 'severity'),
-        ('priority', 'priority'),
-        ('category', 'category'),
-        ('status', 'status'),
-    ):
+    for field, tag_key in ISSUE_TAG_FIELDS:
         _count_by(check, 'issue.count', issues, field, tag_key, tags)
+
+    watermark = reported_through
+    for record in issues:
+        occurred = record.get('mostRecentOccurredTime')
+        occurred = occurred if isinstance(occurred, int) else None
+        if reported_through is not None and (occurred is None or occurred <= reported_through):
+            continue
+        check.event(_issue_payload(record, tags))
+        if occurred is not None and (watermark is None or occurred > watermark):
+            watermark = occurred
+
+    return watermark
 
 
 # -- assurance events -----------------------------------------------------------------

@@ -21,6 +21,7 @@ cisco_catalyst_center.client.rssi.avg,gauge,,,,Average client received signal st
 cisco_catalyst_center.client.snr.avg,gauge,,,,Average client signal-to-noise ratio in dB.,1,cisco_catalyst_center,client snr,,"ssid,band"
 cisco_catalyst_center.client.unique.count,gauge,,,,Unique clients of a given connection type.,0,cisco_catalyst_center,client unique count,,client_type
 cisco_catalyst_center.client.usage,gauge,,byte,,Data transferred by clients in the group.,0,cisco_catalyst_center,client usage,,"ssid,band"
+cisco_catalyst_center.collection.success,gauge,,,,1 when every enabled collector completed this cycle and 0 when any of them failed.,0,cisco_catalyst_center,collection success,,catalyst_center_host
 cisco_catalyst_center.device.air_quality.score,gauge,,,,Air quality health score across the device radios from 1 to 10.,1,cisco_catalyst_center,air quality score,,device_name
 cisco_catalyst_center.device.ap.count,gauge,,,,Number of access points registered to a wireless controller.,0,cisco_catalyst_center,ap count,,device_name
 cisco_catalyst_center.device.ap.radio.air_quality,gauge,,percent,,Radio channel air quality.,1,cisco_catalyst_center,radio air quality,,"device_name,radio_band,radio_slot"

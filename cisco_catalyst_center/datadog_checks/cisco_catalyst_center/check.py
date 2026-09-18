@@ -40,7 +40,6 @@ from .ndm_models import (
     create_interface_metadata,
 )
 
-SERVICE_CHECK_CAN_CONNECT = 'can_connect'
 NDM_METADATA_EVENT_TYPE = 'network-devices-metadata'
 
 
@@ -53,6 +52,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # End of the last assurance-event window that was collected, in epoch milliseconds. The
         # check object outlives a single cycle, which is what lets consecutive windows abut.
         self._events_polled_through: int | None = None
+        self._issues_reported_through: int | None = None
 
     @property
     def client(self) -> CatalystCenterClient:
@@ -118,7 +118,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         """Run one collector, containing its failure.
 
         A single unreachable domain must not cost the whole cycle: losing site health should not
-        also lose device health. The service check reflects whether *anything* failed, so a
+        also lose device health. ``collection.success`` reflects whether *anything* failed, so a
         partial collection is still visible rather than silently degraded.
         """
         try:
@@ -200,6 +200,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     views=self._interface_views(),
                     base_tags=base_tags,
                     namespace=namespace,
+                    enrich_metadata=self._option('send_ndm_metadata', False),
                 )
 
             healthy &= self._run('interfaces', _interfaces)
@@ -244,9 +245,17 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             )
 
         if self._option('collect_assurance_issues', False):
-            healthy &= self._run(
-                'assurance issues', lambda: collect_assurance_issues(self, self.client, base_tags=base_tags)
-            )
+
+            def _issues() -> None:
+                # Only advanced on success, so a failed cycle re-reports rather than skipping.
+                self._issues_reported_through = collect_assurance_issues(
+                    self,
+                    self.client,
+                    base_tags=base_tags,
+                    reported_through=self._issues_reported_through,
+                )
+
+            healthy &= self._run('assurance issues', _issues)
 
         if self._option('collect_events', False):
             window = self._event_window()
@@ -283,12 +292,8 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self._option('send_ndm_metadata', False):
             healthy &= self._run('NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace))
 
-        if healthy:
-            self.service_check(SERVICE_CHECK_CAN_CONNECT, AgentCheck.OK, tags=base_tags)
-        else:
-            self.service_check(
-                SERVICE_CHECK_CAN_CONNECT,
-                AgentCheck.CRITICAL,
-                tags=base_tags,
-                message='One or more Catalyst Center collectors failed; see the Agent log.',
-            )
+        # A metric rather than a service check: new integrations in this repository do not ship
+        # their own service checks. It has to be emitted on failure too, which is the whole point
+        # -- a monitor on missing data cannot tell an unreachable appliance from a check that is
+        # not running, but a 0 on a series that is still arriving says exactly which it is.
+        self.gauge('collection.success', int(healthy), tags=base_tags)

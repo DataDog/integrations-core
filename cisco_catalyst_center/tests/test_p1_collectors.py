@@ -9,8 +9,9 @@ Only topology has real data on the always-on sandbox. The other four return empt
 responses, which is precisely why they make good fixtures: the collector must neither crash nor
 invent a zero where the appliance reported nothing.
 
-Issues and security emit *metrics* here. Turning them into Datadog events is the separate
-ingestion decision the brief leaves open, and it is not settled by this work.
+Issues emit both metrics and Datadog events, on the same reasoning that settled assurance
+events: counts are what a monitor alerts on, the event body is what someone reads afterwards to
+find out why. Security still emits metrics only.
 """
 
 from __future__ import annotations
@@ -142,6 +143,76 @@ def test_collect_assurance_issues_counts_by_severity_and_category(aggregator, in
 
     assert metric_values(aggregator, 'cisco_catalyst_center.issue.count', 'severity:High') == [2]
     assert metric_values(aggregator, 'cisco_catalyst_center.issue.count', 'category:Device') == [1]
+
+
+# Issues are stateful in a way assurance events are not: an open issue comes back on every cycle
+# until it clears. `mostRecentOccurredTime` is the watermark that stops one open issue becoming
+# one Datadog event per cycle for as long as it stays open.
+OPEN_ISSUE = {
+    'issueId': 'i1',
+    'name': 'Switch unreachable',
+    'severity': 'High',
+    'priority': 'P1',
+    'category': 'Connectivity',
+    'status': 'active',
+    'mostRecentOccurredTime': 1_755_002_000_000,
+    'summary': 'Device did not respond to three consecutive polls',
+    'suggestedActions': 'Check the uplink cable; verify PoE budget',
+    'deviceType': 'Switches and Hubs',
+}
+
+
+def _issues(*records):
+    return with_value(load_captured('data_assurance_issues'), 'response', list(records))
+
+
+def test_collect_assurance_issues_submits_an_event_carrying_the_suggested_actions(aggregator, instance):
+    # The brief's separate issue-enrichment call is unnecessary because suggestedActions arrives
+    # in this response -- but free text cannot ride on a metric tag, so it needs an event body.
+    collect_assurance_issues(_check(instance), _client(instance, [_issues(OPEN_ISSUE)]))
+
+    assert 'Check the uplink cable; verify PoE budget' in aggregator.events[0]['msg_text']
+
+
+def test_collect_assurance_issues_given_an_issue_already_reported_submits_no_event(aggregator, instance):
+    # Without the watermark, an issue that stays open produces one event every cycle, forever.
+    collect_assurance_issues(
+        _check(instance),
+        _client(instance, [_issues(OPEN_ISSUE)]),
+        reported_through=OPEN_ISSUE['mostRecentOccurredTime'],
+    )
+
+    assert not aggregator.events
+
+
+def test_collect_assurance_issues_still_counts_an_issue_it_does_not_re_report(aggregator, instance):
+    # The counts are current state, so a still-open issue keeps counting on the cycles where it
+    # is not worth another event.
+    collect_assurance_issues(
+        _check(instance),
+        _client(instance, [_issues(OPEN_ISSUE)]),
+        reported_through=OPEN_ISSUE['mostRecentOccurredTime'],
+    )
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.issue.total.count') == [1]
+
+
+def test_collect_assurance_issues_returns_the_latest_occurrence_as_the_new_watermark(aggregator, instance):
+    # The caller stores this and hands it back next cycle. If it does not advance past the newest
+    # issue, every issue is reported again on the following cycle.
+    older = dict(OPEN_ISSUE, issueId='i0', mostRecentOccurredTime=1_755_001_000_000)
+
+    watermark = collect_assurance_issues(_check(instance), _client(instance, [_issues(older, OPEN_ISSUE)]))
+
+    assert watermark == 1_755_002_000_000
+
+
+def test_collect_assurance_issues_maps_issue_priority_to_an_alert_type(aggregator, instance):
+    # Issue priority runs P1 (most severe) to P4 -- the inverse of the syslog severity scale the
+    # assurance *event* collector reads. Mapping one with the other's table inverts every alert.
+    collect_assurance_issues(_check(instance), _client(instance, [_issues(OPEN_ISSUE)]))
+
+    assert aggregator.events[0]['alert_type'] == 'error'
 
 
 # -- application visibility -------------------------------------------------------
