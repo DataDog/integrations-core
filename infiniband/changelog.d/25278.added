@@ -1,3 +1,1 @@
-Collect `req_transport_retries_exceeded` and `req_rnr_retries_exceeded`. These record retry exhaustion on a queue pair and sit in the same driver counter group as the errors already collected.
-
-Log the difference between configured counter names and the files actually present in sysfs, at debug level. A counter name that matches no file previously produced no metric, no warning and no error, which made it indistinguishable from hardware that does not expose the counter.
+Collect the `req_transport_retries_exceeded` and `req_rnr_retries_exceeded` hardware counters, and log at debug level any configured counter name that does not match a file in sysfs.

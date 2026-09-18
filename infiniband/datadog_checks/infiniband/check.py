@@ -169,7 +169,9 @@ class InfinibandCheck(AgentCheck):
 
         self.gauge("port.rate", value, tags)
 
-    def _log_absent_counters(self, counters_path, found, configured, additional):
+    def _log_absent_counters(
+        self, counters_path: str, found: set[str], configured: set[str], additional: set[str]
+    ) -> None:
         # Under glob-and-filter a misspelled or driver-inappropriate counter name yields no
         # metric, no warning and no error -- it looks exactly like a counter the hardware does
         # not expose. Surfacing the difference is the only way this kind of drift stays

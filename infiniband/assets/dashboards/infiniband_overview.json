@@ -1236,55 +1236,6 @@
                         }
                     },
                     {
-                        "id": 5000000000000032,
-                        "definition": {
-                            "title": "Discarded Transmitted Packets",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Transmitted Discards"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:infiniband.port_xmit_discards{$env,$host,$device,$port,$link_layer} by {host,device,port}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "order_by": "values",
-                                        "palette": "warm",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 8,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 5000000000000033,
                         "definition": {
                             "title": "Outbound Packets Discarded",
