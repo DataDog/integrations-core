@@ -11,7 +11,7 @@ pages to its-agent-intake. The stream's own header supplies the descriptor — c
 ClickHouse type strings, logical types — registered once before any result row is read; the
 shared source-page writer frames, bounds, and uploads each page. Intake decodes, redacts,
 and writes the final JSON pages, so this module no longer constructs a final JSON envelope
-and no longer claims source bytes or checksums are final artifact metadata. Bulk page bytes
+and no longer claims source bytes are final artifact metadata. Bulk page bytes
 never traverse the native emit bridge, AgentSecure, PAR, or AP action output; the emit
 callback carries only ``metadata``/``final``/``error`` events, and the final event carries
 only the compact run receipt.

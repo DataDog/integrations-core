@@ -9,7 +9,7 @@ DECLARE descriptor, the single ``COPY ... TO STDOUT``, record framing, page buff
 page uploads — with a discard upload client: every page body is read and dropped, a
 structurally valid receipt is returned, and no HTTP request is made, so the measured wall is
 exactly the producer's own phases (COPY generation and fetch, CSV framing, source-page
-buffering, checksum), never network or intake work.
+buffering), never network or intake work.
 
 Two scales run per invocation: a fast multi-page development case and a 256 MiB comparison
 case. The producer phase diagnostics (``databaseSetupMs``, ``databaseFetchMs``,

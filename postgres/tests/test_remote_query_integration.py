@@ -56,7 +56,6 @@ class FakeUploadClient:
                 record_offset=page.record_offset,
                 source_bytes=page.source_bytes,
                 rows=page.rows,
-                sha256_hex=page.sha256_hex,
                 payload=payload,
             )
         )
@@ -66,7 +65,7 @@ class FakeUploadClient:
             'record_offset': page.record_offset,
             'bytes': page.source_bytes,
             'rows': page.rows,
-            'sha256': page.sha256_hex,
+            'sha256': 'a' * 64,
         }
 
     def finalize_run(self, creds):
@@ -214,7 +213,6 @@ def test_remote_query_registers_real_descriptor_and_sends_source_pages(integrati
     assert page_call.record_offset == 0
     assert page_call.source_bytes == len(pages[0])
     assert page_call.rows == 2
-    assert page_call.sha256_hex == hashlib.sha256(pages[0]).hexdigest()
     assert client.run_finalize_calls == 1
     # The compact receipt repeats intake's finalize totals, never local source accounting.
     assert final['upload_receipt'] == {

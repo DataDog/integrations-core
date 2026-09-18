@@ -603,7 +603,6 @@ def test_source_pages_frame_canonical_json_cell_tokens_as_csv(delivery, creds):
     assert page.record_offset == 0
     assert page.source_bytes == len(payload)
     assert page.rows == 1
-    assert page.sha256_hex == hashlib.sha256(payload).hexdigest()
     assert result['pageCount'] == 1
 
 
@@ -744,7 +743,6 @@ def test_native_blocks_stream_verbatim_as_the_source_page(delivery, creds):
     assert page.record_offset == 0
     assert page.source_bytes == len(first) + len(second)
     assert page.rows == 2
-    assert page.sha256_hex == hashlib.sha256(first + second).hexdigest()
     assert result['pageCount'] == 1
     assert uploads.descriptor_bodies[0].startswith(b'{"format_version":"postgres-copy-csv-v1"')
 
@@ -886,7 +884,6 @@ def test_native_zero_record_schema_page(delivery, creds):
     assert page.rows == 0
     assert page.record_offset == 0
     assert page.source_bytes == 0
-    assert page.sha256_hex == hashlib.sha256(b'').hexdigest()
 
 
 def test_native_final_page_too_large_splits_and_retries_without_requery(delivery, creds):
@@ -1028,7 +1025,6 @@ def test_source_pages_frame_non_ascii_cells_as_raw_utf8_csv(delivery, creds):
     (fields,) = list(csv.reader([payload.decode('utf-8')]))
     assert [field.encode('utf-8') for field in fields] == [b'"h\xc3\xa9llo"', b'"a,b\xc3\xa9"']
     assert page.source_bytes == len(payload)
-    assert page.sha256_hex == hashlib.sha256(payload).hexdigest()
     assert result['pageCount'] == 1
 
 
@@ -1101,7 +1097,6 @@ def test_pages_preserve_row_order_offsets_and_source_identity(delivery, creds):
         assert payload == csv_record([tokens[index]])
         assert page.record_offset == index
         assert page.source_bytes == len(payload)
-        assert page.sha256_hex == hashlib.sha256(payload).hexdigest()
     assert result == {
         'uploadId': 'upload-1',
         'pageCount': 3,
@@ -1229,7 +1224,7 @@ def test_page_receipt_identity_must_match(delivery, creds, field, bad):
 
 @pytest.mark.parametrize('field,bad', [('bytes', 'x'), ('bytes', -1), ('sha256', 'nothex'), ('sha256', 'A' * 64)])
 def test_page_receipt_final_metadata_shape_must_be_valid(field, bad):
-    page = rq.SourcePageUploadMetadata(0, 0, 10, 1, hashlib.sha256(b'source').hexdigest())
+    page = rq.SourcePageUploadMetadata(0, 0, 10, 1)
     receipt = {
         'batch_index': 0,
         'key': 'agent-intake-test/pages/0.json',
@@ -1245,7 +1240,7 @@ def test_page_receipt_final_metadata_shape_must_be_valid(field, bad):
 
 def test_page_receipt_final_metadata_needs_no_source_agreement():
     """Final bytes and checksum are intake-derived: any valid shape is accepted."""
-    page = rq.SourcePageUploadMetadata(0, 0, 10, 1, hashlib.sha256(b'source').hexdigest())
+    page = rq.SourcePageUploadMetadata(0, 0, 10, 1)
     rq.verify_source_page_receipt(
         {
             'batch_index': 0,
@@ -1285,7 +1280,6 @@ def test_empty_result_semantics(delivery, creds):
     assert page.rows == 0
     assert page.record_offset == 0
     assert page.source_bytes == 0
-    assert page.sha256_hex == hashlib.sha256(b'').hexdigest()
 
     # include_schema=false: zero pages; only the finalize call happens.
     uploads = Uploads()
@@ -1458,7 +1452,6 @@ def source_page(payload, batch_index=0, record_offset=7):
         record_offset=record_offset,
         source_bytes=len(payload),
         rows=1,
-        sha256_hex=hashlib.sha256(payload).hexdigest(),
     )
 
 
@@ -1531,7 +1524,6 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
         'X-DD-Source-Page-Bytes': str(len(payload)),
         'X-DD-Source-Page-Rows': '1',
         'X-DD-Record-Offset': '7',
-        'X-DD-Source-Page-SHA256': page.sha256_hex,
     }
     assert receipt['bytes'] == 40  # final metadata, never the source size
 
@@ -1744,7 +1736,7 @@ def test_retry_accounting_includes_failed_attempts_and_backoff_exactly_once(monk
                     'record_offset': int(headers['X-DD-Record-Offset']),
                     'bytes': int(headers['X-DD-Source-Page-Bytes']),
                     'rows': int(headers['X-DD-Source-Page-Rows']),
-                    'sha256': headers['X-DD-Source-Page-SHA256'],
+                    'sha256': 'a' * 64,
                 }
             ).encode(),
         )
@@ -1839,7 +1831,7 @@ def receipt(page):
         'record_offset': page.record_offset,
         'bytes': page.source_bytes,
         'rows': page.rows,
-        'sha256': page.sha256_hex,
+        'sha256': 'a' * 64,  # intake-derived final checksum: shape-validated, never source metadata
         'key': f'pages/{page.batch_index}.json',
     }
 
@@ -1847,7 +1839,7 @@ def receipt(page):
 def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_changes(monkeypatch, creds):
     import requests
 
-    page = rq.SourcePageUploadMetadata(0, 0, 1, 1, hashlib.sha256(b'x').hexdigest())
+    page = rq.SourcePageUploadMetadata(0, 0, 1, 1)
     page_receipt = json.dumps(receipt(page)).encode()
     calls = []
 

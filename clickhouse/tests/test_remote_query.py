@@ -152,7 +152,7 @@ class FakeUploadClient:
         raise_on_run_finalize=None,
         put_log=None,
     ):
-        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, sha256_hex, payload)
+        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, payload)
         self.descriptor_bodies = []
         self.put_page_calls = []
         self.run_finalize_calls = 0
@@ -184,7 +184,6 @@ class FakeUploadClient:
                 record_offset=page.record_offset,
                 source_bytes=page.source_bytes,
                 rows=page.rows,
-                sha256_hex=page.sha256_hex,
                 payload=payload,
             )
         )
@@ -203,7 +202,7 @@ class FakeUploadClient:
                 'record_offset': page.record_offset,
                 'bytes': page.source_bytes,
                 'rows': page.rows,
-                'sha256': page.sha256_hex,
+                'sha256': 'a' * 64,
             }
         return response
 
@@ -1121,7 +1120,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
     assert pages[0] == b''
     (call,) = fake.put_page_calls
     assert (call.batch_index, call.record_offset, call.rows, call.source_bytes) == (0, 0, 0, 0)
-    assert call.sha256_hex == hashlib.sha256(b'').hexdigest()
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
     assert descriptor['columns'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}]
@@ -1206,7 +1204,7 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
             'record_offset': page.record_offset,
             'bytes': page.source_bytes,
             'rows': page.rows,
-            'sha256': page.sha256_hex,
+            'sha256': 'a' * 64,
         }
 
     fake = FakeUploadClient(put_page_response=fail_second_page)
@@ -2379,7 +2377,6 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
     assert page_call.record_offset == 0
     assert page_call.source_bytes == len(pages[0])
     assert page_call.rows == 1
-    assert page_call.sha256_hex == hashlib.sha256(pages[0]).hexdigest()
     assert fake.run_finalize_calls == 1
     assert final['upload_receipt'] == {
         'uploadId': UPLOAD_ID,
@@ -2444,7 +2441,6 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
     assert page_call.source_bytes == len(pages[0])
     assert page_call.source_bytes <= 64 * 1024 * 1024
     assert page_call.rows == 1
-    assert page_call.sha256_hex == hashlib.sha256(pages[0]).hexdigest()
     assert fake.run_finalize_calls == 1
     # The single row is one CSV record: an independent reader recovers the canonical cell
     # token, and its JSON value is the exact row.

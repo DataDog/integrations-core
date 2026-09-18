@@ -199,7 +199,7 @@ class FakeUploadClient:
         raise_on_run_finalize=None,
         put_log=None,
     ):
-        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, sha256_hex, payload)
+        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, payload)
         self.descriptor_bodies = []
         self.put_page_calls = []
         self.run_finalize_calls = 0
@@ -231,7 +231,6 @@ class FakeUploadClient:
                 record_offset=page.record_offset,
                 source_bytes=page.source_bytes,
                 rows=page.rows,
-                sha256_hex=page.sha256_hex,
                 payload=payload,
             )
         )
@@ -250,7 +249,7 @@ class FakeUploadClient:
                 'record_offset': page.record_offset,
                 'bytes': page.source_bytes,
                 'rows': page.rows,
-                'sha256': page.sha256_hex,
+                'sha256': 'a' * 64,
             }
         return response
 
@@ -1507,7 +1506,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
     assert pages[0] == b''
     (call,) = fake.put_page_calls
     assert (call.batch_index, call.record_offset, call.rows, call.source_bytes) == (0, 0, 0, 0)
-    assert call.sha256_hex == hashlib.sha256(b'').hexdigest()
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
     assert descriptor['columns'] == [
@@ -1887,7 +1885,6 @@ def test_producer_frames_native_records_across_block_boundaries(monkeypatch):
     (call,) = fake.put_page_calls
     assert call.rows == 2
     assert call.source_bytes == len(first) + len(second)
-    assert call.sha256_hex == hashlib.sha256(first + second).hexdigest()
 
 
 def test_producer_fails_closed_when_the_copy_stream_ends_mid_record(monkeypatch):
@@ -2209,7 +2206,7 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
             'record_offset': page.record_offset,
             'bytes': page.source_bytes,
             'rows': page.rows,
-            'sha256': page.sha256_hex,
+            'sha256': 'a' * 64,
         }
 
     fake = FakeUploadClient(put_page_response=fail_second_page)

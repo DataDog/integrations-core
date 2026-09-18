@@ -10,7 +10,7 @@ source pages to its-agent-intake: native ``COPY TO STDOUT`` blocks stream throug
 bounded mutable page buffer with single-pass CSV framing — no per-record objects are
 materialized — while canonical-token producers append framed rows to the same buffer.
 Intake decodes, redacts, and writes the final JSON pages, so the producer never constructs
-a final JSON envelope and never claims its source bytes or checksums are final artifact
+a final JSON envelope and never claims its source bytes are final artifact
 metadata. Only metadata and the compact receipt return through the Agent's native callback.
 """
 
@@ -786,7 +786,6 @@ class SourcePageUploadMetadata:
     record_offset: int
     source_bytes: int
     rows: int
-    sha256_hex: str
 
 
 @dataclass(frozen=True)
@@ -1013,11 +1012,10 @@ class SourcePageWriter:
     final-JSON bound; the native grammar closes a page at the record boundary that reaches
     the internal source-page target and leaves intake authoritative for the transformed
     final size, splitting a rejected page at a recorded boundary and retrying the same page
-    index without requerying. Every retry sends the same buffered bytes, and the page
-    checksum is fed each record's bytes exactly once. Stats and the compact receipt
-    accumulate from intake's returned final metadata, never from local source sizes. The
-    Agent admits one execution at a time; each adapter must call discard in its finally
-    block so query/encoding failures also release the active page.
+    index without requerying. Every retry sends the same buffered bytes. Stats and the
+    compact receipt accumulate from intake's returned final metadata, never from local
+    source sizes. The Agent admits one execution at a time; each adapter must call discard
+    in its finally block so query/encoding failures also release the active page.
     """
 
     def __init__(
@@ -1080,17 +1078,14 @@ class SourcePageWriter:
         # unreachable while the target close holds, kept so retry memory stays bounded even
         # if that proof ever breaks.
         self._source_page_cap = REMOTE_QUERY_SOURCE_PAGE_CAP_FACTOR * limits.max_file_bytes
-        # One bounded mutable source-page buffer: complete records append verbatim, the
-        # record-end offsets carry the page's row boundaries for close and split, and the
-        # page checksum is fed each record's bytes exactly once.
+        # One bounded mutable source-page buffer: complete records append verbatim and the
+        # record-end offsets carry the page's row boundaries for close and split.
         self._buf = bytearray()
         self._record_ends: array = array('q')
         self._record_bounds: array | None = None if self._native_mode else array('q')
         self._page_bound = 0
         self._page_active = False
         self._page_record_offset = 0
-        self._page_sha = hashlib.sha256()
-        self._page_hashed = 0
         # Native framing state, carried across COPY blocks: the scanned position, the
         # running quote parity of the still-open record, and where that record begins.
         self._scan_pos = 0
@@ -1131,8 +1126,8 @@ class SourcePageWriter:
                 'unsupported_value', 'Native COPY blocks require a postgres-copy-csv-v1 descriptor.'
             )
         # The record loop below is the producer's hot path, so every value it touches per
-        # record — the framing bytes, the budgets, the guard, the record offsets, the
-        # checksum — is bound once per block; a page close rebinds the two it replaces.
+        # record — the framing bytes, the budgets, the guard, the record offsets —
+        # is bound once per block; a page close rebinds the two it replaces.
         max_row_bytes = self._delivery.limits.max_row_bytes
         record_terminator = POSTGRES_COPY_CSV_RECORD_TERMINATOR
         field_quote = POSTGRES_COPY_CSV_FIELD_QUOTE
@@ -1140,7 +1135,6 @@ class SourcePageWriter:
         cap = self._source_page_cap
         guard = self._guard
         record_ends = self._record_ends
-        sha = self._page_sha
         active = self._page_active
         buf = self._buf
         buf += block
@@ -1178,7 +1172,6 @@ class SourcePageWriter:
                     open_start -= consumed
                 buf = self._buf
                 record_ends = self._record_ends
-                sha = self._page_sha
         # Quotes between the last LF and the block's end belong to the still-open record.
         end = len(buf)
         if pos < end:
@@ -1193,11 +1186,6 @@ class SourcePageWriter:
                 'row_too_large',
                 'A single native record exceeds maxRowBytes ({} > {} bytes).'.format(end - open_start, max_row_bytes),
             )
-        # Feed the page checksum the records this block completed: each byte exactly once.
-        hashed_to = record_ends[-1] if record_ends else 0
-        if hashed_to > self._page_hashed:
-            sha.update(memoryview(buf)[self._page_hashed : hashed_to])
-            self._page_hashed = hashed_to
 
     def finish_native_copy_stream(self) -> None:
         """Fail closed unless the COPY stream ended exactly at a record boundary."""
@@ -1246,9 +1234,6 @@ class SourcePageWriter:
         self._record_bounds.append(row_bound)
         self._buf += record
         self._record_ends.append(len(self._buf))
-        # The page checksum is fed each record's bytes exactly once.
-        self._page_sha.update(record)
-        self._page_hashed = len(self._buf)
 
     def finish(self) -> dict[str, Any]:
         """Close any open page and return the compact receipt from intake's authoritative totals."""
@@ -1280,8 +1265,6 @@ class SourcePageWriter:
         self._record_ends = array('q')
         if not self._native_mode:
             self._record_bounds = array('q')
-        self._page_sha = hashlib.sha256()
-        self._page_hashed = 0
         self._scan_pos = 0
         self._quote_parity = 0
         self._open_start = 0
@@ -1332,18 +1315,11 @@ class SourcePageWriter:
         receipt: Mapping[str, Any]
         while True:
             page_end = record_ends[count - 1] if count else 0
-            if count == total:
-                sha256_hex = self._page_digest(page_end)
-            else:
-                # A halved retry declares only the prefix it sends: one bounded pass over the
-                # prefix, exceptional retry work rather than ordinary per-page cost.
-                sha256_hex = hashlib.sha256(memoryview(self._buf)[:page_end]).hexdigest()
             metadata = SourcePageUploadMetadata(
                 batch_index=self._stats.pages_emitted,
                 record_offset=offset,
                 source_bytes=page_end,
                 rows=count,
-                sha256_hex=sha256_hex,
             )
             body = _SourcePageBody(self._buf, page_end)
             try:
@@ -1382,23 +1358,11 @@ class SourcePageWriter:
             self._page_record_offset = offset + count
             if not self._native_mode:
                 self._recompute_page_accounting()
-        # The retained tail's checksum state: one bounded pass over its completed records.
-        self._page_sha = hashlib.sha256()
-        self._page_hashed = self._record_ends[-1] if self._record_ends else 0
-        if self._page_hashed:
-            self._page_sha.update(memoryview(self._buf)[: self._page_hashed])
         if self._native_mode:
             # The still-open record's framing state shifts with the buffer.
             self._scan_pos -= acknowledged
             self._open_start -= acknowledged
         return acknowledged
-
-    def _page_digest(self, page_end: int) -> str:
-        """The active page's source checksum, finalized over its last unhashed segment."""
-        if self._page_hashed != page_end:
-            self._page_sha.update(memoryview(self._buf)[self._page_hashed : page_end])
-            self._page_hashed = page_end
-        return self._page_sha.hexdigest()
 
     def _recompute_page_accounting(self) -> None:
         prefix_len = len(
@@ -1599,7 +1563,7 @@ class RequestsUploadClient:
         if creds.trace_context is not None:
             # Tracing headers ride on every request built from these credentials — page,
             # finalize, abort, and each retry attempt — alongside the unchanged auth,
-            # integrity, content-length, and Test Drive headers.
+            # content-length, and Test Drive headers.
             headers.update(creds.trace_context.trace_headers())
         return headers
 
@@ -1627,7 +1591,6 @@ class RequestsUploadClient:
         headers['X-DD-Source-Page-Bytes'] = str(page.source_bytes)
         headers['X-DD-Source-Page-Rows'] = str(page.rows)
         headers['X-DD-Record-Offset'] = str(page.record_offset)
-        headers['X-DD-Source-Page-SHA256'] = page.sha256_hex
         # The buffer is complete and rewound before the request, so the exact source size is
         # declared as a stable Content-Length for one non-chunked request body.
         headers['Content-Length'] = str(page.source_bytes)
@@ -1721,7 +1684,7 @@ def verify_source_page_receipt(response: Mapping[str, Any], page: SourcePageUplo
     ``batch_index``, ``record_offset``, and ``rows`` must match exactly: one source page maps
     to one final page with the same rows and offset. ``key``, ``bytes``, and ``sha256`` are
     intake-derived final metadata, so they are validated for shape only — never compared to
-    the source page's own bytes or checksum. The final key's exact value is verified
+    the source page's own bytes. The final key's exact value is verified
     downstream by its-agent against intake's authoritative result.
     """
     if not isinstance(response, Mapping):
