@@ -95,8 +95,6 @@ class DNSCheck(AgentCheck):
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
             self.log.debug('Resolved hostname: %s', self.hostname)
-            self.gauge("dns.can_connect", 1, tags=tags)
-            self.gauge("dns.cant_connect", 0, tags=tags)
             self.report_as_service_check(AgentCheck.OK)
 
     def _check_answer(self, answer):
