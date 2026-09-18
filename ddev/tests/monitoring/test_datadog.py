@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 import time
 from typing import Any
 
@@ -155,6 +156,32 @@ def test_the_owned_api_client_is_closed_after_the_worker_stops(monkeypatch: pyte
 
     submitter.assert_logs(payload('Delivered'))
     assert clients[0].closed
+
+
+def test_a_failing_owned_client_close_is_diagnosed_without_escaping_the_worker(monkeypatch: pytest.MonkeyPatch):
+    unhandled: list[object] = []
+    monkeypatch.setattr(threading, 'excepthook', lambda args: unhandled.append(args))
+    submitter = FakeLogSubmitter()
+
+    class FailingCloseClient:
+        def __init__(self, _configuration: object) -> None:
+            pass
+
+        def close(self) -> None:
+            raise RuntimeError('client teardown failed')
+
+    monkeypatch.setattr(datadog_module, 'ApiClient', FailingCloseClient)
+    monkeypatch.setattr(datadog_module, 'LogsApi', lambda _client: submitter)
+    diagnostics: list[str] = []
+    handler = DatadogLogHandler(api_key='test-api-key', diagnostics=diagnostics.append)
+    handler.setFormatter(JsonLogFormatter())
+
+    handler.emit(log_record(payload('Delivered')))
+    handler.close()
+
+    submitter.assert_logs(payload('Delivered'))
+    assert any('closing the logs API client failed' in notice for notice in diagnostics)
+    assert not unhandled
 
 
 @pytest.mark.parametrize(
