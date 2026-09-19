@@ -14,6 +14,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Containers",
+      "Category::Event Management",
       "Category::Kubernetes",
       "Category::Log Collection",
       "Category::Network",
