@@ -595,35 +595,64 @@ class ClickhouseCheck(DatabaseCheck):
         See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
         """
         try:
-            # Convert compression None to False for get_client
-            compress = self._config.compression if self._config.compression else False
-            client = clickhouse_connect.get_client(
-                host=self._config.server,
-                port=self._config.port,
-                username=self._config.username,
-                password=self._config.password,
-                database=self._config.db,
-                secure=self._config.tls_verify,
-                connect_timeout=self._config.connect_timeout,
-                send_receive_timeout=self._config.read_timeout,
-                client_name=f'datadog-dbm-{self.check_id}',
-                compress=compress,
-                ca_cert=self._config.tls_ca_cert,
-                verify=self._config.verify,
-                # Disable session IDs for multi-threaded safety
-                # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#managing-clickhouse-session-ids
-                autogenerate_session_id=False,
-                settings={},
-                # Use shared connection pool for efficiency
-                pool_mgr=self._pool_manager,
-            )
-            return client
+            return self._create_client(f'datadog-dbm-{self.check_id}')
         except Exception as e:
             error = 'Unable to create DBM client: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
             )
             self.log.warning(error)
             raise
+
+    def create_remote_query_client(self, send_receive_timeout: int | None = None):
+        """
+        Create a dedicated ClickHouse client for one remote query run.
+
+        Remote queries must not share the main client: the run streams one HTTP response
+        over a pooled connection for its whole duration, and the executor runs outside the
+        check's own thread. The client shares the check's HTTP connection pool and derives
+        every connection parameter from the instance config, like the DBM clients. Query
+        retries are disabled so the user query executes at most once per run.
+        """
+        return self._create_client(
+            f'datadog-remote-query-{self.check_id}',
+            send_receive_timeout=send_receive_timeout,
+            query_retries=0,
+        )
+
+    def _create_client(
+        self, client_name: str, send_receive_timeout: int | None = None, query_retries: int | None = None
+    ):
+        """
+        Create a ClickHouse client from the instance config, sharing the HTTP connection pool.
+
+        See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
+        """
+        # Convert compression None to False for get_client
+        compress = self._config.compression if self._config.compression else False
+        kwargs = {}
+        if query_retries is not None:
+            kwargs['query_retries'] = query_retries
+        return clickhouse_connect.get_client(
+            host=self._config.server,
+            port=self._config.port,
+            username=self._config.username,
+            password=self._config.password,
+            database=self._config.db,
+            secure=self._config.tls_verify,
+            connect_timeout=self._config.connect_timeout,
+            send_receive_timeout=self._config.read_timeout if send_receive_timeout is None else send_receive_timeout,
+            client_name=client_name,
+            compress=compress,
+            ca_cert=self._config.tls_ca_cert,
+            verify=self._config.verify,
+            # Disable session IDs for multi-threaded safety
+            # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#managing-clickhouse-session-ids
+            autogenerate_session_id=False,
+            settings={},
+            # Use shared connection pool for efficiency
+            pool_mgr=self._pool_manager,
+            **kwargs,
+        )
 
     def shutdown(self) -> None:
         """Close the main client and release the shared connection pool."""

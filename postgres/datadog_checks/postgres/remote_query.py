@@ -1,0 +1,945 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+"""Remote query source-page producer for the Postgres integration.
+
+Executes one validated query once through the database-native ``COPY ... TO STDOUT`` CSV
+path and streams the native byte blocks as record-complete source pages to its-agent-intake:
+the server frames every non-null field as quoted CSV text (``FORCE_QUOTE *``) with NULL as
+the sole unquoted ``\\N`` field, so embedded commas, quotes, CR/LF, empty strings, a
+literal ``\\N``, and NULL stay distinguishable in the raw bytes and no value is decoded,
+re-encoded, or re-framed in Python. The adapter describes the result once — from a
+never-fetched named (server-side) cursor DECLARE inside the same read-only transaction,
+so the customer query's values are evaluated exactly once, by the COPY alone — and
+registers one immutable descriptor (column names, vendor types, logical types) before any
+result record is read; the shared source-page writer frames the native records in one
+bounded buffer — carrying CSV quote parity across COPY block boundaries, closing pages
+at the internal source-page target — and uploads each page, while intake decodes the
+native text by the descriptor, applies optional redaction,
+and writes the final JSON pages. Session output settings that shape native text (time
+zone, date style, interval style, bytea output, float digits) are pinned
+transaction-locally, so the records are a pure function of the values. Bulk page bytes
+never traverse the native emit bridge, AgentSecure, PAR, or AP action output; the emit
+callback carries only ``metadata``/``final``/``error`` events, and the final event carries
+only the compact run receipt.
+
+Two operations dispatch through the single Agent entry point by their ``operation`` field:
+``produce_json_pages`` runs the producer, and ``resolve_target`` answers the Agent's
+side-effect-free per-check sweep with exactly one MATCHED verdict event (the sanitized
+match identity the Agent aggregates zero/one/many and binds into its match fingerprint) or
+one fail-closed error event. Both operations share one matching authority: a target may
+match only inside a loaded check's effective monitoring scope, never by endpoint
+reachability alone.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import time
+import uuid
+from collections.abc import Iterable, Iterator, Mapping, Sequence
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Protocol
+
+import psycopg.errors as psycopg_errors
+from pydantic import ValidationError
+
+from datadog_checks.base.utils import remote_queries as rq
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
+LOGGER = logging.getLogger(__name__)
+
+REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
+    (
+        'SELECT 1 AS value',
+        'SELECT city, country FROM cities ORDER BY city',
+        'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, '
+        'expected_postgres_port, expected_dbname, marker FROM remote_query_identity',
+        "SELECT decode('00ff80', 'hex') AS payload",
+        "SELECT repeat('x', 1048576) AS payload",
+        "SELECT repeat('x', 2097152) AS payload",
+        "SELECT repeat('x', 4194304) AS payload",
+        "SELECT repeat('x', 8388608) AS payload",
+        "SELECT repeat('x', 16777216) AS payload",
+        "SELECT repeat('x', 33554432) AS payload",
+        'SELECT i, repeat(\'x\', 1000) AS payload FROM generate_series(1, 3000) AS i',
+    )
+)
+
+
+@dataclass(frozen=True)
+class ResultColumn:
+    """One described result field: its column name, type OID, and type modifier."""
+
+    name: str
+    type_oid: int
+    type_modifier: int | None
+
+
+@dataclass(frozen=True)
+class StaticPostgresCheckRegistry:
+    checks: Sequence['PostgreSql']
+
+    def iter_postgres_checks(self) -> Iterable['PostgreSql']:
+        return iter(self.checks)
+
+
+class PostgresCheckRegistry(Protocol):
+    def iter_postgres_checks(self) -> Iterable['PostgreSql']: ...
+
+
+# ---------------------------------------------------------------------------
+# Result description, vendor types, and the upload descriptor
+# ---------------------------------------------------------------------------
+
+# The catalog lookup resolves each described type through domain chains to its effective
+# base type, decides whether that effective type is an array (typcategory 'A'), and for
+# array columns resolves the ELEMENT type's own domain chain to read its typdelim — the
+# delimiter PostgreSQL's own array parser uses for that element family (box is semicolon-
+# delimited, for example). Depth bounds keep a pathological domain loop from recursing
+# forever; DISTINCT ON keeps the deepest (fully resolved) walk row per requested type.
+VENDOR_TYPE_QUERY = """
+WITH RECURSIVE
+requested AS (
+    SELECT t.type_oid::oid AS type_oid, t.type_mod::int4 AS type_mod
+    FROM unnest(%s::text[], %s::text[]) AS t(type_oid, type_mod)
+),
+type_walk(origin, type_oid, depth) AS (
+    SELECT r.type_oid, r.type_oid, 0 FROM requested r
+    UNION ALL
+    SELECT w.origin, b.typbasetype, w.depth + 1
+    FROM type_walk w
+    JOIN pg_catalog.pg_type b ON b.oid = w.type_oid AND b.typtype = 'd'
+    WHERE w.depth < 32
+),
+effective AS (
+    SELECT DISTINCT ON (origin) origin, type_oid FROM type_walk ORDER BY origin, depth DESC
+),
+element_walk(origin, type_oid, depth) AS (
+    SELECT e.origin, a.typelem, 0
+    FROM effective e
+    JOIN pg_catalog.pg_type a ON a.oid = e.type_oid
+    WHERE a.typcategory = 'A'
+    UNION ALL
+    SELECT w.origin, b.typbasetype, w.depth + 1
+    FROM element_walk w
+    JOIN pg_catalog.pg_type b ON b.oid = w.type_oid AND b.typtype = 'd'
+    WHERE w.depth < 32
+),
+element AS (
+    SELECT DISTINCT ON (origin) origin, type_oid FROM element_walk ORDER BY origin, depth DESC
+)
+SELECT r.type_oid, r.type_mod,
+       pg_catalog.format_type(r.type_oid, r.type_mod) AS vendor_data_type,
+       (a.typcategory = 'A') AS is_array,
+       pg_catalog.ascii(e.typdelim::text) AS element_delimiter
+FROM requested r
+JOIN effective f ON f.origin = r.type_oid
+JOIN pg_catalog.pg_type a ON a.oid = f.type_oid
+LEFT JOIN element el ON el.origin = r.type_oid
+LEFT JOIN pg_catalog.pg_type e ON e.oid = el.type_oid
+"""
+
+
+@dataclass(frozen=True)
+class ResolvedVendorType:
+    """One described type's vendor name plus its catalog-resolved array metadata."""
+
+    vendor_data_type: str
+    is_array: bool
+    # The element delimiter's internal-char byte code, or None for non-array types.
+    element_delimiter: int | None
+
+
+def described_columns(cursor: Any) -> list[ResultColumn]:
+    """Read the ordered result column names, type OIDs, and type modifiers.
+
+    A named cursor's description is available immediately after the DECLARE, including for
+    zero-row results, so a schema-bearing empty page can still be produced. psycopg keeps
+    the raw RowDescription type modifier on the ``Column`` object (``_fmod``); it is the
+    exact value ``pg_catalog.format_type`` expects.
+    """
+    description = getattr(cursor, 'description', None)
+    if not description:
+        raise rq.RemoteQueryFailure('query_failed', 'Query returned no result description.')
+
+    columns = []
+    for described in description:
+        name = described.name
+        if not isinstance(name, str) or not name:
+            raise rq.RemoteQueryFailure('schema_unavailable', 'Result description carried an empty column name.')
+        type_oid = described.type_code
+        if not isinstance(type_oid, int):
+            raise rq.RemoteQueryFailure('schema_unavailable', 'Result description carried a non-integer type oid.')
+        columns.append(ResultColumn(name=name, type_oid=type_oid, type_modifier=getattr(described, '_fmod', None)))
+    return columns
+
+
+def validate_columns(columns: Sequence[ResultColumn], max_columns: int) -> None:
+    if len(columns) > max_columns:
+        raise rq.RemoteQueryFailure(
+            'max_columns_exceeded',
+            'Query described {} result columns; the limit is {}.'.format(len(columns), max_columns),
+        )
+    seen = set()
+    for column in columns:
+        if column.name in seen:
+            raise rq.RemoteQueryFailure(
+                'duplicate_columns',
+                'Duplicate result-column name {!r} cannot key a JSON row object.'.format(column.name),
+            )
+        seen.add(column.name)
+
+
+def resolve_vendor_types(
+    control_cursor: Any, columns: Sequence[ResultColumn]
+) -> dict[tuple[int, int], ResolvedVendorType]:
+    """Resolve every DISTINCT (type_oid, type_modifier) pair with one parameterized lookup.
+
+    The catalog query runs in the same read-only transaction and statement timeout scope as
+    the user query. Types are passed as text arrays and cast element-wise (text -> oid and
+    text -> int4 both cast via I/O), which is version-stable and avoids psycopg's
+    element-width-dependent int array dump OIDs. Each resolved type carries its vendor
+    name, whether its domain-resolved effective type is an array, and — for array types —
+    the byte code of the element type's own typdelim, resolved through the element's
+    domain chain.
+    """
+    distinct_pairs = sorted({(column.type_oid, column.type_modifier) for column in columns})
+    if any(pair[1] is None for pair in distinct_pairs):
+        raise rq.RemoteQueryFailure(
+            'schema_unavailable', 'Result description did not expose type modifiers for every column.'
+        )
+
+    oids = [str(pair[0]) for pair in distinct_pairs]
+    type_modifiers = [str(pair[1]) for pair in distinct_pairs]
+    control_cursor.execute(VENDOR_TYPE_QUERY, (oids, type_modifiers))
+    rows = control_cursor.fetchall()
+
+    type_map: dict[tuple[int, int], ResolvedVendorType] = {}
+    for row in rows:
+        oid, type_modifier, vendor_data_type, is_array, element_delimiter = (
+            row[0],
+            row[1],
+            row[2],
+            row[3],
+            row[4],
+        )
+        if not isinstance(vendor_data_type, str) or not vendor_data_type:
+            raise rq.RemoteQueryFailure('schema_unavailable', 'pg_catalog.format_type returned an unusable type name.')
+        type_map[(oid, type_modifier)] = ResolvedVendorType(
+            vendor_data_type=vendor_data_type,
+            is_array=bool(is_array),
+            element_delimiter=element_delimiter,
+        )
+
+    missing = [pair for pair in distinct_pairs if pair not in type_map]
+    if missing:
+        raise rq.RemoteQueryFailure(
+            'schema_unavailable',
+            'pg_catalog.format_type lookup did not resolve {} requested type(s).'.format(len(missing)),
+        )
+    return type_map
+
+
+# Descriptor logical types for the built-in OID families. Any array family (a vendor type
+# rendered with an ``[]`` suffix) carries a JSON array, decoded by intake from the element
+# type the vendor name carries; custom types, domains, and extensions have no stable
+# cross-vendor family, so they map to ``vendor`` — intake falls back to the family's
+# documented string form, never a guess from contents.
+POSTGRES_LOGICAL_TYPE_BY_OID = {
+    16: 'boolean',  # bool
+    17: 'binary',  # bytea
+    18: 'string',  # char
+    19: 'string',  # name
+    20: 'integer',  # int8
+    21: 'integer',  # int2
+    23: 'integer',  # int4
+    25: 'string',  # text
+    26: 'integer',  # oid
+    114: 'json',  # json
+    700: 'float',  # float4
+    701: 'float',  # float8
+    1700: 'decimal',  # numeric
+    790: 'vendor',  # money (locale-dependent text)
+    829: 'vendor',  # macaddr
+    869: 'vendor',  # inet
+    650: 'vendor',  # cidr
+    1042: 'string',  # bpchar
+    1043: 'string',  # varchar
+    1082: 'temporal',  # date
+    1083: 'temporal',  # time
+    1114: 'temporal',  # timestamp
+    1184: 'temporal',  # timestamptz
+    1186: 'temporal',  # interval
+    1266: 'temporal',  # timetz
+    2249: 'json',  # record
+    2950: 'string',  # uuid
+    3802: 'json',  # jsonb
+}
+
+
+def logical_type_for_column(column: ResultColumn, vendor_data_type: str) -> str:
+    """Map one described column to a closed descriptor logical type, deterministically."""
+    if vendor_data_type.endswith('[]'):
+        return 'json'
+    return POSTGRES_LOGICAL_TYPE_BY_OID.get(column.type_oid, 'vendor')
+
+
+def build_upload_descriptor(
+    request: rq.RemoteQueryRequest,
+    columns: Sequence[ResultColumn],
+    type_map: Mapping[tuple[int, int], ResolvedVendorType],
+    agent_hostname: str,
+) -> rq.RemoteQueryUploadDescriptor:
+    """Build the immutable source-page descriptor from the described result columns.
+
+    The vendor type names always come from ``pg_catalog.format_type`` — schema or not —
+    because the descriptor is registered once, before any result record is read, and intake
+    stamps the schema (when requested) into every final page from it. The format version
+    selects the native COPY CSV cell grammar, so intake decodes the source pages by these
+    column types instead of canonical JSON tokens. Every array column (a vendor name
+    rendered with an ``[]`` suffix) carries its element type's own typdelim — resolved
+    through the catalog, never guessed — so intake splits the native array literal on
+    exactly the separator PostgreSQL uses; a rendered array whose catalog type disagrees
+    fails closed instead of describing an undecodable column.
+    """
+    descriptor_columns = []
+    for column in columns:
+        resolved = type_map[(column.type_oid, column.type_modifier)]
+        vendor_data_type = resolved.vendor_data_type
+        is_array_column = vendor_data_type.endswith('[]')
+        element_delimiter = None
+        if is_array_column:
+            if not resolved.is_array or resolved.element_delimiter is None:
+                raise rq.RemoteQueryFailure(
+                    'schema_unavailable',
+                    'A rendered array column type did not resolve to a catalog array element delimiter.',
+                )
+            element_delimiter = rq.valid_array_element_delimiter_code(resolved.element_delimiter)
+        descriptor_columns.append(
+            rq.RemoteQueryDescriptorColumn(
+                column_name=column.name,
+                vendor_data_type=vendor_data_type,
+                logical_type=logical_type_for_column(column, vendor_data_type),
+                array_element_delimiter=element_delimiter,
+            )
+        )
+    return rq.RemoteQueryUploadDescriptor(
+        format_version=rq.POSTGRES_COPY_CSV_DESCRIPTOR_FORMAT_VERSION,
+        include_schema=request.include_schema,
+        agent_hostname=agent_hostname,
+        columns=descriptor_columns,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Native COPY CSV source wire (postgres-copy-csv-v1)
+# ---------------------------------------------------------------------------
+
+# The frozen native wire: the customer query is evaluated exactly once, by a single
+# ``COPY ... TO STDOUT``. ``FORCE_QUOTE *`` makes every non-null field quoted — including
+# empty strings, numerics, booleans, and a literal backslash-N text — and ``NULL '\\N'``
+# makes NULL the sole unquoted field, so NULL, empty string, and a literal ``\\N`` stay
+# distinguishable in the raw bytes and quote provenance survives to intake. Standard
+# PostgreSQL CSV escaping doubles quotes inside quoted fields, and commas and CR/LF ride
+# raw inside them; records end with one LF, so a record's terminator is the first LF that
+# closes every quoted field (an even number of quotes since the record's start).
+POSTGRES_COPY_SQL_OPTIONS = "FORMAT CSV, NULL '\\N', FORCE_QUOTE *"
+
+# Session output settings pinned transaction-locally so the native COPY text is a pure
+# function of the values, never of the pooled session's ambient configuration:
+# timestamptz renders in UTC, dates and timestamps in ISO style, intervals in the
+# documented postgres spelling, bytea in hex, and float4/float8 in the server's shortest
+# round-trip text. All are USERSET GUCs, so ``SET LOCAL`` works for every non-superuser,
+# and ``SET LOCAL`` scopes each change to this read-only transaction: the closing ROLLBACK
+# restores the pooled connection's session state untouched.
+POSTGRES_COPY_SESSION_SETTINGS = (
+    "SET LOCAL TimeZone = 'UTC'",
+    "SET LOCAL DateStyle = 'ISO, MDY'",
+    "SET LOCAL IntervalStyle = 'postgres'",
+    "SET LOCAL bytea_output = 'hex'",
+    'SET LOCAL extra_float_digits = 1',
+)
+
+
+def native_copy_sql(query: str) -> str:
+    """The one COPY statement that evaluates the validated query and emits its native CSV."""
+    return 'COPY ({}) TO STDOUT WITH ({})'.format(query, POSTGRES_COPY_SQL_OPTIONS)
+
+
+# The record framing the native CSV needs — locating each record's true LF terminator by
+# quote parity — belongs to the shared source-page writer: libpq block boundaries are not
+# a record contract, so the writer carries the quote parity across blocks and frames
+# records while it buffers them, never materializing one object per row.
+
+
+# ---------------------------------------------------------------------------
+# Producer: one validated query execution through the native COPY CSV path
+# ---------------------------------------------------------------------------
+
+
+def produce_remote_query(
+    request: rq.RemoteQueryRequest,
+    check: 'PostgreSql',
+    creds: rq.UploadCredentials,
+    client: rq.UploadClient,
+    execution_dbname: str,
+    started_at: float,
+    stats: rq.RemoteQueryRunStats,
+    timings: rq.RemoteQueryProducerTimings | None = None,
+) -> dict[str, Any]:
+    """Execute the validated query once, natively, and return the compact run receipt.
+
+    The query's values are evaluated exactly once: a named server-side cursor DECLAREs it
+    inside the existing read-only transaction with the effective statement timeout applied
+    — the smaller of the instance-configured ``remote_queries.timeout_ms`` and the remaining
+    run-wide wall, where the wall is the delivered ``limits.timeout_ms`` that no instance
+    setting may lengthen — but is never fetched, so the DECLARE only plans and its
+    description yields the column metadata; the single ``COPY (query) TO STDOUT`` then
+    evaluates the query and streams its native CSV records. Session output settings are
+    pinned in the same transaction, the vendor-type lookup and descriptor registration both
+    precede the first record, and the shared source-page writer frames the native blocks,
+    buffers one bounded source page, and uploads it without re-querying.
+
+    Producer phases: connection acquisition through descriptor registration and the COPY
+    dispatch is database setup, each ``copy.read`` call is a database fetch, record
+    framing and page buffering are encode and page build (with any upload triggers nested
+    inside it), and page uploads and finalize are accounted by the shared source-page
+    writer. Everything else — timeout resolution, the pre-read guards, transaction
+    teardown — lands in ``otherMs``.
+    """
+    delivery = request.result_delivery
+    limits = delivery.limits
+    # The delivered timeout is the run-wide monotonic hard wall; the instance-configured
+    # remote_queries.timeout_ms may shorten the statement timeout below it but never
+    # replace or lengthen the wall.
+    deadline = started_at + limits.timeout_ms / 1000
+    statement_timeout_ms = _resolve_statement_timeout_ms(check, deadline)
+    timings = timings if timings is not None else rq.NULL_PRODUCER_TIMINGS
+
+    def guard() -> None:
+        rq.raise_if_timed_out(deadline)
+        rq.raise_if_cancelled(check)
+
+    cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
+    # The setup phase spans pool connection acquisition through descriptor registration and
+    # the COPY dispatch, and ends before the first data read; the connection and cursor
+    # contexts outlive the phase, so it is entered and exited explicitly. The inline exit
+    # marks the boundary before the record loop; the spanning ``finally`` re-exits it
+    # (idempotently) so a setup interrupted mid-flight still reports its partial wall.
+    setup_phase = timings.enter_phase('database_setup')
+    try:
+        with check.db_pool.get_connection(execution_dbname) as conn:
+            with conn.cursor() as control:
+                in_transaction = False
+                try:
+                    control.execute('BEGIN READ ONLY')
+                    in_transaction = True
+                    # SET statements do not accept bind parameters, so the timeout is inlined; it
+                    # is a validated positive int resolved from the instance override and the
+                    # remaining wall, never raw text.
+                    control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
+                    for session_setting in POSTGRES_COPY_SESSION_SETTINGS:
+                        control.execute(session_setting)
+                    with conn.cursor(name=cursor_name) as described_cursor:
+                        # The DECLARE plans the query and yields its result description —
+                        # including for zero-row results — without fetching: no value is
+                        # evaluated here, only by the COPY below.
+                        described_cursor.execute(request.query)
+                        columns = described_columns(described_cursor)
+                        validate_columns(columns, limits.max_columns)
+                        # The descriptor needs every vendor type name, schema or not: it is
+                        # registered once, before any result record is read.
+                        type_map = resolve_vendor_types(control, columns)
+                        descriptor = build_upload_descriptor(request, columns, type_map, check.hostname)
+                        # The executing check's Agent-reported hostname: the descriptor carries it
+                        # so intake stamps the envelope with the agent node identity Fleet reports,
+                        # never socket.gethostname().
+                        writer = rq.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings)
+                        guard()
+                        with conn.cursor() as stream_cursor:
+                            with stream_cursor.copy(native_copy_sql(request.query)) as copy:
+                                # Setup ends here: the first copy.read below is its own phase.
+                                timings.exit_phase(setup_phase)
+                                try:
+                                    with timings.phase('encode_and_page_build'):
+                                        while True:
+                                            # One fetch phase per read, entered and exited
+                                            # explicitly like the setup phase above: the
+                                            # per-record loop is the hot path, and a phase
+                                            # context manager per read costs more than the
+                                            # read itself.
+                                            fetch_phase = timings.enter_phase('database_fetch')
+                                            try:
+                                                block = copy.read()
+                                            finally:
+                                                timings.exit_phase(fetch_phase)
+                                            if not block:
+                                                break
+                                            guard()
+                                            writer.feed_native_copy_block(block)
+                                        # Fail closed unless the COPY stream ended exactly at a
+                                        # record boundary; the final page close and the run
+                                        # finalize below are their own phases.
+                                        writer.finish_native_copy_stream()
+                                    return writer.finish()
+                                finally:
+                                    # Release the page even if record framing or the copy fails.
+                                    writer.discard()
+                finally:
+                    if in_transaction:
+                        try:
+                            control.execute('ROLLBACK')
+                        except Exception:
+                            # Fixed text only: the driver's exception can quote connection strings
+                            # or identifiers embedded in its message.
+                            LOGGER.debug('Unable to roll back remote query read-only transaction')
+    finally:
+        timings.exit_phase(setup_phase)
+
+
+def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
+    """Resolve the statement timeout that protects the customer database for this run.
+
+    ``deadline`` is the run-wide hard wall derived from the delivered ``limits.timeout_ms``:
+    it covers target resolution, query execution, page construction, upload, and retries,
+    and instance configuration can never lengthen it. The instance config
+    ``remote_queries.timeout_ms`` stays a customer-database protection with per-instance
+    granularity (a warehouse instance can allow minutes while an OLTP instance allows
+    seconds), but it may only shorten the run: the effective statement timeout is the smaller
+    of the positive instance value and the remaining wall, and the wall's remainder applies
+    when the instance does not configure one. The value is resolved locally per run; the
+    delivery limits object is never mutated.
+    """
+    config = getattr(check, '_config', None)
+    instance_timeout_ms = getattr(getattr(config, 'remote_queries', None), 'timeout_ms', None)
+    remaining_ms = rq.remaining_wall_ms(deadline)
+    if isinstance(instance_timeout_ms, int) and instance_timeout_ms > 0:
+        return min(instance_timeout_ms, remaining_ms)
+    return remaining_ms
+
+
+# ---------------------------------------------------------------------------
+# Target resolution
+# ---------------------------------------------------------------------------
+
+
+def _resolve_matches(target: rq.RemoteQueryTarget, checks: Iterable['PostgreSql']) -> list['PostgreSql']:
+    """Resolve the loaded checks a target selects, fail-closed: zero, one, or many matches.
+
+    A database_instance selector matches one loaded check by its rendered identifier. A tuple
+    selector matches only a check whose normalized configured endpoint equals the request and
+    whose effective monitoring scope includes the requested database.
+    """
+    if target.database_instance is not None:
+        return [check for check in checks if getattr(check, 'database_identifier', None) == target.database_instance]
+    return [check for check in checks if _target_matches_scope(check, target)]
+
+
+def _resolve_unique_check(
+    target: rq.RemoteQueryTarget,
+    checks: Iterable['PostgreSql'],
+    started_at: float,
+    timings: rq.RemoteQueryProducerTimings | None = None,
+) -> tuple['PostgreSql | None', rq.RemoteQueryEvent | None]:
+    """The one selection shared by resolve and execute; exactly one side of the pair is set.
+
+    Zero matches answer target_not_found, more than one answer target_ambiguous, and a
+    scope that cannot be established answers its own error (never a silent no-match); the
+    caller emits the failure event verbatim, so both operations report identical verdicts
+    for the same target and check state. ``timings``, when given, attaches the producer
+    execution diagnostics measured at the failure to each error event: execute passes its
+    accumulator, resolve passes none, so its verdicts stay bare.
+    """
+
+    def diagnostics() -> Mapping[str, Any] | None:
+        return timings.metadata() if timings is not None else None
+
+    try:
+        matches = _resolve_matches(target, checks)
+    except rq.RemoteQueryFailure as e:
+        return None, rq.failed_event(
+            e.code,
+            e.message,
+            retryable=e.retryable,
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=diagnostics(),
+        )
+    LOGGER.debug('Remote query target match count: %d', len(matches))
+    if not matches:
+        return None, rq.failed_event(
+            'target_not_found',
+            'No loaded Postgres integration instance matched target selector.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=diagnostics(),
+        )
+    if len(matches) > 1:
+        return None, rq.failed_event(
+            'target_ambiguous',
+            'More than one loaded Postgres integration instance matched target selector.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=diagnostics(),
+        )
+    return matches[0], None
+
+
+def _resolved_dbname(target: rq.RemoteQueryTarget, check: 'PostgreSql') -> str | None:
+    """The database a matched check admits for the target.
+
+    A tuple target's dbname is part of match identity and is the admitted database. A
+    database_instance selector identifies one loaded check and admits its materialized
+    configured database, never a request-named other one; None means the matched check
+    cannot name a database at all.
+    """
+    if target.database_instance is not None:
+        return _dbname_from_check(check)
+    return target.dbname
+
+
+def _target_matches_scope(check: 'PostgreSql', target: rq.RemoteQueryTarget) -> bool:
+    """A tuple target matches only inside one check's effective monitoring scope.
+
+    The requested dbname is part of match identity, never an execution parameter resolved after
+    selection: a different database on the same reachable server is not a match, and neither an
+    out-of-scope database nor a nonexistent one is probed to distinguish them.
+    """
+    return _endpoint_from_check(check) == (target.host, target.port) and database_in_monitoring_scope(
+        check, target.dbname
+    )
+
+
+def _endpoint_from_check(check: 'PostgreSql') -> tuple[str, int] | None:
+    """The check's endpoint identity: normalized configured host and effective port.
+
+    A check whose configuration does not expose a usable endpoint (missing config, non-string
+    host, non-integer port) has no endpoint identity and matches no tuple target.
+    """
+    config = getattr(check, '_config', None)
+    host = getattr(config, 'host', None)
+    port = getattr(config, 'port', None)
+    if not isinstance(host, str) or not isinstance(port, int) or isinstance(port, bool):
+        return None
+    try:
+        return rq.normalize_host(host), port
+    except ValueError:
+        return None
+
+
+def _dbname_from_check(check: 'PostgreSql') -> str | None:
+    config = getattr(check, '_config', None)
+    return getattr(config, 'dbname', None)
+
+
+def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
+    """Answer whether one database lies inside a loaded check's effective monitoring scope.
+
+    Single integration-owned source of truth for Remote Query database targeting, consumed by
+    target matching and execution alike. The scope is the check's materialized ``config.dbname``
+    — an explicit ``dbname``, else the ``postgres`` default, else
+    ``database_autodiscovery.global_view_db``, exactly as the integration's own ``build_config``
+    materialized it — plus, when database autodiscovery is enabled, the current database set
+    admitted by the check's own autodiscovery implementation with its existing include/exclude
+    filters, refresh cycle, and ``max_databases`` bound. Defaulting and filtering stay
+    integration-owned: this helper never reimplements them and never probes the requested
+    database, so a database that exists but is out of scope and a database that does not exist
+    are indistinguishable by design.
+
+    Raises RemoteQueryFailure(target_unavailable, retryable) when the admitted discovery set
+    cannot be determined: an unknown scope fails closed and visible, never as a silent
+    no-match.
+    """
+    configured_dbname = _dbname_from_check(check)
+    if configured_dbname is not None and dbname == configured_dbname:
+        return True
+    autodiscovery = getattr(check, 'autodiscovery', None)
+    if autodiscovery is None:
+        return False
+    try:
+        return dbname in autodiscovery.get_items()
+    except Exception:
+        # The caught exception neither reaches the message nor rides the wrapper's
+        # exception chain: discovery failures can quote connection strings, identifiers, or
+        # other server detail, so a traceback log of the wrapper must not recover them.
+        # Classification and retryability are what the event carries, not the underlying
+        # text.
+        raise rq.RemoteQueryFailure(
+            'target_unavailable',
+            "Unable to determine the matched check's autodiscovered database scope.",
+            retryable=True,
+        ) from None
+
+
+# ---------------------------------------------------------------------------
+# Query allowlist
+# ---------------------------------------------------------------------------
+
+
+def _is_query_allowed(query: str) -> bool:
+    return not rq.is_query_allowlist_enabled() or query in REMOTE_QUERY_QUERY_ALLOWLIST
+
+
+# ---------------------------------------------------------------------------
+# Event entry points
+# ---------------------------------------------------------------------------
+
+
+def execute_agent_rpc_stream_copy(
+    request_json: str | bytes | bytearray, check: 'PostgreSql', emit: rq.RemoteQueryEmit
+) -> None:
+    """Execute a remote query request and emit its events, dispatching by operation.
+
+    The entry point name is kept for the Agent's rtloader bridge, which resolves this
+    function by name. ``produce_json_pages`` drives the page producer and emits ``metadata``
+    (STARTED), then one ``final`` (SUCCEEDED with the compact receipt) or ``error`` (FAILED)
+    event; bulk page bytes never cross the callback. ``resolve_target`` drives the
+    side-effect-free resolver and emits one ``final`` (MATCHED verdict) or ``error`` event.
+    Diagnostics collection starts before the request JSON is parsed, so even a malformed
+    request reports its measured wall.
+    """
+    started_at = time.monotonic()
+    timings = rq.RemoteQueryProducerTimings(started_at)
+    try:
+        request = json.loads(request_json)
+    except (TypeError, ValueError):
+        rq.emit_event(
+            emit,
+            rq.failed_event(
+                'invalid_request',
+                'Invalid remote query request: request_json must be a valid JSON object.',
+                execution_diagnostics=timings.metadata(),
+            ),
+        )
+        return
+
+    if not isinstance(request, Mapping):
+        rq.emit_event(
+            emit,
+            rq.failed_event(
+                'invalid_request',
+                'Invalid remote query request: request_json must be a JSON object.',
+                execution_diagnostics=timings.metadata(),
+            ),
+        )
+        return
+
+    if request.get('operation') == 'resolve_target':
+        _execute_resolve_stream(request, check, emit)
+        return
+
+    _execute_upload_stream(request, check, emit, timings=timings)
+
+
+def _execute_upload_stream(
+    request: Mapping[str, Any],
+    check: 'PostgreSql',
+    emit: rq.RemoteQueryEmit,
+    http_client: rq.UploadClient | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
+) -> None:
+    """Drive the producer with the default (or injected) upload client and emit its events."""
+    events = iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), http_client, timings)
+    try:
+        for event in events:
+            rq.emit_event(emit, event)
+    except BaseException:
+        events.close()
+        raise
+
+
+def _execute_resolve_stream(request: Mapping[str, Any], check: 'PostgreSql', emit: rq.RemoteQueryEmit) -> None:
+    """Drive the per-check resolver and emit its verdict events."""
+    events = iter_agent_resolve_events(request, StaticPostgresCheckRegistry([check]))
+    try:
+        for event in events:
+            rq.emit_event(emit, event)
+    except BaseException:
+        events.close()
+        raise
+
+
+def iter_agent_resolve_events(request: Any, registry: PostgresCheckRegistry) -> Iterator[rq.RemoteQueryEvent]:
+    """Yield the per-check resolve verdict: one MATCHED ``final`` event or one ``error`` event.
+
+    Resolve evaluates the target against the loaded checks' effective monitoring scope with
+    the same selection authority as execute, then reports the sanitized match identity the
+    Agent aggregates zero/one/many and binds into its match fingerprint. It is side-effect
+    free: no customer SQL, no result delivery, no upload, and no probe of the requested
+    database. An invalid request or an undeterminable eligible set is an error other than
+    target_not_found, so the Agent fails its aggregate resolution instead of skipping the
+    check.
+    """
+    started_at = time.monotonic()
+    try:
+        parsed_request = rq.RemoteQueryResolveRequest.model_validate(request)
+    except ValidationError as e:
+        yield rq.failed_event('invalid_request', rq.validation_message(e), elapsed_ms=rq.elapsed_ms(started_at))
+        return
+
+    target = parsed_request.target
+    check, failure = _resolve_unique_check(target, registry.iter_postgres_checks(), started_at)
+    if failure is not None:
+        yield failure
+        return
+
+    resolved_dbname = _resolved_dbname(target, check)
+    if resolved_dbname is None:
+        yield rq.failed_event(
+            'target_unavailable',
+            'Matched Postgres check does not expose a configured database name.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+        )
+        return
+
+    endpoint = _endpoint_from_check(check)
+    yield rq.matched_resolve_event(
+        host=endpoint[0] if endpoint is not None else None,
+        port=endpoint[1] if endpoint is not None else None,
+        configured_dbname=_dbname_from_check(check),
+        resolved_dbname=resolved_dbname,
+        database_instance=getattr(check, 'database_identifier', None),
+    )
+
+
+def iter_agent_rpc_stream_events(
+    request: Any,
+    registry: PostgresCheckRegistry,
+    http_client: rq.UploadClient | None = None,
+    timings: rq.RemoteQueryProducerTimings | None = None,
+) -> Iterator[rq.RemoteQueryEvent]:
+    """Yield producer events for unit tests and callback adaptation.
+
+    ``timings`` collects the producer execution diagnostics; when absent a fresh
+    accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
+    so both report one wall.
+    """
+    started_at = time.monotonic() if timings is None else timings.started_at
+    if timings is None:
+        timings = rq.RemoteQueryProducerTimings(started_at)
+    try:
+        parsed_request = rq.RemoteQueryRequest.model_validate(request)
+    except ValidationError as e:
+        yield rq.failed_event(
+            'invalid_request',
+            rq.validation_message(e),
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    if not _is_query_allowed(parsed_request.query):
+        yield rq.failed_event(
+            'invalid_request',
+            'Invalid remote query request: query is not allowlisted.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    target = parsed_request.target
+    check, failure = _resolve_unique_check(target, registry.iter_postgres_checks(), started_at, timings)
+    if failure is not None:
+        yield failure
+        return
+
+    # The same selection authority as resolve: the resolved database is the database
+    # execution runs on, and the two operations can never disagree.
+    execution_dbname = _resolved_dbname(target, check)
+    if execution_dbname is None:
+        yield rq.failed_event(
+            'target_unavailable',
+            'Matched Postgres check does not expose a configured database name.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    creds = rq.resolve_upload_credentials(
+        parsed_request.result_delivery, started_at, trace_context=parsed_request.trace_context
+    )
+    if not creds.api_key or not creds.app_key:
+        yield rq.failed_event(
+            'credentials_unavailable',
+            'Remote query upload requires api_key and app_key to be configured on the Agent.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    db_pool = getattr(check, 'db_pool', None)
+    if db_pool is None:
+        yield rq.failed_event(
+            'credentials_unavailable',
+            'Matched Postgres check does not expose a connection pool.',
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+    if getattr(db_pool, 'is_closed', lambda: False)():
+        yield rq.failed_event(
+            'target_unavailable',
+            'Matched Postgres check connection pool is closed.',
+            retryable=False,
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    client = http_client if http_client is not None else rq.RequestsUploadClient(timings=timings)
+    stats = rq.RemoteQueryRunStats()
+    yield rq.RemoteQueryEvent('metadata', rq.started_metadata(parsed_request))
+
+    try:
+        receipt = produce_remote_query(
+            parsed_request, check, creds, client, execution_dbname, started_at, stats, timings
+        )
+    except rq.RemoteQueryFailure as e:
+        rq.safe_abort(client, creds)
+        yield rq.failed_event(
+            e.code,
+            e.message,
+            retryable=e.retryable,
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
+        return
+    except psycopg_errors.QueryCanceled:
+        # SQLSTATE class 57014: the server canceled the statement (statement timeout or an
+        # explicit cancel); both are retryable query timeouts for the run.
+        rq.safe_abort(client, creds)
+        yield rq.failed_event(
+            'timeout',
+            'Remote query was canceled by the server (statement timeout or cancellation).',
+            retryable=True,
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
+        return
+    except RuntimeError:
+        rq.safe_abort(client, creds)
+        yield rq.failed_event(
+            'target_unavailable',
+            'Matched Postgres check connection pool is unavailable.',
+            retryable=False,
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
+        return
+    except BaseException as e:
+        rq.safe_abort(client, creds)
+        if not isinstance(e, Exception):
+            raise
+        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
+        LOGGER.error('Remote query execution failed')
+        yield rq.failed_event(
+            'query_failed',
+            'Remote query execution failed.',
+            stats=rq.stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
+        return
+
+    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at, timings))
