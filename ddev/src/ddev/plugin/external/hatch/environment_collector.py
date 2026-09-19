@@ -118,7 +118,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @staticmethod
     def uv_install_command(*args):
-        return f'uv pip install {{verbosity:flag:-1}} {" ".join(args)}'
+        return f'uv pip install {" ".join(args)}'
 
     def finalize_config(self, config):
         for env_name, env_config in config.items():

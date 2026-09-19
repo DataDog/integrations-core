@@ -1,9 +1,14 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
-from .metrics import METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative
+
+from .metrics import GPU_METRIC_MAP, METRIC_MAP, RAY_GPU_METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
@@ -12,11 +17,12 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'vllm'
 
     def get_default_config(self):
+        metrics = [METRIC_MAP, RAY_METRIC_MAP]
+        if is_affirmative(datadog_agent.get_config('gpu.enabled')):
+            metrics.extend([GPU_METRIC_MAP, RAY_GPU_METRIC_MAP])
+
         return {
-            'metrics': [
-                METRIC_MAP,
-                RAY_METRIC_MAP,
-            ],
+            'metrics': metrics,
             "rename_labels": RENAME_LABELS_MAP,
         }
 

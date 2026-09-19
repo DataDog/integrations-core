@@ -21,9 +21,13 @@ from tests.helpers.clock import FakeClock
 from tests.utils.github_async.payloads import (
     artifact,
     check_run_payload,
+    file_commit_payload,
+    file_content_payload,
     full_pull_request_payload,
+    git_ref_payload,
     issue_comment_payload,
     pr_review_comment_payload,
+    pull_request_file_payload,
     pull_request_payload,
     workflow_job,
     workflow_run_payload,
@@ -173,9 +177,21 @@ ENDPOINT_CALLS = [
         default_retry="safe",
     ),
     EndpointCase(
+        "list_pull_request_files",
+        lambda c: first_page(c.list_pull_request_files("o", "r", 5)),
+        lambda: json_response([pull_request_file_payload()]),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "list_commit_pulls",
+        lambda c: first_page(c.list_commit_pulls("o", "r", "abc123")),
+        lambda: json_response([pull_request_payload(number=1)]),
+        default_retry="safe",
+    ),
+    EndpointCase(
         "create_pull_request",
         lambda c: c.create_pull_request("o", "r", "t", "h", "b"),
-        lambda: json_response(pull_request_payload(number=1), status_code=201),
+        lambda: json_response(full_pull_request_payload(number=1), status_code=201),
         default_retry="mutating",
     ),
     EndpointCase(
@@ -201,5 +217,31 @@ ENDPOINT_CALLS = [
         lambda c: c.update_check_run("o", "r", 77, status="in_progress"),
         lambda: json_response(check_run_payload(id=77)),
         default_retry="safe",
+    ),
+    EndpointCase(
+        "get_ref",
+        lambda c: c.get_ref("o", "r", "heads/main"),
+        lambda: json_response(git_ref_payload()),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "create_ref",
+        lambda c: c.create_ref("o", "r", "refs/heads/feature", "a" * 40),
+        lambda: json_response(git_ref_payload(ref="refs/heads/feature"), status_code=201),
+        default_retry="mutating",
+    ),
+    EndpointCase(
+        "get_content",
+        lambda c: c.get_content("o", "r", "release.json"),
+        lambda: json_response(file_content_payload()),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "create_or_update_file_contents",
+        lambda c: c.create_or_update_file_contents(
+            "o", "r", "release.json", message="m", content="e30K", sha="b" * 40, branch="feature"
+        ),
+        lambda: json_response(file_commit_payload(), status_code=201),
+        default_retry="mutating",
     ),
 ]

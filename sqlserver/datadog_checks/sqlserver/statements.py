@@ -626,6 +626,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
+        attempted_plan_keys = set()
         for row in rows:
             if self.enforce_collection_interval_deadline and time.time() > deadline:
                 self.log.debug("ending plan collection early because check deadline has been exceeded")
@@ -637,9 +638,25 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # we use the plan handle
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
-            if self._seen_plans_ratelimiter.acquire(plan_key):
-                raise_if_cancelled(self._cancel_event)
+            # Skip duplicates in this pass without suppressing failed keys in later passes.
+            if (
+                plan_key in attempted_plan_keys
+                or plan_key in self._seen_plans_ratelimiter
+                or len(self._seen_plans_ratelimiter) >= self._seen_plans_ratelimiter.maxsize
+            ):
+                continue
+            attempted_plan_keys.add(plan_key)
+            raise_if_cancelled(self._cancel_event)
+            try:
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
+            except Exception as e:
+                # A connection closed during cancellation may surface as a database error.
+                raise_if_cancelled(self._cancel_event)
+                self.log.debug("Failed to load plan. plan_handle=%s error=%s", row['plan_handle'], e)
+                error_tags = ["error:load-plan-{}".format(type(e))]
+                self._check.count("dd.sqlserver.statements.error", 1, **self._check.debug_stats_kwargs(tags=error_tags))
+                continue
+            if self._seen_plans_ratelimiter.acquire(plan_key):
                 obfuscated_plan = None
                 collection_errors = []
 
