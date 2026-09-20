@@ -58,6 +58,48 @@ tests:
         client:
           geoip: {}
           ip: "10.41.13.131"
+      ocsf:
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+          protocol_name: "UDP"
+        disposition: "Blocked"
+        disposition_id: 2
+        duration: 0
+        metadata:
+          log_name: "dns-query-logs"
+          product:
+            name: "Edge"
+            vendor_name: "BlueCat"
+          profiles:
+           - "security_control"
+          uid: "1768799730903712CBD65A6B0963C276D07800E643DBG"
+          version: "1.5.0"
+        policy:
+          uid: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+        query:
+          hostname: "amazon.in."
+          packet_uid: 8121
+          type: "A"
+        query_time: 1770186142000
+        rcode: "NXDomain"
+        rcode_id: 3
+        severity: "Medium"
+        severity_id: 3
+        src_endpoint:
+          ip: "10.41.13.131"
+          owner:
+            uid: "example@test.bluecat.com"
+        status: "Failure"
+        status_code: "NXDOMAIN"
+        status_id: 2
+        time: 1770186142000
       query_log:
         actionTaken: "block"
         appliedPolicyId: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
@@ -71,6 +113,7 @@ tests:
         id: "1768799730903712CBD65A6B0963C276D07800E643DBG"
         identity:
           identityId: "identity_id_example"
+          userId: "example@test.bluecat.com"
         latency: 0
         matchedPolicies:
          -
@@ -79,9 +122,14 @@ tests:
           eventType: "block"
           id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
           name: "Local Policy"
+        query: "amazon.in."
         queryClassId: 1
+        queryId: 8121
         queryProtocol: "UDP"
+        queryType: "A"
+        response: "NXDOMAIN"
         siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+        source: "10.41.13.131"
         time: 1770186142000
       site_details:
         id: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
