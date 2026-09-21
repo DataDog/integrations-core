@@ -40,32 +40,27 @@ SWITCHES = [
 # -- stacks -----------------------------------------------------------------------
 
 
-def test_collect_stacks_emits_member_count_per_switch(aggregator, instance):
+def test_collect_stacks_given_the_captured_stack_emits_member_count_and_state(aggregator, instance):
+    # Cisco reports ACTIVE / STANDBY / MEMBER for the role, not the master/member the brief
+    # describes. And stackPortInfo is null rather than an empty list -- iterating it raises
+    # TypeError on the first real payload, which is what the prior design documents got wrong.
     stack = load_captured('intent_stack')
 
     collect_stacks(_check(instance), _client(instance, [stack, stack]), SWITCHES)
 
+    # One lookup per switch, each tagged with its own device identity.
+    aggregator.assert_metric('cisco_catalyst_center.device.stack.member.count', count=2)
     assert metric_values(aggregator, 'cisco_catalyst_center.device.stack.member.count', 'device_name:sw1') == [1]
-    # Stack metrics hang off a device, so they carry the same device identity as the rest.
     aggregator.assert_metric_has_tag(
         'cisco_catalyst_center.device.stack.member.count', 'device_id:default:10.10.20.175'
     )
-
-
-def test_collect_stacks_emits_member_state_tagged_by_role(aggregator, instance):
-    # Cisco reports ACTIVE / STANDBY / MEMBER here, not the master/member the brief describes.
-    collect_stacks(_check(instance), _client(instance, [load_captured('intent_stack')]), SWITCHES[:1])
-
     assert metric_values(
-        aggregator, 'cisco_catalyst_center.device.stack.member.state', 'stack_role:ACTIVE', 'stack_member:1'
+        aggregator,
+        'cisco_catalyst_center.device.stack.member.state',
+        'device_name:sw1',
+        'stack_role:ACTIVE',
+        'stack_member:1',
     ) == [1]
-
-
-def test_collect_stacks_given_null_stack_port_info_does_not_raise(aggregator, instance):
-    # stackPortInfo is null, not an empty list. Iterating it raises TypeError on the first real
-    # payload, which is what the prior design documents got wrong.
-    collect_stacks(_check(instance), _client(instance, [load_captured('intent_stack')]), SWITCHES[:1])
-
     aggregator.assert_metric('cisco_catalyst_center.device.stack.port.status', count=0)
 
 
@@ -82,7 +77,7 @@ def test_collect_stacks_given_populated_stack_ports_emits_status(aggregator, ins
     assert metric_values(aggregator, 'cisco_catalyst_center.device.stack.port.status', 'stack_port:StackPort1') == [1]
 
 
-def test_collect_stacks_skips_devices_that_are_not_switches(aggregator, instance):
+def test_collect_stacks_skips_devices_that_are_not_switches(instance):
     devices = [{'id': 'uuid-ap1', 'name': 'ap1', 'deviceFamily': 'Unified AP'}]
     client = _client(instance, [load_captured('intent_stack')])
 

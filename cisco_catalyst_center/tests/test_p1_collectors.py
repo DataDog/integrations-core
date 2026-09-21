@@ -16,11 +16,14 @@ find out why. Security still emits metrics only.
 
 from __future__ import annotations
 
+import pytest
+
 from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import (
     collect_application_health,
     collect_assurance_issues,
+    collect_l3_topology,
     collect_sda_fabric,
     collect_security,
     collect_topology,
@@ -56,19 +59,37 @@ def test_collect_topology_given_a_down_link_reports_zero(aggregator, instance):
     assert 0 in metric_values(aggregator, 'cisco_catalyst_center.topology.link.status')
 
 
+def test_collect_l3_topology_emits_link_and_node_counts(aggregator, instance):
+    collect_l3_topology(
+        _check(instance), _client(instance, [load_captured('intent_topology_l3_ospf')]), topology_type='ospf'
+    )
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.topology.l3.link.count', 'topology_type:ospf') == [10]
+    assert metric_values(aggregator, 'cisco_catalyst_center.topology.l3.node.count', 'topology_type:ospf') == [4]
+
+
 # -- SD-Access fabric -------------------------------------------------------------
 
 
-def test_collect_sda_fabric_given_no_fabric_emits_nothing_and_does_not_raise(aggregator, instance):
-    # The sandbox has no fabric. Both summary endpoints answer 200 with an empty list.
+@pytest.mark.parametrize(
+    'devices',
+    [
+        pytest.param([], id='no-devices'),
+        pytest.param([{'id': 'u1', 'name': 'sw1', 'fabricDetails': None}], id='no-fabric-role'),
+    ],
+)
+def test_collect_sda_fabric_given_no_fabric_emits_nothing_and_does_not_raise(aggregator, instance, devices):
+    # The sandbox has no fabric. Both summary endpoints answer 200 with an empty list, and every
+    # device record carries a null fabricDetails -- neither is a zero to report.
     script = [
         load_captured('data_fabric_site_health_summaries'),
         load_captured('data_virtual_network_health_summaries'),
     ]
 
-    collect_sda_fabric(_check(instance), _client(instance, script), devices=[])
+    collect_sda_fabric(_check(instance), _client(instance, script), devices=devices)
 
     aggregator.assert_metric('cisco_catalyst_center.fabric.site.health', count=0)
+    aggregator.assert_metric('cisco_catalyst_center.fabric.device.count', count=0)
 
 
 def test_collect_sda_fabric_emits_device_role_counts_from_the_bulk_record(aggregator, instance):
@@ -87,18 +108,6 @@ def test_collect_sda_fabric_emits_device_role_counts_from_the_bulk_record(aggreg
 
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:edge') == [2]
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:border') == [1]
-
-
-def test_collect_sda_fabric_ignores_devices_with_no_fabric_role(aggregator, instance):
-    devices = [{'id': 'u1', 'name': 'sw1', 'fabricDetails': None}]
-    script = [
-        load_captured('data_fabric_site_health_summaries'),
-        load_captured('data_virtual_network_health_summaries'),
-    ]
-
-    collect_sda_fabric(_check(instance), _client(instance, script), devices=devices)
-
-    aggregator.assert_metric('cisco_catalyst_center.fabric.device.count', count=0)
 
 
 # -- assurance issues -------------------------------------------------------------
@@ -149,12 +158,15 @@ def _issues(*records):
     return with_value(load_captured('data_assurance_issues'), 'response', list(records))
 
 
-def test_collect_assurance_issues_submits_an_event_carrying_the_suggested_actions(aggregator, instance):
+def test_collect_assurance_issues_submits_an_event_carrying_the_diagnosis(aggregator, instance):
     # The brief's separate issue-enrichment call is unnecessary because suggestedActions arrives
     # in this response -- but free text cannot ride on a metric tag, so it needs an event body.
+    # Issue priority runs P1 (most severe) to P4, the inverse of the syslog severity scale the
+    # assurance *event* collector reads. Mapping one with the other's table inverts every alert.
     collect_assurance_issues(_check(instance), _client(instance, [_issues(OPEN_ISSUE)]))
 
     assert 'Check the uplink cable; verify PoE budget' in aggregator.events[0]['msg_text']
+    assert aggregator.events[0]['alert_type'] == 'error'
 
 
 def test_collect_assurance_issues_given_an_issue_already_reported_counts_it_without_a_new_event(aggregator, instance):
@@ -170,7 +182,7 @@ def test_collect_assurance_issues_given_an_issue_already_reported_counts_it_with
     assert metric_values(aggregator, 'cisco_catalyst_center.issue.total.count') == [1]
 
 
-def test_collect_assurance_issues_returns_the_latest_occurrence_as_the_new_watermark(aggregator, instance):
+def test_collect_assurance_issues_returns_the_latest_occurrence_as_the_new_watermark(instance):
     # The caller stores this and hands it back next cycle. If it does not advance past the newest
     # issue, every issue is reported again on the following cycle.
     older = dict(OPEN_ISSUE, issueId='i0', mostRecentOccurredTime=1_755_001_000_000)
@@ -180,34 +192,22 @@ def test_collect_assurance_issues_returns_the_latest_occurrence_as_the_new_water
     assert watermark == 1_755_002_000_000
 
 
-def test_collect_assurance_issues_maps_issue_priority_to_an_alert_type(aggregator, instance):
-    # Issue priority runs P1 (most severe) to P4 -- the inverse of the syslog severity scale the
-    # assurance *event* collector reads. Mapping one with the other's table inverts every alert.
-    collect_assurance_issues(_check(instance), _client(instance, [_issues(OPEN_ISSUE)]))
-
-    assert aggregator.events[0]['alert_type'] == 'error'
-
-
 # -- application visibility -------------------------------------------------------
 
 SITES = [{'id': 'site-a', 'siteHierarchy': 'Global/A'}]
 
 
-def test_collect_application_health_requires_a_site_id_per_call(aggregator, instance):
+def test_collect_application_health_asks_each_site_for_its_top_applications_by_usage(aggregator, instance):
     # networkApplications rejects a call without siteId (errorCode 14029). Note the API's own
-    # message says "siteIds", but the accepted parameter is singular.
+    # message says "siteIds", but the accepted parameter is singular. "Top applications by usage
+    # per site" is a sort on that same call rather than a separate endpoint.
     client = _client(instance, [load_captured('data_network_applications')])
 
     collect_application_health(_check(instance), client, sites=SITES)
 
-    assert client.http.requests[0]['params']['siteId'] == 'site-a'
-
-
-def test_collect_application_health_given_no_applications_emits_nothing(aggregator, instance):
-    collect_application_health(
-        _check(instance), _client(instance, [load_captured('data_network_applications')]), sites=SITES
-    )
-
+    params = client.http.requests[0]['params']
+    assert (params['siteId'], params['sortBy'], params['order']) == ('site-a', 'usage', 'des')
+    # The captured page is empty, and an empty page is not a zero.
     aggregator.assert_metric('cisco_catalyst_center.application.health', count=0)
 
 
@@ -224,7 +224,7 @@ def test_collect_application_health_emits_per_application_metrics(aggregator, in
     assert metric_values(aggregator, 'cisco_catalyst_center.application.usage', 'application:webex') == [4096]
 
 
-def test_collect_application_health_given_no_sites_makes_no_calls(aggregator, instance):
+def test_collect_application_health_given_no_sites_makes_no_calls(instance):
     client = _client(instance, [load_captured('data_network_applications')])
 
     collect_application_health(_check(instance), client, sites=[])

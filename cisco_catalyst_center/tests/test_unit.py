@@ -84,8 +84,6 @@ def test_check_given_one_failing_collector_still_emits_the_others(
 ) -> None:
     # Devices succeed, then site health fails. Losing one domain must not cost the rest of the
     # cycle -- otherwise an unreachable corner of the API blinds the whole integration.
-    from .conftest import ScriptedHttp
-
     devices = load_captured('data_network_devices')
     failure = {'status_code': 500, 'json': {}}
     # devices, stacks (4 switches), interfaces (configuration + statistics), then site health.

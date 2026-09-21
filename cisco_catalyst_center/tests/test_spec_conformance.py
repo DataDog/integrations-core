@@ -98,10 +98,12 @@ def _ap_records():
     return [record for record in payload['response'] if record.get('apDetails')]
 
 
-def test_synthetic_ap_details_uses_only_documented_fields():
+def test_synthetic_ap_details_matches_the_documented_schema_exactly():
+    # Both directions in one comparison. An invented field passes every other test forever while
+    # collecting nothing in production; a partial fixture lets a collector read a field no test
+    # ever exercises.
     for record in _ap_records():
-        unknown = set(record['apDetails']) - AP_CONFIGURATION_DETAIL_FIELDS
-        assert not unknown, f'{record["name"]} carries apDetails fields absent from the schema: {unknown}'
+        assert set(record['apDetails']) == AP_CONFIGURATION_DETAIL_FIELDS, record['name']
 
 
 def test_synthetic_radios_use_only_documented_fields():
@@ -143,10 +145,3 @@ def test_every_declared_metric_appears_in_metadata_csv():
 
     assert not emitted - declared, f'emitted but missing from metadata.csv: {sorted(emitted - declared)}'
     assert not declared - emitted, f'declared in metadata.csv but never emitted: {sorted(declared - emitted)}'
-
-
-def test_synthetic_ap_details_covers_the_whole_documented_schema():
-    # A partial fixture would let a collector read a field no test ever exercises.
-    for record in _ap_records():
-        missing = AP_CONFIGURATION_DETAIL_FIELDS - set(record['apDetails'])
-        assert not missing, f'{record["name"]} omits documented apDetails fields: {missing}'

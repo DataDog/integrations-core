@@ -33,14 +33,10 @@ def _client(instance, payload):
 EMPTY = 'data_clients_summary_analytics'
 
 
-def test_collect_client_experience_given_no_clients_does_not_raise(aggregator, instance):
-    # `aggregateAttributes` and `groups` are both null, not []. Iterating either raises TypeError.
-    collect_client_experience(_check(instance), _client(instance, load_captured(EMPTY)))
-
-    aggregator.assert_metric('cisco_catalyst_center.client.rssi.avg', count=0)
-
-
-def test_collect_client_experience_asks_the_appliance_to_aggregate(aggregator, instance):
+def test_collect_client_experience_asks_the_appliance_to_aggregate(instance):
+    # The captured payload is the sandbox's zero-client answer, where `aggregateAttributes` and
+    # `groups` are both null rather than []. Iterating either raises TypeError, so this run also
+    # has to survive the request it makes coming back empty.
     client = _client(instance, load_captured(EMPTY))
 
     collect_client_experience(_check(instance), client, group_by=('ssid', 'band'))
@@ -81,7 +77,10 @@ def test_collect_client_experience_emits_signal_quality_per_group(aggregator, in
     assert {tag.split(':', 1)[0] for tag in rssi.tags} == {'ssid', 'band'}
 
 
-def test_collect_client_experience_emits_onboarding_durations(aggregator, instance):
+def test_collect_client_experience_emits_top_level_aggregates_and_skips_the_null_ones(aggregator, instance):
+    # Onboarding durations arrive ungrouped, in the top-level `aggregateAttributes` slot. Any
+    # one of them can come back with value null when the field has no data, and emitting that
+    # as a zero would graph an instant onboarding that never happened.
     payload = with_value(
         load_captured(EMPTY),
         'response',
@@ -91,6 +90,7 @@ def test_collect_client_experience_emits_onboarding_durations(aggregator, instan
             'aggregateAttributes': [
                 {'name': 'avgRunDuration', 'function': 'avg', 'value': 1500},
                 {'name': 'avgDhcpDuration', 'function': 'avg', 'value': 250},
+                {'name': 'rssi', 'function': 'avg', 'value': None},
             ],
         },
     )
@@ -99,24 +99,4 @@ def test_collect_client_experience_emits_onboarding_durations(aggregator, instan
 
     assert metric_values(aggregator, 'cisco_catalyst_center.client.onboarding.duration') == [1500]
     assert metric_values(aggregator, 'cisco_catalyst_center.client.onboarding.dhcp.duration') == [250]
-
-
-def test_collect_client_experience_given_a_null_aggregate_value_skips_it(aggregator, instance):
-    # A requested aggregate can come back with value null when the field has no data.
-    payload = with_value(
-        load_captured(EMPTY),
-        'response',
-        {
-            'attributes': None,
-            'groups': None,
-            'aggregateAttributes': [
-                {'name': 'rssi', 'function': 'avg', 'value': None},
-                {'name': 'snr', 'function': 'avg', 'value': 30},
-            ],
-        },
-    )
-
-    collect_client_experience(_check(instance), _client(instance, payload))
-
     aggregator.assert_metric('cisco_catalyst_center.client.rssi.avg', count=0)
-    aggregator.assert_metric('cisco_catalyst_center.client.snr.avg', count=1)

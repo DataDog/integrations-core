@@ -121,7 +121,9 @@ def clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[float], None]:
 # -- the request contract ---------------------------------------------------------------
 
 
-def test_collect_events_asks_for_every_device_family_group(instance: InstanceType) -> None:
+def test_collect_events_asks_for_every_device_family_group_over_the_given_window(
+    instance: InstanceType,
+) -> None:
     # deviceFamily is mandatory and the endpoint refuses to mix its four groups in one request
     # (errorCode 2600), so a sweep that skipped a group would never see its events at all.
     client = _client(instance, [])
@@ -135,13 +137,6 @@ def test_collect_events_asks_for_every_device_family_group(instance: InstanceTyp
         ['Wired Client'],
         ['Wireless Client'],
     ]
-
-
-def test_collect_events_asks_for_the_window_it_was_given(instance: InstanceType) -> None:
-    client = _client(instance, [])
-
-    collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
-
     params = client.http.requests[0]['params']
     assert (params['startTime'], params['endTime']) == (WINDOW_START, WINDOW_END)
 
@@ -161,20 +156,22 @@ def test_collect_events_given_no_events_emits_a_total_of_zero(
     assert metric_values(aggregator, 'cisco_catalyst_center.event.total.count') == [0, 0, 0, 0]
 
 
-def test_collect_events_counts_by_severity_and_event_name(aggregator: AggregatorStub, instance: InstanceType) -> None:
+def test_collect_events_given_three_records_breaks_them_down_and_emits_one_event_each(
+    aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # The counts say how many; the events say which. Dropping to counts alone discards 65 of the
+    # 69 fields on each record, and the diagnosis is in those fields.
+    #
+    # The counts are submitted as counts rather than gauges because events are a delta over a
+    # window, not a level: a gauge would report only the most recent window and would not sum
+    # across the timeframe a dashboard is showing.
     collect_events(_check(instance), _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1') == [2]
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'event_name:AP Coverage Hole') == [1]
-
-
-def test_collect_events_submits_counts_rather_than_gauges(aggregator: AggregatorStub, instance: InstanceType) -> None:
-    # Events are a delta over a window, not a level. A gauge would report only the most recent
-    # window and would not sum across the timeframe a dashboard is showing.
-    collect_events(_check(instance), _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
-
     aggregator.assert_metric('cisco_catalyst_center.event.total.count', metric_type=aggregator.COUNT)
     aggregator.assert_metric('cisco_catalyst_center.event.count', metric_type=aggregator.COUNT)
+    assert len(aggregator.events) == len(EVENTS)
 
 
 def test_collect_events_given_a_truncated_sweep_reports_the_appliance_total(
@@ -232,51 +229,45 @@ def test_collect_events_tags_only_the_bounded_dimensions(aggregator: AggregatorS
 # -- the Datadog events -----------------------------------------------------------------
 
 
-def test_collect_events_submits_one_datadog_event_per_record(
+def test_collect_events_given_a_detailed_record_emits_the_expected_datadog_event(
     aggregator: AggregatorStub, instance: InstanceType
 ) -> None:
-    # The counts say how many; the events say which. Dropping to counts alone discards 65 of the
-    # 69 fields on each record, and the diagnosis is in those fields.
-    collect_events(_check(instance), _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
+    """One record in, one Datadog event out, asserted whole.
 
-    assert len(aggregator.events) == len(EVENTS)
-
-
-def test_collect_events_titles_the_event_with_the_event_name(
-    aggregator: AggregatorStub, instance: InstanceType
-) -> None:
+    Four things carry the weight. `timestamp` is seconds: the appliance reports epoch
+    milliseconds, and submitting those unconverted dates every event to the year 57000, which
+    silently empties the event stream for the window being viewed. `aggregation_key` is the
+    appliance's own id, which is what lets a re-polled window collapse instead of showing each
+    event twice. `msg_text` carries what a metric dimension cannot hold -- free text, and the
+    per-client fields. And there is no `host` key at all: Catalyst Center device names are not
+    Datadog hostnames, so setting one would invent a host in the infrastructure list, and the
+    device travels as a tag instead.
+    """
     collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
 
-    assert aggregator.events[0]['msg_title'] == 'AP Disconnected'
-
-
-def test_collect_events_body_carries_the_diagnosis(aggregator: AggregatorStub, instance: InstanceType) -> None:
-    # These are the fields a metric dimension cannot hold: free text, and per-client.
-    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
-
-    body = aggregator.events[0]['msg_text']
-    assert 'AP lost connection to WLC' in body
-    assert 'aa:bb:cc:dd:ee:ff' in body
-
-
-def test_collect_events_converts_the_appliance_timestamp_to_seconds(
-    aggregator: AggregatorStub, instance: InstanceType
-) -> None:
-    # The appliance reports epoch milliseconds. Submitting those unconverted dates every event to
-    # the year 57000, which silently empties the event stream for the window being viewed.
-    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
-
-    assert aggregator.events[0]['timestamp'] == 1_755_001_234
-
-
-def test_collect_events_aggregates_on_the_appliance_event_id(
-    aggregator: AggregatorStub, instance: InstanceType
-) -> None:
-    # A re-polled window resubmits the same events. The appliance id is what lets the stream
-    # collapse them instead of showing each one twice.
-    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
-
-    assert aggregator.events[0]['aggregation_key'] == 'e9'
+    assert aggregator.events == [
+        {
+            'msg_title': 'AP Disconnected',
+            'msg_text': (
+                'Reason: AP lost connection to WLC\n'
+                'Failure category: AP_CONNECTIVITY\n'
+                'Device: ap-7\n'
+                'Client MAC: aa:bb:cc:dd:ee:ff'
+            ),
+            'timestamp': 1_755_001_234,
+            'aggregation_key': 'e9',
+            'alert_type': 'error',
+            'event_type': 'cisco_catalyst_center_assurance',
+            'source_type_name': 'cisco_catalyst_center',
+            'tags': [
+                'device_family:Unified AP',
+                'event_name:AP Disconnected',
+                'device_name:ap-7',
+                'site:Global/US/Building-1',
+                'ssid:corp-wifi',
+            ],
+        }
+    ]
 
 
 @pytest.mark.parametrize(
@@ -298,14 +289,6 @@ def test_collect_events_maps_syslog_severity_to_alert_type(
     collect_events(_check(instance), _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
 
     assert aggregator.events[0]['alert_type'] == expected
-
-
-def test_collect_events_does_not_set_a_host_on_the_event(aggregator: AggregatorStub, instance: InstanceType) -> None:
-    # Catalyst Center device names are not Datadog hostnames. Setting one that does not resolve
-    # invents a host in the infrastructure list, so the device travels as a tag instead.
-    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
-
-    assert not aggregator.events[0].get('host')
 
 
 def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(
@@ -362,7 +345,7 @@ def test_event_window_given_a_cursor_in_the_future_skips_the_cycle(
 
 
 def test_event_window_given_a_configured_lookback_uses_it_for_the_first_cycle(
-    instance: InstanceType, clock: Callable[[float], None]
+    instance: InstanceType,
 ) -> None:
     instance['events_initial_lookback_minutes'] = 60
     check = _check(instance)

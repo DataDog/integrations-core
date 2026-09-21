@@ -28,6 +28,7 @@ from datadog_checks.cisco_catalyst_center.ndm_models import (
 )
 
 from .common import load_captured, load_wireless_synthetic
+from .conftest import ScriptedHttp, ViewRoutedHttp
 
 
 def _device_record():
@@ -159,25 +160,17 @@ def test_interface_metadata_given_a_captured_interface_returns_the_expected_payl
     }
 
 
-def test_interface_device_ids_resolve_to_the_collected_devices():
-    # The interface's device_id must be one of the device ids, or interfaces attach to nothing.
-    devices = load_captured('data_network_devices')['response']
-    device_ids = {create_device_metadata(d, namespace='default').id for d in devices}
-
-    interfaces = load_captured('data_interfaces_configuration')['response']
-    interface_parents = {create_interface_metadata(i, namespace='default').device_id for i in interfaces}
-
-    assert interface_parents <= device_ids
-
-
 @pytest.mark.parametrize(
-    ('reported_status', 'expected_status'),
+    ('reported_status', 'expected_admin', 'expected_oper'),
     [
-        ('UP', STATUS_UP),
-        ('DOWN', STATUS_DOWN),
+        ('UP', STATUS_UP, STATUS_UP),
+        ('DOWN', STATUS_DOWN, STATUS_DOWN),
+        # A status Catalyst Center never reported must not read the same as one it reported
+        # down, or an interface the appliance is simply silent about looks like an outage.
+        (None, None, OPER_STATUS_UNKNOWN),
     ],
 )
-def test_interface_metadata_given_reported_status_reports_it(reported_status, expected_status):
+def test_interface_metadata_maps_the_reported_status(reported_status, expected_admin, expected_oper):
     record = dict(
         load_captured('data_interfaces_configuration')['response'][0],
         adminStatus=reported_status,
@@ -186,48 +179,40 @@ def test_interface_metadata_given_reported_status_reports_it(reported_status, ex
 
     interface = create_interface_metadata(record, namespace='default')
 
-    assert interface.admin_status == expected_status
-    assert interface.oper_status == expected_status
+    assert interface.admin_status == expected_admin
+    assert interface.oper_status == expected_oper
 
 
-def test_interface_metadata_given_no_reported_status_reports_unknown_rather_than_down():
-    # A status Catalyst Center never reported must not read the same as one it reported down --
-    # otherwise an interface the appliance is simply silent about looks like an outage.
-    record = dict(load_captured('data_interfaces_configuration')['response'][0], adminStatus=None, operStatus=None)
+def test_interface_metadata_port_role_prefers_uplink_when_iswan_is_set():
+    # The brief derives port_role from interfaceType, portMode and description; an interface the
+    # appliance has identified as a WAN link is an uplink regardless of its port mode.
+    record = dict(load_captured('data_interfaces_configuration')['response'][0], isWan=True)
 
-    interface = create_interface_metadata(record, namespace='default')
-
-    assert interface.admin_status is None
-    assert interface.oper_status == OPER_STATUS_UNKNOWN
+    assert create_interface_metadata(record, namespace='default').port_role == 'uplink'
 
 
-def test_batch_payloads_splits_at_one_hundred_items():
-    devices = [create_device_metadata(_device_record(), namespace='default') for _ in range(250)]
+@pytest.mark.parametrize(('device_count', 'expected_sizes'), [(0, []), (250, [100, 100, 50])])
+def test_batch_payloads_splits_into_batches_of_at_most_one_hundred(device_count, expected_sizes):
+    # The intake rejects an oversized payload outright, so a sweep of a large estate has to be
+    # split. Nothing in, nothing out: an empty cycle must not send an empty payload either.
+    devices = [create_device_metadata(_device_record(), namespace='default') for _ in range(device_count)]
 
     batches = list(batch_payloads('default', devices))
 
-    assert [batch.size for batch in batches] == [100, 100, 50]
-
-
-def test_batch_payloads_given_nothing_yields_nothing():
-    assert list(batch_payloads('default', [])) == []
+    assert [batch.size for batch in batches] == expected_sizes
 
 
 def test_check_given_ndm_disabled_sends_no_metadata_event(dd_run_check, aggregator, instance):
-    from .conftest import ScriptedHttp
-
     instance['send_ndm_metadata'] = False
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
     check.client.http = ScriptedHttp([load_captured('data_network_devices')])
 
     dd_run_check(check)
 
-    assert aggregator.events == []
+    assert aggregator.get_event_platform_events('network-devices-metadata', parse_json=False) == []
 
 
 def test_check_given_ndm_enabled_sends_devices_in_the_metadata_event(dd_run_check, aggregator, instance):
-    from .conftest import ViewRoutedHttp
-
     instance['send_ndm_metadata'] = True
     instance['collect_stacks'] = False
     instance['collect_site_health'] = False

@@ -11,6 +11,8 @@ plumbing there, never on a value being realistic.
 
 from __future__ import annotations
 
+import pytest
+
 from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_devices
@@ -27,9 +29,15 @@ def _check(instance):
     return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
 
 
-def test_collect_devices_given_captured_switches_emits_health_per_device(aggregator, instance):
-    # `device_id` must mean one thing across the whole integration: the {namespace}:{ip} form the
-    # SNMP check also uses. The Catalyst Center UUID travels separately as `device_uuid`.
+# -- switches, from the sandbox recording -----------------------------------------
+
+
+def test_collect_devices_given_captured_switches_emits_the_expected_device_series(aggregator, instance):
+    # Four recorded switches, and what the collector makes of them. `device_id` must mean one
+    # thing across the whole integration: the {namespace}:{ip} form the SNMP check also uses,
+    # with the Catalyst Center UUID travelling separately as `device_uuid`. An empty
+    # errorInterfaces list means zero interfaces in error, which is a real datapoint -- skipping
+    # it leaves a gap in the graph during healthy periods and a spike during unhealthy ones.
     collect_devices(_check(instance), _client(instance, load_captured('data_network_devices')), collect_wireless=False)
 
     aggregator.assert_metric('cisco_catalyst_center.device.health', count=4)
@@ -38,6 +46,19 @@ def test_collect_devices_given_captured_switches_emits_health_per_device(aggrega
         'cisco_catalyst_center.device.health',
         ['device_id:default:10.10.20.175', 'device_uuid:aa754801-8895-41e8-8ca5-27ee415c9c42'],
     )
+    aggregator.assert_metric_has_tag('cisco_catalyst_center.device.health', 'reachability:REACHABLE')
+    aggregator.assert_metric('cisco_catalyst_center.device.link.error.count', value=0, count=4)
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.uptime', 'device_name:sw1') == [16847210]
+
+
+@pytest.mark.parametrize(('reachability', 'expected'), [('REACHABLE', 1), ('UNREACHABLE', 0)])
+def test_collect_devices_maps_reachability_to_a_gauge(aggregator, instance, reachability, expected):
+    # "Is this device up" is answerable from NDM metadata, which is not alertable. The gauge is.
+    payload = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', reachability)
+
+    collect_devices(_check(instance), _client(instance, payload), collect_wireless=False)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [expected]
 
 
 def test_collect_devices_given_score_of_minus_one_skips_that_metric(aggregator, instance):
@@ -49,15 +70,10 @@ def test_collect_devices_given_score_of_minus_one_skips_that_metric(aggregator, 
     aggregator.assert_metric('cisco_catalyst_center.device.cpu.score', count=3)
 
 
-def test_collect_devices_given_empty_error_interfaces_emits_count_of_zero(aggregator, instance):
-    # [] means zero interfaces in error, which is a real datapoint. Skipping it leaves a gap in
-    # the graph during healthy periods and a spike during unhealthy ones.
-    collect_devices(_check(instance), _client(instance, load_captured('data_network_devices')), collect_wireless=False)
-
-    aggregator.assert_metric('cisco_catalyst_center.device.link.error.count', value=0, count=4)
+# -- access points and controllers, from the synthetic payload --------------------
 
 
-def test_collect_devices_given_ap_record_emits_radio_metrics_tagged_by_band(aggregator, instance):
+def test_collect_devices_given_wireless_records_emits_radio_and_controller_metrics(aggregator, instance):
     payload = load_wireless_synthetic('data_network_devices_wireless')
 
     collect_devices(_check(instance), _client(instance, payload), collect_wireless=True)
@@ -66,6 +82,9 @@ def test_collect_devices_given_ap_record_emits_radio_metrics_tagged_by_band(aggr
     assert metric_values(aggregator, noise, 'radio_band:2.4Ghz') == [-92]
     assert metric_values(aggregator, noise, 'radio_band:5Ghz') == [-97]
     aggregator.assert_metric('cisco_catalyst_center.device.ap.radio.client.count', count=2)
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.ap.count', 'device_family:Wireless Controller') == [
+        31
+    ]
 
 
 def test_collect_devices_given_wireless_disabled_emits_no_radio_metrics(aggregator, instance):
@@ -78,16 +97,6 @@ def test_collect_devices_given_wireless_disabled_emits_no_radio_metrics(aggregat
     aggregator.assert_metric('cisco_catalyst_center.device.health', count=2)
 
 
-def test_collect_devices_given_wlc_record_emits_ap_count(aggregator, instance):
-    payload = load_wireless_synthetic('data_network_devices_wireless')
-
-    collect_devices(_check(instance), _client(instance, payload), collect_wireless=True)
-
-    assert metric_values(aggregator, 'cisco_catalyst_center.device.ap.count', 'device_family:Wireless Controller') == [
-        31
-    ]
-
-
 def test_collect_devices_given_null_ap_details_does_not_raise(aggregator, instance):
     # apDetails is null on every switch, and on controllers. `for r in record['apDetails']['radios']`
     # would raise TypeError on the first real payload.
@@ -96,9 +105,3 @@ def test_collect_devices_given_null_ap_details_does_not_raise(aggregator, instan
     collect_devices(_check(instance), _client(instance, payload), collect_wireless=True)
 
     aggregator.assert_metric('cisco_catalyst_center.device.ap.radio.noise', count=0)
-
-
-def test_collect_devices_given_string_numeric_uptime_emits_numeric(aggregator, instance):
-    collect_devices(_check(instance), _client(instance, load_captured('data_network_devices')), collect_wireless=False)
-
-    aggregator.assert_metric('cisco_catalyst_center.device.uptime', count=4)
