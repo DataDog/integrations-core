@@ -267,3 +267,9 @@ dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dyn
 dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="+Inf"} 51
 dynamo_component_router_overlap_blocks_lost_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 51
 dynamo_component_router_overlap_blocks_lost_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 42.0
+# HELP dynamo_component_kv_publisher_zmq_events_total ZMQ KV events seen by the relay
+# TYPE dynamo_component_kv_publisher_zmq_events_total counter
+dynamo_component_kv_publisher_zmq_events_total{stage="decode",event_type="stored"} 42
+# HELP dynamo_component_kv_publisher_zmq_filtered_events_total ZMQ KV events filtered before conversion
+# TYPE dynamo_component_kv_publisher_zmq_filtered_events_total counter
+dynamo_component_kv_publisher_zmq_filtered_events_total{event_type="stored",reason="not_decode"} 7

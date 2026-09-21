@@ -32,6 +32,7 @@ class ValidationConfig:
     description: str = ""
     repo_wide: bool = False
     fix_flag: str | None = None
+    failure_guidance: str | None = None
 
 
 # This is a subset of the available validations. Some validations still live
@@ -108,6 +109,11 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     "qa-label": ValidationConfig(
         description="Validate the pull request declares whether it needs QA for the next Agent release",
         repo_wide=True,
+        failure_guidance=(
+            "**To fix:** Choose exactly one QA label:\n"
+            "• `qa/required` if the PR needs QA validation.\n"
+            "• `qa/skip-qa` if the PR does not need QA validation."
+        ),
     ),
     "readmes": ValidationConfig(
         description="Validate README files have required sections",

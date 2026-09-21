@@ -187,6 +187,7 @@ class InstanceConfig(BaseModel):
     send_monotonic_with_gauge: Optional[bool] = None
     service: Optional[str] = None
     share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabels]]] = None
+    sidekiq_endpoint: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tag_by_endpoint: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
@@ -205,6 +206,7 @@ class InstanceConfig(BaseModel):
     use_legacy_auth_encoding: Optional[bool] = None
     use_process_start_time: Optional[bool] = None
     username: Optional[str] = None
+    workhorse_endpoint: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

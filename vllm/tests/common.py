@@ -74,4 +74,27 @@ METRICS_MOCK = [
     'time_to_first_token.seconds.sum',
 ]
 
-METRICS_MOCK = [f'vllm.{m}' for m in METRICS_MOCK]
+GPU_METRICS_MOCK = [
+    'estimated_flops_per_gpu.count',
+    'external_prefix_cache.hits.count',
+    'external_prefix_cache.queries.count',
+    'prompt_tokens.cached.count',
+    'request.decode_time.seconds.bucket',
+    'request.decode_time.seconds.count',
+    'request.decode_time.seconds.sum',
+    'request.prefill_kv_computed_tokens.bucket',
+    'request.prefill_kv_computed_tokens.count',
+    'request.prefill_kv_computed_tokens.sum',
+    'request.prefill_time.seconds.bucket',
+    'request.prefill_time.seconds.count',
+    'request.prefill_time.seconds.sum',
+    'request.queue_time.seconds.bucket',
+    'request.queue_time.seconds.count',
+    'request.queue_time.seconds.sum',
+    'spec_decode.num_accepted_tokens.count',
+    'spec_decode.num_accepted_tokens_per_pos.count',
+    'spec_decode.num_draft_tokens.count',
+]
+
+METRICS_MOCK = [f'vllm.{m}' for m in METRICS_MOCK + GPU_METRICS_MOCK]
+GPU_METRICS_MOCK = [f'vllm.{m}' for m in GPU_METRICS_MOCK]
