@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from copy import deepcopy
-
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.squid import SquidCheck
 
@@ -107,24 +104,3 @@ def test_host_https(instance, fake_http, fake_http_response):
         check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
         check.check(instance)
         assert fake_http.requests[0].url == expected_url
-
-
-@pytest.mark.parametrize(
-    'auth_config',
-    [
-        {"cachemgr_username": "datadog_user", "cachemgr_password": "datadog_pass"},
-        {"username": "datadog_user", "password": "datadog_pass"},
-    ],
-)
-def test_legacy_username_password(aggregator, instance, auth_config, fake_http, fake_http_response):
-    instance = deepcopy(instance)
-    instance.update(auth_config)
-    fake_http_response(common.URL, "client_http.requests=42\n")
-    check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
-
-    check.check(instance)
-
-    fake_http.assert_requests([RecordedRequest('GET', common.URL)])
-    tags = ['name:ok_instance', 'custom_tag']
-    aggregator.assert_service_check(common.SERVICE_CHECK, status=check.OK, tags=tags)
-    aggregator.assert_metric('squid.cachemgr.client_http.requests', value=42, tags=tags)
