@@ -27,9 +27,10 @@ official documentation. Beyond the catalog families and any metric you confirm i
 List the working tree and look for the package directory named by your standing
 integration-identity rule. It may or may not be there already.
 
-**If it is absent,** create the integration with the scaffolding tool, supplying the
-**integration name** — the name derived by your standing integration-identity rule. This
-creates the `<integration_name>/` directory with its manifest and boilerplate files.
+**If it is absent,** create the integration with the scaffolding tool, supplying
+`${integration}` exactly as given here — not the name derived by your standing
+integration-identity rule. This creates the `<integration_name>/` directory with its
+manifest and boilerplate files.
 
 **If it is already there,** do not run the scaffolding tool over it and do not create a second
 package. Adopt the existing directory instead.

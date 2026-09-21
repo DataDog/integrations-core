@@ -10,13 +10,22 @@ from ddev.ai.tools.shell.base import CmdTool
 
 
 class DdevCreateInput(BaseToolInput):
-    integration: Annotated[str, Field(description="Name of the new integration (snake_case)")]
+    integration: Annotated[
+        str,
+        Field(
+            description=(
+                "Human-readable display name of the new integration, exactly as given "
+                "(e.g. 'HPE Aruba Edge'), not a snake_case slug. This command normalizes it "
+                "to snake_case for the directory, Python package, and metrics prefix, while "
+                "the generated manifest's display-name fields keep it exactly as given."
+            )
+        ),
+    ]
 
 
 class DdevCreateTool(CmdTool[DdevCreateInput]):
     """Scaffolds a new Datadog Agent check integration with all boilerplate files and
-    directory structure. Creates a directory named after the integration (snake_case)
-    in the current working directory. Use before writing any integration code."""
+    directory structure. Use before writing any integration code."""
 
     timeout = 60
 

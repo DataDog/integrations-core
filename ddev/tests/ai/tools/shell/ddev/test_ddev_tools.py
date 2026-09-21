@@ -17,13 +17,15 @@ from ddev.ai.tools.shell.ddev.validate import DdevValidateInput, DdevValidateToo
 
 
 def test_create_cmd():
-    cmd = DdevCreateTool().cmd(DdevCreateInput(**{"integration": "my_check"}))
+    # The display name is passed through verbatim; `ddev create` normalizes it to
+    # snake_case for the directory/package/metrics prefix while keeping it exact in the manifest.
+    cmd = DdevCreateTool().cmd(DdevCreateInput(**{"integration": "HPE Aruba Edge"}))
     assert cmd == [
         "ddev",
         "--no-interactive",
         "create",
         "check",
-        "my_check",
+        "HPE Aruba Edge",
     ]
 
 
