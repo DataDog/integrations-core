@@ -1,0 +1,15 @@
+{
+  "page": {
+    "count": 0,
+    "limit": 20,
+    "offset": 1,
+    "sortBy": [
+      {
+        "name": "applicationName",
+        "order": "asc"
+      }
+    ]
+  },
+  "response": [],
+  "version": "1.0"
+}
