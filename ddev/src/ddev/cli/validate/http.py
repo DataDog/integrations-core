@@ -75,7 +75,9 @@ def validate_use_http_wrapper_file(file, check):
         found_http = re.search(r'self\._?http\b|OpenMetricsBaseCheck', read_file)
         skip_validation = re.search(r'SKIP_HTTP_VALIDATION', read_file)
         http_func = re.search(REQUEST_LIBRARY_FUNC_RE, read_file)
-        if http_func and not skip_validation:
+        # datadog_checks_base owns the requests backend behind the agnostic HTTP client, so
+        # Session/verb calls there are the implementation, not integration coupling.
+        if http_func and not skip_validation and check != 'datadog_checks_base':
             error_message += (
                 f'Check `{check}` uses `{http_func.group(0)}` in `{os.path.basename(file)}`, '
                 f'please use the HTTP wrapper instead\n'
