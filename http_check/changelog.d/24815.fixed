@@ -1,1 +1,1 @@
-Fix peer certificate retrieval when ``use_cert_from_response`` is enabled.
+Migrate to the backend-agnostic HTTP client and error types.
