@@ -96,23 +96,42 @@ Follow `references/redis-exemplar.md`. Produce, under `<integration>/tests/`:
 
 1. A **full-coverage compose** (reuse/extend an existing one where possible) with:
    - the live service (add replica/secondary topology only if a target metric needs it),
+     its image tag driven by a **version override env** so a consumer can pick the service version
+     from the host environment — `image: "<service>:${<SERVICE>_VERSION:-<pinned default>}"` (e.g.
+     `redis:${REDIS_VERSION:-7.4}`), the same host-env pattern as `ACTIVITY_GEN`. Every service that
+     runs the same engine (primary, replica, seed, activity-gen) reads the **same** var so they stay
+     on one version. Keep a sensible pinned default so the fixture is reproducible with no env set.
    - a one-shot `seed` service for state-dependent metrics (`restart: "no"`,
      `condition: service_completed_successfully`),
    - a continuous `activity-gen` service running `../activity-gen.sh`, `restart: unless-stopped`,
      gated by an `ACTIVITY_GEN=0` escape hatch and `depends_on` the seed,
    - the entrypoint service gated (`depends_on` … `service_healthy` / `service_completed_successfully`)
      so one dependency pulls up the whole environment.
+   - **credentials** set once via compose env with clear names and defaults — `DB_USERNAME` /
+     `DB_PASSWORD` (or the engine's convention, e.g. `REDIS_PASSWORD`), overridable from the host
+     environment like the version var. The broker service, the healthcheck, `seed`, and
+     `activity-gen` all read the same vars, so a consumer changes the password in one place.
 2. An **`activity-gen.sh`** that loops the rate/counter workload, consumes the connection details
    from the `provides.*` env, supports `ACTIVITY_GEN=0` (idle but alive) and a duration cap, and
    logs progress. Keep it POSIX `sh`.
 3. **`tests/evalya.yaml`** with a `<integration>-full` task referencing the compose entrypoint
    service (`./compose/<file>.compose@<service>`), with:
-   - `labels`: `evalya.io/publish: "true"` and `evalya.io/provides.<VAR>` for host/port/credentials
-     (`{{ .hostname }}` for the host),
-   - `env` for any secrets the healthcheck/consumers need,
-   - a `healthcheck` that returns ready only when the service can actually serve the check.
+   - `labels`: `evalya.io/publish: "true"` and `evalya.io/provides.<VAR>` for host, port, **and the
+     credentials** (`{{ .hostname }}` for the host). Publish the username and password under the
+     same names the check config expects (e.g. `provides.DB_USERNAME` / `provides.DB_PASSWORD`, or
+     the engine's own like `provides.REDIS_PASSWORD`) so a downstream consumer inherits working
+     credentials automatically rather than hardcoding them.
+   - `env` for the version override, credentials, and any secret the healthcheck/consumers need —
+     these are the task's configurable inputs; give each a default that matches the compose default.
+   - a `healthcheck` that returns ready only when the service can actually serve the check (it must
+     authenticate with the same credential vars).
 
    Keep any existing lightweight task (e.g. `<integration>-standalone`) alongside it.
+
+**Configurable inputs to expose and document** (all overridable from the host environment, defaults
+that keep the fixture reproducible): the **service version** (`<SERVICE>_VERSION`), the
+**credentials** (`DB_USERNAME`/`DB_PASSWORD` or engine equivalent), and the **workload switch**
+(`ACTIVITY_GEN`). List them explicitly in the `tests/README.md` (step 6) with their defaults.
 
 ### 5. Close the coverage loop
 
@@ -147,7 +166,8 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 ### 6. Document and finish
 
 - Add/extend `<integration>/tests/README.md`: what `<integration>-full` is, the services, the
-  `ACTIVITY_GEN` switch, and any documented-unreachable metrics.
+  configurable inputs with their defaults (`<SERVICE>_VERSION`, the credential vars, `ACTIVITY_GEN`)
+  and how to override them, and any documented-unreachable metrics.
 - Lint touched Python (the workload is usually `sh`, but the extractor and any helper are Python):
   `ddev test -fs <integration>` where applicable.
 - Changelog: **open the PR first**, then add `<integration>/changelog.d/<PR>.added` by hand (see

@@ -43,8 +43,19 @@ Transferable rules:
 - `task: ./compose/<file>.compose@<service>` — the `@service` is the environment's *entrypoint*.
   Gate it (via `depends_on`) so requesting it pulls up seed, workload, and any topology.
 - `evalya.io/provides.<VAR>` is the contract consumers depend on. Name the vars for what the check's
-  config needs (host, port, credentials). Use `{{ .hostname }}` for the host.
-- The healthcheck must reflect *serving readiness*, not just process liveness.
+  config needs — host, port, **and credentials** (`provides.REDIS_PASSWORD` here; use
+  `provides.DB_USERNAME`/`provides.DB_PASSWORD` for engines with a username). A consumer inherits
+  working credentials from these, so never hardcode them downstream. Use `{{ .hostname }}` for the host.
+- The image tag is a **host-overridable env with a default**, the same pattern as `ACTIVITY_GEN`:
+  `image: "redis:${REDIS_VERSION:-7.4}"`, read identically by every service (master, replica, seed,
+  activity-gen) so the whole environment stays on one version. Copy this.
+- Credentials: the redis exemplar **hardcodes** the password (`--requirepass devops-best-friend`,
+  repeated in each service and the healthcheck). Do **not** copy that; parameterize it the same way
+  as the version — `--requirepass ${REDIS_PASSWORD:-devops-best-friend}`, one var read by every
+  service and the healthcheck, published via `provides.REDIS_PASSWORD`. This is the credential
+  convention the skill requires (SKILL.md step 4); the exemplar predates it.
+- The healthcheck must reflect *serving readiness*, not just process liveness, and authenticates
+  with the same credential var.
 - Keep a minimal task (`redis-standalone`) next to the full one; not every consumer wants the
   heavy environment.
 
@@ -65,9 +76,11 @@ Four service kinds, each mapping to a metric class from SKILL.md step 2:
    redis dashboards use fields OSS Redis never emits (managed-service, cluster, sentinel,
    RediSearch). Most integrations need no proxy. If yours does, that is a pause-and-consult point.
 
-Details worth copying: an `ACTIVITY_GEN=0` host-env escape hatch (container stays up, no traffic);
-no host port publish on the internal entrypoint (reach it over the compose network via the
-`provides` label) to avoid clashing with a local instance.
+Details worth copying: a `${REDIS_VERSION:-7.4}` version override; an `ACTIVITY_GEN=0` host-env
+escape hatch (container stays up, no traffic); no host port publish on the internal entrypoint
+(reach it over the compose network via the `provides` label) to avoid clashing with a local
+instance. Not worth copying: the hardcoded password — parameterize it (see the credentials rule
+above).
 
 ## activity-gen.sh contract
 
