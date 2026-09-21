@@ -6,6 +6,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.squid import SquidCheck
 
 from . import common
@@ -55,40 +56,56 @@ def test_parse_instance(aggregator, check):
         check.parse_instance(instance)
 
 
-def test_get_counters(check):
+def test_get_counters(fake_http_response):
     """
     Squid can return a trailing newline at the end of its metrics and it would be
     treated as a metric line: an error would be raised attempting to parse the line
     due to a missing = character.
     See https://github.com/DataDog/integrations-core/pull/1643
     """
-    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
-        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
-            g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
-            check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
-            check.get_counters('host', 'port', [])
-            # we assert `parse_counter` was called only once despite the raw text
-            # containing multiple `\n` chars
-            check.parse_counter.assert_called_once()
+    check = SquidCheck(common.CHECK_NAME, {}, {})
+    with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+        fake_http_response('http://host:port/squid-internal-mgr/counters', "client_http.requests=42\n\n")
+        check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+        check.get_counters('host', 'port', [])
+        # we assert `parse_counter` was called only once despite the raw text
+        # containing multiple `\n` chars
+        check.parse_counter.assert_called_once()
 
 
-def test_host_without_protocol(check, instance):
-    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
-        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
-            g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
-            check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
-            check.check(instance)
-            assert g.call_args.args[0] == 'http://localhost:3128/squid-internal-mgr/counters'
+def test_service_check_critical_when_the_cachemgr_rejects_the_request(aggregator, fake_http_response):
+    # The cachemgr_username and cachemgr_password options exist because this endpoint answers 403 without
+    # them, so an error status has to reach the same handler as a transport failure. A status error is a
+    # sibling of the transport family rather than a member of it, so a handler covering only the transport
+    # root would leave squid.can_connect silent on the one failure the credentials are there to fix.
+    fake_http_response('http://host:port/squid-internal-mgr/counters', status_code=403)
+    check = SquidCheck(common.CHECK_NAME, {}, {})
+
+    with pytest.raises(HTTPClientStatusError):
+        check.get_counters('host', 'port', ['name:ok_instance'])
+
+    aggregator.assert_service_check(common.SERVICE_CHECK, status=check.CRITICAL, tags=['name:ok_instance'])
 
 
-def test_host_https(check, instance):
+def test_host_without_protocol(instance, fake_http, fake_http_response):
+    check = SquidCheck(common.CHECK_NAME, {}, {})
+    with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+        expected_url = 'http://localhost:3128/squid-internal-mgr/counters'
+        fake_http_response(expected_url, "client_http.requests=42\n\n")
+        check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+        check.check(instance)
+        assert fake_http.requests[0].url == expected_url
+
+
+def test_host_https(instance, fake_http, fake_http_response):
+    check = SquidCheck(common.CHECK_NAME, {}, {})
     instance['host'] = 'https://localhost'
-    with mock.patch('datadog_checks.squid.squid.requests.Session.get') as g:
-        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
-            g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
-            check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
-            check.check(instance)
-            assert g.call_args.args[0] == 'https://localhost:3128/squid-internal-mgr/counters'
+    with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
+        expected_url = 'https://localhost:3128/squid-internal-mgr/counters'
+        fake_http_response(expected_url, "client_http.requests=42\n\n")
+        check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+        check.check(instance)
+        assert fake_http.requests[0].url == expected_url
 
 
 @pytest.mark.parametrize(
@@ -103,17 +120,4 @@ def test_legacy_username_password(instance, auth_config):
     instance.update(auth_config)
     check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests.Session.get') as g:
-        with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
-            check.get_counters('host', 'port', [])
-
-            g.assert_called_with(
-                'http://host:port/squid-internal-mgr/counters',
-                auth=('datadog_user', 'datadog_pass'),
-                cert=mock.ANY,
-                headers=mock.ANY,
-                proxies=mock.ANY,
-                timeout=mock.ANY,
-                verify=mock.ANY,
-                allow_redirects=mock.ANY,
-            )
+    assert check.http.options['auth'] == ('datadog_user', 'datadog_pass')

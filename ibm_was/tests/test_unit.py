@@ -1,13 +1,17 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
+from pathlib import Path
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.ibm_was import IbmWasCheck
 
 from . import common
@@ -16,9 +20,7 @@ pytestmark = pytest.mark.unit
 
 
 def mock_data(file):
-    filepath = os.path.join(common.FIXTURE_DIR, file)
-    with open(filepath, 'rb') as f:
-        return f.read()
+    return (Path(common.FIXTURE_DIR) / file).read_bytes()
 
 
 def test_metric_collection_per_category(aggregator, instance, check):
@@ -86,10 +88,22 @@ def test_critical_service_check(instance, check, aggregator):
     instance['servlet_url'] = 'http://localhost:5678/wasPerfTool/servlet/perfservlet'
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
 
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(HTTPClientConnectionError):
         check = check(instance)
         check.check(instance)
 
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+@pytest.mark.parametrize('error_cls', [HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError])
+def test_make_request_catches_timeouts(instance, check, aggregator, fake_http, error_cls):
+    fake_http.register_response('GET', instance['servlet_url'], error_cls('timed out'))
+    check = check(instance)
+
+    with pytest.raises(error_cls, match='timed out'):
+        check.make_request()
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
 
 
