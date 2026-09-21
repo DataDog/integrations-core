@@ -107,12 +107,13 @@ Follow `references/redis-exemplar.md`. Produce, under `<integration>/tests/`:
      gated by an `ACTIVITY_GEN=0` escape hatch and `depends_on` the seed,
    - the entrypoint service gated (`depends_on` … `service_healthy` / `service_completed_successfully`)
      so one dependency pulls up the whole environment.
-   - **credentials** with a sane default so the task runs as-is (no env required) — a fixed default
-     like redis's `devops-best-friend` is fine. Set it once with a clear name (`DB_USERNAME` /
-     `DB_PASSWORD`, or the engine's convention e.g. `REDIS_PASSWORD`) and have the broker, the
-     healthcheck, `seed`, and `activity-gen` all read that one value, so it stays consistent in one
-     place. Making it a host-overridable env (`${DB_PASSWORD:-<default>}`) is a nice-to-have, not
-     required — the default must work unattended either way.
+   - **credentials** written as a host-overridable env *with* a sane default —
+     `${DB_PASSWORD:-<default>}` (or the engine's convention, e.g. `${REDIS_PASSWORD:-devops-best-friend}`,
+     and a `DB_USERNAME` where the engine has one). This gives both: the task runs as-is with no env
+     set, and a consumer can still customize the credential from the host environment. Set it once
+     and have the broker, the healthcheck, `seed`, and `activity-gen` all read that one var, so it
+     stays consistent in one place. Prefer this to a bare hardcoded literal, which runs as-is but
+     can't be overridden without editing the compose.
 2. An **`activity-gen.sh`** that loops the rate/counter workload, consumes the connection details
    from the `provides.*` env, supports `ACTIVITY_GEN=0` (idle but alive) and a duration cap, and
    logs progress. Keep it POSIX `sh`.
@@ -132,7 +133,7 @@ Follow `references/redis-exemplar.md`. Produce, under `<integration>/tests/`:
 
 **Inputs to document, each with a working default so the task runs unattended:** the **service
 version** (`<SERVICE>_VERSION`, host-overridable), the **credentials** (`DB_USERNAME`/`DB_PASSWORD`
-or engine equivalent — a fixed sane default is fine, override optional), and the **workload switch**
+or engine equivalent, host-overridable with a working default), and the **workload switch**
 (`ACTIVITY_GEN`, host-overridable). List them explicitly in the `tests/README.md` (step 6) with
 their defaults, and note which accept a host-env override.
 

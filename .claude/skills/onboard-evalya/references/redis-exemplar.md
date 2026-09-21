@@ -50,11 +50,11 @@ Transferable rules:
   `image: "redis:${REDIS_VERSION:-7.4}"`, read identically by every service (master, replica, seed,
   activity-gen) so the whole environment stays on one version. Copy this.
 - Credentials: the redis exemplar uses a fixed default password (`--requirepass devops-best-friend`,
-  the same value in each service and the healthcheck) and publishes it via `provides.REDIS_PASSWORD`.
-  That is fine — a sane default lets the task run as-is with no env, which is the goal. Copy the
-  shape: one credential value used consistently across every service and the healthcheck, published
-  through `provides`. Making it a host-overridable env (`${REDIS_PASSWORD:-devops-best-friend}`) is
-  an optional nicety, not required.
+  the same value in each service and the healthcheck) and publishes it via `provides.REDIS_PASSWORD`,
+  so the task runs as-is. Copy the shape — one credential value used consistently across every
+  service and the healthcheck, published through `provides` — but prefer the host-overridable form
+  `${REDIS_PASSWORD:-devops-best-friend}` so a consumer can still customize the credential without
+  editing the compose. The exemplar's bare literal runs as-is but can't be overridden.
 - The healthcheck must reflect *serving readiness*, not just process liveness, and authenticates
   with the same credential var.
 - Keep a minimal task (`redis-standalone`) next to the full one; not every consumer wants the
