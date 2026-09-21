@@ -74,19 +74,27 @@ def test_check_vllm_w_ray_prefix(dd_run_check, aggregator, datadog_agent, ray_in
     fake_http.assert_all_responses_consumed()
 
 
-def test_check_succeeds_when_version_endpoint_is_unavailable(dd_run_check, aggregator, instance):
-    mock_responses = [
-        MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
-        MockResponse(status_code=404),
-    ]
+def test_check_succeeds_when_version_endpoint_is_unavailable(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        Path(get_fixture_path("vllm_metrics.txt")).read_bytes(),
+        match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
+    )
+    fake_http_response(
+        instance['openmetrics_endpoint'].replace('/metrics', '/version'),
+        status_code=404,
+    )
     check = vLLMCheck("vLLM", {}, [instance])
 
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
-        dd_run_check(check)
+    dd_run_check(check)
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)
     aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.OK)
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize(
