@@ -129,27 +129,27 @@ state_test_data = [
         'OK for /state',
         [('http://hello.com/state', FakeHTTPResponse(json_result={"frameworks": []}))],
         ['url:http://hello.com/state'] + additional_tags,
-        False,
+        None,
         AgentCheck.OK,
     ),
     (
         'failing for /state, OK for /state.json',
         [
-            ('http://hello.com/state', Exception("unexpected error")),
+            ('http://hello.com/state', HTTPClientConnectionError("unexpected error")),
             ('http://hello.com/state.json', FakeHTTPResponse(json_result={"frameworks": []})),
         ],
         ['url:http://hello.com/state.json'] + additional_tags,
-        False,
+        None,
         AgentCheck.OK,
     ),
     (
         'failing for /state and failing for /state.json',
         [
-            ('http://hello.com/state', Exception("unexpected error")),
-            ('http://hello.com/state.json', Exception("unexpected error")),
+            ('http://hello.com/state', HTTPClientConnectionError("unexpected error")),
+            ('http://hello.com/state.json', HTTPClientConnectionError("unexpected error")),
         ],
         ['url:http://hello.com/state.json'] + additional_tags,
-        True,
+        HTTPClientConnectionError,
         AgentCheck.CRITICAL,
     ),
     (
@@ -162,7 +162,7 @@ state_test_data = [
             ('http://localhost:5050/state-summary', FakeHTTPResponse(json_result={"cluster": "test-cluster"})),
         ],
         ['url:http://hello.com/state'] + additional_tags + cluster_name_tag,
-        False,
+        None,
         AgentCheck.OK,
     ),
 ]
@@ -172,14 +172,14 @@ stats_test_data = [
         'OK for /stats.json',
         [('http://hello.com/stats.json', FakeHTTPResponse(json_result={"metric": 1}))],
         ['url:http://hello.com/stats.json'] + additional_tags,
-        False,
+        None,
         AgentCheck.OK,
     ),
     (
         'Failing for /stats.json',
-        [('http://hello.com/stats.json', Exception("unexpected error"))],
+        [('http://hello.com/stats.json', HTTPClientConnectionError("unexpected error"))],
         ['url:http://hello.com/stats.json'] + additional_tags,
-        True,
+        HTTPClientConnectionError,
         AgentCheck.CRITICAL,
     ),
 ]
@@ -192,22 +192,23 @@ def test_can_connect_service_check_state(
     aggregator,
     fake_http,
     test_case_name,
-    request_mock_effects,
+    request_outcomes,
     expected_tags,
-    expect_exception,
+    expected_exception,
     expected_status,
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    for url, outcome in request_mock_effects:
+    for url, outcome in request_outcomes:
         fake_http.register_response('GET', url, outcome)
-    try:
+
+    if expected_exception is not None:
+        with pytest.raises(expected_exception, match='unexpected error'):
+            check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
+    else:
         check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
-        assert not expect_exception
-    except Exception:
-        if not expect_exception:
-            raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.integration
@@ -224,6 +225,7 @@ def test_can_connect_service_with_instance_cluster_name(instance, aggregator, fa
     check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize(PARAMETERS, stats_test_data)
@@ -233,22 +235,23 @@ def test_can_connect_service_check_stats(
     aggregator,
     fake_http,
     test_case_name,
-    request_mock_effects,
+    request_outcomes,
     expected_tags,
-    expect_exception,
+    expected_exception,
     expected_status,
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    for url, outcome in request_mock_effects:
+    for url, outcome in request_outcomes:
         fake_http.register_response('GET', url, outcome)
-    try:
+
+    if expected_exception is not None:
+        with pytest.raises(expected_exception, match='unexpected error'):
+            check._process_stats_info('http://hello.com', instance['tags'])
+    else:
         check._process_stats_info('http://hello.com', instance['tags'])
-        assert not expect_exception
-    except Exception:
-        if not expect_exception:
-            raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize(

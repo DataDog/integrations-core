@@ -80,49 +80,49 @@ def test_instance_timeout(check, instance):
 
 
 @pytest.mark.parametrize(
-    'test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception',
+    'test_case_name, request_outcomes, expected_status, expected_tags, expected_exception',
     [
         (
             'OK case for /state endpoint',
             [FakeHTTPResponse(json_result={})],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state'],
-            False,
+            None,
         ),
         (
             'OK case with failing /state due to bad status and fallback on /state.json',
             [FakeHTTPResponse(status_code=500), FakeHTTPResponse(json_result={})],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
-            False,
+            None,
         ),
         (
             'OK case with failing /state due to Timeout and fallback on /state.json',
             [HTTPClientTimeoutError("timeout"), FakeHTTPResponse(json_result={})],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
-            False,
+            None,
         ),
         (
             'OK case with failing /state due to Exception and fallback on /state.json',
             [Exception("unexpected error"), FakeHTTPResponse(json_result={})],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
-            False,
+            None,
         ),
         (
             'NOK case with failing /state and /state.json due to timeout',
             [HTTPClientTimeoutError("timeout"), HTTPClientTimeoutError("timeout")],
             AgentCheck.CRITICAL,
             ['my:tag', 'url:http://hello.com/state.json'],
-            True,
+            CheckException,
         ),
         (
             'NOK case with failing /state and /state.json with bad status',
             [FakeHTTPResponse(status_code=500), FakeHTTPResponse(status_code=500)],
             AgentCheck.CRITICAL,
             ['my:tag', 'url:http://hello.com/state.json'],
-            True,
+            CheckException,
         ),
         (
             'OK case with non-leader master on /state',
@@ -132,7 +132,7 @@ def test_instance_timeout(check, instance):
             ],
             AgentCheck.UNKNOWN,
             ['my:tag', 'url:http://hello.com/state.json'],
-            False,
+            None,
         ),
         (
             'OK case with non-leader master on /state.json',
@@ -142,7 +142,7 @@ def test_instance_timeout(check, instance):
             ],
             AgentCheck.UNKNOWN,
             ['my:tag', 'url:http://hello.com/state.json'],
-            False,
+            None,
         ),
     ],
 )
@@ -152,26 +152,25 @@ def test_can_connect_service_check(
     aggregator,
     fake_http,
     test_case_name,
-    request_mock_side_effects,
+    request_outcomes,
     expected_status,
     expected_tags,
-    expect_exception,
+    expected_exception,
 ):
     check = MesosMaster('mesos_master', {}, [instance])
 
     urls = ['http://hello.com/state', 'http://hello.com/state.json']
-    for url, outcome in zip(urls, request_mock_side_effects):
+    for url, outcome in zip(urls, request_outcomes):
         fake_http.register_response('GET', url, outcome)
 
-    try:
+    if expected_exception is not None:
+        with pytest.raises(expected_exception):
+            check._get_master_state('http://hello.com', ['my:tag'])
+    else:
         check._get_master_state('http://hello.com', ['my:tag'])
-        exception_raised = False
-    except CheckException:
-        exception_raised = True
-
-    assert expect_exception == exception_raised
 
     aggregator.assert_service_check('mesos_master.can_connect', count=1, status=expected_status, tags=expected_tags)
+    fake_http.assert_all_responses_consumed()
 
 
 def test_timeout_service_check_preserves_timeout_context(instance, aggregator, fake_http):

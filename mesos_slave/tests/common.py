@@ -21,4 +21,4 @@ INSTANCE = {'url': URL, 'tasks': ['hello'], 'tags': ['instance:mytag1']}
 
 BAD_INSTANCE = {'url': 'http://localhost:9999', 'tasks': ['hello']}
 
-PARAMETERS = 'test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status'
+PARAMETERS = 'test_case_name, request_outcomes, expected_tags, expected_exception, expected_status'

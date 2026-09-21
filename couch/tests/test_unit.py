@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.couch import CouchDb
 from datadog_checks.couch.couch import CouchDB1, CouchDB2
@@ -55,29 +56,31 @@ def test_new_version_system_metrics(load_test_data):
     mock_agent_check.log.debug.assert_any_call("Skipping distribution events")
 
 
-def test_v1_status_error_without_response_skips_unresolved_database():
-    mock_agent_check = MagicMock()
-    mock_agent_check.instance = {}
-    mock_agent_check.MAX_DB = 50
-    mock_agent_check.get.side_effect = [{}, ['db1'], HTTPClientStatusError('403 Client Error')]
+def test_v1_status_error_without_response_skips_unresolved_database(fake_http):
+    instance = deepcopy(common.BASIC_CONFIG)
+    check = CouchDb(common.CHECK_NAME, {}, [instance])
+    server = instance['server']
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
+    fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
+    fake_http.register_response('GET', f'{server}/db1', HTTPClientStatusError('403 Client Error'))
 
-    data = CouchDB1(mock_agent_check).get_data('http://localhost:5984', [])
+    data = CouchDB1(check).get_data(server, [])
 
     assert data['databases'] == {}
-    mock_agent_check.warning.assert_not_called()
+    assert not check.warnings
+    fake_http.assert_all_responses_consumed()
 
 
-def test_v1_unresolved_database_still_emits_overall_stats():
-    mock_agent_check = MagicMock()
-    mock_agent_check.instance = {}
-    mock_agent_check.MAX_DB = 50
-    mock_agent_check.get_server.return_value = 'http://localhost:5984'
-    mock_agent_check.get_config_tags.return_value = []
+def test_v1_unresolved_database_still_emits_overall_stats(aggregator, fake_http):
+    instance = deepcopy(common.BASIC_CONFIG)
+    check = CouchDb(common.CHECK_NAME, {}, [instance])
+    server = instance['server']
     overall_stats = {'httpd': {'requests': {'current': 12}}}
-    mock_agent_check.get.side_effect = [overall_stats, ['db1'], HTTPClientStatusError('404 Client Error')]
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result=overall_stats))
+    fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
+    fake_http.register_response('GET', f'{server}/db1', HTTPClientStatusError('404 Client Error'))
 
-    CouchDB1(mock_agent_check).check()
+    CouchDB1(check).check()
 
-    mock_agent_check.gauge.assert_called_once_with(
-        'couchdb.httpd.requests', 12, tags=['instance:http://localhost:5984']
-    )
+    aggregator.assert_metric('couchdb.httpd.requests', 12, tags=[f'instance:{server}'], count=1)
+    fake_http.assert_all_responses_consumed()

@@ -52,15 +52,6 @@ def test_extract_seconds_value(instance):
         )
 
 
-def test__get_query_monitoring_data(instance_query):
-    """
-    `query_monitoring_url` can potentially fail, be sure we don't raise when the
-    endpoint is not reachable
-    """
-    couchbase = Couchbase('couchbase', {}, [instance_query])
-    couchbase._get_query_monitoring_data()
-
-
 def test_query_monitoring_connection_error_is_nonfatal(instance_query, fake_http):
     url = 'http://localhost:8093/admin/vitals'
     fake_http.register_response('GET', url, HTTPClientConnectionError('connection refused'))
