@@ -13,15 +13,18 @@ import pytest
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
+from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 from .helpers import (
     PARENT_ID,
     TRACE_ID,
+    RefusingPropagator,
     acceptance_receipt,
     descriptor,
     descriptor_receipt,
     finalize_receipt,
+    make_tracing,
     pending_receipt,
     receipt,
     source_page,
@@ -548,6 +551,153 @@ def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_chang
         # integrity, content-length, and Test Drive headers are unchanged, and an absent
         # context preserves the request behavior byte for byte.
         assert traced_headers == {**plain_headers, **expected_trace_headers}
+
+
+def test_page_upload_attempts_span_each_http_attempt_with_retry_and_outcome(monkeypatch, delivery, creds):
+    import requests
+
+    page = rq_contract.SourcePageUploadMetadata(0, 0, 1, 1)
+    page_receipt = json.dumps(receipt(page)).encode()
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append(dict(headers))
+        if len(calls) == 1:
+            return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
+        return SimpleNamespace(status_code=202, content=page_receipt)
+
+    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    tracing, tracer = make_tracing()
+    tracing.open_root(delivery)
+    timings = rq_timing.RemoteQueryProducerTimings(0.0)
+    client = rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
+
+    with io.BytesIO(b'x') as body:
+        page_receipt = client.put_source_page(creds, page, body)
+
+    tracing.succeed(rq_contract.RemoteQueryRunStats())
+    tracing.close()
+
+    assert page_receipt['status'] == 'accepted'
+    first, second = tracer.by_name(rq_tracing.REMOTE_QUERY_PAGE_UPLOAD_SPAN_OPERATION)
+    # The failed first attempt is a rejection with its public status counter; the retried
+    # attempt succeeds and is marked as the page's second attempt.
+    assert first.tags[rq_tracing.REMOTE_QUERY_SPAN_RETRY_TAG] == 'false'
+    assert first.error == 1
+    assert first.tags[rq_tracing.REMOTE_QUERY_SPAN_ERROR_TYPE_TAG] == 'rejected'
+    assert first.metrics[rq_tracing.REMOTE_QUERY_SPAN_HTTP_STATUS_METRIC] == 503
+    assert second.tags[rq_tracing.REMOTE_QUERY_SPAN_RETRY_TAG] == 'true'
+    assert second.error == 0
+    assert second.metrics[rq_tracing.REMOTE_QUERY_SPAN_HTTP_STATUS_METRIC] == 202
+    assert [span.child_of for span in (first, second)] == [tracer.spans[0], tracer.spans[0]]
+    # The root's attempt counters agree with the accumulator's upload accounting for the
+    # same retries.
+    root = tracer.spans[0]
+    assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_ATTEMPT_COUNT_METRIC] == 2
+    assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_RETRY_COUNT_METRIC] == 1
+    accumulator = timings.metadata()['producer']
+    assert accumulator['uploadAttemptCount'] == 2
+    assert accumulator['uploadRetryCount'] == 1
+
+
+def test_active_spans_replace_the_manual_trace_headers_only_on_spanned_requests(monkeypatch, delivery, creds):
+    import requests
+
+    traced = rq_upload.UploadCredentials(
+        creds.base_url,
+        creds.upload_id,
+        creds.api_key,
+        creds.app_key,
+        None,
+        trace_context=rq_contract.RemoteQueryTraceContext.model_validate(
+            {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}
+        ),
+    )
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append(dict(headers))
+        if url.endswith('/pages/0'):
+            page = rq_contract.SourcePageUploadMetadata(0, 0, 1, 1)
+            return SimpleNamespace(status_code=202, content=json.dumps(receipt(page)).encode())
+        if url.endswith('/finalize'):
+            return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
+        return SimpleNamespace(status_code=200, content=b'{}')
+
+    monkeypatch.setattr(requests, 'request', request)
+    tracing, tracer = make_tracing()
+    tracing.open_root(delivery)
+    client = rq_upload.RequestsUploadClient(tracing=tracing)
+
+    # The descriptor registration carries no span, so its manual trace headers stand.
+    client.register_descriptor(traced, b'{"format_version":"csv-json-cell-v1"}')
+    assert calls[0][rq_contract.REMOTE_QUERY_TRACE_ID_HEADER] == TRACE_ID
+    assert calls[0][rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == PARENT_ID
+    assert calls[0][rq_contract.REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER] == '2'
+
+    # The page upload replaces the manual trio with the attempt span's own injected
+    # context, while the authorization and declared-metadata headers ride unchanged.
+    with io.BytesIO(b'x') as body:
+        client.put_source_page(traced, rq_contract.SourcePageUploadMetadata(0, 0, 1, 1), body)
+    [attempt] = tracer.by_name(rq_tracing.REMOTE_QUERY_PAGE_UPLOAD_SPAN_OPERATION)
+    page_headers = calls[1]
+    assert page_headers[rq_contract.REMOTE_QUERY_TRACE_ID_HEADER] == '222'
+    assert page_headers[rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == str(attempt.span_id)
+    assert page_headers[rq_contract.REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER] == '1'
+    assert page_headers['dd-api-key'] == 'test-api-key'
+    assert page_headers['dd-application-key'] == 'test-app-key'
+    assert page_headers['Content-Type'] == rq_upload.REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE
+
+    # Finalize and abort inject their whole-call spans the same way.
+    with tracing.finalize_span():
+        client.finalize_run(traced, 1)
+    with tracing.abort_span():
+        client.abort(traced)
+    [finalize_span] = tracer.by_name(rq_tracing.REMOTE_QUERY_FINALIZE_SPAN_OPERATION)
+    [abort_span] = tracer.by_name(rq_tracing.REMOTE_QUERY_ABORT_SPAN_OPERATION)
+    assert calls[2][rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == str(finalize_span.span_id)
+    assert calls[3][rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == str(abort_span.span_id)
+
+
+def test_injection_failure_falls_back_to_the_manual_trace_headers(monkeypatch, delivery, creds):
+    import requests
+
+    traced = rq_upload.UploadCredentials(
+        creds.base_url,
+        creds.upload_id,
+        creds.api_key,
+        creds.app_key,
+        None,
+        trace_context=rq_contract.RemoteQueryTraceContext.model_validate(
+            {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}
+        ),
+    )
+    calls = []
+
+    def request(method, url, headers, data, timeout):
+        calls.append(dict(headers))
+        return SimpleNamespace(
+            status_code=202, content=json.dumps(receipt(rq_contract.SourcePageUploadMetadata(0, 0, 1, 1))).encode()
+        )
+
+    monkeypatch.setattr(requests, 'request', request)
+    tracing, tracer = make_tracing(propagator=RefusingPropagator())
+    tracing.open_root(delivery)
+    client = rq_upload.RequestsUploadClient(tracing=tracing)
+
+    with io.BytesIO(b'x') as body:
+        page_receipt = client.put_source_page(traced, rq_contract.SourcePageUploadMetadata(0, 0, 1, 1), body)
+
+    # The propagator failed, so the request still carries the manual trace headers
+    # verbatim — the no-tracer fallback — and the upload itself succeeded.
+    assert page_receipt['status'] == 'accepted'
+    assert calls[0][rq_contract.REMOTE_QUERY_TRACE_ID_HEADER] == TRACE_ID
+    assert calls[0][rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == PARENT_ID
+    assert calls[0][rq_contract.REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER] == '2'
+    # The span still finished with its outcome; only the injection fell back.
+    [attempt] = tracer.by_name(rq_tracing.REMOTE_QUERY_PAGE_UPLOAD_SPAN_OPERATION)
+    assert attempt.finished
 
 
 @pytest.mark.parametrize('body', [b'', b'not-json', b'[]', b'null'])

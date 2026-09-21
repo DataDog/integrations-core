@@ -5,6 +5,7 @@
 
 import json
 import logging
+from contextlib import contextmanager
 
 import pytest
 import urllib3.exceptions
@@ -12,6 +13,7 @@ from clickhouse_connect.driver.exceptions import DatabaseError
 
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
+from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.clickhouse import remote_query
 from datadog_checks.clickhouse.remote_query import execute_agent_rpc_stream_copy
 
@@ -46,6 +48,23 @@ from .remote_query_fakes import (
     two_row_client,
     valid_request,
 )
+
+
+@pytest.fixture(autouse=True)
+def null_native_producer_tracing(monkeypatch):
+    """Keep native ddtrace producer spans out of every test in this module.
+
+    The produce lifecycle opens real producer spans through
+    `open_remote_query_producer_tracing` whenever ddtrace is importable — including in
+    this suite's process — so the module-wide default here is the null tracing. The
+    span-boundary behavior is pinned by the recording tracing test below and by the
+    shared checks-base suite; no test here emits real spans or depends on a trace agent.
+    """
+    monkeypatch.setattr(
+        rq_tracing,
+        'open_remote_query_producer_tracing',
+        lambda trace_context, integration: rq_tracing.NULL_PRODUCER_TRACING,
+    )
 
 
 @pytest.mark.parametrize('field', ['extra', 'password'])
@@ -813,3 +832,157 @@ def test_entry_propagates_callback_failure_without_upload(monkeypatch):
 
     with pytest.raises(RuntimeError, match='stop streaming'):
         execute_agent_rpc_stream_copy(json.dumps(valid_request()), make_check(), emit)
+
+
+# ---------------------------------------------------------------------------
+# Native producer spans
+# ---------------------------------------------------------------------------
+
+
+class RecordingTracing(rq_tracing.NullRemoteQueryProducerTracing):
+    """A null tracing that records the producer's span-boundary calls in order."""
+
+    def __init__(self):
+        self.calls = []
+
+    def open_root(self, delivery):
+        self.calls.append(('open_root', delivery.run_id, delivery.upload_id))
+
+    def succeed(self, stats):
+        self.calls.append(('succeed', stats.pages_emitted))
+
+    def fail(self, error_code, stats):
+        self.calls.append(('fail', error_code, stats.pages_emitted))
+
+    def enter_phase(self, name):
+        self.calls.append(('enter', name))
+        return None
+
+    def enter_fetch(self):
+        self.calls.append('fetch')
+
+    def note_page_acknowledged(self):
+        self.calls.append('page_ack')
+
+    @contextmanager
+    def finalize_span(self):
+        self.calls.append('finalize')
+        yield
+
+    @contextmanager
+    def abort_span(self):
+        self.calls.append('abort_span:open')
+        try:
+            yield
+        finally:
+            self.calls.append('abort_span:close')
+
+    def close(self):
+        self.calls.append('close')
+
+
+def recording_tracing_factory(tracing):
+    """A factory replacement answering the recording tracing and capturing its arguments."""
+
+    def factory(trace_context, integration):
+        tracing.calls.append(('factory', trace_context, integration))
+        return tracing
+
+    return factory
+
+
+def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    prefix_len = len(prefix_bytes())
+    request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq_pages.PAGE_SUFFIX))
+    clickhouse_client = two_row_client()
+    fake = FakeUploadClient()
+    tracing = RecordingTracing()
+    monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
+
+    events = collect_events(request, make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
+
+    assert_success(events)
+    # The native spans open at exactly the accumulator's phase boundaries: the root
+    # before the run, both setup segments (client creation and stream open through
+    # descriptor registration) with the header read's fetch boundary inside, encode around
+    # the row loop with one fetch boundary per raw stream read — the second read is the
+    # exhaustion read the loop makes after the second row — and the page acknowledgments
+    # at the writer's own closes (the first page closes when the overflow row arrives,
+    # the final page inside finish), then the finalize span around run finalization,
+    # closed by the terminal success and the single close.
+    assert tracing.calls == [
+        ('factory', None, 'clickhouse'),
+        ('open_root', RUN_ID, UPLOAD_ID),
+        ('enter', 'database_setup'),
+        ('enter', 'database_setup'),
+        'fetch',
+        ('enter', 'encode_and_page_build'),
+        'page_ack',
+        'fetch',
+        'page_ack',
+        'finalize',
+        ('succeed', 2),
+        'close',
+    ]
+    # Every raw stream read opened exactly one fetch boundary call.
+    assert tracing.calls.count('fetch') == clickhouse_client.stream.read_count
+
+
+def test_producer_brackets_the_abort_and_fails_the_root_on_a_produce_failure(monkeypatch, caplog):
+    """A produce failure brackets the failure tail's upload abort with the abort span and
+    closes the root with the same failure code the event carries, never echoing the
+    exception's text on any span."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    clickhouse_client = FakeClickhouseClient(
+        stream_body(('value',), ('UInt8',), [[1], [2], [3]]),
+        read_error=urllib3.exceptions.ProtocolError('Connection broken: SECRET_DO_NOT_LOG'),
+    )
+    fake = FakeUploadClient()
+    tracing = RecordingTracing()
+    monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
+
+    caplog.set_level(logging.DEBUG)
+    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
+
+    assert_failed_event(events, 'timeout', 'interrupted')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert fake.abort_calls == 1
+    assert clickhouse_client.stream.closed
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+    # The abort span brackets the failure tail's upload abort and closes before the root
+    # is marked failed; close runs exactly once, last.
+    assert tracing.calls == [
+        ('factory', None, 'clickhouse'),
+        ('open_root', RUN_ID, UPLOAD_ID),
+        ('enter', 'database_setup'),
+        ('enter', 'database_setup'),
+        'fetch',
+        'abort_span:open',
+        'abort_span:close',
+        ('fail', 'timeout', 0),
+        'close',
+    ]
+
+
+def test_producer_fails_the_root_for_an_admission_failure(monkeypatch):
+    tracing = RecordingTracing()
+    monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
+    request = valid_request()
+    request['target'] = {'database_instance': 'Clickhouse/Primary-B'}
+    check = make_check(check_database_identifier='Clickhouse/Primary-A')
+
+    events = collect_events(request, check, clickhouse_client=make_client(rows=[[1]]))
+
+    assert_failed_event(events, 'target_not_found')
+    # The admission failure still closes the root with the failure code and zero
+    # counters; no page, abort, or produce boundary was ever reached.
+    assert tracing.calls == [
+        ('factory', None, 'clickhouse'),
+        ('open_root', RUN_ID, UPLOAD_ID),
+        ('fail', 'target_not_found', 0),
+        'close',
+    ]

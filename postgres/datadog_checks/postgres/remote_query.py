@@ -27,6 +27,7 @@ from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
+from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 if TYPE_CHECKING:
@@ -381,8 +382,9 @@ class CopyPageWriter:
         guard: Callable[[], None],
         stats: rq_contract.RemoteQueryRunStats,
         timings: rq_timing.RemoteQueryProducerTimings,
+        tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
     ):
-        self._uploader = rq_pages.PageUploader(delivery, creds, client, descriptor, guard, stats, timings)
+        self._uploader = rq_pages.PageUploader(delivery, creds, client, descriptor, guard, stats, timings, tracing)
         self._guard = guard
         self._max_row_bytes = delivery.limits.max_row_bytes
         self._target = delivery.limits.max_file_bytes * 4 // 5
@@ -451,6 +453,7 @@ def produce_remote_query(
     started_at: float,
     stats: rq_contract.RemoteQueryRunStats,
     timings: rq_timing.RemoteQueryProducerTimings | None = None,
+    tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
 ) -> dict[str, Any]:
     """Execute the validated query once, natively, and return the compact run receipt.
 
@@ -470,7 +473,9 @@ def produce_remote_query(
     framing and page buffering are encode and page build (with any upload triggers nested
     inside it), and page uploads and finalize are accounted by the shared source-page
     writer. Everything else — timeout resolution, the pre-read guards, transaction
-    teardown — lands in `otherMs`.
+    teardown — lands in `otherMs`. The native producer spans open at exactly these phase
+    boundaries — `tracing` is fail-open and additive to the timing accumulator, and
+    every span boundary here is the accumulator's own.
     """
     delivery = request.result_delivery
     limits = delivery.limits
@@ -480,6 +485,7 @@ def produce_remote_query(
     deadline = started_at + limits.timeout_ms / 1000
     statement_timeout_ms = _resolve_statement_timeout_ms(check, deadline)
     timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+    tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
 
     def guard() -> None:
         rq_events.raise_if_timed_out(deadline)
@@ -490,8 +496,10 @@ def produce_remote_query(
     # the COPY dispatch, and ends before the first data read; the connection and cursor
     # contexts outlive the phase, so it is entered and exited explicitly. The inline exit
     # marks the boundary before the record loop; the spanning `finally` re-exits it
-    # (idempotently) so a setup interrupted mid-flight still reports its partial wall.
+    # (idempotently) so a setup interrupted mid-flight still reports its partial wall. The
+    # setup span enters and exits at the same boundaries.
     setup_phase = timings.enter_phase('database_setup')
+    setup_span = tracing.enter_phase('database_setup')
     try:
         with check.db_pool.get_connection(execution_dbname) as conn:
             with conn.cursor() as control:
@@ -519,14 +527,15 @@ def produce_remote_query(
                         # The executing check's Agent-reported hostname: the descriptor carries it
                         # so intake stamps the envelope with the agent node identity Fleet reports,
                         # never socket.gethostname().
-                        writer = CopyPageWriter(delivery, creds, client, descriptor, guard, stats, timings)
+                        writer = CopyPageWriter(delivery, creds, client, descriptor, guard, stats, timings, tracing)
                         guard()
                         with conn.cursor() as stream_cursor:
                             with stream_cursor.copy(native_copy_sql(request.query)) as copy:
                                 # Setup ends here: the first copy.read below is its own phase.
                                 timings.exit_phase(setup_phase)
+                                tracing.exit_phase(setup_span)
                                 try:
-                                    with timings.phase('encode_and_page_build'):
+                                    with timings.phase('encode_and_page_build'), tracing.phase('encode_and_page_build'):
                                         while True:
                                             # One fetch phase per read, entered and exited
                                             # explicitly like the setup phase above: the
@@ -534,6 +543,9 @@ def produce_remote_query(
                                             # context manager per read costs more than the
                                             # read itself.
                                             fetch_phase = timings.enter_phase('database_fetch')
+                                            # The fetch region span opens lazily: one span per
+                                            # page's worth of reads, bounded by maxPages.
+                                            tracing.enter_fetch()
                                             try:
                                                 block = copy.read()
                                             finally:
@@ -560,6 +572,7 @@ def produce_remote_query(
                             LOGGER.debug('Unable to roll back remote query read-only transaction')
     finally:
         timings.exit_phase(setup_phase)
+        tracing.exit_phase(setup_span)
 
 
 def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
@@ -780,59 +793,98 @@ def iter_agent_rpc_stream_events(
     http_client: rq_upload.UploadClient | None = None,
     timings: rq_timing.RemoteQueryProducerTimings | None = None,
 ) -> Iterator[rq_contract.RemoteQueryEvent]:
-    """Execute on the supplied check; emit only status and the intake receipt."""
+    """Execute on the supplied check; emit only status and the intake receipt.
+
+    The produce hook is `produce_remote_query` itself, its adapter-owned phase boundaries
+    opening the native producer spans. Once the request is admitted — validation and the
+    allowlist — the run opens its native producer spans fail-open through
+    `open_remote_query_producer_tracing`: a root span on the request's trace context
+    covering the admission failures below, the abort span around the failure tail's upload
+    abort, and the terminal status; every span failure is swallowed without changing an
+    event, a receipt, a retry, or an error.
+    """
     timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
     stats = None
     client = None
     creds = None
+    tracing = rq_tracing.NULL_PRODUCER_TRACING
     try:
-        parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
-        if _match_check_for_target(parsed.target, check) is None:
-            raise rq_contract.RemoteQueryFailure(
-                'target_not_found', 'No loaded Postgres integration instance matched target selector.'
-            )
-        execution_dbname = _resolved_dbname(parsed.target, check)
-        if execution_dbname is None:
-            raise rq_contract.RemoteQueryFailure(
-                'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
-            )
-        creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, timings.started_at, parsed.trace_context)
-        if not creds.api_key or not creds.app_key:
-            raise rq_contract.RemoteQueryFailure(
-                'credentials_unavailable',
-                'Remote query upload requires api_key and app_key to be configured on the Agent.',
-            )
-        pool = getattr(check, 'db_pool', None)
-        if pool is None:
-            raise rq_contract.RemoteQueryFailure(
-                'credentials_unavailable', 'Matched Postgres check does not expose a connection pool.'
-            )
-        if pool.is_closed():
-            raise rq_contract.RemoteQueryFailure(
-                'target_unavailable', 'Matched Postgres check connection pool is closed.'
-            )
-        client = http_client if http_client is not None else rq_upload.RequestsUploadClient(timings=timings)
-        stats = rq_contract.RemoteQueryRunStats()
-        yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
         try:
-            receipt = produce_remote_query(
-                parsed, check, creds, client, execution_dbname, timings.started_at, stats, timings
+            parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
+            # Native producer spans cover every admitted run — the admission failures below
+            # included — as a root span on the request's trace context, additive to the
+            # timing accumulator and the event contract, fail-open through every boundary.
+            tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'postgres')
+            tracing.open_root(parsed.result_delivery)
+            if _match_check_for_target(parsed.target, check) is None:
+                raise rq_contract.RemoteQueryFailure(
+                    'target_not_found', 'No loaded Postgres integration instance matched target selector.'
+                )
+            execution_dbname = _resolved_dbname(parsed.target, check)
+            if execution_dbname is None:
+                raise rq_contract.RemoteQueryFailure(
+                    'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
+                )
+            creds = rq_upload.resolve_upload_credentials(
+                parsed.result_delivery, timings.started_at, parsed.trace_context
             )
-        except psycopg_errors.QueryCanceled:
-            raise rq_contract.RemoteQueryFailure(
-                'timeout', 'Remote query was canceled by the server (statement timeout or cancellation).', True
-            ) from None
-        except RuntimeError:
-            raise rq_contract.RemoteQueryFailure(
-                'target_unavailable', 'Matched Postgres check connection pool is unavailable.'
-            ) from None
-    except BaseException as error:
-        if client is not None:
-            rq_upload.safe_abort(client, creds)
-        if not isinstance(error, Exception):
-            raise
-        yield rq_events.query_failure_event(error, timings, stats)
-        return
-    yield rq_contract.RemoteQueryEvent(
-        'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
-    )
+            if not creds.api_key or not creds.app_key:
+                raise rq_contract.RemoteQueryFailure(
+                    'credentials_unavailable',
+                    'Remote query upload requires api_key and app_key to be configured on the Agent.',
+                )
+            pool = getattr(check, 'db_pool', None)
+            if pool is None:
+                raise rq_contract.RemoteQueryFailure(
+                    'credentials_unavailable', 'Matched Postgres check does not expose a connection pool.'
+                )
+            if pool.is_closed():
+                raise rq_contract.RemoteQueryFailure(
+                    'target_unavailable', 'Matched Postgres check connection pool is closed.'
+                )
+            client = (
+                http_client
+                if http_client is not None
+                else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
+            )
+            stats = rq_contract.RemoteQueryRunStats()
+            yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
+            try:
+                receipt = produce_remote_query(
+                    parsed, check, creds, client, execution_dbname, timings.started_at, stats, timings, tracing
+                )
+            except psycopg_errors.QueryCanceled:
+                raise rq_contract.RemoteQueryFailure(
+                    'timeout', 'Remote query was canceled by the server (statement timeout or cancellation).', True
+                ) from None
+            except RuntimeError:
+                raise rq_contract.RemoteQueryFailure(
+                    'target_unavailable', 'Matched Postgres check connection pool is unavailable.'
+                ) from None
+        except BaseException as error:
+            if client is not None:
+                with tracing.abort_span():
+                    rq_upload.safe_abort(client, creds)
+            # The root span's counters mirror the stats the failure event carries; the
+            # failure classification rides the same closed event error-code vocabulary, and
+            # an admission failure before the run's stats exist carries all-zero counters.
+            terminal_stats = stats if stats is not None else rq_contract.RemoteQueryRunStats()
+            if not isinstance(error, Exception):
+                # The stream was terminated mid-run (cancellation or an emit callback
+                # failure): the root span closes with a fixed classification and the signal
+                # re-raises, never swallowed into an ordinary query failure.
+                tracing.fail('interrupted', terminal_stats)
+                raise
+            tracing.fail(
+                error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
+            )
+            yield rq_events.query_failure_event(error, timings, stats)
+            return
+        tracing.succeed(stats)
+        yield rq_contract.RemoteQueryEvent(
+            'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
+        )
+    finally:
+        # The run's only flush, best-effort: the root span finishes here at the latest and
+        # the singleton is never shut down.
+        tracing.close()

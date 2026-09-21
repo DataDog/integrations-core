@@ -27,6 +27,7 @@ from .contract import (
     descriptor_schema_bytes,
 )
 from .timing import RemoteQueryProducerTimings
+from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 from .upload import (
     REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE,
     UploadClient,
@@ -168,9 +169,11 @@ class PageUploader:
         guard: Callable[[], None],
         stats: RemoteQueryRunStats,
         timings: RemoteQueryProducerTimings,
+        tracing: RemoteQueryProducerTracing | None = None,
     ):
         self.delivery, self.creds, self.client = delivery, creds, client
         self.descriptor, self.guard, self.stats, self.timings = descriptor, guard, stats, timings
+        self.tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
         self.schema_json = descriptor_schema_bytes(descriptor)
         limits = delivery.limits
         if len(descriptor.columns) > limits.max_columns:
@@ -222,13 +225,17 @@ class PageUploader:
             stats.rows_emitted += count
             stats.bytes_emitted += bound
             self.timings.note_page_acknowledged()
+            # The root span's time_to_first_page_ms counts the same first-page boundary.
+            self.tracing.note_page_acknowledged()
             return count, end
 
     def finalize(self) -> dict[str, Any]:
-        with self.timings.phase('finalize'):
-            response = self.client.finalize_run(self.creds, self.stats.pages_emitted)
-            verify_run_finalize_response(response, self.creds.upload_id)
-            pages, rows, size = finalize_totals(response)
+        # The finalize span is also the injection parent of the finalize requests.
+        with self.tracing.finalize_span():
+            with self.timings.phase('finalize'):
+                response = self.client.finalize_run(self.creds, self.stats.pages_emitted)
+                verify_run_finalize_response(response, self.creds.upload_id)
+                pages, rows, size = finalize_totals(response)
         self.stats.pages_emitted, self.stats.rows_emitted, self.stats.bytes_emitted = pages, rows, size
         return {'uploadId': self.creds.upload_id, 'pageCount': pages, 'totalRows': rows, 'totalBytes': size}
 
@@ -245,9 +252,10 @@ class SourcePageWriter:
         guard: Callable[[], None],
         stats: RemoteQueryRunStats,
         timings: RemoteQueryProducerTimings | None = None,
+        tracing: RemoteQueryProducerTracing | None = None,
     ):
         timings = timings or RemoteQueryProducerTimings(time.monotonic())
-        self._uploader = PageUploader(delivery, creds, client, descriptor, guard, stats, timings)
+        self._uploader = PageUploader(delivery, creds, client, descriptor, guard, stats, timings, tracing)
         self._limits = delivery.limits
         self._columns = len(descriptor.columns)
         self._key_bound = sum(len(canonical_json_bytes(c.column_name)) for c in descriptor.columns)

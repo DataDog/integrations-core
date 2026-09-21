@@ -28,6 +28,7 @@ from .contract import (
 )
 from .events import raise_if_timed_out
 from .timing import RemoteQueryProducerTimings
+from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 
 LOGGER = logging.getLogger(__name__)
 
@@ -155,9 +156,11 @@ class RequestsUploadClient:
         self,
         timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
         timings: RemoteQueryProducerTimings | None = None,
+        tracing: RemoteQueryProducerTracing | None = None,
     ) -> None:
         self._timeout = timeout
         self._timings = timings or RemoteQueryProducerTimings(time.monotonic())
+        self._tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
 
     def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
         headers = {
@@ -217,6 +220,8 @@ class RequestsUploadClient:
             },
             deadline=creds.wall_deadline,
             timings=self._timings,
+            tracing=self._tracing,
+            attempt_spans=True,
         )
         if status != REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE:
             raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload answered HTTP {}.'.format(status))
@@ -240,7 +245,7 @@ class RequestsUploadClient:
         backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
         while True:
             status, response_body = upload_with_retry(
-                'POST', url, headers, request_body, self._timeout, deadline=creds.wall_deadline
+                'POST', url, headers, request_body, self._timeout, deadline=creds.wall_deadline, tracing=self._tracing
             )
             if status == 200:
                 return parse_json_object_response(response_body, 'run finalize')
@@ -259,8 +264,9 @@ class RequestsUploadClient:
         url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
         try:
             # Abort is cleanup: it must stay possible after the run wall expired (that is
-            # exactly when it runs), so it carries no deadline.
-            upload_with_retry('POST', url, headers, b'{}', self._timeout)
+            # exactly when it runs), so it carries no deadline. Its requests carry the
+            # abort span's context when the run's producer tracing is active.
+            upload_with_retry('POST', url, headers, b'{}', self._timeout, tracing=self._tracing)
         except RemoteQueryFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)')
 
@@ -438,15 +444,33 @@ def upload_with_retry(
     mapped_error_codes: Mapping[str, str] | None = None,
     deadline: float | None = None,
     timings: RemoteQueryProducerTimings | None = None,
+    tracing: RemoteQueryProducerTracing | None = None,
+    attempt_spans: bool = False,
 ) -> tuple[int, bytes]:
-    """Send one intake request with bounded retries; `deadline` is the run-wide wall."""
+    """Send one intake request with bounded retries; `deadline` is the run-wide wall.
+
+    `timings`, when given, counts each HTTP attempt (and each retry beyond a page's
+    first attempt) on the producer accumulator; only `put_source_page` passes one, so
+    descriptor, finalize, and abort attempts are not page upload attempts.
+
+    `tracing`, when given, carries the active producer span's context into the request
+    headers in place of the manual trace-context trio: with `attempt_spans` (page
+    uploads) each attempt opens its own `remote_queries.page_upload` span and injects
+    it, making the intake request spans children of that attempt, while finalize and
+    abort requests inject the whole-call span their caller opened. With no span open —
+    tracing inactive or degraded, or a descriptor registration — the manual headers
+    stand unchanged.
+    """
     import requests  # lazy: only the POC upload path needs it
 
     timings = timings or RemoteQueryProducerTimings(time.monotonic())
+    tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
     # The default is an empty mapping, normalized once here: descriptor, finalize, and abort
     # map no intake error codes, so their terminal rejections fail closed as upload_failed.
     if mapped_error_codes is None:
         mapped_error_codes = {}
+    if not attempt_spans:
+        headers = tracing.inject_request_headers(headers)
     backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
     # The exhausted sequence's diagnostic: intake's HTTP status (a public counter) or one of
     # the fixed failure categories assigned below, never the caught exception's text or
@@ -464,15 +488,32 @@ def upload_with_retry(
             attempt_deadline = min(deadline, time.monotonic() + REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS)
             request_body = DeadlinedPageBody(body, attempt_deadline)
         timings.note_upload_attempt(retry=attempt > 0)
+        # One span per page upload attempt, retry-tagged; the attempt's injected context
+        # replaces the manual trace headers on exactly this attempt's request.
+        page_attempt = tracing.begin_page_upload_attempt(retry=attempt > 0) if attempt_spans else None
+        # The attempt span's bounded outcome classification: no response is a transport
+        # failure and any non-2xx answer a rejection, never the response's or exception's
+        # text.
+        attempt_error: str | None = 'transport'
+        attempt_status: int | None = None
         try:
-            resp = requests.request(method, url, headers=dict(headers), data=request_body, timeout=timeout)
+            resp = requests.request(
+                method,
+                url,
+                headers=page_attempt.inject(headers) if page_attempt is not None else dict(headers),
+                data=request_body,
+                timeout=timeout,
+            )
         except UploadAttemptExpired:
             last_failure = 'the page upload attempt exceeded its per-attempt deadline'
         except requests.exceptions.RequestException:
             last_failure = 'transport failure'
         else:
+            attempt_status = resp.status_code
             if 200 <= resp.status_code < 300:
+                attempt_error = None
                 return resp.status_code, resp.content
+            attempt_error = 'rejected'
             if is_transient_upload_status(resp.status_code):
                 last_failure = 'HTTP status {}'.format(resp.status_code)
             else:
@@ -487,6 +528,9 @@ def upload_with_retry(
                 raise RemoteQueryFailure(
                     'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
                 )
+        finally:
+            if page_attempt is not None:
+                page_attempt.finish(error=attempt_error, http_status=attempt_status)
         if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
             break
         time.sleep(backoff)

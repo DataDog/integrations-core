@@ -100,6 +100,7 @@ from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
+from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 if TYPE_CHECKING:
@@ -197,15 +198,23 @@ class TimedStreamSource:
 
     The wrapped stream's reads are this producer's only result-fetch calls, so every
     read — header or data — enters the fetch phase, suspending whatever phase encloses
-    it (setup during the header rows, the encode loop during data rows).
+    it (setup during the header rows, the encode loop during data rows). The tracing
+    handle keeps one database-fetch region span open across those same reads.
     """
 
-    def __init__(self, stream: StreamSource, timings: rq_timing.RemoteQueryProducerTimings):
+    def __init__(
+        self,
+        stream: StreamSource,
+        timings: rq_timing.RemoteQueryProducerTimings,
+        tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
+    ):
         self._stream = stream
         self._timings = timings
+        self._tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
 
     def read(self, amount: int) -> bytes:
         with self._timings.phase('database_fetch'):
+            self._tracing.enter_fetch()
             return self._stream.read(amount)
 
     def close(self) -> None:
@@ -667,14 +676,16 @@ def _run_streamed_query(
     stats: rq_contract.RemoteQueryRunStats,
     deadline: float,
     timings: rq_timing.RemoteQueryProducerTimings | None = None,
+    tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
 ) -> dict[str, Any]:
     """Stream the query result into bounded JSON pages and return the run receipt."""
     timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+    tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
     delivery = request.result_delivery
     limits = delivery.limits
     stream = None
     try:
-        with timings.phase('database_setup'):
+        with timings.phase('database_setup'), tracing.phase('database_setup'):
             # The second setup segment (client creation was the first, in the caller):
             # settings resolution, stream open, header/column building, and descriptor
             # registration. Every raw stream read inside — header or data — is the fetch phase.
@@ -683,6 +694,7 @@ def _run_streamed_query(
             stream = TimedStreamSource(
                 clickhouse_client.raw_stream(request.query, settings=settings, fmt=REMOTE_QUERY_STREAM_FORMAT),
                 timings,
+                tracing,
             )
             bounds = LineBoundTracker(limits)
             lines = iter_stream_lines(stream, guard, bounds)
@@ -702,10 +714,10 @@ def _run_streamed_query(
             # stamps the envelope with the agent node identity Fleet reports, never
             # socket.gethostname().
             descriptor = build_upload_descriptor(request, columns, agent_hostname)
-            writer = rq_pages.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings)
+            writer = rq_pages.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings, tracing)
         try:
             guard()
-            with timings.phase('encode_and_page_build'):
+            with timings.phase('encode_and_page_build'), tracing.phase('encode_and_page_build'):
                 for line in lines:
                     guard()
                     values = _parse_json_line(line)
@@ -736,6 +748,7 @@ def produce_remote_query(
     stats: rq_contract.RemoteQueryRunStats,
     clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
     timings: rq_timing.RemoteQueryProducerTimings | None = None,
+    tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
 ) -> dict[str, Any]:
     """Execute the validated query once and return the compact run receipt.
 
@@ -746,12 +759,15 @@ def produce_remote_query(
     Producer phases: client creation, stream open, header/column building, and descriptor
     registration are database setup; every raw stream read is a database fetch; the row loop
     is encode and page build (with any upload `add_row` triggers nested inside it); page
-    uploads and finalize are accounted by the shared source-page writer.
+    uploads and finalize are accounted by the shared source-page writer. The native
+    producer spans open at exactly these phase boundaries — `tracing` is fail-open and
+    additive to the timing accumulator.
     """
     delivery = request.result_delivery
     limits = delivery.limits
     deadline = started_at + limits.timeout_ms / 1000
     timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+    tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
 
     def guard() -> None:
         rq_events.raise_if_timed_out(deadline)
@@ -764,7 +780,7 @@ def produce_remote_query(
             # The first database-setup segment: client creation. The send/receive timeout
             # derives from the remaining wall, not the full delivered budget, so a client
             # created late cannot wait past the run-wide deadline.
-            with timings.phase('database_setup'):
+            with timings.phase('database_setup'), tracing.phase('database_setup'):
                 clickhouse_client = factory(check, max(1, math.ceil(deadline - time.monotonic())))
         except rq_contract.RemoteQueryFailure:
             raise
@@ -778,7 +794,7 @@ def produce_remote_query(
             ) from None
         try:
             receipt = _run_streamed_query(
-                request, clickhouse_client, creds, client, check.hostname, guard, stats, deadline, timings
+                request, clickhouse_client, creds, client, check.hostname, guard, stats, deadline, timings, tracing
             )
         except rq_contract.RemoteQueryFailure:
             raise
@@ -902,47 +918,87 @@ def iter_agent_rpc_stream_events(
     clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
     timings: rq_timing.RemoteQueryProducerTimings | None = None,
 ) -> Iterator[rq_contract.RemoteQueryEvent]:
-    """Execute on the supplied check; emit only status and the intake receipt."""
+    """Execute on the supplied check; emit only status and the intake receipt.
+
+    The produce hook is `produce_remote_query` itself, its adapter-owned phase boundaries
+    opening the native producer spans. Once the request is admitted — validation and the
+    allowlist — the run opens its native producer spans fail-open through
+    `open_remote_query_producer_tracing`: a root span on the request's trace context
+    covering the admission failures below, the abort span around the failure tail's upload
+    abort, and the terminal status; every span failure is swallowed without changing an
+    event, a receipt, a retry, or an error.
+    """
     timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
     stats = None
     client = None
     creds = None
+    tracing = rq_tracing.NULL_PRODUCER_TRACING
     try:
-        parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
-        if not _check_matches_target(check, parsed.target):
-            raise rq_contract.RemoteQueryFailure(
-                'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
+        try:
+            parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
+            # Native producer spans cover every admitted run — the admission failures below
+            # included — as a root span on the request's trace context, additive to the
+            # timing accumulator and the event contract, fail-open through every boundary.
+            tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'clickhouse')
+            tracing.open_root(parsed.result_delivery)
+            if not _check_matches_target(check, parsed.target):
+                raise rq_contract.RemoteQueryFailure(
+                    'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
+                )
+            creds = rq_upload.resolve_upload_credentials(
+                parsed.result_delivery, timings.started_at, parsed.trace_context
             )
-        creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, timings.started_at, parsed.trace_context)
-        if not creds.api_key or not creds.app_key:
-            raise rq_contract.RemoteQueryFailure(
-                'credentials_unavailable',
-                'Remote query upload requires api_key and app_key to be configured on the Agent.',
+            if not creds.api_key or not creds.app_key:
+                raise rq_contract.RemoteQueryFailure(
+                    'credentials_unavailable',
+                    'Remote query upload requires api_key and app_key to be configured on the Agent.',
+                )
+            if getattr(check, '_pool_manager', None) is None:
+                raise rq_contract.RemoteQueryFailure(
+                    'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
+                )
+            client = (
+                http_client
+                if http_client is not None
+                else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
             )
-        if getattr(check, '_pool_manager', None) is None:
-            raise rq_contract.RemoteQueryFailure(
-                'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
+            stats = rq_contract.RemoteQueryRunStats()
+            yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
+            receipt = produce_remote_query(
+                parsed,
+                check,
+                creds,
+                client,
+                timings.started_at,
+                stats,
+                clickhouse_client_factory=clickhouse_client_factory,
+                timings=timings,
+                tracing=tracing,
             )
-        client = http_client if http_client is not None else rq_upload.RequestsUploadClient(timings=timings)
-        stats = rq_contract.RemoteQueryRunStats()
-        yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
-        receipt = produce_remote_query(
-            parsed,
-            check,
-            creds,
-            client,
-            timings.started_at,
-            stats,
-            clickhouse_client_factory=clickhouse_client_factory,
-            timings=timings,
+        except BaseException as error:
+            if client is not None:
+                with tracing.abort_span():
+                    rq_upload.safe_abort(client, creds)
+            # The root span's counters mirror the stats the failure event carries; the
+            # failure classification rides the same closed event error-code vocabulary, and
+            # an admission failure before the run's stats exist carries all-zero counters.
+            terminal_stats = stats if stats is not None else rq_contract.RemoteQueryRunStats()
+            if not isinstance(error, Exception):
+                # The stream was terminated mid-run (cancellation or an emit callback
+                # failure): the root span closes with a fixed classification and the signal
+                # re-raises, never swallowed into an ordinary query failure.
+                tracing.fail('interrupted', terminal_stats)
+                raise
+            tracing.fail(
+                error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
+            )
+            yield rq_events.query_failure_event(error, timings, stats)
+            return
+        tracing.succeed(stats)
+        yield rq_contract.RemoteQueryEvent(
+            'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
         )
-    except BaseException as error:
-        if client is not None:
-            rq_upload.safe_abort(client, creds)
-        if not isinstance(error, Exception):
-            raise
-        yield rq_events.query_failure_event(error, timings, stats)
-        return
-    yield rq_contract.RemoteQueryEvent(
-        'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
-    )
+    finally:
+        # The run's only flush, best-effort: the root span finishes here at the latest and
+        # the singleton is never shut down.
+        tracing.close()

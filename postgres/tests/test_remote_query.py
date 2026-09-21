@@ -6,6 +6,7 @@
 import json
 import logging
 import socket
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 import psycopg.errors as psycopg_errors
@@ -13,6 +14,7 @@ import pytest
 
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
+from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 from datadog_checks.postgres.remote_query import execute_agent_rpc_stream_copy
@@ -46,6 +48,23 @@ from .remote_query_fakes import (
     valid_request,
     wide_row_pool,
 )
+
+
+@pytest.fixture(autouse=True)
+def null_native_producer_tracing(monkeypatch):
+    """Keep native ddtrace producer spans out of every test in this module.
+
+    The produce lifecycle opens real producer spans through
+    `open_remote_query_producer_tracing` whenever ddtrace is importable — including in
+    this suite's process — so the module-wide default here is the null tracing. The
+    span-boundary behavior is pinned by the recording tracing test below and by the
+    shared checks-base suite; no test here emits real spans or depends on a trace agent.
+    """
+    monkeypatch.setattr(
+        rq_tracing,
+        'open_remote_query_producer_tracing',
+        lambda trace_context, integration: rq_tracing.NULL_PRODUCER_TRACING,
+    )
 
 
 @pytest.mark.parametrize('field', ['extra', 'password'])
@@ -826,3 +845,141 @@ def test_entry_propagates_callback_failure_without_upload(monkeypatch):
 
     # The callback failed on the STARTED metadata event, before any page bytes existed.
     assert pool.requested_dbnames == []
+
+
+# ---------------------------------------------------------------------------
+# Native producer spans
+# ---------------------------------------------------------------------------
+
+
+class RecordingTracing(rq_tracing.NullRemoteQueryProducerTracing):
+    """A null tracing that records the producer's span-boundary calls in order."""
+
+    def __init__(self):
+        self.calls = []
+
+    def open_root(self, delivery):
+        self.calls.append(('open_root', delivery.run_id, delivery.upload_id))
+
+    def succeed(self, stats):
+        self.calls.append(('succeed', stats.pages_emitted))
+
+    def fail(self, error_code, stats):
+        self.calls.append(('fail', error_code, stats.pages_emitted))
+
+    def enter_phase(self, name):
+        self.calls.append(('enter', name))
+        return None
+
+    def enter_fetch(self):
+        self.calls.append('fetch')
+
+    def note_page_acknowledged(self):
+        self.calls.append('page_ack')
+
+    @contextmanager
+    def finalize_span(self):
+        self.calls.append('finalize')
+        yield
+
+    @contextmanager
+    def abort_span(self):
+        self.calls.append('abort_span:open')
+        try:
+            yield
+        finally:
+            self.calls.append('abort_span:close')
+
+    def close(self):
+        self.calls.append('close')
+
+
+def recording_tracing_factory(tracing):
+    """A factory replacement answering the recording tracing and capturing its arguments."""
+
+    def factory(trace_context, integration):
+        tracing.calls.append(('factory', trace_context, integration))
+        return tracing
+
+    return factory
+
+
+def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
+    request = two_row_boundary_request(monkeypatch)
+    pool = wide_row_pool()
+    fake = FakeUploadClient()
+    tracing = RecordingTracing()
+    monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
+
+    events = collect_events(request, make_check(pool=pool), client=fake)
+
+    assert_success(events)
+    # The native spans open at exactly the accumulator's phase boundaries: the root before
+    # the run, setup through the COPY dispatch, encode around the read loop with one fetch
+    # boundary per copy.read, a page acknowledgment per accepted page, and the finalize
+    # span around run finalization — closed by the terminal success and the single close.
+    assert tracing.calls == [
+        ('factory', None, 'postgres'),
+        ('open_root', RUN_ID, UPLOAD_ID),
+        ('enter', 'database_setup'),
+        ('enter', 'encode_and_page_build'),
+        'fetch',
+        'page_ack',
+        'fetch',
+        'page_ack',
+        'fetch',
+        'finalize',
+        ('succeed', 2),
+        'close',
+    ]
+
+
+def test_producer_brackets_the_abort_and_fails_the_root_on_a_produce_failure(monkeypatch, caplog):
+    """A produce failure brackets the failure tail's upload abort with the abort span and
+    closes the root with the same failure code the event carries, never echoing the
+    exception's text on any span."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    pool = FakePool(rows=[(1,)], copy_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
+    fake = FakeUploadClient()
+    tracing = RecordingTracing()
+    monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
+
+    caplog.set_level(logging.DEBUG)
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+
+    assert_failed_event(events, 'query_failed', 'Remote query execution failed')
+    assert fake.abort_calls == 1
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+    # The abort span brackets the failure tail's upload abort and closes before the root
+    # is marked failed; close runs exactly once, last.
+    assert tracing.calls == [
+        ('factory', None, 'postgres'),
+        ('open_root', RUN_ID, UPLOAD_ID),
+        ('enter', 'database_setup'),
+        ('enter', 'encode_and_page_build'),
+        'fetch',
+        'abort_span:open',
+        'abort_span:close',
+        ('fail', 'query_failed', 0),
+        'close',
+    ]
+
+
+def test_producer_fails_the_root_for_an_admission_failure(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    tracing = RecordingTracing()
+    monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
+
+    events = collect_events(valid_request(dbname='other_database'), make_check(), client=FakeUploadClient())
+
+    assert_failed_event(events, 'target_not_found')
+    # The admission failure still closes the root with the failure code and zero
+    # counters; no page, abort, or produce boundary was ever reached.
+    assert tracing.calls == [
+        ('factory', None, 'postgres'),
+        ('open_root', RUN_ID, UPLOAD_ID),
+        ('fail', 'target_not_found', 0),
+        'close',
+    ]

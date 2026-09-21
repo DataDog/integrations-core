@@ -3,4 +3,4 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-"""Shared request contracts, diagnostics, and intake transport for remote queries."""
+"""Shared request contracts, diagnostics, intake transport, and native producer tracing for remote queries."""

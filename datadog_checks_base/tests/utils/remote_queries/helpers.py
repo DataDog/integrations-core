@@ -8,6 +8,7 @@ import json
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
+from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 
 AGENT_HOSTNAME = 'rq-proof-agent-a'
 
@@ -258,3 +259,107 @@ def finalize_receipt(page_count=1, total_rows=0, total_bytes=0, upload_id='uploa
 
 def receipt(page):
     return acceptance_receipt(page.batch_index, page.record_offset, page.rows)
+
+
+# ---------------------------------------------------------------------------
+# Native producer tracing doubles
+# ---------------------------------------------------------------------------
+
+
+class FakeSpan:
+    """A recording span double: tags, metrics, and finish — no ddtrace, no writer."""
+
+    def __init__(self, name, child_of, service=None, resource=None, activate=None):
+        self.name = name
+        self.child_of = child_of
+        self.service = service
+        self.resource = resource
+        self.activate = activate
+        self.span_id = None
+        self.tags = {}
+        self.metrics = {}
+        self.error = 0
+        self.finished = False
+
+    def set_tag(self, key, value):
+        self.tags[key] = value
+
+    def set_metric(self, key, value):
+        self.metrics[key] = value
+
+    def finish(self):
+        self.finished = True
+
+
+class FakeTracer:
+    """A recording tracer double: starts spans and counts flushes, never sends."""
+
+    def __init__(self, refuse_span=None, refuse_flush=False):
+        self.spans = []
+        self.flushes = 0
+        self.refuse_span = refuse_span
+        self.refuse_flush = refuse_flush
+
+    def start_span(
+        self, name, child_of=None, service=None, resource=None, span_type=None, activate=False, span_api='datadog'
+    ):
+        if self.refuse_span == name:
+            raise RuntimeError('span start refused')
+        span = FakeSpan(name, child_of, service=service, resource=resource, activate=activate)
+        span.span_id = len(self.spans) + 1
+        self.spans.append(span)
+        return span
+
+    def flush(self):
+        self.flushes += 1
+        if self.refuse_flush:
+            raise RuntimeError('flush refused')
+
+    def by_name(self, name):
+        return [span for span in self.spans if span.name == name]
+
+
+class FakePropagator:
+    """A recording propagator double: injects the span's own id as the trace parent.
+
+    The real ``HTTPPropagator`` answers the same observable contract for a span: the
+    injected parent id is the span's own id, so a request carrying the injected headers
+    becomes that span's child — never a sibling of the run's action parent.
+    """
+
+    def __init__(self):
+        self.injected = []
+
+    def inject(self, span, headers):
+        self.injected.append((span, dict(headers)))
+        headers[rq_contract.REMOTE_QUERY_TRACE_ID_HEADER] = '222'
+        headers[rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] = str(span.span_id)
+        headers[rq_contract.REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER] = '1'
+
+
+class RefusingPropagator(FakePropagator):
+    """A propagator double whose injection fails, exercising the manual-header fallback."""
+
+    def inject(self, span, headers):
+        raise RuntimeError('inject refused')
+
+
+class FakeParentContext:
+    """A stand-in for the ddtrace Context the factory builds from the request carrier."""
+
+    def __init__(self, trace_id, span_id, sampling_priority):
+        self.trace_id = trace_id
+        self.span_id = span_id
+        self.sampling_priority = sampling_priority
+
+
+def make_tracing(integration='postgres', propagator=None, **tracer_kwargs):
+    """A producer tracing over the fake doubles, parented on a sentinel request carrier."""
+    tracer = FakeTracer(**tracer_kwargs)
+    parent = FakeParentContext(int(TRACE_ID), int(PARENT_ID), 2)
+    return (
+        rq_tracing.RemoteQueryProducerTracing(
+            tracer, propagator if propagator is not None else FakePropagator(), parent, integration
+        ),
+        tracer,
+    )
