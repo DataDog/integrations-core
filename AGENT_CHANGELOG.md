@@ -52,7 +52,7 @@
 * MySQL [15.20.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
 * n8n [2.1.1](https://github.com/DataDog/integrations-core/blob/master/n8n/CHANGELOG.md)
 * NGINX Ingress Controller [5.5.0](https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/CHANGELOG.md)
-* NGINX [10.0.0](https://github.com/DataDog/integrations-core/blob/master/nginx/CHANGELOG.md)
+* NGINX [10.0.0](https://github.com/DataDog/integrations-core/blob/master/nginx/CHANGELOG.md) **BREAKING CHANGE**
 * Nutanix [1.7.0](https://github.com/DataDog/integrations-core/blob/master/nutanix/CHANGELOG.md)
 * OpenLDAP [3.4.0](https://github.com/DataDog/integrations-core/blob/master/openldap/CHANGELOG.md)
 * OpenStack Controller [9.7.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
