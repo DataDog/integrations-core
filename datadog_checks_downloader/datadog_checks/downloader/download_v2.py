@@ -30,7 +30,7 @@ from .exceptions import (
 
 logger = logging.getLogger(__name__)
 
-V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
+V2_REPOSITORY_URL = "https://agent-integration-wheels.datadoghq.com"
 
 # tuf.ngclient sets its own fetcher timeout; this applies only to the raw wheel urlopen().
 WHEEL_FETCH_TIMEOUT_SECONDS = 60

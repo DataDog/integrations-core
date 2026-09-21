@@ -5,7 +5,12 @@ import os
 
 import pytest
 
-from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
+from ddev.config.model import (
+    ConfigurationError,
+    RootConfig,
+    get_github_token,
+    get_github_user,
+)
 
 
 def test_default():
@@ -54,6 +59,9 @@ def test_default():
                 'debug': 'bold',
                 'spinner': 'simpleDotsScrolling',
             },
+        },
+        'ai': {
+            'flow_dirs': [],
         },
     }
 
@@ -1474,3 +1482,162 @@ class TestGitHubConfig:
 
         # raw_data should still be empty
         assert config.raw_data['github'] == {}
+
+
+class TestAI:
+    def test_default(self, monkeypatch):
+        monkeypatch.delenv('DD_ANTHROPIC_API_KEY', raising=False)
+        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == config.ai.anthropic_api_key == ''
+        assert config.ai.flow_dirs == config.ai.flow_dirs == []
+        assert config.raw_data == {'ai': {'flow_dirs': []}}
+
+    def test_not_table(self, helpers):
+        config = RootConfig({'ai': 9000})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai
+                  must be a table"""
+            ),
+        ):
+            _ = config.ai
+
+    def test_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.ai = 9000
+        assert config.raw_data == {'ai': 9000}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai
+                  must be a table"""
+            ),
+        ):
+            _ = config.ai
+
+    def test_anthropic_api_key_from_config(self):
+        config = RootConfig({'ai': {'anthropic_api_key': 'sk-test'}})
+
+        assert config.ai.anthropic_api_key == 'sk-test'
+        assert config.raw_data == {'ai': {'anthropic_api_key': 'sk-test'}}
+
+    def test_anthropic_api_key_dd_env_var(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'dd-key')
+        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == 'dd-key'
+        assert config.raw_data == {'ai': {}}
+
+    def test_anthropic_api_key_env_var(self, monkeypatch):
+        monkeypatch.delenv('DD_ANTHROPIC_API_KEY', raising=False)
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'anth-key')
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == 'anth-key'
+        assert config.raw_data == {'ai': {}}
+
+    def test_anthropic_api_key_config_takes_precedence_over_env(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'ai': {'anthropic_api_key': 'config-key'}})
+
+        assert config.ai.anthropic_api_key == 'config-key'
+
+    def test_anthropic_api_key_dd_takes_precedence(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'dd-key')
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'anth-key')
+        config = RootConfig({})
+
+        assert config.ai.anthropic_api_key == 'dd-key'
+
+    def test_anthropic_api_key_not_string(self, helpers):
+        config = RootConfig({'ai': {'anthropic_api_key': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> anthropic_api_key
+                  must be a string"""
+            ),
+        ):
+            _ = config.ai.anthropic_api_key
+
+    def test_anthropic_api_key_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.ai.anthropic_api_key = 9000
+        assert config.raw_data == {'ai': {'anthropic_api_key': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> anthropic_api_key
+                  must be a string"""
+            ),
+        ):
+            _ = config.ai.anthropic_api_key
+
+    def test_flow_dirs(self):
+        config = RootConfig({'ai': {'flow_dirs': ['~/foo', './bar', '../baz']}})
+
+        assert config.ai.flow_dirs == ['~/foo', './bar', '../baz']
+        assert config.raw_data == {'ai': {'flow_dirs': ['~/foo', './bar', '../baz']}}
+
+    def test_flow_dirs_not_list(self, helpers):
+        config = RootConfig({'ai': {'flow_dirs': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> flow_dirs
+                  must be an array"""
+            ),
+        ):
+            _ = config.ai.flow_dirs
+
+    def test_flow_dirs_entry_not_string(self, helpers):
+        config = RootConfig({'ai': {'flow_dirs': [9000]}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> flow_dirs -> 0
+                  must be a string"""
+            ),
+        ):
+            _ = config.ai.flow_dirs
+
+    def test_flow_dirs_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.ai.flow_dirs = 9000
+        assert config.raw_data == {'ai': {'flow_dirs': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> flow_dirs
+                  must be an array"""
+            ),
+        ):
+            _ = config.ai.flow_dirs

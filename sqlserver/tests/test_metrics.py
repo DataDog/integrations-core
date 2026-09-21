@@ -22,8 +22,10 @@ from datadog_checks.sqlserver.const import (
     DATABASE_STATS_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
+    INSTANCE_METRICS_DATABASE,
     INSTANCE_METRICS_DATABASE_AO,
     INSTANCE_METRICS_DATABASE_SINGLE,
+    INSTANCE_METRICS_NEWER_2016,
     OS_SCHEDULER_METRICS,
     SERVICE_CHECK_NAME,
     STATIC_INFO_SERVERNAME,
@@ -45,6 +47,15 @@ from .utils import always_on, is_always_on, not_windows_ci
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_waits'}
 AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
+INSTANCE_METRIC_NAMES = {
+    metric_name
+    for metric_name, _, _, _ in (
+        INSTANCE_METRICS + INSTANCE_METRICS_NEWER_2016 + DBM_MIGRATED_METRICS + INSTANCE_METRICS_DATABASE
+    )
+}
+EXPECTED_INSTANCE_METRIC_NAMES = {
+    metric_name for metric_name, _, _, _ in INSTANCE_METRICS + INSTANCE_METRICS_DATABASE_SINGLE
+} - INCR_FRACTION_METRICS
 
 
 @pytest.mark.integration
@@ -74,45 +85,81 @@ def test_check_server_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("dbm_enabled", [True, False])
-def test_check_instance_metrics(
+@pytest.mark.parametrize('enabled', [True, False])
+@pytest.mark.parametrize('dbm_enabled', [True, False])
+def test_legacy_instance_metrics_option(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
+    enabled,
     dbm_enabled,
 ):
     instance_docker_metrics['database_autodiscovery'] = False
     instance_docker_metrics['dbm'] = dbm_enabled
-    instance_docker_metrics['include_instance_metrics'] = True
+    instance_docker_metrics['include_instance_metrics'] = enabled
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = sqlserver_check._config.tags + [
-        "database_hostname:{}".format("stubbed.hostname"),
-        "database_instance:{}".format("stubbed.hostname"),
-        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
-    ]
+    emitted_instance_metrics = set(aggregator.metric_names) & INSTANCE_METRIC_NAMES
+    if enabled:
+        assert EXPECTED_INSTANCE_METRIC_NAMES <= emitted_instance_metrics
+        if not dbm_enabled:
+            assert {metric_name for metric_name, _, _, _ in DBM_MIGRATED_METRICS} <= emitted_instance_metrics
+    else:
+        assert emitted_instance_metrics == set()
 
-    check_sqlserver_can_connect(
-        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, False
-    )
 
-    for metric_name, _, _, _ in INSTANCE_METRICS:
-        # TODO: we should find a better way to test these metrics
-        # remove SQL Server incremental sql fraction metrics for now
-        if metric_name in INCR_FRACTION_METRICS:
-            continue
-        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('enabled', [True, False])
+def test_database_instance_metrics_option(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    enabled,
+):
+    instance_docker_metrics['database_autodiscovery'] = False
+    instance_docker_metrics['database_metrics'] = {'instance_metrics': {'enabled': enabled}}
 
-    for metric_name, _, _, _ in INSTANCE_METRICS_DATABASE_SINGLE:
-        aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    dd_run_check(sqlserver_check)
 
-    if not dbm_enabled:
-        for metric_name, _, _, _ in DBM_MIGRATED_METRICS:
-            aggregator.assert_metric(metric_name, tags=tags, hostname=sqlserver_check.resolved_hostname, count=1)
+    emitted_instance_metrics = set(aggregator.metric_names) & INSTANCE_METRIC_NAMES
+    if enabled:
+        assert EXPECTED_INSTANCE_METRIC_NAMES <= emitted_instance_metrics
+    else:
+        assert emitted_instance_metrics == set()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'legacy_enabled, documented_enabled',
+    [(True, True), (True, False), (False, True), (False, False)],
+)
+def test_instance_metrics_options_agree(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    legacy_enabled,
+    documented_enabled,
+):
+    instance_docker_metrics['database_autodiscovery'] = False
+    instance_docker_metrics['include_instance_metrics'] = legacy_enabled
+    instance_docker_metrics['database_metrics'] = {'instance_metrics': {'enabled': documented_enabled}}
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    dd_run_check(sqlserver_check)
+
+    emitted_instance_metrics = set(aggregator.metric_names) & INSTANCE_METRIC_NAMES
+    if legacy_enabled and documented_enabled:
+        assert EXPECTED_INSTANCE_METRIC_NAMES <= emitted_instance_metrics
+    else:
+        assert emitted_instance_metrics == set()
 
 
 @pytest.mark.integration

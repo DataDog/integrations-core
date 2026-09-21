@@ -1,5 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+nginx_ingress.controller.connect.duration.count,gauge,,,,Count of upstream connection time per Ingress,0,nginx-ingress-controller,connect duration count,
+nginx_ingress.controller.connect.duration.sum,gauge,,second,,Sum of upstream connection time per Ingress,0,nginx-ingress-controller,connect duration sum,
 nginx_ingress.controller.cpu.time,count,,second,,Cpu usage in seconds,0,nginx-ingress-controller,cpu,
+nginx_ingress.controller.header.duration.count,gauge,,,,Count of time to receive the response header from the upstream server per Ingress,0,nginx-ingress-controller,header duration count,
+nginx_ingress.controller.header.duration.sum,gauge,,second,,Sum of time to receive the response header from the upstream server per Ingress,0,nginx-ingress-controller,header duration sum,
 nginx_ingress.controller.last.reload.success,gauge,,,,Whether the last configuration reload attempt was successful,0,nginx-ingress-controller,nb reload,
 nginx_ingress.controller.mem.resident,gauge,,byte,,Resident memory size in bytes,0,nginx-ingress-controller,mem rss,
 nginx_ingress.controller.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,nginx-ingress-controller,mem virt,

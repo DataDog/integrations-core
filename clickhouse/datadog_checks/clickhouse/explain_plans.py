@@ -10,11 +10,6 @@ from typing import TYPE_CHECKING, Callable, Iterator
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
@@ -197,7 +192,7 @@ class ClickhouseExplainPlans:
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
             'ddsource': 'clickhouse',
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'dbm_type': 'plan',
             'timestamp': row.get('event_time_microseconds', 0) / 1000,
             'ddtags': ','.join(tags_no_db),

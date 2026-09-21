@@ -142,14 +142,21 @@ def test(
 
     target_name, _, environments = target_spec.partition(':')
 
+    # These operations only need Hatch configuration, not a pytest suite.
+    hatch_only = list_envs or lint or lint_unsafe or fmt or fmt_unsafe
+
+    def is_eligible(integration: Integration) -> bool:
+        return integration.has_hatch_config if hatch_only else integration.is_testable
+
     # target name -> target
     targets: dict[str, Integration] = {}
     if target_name == 'changed':
         for integration in app.repo.integrations.iter_changed():
-            if integration.is_testable:
+            if is_eligible(integration):
                 targets[integration.name] = integration
     elif target_name == 'all':
-        for integration in app.repo.integrations.iter_testable('all'):
+        iterator = app.repo.integrations.iter_hatch_configured if hatch_only else app.repo.integrations.iter_testable
+        for integration in iterator('all'):
             targets[integration.name] = integration
     else:
         try:
@@ -157,7 +164,7 @@ def test(
         except OSError:
             app.abort(f'Unknown target: {target_name}')
 
-        if integration.is_testable:
+        if is_eligible(integration):
             targets[integration.name] = integration
 
     if not targets:

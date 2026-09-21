@@ -2655,7 +2655,7 @@
                     {
                         "id": 7350980922272526,
                         "definition": {
-                            "title": "Nodes unealthy",
+                            "title": "Nodes unhealthy",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",

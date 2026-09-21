@@ -151,12 +151,12 @@ def test_run_job_table_sizes_query_dedupes_via_limit_by(check):
     assert 'LIMIT 1 BY database, name' in captured[0]
 
 
-def test_cancel_closes_db_client(check):
+def test_shutdown_closes_db_client(check):
     job = check.table_metrics
     fake_client = mock.MagicMock()
     job._db_client = fake_client
 
-    job.cancel()
+    job.shutdown()
 
     assert job._db_client is None
     fake_client.close.assert_called_once()
@@ -172,7 +172,9 @@ def test_routes_through_cluster_all_replicas_in_single_endpoint_mode(schema_metr
     with (
         mock.patch.object(check.table_metrics, '_execute_query', side_effect=lambda q: dbm_queries.append(q) or []),
         mock.patch.object(check, 'execute_query_raw', side_effect=lambda q: raw_queries.append(q) or []),
+        mock.patch.object(ClickhouseCheck, 'fanout_cluster_name', new_callable=mock.PropertyMock) as fanout,
     ):
+        fanout.return_value = 'default'
         check.table_metrics.run_job()
 
     assert any("clusterAllReplicas('default', system.tables)" in q for q in dbm_queries)
@@ -200,6 +202,7 @@ def test_collect_view_refresh_emits_gauges(check):
     assert 'db:mydb' in by_name['view.refresh.status'][1]
     assert 'view:mv_orders' in by_name['view.refresh.status'][1]
     assert 'host:replica-1' in by_name['view.refresh.status'][1]
+    assert 'clickhouse_node:replica-1' in by_name['view.refresh.status'][1]
     assert by_name['view.refresh.rows'][0] == 500
     assert by_name['view.refresh.bytes'][0] == 4096
 
@@ -249,6 +252,25 @@ def test_collect_view_refresh_skips_when_flag_set(check):
         job._collect_view_refresh_metrics()
 
     mock_query.assert_not_called()
+
+
+def test_run_job_skips_view_refresh_once_cancelled(check):
+    """A cancel landing mid-tick must not start the view refresh query.
+
+    The table size collection swallows the cancellation raised by _execute_query, so without the
+    check in run_job() unscheduling would issue this query and wait out the client read timeout.
+    """
+    job = check.table_metrics
+    job.cancel()
+
+    with (
+        mock.patch.object(check, 'create_dbm_client') as mock_client,
+        mock.patch.object(check, 'execute_query_raw') as mock_query,
+    ):
+        job.run_job()
+
+    mock_query.assert_not_called()
+    mock_client.assert_not_called()
 
 
 def test_handle_view_refreshes_unknown_table_sets_skip_and_logs_once(check):

@@ -1,7 +1,5 @@
 # CHANGELOG - tokumx
 
-<!-- towncrier release notes start -->
-
 ## 3.6.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

@@ -35,6 +35,8 @@ No additional installation is needed on your server.
 
    **Note**: Monitor permissions are enough to collect most metrics. Admin permissions are required to collect the `hpe_aruba_edgeconnect.device.cpu.usage` metric on the appliances. If the configured credentials do not have admin access, the Agent skips this metric, but collects the rest of the metrics.
 
+   It is recommended to configure `appliance_ips` with an explicit include list that matches your known appliance IP ranges. This helps ensure that the check only connects to expected appliances.
+
 2. [Restart the Agent][5].
 
 ### Validation

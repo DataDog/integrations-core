@@ -20,7 +20,11 @@ class Resource:
         return f'{self.name}.{self.normalized_metric_name(metric)}'
 
     def parse_tags(self, global_tags, metric_data):
-        group = metric_data.pop('name')
+        # ACE can omit `name` for some resourceIdentifier entries.
+        group = metric_data.pop('name', None)
+        if group is None:
+            return list(global_tags)
+
         return [f'group:{group}', *global_tags]
 
     def submit(self, check, metric, value, tags):

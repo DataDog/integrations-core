@@ -1,0 +1,21 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Admin API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "Admin API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "anthropic-compliance-logs"
+    }
+  ]
+}

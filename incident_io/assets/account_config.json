@@ -1,0 +1,34 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_token",
+          "label": "API key",
+          "help": "incident.io API Key",
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "incident.io",
+      "fixed": {
+        "fixed_base_url": "https://api.incident.io"
+      }
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v1/identity",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
+}

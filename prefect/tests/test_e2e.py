@@ -4,7 +4,9 @@
 
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.prefect import PrefectCheck
 
 WORK_POOL_TAG_KEYS = ["work_pool_id:", "work_pool_name:", "work_pool_type:"]
 
@@ -81,10 +83,7 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
 }
 
 
-@pytest.mark.e2e
-def test_e2e_metrics(dd_agent_check):
-    aggregator = dd_agent_check(check_times=2, pause=20000)
-
+def _assert_e2e_metrics(aggregator):
     cross_check_metrics = (
         'flow_runs.retry_gaps_duration',
         'task_runs.dependency_wait_duration',
@@ -106,3 +105,20 @@ def test_e2e_metrics(dd_agent_check):
     for metric_name, expected_tags in E2E_METRIC_TAGS.items():
         for tag in expected_tags:
             aggregator.assert_metric_has_tag_prefix(metric_name, tag)
+
+
+@pytest.mark.e2e
+def test_e2e_metrics(dd_agent_check):
+    aggregator = dd_agent_check(check_times=2, pause=20000)
+    _assert_e2e_metrics(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_times=2, pause=20000)
+    _assert_e2e_metrics(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, PrefectCheck, compose_service='prefect-server')

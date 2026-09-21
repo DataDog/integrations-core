@@ -2,6 +2,7 @@ provides:
   - id: hubspot-content-hub-reference-tables
     always_on: false
     granular: false
+    data_type: resources
     direction: inbound
   - id: hubspot-content-hub-metrics
     always_on: false

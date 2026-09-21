@@ -23,14 +23,9 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_azure_sql_database
+from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cancelled
 
 from .xml_tools import extract_int_value, extract_value
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 
 def agent_check_getter(self):
@@ -161,7 +156,7 @@ class XESessionBase(DBMAsyncJob):
             run_sync=is_affirmative(xe_config.get('run_sync', False)),
             enabled=True,
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(self.collection_interval),
             job_name=f"xe_{session_name}",
             shutdown_callback=self._close_db_conn,
@@ -198,12 +193,17 @@ class XESessionBase(DBMAsyncJob):
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
         self._is_azure_sql_database = is_azure_sql_database(engine_edition)
 
+    def shutdown(self) -> None:
+        self._check = None
+
     def _close_db_conn(self):
         """Close database connection on shutdown"""
         pass
 
     def session_exists(self):
         """Check if this XE session exists and is running"""
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
@@ -223,6 +223,8 @@ class XESessionBase(DBMAsyncJob):
         Query the ring buffer data and parse the XML on the client side.
         This avoids expensive server-side XML parsing for better performance.
         """
+        raise_if_cancelled(self._cancel_event)
+
         raw_xml = None
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
@@ -466,7 +468,7 @@ class XESessionBase(DBMAsyncJob):
         return {
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": self._determine_dbm_type(),
             "collection_interval": self.collection_interval,
@@ -597,7 +599,7 @@ class XESessionBase(DBMAsyncJob):
             batched_payload = {
                 "host": self._check.resolved_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
                 "dbm_type": self._determine_dbm_type(),
                 "collection_interval": self.collection_interval,
@@ -795,7 +797,7 @@ class XESessionBase(DBMAsyncJob):
             "timestamp": time() * 1000,
             "host": self._check.resolved_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "rqt",
             "ddtags": ",".join(self._check.tag_manager.get_tags()),

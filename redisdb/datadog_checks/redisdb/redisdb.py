@@ -89,11 +89,16 @@ class Redis(AgentCheck):
                     'ssl_ca_certs',
                     'ssl_cert_reqs',
                     'ssl_check_hostname',
+                    'client_name',
                 ]
 
                 # Set a default timeout (in seconds) if no timeout is specified in the instance config
                 instance_config['socket_timeout'] = instance_config.get('socket_timeout', 5)
                 connection_params = {k: instance_config[k] for k in list_params if k in instance_config}
+                # Select RESP2 explicitly instead of relying on the client default, which flipped to RESP3
+                # in redis-py 8. RESP3 sends `HELLO` on connect, unsupported before Redis 6.0, and changes
+                # the shape of some replies we parse.
+                connection_params['protocol'] = 2
                 # If caching is disabled, we overwrite the dictionary value so the old connection
                 # will be closed as soon as the corresponding Python object gets garbage collected
                 self.connections[key] = redis.Redis(**connection_params)

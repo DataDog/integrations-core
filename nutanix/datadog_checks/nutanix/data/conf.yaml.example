@@ -136,6 +136,15 @@ instances:
     #
     # prefix_category_tags: false
 
+    ## @param collect_resource_ids_as_tags - boolean - optional - default: false
+    ## Whether to collect Nutanix resource extId values as tags on infrastructure metrics.
+    ## When true, cluster metrics get 'ntnx_cluster_id', host metrics get 'ntnx_host_id',
+    ## and VM metrics get 'ntnx_vm_id', 'ntnx_host_id', and 'ntnx_cluster_id'.
+    ## These tags are high cardinality (one unique value per resource).
+    ## Default is false.
+    #
+    # collect_resource_ids_as_tags: false
+
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
     ## Default is true.
@@ -194,6 +203,11 @@ instances:
     ## Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
     #
     # hostname_transform: <HOSTNAME_TRANSFORM>
+
+    ## @param infrastructure_mode - string - optional - default: full
+    ## The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
+    #
+    # infrastructure_mode: full
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

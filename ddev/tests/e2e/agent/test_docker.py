@@ -6,7 +6,7 @@ import subprocess
 
 import pytest
 
-from ddev.e2e.agent.docker import DockerAgent
+from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, DockerAgent
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path
@@ -25,6 +25,23 @@ def free_port(mocker):
     port = 9000
     mocker.patch('ddev.e2e.agent.docker._find_free_port', return_value=port)
     return port
+
+
+def apt_mirror_reset_call(mocker, docker_path, container_name):
+    """The apt mirror reset that precedes start and post-install commands on Linux containers."""
+    return mocker.call(
+        [
+            docker_path,
+            'exec',
+            container_name,
+            'sh',
+            '-c',
+            f'test -f {APT_MIRRORLIST_FILE} && echo {APT_MIRROR} > {APT_MIRRORLIST_FILE}',
+        ],
+        shell=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
 
 
 class TestStart:
@@ -134,6 +151,8 @@ class TestStart:
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -177,7 +196,11 @@ class TestStart:
         agent.start(
             agent_build='',
             local_packages={},
-            env_vars={'DD_API_KEY': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'DD_LOGS_ENABLED': 'true'},
+            env_vars={
+                'DD_AGENT_TELEMETRY_ENABLED': 'true',
+                'DD_API_KEY': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                'DD_LOGS_ENABLED': 'true',
+            },
         )
 
         assert run.call_args_list == [
@@ -195,6 +218,8 @@ class TestStart:
                     '/proc:/host/proc',
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=true',
                     '-e',
                     'DD_API_KEY=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
                     '-e',
@@ -250,6 +275,8 @@ class TestStart:
                     '-v',
                     '/proc:/host/proc',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -303,6 +330,8 @@ class TestStart:
                     f'dd_{integration}_{environment}',
                     '-v',
                     f'{config_file.parent}:C:\\ProgramData\\Datadog\\conf.d\\{integration}.d',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -364,6 +393,8 @@ class TestStart:
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
                     '-v',
                     '/a/b/c:/d/e/f',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -428,6 +459,8 @@ class TestStart:
                     '-v',
                     f'/{str(config_file).replace(":", "", 1).replace(os.sep, "/")}:/mnt/{config_file.name}',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -484,6 +517,8 @@ class TestStart:
                     f'{config_file.parent}:C:\\ProgramData\\Datadog\\conf.d\\{integration}.d',
                     '-v',
                     f'{config_file.parent.parent}:C:\\mnt',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -547,6 +582,8 @@ class TestStart:
                     '-v',
                     '/proc:/host/proc',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -604,6 +641,8 @@ class TestStart:
                     '/proc:/host/proc',
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -667,6 +706,8 @@ class TestStart:
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -728,6 +769,8 @@ class TestStart:
                     '/proc:/host/proc',
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -791,6 +834,8 @@ class TestStart:
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -808,6 +853,7 @@ class TestStart:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             ),
+            apt_mirror_reset_call(mocker, docker_path, f'dd_{integration}_{environment}'),
             mocker.call([docker_path, 'exec', f'dd_{integration}_{environment}', 'echo', 'hello world'], shell=False),
             mocker.call(
                 [docker_path, 'restart', f'dd_{integration}_{environment}'],
@@ -856,6 +902,8 @@ class TestStart:
                     '-v',
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -873,6 +921,7 @@ class TestStart:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             ),
+            apt_mirror_reset_call(mocker, docker_path, f'dd_{integration}_{environment}'),
             mocker.call([docker_path, 'exec', f'dd_{integration}_{environment}', 'echo', 'hello world'], shell=False),
             mocker.call(
                 [docker_path, 'restart', f'dd_{integration}_{environment}'],
@@ -922,6 +971,8 @@ class TestStart:
                     f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
                     '-v',
                     f'{temp_dir / "foo"}:/home/foo',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -999,6 +1050,8 @@ class TestStart:
                     f'{config_file.parent}:C:\\ProgramData\\Datadog\\conf.d\\{integration}.d',
                     '-v',
                     f'{temp_dir / "foo"}:C:\\Users\\ContainerAdministrator\\foo',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
                     '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
@@ -1081,6 +1134,8 @@ class TestStart:
                     '-v',
                     f'{temp_dir / "foo"}:/home/foo',
                     '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
@@ -1098,6 +1153,7 @@ class TestStart:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             ),
+            apt_mirror_reset_call(mocker, docker_path, f'dd_{integration}_{environment}'),
             mocker.call([docker_path, 'exec', f'dd_{integration}_{environment}', 'echo', 'hello world1'], shell=False),
             mocker.call(
                 [
@@ -1122,6 +1178,41 @@ class TestStart:
                 stderr=subprocess.STDOUT,
             ),
         ]
+
+    def test_apt_mirror_not_reset_on_windows_container(self, app, temp_dir, get_integration, docker_path, mocker):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'postgres'
+        environment = 'py3.12'
+        metadata = {'docker_platform': 'windows', 'start_commands': ['echo "hello world"']}
+
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        assert apt_mirror_reset_call(mocker, docker_path, f'dd_{integration}_{environment}') not in run.call_args_list
+        assert (
+            mocker.call([docker_path, 'exec', f'dd_{integration}_{environment}', 'echo', 'hello world'], shell=False)
+            in run.call_args_list
+        )
+
+    def test_apt_mirror_not_reset_without_lifecycle_commands(self, app, temp_dir, get_integration, docker_path, mocker):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'postgres'
+        environment = 'py3.12'
+
+        agent = DockerAgent(app, get_integration(integration), environment, {}, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        assert apt_mirror_reset_call(mocker, docker_path, f'dd_{integration}_{environment}') not in run.call_args_list
 
 
 class TestStop:
@@ -1212,6 +1303,35 @@ class TestInvoke:
         assert run.call_args_list == [
             mocker.call(
                 [docker_path, 'exec', f'dd_{integration}_{environment}', 'agent', 'check', 'postgres'],
+                shell=False,
+                check=True,
+            ),
+        ]
+
+    def test_with_env_vars(self, app, get_integration, docker_path, mocker):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        integration = 'postgres'
+        environment = 'py3.12'
+        metadata = {}
+
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent.invoke(['check', 'postgres'], env_vars={'FOO': 'bar', 'BAZ': 'qux'})
+
+        assert run.call_args_list == [
+            mocker.call(
+                [
+                    docker_path,
+                    'exec',
+                    '-e',
+                    'FOO=bar',
+                    '-e',
+                    'BAZ=qux',
+                    f'dd_{integration}_{environment}',
+                    'agent',
+                    'check',
+                    'postgres',
+                ],
                 shell=False,
                 check=True,
             ),

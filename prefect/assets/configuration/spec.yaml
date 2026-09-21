@@ -1,9 +1,17 @@
 name: Prefect
 files:
 - name: prefect.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 4200
+      candidates:
+      - prefect_url: "http://{service.host}:{port.number}/api"
   options:
   - template: init_config
     options:
+    - template: init_config/http
     - template: init_config/default
   - template: instances
     options:
@@ -115,16 +123,6 @@ files:
             items:
               type: string
       fleet_configurable: false
-    - name: custom_headers
-      description: |
-        Additional HTTP headers to include in all requests to the Prefect API.
-      value:
-        type: object
-        example:
-          Authorization: "Bearer <YOUR_TOKEN>"
-          Custom-Header: "CustomValue"
-      fleet_configurable: false
-
     - name: collect_events
       description: |
         Whether or not to send Prefect events to Datadog.
@@ -134,6 +132,7 @@ files:
         default: false
       fleet_configurable: false
 
+    - template: instances/http
     - template: instances/default
 
   - template: logs
@@ -146,4 +145,14 @@ files:
       - type: multi_line
         name: python_stack_trace
         pattern: '^\d{2}:\d{2}:\d{2}\.\d{3} \|'
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - prefect
+  - template: auto_conf/discovery
+    overrides:
+      discovery.example:
+        metrics_prefix: prefect.server
 

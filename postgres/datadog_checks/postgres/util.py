@@ -57,6 +57,12 @@ class DatabaseConfigurationError(Enum):
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
 TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting/"
 
+# Prepended to queries that should be excluded from query metrics collection.
+DDIGNORE_COMMENT = '/* DDIGNORE */'
+
+# Query text Postgres returns when the monitoring role cannot see a statement.
+INSUFFICIENT_PRIVILEGE = '<insufficient privilege>'
+
 
 # Central map of diagnostic metadata for every DatabaseConfigurationError code. Used by both the
 # runtime `record_warning` path (so `agent diagnose` sees the same remediation text as `agent status`)
@@ -149,7 +155,7 @@ DIAGNOSTIC_METADATA = {
         "docs_anchor": DatabaseConfigurationError.missing_pg_monitor_role.value,
     },
     DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity: {
-        "description": "pg_stat_activity rows are being masked as `<insufficient privilege>`.",
+        "description": f"pg_stat_activity rows are being masked as `{INSUFFICIENT_PRIVILEGE}`.",
         "remediation": "Grant pg_monitor to the datadog user so activity rows are visible across users.",
         "docs_anchor": DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value,
     },
@@ -277,7 +283,7 @@ class DBExplainError(Enum):
     # not able to access the required function
     database_error = 'database_error'
 
-    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    # datatype mismatch occurs when the return type of the EXPLAIN function is not json
     datatype_mismatch = 'datatype_mismatch'
 
     # this could be the result of a missing EXPLAIN function

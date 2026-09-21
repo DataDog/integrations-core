@@ -52,9 +52,19 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
     def queries(self):
         # make a copy of the query to avoid modifying the original
         # in case different instances have different collection intervals
-        query = DATABASE_BACKUP_METRICS_QUERY.copy()
-        query['collection_interval'] = self.collection_interval
-        return [query]
+        queries = []
+        for database_filter, params in self._database_filters("sys.databases.name"):
+            query = DATABASE_BACKUP_METRICS_QUERY.copy()
+            if database_filter:
+                query['query'] = query['query'].replace(
+                    "        group by sys.databases.name",
+                    f"        where {database_filter}\n        group by sys.databases.name",
+                )
+            if params:
+                query['params'] = params
+            query['collection_interval'] = self.collection_interval
+            queries.append(query)
+        return queries
 
     def __repr__(self) -> str:
         return (

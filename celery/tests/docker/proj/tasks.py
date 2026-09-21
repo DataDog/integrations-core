@@ -1,6 +1,6 @@
 from celery import Celery
 
-app = Celery('tasks', broker='redis://default:devops-best-friend@docker-redis-standalone-1:6379')
+app = Celery('tasks', broker='redis://default:devops-best-friend@redis-standalone:6379')
 
 
 @app.task(bind=True)

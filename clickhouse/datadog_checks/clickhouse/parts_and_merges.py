@@ -22,11 +22,6 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import PartsAndMerges
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
@@ -240,7 +235,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
             enabled=config.enabled,
-            dbms="clickhouse",
+            dbms=check.dbms,
             min_collection_interval=check._config.min_collection_interval,
             expected_db_exceptions=(Exception,),
             job_name="parts-and-merges",
@@ -266,9 +261,9 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-    def cancel(self):
-        super(ClickhousePartsAndMerges, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         if self._db_client:
@@ -282,6 +277,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         return list(self._tags_no_db) if self._tags_no_db else []
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
         try:
@@ -679,7 +676,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
                 tags = self.tags + [
                     f'database:{database}',
                     f'table:{table}',
-                    f'server_node:{server_node}',
+                    f'clickhouse_node:{server_node}',
                     f'partition:{partition}',
                 ]
             else:
@@ -687,7 +684,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
                 tags = self.tags + [
                     f'database:{database}',
                     f'table:{table}',
-                    f'server_node:{server_node}',
+                    f'clickhouse_node:{server_node}',
                 ]
             self._check.gauge('table.parts.active', agg['active'], tags=tags)
             self._check.gauge('table.parts.level_zero', agg['level_zero'], tags=tags)
@@ -735,7 +732,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{database}',
                 f'table:{table}',
-                f'server_node:{server_node}',
+                f'clickhouse_node:{server_node}',
             ]
             avg_progress = agg['progress_sum'] / agg['progress_count'] if agg['progress_count'] > 0 else 0.0
             self._check.gauge('merges.active', agg['active'], tags=tags)
@@ -750,7 +747,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{row["database"]}',
                 f'table:{row["table"]}',
-                f'server_node:{row.get("server_node", "")}',
+                f'clickhouse_node:{row.get("server_node", "")}',
             ]
             oldest_create_time = row.get('oldest_create_time')
             oldest_age = now - oldest_create_time if oldest_create_time is not None else 0
@@ -764,7 +761,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{row["database"]}',
                 f'table:{row["table"]}',
-                f'server_node:{row.get("server_node", "")}',
+                f'clickhouse_node:{row.get("server_node", "")}',
             ]
             self._check.gauge('replication.queue_depth', row['depth'], tags=tags)
             self._check.gauge('replication.stuck_tasks', row['stuck'], tags=tags)
@@ -788,7 +785,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             tags = self.tags + [
                 f'database:{database}',
                 f'table:{table}',
-                f'server_node:{server_node}',
+                f'clickhouse_node:{server_node}',
             ]
             self._check.gauge('table.detached_parts.count', agg['total'], tags=tags)
             self._check.gauge('table.detached_parts.manual', agg['manual'], tags=tags)
@@ -798,7 +795,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         # --- Thresholds (server-level MergeTree settings) ---
         for row in thresholds or []:
             server_node = row.get('server_node', '')
-            tags = self.tags + [f'server_node:{server_node}']
+            tags = self.tags + [f'clickhouse_node:{server_node}']
             if row['name'] == 'parts_to_delay_insert':
                 self._check.gauge('parts.threshold.delay_insert', row['value'], tags=tags)
             elif row['name'] == 'parts_to_throw_insert':
@@ -824,9 +821,9 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         payload = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddagenthostname": self._check.agent_hostname,
-            "dbms": "clickhouse",
+            "dbms": self._check.dbms,
             "ddsource": "clickhouse",
             "dbms_version": self._check.dbms_version,
             "dbm_type": DBM_TYPE,

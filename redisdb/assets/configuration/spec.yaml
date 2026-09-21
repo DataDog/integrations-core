@@ -128,6 +128,13 @@ files:
         type: boolean
         example: true
       fleet_configurable: true
+    - name: client_name
+      display_priority: 0
+      description: |
+        Set the connection name that appears in CLIENT LIST on the Redis server.
+        Useful for identifying agent connections. Requires the CLIENT SETNAME permission.
+      value:
+        type: string
     - name: keys
       display_priority: 0
       description: |

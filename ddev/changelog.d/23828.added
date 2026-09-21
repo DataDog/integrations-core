@@ -1,1 +1,0 @@
-Print the exact workflow run URL when dispatching `ddev dep promote`, via a new `return_run_details` option on `GitHubManager.dispatch_workflow`.

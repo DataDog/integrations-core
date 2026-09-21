@@ -19,7 +19,7 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['stream_path'])
+SECURE_FIELD_NAMES = frozenset(['stream_path', 'ticket_location'])
 
 
 class MetricPatterns(BaseModel):

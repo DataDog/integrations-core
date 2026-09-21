@@ -63,6 +63,13 @@ EXT_PROC_METRICS = [
     "envoy.http.ext_proc.send_immediate_resp_upstream_ignored",
 ]
 
+GLOBAL_RATE_LIMIT_METRICS = [
+    "envoy.cluster.ratelimit.error",
+    "envoy.cluster.ratelimit.failure_mode_allowed",
+    "envoy.cluster.ratelimit.ok",
+    "envoy.cluster.ratelimit.over_limit",
+]
+
 LOCAL_RATE_LIMIT_METRICS = [
     "envoy.http_local_rate_limit.enabled",
     "envoy.http_local_rate_limit.enforced",
@@ -90,3 +97,17 @@ RBAC_SHADOW_METRICS = [
 ]
 
 RBAC_METRICS = RBAC_ENFORCE_METRICS + RBAC_SHADOW_METRICS
+
+ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG = ['stat_prefix:ingress_http']
+
+ADAPTIVE_CONCURRENCY_METRIC_VALUES = {
+    "envoy.http.adaptive_concurrency.gradient_controller.rq_blocked": 5,
+    "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active": 1,
+    "envoy.http.adaptive_concurrency.gradient_controller.concurrency_limit": 30,
+    "envoy.http.adaptive_concurrency.gradient_controller.gradient": 1000,
+    "envoy.http.adaptive_concurrency.gradient_controller.burst_queue_size": 22,
+    "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_msecs": 100,
+    "envoy.http.adaptive_concurrency.gradient_controller.sample_rtt_msecs": 95,
+}
+
+ADAPTIVE_CONCURRENCY_METRICS = list(ADAPTIVE_CONCURRENCY_METRIC_VALUES.keys())

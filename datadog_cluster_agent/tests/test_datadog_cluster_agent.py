@@ -68,6 +68,8 @@ METRICS = [
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',
+    'instrumentation_controller.reconciliations',
+    'instrumentation_controller.resources',
     'kubernetes_apiserver.emitted_events',
     'kubernetes_apiserver.kube_events',
     'language_detection_dca_handler.processed_requests',
