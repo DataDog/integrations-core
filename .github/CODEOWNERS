@@ -644,6 +644,10 @@ plaid/assets/logs/                                                  @DataDog/saa
 /gpu/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
 /gpu/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
+/infiniband/                                                         @DataDog/gpu-monitoring-agent
+/infiniband/*.md                                                     @DataDog/gpu-monitoring-agent @DataDog/documentation
+/infiniband/manifest.json                                            @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+
 /kueue/                                                                @DataDog/gpu-monitoring-agent
 /kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
 /kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
