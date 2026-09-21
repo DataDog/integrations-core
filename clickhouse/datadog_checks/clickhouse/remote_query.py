@@ -4,7 +4,7 @@
 
 """Remote query source-page producer for the ClickHouse integration.
 
-Executes one validated read-only query through a dedicated ``clickhouse-connect`` client,
+Executes one validated query through a dedicated ``clickhouse-connect`` client,
 streams the server-rendered rows with bounded memory, normalizes ClickHouse values into
 the pinned cross-language JSON contract, and sends them as record-complete CSV source
 pages to its-agent-intake. The stream's own header supplies the descriptor — column names,
@@ -61,15 +61,19 @@ Value contract (pinned, cross-language):
 
 Read-only posture, defense in depth:
 
-1. Statement gate: the query must be a single statement whose operative keyword is in a
-   read-only set (``SELECT``/``SHOW``/``DESCRIBE``/``EXISTS``/``EXPLAIN``, or ``WITH``
-   followed by CTE definitions and then ``SELECT``), verified before any server access.
-2. Server-side settings: ``readonly=1`` and ``max_execution_time`` are injected per request
+1. Server-side settings: ``readonly=1`` and ``max_execution_time`` are injected per request
    when the connected user's server-reported ``readonly`` level is 0. Users with a
    read-only profile (level >= 1) cannot change settings at all, so injecting would fail
-   their queries; their own profile enforces the posture.
-3. At-most-once execution: the dedicated client disables query retries, and the user query
+   their queries; their own profile enforces the posture. When the server reports no
+   usable ``readonly`` setting, no settings are injected — and that case does not prove
+   database-side read-only enforcement.
+2. At-most-once execution: the dedicated client disables query retries, and the user query
    is never wrapped, probed, or re-executed.
+
+There is no integration-side SQL statement policy: query text reaches the driver's streaming
+call verbatim — no rewriting, no preflight query — and the database alone rejects what it
+does not admit. SQL syntax and statement-policy validation belong in the backend; their
+ownership and behavior are to be specified in a future RFC update.
 
 Cancellation: the HTTP response is always closed when a run finishes, fails, or is
 abandoned; closing (never draining) the socket lets the server cancel the query when
@@ -215,255 +219,6 @@ class TimedStreamSource:
 
     def close(self) -> None:
         self._stream.close()
-
-
-# ---------------------------------------------------------------------------
-# Statement gate: one read-only statement, verified client-side before any server access
-# ---------------------------------------------------------------------------
-
-REMOTE_QUERY_READ_ONLY_STATEMENTS = frozenset(('select', 'show', 'describe', 'desc', 'exists', 'explain'))
-
-
-class StatementScanner:
-    """Comment/string-aware scanner over one ClickHouse statement.
-
-    Skips whitespace, ``--`` line comments, and (nested) ``/* */`` block comments, and treats
-    single-quoted strings (backslash escapes and doubled quotes), double-quoted strings, and
-    backtick identifiers as single tokens. An unterminated string or comment leaves
-    ``terminated`` false so the caller can fail closed.
-    """
-
-    def __init__(self, text: str):
-        self._text = text
-        self._position = 0
-        self.terminated = True
-
-    def _skip_trivia(self) -> None:
-        """Advance past whitespace and comments so the scanner sits on the next token."""
-        text, length = self._text, len(self._text)
-        while self._position < length:
-            char = text[self._position]
-            if char.isspace():
-                self._position += 1
-            elif char == '-' and text.startswith('--', self._position):
-                newline = text.find('\n', self._position)
-                self._position = length if newline < 0 else newline + 1
-            elif char == '/' and text.startswith('/*', self._position):
-                self._position = self._skip_block_comment(self._position)
-            else:
-                return
-
-    def _skip_block_comment(self, start: int) -> int:
-        """Return the position just past a block comment, handling nesting.
-
-        ClickHouse nests block comments one level deep (its parser's own limit).
-        """
-        text = self._text
-        position = start + 2
-        while position < len(text):
-            if text.startswith('*/', position):
-                return position + 2
-            if text.startswith('/*', position):
-                end = self._skip_block_comment(position)
-                if end == position:
-                    break
-                position = end
-                continue
-            position += 1
-        self.terminated = False
-        return len(text)
-
-    def _skip_quoted(self) -> None:
-        """Skip a quoted token at the scanner position: ``'...'``, ``"..."``, or ```...```."""
-        text = self._text
-        quote = text[self._position]
-        position = self._position + 1
-        while position < len(text):
-            char = text[position]
-            if char == '\\' and quote != '`':
-                position += 2
-                continue
-            if char == quote:
-                # A doubled quote inside the token is an escape, not the terminator.
-                if position + 1 < len(text) and text[position + 1] == quote:
-                    position += 2
-                    continue
-                self._position = position + 1
-                return
-            position += 1
-        self.terminated = False
-        self._position = len(text)
-
-    def at_end(self) -> bool:
-        self._skip_trivia()
-        return self._position >= len(self._text)
-
-    def peek(self) -> str | None:
-        self._skip_trivia()
-        if self._position >= len(self._text):
-            return None
-        return self._text[self._position]
-
-    def consume(self) -> None:
-        """Consume one raw character at the scanner position (after trivia)."""
-        self._skip_trivia()
-        if self._position < len(self._text):
-            self._position += 1
-
-    def keyword(self) -> str | None:
-        """Read an identifier/keyword at the scanner position, or None if none starts here."""
-        self._skip_trivia()
-        text = self._text
-        position = self._position
-        if position >= len(text):
-            return None
-        if not (text[position].isalpha() or text[position] == '_'):
-            return None
-        end = position + 1
-        while end < len(text) and (text[end].isalnum() or text[end] == '_'):
-            end += 1
-        self._position = end
-        return text[position:end]
-
-    def quoted(self) -> bool:
-        """Skip a quoted token if one starts here, leaving the scanner just past it."""
-        if self.peek() in ('\'', '"', '`'):
-            self._skip_quoted()
-            return self.terminated
-        return False
-
-    def balanced_group(self) -> bool:
-        """Skip a balanced parenthesis group starting at the current ``(`` position."""
-        if self.peek() != '(':
-            return False
-        text = self._text
-        depth = 0
-        while self._position < len(text):
-            char = text[self._position]
-            if char == '(':
-                depth += 1
-                self._position += 1
-            elif char == ')':
-                depth -= 1
-                self._position += 1
-                if depth == 0:
-                    return True
-            elif char in '\'"`':
-                self._skip_quoted()
-                if not self.terminated:
-                    return False
-            elif char == '/' and text.startswith('/*', self._position):
-                self._position = self._skip_block_comment(self._position)
-            elif char == '-' and text.startswith('--', self._position):
-                newline = text.find('\n', self._position)
-                self._position = len(text) if newline < 0 else newline + 1
-            else:
-                self._position += 1
-        self.terminated = False
-        return False
-
-    def expression_until_keyword(self, keyword: str) -> bool:
-        """Scan an expression up to (and consuming) a top-level ``keyword``.
-
-        Anything that is not an identifier/keyword token (numbers, operators) is consumed
-        one character at a time; parentheses, strings, and comments are skipped whole, so
-        the keyword only matches at the top level of the expression.
-        """
-        target = keyword.lower()
-        while True:
-            if self.peek() is None:
-                return False
-            if self.peek() == '(':
-                if not self.balanced_group():
-                    return False
-                continue
-            if self.peek() in ('\'', '"', '`'):
-                if not self.quoted():
-                    return False
-                continue
-            token = self.keyword()
-            if token is not None:
-                if token.lower() == target:
-                    return True
-                continue
-            # A non-identifier character: number, operator, punctuation. Consume it and
-            # keep scanning; no trivia or nesting hides inside a single such character.
-            self.consume()
-
-    def scan_statements(self) -> bool:
-        """True when the text holds exactly one statement (no non-trailing semicolon)."""
-        self._position = 0
-        while self._position < len(self._text):
-            char = self._text[self._position]
-            if char in '\'"`':
-                self._skip_quoted()
-            elif char == '/' and self._text.startswith('/*', self._position):
-                self._position = self._skip_block_comment(self._position)
-            elif char == '-' and self._text.startswith('--', self._position):
-                newline = self._text.find('\n', self._position)
-                self._position = len(self._text) if newline < 0 else newline + 1
-            elif char == ';':
-                self._position += 1
-                if not self.at_end():
-                    return False
-            else:
-                self._position += 1
-        return True
-
-    def rewind(self) -> None:
-        self._position = 0
-        self.terminated = True
-
-
-def validate_read_only_statement(query: str) -> None:
-    """Fail closed unless the query is a single statement with a read-only operative keyword.
-
-    ClickHouse HTTP executes one statement per request, so the server already rejects a
-    second statement; this gate rejects mutations before any server access. ``WITH`` is
-    allowed only when its CTE definitions are followed by ``SELECT`` because ClickHouse
-    also accepts ``WITH ... INSERT INTO ... SELECT``.
-    """
-    scanner = StatementScanner(query)
-    if not scanner.scan_statements() or not scanner.terminated:
-        raise rq.RemoteQueryFailure(
-            'invalid_request', 'Invalid remote query request: query must be a single read-only statement.'
-        )
-    scanner.rewind()
-    keyword = (scanner.keyword() or '').lower()
-    if keyword == 'with':
-        # ``WITH`` itself is not read-only (ClickHouse also accepts WITH ... INSERT); the
-        # CTE definitions must resolve to an operative SELECT.
-        keyword = 'select' if _validate_with_select(scanner) else ''
-    if keyword not in REMOTE_QUERY_READ_ONLY_STATEMENTS:
-        raise rq.RemoteQueryFailure(
-            'invalid_request', 'Invalid remote query request: query is not a read-only statement.'
-        )
-
-
-def _validate_with_select(scanner: StatementScanner) -> bool:
-    """True when a leading ``WITH`` clause is followed by an operative ``SELECT``.
-
-    Each definition is ``<name-or-expression> AS (<query>)``, optionally with a
-    ``(<columns>)`` list after the name, or a bare alias after a scalar expression;
-    definitions are separated by commas. The scanner stays shallow on purpose: anything
-    unexpected makes the gate reject rather than guess.
-    """
-    while True:
-        if not scanner.expression_until_keyword('as'):
-            return False
-        if scanner.peek() == '(':
-            # Named CTE form: ``name (columns) AS (query)`` or ``name AS (query)``.
-            if not scanner.balanced_group():
-                return False
-        else:
-            # Scalar CTE form: ``WITH <expression> AS <alias>``.
-            if scanner.keyword() is None:
-                return False
-        if scanner.peek() != ',':
-            break
-        # Consume the comma separator and continue with the next CTE definition.
-        scanner.consume()
-    return (scanner.keyword() or '').lower() == 'select'
 
 
 # ---------------------------------------------------------------------------
@@ -863,7 +618,7 @@ class LineBoundTracker:
 
 
 # ---------------------------------------------------------------------------
-# Producer: one validated read-only query execution through a dedicated streaming client
+# Producer: one validated query execution through a dedicated streaming client
 # ---------------------------------------------------------------------------
 
 
@@ -881,9 +636,10 @@ def resolve_readonly_settings(client: ClickhouseClient, timeout_ms: int) -> dict
       docstring) and a server-side ``max_execution_time`` kill for runaway execution;
     - level >= 1: settings cannot be changed for that user, so injecting would fail their
       queries; the profile's own read-only posture already applies.
-    - unknown (no discovery data): inject nothing; the statement gate and, for modern
-      servers, the profile remain the posture. The client would also refuse to send an
-      unknown setting (its validation fails closed), so injecting is not an option.
+    - unknown (no discovery data): inject nothing. A missing or unparseable ``readonly``
+      setting results in no injected settings, and that case does not prove database-side
+      read-only enforcement. The client would also refuse to send an unknown setting (its
+      validation fails closed), so injecting is not an option.
     """
     settings = getattr(client, 'server_settings', None)
     setting = settings.get('readonly') if settings is not None else None
@@ -1241,14 +997,6 @@ def iter_agent_rpc_stream_events(
             rq.validation_message(e),
             elapsed_ms=rq.elapsed_ms(started_at),
             execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    try:
-        validate_read_only_statement(parsed_request.query)
-    except rq.RemoteQueryFailure as e:
-        yield rq.failed_event(
-            e.code, e.message, elapsed_ms=rq.elapsed_ms(started_at), execution_diagnostics=timings.metadata()
         )
         return
 

@@ -484,104 +484,8 @@ def csv_record(tokens):
 
 
 # ---------------------------------------------------------------------------
-# Statement gate
+# Query pass-through to the driver (no integration-side SQL statement policy)
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    'query',
-    [
-        'SELECT 1 AS value',
-        'select * from system.databases',
-        'SELECT 1',
-        'SELECT 1;',
-        'SELECT 1 ;   ',
-        '-- leading comment\nSELECT 1',
-        '/* leading comment */ SELECT 1',
-        '/* outer /* nested */ comment */ SELECT 1',
-        'SHOW TABLES',
-        'DESCRIBE system.databases',
-        'DESC system.databases',
-        'EXPLAIN SELECT 1',
-        'EXISTS TABLE t',
-        "SELECT ';' AS semi, 'drop table' AS words",
-        "SELECT 'unterminated comment /* inside a string'",
-        'SELECT 1 -- trailing comment with ; inside',
-        'SELECT `a;b` FROM t',
-        'WITH 1 AS x SELECT x',
-        'WITH 1 AS x, 2 AS y SELECT x + y',
-        'WITH cte AS (SELECT 1 AS a) SELECT a FROM cte',
-        'WITH a AS (SELECT 1), b AS (SELECT 2) SELECT * FROM a, b',
-        'WITH t(x) AS (SELECT 1) SELECT x FROM t',
-        'WITH t (x, y) AS (SELECT 1, 2) SELECT x FROM t',
-        'WITH cte AS (SELECT 1 AS a) SELECT a FROM cte;',
-    ],
-)
-def test_statement_gate_accepts_read_only_statements(query):
-    remote_query.validate_read_only_statement(query)
-
-
-@pytest.mark.parametrize(
-    'query',
-    [
-        '',
-        '/* only a comment */',
-        '/* never closed SELECT 1',
-        "SELECT 'never closed",
-        'INSERT INTO t VALUES (1)',
-        'DROP TABLE t',
-        'ALTER TABLE t DELETE WHERE 1',
-        'ALTER TABLE t UPDATE x = 1 WHERE 1',
-        'DELETE FROM t WHERE 1',
-        'UPDATE t SET x = 1 WHERE 1',
-        'TRUNCATE TABLE t',
-        'RENAME TABLE a TO b',
-        'EXCHANGE TABLES a AND b',
-        'OPTIMIZE TABLE t',
-        'CREATE TABLE t (x UInt8) ENGINE = Memory',
-        'SET max_execution_time = 1',
-        'USE default',
-        'GRANT SELECT ON * TO u',
-        'KILL QUERY WHERE 1',
-        'SYSTEM FLUSH LOGS',
-        'select 1; drop table t',
-        'DROP TABLE t -- after a select',
-        'SELECT 1; /* trailing comment is fine but this is a second statement */ SELECT 2',
-        'WITH cte AS (SELECT 1) INSERT INTO t SELECT * FROM cte',
-        'WITH cte AS (SELECT 1) DELETE FROM t',
-        'WITH ( FROM t SELECT 1',
-        'WITH cte AS (unclosed SELECT 1',
-        'WITH 1 AS SELECT 2',
-    ],
-)
-def test_statement_gate_rejects_mutations_and_malformed_statements(query):
-    with pytest.raises(rq.RemoteQueryFailure) as excinfo:
-        remote_query.validate_read_only_statement(query)
-    assert excinfo.value.code == 'invalid_request'
-    # The message is one of the two fixed spellings: it never echoes the query text.
-    assert excinfo.value.message in (
-        'Invalid remote query request: query must be a single read-only statement.',
-        'Invalid remote query request: query is not a read-only statement.',
-    )
-
-
-@pytest.mark.parametrize(
-    'query',
-    [
-        'INSERT INTO t VALUES (1)',
-        'DROP TABLE t',
-        'select 1; drop table t',
-        "SELECT 'unterminated",
-    ],
-)
-def test_stream_rejects_non_read_only_queries_before_resolution(query):
-    request = valid_request(query=query)
-
-    events = collect_events(request, None, registry=ExplodingRegistry())
-
-    assert_failed_event(events, 'invalid_request', 'read-only')
-    # The failing query text never appears in the emitted events.
-    assert query not in str(events)
 
 
 def test_stream_accepts_with_select_statement_when_allowlist_disabled(monkeypatch):
@@ -595,6 +499,24 @@ def test_stream_accepts_with_select_statement_when_allowlist_disabled(monkeypatc
     final = assert_success(events)
     assert final['upload_receipt']['totalRows'] == 1
     assert clickhouse_client.raw_stream_calls[0]['query'] == request['query']
+
+
+def test_stream_passes_queries_verbatim_to_the_driver_without_a_statement_gate(monkeypatch):
+    """No integration-side SQL grammar check remains: mutation text the old statement
+    gate rejected reaches the driver's streaming call verbatim, and only the database
+    judges it. The fake client is the proof surface — a mutation query is never run
+    against a real server."""
+    patch_upload_credentials(monkeypatch)
+    patch_allowlist_disabled(monkeypatch)
+    clickhouse_client = make_client(names=('x',), types=('UInt8',), rows=[[7]])
+    request = valid_request(query='INSERT INTO t VALUES (1)')
+
+    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
+
+    assert_success(events)
+    # The run proceeds to the streaming call, with the query unrewritten.
+    assert clickhouse_client.raw_stream_calls[0]['query'] == request['query']
+    assert clickhouse_client.raw_stream_calls[0]['fmt'] == remote_query.REMOTE_QUERY_STREAM_FORMAT
 
 
 # ---------------------------------------------------------------------------
@@ -1002,7 +924,14 @@ def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
         'format_version': 'csv-json-cell-v1',
         'include_schema': False,
         'agent_hostname': AGENT_HOSTNAME,
-        'columns': [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}],
+        'columns': [
+            {
+                'column_name': 'value',
+                'vendor_data_type': 'UInt8',
+                'logical_type': 'integer',
+                'array_element_delimiter': None,
+            }
+        ],
     }
 
 
@@ -1125,7 +1054,14 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
     assert (call.batch_index, call.record_offset, call.rows, call.source_bytes) == (0, 0, 0, 0)
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
-    assert descriptor['columns'] == [{'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}]
+    assert descriptor['columns'] == [
+        {
+            'column_name': 'value',
+            'vendor_data_type': 'UInt8',
+            'logical_type': 'integer',
+            'array_element_delimiter': None,
+        }
+    ]
     assert final['upload_receipt']['pageCount'] == 1
     assert final['upload_receipt']['totalRows'] == 0
     assert final['upload_receipt']['totalBytes'] == 0
@@ -1362,8 +1298,18 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     descriptor = json.loads(fake.descriptor_bodies[0])
     assert descriptor['include_schema'] is True
     assert descriptor['columns'] == [
-        {'column_name': 'city', 'vendor_data_type': 'String', 'logical_type': 'string', 'array_element_delimiter': None},
-        {'column_name': 'country', 'vendor_data_type': 'String', 'logical_type': 'string', 'array_element_delimiter': None},
+        {
+            'column_name': 'city',
+            'vendor_data_type': 'String',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
+        {
+            'column_name': 'country',
+            'vendor_data_type': 'String',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
     ]
     assert event_metadata(events[0])['includeSchema'] is True
 
@@ -1386,8 +1332,18 @@ def test_producer_descriptor_carries_clickhouse_type_strings_and_logical_types(m
     # The descriptor's vendor data types are the exact ClickHouse type strings from the
     # stream header, with wrappers peeled for the logical types.
     assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {'column_name': 'count', 'vendor_data_type': 'Nullable(UInt64)', 'logical_type': 'integer', 'array_element_delimiter': None},
-        {'column_name': 'name', 'vendor_data_type': 'LowCardinality(String)', 'logical_type': 'string', 'array_element_delimiter': None},
+        {
+            'column_name': 'count',
+            'vendor_data_type': 'Nullable(UInt64)',
+            'logical_type': 'integer',
+            'array_element_delimiter': None,
+        },
+        {
+            'column_name': 'name',
+            'vendor_data_type': 'LowCardinality(String)',
+            'logical_type': 'string',
+            'array_element_delimiter': None,
+        },
         {'column_name': 'flag', 'vendor_data_type': 'Bool', 'logical_type': 'boolean', 'array_element_delimiter': None},
     ]
     assert page == csv_record([b'null', b'"x"', b'true'])
@@ -2372,7 +2328,12 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
     # any page is uploaded.
     (descriptor_body,) = fake.descriptor_bodies
     assert json.loads(descriptor_body)['columns'] == [
-        {'column_name': 'value', 'vendor_data_type': 'UInt8', 'logical_type': 'integer', 'array_element_delimiter': None}
+        {
+            'column_name': 'value',
+            'vendor_data_type': 'UInt8',
+            'logical_type': 'integer',
+            'array_element_delimiter': None,
+        }
     ]
     # One complete page uploaded as one direct PUT: exact whole-page identity, rows exact.
     (page_call,) = fake.put_page_calls
