@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
-from unittest.mock import MagicMock
 
 import pytest
-from requests.exceptions import ConnectionError, HTTPError
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -60,22 +60,23 @@ def assert_bwc_metrics(aggregator, bwc_metrics, tags, value=0):
         aggregator.assert_metric(f'{metric_prefix}.num_occured', value=value, tags=tags)
 
 
-def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
-    mocker.patch('requests.Session.post', side_effect=ConnectionError('connection refused'))
+def test_can_connect_down(dd_run_check, aggregator, instance, fake_http):
+    fake_http.register_response(
+        'POST',
+        f'{DEFAULT_GATEWAY_URL}/auth/realms/powerflex/protocol/openid-connect/token',
+        HTTPClientConnectionError('connection refused'),
+    )
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=0, tags=BASE_TAGS)
 
 
-def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, mocker, caplog):
-    mocker.patch(
-        'requests.Session.post',
-        return_value=MagicMock(
-            raise_for_status=MagicMock(),
-            json=MagicMock(return_value={'error': 'unauthorized_client'}),
-            status_code=200,
-        ),
+def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, fake_http, caplog):
+    fake_http.register_response(
+        'POST',
+        f'{DEFAULT_GATEWAY_URL}/auth/realms/powerflex/protocol/openid-connect/token',
+        FakeHTTPResponse(json_result={'error': 'unauthorized_client'}),
     )
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
@@ -85,8 +86,17 @@ def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, 
     assert 'Auth response missing access_token' in caplog.text
 
 
-def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mocker, caplog):
-    mocker.patch('requests.Session.get', side_effect=HTTPError(response=MagicMock(status_code=500)))
+def test_version_failure(dd_run_check, aggregator, instance, fake_http, fake_http_response, caplog):
+    fake_http_response(
+        f'{DEFAULT_GATEWAY_URL}/auth/realms/powerflex/protocol/openid-connect/token',
+        method='POST',
+        json_data={'access_token': 'fake-token', 'expires_in': 300},
+    )
+    fake_http.register_response(
+        'GET',
+        f'{DEFAULT_GATEWAY_URL}/api/version',
+        HTTPClientStatusError('500 Server Error', response=FakeHTTPResponse(status_code=500)),
+    )
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     caplog.set_level(logging.WARNING)
@@ -96,27 +106,25 @@ def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mocker, 
     assert 'Could not connect to PowerFlex Gateway' in caplog.text
 
 
-def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
-    mocker.patch('requests.Session.get', return_value=MagicMock(raise_for_status=MagicMock()))
+def test_can_connect_up(dd_run_check, aggregator, instance, fake_http_response):
+    fake_http_response(
+        f'{DEFAULT_GATEWAY_URL}/auth/realms/powerflex/protocol/openid-connect/token',
+        method='POST',
+        json_data={'access_token': 'fake-token', 'expires_in': 300},
+    )
+    fake_http_response(f'{DEFAULT_GATEWAY_URL}/api/version', json_data={})
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=BASE_TAGS)
 
 
-def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mocker):
+def test_unauthenticated_mode(dd_run_check, aggregator, powerflex_http):
     instance = {'powerflex_gateway_url': DEFAULT_GATEWAY_URL}
-    mocker.patch(
-        'requests.Session.get',
-        side_effect=lambda url, *args, **kwargs: MagicMock(
-            json=MagicMock(return_value=mock_http_call(url)), status_code=200
-        ),
-    )
-    mock_post = mocker.patch('requests.Session.post')
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    mock_post.assert_not_called()
+    assert all(request.method != 'POST' for request in powerflex_http.requests)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', at_least=1)
     aggregator.assert_metric('dell_powerflex.system.count', at_least=1)
@@ -124,7 +132,7 @@ def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mocker):
     aggregator.assert_metric('dell_powerflex.volume.count', at_least=1)
 
 
-def test_token_refresh_uses_min_collection_interval(dd_run_check, instance, mock_http_get, mocker):
+def test_token_refresh_uses_min_collection_interval(dd_run_check, instance, powerflex_http, mocker):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
 
     dd_run_check(check)
@@ -140,7 +148,7 @@ def test_token_refresh_uses_min_collection_interval(dd_run_check, instance, mock
     assert spy.call_count == 1
 
 
-def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_system(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -168,7 +176,7 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
     aggregator.assert_metric('dell_powerflex.user_data_read_bwc.num_occured', value=42, tags=system_tags)
 
 
-def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
+def test_assert_all_metrics(dd_run_check, aggregator, instance, powerflex_http):
     instance['resource_filters'] = [
         {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
     ]
@@ -183,7 +191,7 @@ def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
     )
 
 
-def test_device_statistics_disabled_by_default(dd_run_check, aggregator, instance, mock_http_get):
+def test_device_statistics_disabled_by_default(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -191,7 +199,7 @@ def test_device_statistics_disabled_by_default(dd_run_check, aggregator, instanc
         aggregator.assert_metric(metric, count=0)
 
 
-def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_volumes(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -221,7 +229,7 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=0, tags=snap_tags)
 
 
-def test_collect_storage_pools(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_storage_pools(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -239,7 +247,7 @@ def test_collect_storage_pools(dd_run_check, aggregator, instance, mock_http_get
     assert_bwc_metrics(aggregator, STORAGE_POOL_STATS_BWC_METRICS, pool2_tags)
 
 
-def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_protection_domains(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -263,7 +271,7 @@ def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_htt
     ],
 )
 def test_resource_collect_failure(
-    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, method, log_message
+    dd_run_check, aggregator, instance, powerflex_http, mocker, caplog, method, log_message
 ):
     mocker.patch(
         f'datadog_checks.dell_powerflex.check.DellPowerflexCheck.{method}',
@@ -277,7 +285,7 @@ def test_resource_collect_failure(
 
 
 def test_collector_failure_does_not_stop_next_collectors(
-    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog
+    dd_run_check, aggregator, instance, powerflex_http, mocker, caplog
 ):
     mocker.patch(
         'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_sds_list',
@@ -291,7 +299,7 @@ def test_collector_failure_does_not_stop_next_collectors(
     aggregator.assert_metric('dell_powerflex.storage_pool.count', value=1, tags=BASE_TAGS + POOL1_TAGS)
 
 
-def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_sds(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -313,7 +321,7 @@ def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
         assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, tags)
 
 
-def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_sdc(dd_run_check, aggregator, instance, powerflex_http):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
@@ -330,7 +338,7 @@ def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
         assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, tags)
 
 
-def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_devices(dd_run_check, aggregator, instance, powerflex_http):
     instance['resource_filters'] = [
         {'resource': 'device', 'property': 'name', 'patterns': ['.*'], 'collect_statistics': True},
     ]
@@ -354,8 +362,8 @@ def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
         assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, tags)
 
 
-def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_http_get, mock_responses):
-    mock_responses(f'{DEFAULT_GATEWAY_URL}/api/types/System/instances')[0]['name'] = 'my-powerflex'
+def test_collect_system_with_name(dd_run_check, aggregator, instance, powerflex_http, powerflex_responses):
+    powerflex_responses[f'{DEFAULT_GATEWAY_URL}/api/types/System/instances'][0]['name'] = 'my-powerflex'
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -365,7 +373,7 @@ def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_http_
     aggregator.assert_metric('dell_powerflex.mdm_cluster.good_replicas', value=2, tags=system_tags)
 
 
-def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_get, caplog):
+def test_include_filter_by_name(dd_run_check, aggregator, instance, powerflex_http, caplog):
     instance['resource_filters'] = [
         {'resource': 'storage_pool', 'property': 'name', 'patterns': ['^pool1$']},
     ]
@@ -378,7 +386,7 @@ def test_include_filter_by_name(dd_run_check, aggregator, instance, mock_http_ge
     assert 'Skipping storage_pool storagepool2: did not match any include pattern' in caplog.text
 
 
-def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_get, caplog):
+def test_exclude_filter_by_name(dd_run_check, aggregator, instance, powerflex_http, caplog):
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'name', 'type': 'exclude', 'patterns': ['^SDS3$']},
     ]
@@ -391,7 +399,7 @@ def test_exclude_filter_by_name(dd_run_check, aggregator, instance, mock_http_ge
     assert 'Skipping sds SDS3: matched exclude pattern' in caplog.text
 
 
-def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instance, mock_http_get):
+def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instance, powerflex_http):
     instance['resource_filters'] = [
         {'resource': 'storage_pool', 'property': 'name', 'patterns': ['.*']},
         {'resource': 'storage_pool', 'property': 'name', 'type': 'exclude', 'patterns': ['^pool1$']},
@@ -416,7 +424,7 @@ def test_exclude_takes_precedence_over_include(dd_run_check, aggregator, instanc
         ),
     ],
 )
-def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_get, resource_filters):
+def test_collect_statistics_false(dd_run_check, aggregator, instance, powerflex_http, resource_filters):
     instance['resource_filters'] = resource_filters
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -427,7 +435,7 @@ def test_collect_statistics_false(dd_run_check, aggregator, instance, mock_http_
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', count=0, tags=sds3_tags)
 
 
-def test_filter_by_volume_type(dd_run_check, aggregator, instance, mock_http_get):
+def test_filter_by_volume_type(dd_run_check, aggregator, instance, powerflex_http):
     instance['resource_filters'] = [
         {'resource': 'volume', 'property': 'volumeType', 'patterns': ['^ThinProvisioned$']},
     ]
@@ -438,7 +446,7 @@ def test_filter_by_volume_type(dd_run_check, aggregator, instance, mock_http_get
     aggregator.assert_metric('dell_powerflex.num_of_child_volumes', count=0, tags=BASE_TAGS + VOL_SNAP1_TAGS)
 
 
-def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, mock_http_get):
+def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, powerflex_http):
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'name', 'patterns': ['^nonexistent$']},
     ]
@@ -449,7 +457,7 @@ def test_unfiltered_resources_not_affected(dd_run_check, aggregator, instance, m
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', tags=BASE_TAGS + POOL1_TAGS)
 
 
-def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance, mock_http_get):
+def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance, powerflex_http):
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'name', 'patterns': ['^SDS[12]$']},
         {'resource': 'sds', 'property': 'id', 'type': 'exclude', 'patterns': ['^d1c062b800000001$']},
@@ -493,7 +501,7 @@ def test_multiple_filters_same_resource_type(dd_run_check, aggregator, instance,
     ],
 )
 def test_filter_validation_warning(
-    dd_run_check, aggregator, instance, mock_http_get, caplog, resource_filters, log_message
+    dd_run_check, aggregator, instance, powerflex_http, caplog, resource_filters, log_message
 ):
     instance['resource_filters'] = resource_filters
     caplog.set_level(logging.WARNING)
@@ -503,7 +511,7 @@ def test_filter_validation_warning(
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
 
 
-def test_invalid_filter_type_is_skipped(dd_run_check, aggregator, instance, mock_http_get):
+def test_invalid_filter_type_is_skipped(dd_run_check, aggregator, instance, powerflex_http):
     # test that a restrictive pattern with an invalid type is skipped
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'name', 'type': 'exculde', 'patterns': ['^nonexistent$']},
@@ -513,7 +521,7 @@ def test_invalid_filter_type_is_skipped(dd_run_check, aggregator, instance, mock
     aggregator.assert_metric('dell_powerflex.sds.count', at_least=1)
 
 
-def test_include_filter_missing_property(dd_run_check, aggregator, instance, mock_http_get, caplog):
+def test_include_filter_missing_property(dd_run_check, aggregator, instance, powerflex_http, caplog):
     instance['resource_filters'] = [
         {'resource': 'sds', 'property': 'nonexistent_field', 'patterns': ['.*']},
     ]
@@ -539,7 +547,7 @@ def test_include_filter_missing_property(dd_run_check, aggregator, instance, moc
         ),
     ],
 )
-def test_invalid_filter_still_collects_metrics(dd_run_check, aggregator, instance, mock_http_get, resource_filters):
+def test_invalid_filter_still_collects_metrics(dd_run_check, aggregator, instance, powerflex_http, resource_filters):
     instance['resource_filters'] = resource_filters
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -561,7 +569,7 @@ def test_invalid_filter_still_collects_metrics(dd_run_check, aggregator, instanc
     ],
 )
 def test_collect_statistics_false_per_resource(
-    dd_run_check, aggregator, instance, mock_http_get, resource, property, stats_metric
+    dd_run_check, aggregator, instance, powerflex_http, resource, property, stats_metric
 ):
     instance['resource_filters'] = [
         {'resource': resource, 'property': property, 'patterns': ['.*'], 'collect_statistics': False},
@@ -582,7 +590,9 @@ def test_collect_statistics_false_per_resource(
         ('device', 'name', ['^nonexistent$']),
     ],
 )
-def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_http_get, resource, property, patterns):
+def test_filter_excludes_all_resources(
+    dd_run_check, aggregator, instance, powerflex_http, resource, property, patterns
+):
     instance['resource_filters'] = [
         {'resource': resource, 'property': property, 'patterns': patterns},
     ]
@@ -593,7 +603,7 @@ def test_filter_excludes_all_resources(dd_run_check, aggregator, instance, mock_
     aggregator.assert_metric(f'dell_powerflex.{resource}.count', count=0)
 
 
-def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_events(dd_run_check, aggregator, instance, powerflex_http):
     instance['collect_events'] = True
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -629,7 +639,7 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
     assert check.read_persistent_cache('last_event_timestamp') is not None
 
 
-def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
+def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, powerflex_http, mocker):
     instance['collect_events'] = True
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -641,7 +651,7 @@ def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator
     assert spy.call_args.kwargs['since'] == cached_timestamp
 
 
-def test_collect_alerts_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
+def test_collect_alerts_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, powerflex_http, mocker):
     instance['collect_alerts'] = True
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -654,7 +664,7 @@ def test_collect_alerts_subsequent_run_uses_cached_time(dd_run_check, aggregator
 
 
 @pytest.mark.parametrize('config_key', ['collect_events', 'collect_alerts'])
-def test_collect_disabled(dd_run_check, aggregator, instance, mock_http_get, config_key):
+def test_collect_disabled(dd_run_check, aggregator, instance, powerflex_http, config_key):
     instance[config_key] = False
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -670,7 +680,7 @@ def test_collect_disabled(dd_run_check, aggregator, instance, mock_http_get, con
     ],
 )
 def test_collect_failure(
-    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, config_key, mock_target, log_message
+    dd_run_check, aggregator, instance, powerflex_http, mocker, caplog, config_key, mock_target, log_message
 ):
     instance[config_key] = True
     mocker.patch(mock_target, side_effect=Exception(f'{config_key} API failed'))
@@ -703,7 +713,7 @@ def test_collect_failure(
     ],
 )
 def test_malformed_record_is_skipped(
-    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, config_key, mock_target, log_message
+    dd_run_check, aggregator, instance, powerflex_http, mocker, caplog, config_key, mock_target, log_message
 ):
     instance[config_key] = True
     valid_record = {'name': 'VALID_EVENT', 'timestamp': '2026-03-18T03:40:16.253Z', 'severity': 'CRITICAL'}
@@ -716,7 +726,7 @@ def test_malformed_record_is_skipped(
     assert len(aggregator.events) == 1
 
 
-def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
+def test_collect_alerts(dd_run_check, aggregator, instance, powerflex_http):
     instance['collect_alerts'] = True
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -746,7 +756,7 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
 
 
 def test_statistics_failure_does_not_block_other_resources(
-    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog
+    dd_run_check, aggregator, instance, powerflex_http, mocker, caplog
 ):
     sds2_stats = {'capacityInUseInKb': 350208, 'unusedCapacityInKb': 103406592, 'numOfDevices': 1}
 
@@ -776,7 +786,7 @@ def test_statistics_failure_does_not_block_other_resources(
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=350208, tags=sds2_tags)
 
 
-def test_user_configured_tags(dd_run_check, aggregator, instance, mock_http_get):
+def test_user_configured_tags(dd_run_check, aggregator, instance, powerflex_http):
     instance['tags'] = ['env:prod', 'cluster:powerflex-01']
     instance['collect_events'] = True
     instance['collect_alerts'] = True

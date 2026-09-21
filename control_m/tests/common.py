@@ -5,34 +5,30 @@
 import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import Mock
+from urllib.parse import urlencode
 
-from pytest import MonkeyPatch
-from requests.exceptions import HTTPError
-
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.control_m import ControlMCheck
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 BASE_TAGS = ["control_m_instance:https://example.com/automation-api"]
 
 
-def _respond(data: Any, status_code: int = 200) -> Mock:
-    resp = Mock()
-    resp.status_code = status_code
-    resp.ok = 200 <= status_code < 300
-    if resp.ok:
-        resp.json = Mock(return_value=data)
-        resp.text = json.dumps(data) if not isinstance(data, str) else data
-        resp.raise_for_status = Mock()
-    else:
-        resp.text = f"Error {status_code}"
-        resp.raise_for_status = Mock(side_effect=HTTPError(f"{status_code} Server Error", response=resp))
-    return resp
+def _respond(data: Any, status_code: int = 200) -> FakeHTTPResponse:
+    status_error = None
+    if status_code >= 400:
+        status_error = HTTPClientStatusError(f"{status_code} Server Error")
+    return FakeHTTPResponse(
+        status_code=status_code,
+        json_result=data,
+        text=(f"Error {status_code}" if status_code >= 400 else (data if isinstance(data, str) else json.dumps(data))),
+        status_error=status_error,
+    )
 
 
 def _mock_api(
     check: ControlMCheck,
-    monkeypatch: MonkeyPatch,
     *,
     servers: list[dict[str, Any]] | None = None,
     jobs: list[dict[str, Any]] | None = None,
@@ -48,29 +44,24 @@ def _mock_api(
         "jobs": jobs if jobs is not None else [],
         "jobs_total": jobs_total,
     }
-    server_call_count = 0
+    api_endpoint = check.instance["control_m_api_endpoint"].rstrip("/")
+    server_url = f"{api_endpoint}/config/servers"
+    query = {
+        "limit": int(check.instance.get("job_status_limit", 10000)),
+        "jobname": check.instance.get("job_name_filter", "*"),
+    }
+    jobs_url = f"{api_endpoint}/run/jobs/status?{urlencode(query)}"
+    login_url = f"{api_endpoint}/session/login"
+    if reject_first_server_call:
+        check.http.register_response("GET", server_url, _respond(None, 401))
 
-    def handle_get(_self: Any, url: str, **kw: Any) -> Mock:
-        nonlocal server_call_count
-        if "/config/servers" in url:
-            server_call_count += 1
-            if reject_first_server_call and server_call_count == 1:
-                return _respond(None, 401)
-            return _respond(state["servers"], server_status)
-        if "/run/jobs/status" in url:
-            payload: dict[str, Any] = {"statuses": state["jobs"]}
-            if state["jobs_total"] is not None:
-                payload["total"] = state["jobs_total"]
-            return _respond(payload, jobs_status)
-        return _respond(None, 404)
-
-    def handle_post(_self: Any, url: str, **kw: Any) -> Mock:
-        if "/session/login" in url:
-            return _respond({"token": login_token}, login_status)
-        return _respond(None, 404)
-
-    monkeypatch.setattr(type(check.http), "get", handle_get)
-    monkeypatch.setattr(type(check.http), "post", handle_post)
+    jobs_payload: dict[str, Any] = {"statuses": state["jobs"]}
+    if state["jobs_total"] is not None:
+        jobs_payload["total"] = state["jobs_total"]
+    for _ in range(10):
+        check.http.register_response("GET", server_url, _respond(state["servers"], server_status))
+        check.http.register_response("GET", jobs_url, _respond(jobs_payload, jobs_status))
+        check.http.register_response("POST", login_url, _respond({"token": login_token}, login_status))
     return state
 
 

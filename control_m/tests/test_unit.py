@@ -3,17 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import logging
 import time
 from typing import Any
 
 import pytest
 from pytest import MonkeyPatch
-from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
+
+pytestmark = pytest.mark.usefixtures("fake_http")
 
 
 @pytest.mark.parametrize(
@@ -43,9 +46,9 @@ def test_connect_server_error_emits_critical(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, server_status=500)
+    _mock_api(check, server_status=500)
 
-    with pytest.raises(HTTPError, match="500"):
+    with pytest.raises(HTTPClientStatusError, match="500"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
@@ -56,7 +59,7 @@ def test_connect_session_login_ok(
     session_instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
     check = _make_check(session_instance)
-    _mock_api(check, monkeypatch, servers=[{"name": "srv1", "state": "Up"}])
+    _mock_api(check, servers=[{"name": "srv1", "state": "Up"}])
 
     _run_check(check)
 
@@ -69,13 +72,41 @@ def test_connect_session_login_failure_emits_critical(
     session_instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
     check = _make_check(session_instance)
-    _mock_api(check, monkeypatch, login_status=401)
+    _mock_api(check, login_status=401)
 
-    with pytest.raises(HTTPError, match="401"):
+    with pytest.raises(HTTPClientStatusError, match="401"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_login", value=0, count=1)
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        pytest.param(HTTPClientConnectionError("connection refused"), id="connection_error"),
+        # The pre-request auth-token poll raises this one, and it escapes `post` uncaught.
+        pytest.param(HTTPClientStatusError("503 Server Error"), id="status_error"),
+    ],
+)
+def test_login_transport_failure_logs_unreachable_endpoint(
+    session_instance: dict[str, Any],
+    caplog: pytest.LogCaptureFixture,
+    error: Exception,
+) -> None:
+    """An unreachable endpoint names the failing URL in the log before the error propagates."""
+    check = _make_check(session_instance)
+    check.http.register_response(
+        "POST",
+        "https://example.com/automation-api/session/login",
+        error,
+    )
+    caplog.set_level(logging.ERROR)
+
+    with pytest.raises(type(error)):
+        _run_check(check)
+
+    assert "Could not reach Control-M API at https://example.com/automation-api/session/login" in caplog.text
 
 
 def test_connect_static_token_401_falls_back_to_session(
@@ -86,7 +117,6 @@ def test_connect_static_token_401_falls_back_to_session(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         servers=[{"name": "srv1", "state": "Up"}],
         reject_first_server_call=True,
     )
@@ -103,7 +133,6 @@ def test_server_health_up_and_down(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         servers=[
             {"name": "srv_up", "state": "Up"},
             {"name": "srv_down", "state": "Disconnected"},
@@ -130,7 +159,6 @@ def test_jobs_total_and_returned(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job("job_executing.json"),
             _load_job("job_executing.json"),
@@ -150,7 +178,6 @@ def test_terminal_ended_ok_with_duration(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -174,7 +201,7 @@ def test_dedup_same_terminal_job_counted_once(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
+    _mock_api(check, jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
 
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
@@ -188,13 +215,13 @@ def test_dedup_new_run_number_counted_as_new_completion(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
     check = _make_check(instance)
-    state = _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
+    state = _mock_api(check, jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
 
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
 
     aggregator.reset()
-    state["jobs"] = [_load_job("job_ended_ok.json", jobId="r1", name="j1", numberOfRuns=2)]
+    state["jobs"][:] = [_load_job("job_ended_ok.json", jobId="r1", name="j1", numberOfRuns=2)]
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
 
@@ -221,7 +248,7 @@ def test_no_events_emitted(
 ) -> None:
     instance.update(extra_config)
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job(fixture, **fixture_kwargs)])
+    _mock_api(check, jobs=[_load_job(fixture, **fixture_kwargs)])
 
     _run_check(check)
 
@@ -234,7 +261,7 @@ def test_event_on_terminal_failure(
 ) -> None:
     instance["emit_job_events"] = True
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_not_ok.json", jobId="e2")])
+    _mock_api(check, jobs=[_load_job("job_ended_not_ok.json", jobId="e2")])
 
     _run_check(check)
 
@@ -254,7 +281,7 @@ def test_event_success_when_opted_in(
     instance["emit_job_events"] = True
     instance["emit_success_events"] = True
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="e5", name="ok_job")])
+    _mock_api(check, jobs=[_load_job("job_ended_ok.json", jobId="e5", name="ok_job")])
 
     _run_check(check)
 
@@ -273,7 +300,6 @@ def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorSt
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -320,7 +346,7 @@ def test_metadata_version_from_servers(
     expected_version: str,
 ) -> None:
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, servers=servers)
+    _mock_api(check, servers=servers)
 
     _run_check(check)
 
@@ -339,7 +365,6 @@ def test_full_cycle_with_fixture_data(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         servers=servers,
         jobs=jobs_payload["statuses"],
         jobs_total=jobs_payload.get("total"),
@@ -398,7 +423,6 @@ def test_overrun_gauge_given_executing_job(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job(
                 "job_executing.json",
@@ -441,7 +465,6 @@ def test_overrun_histogram_given_terminal_job(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -474,7 +497,6 @@ def test_timezone_displayed_in_event_text(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -505,7 +527,6 @@ def test_timezone_corrects_overrun_for_non_utc_server(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
         jobs=[
             _load_job(
                 "job_executing.json",

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -19,14 +21,19 @@ from .common import PROMETHEUS_METRICS, PROMETHEUS_METRICS_2023_05_04, get_fixtu
 def test_omv2_check(
     aggregator,
     openmetrics_instance,
-    mock_http_response,
+    fake_http_response,
     dd_run_check,
     teamcity_om_check,
     fixture_path,
     metrics_set,
     node_id,
 ):
-    mock_http_response(file_path=get_fixture_path(fixture_path))
+    fake_http_response(
+        'http://localhost:8111/guestAuth/app/metrics',
+        Path(get_fixture_path(fixture_path)).read_text(),
+        headers={'Content-Type': 'text/plain'},
+        match_options={'stream': True},
+    )
     check = teamcity_om_check(openmetrics_instance)
     dd_run_check(check)
     for m in metrics_set:
