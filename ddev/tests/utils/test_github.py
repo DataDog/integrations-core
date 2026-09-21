@@ -7,8 +7,58 @@ import httpx
 import pytest
 from pytest_mock import MockerFixture
 
-from ddev.utils.github import GitHubManager, PullRequest
+from ddev.repo.core import Repository
+from ddev.utils.github import GitHubManager, PullRequest, resolve_owner_repo
 from ddev.utils.github_errors import GitHubAuthenticationError
+
+
+class TestOwner:
+    def test_default_owner_is_datadog(self, local_repo, config_file, terminal):
+        repo = Repository(local_repo.name, str(local_repo))
+        manager = GitHubManager(
+            repo,
+            user=config_file.model.github.user,
+            token=config_file.model.github.token,
+            status=terminal.status,
+        )
+
+        assert manager.repo_id == f'DataDog/{repo.full_name}'
+
+    def test_owner_from_repository_is_used(self, local_repo, config_file, terminal):
+        repo = Repository(local_repo.name, str(local_repo))
+        repo.owner = 'ddoghq'
+        manager = GitHubManager(
+            repo,
+            user=config_file.model.github.user,
+            token=config_file.model.github.token,
+            status=terminal.status,
+        )
+
+        assert manager.repo_id == f'ddoghq/{repo.full_name}'
+
+
+class TestResolveOwnerRepo:
+    @pytest.mark.parametrize(
+        ('repository', 'expected_name'),
+        [
+            pytest.param(None, None, id='active-repository'),
+            pytest.param('marketplace', 'marketplace', id='bare-repository'),
+        ],
+    )
+    def test_repository_owner_is_used(self, mocker, local_repo, repository, expected_name):
+        repo = Repository('core', str(local_repo))
+        repo.owner = 'ddoghq'
+        # Owner resolution must remain independent of the legacy synchronous manager.
+        app = mocker.Mock(repo=repo, github=None)
+
+        assert resolve_owner_repo(app, repository) == ('ddoghq', expected_name or repo.full_name)
+
+    def test_explicit_owner_and_name_remain_authoritative(self, mocker, local_repo):
+        repo = Repository('core', str(local_repo))
+        repo.owner = 'ddoghq'
+        app = mocker.Mock(repo=repo, github=None)
+
+        assert resolve_owner_repo(app, 'DataDog/integrations-core') == ('DataDog', 'integrations-core')
 
 
 class TestGetPullRequest:

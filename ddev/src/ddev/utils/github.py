@@ -32,11 +32,11 @@ if TYPE_CHECKING:
 
 
 def resolve_owner_repo(app: Application, repository: str | None = None) -> tuple[str, str]:
-    """Split `owner/name`, defaulting to the active repository and the `DataDog` organization."""
+    """Split `owner/name`, defaulting to the active repository's selected GitHub owner."""
     full_name = repository or app.repo.full_name
     owner, separator, name = full_name.partition('/')
     if not separator:
-        return 'DataDog', full_name
+        return app.repo.owner, full_name
     return owner, name
 
 
@@ -133,7 +133,7 @@ class GitHubManager:
         self.__repo = repo
         self.__auth = (user, token)
         self.__status = status
-        self.__repo_id = f'DataDog/{self.__repo.full_name}'
+        self.__repo_id = f'{self.__repo.owner}/{self.__repo.full_name}'
 
     @property
     def repo_id(self) -> str:

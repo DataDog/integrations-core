@@ -10,6 +10,8 @@ FULL_NAMES = {
     'agent': 'datadog-agent',
 }
 
+DEFAULT_GITHUB_OWNER = 'DataDog'
+
 # This is automatically maintained
 PYTHON_VERSION = '3.13'
 PYTHON_VERSION_FULL = '3.13.15'
