@@ -39,9 +39,9 @@ import json
 import logging
 import time
 import uuid
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any
 
 import psycopg.errors as psycopg_errors
 from pydantic import ValidationError
@@ -78,18 +78,6 @@ class ResultColumn:
     name: str
     type_oid: int
     type_modifier: int | None
-
-
-@dataclass(frozen=True)
-class StaticPostgresCheckRegistry:
-    checks: Sequence['PostgreSql']
-
-    def iter_postgres_checks(self) -> Iterable['PostgreSql']:
-        return iter(self.checks)
-
-
-class PostgresCheckRegistry(Protocol):
-    def iter_postgres_checks(self) -> Iterable['PostgreSql']: ...
 
 
 # ---------------------------------------------------------------------------
@@ -528,63 +516,20 @@ def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_matches(target: rq.RemoteQueryTarget, checks: Iterable['PostgreSql']) -> list['PostgreSql']:
-    """Resolve the loaded checks a target selects, fail-closed: zero, one, or many matches.
+def _match_check_for_target(target: rq.RemoteQueryTarget, check: 'PostgreSql') -> 'PostgreSql | None':
+    """The matching authority shared by resolve and execute, on the supplied check alone.
 
-    A database_instance selector matches one loaded check by its rendered identifier. A tuple
-    selector matches only a check whose normalized configured endpoint equals the request and
-    whose effective monitoring scope includes the requested database.
+    A database_instance selector matches by rendered identifier. A tuple selector matches
+    only when the check's normalized configured endpoint equals the request and its
+    effective monitoring scope includes the requested database. Returns the matched check
+    or None; raises RemoteQueryFailure when the scope cannot be established — fail-closed
+    and visible, never a silent no-match. Selecting zero, one, or many matching checks
+    across the Agent's loaded checks is the Agent's own responsibility, so both operations
+    report identical verdicts for the same target and check state.
     """
     if target.database_instance is not None:
-        return [check for check in checks if getattr(check, 'database_identifier', None) == target.database_instance]
-    return [check for check in checks if _target_matches_scope(check, target)]
-
-
-def _resolve_unique_check(
-    target: rq.RemoteQueryTarget,
-    checks: Iterable['PostgreSql'],
-    started_at: float,
-    timings: rq.RemoteQueryProducerTimings | None = None,
-) -> tuple['PostgreSql | None', rq.RemoteQueryEvent | None]:
-    """The one selection shared by resolve and execute; exactly one side of the pair is set.
-
-    Zero matches answer target_not_found, more than one answer target_ambiguous, and a
-    scope that cannot be established answers its own error (never a silent no-match); the
-    caller emits the failure event verbatim, so both operations report identical verdicts
-    for the same target and check state. ``timings``, when given, attaches the producer
-    execution diagnostics measured at the failure to each error event: execute passes its
-    accumulator, resolve passes none, so its verdicts stay bare.
-    """
-
-    def diagnostics() -> Mapping[str, Any] | None:
-        return timings.metadata() if timings is not None else None
-
-    try:
-        matches = _resolve_matches(target, checks)
-    except rq.RemoteQueryFailure as e:
-        return None, rq.failed_event(
-            e.code,
-            e.message,
-            retryable=e.retryable,
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=diagnostics(),
-        )
-    LOGGER.debug('Remote query target match count: %d', len(matches))
-    if not matches:
-        return None, rq.failed_event(
-            'target_not_found',
-            'No loaded Postgres integration instance matched target selector.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=diagnostics(),
-        )
-    if len(matches) > 1:
-        return None, rq.failed_event(
-            'target_ambiguous',
-            'More than one loaded Postgres integration instance matched target selector.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=diagnostics(),
-        )
-    return matches[0], None
+        return check if getattr(check, 'database_identifier', None) == target.database_instance else None
+    return check if _target_matches_scope(check, target) else None
 
 
 def _resolved_dbname(target: rq.RemoteQueryTarget, check: 'PostgreSql') -> str | None:
@@ -741,7 +686,7 @@ def _execute_upload_stream(
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
-    events = iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), http_client, timings)
+    events = iter_agent_rpc_stream_events(request, check, http_client, timings)
     try:
         for event in events:
             rq.emit_event(emit, event)
@@ -752,7 +697,7 @@ def _execute_upload_stream(
 
 def _execute_resolve_stream(request: Mapping[str, Any], check: 'PostgreSql', emit: rq.RemoteQueryEmit) -> None:
     """Drive the per-check resolver and emit its verdict events."""
-    events = iter_agent_resolve_events(request, StaticPostgresCheckRegistry([check]))
+    events = iter_agent_resolve_events(request, check)
     try:
         for event in events:
             rq.emit_event(emit, event)
@@ -761,16 +706,16 @@ def _execute_resolve_stream(request: Mapping[str, Any], check: 'PostgreSql', emi
         raise
 
 
-def iter_agent_resolve_events(request: Any, registry: PostgresCheckRegistry) -> Iterator[rq.RemoteQueryEvent]:
+def iter_agent_resolve_events(request: Any, check: 'PostgreSql') -> Iterator[rq.RemoteQueryEvent]:
     """Yield the per-check resolve verdict: one MATCHED ``final`` event or one ``error`` event.
 
-    Resolve evaluates the target against the loaded checks' effective monitoring scope with
-    the same selection authority as execute, then reports the sanitized match identity the
-    Agent aggregates zero/one/many and binds into its match fingerprint. It is side-effect
-    free: no customer SQL, no result delivery, no upload, and no probe of the requested
-    database. An invalid request or an undeterminable eligible set is an error other than
-    target_not_found, so the Agent fails its aggregate resolution instead of skipping the
-    check.
+    Resolve evaluates the target against the supplied check's effective monitoring scope
+    with the same matching authority as execute, then reports the sanitized match identity
+    the Agent aggregates across its loaded checks and binds into its match fingerprint.
+    It is side-effect free: no customer SQL, no result delivery, no upload, and no probe of
+    the requested database. An invalid request or an undeterminable eligible set is an
+    error other than target_not_found, so the Agent fails its aggregate resolution instead
+    of skipping the check.
     """
     started_at = time.monotonic()
     try:
@@ -780,9 +725,16 @@ def iter_agent_resolve_events(request: Any, registry: PostgresCheckRegistry) -> 
         return
 
     target = parsed_request.target
-    check, failure = _resolve_unique_check(target, registry.iter_postgres_checks(), started_at)
-    if failure is not None:
-        yield failure
+    try:
+        if _match_check_for_target(target, check) is None:
+            yield rq.failed_event(
+                'target_not_found',
+                'No loaded Postgres integration instance matched target selector.',
+                elapsed_ms=rq.elapsed_ms(started_at),
+            )
+            return
+    except rq.RemoteQueryFailure as e:
+        yield rq.failed_event(e.code, e.message, retryable=e.retryable, elapsed_ms=rq.elapsed_ms(started_at))
         return
 
     resolved_dbname = _resolved_dbname(target, check)
@@ -806,12 +758,14 @@ def iter_agent_resolve_events(request: Any, registry: PostgresCheckRegistry) -> 
 
 def iter_agent_rpc_stream_events(
     request: Any,
-    registry: PostgresCheckRegistry,
+    check: 'PostgreSql',
     http_client: rq.UploadClient | None = None,
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> Iterator[rq.RemoteQueryEvent]:
-    """Yield producer events for unit tests and callback adaptation.
+    """Yield producer events for the supplied check, for unit tests and callback adaptation.
 
+    The Agent bridge selects the one check a request executes on and supplies it here;
+    zero/one/many selection across loaded checks is the Agent's own responsibility.
     ``timings`` collects the producer execution diagnostics; when absent a fresh
     accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
     so both report one wall.
@@ -840,9 +794,23 @@ def iter_agent_rpc_stream_events(
         return
 
     target = parsed_request.target
-    check, failure = _resolve_unique_check(target, registry.iter_postgres_checks(), started_at, timings)
-    if failure is not None:
-        yield failure
+    try:
+        if _match_check_for_target(target, check) is None:
+            yield rq.failed_event(
+                'target_not_found',
+                'No loaded Postgres integration instance matched target selector.',
+                elapsed_ms=rq.elapsed_ms(started_at),
+                execution_diagnostics=timings.metadata(),
+            )
+            return
+    except rq.RemoteQueryFailure as e:
+        yield rq.failed_event(
+            e.code,
+            e.message,
+            retryable=e.retryable,
+            elapsed_ms=rq.elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
         return
 
     # The same selection authority as resolve: the resolved database is the database

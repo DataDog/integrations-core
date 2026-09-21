@@ -88,7 +88,7 @@ import logging
 import math
 import re
 import time
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Protocol
@@ -167,18 +167,6 @@ class ResultColumn:
     vendor_data_type: str
     family: str
     logical_type: str
-
-
-@dataclass(frozen=True)
-class StaticClickhouseCheckRegistry:
-    checks: Sequence['ClickhouseCheck']
-
-    def iter_clickhouse_checks(self) -> Iterable['ClickhouseCheck']:
-        return iter(self.checks)
-
-
-class ClickhouseCheckRegistry(Protocol):
-    def iter_clickhouse_checks(self) -> Iterable['ClickhouseCheck']: ...
 
 
 class ClickhouseClient(Protocol):
@@ -880,10 +868,17 @@ def _default_client_factory(check: 'ClickhouseCheck', timeout_seconds: int) -> C
 # ---------------------------------------------------------------------------
 
 
-def _resolve_matches(target: rq.RemoteQueryTarget, checks: Iterable['ClickhouseCheck']) -> list['ClickhouseCheck']:
+def _check_matches_target(check: 'ClickhouseCheck', target: rq.RemoteQueryTarget) -> bool:
+    """Whether the supplied check admits the target.
+
+    A database_instance selector matches by rendered identifier; a tuple selector matches
+    the check's configured endpoint and database. Selecting zero, one, or many matching
+    checks across the Agent's loaded checks is the Agent's own responsibility; this
+    predicate answers for the one check the bridge supplied.
+    """
     if target.database_instance is not None:
-        return [check for check in checks if getattr(check, 'database_identifier', None) == target.database_instance]
-    return [check for check in checks if _target_from_check(check) == target]
+        return getattr(check, 'database_identifier', None) == target.database_instance
+    return _target_from_check(check) == target
 
 
 def _target_from_check(check: 'ClickhouseCheck') -> rq.RemoteQueryTarget | None:
@@ -962,9 +957,7 @@ def _execute_upload_stream(
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
-    events = iter_agent_rpc_stream_events(
-        request, StaticClickhouseCheckRegistry([check]), http_client, clickhouse_client_factory, timings
-    )
+    events = iter_agent_rpc_stream_events(request, check, http_client, clickhouse_client_factory, timings)
     try:
         for event in events:
             rq.emit_event(emit, event)
@@ -975,13 +968,15 @@ def _execute_upload_stream(
 
 def iter_agent_rpc_stream_events(
     request: Any,
-    registry: ClickhouseCheckRegistry,
+    check: 'ClickhouseCheck',
     http_client: rq.UploadClient | None = None,
     clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> Iterator[rq.RemoteQueryEvent]:
-    """Yield producer events for unit tests and callback adaptation.
+    """Yield producer events for the supplied check, for unit tests and callback adaptation.
 
+    The Agent bridge selects the one check a request executes on and supplies it here;
+    zero/one/many selection across loaded checks is the Agent's own responsibility.
     ``timings`` collects the producer execution diagnostics; when absent a fresh
     accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
     so both report one wall.
@@ -1010,9 +1005,7 @@ def iter_agent_rpc_stream_events(
         return
 
     target = parsed_request.target
-    matches = _resolve_matches(target, registry.iter_clickhouse_checks())
-    LOGGER.debug('Remote query target match count: %d', len(matches))
-    if not matches:
+    if not _check_matches_target(check, target):
         yield rq.failed_event(
             'target_not_found',
             'No loaded ClickHouse integration instance matched target selector.',
@@ -1020,16 +1013,7 @@ def iter_agent_rpc_stream_events(
             execution_diagnostics=timings.metadata(),
         )
         return
-    if len(matches) > 1:
-        yield rq.failed_event(
-            'target_ambiguous',
-            'More than one loaded ClickHouse integration instance matched target selector.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
 
-    check = matches[0]
     creds = rq.resolve_upload_credentials(
         parsed_request.result_delivery, started_at, trace_context=parsed_request.trace_context
     )

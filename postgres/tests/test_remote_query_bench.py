@@ -29,7 +29,7 @@ from types import SimpleNamespace
 import pytest
 
 from datadog_checks.base.utils import remote_queries as rq
-from datadog_checks.postgres.remote_query import StaticPostgresCheckRegistry, iter_agent_rpc_stream_events
+from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
@@ -197,7 +197,7 @@ def run_producer(benchmark, integration_check, pg_instance, monkeypatch, rows, m
 
     def produce_once():
         client = DiscardUploadClient()
-        events = list(iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), client))
+        events = list(iter_agent_rpc_stream_events(request, check, client))
         return client, events[-1].metadata
 
     client, final = benchmark.pedantic(produce_once, rounds=rounds, iterations=1)

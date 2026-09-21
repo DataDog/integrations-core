@@ -17,7 +17,6 @@ from clickhouse_connect.driver.exceptions import DatabaseError, OperationalError
 from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.clickhouse import remote_query
 from datadog_checks.clickhouse.remote_query import (
-    StaticClickhouseCheckRegistry,
     execute_agent_rpc_stream_copy,
     iter_agent_rpc_stream_events,
 )
@@ -394,12 +393,14 @@ def instrument_clickhouse_fakes(monkeypatch, clock):
     monkeypatch.setattr(FakeUploadClient, 'finalize_run', timed_finalize_run)
 
 
-class ExplodingRegistry:
-    def iter_clickhouse_checks(self):
-        pytest.fail('registry must not be iterated')
+class ExplodingCheck:
+    """A check that fails any test touching it: request validation must reject first."""
+
+    def __getattr__(self, name):
+        pytest.fail('check must not be touched before request validation completes')
 
 
-def collect_events(request, check, upload_client=None, registry=None, clickhouse_client=None):
+def collect_events(request, check, upload_client=None, clickhouse_client=None):
     """Run the producer with fakes and collect its events.
 
     ``clickhouse_client`` is injected as the per-run client factory result. With no
@@ -414,14 +415,7 @@ def collect_events(request, check, upload_client=None, registry=None, clickhouse
 
     if upload_client is None:
         upload_client = FakeUploadClient()
-    return list(
-        iter_agent_rpc_stream_events(
-            request,
-            registry if registry is not None else StaticClickhouseCheckRegistry([check]),
-            upload_client,
-            client_factory,
-        )
-    )
+    return list(iter_agent_rpc_stream_events(request, check, upload_client, client_factory))
 
 
 def event_metadata(event):
@@ -533,7 +527,7 @@ def test_stream_passes_queries_verbatim_to_the_driver_without_a_statement_gate(m
 def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
     request = valid_request(**{field: 'SECRET_DO_NOT_LOG'})
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', field)
     assert 'SECRET_DO_NOT_LOG' not in str(events)
@@ -742,24 +736,17 @@ def test_stream_host_port_dbname_target_still_succeeds_when_check_has_database_i
     assert_success(events)
 
 
-def test_stream_resolves_unique_database_instance_from_check_identifier(monkeypatch):
+def test_stream_database_instance_match_runs_the_supplied_check(monkeypatch):
     patch_upload_credentials(monkeypatch)
     matching_client = make_client(rows=[[1]])
-    non_matching_client = make_client(rows=[[1]])
-    checks = [
-        make_check(server='analytics.internal', db='analytics', check_database_identifier='Clickhouse/Primary-A'),
-        make_check(server='logs.internal', db='logs', check_database_identifier='Clickhouse/Primary-B'),
-    ]
+    check = make_check(server='analytics.internal', db='analytics', check_database_identifier='Clickhouse/Primary-A')
 
     request = valid_request()
     request['target'] = {'database_instance': 'Clickhouse/Primary-A'}
-    events = collect_events(
-        request, None, registry=StaticClickhouseCheckRegistry(checks), clickhouse_client=matching_client
-    )
+    events = collect_events(request, check, clickhouse_client=matching_client)
 
     assert_success(events)
     assert matching_client.raw_stream_calls
-    assert non_matching_client.raw_stream_calls == []
 
 
 def test_stream_database_instance_miss_fails_without_client_access():
@@ -774,28 +761,11 @@ def test_stream_database_instance_miss_fails_without_client_access():
     assert clickhouse_client.raw_stream_calls == []
 
 
-def test_stream_database_instance_ambiguous_fails_without_client_access():
-    clickhouse_client = make_client(rows=[[1]])
-    checks = [
-        make_check(server='a.internal', check_database_identifier='Clickhouse/Primary-A'),
-        make_check(server='b.internal', check_database_identifier='Clickhouse/Primary-A'),
-    ]
-
-    request = valid_request()
-    request['target'] = {'database_instance': 'Clickhouse/Primary-A'}
-    events = collect_events(
-        request, None, registry=StaticClickhouseCheckRegistry(checks), clickhouse_client=clickhouse_client
-    )
-
-    assert_failed_event(events, 'target_ambiguous')
-    assert clickhouse_client.raw_stream_calls == []
-
-
 def test_stream_rejects_mixed_database_instance_and_host_selector_before_resolution():
     request = valid_request()
     request['target'] = {'database_instance': 'clickhouse-dbi', 'host': 'localhost'}
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
 
@@ -804,7 +774,7 @@ def test_stream_rejects_empty_database_instance_before_resolution():
     request = valid_request()
     request['target'] = {'database_instance': ' clickhouse-dbi '}
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', 'database_instance')
 
@@ -826,14 +796,6 @@ def test_stream_requires_dbname_match_even_when_host_and_port_match():
     events = collect_events(valid_request(dbname='analytics'), check)
 
     assert_failed_event(events, 'target_not_found')
-
-
-def test_stream_fails_ambiguous_duplicate_configs():
-    checks = [make_check(server='localhost'), make_check(server='localhost')]
-
-    events = collect_events(valid_request(), None, registry=StaticClickhouseCheckRegistry(checks))
-
-    assert_failed_event(events, 'target_ambiguous')
 
 
 def test_stream_missing_pool_manager_returns_target_unavailable(monkeypatch):
@@ -1081,11 +1043,7 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
         clock.advance_seconds(0.125)
         return clickhouse_client
 
-    events = list(
-        iter_agent_rpc_stream_events(
-            valid_request(), StaticClickhouseCheckRegistry([make_check()]), fake, client_factory
-        )
-    )
+    events = list(iter_agent_rpc_stream_events(valid_request(), make_check(), fake, client_factory))
 
     final = assert_success(events)
     # The final metadata gained exactly one key: the optional execution diagnostics.
@@ -1151,9 +1109,7 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
         clock.advance_seconds(0.125)
         return clickhouse_client
 
-    events = list(
-        iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([make_check()]), fake, client_factory)
-    )
+    events = list(iter_agent_rpc_stream_events(request, make_check(), fake, client_factory))
 
     error = event_metadata(events[-1])
     assert_failed_event(events, 'upload_failed')
@@ -2102,11 +2058,7 @@ def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch, 
 
     request = valid_request()
     caplog.set_level(logging.DEBUG)
-    events = list(
-        iter_agent_rpc_stream_events(
-            request, StaticClickhouseCheckRegistry([make_check()]), FakeUploadClient(), broken_factory
-        )
-    )
+    events = list(iter_agent_rpc_stream_events(request, make_check(), FakeUploadClient(), broken_factory))
 
     assert_failed_event(events, 'target_unavailable')
     assert 'SECRET_DO_NOT_LOG' not in str(events)
@@ -2212,9 +2164,7 @@ def test_stream_target_unavailable_when_check_cannot_create_clients(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     # No create_remote_query_client on the fake check and no factory injected.
     request = valid_request()
-    events = list(
-        iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([make_check()]), FakeUploadClient(), None)
-    )
+    events = list(iter_agent_rpc_stream_events(request, make_check(), FakeUploadClient(), None))
 
     assert_failed_event(events, 'target_unavailable')
     assert 'upload_receipt' not in event_metadata(events[-1])
@@ -2318,7 +2268,7 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
     fake = FakeUploadClient()
 
     # No client factory is injected: the real check creates the per-run client itself.
-    events = list(iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([check]), fake, None))
+    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
 
     final = assert_success(events)
     pages = assembled_pages(fake)
@@ -2359,7 +2309,7 @@ def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clic
     fake = FakeUploadClient()
 
     request = real_server_request(instance, remote_query.REMOTE_QUERY_BINARY_QUERY)
-    events = list(iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([check]), fake, None))
+    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
@@ -2392,7 +2342,7 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
     fake = FakeUploadClient()
 
     request = real_server_request(instance, query, include_schema=include_schema)
-    events = list(iter_agent_rpc_stream_events(request, StaticClickhouseCheckRegistry([check]), fake, None))
+    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
 
     final = assert_success(events)
     pages = assembled_pages(fake)

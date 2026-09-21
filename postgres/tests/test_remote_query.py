@@ -16,7 +16,6 @@ from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 from datadog_checks.postgres.remote_query import (
-    StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
     iter_agent_resolve_events,
     iter_agent_rpc_stream_events,
@@ -468,17 +467,15 @@ def instrument_postgres_fakes(monkeypatch, clock):
     monkeypatch.setattr(FakeUploadClient, 'finalize_run', timed_finalize_run)
 
 
-class ExplodingRegistry:
-    def iter_postgres_checks(self):
-        pytest.fail('registry must not be iterated')
+class ExplodingCheck:
+    """A check that fails any test touching it: request validation must reject first."""
+
+    def __getattr__(self, name):
+        pytest.fail('check must not be touched before request validation completes')
 
 
-def collect_events(request, check, client=None, registry=None):
-    return list(
-        iter_agent_rpc_stream_events(
-            request, registry if registry is not None else StaticPostgresCheckRegistry([check]), client
-        )
-    )
+def collect_events(request, check, client=None):
+    return list(iter_agent_rpc_stream_events(request, check, client))
 
 
 def event_metadata(event):
@@ -548,7 +545,7 @@ def native_record(*values):
 def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
     request = valid_request(**{field: 'SECRET_DO_NOT_LOG'})
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', field)
     assert 'SECRET_DO_NOT_LOG' not in str(events)
@@ -675,22 +672,19 @@ def test_stream_host_port_dbname_target_still_succeeds_when_check_has_database_i
     assert pool.requested_dbnames == ['datadog_test']
 
 
-def test_stream_resolves_unique_database_instance_from_check_identifier(monkeypatch):
+def test_stream_database_instance_match_runs_on_the_check_configured_database(monkeypatch):
     patch_upload_credentials(monkeypatch)
     matching_pool = FakePool(rows=[(1,)])
-    non_matching_pool = FakePool(rows=[(1,)])
-    checks = [
-        make_check(dbname='analytics', pool=matching_pool, check_database_identifier='Postgres/Primary-A'),
-        make_check(dbname='postgres', pool=non_matching_pool, check_database_identifier='Postgres/Primary-B'),
-    ]
+    check = make_check(dbname='analytics', pool=matching_pool, check_database_identifier='Postgres/Primary-A')
 
     request = valid_request()
     request['target'] = {'database_instance': 'Postgres/Primary-A'}
-    events = collect_events(request, None, client=FakeUploadClient(), registry=StaticPostgresCheckRegistry(checks))
+    events = collect_events(request, check, client=FakeUploadClient())
 
     assert_success(events)
+    # A database_instance selector admits the matched check's materialized configured
+    # database, never a request-named other one.
     assert matching_pool.requested_dbnames == ['analytics']
-    assert non_matching_pool.requested_dbnames == []
 
 
 def test_stream_database_instance_miss_fails_without_pool_access():
@@ -705,45 +699,11 @@ def test_stream_database_instance_miss_fails_without_pool_access():
     assert pool.requested_dbnames == []
 
 
-def test_stream_database_instance_ambiguous_fails_without_pool_access():
-    first_pool = FakePool(rows=[(1,)])
-    second_pool = FakePool(rows=[(1,)])
-    checks = [
-        make_check(dbname='postgres_a', pool=first_pool, check_database_identifier='Postgres/Primary-A'),
-        make_check(dbname='postgres_b', pool=second_pool, check_database_identifier='Postgres/Primary-A'),
-    ]
-
-    request = valid_request()
-    request['target'] = {'database_instance': 'Postgres/Primary-A'}
-    events = collect_events(request, None, registry=StaticPostgresCheckRegistry(checks))
-
-    assert_failed_event(events, 'target_ambiguous')
-    assert first_pool.requested_dbnames == []
-    assert second_pool.requested_dbnames == []
-
-
-def test_stream_default_template_database_instance_collapse_is_ambiguous():
-    first_pool = FakePool(rows=[(1,)])
-    second_pool = FakePool(rows=[(1,)])
-    checks = [
-        make_check(dbname='postgres_a', pool=first_pool, check_database_identifier='resolved-hostname'),
-        make_check(dbname='postgres_b', pool=second_pool, check_database_identifier='resolved-hostname'),
-    ]
-
-    request = valid_request()
-    request['target'] = {'database_instance': 'resolved-hostname'}
-    events = collect_events(request, None, registry=StaticPostgresCheckRegistry(checks))
-
-    assert_failed_event(events, 'target_ambiguous')
-    assert first_pool.requested_dbnames == []
-    assert second_pool.requested_dbnames == []
-
-
 def test_stream_rejects_mixed_database_instance_and_host_selector_before_resolution():
     request = valid_request()
     request['target'] = {'database_instance': 'postgres-dbi', 'host': 'localhost'}
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
 
@@ -752,7 +712,7 @@ def test_stream_rejects_database_instance_with_partial_host_selector_before_reso
     request = valid_request()
     request['target'] = {'database_instance': 'postgres-dbi', 'port': 5432}
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
 
@@ -761,7 +721,7 @@ def test_stream_rejects_empty_database_instance_before_resolution():
     request = valid_request()
     request['target'] = {'database_instance': ' postgres-dbi '}
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', 'database_instance')
 
@@ -798,18 +758,6 @@ def test_stream_host_port_dbname_target_ignores_database_instance_matches():
 
     assert_failed_event(events, 'target_not_found')
     assert pool.requested_dbnames == []
-
-
-def test_stream_fails_ambiguous_duplicate_configs():
-    first_pool = FakePool(rows=[(1,)])
-    second_pool = FakePool(rows=[(1,)])
-    checks = [make_check(pool=first_pool), make_check(pool=second_pool)]
-
-    events = collect_events(valid_request(), None, registry=StaticPostgresCheckRegistry(checks))
-
-    assert_failed_event(events, 'target_ambiguous')
-    assert first_pool.requested_dbnames == []
-    assert second_pool.requested_dbnames == []
 
 
 def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
@@ -976,7 +924,7 @@ def test_stream_rejects_database_instance_with_requested_dbname_before_resolutio
     request = valid_request()
     request['target'] = {'database_instance': 'postgres-dbi', 'dbname': 'analytics'}
 
-    events = collect_events(request, None, registry=ExplodingRegistry())
+    events = collect_events(request, ExplodingCheck())
 
     assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
 
@@ -1012,10 +960,8 @@ def resolve_request(**target):
     return {'operation': 'resolve_target', 'target': selector}
 
 
-def collect_resolve_events(request, check=None, registry=None):
-    return list(
-        iter_agent_resolve_events(request, registry if registry is not None else StaticPostgresCheckRegistry([check]))
-    )
+def collect_resolve_events(request, check):
+    return list(iter_agent_resolve_events(request, check))
 
 
 def assert_matched_verdict(events):
@@ -1113,7 +1059,7 @@ def test_resolve_rejects_execution_fields_before_resolution(field, value):
     request = resolve_request()
     request[field] = value
 
-    events = collect_resolve_events(request, registry=ExplodingRegistry())
+    events = collect_resolve_events(request, ExplodingCheck())
 
     assert len(events) == 1
     assert_failed_event(events, 'invalid_request', field)
@@ -1143,14 +1089,13 @@ def test_resolve_and_execute_share_the_same_matching_authority(monkeypatch):
     pool = FakePool(rows=[(1,)])
     autodiscovery = FakeAutodiscovery(databases=['dogs_0'])
     check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
-    registry = StaticPostgresCheckRegistry([check])
 
-    assert_matched_verdict(list(iter_agent_resolve_events(resolve_request(dbname='dogs_0'), registry)))
+    assert_matched_verdict(list(iter_agent_resolve_events(resolve_request(dbname='dogs_0'), check)))
     events = collect_events(valid_request(dbname='dogs_0'), check, client=FakeUploadClient())
     assert_success(events)
     assert pool.requested_dbnames == ['dogs_0']
 
-    assert_failed_event(list(iter_agent_resolve_events(resolve_request(dbname='dogs_9'), registry)), 'target_not_found')
+    assert_failed_event(list(iter_agent_resolve_events(resolve_request(dbname='dogs_9'), check)), 'target_not_found')
     events = collect_events(valid_request(dbname='dogs_9'), check, client=FakeUploadClient())
     assert_failed_event(events, 'target_not_found')
     assert pool.requested_dbnames == ['dogs_0']

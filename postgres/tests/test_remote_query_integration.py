@@ -16,7 +16,7 @@ from types import SimpleNamespace
 import pytest
 
 from datadog_checks.base.utils import remote_queries as rq
-from datadog_checks.postgres.remote_query import StaticPostgresCheckRegistry, iter_agent_rpc_stream_events
+from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
@@ -133,13 +133,13 @@ def event_metadata(event):
 
 def run_producer(request, check):
     client = FakeUploadClient()
-    events = list(iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), client))
+    events = list(iter_agent_rpc_stream_events(request, check, client))
     return events, client
 
 
 def run_producer_with_rejections(request, check):
     client = FakeUploadClient(reject_first_page_too_large=True)
-    events = list(iter_agent_rpc_stream_events(request, StaticPostgresCheckRegistry([check]), client))
+    events = list(iter_agent_rpc_stream_events(request, check, client))
     return events, client
 
 
