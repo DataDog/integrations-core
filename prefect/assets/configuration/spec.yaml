@@ -11,6 +11,7 @@ files:
   options:
   - template: init_config
     options:
+    - template: init_config/http
     - template: init_config/default
   - template: instances
     options:
@@ -122,16 +123,6 @@ files:
             items:
               type: string
       fleet_configurable: false
-    - name: custom_headers
-      description: |
-        Additional HTTP headers to include in all requests to the Prefect API.
-      value:
-        type: object
-        example:
-          Authorization: "Bearer <YOUR_TOKEN>"
-          Custom-Header: "CustomValue"
-      fleet_configurable: false
-
     - name: collect_events
       description: |
         Whether or not to send Prefect events to Datadog.
@@ -141,6 +132,7 @@ files:
         default: false
       fleet_configurable: false
 
+    - template: instances/http
     - template: instances/default
 
   - template: logs
