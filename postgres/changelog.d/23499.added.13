@@ -1,1 +1,0 @@
-Resolve every Postgres Remote Query array column's element delimiter from catalog metadata and declare it as the descriptor's new array_element_delimiter field.

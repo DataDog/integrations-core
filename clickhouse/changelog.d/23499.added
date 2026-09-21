@@ -1,1 +1,1 @@
-Add a remote query POC executor for ClickHouse.
+Add a Remote Query producer to the ClickHouse integration: execute a validated query exactly once through a dedicated streaming client with read-only server settings and send/receive timeouts derived from the remaining run budget, streaming the bounded server-rendered rows to its-agent-intake as one direct request per page.
