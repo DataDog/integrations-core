@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
 from datadog_checks.hpe_aruba_edgeconnect.client import ApplianceClient, OrchestratorClient
@@ -290,41 +291,35 @@ def test_qos_metrics_omit_overlay_tag_without_traffic_class_mapping(dd_run_check
 
 
 def test_login_appliance_csrf_token():
-    http = MagicMock()
-    http.session.cookies = {'edgeosCsrfToken': 'mytoken'}
-    http.session.headers = {}
-    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+    http = FakeHTTPClient(cookies={'edgeosCsrfToken': 'mytoken'})
+    http.register_response('POST', 'https://10.0.0.1/rest/json/login', FakeHTTPResponse())
     logger = MagicMock()
 
     client = ApplianceClient(http, '10.0.0.1', logger)
     client.login('admin', 'pass')
 
-    assert http.session.headers.get('X-XSRF-TOKEN') == 'mytoken'
+    assert http.get_header('X-XSRF-TOKEN') == 'mytoken'
 
 
 def test_login_appliance_session_id_fallback():
-    http = MagicMock()
-    http.session.cookies = {'vxoaSessionID': 'sess123'}
-    http.session.headers = {}
-    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+    http = FakeHTTPClient(cookies={'vxoaSessionID': 'sess123'})
+    http.register_response('POST', 'https://10.0.0.1/rest/json/login', FakeHTTPResponse())
     logger = MagicMock()
 
     client = ApplianceClient(http, '10.0.0.1', logger)
     client.login('admin', 'pass')
 
-    assert http.session.headers.get('vxoaSessionID') == 'sess123'
+    assert http.get_header('vxoaSessionID') == 'sess123'
 
 
 def test_login_orchestrator_csrf_token():
-    http = MagicMock()
-    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
-    http.session.headers = {}
-    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+    http = FakeHTTPClient(cookies={'orchCsrfToken': 'orchtoken'})
+    http.register_response('POST', 'https://10.0.0.1/gms/rest/authentication/login', FakeHTTPResponse())
 
     client = OrchestratorClient(http, '10.0.0.1')
     client.login('admin', 'pass')
 
-    assert http.session.headers.get('X-XSRF-TOKEN') == 'orchtoken'
+    assert http.get_header('X-XSRF-TOKEN') == 'orchtoken'
 
 
 @pytest.mark.parametrize(
@@ -343,24 +338,22 @@ def test_login_orchestrator_csrf_token():
     ],
 )
 def test_request_retries_once_on_401(client_factory, login_url):
-    http = MagicMock()
-    http.session.cookies = {}
-    http.session.headers = {}
-    http.post.return_value = MagicMock(raise_for_status=MagicMock())
-    http.get.side_effect = [
-        MagicMock(status_code=401, raise_for_status=MagicMock()),
-        MagicMock(status_code=200, raise_for_status=MagicMock()),
-    ]
+    http = FakeHTTPClient()
+    http.register_response('POST', login_url, FakeHTTPResponse())
+    http.register_response('POST', login_url, FakeHTTPResponse())
+    http.register_response('GET', 'https://10.0.0.1/some/path', FakeHTTPResponse(status_code=401))
+    http.register_response('GET', 'https://10.0.0.1/some/path', FakeHTTPResponse())
 
     client = client_factory(http)
     client.login('admin', 'pass')
     resp = client._request('get', '/some/path')
 
     assert resp.status_code == 200
-    assert http.get.call_count == 2
-    assert http.post.call_count == 2
-    assert http.post.call_args_list[0].args[0] == login_url
-    assert http.post.call_args_list[1].args[0] == login_url
+    assert [request.url for request in http.requests if request.method == 'GET'] == [
+        'https://10.0.0.1/some/path',
+        'https://10.0.0.1/some/path',
+    ]
+    assert [request.url for request in http.requests if request.method == 'POST'] == [login_url, login_url]
 
 
 # ---------------------------------------------------------------------------
@@ -529,7 +522,7 @@ def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, m
     assert emitted == [f'{NS}.orchestrator.reachability']
     aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
     assert aggregator.get_event_platform_events('network-devices-metadata') == []
-    orch.get_appliances.assert_not_called()
+    assert orch._http.requests == []
     assert check._orch_client is None
 
 

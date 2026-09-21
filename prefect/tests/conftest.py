@@ -3,16 +3,26 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Callable
+from unittest.mock import create_autospec
 
 import pytest
 import requests
 
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.docker import docker_run, get_docker_hostname, get_e2e_discovery_metadata
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.prefect import PrefectCheck
+from datadog_checks.prefect.check import PrefectClient
 
 COMPOSE_FILE_E2E = Path(__file__).parent / "docker" / "docker-compose.yml"
 PREFECT_URL = "http://localhost:4200/api"
@@ -119,8 +129,6 @@ def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | 
 
 
 def _load_fixture(filename: str) -> dict:
-    import json
-
     fixtures_path = Path(__file__).parent / "fixtures" / filename
     with open(fixtures_path) as f:
         return json.load(f)
@@ -128,18 +136,17 @@ def _load_fixture(filename: str) -> dict:
 
 @pytest.fixture
 def mock_prefect_client(mocker):
-    from json import JSONDecodeError
-    from unittest.mock import create_autospec
-
-    from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-
-    from datadog_checks.prefect.check import PrefectClient
-
     get_responses = _load_fixture("get_metrics.json")
     post_responses = _load_fixture("post_metrics.json")
 
     mock_client = create_autospec(PrefectClient, instance=True)
-    mock_client.http_exceptions = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError)
+    mock_client.http_exceptions = (
+        HTTPClientStatusError,
+        HTTPClientInvalidURLError,
+        HTTPClientConnectionError,
+        HTTPClientTimeoutError,
+        JSONDecodeError,
+    )
 
     mock_client.get.side_effect = lambda endpoint, **kwargs: get_responses[endpoint]
     mock_client.paginate_filter.side_effect = lambda endpoint, payload=None: post_responses[endpoint]

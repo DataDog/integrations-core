@@ -6,6 +6,7 @@ import tarfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.hpe_aruba_edgeconnect.client import OrchestratorClient
 
 FIXTURE_DIR = Path(__file__).parent / 'fixtures'
@@ -442,21 +443,24 @@ def _build_cpu_payload(usage):
 
 
 def _mock_orch_client(appliance_payload, overlay_config=None):
-    overlays_response = MagicMock(
-        raise_for_status=MagicMock(),
-        json=MagicMock(return_value=overlay_config if overlay_config is not None else []),
+    http = FakeHTTPClient()
+    http.register_response(
+        'POST',
+        'https://localhost:8443/gms/rest/authentication/login',
+        FakeHTTPResponse(),
     )
-
-    def http_get(url, **kwargs):
-        if url.endswith('/gms/rest/gms/overlays/config'):
-            return overlays_response
-        raise AssertionError(f'unexpected orchestrator GET request: {url}')
-
-    http = MagicMock()
-    http.get.side_effect = http_get
-    client = OrchestratorClient(http, 'localhost:8443')
-    client.get_appliances = MagicMock(return_value=appliance_payload)
-    return client
+    for _ in range(2):
+        http.register_response(
+            'GET',
+            'https://localhost:8443/gms/rest/appliance',
+            FakeHTTPResponse(json_result=appliance_payload),
+        )
+        http.register_response(
+            'GET',
+            'https://localhost:8443/gms/rest/gms/overlays/config',
+            FakeHTTPResponse(json_result=overlay_config if overlay_config is not None else []),
+        )
+    return OrchestratorClient(http, 'localhost:8443')
 
 
 def _mock_appliance_client(

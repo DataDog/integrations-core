@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
-import mock
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
@@ -70,61 +68,39 @@ def instance():
     }
 
 
-def _get_url_path(url):
-    parsed = urlparse(url)
-    return parsed.path.replace('::', '__')
-
-
 @pytest.fixture(scope='function')
-def mock_responses():
-    responses_map = {}
-
-    def load_fixtures():
-        root = os.path.join(get_here(), 'fixtures', 'GET')
-        for file in Path(root).rglob('*'):
-            if file.is_file():
-                relative = file.relative_to(root)
-                path = '/' + str(relative.parent) if str(relative.parent) != '.' else '/'
-                responses_map.setdefault(path, {})[file.stem] = json.loads(file.read_text())
-
-    def get(url, file='response', **kwargs):
-        return responses_map.get(_get_url_path(url), {}).get(file)
-
-    load_fixtures()
-    yield get
+def powerflex_responses():
+    responses = {}
+    root = Path(get_here()) / 'fixtures' / 'GET'
+    for file in root.rglob('*.json'):
+        path = '/' + str(file.relative_to(root).parent).replace('__', '::')
+        responses[f'{DEFAULT_GATEWAY_URL}{path}'] = json.loads(file.read_text())
+    return responses
 
 
 @pytest.fixture
-def mock_http_call(mock_responses):
-    def call(url, file='response', **kwargs):
-        data = mock_responses(url, file=file, **kwargs)
-        if data is not None:
-            return data
-        resp = requests.models.Response()
-        resp.status_code = 404
-        resp.reason = "Not Found"
-        resp.url = url
-        raise requests.exceptions.HTTPError(response=resp)
+def powerflex_http(mocker, fake_http, fake_http_response, powerflex_responses):
+    class FrozenDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            value = cls(2026, 3, 18, 4, 0, tzinfo=timezone.utc)
+            return value if tz is None else value.astimezone(tz)
 
-    yield call
-
-
-@pytest.fixture
-def mock_auth(monkeypatch):
-    def post(url, *args, **kwargs):
-        token_response = {'access_token': 'fake-token', 'expires_in': 300}
-        mock_json = mock.MagicMock(return_value=token_response)
-        return mock.MagicMock(json=mock_json, status_code=200)
-
-    monkeypatch.setattr('requests.Session.post', mock.MagicMock(side_effect=post))
-
-
-@pytest.fixture
-def mock_http_get(monkeypatch, mock_http_call, mock_auth):
-    def get(url, *args, **kwargs):
-        mock_json = mock.MagicMock(return_value=mock_http_call(url, **kwargs))
-        return mock.MagicMock(json=mock_json, status_code=200)
-
-    mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
-    return mock_get
+    mocker.patch('datadog_checks.dell_powerflex.check.datetime', FrozenDateTime)
+    token_url = f'{DEFAULT_GATEWAY_URL}/auth/realms/powerflex/protocol/openid-connect/token'
+    for _ in range(10):
+        fake_http_response(
+            token_url,
+            method='POST',
+            json_data={'access_token': 'fake-token', 'expires_in': 300},
+        )
+    for url, payload in powerflex_responses.items():
+        for _ in range(10):
+            fake_http_response(url, json_data=payload)
+    timestamp = '2026-03-18T04:00:00.000000Z'
+    for endpoint, timestamp_field in (('events', 'timestamp'), ('alerts', 'last_updated')):
+        payload = powerflex_responses[f'{DEFAULT_GATEWAY_URL}/rest/v1/{endpoint}']
+        url = f'{DEFAULT_GATEWAY_URL}/rest/v1/{endpoint}?filter={timestamp_field} ge {timestamp}'
+        for _ in range(10):
+            fake_http_response(url, json_data=payload)
+    return fake_http
