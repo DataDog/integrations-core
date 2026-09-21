@@ -2232,6 +2232,8 @@ def test_target_validation_wrapper_keeps_no_path_back_to_the_rejected_request():
 @pytest.mark.parametrize(
     'path,value',
     [
+        (('extra',), 'SECRET_DO_NOT_LOG'),
+        (('password',), 'SECRET_DO_NOT_LOG'),
         (('operation',), None),
         (('includeSchema',), 'true'),
         (('target', 'port'), '5432'),
@@ -2425,3 +2427,431 @@ def test_agent_config_read_failures_log_fixed_text_only(monkeypatch, caplog):
     assert rq.get_agent_config('api_key') == ''
     assert rq.is_query_allowlist_enabled() is True
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# Shared agent bridge request parsing and produce lifecycle
+# ---------------------------------------------------------------------------
+
+
+def patch_upload_credentials(monkeypatch):
+    def get_config(key):
+        if key in ('api_key', 'app_key'):
+            return 'TEST_API_KEY'
+        return None
+
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
+
+
+def produce_request(delivery, query='SELECT 1 AS value', **extra):
+    request = {
+        'operation': 'produce_json_pages',
+        'query': query,
+        'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
+        'resultDelivery': delivery.model_dump(by_alias=True),
+    }
+    request.update(extra)
+    return request
+
+
+def recording_hooks(produce_result=None, produce_error=None):
+    """Lifecycle hooks that record every stage they reach, in order.
+
+    ``produce`` records the execution context and the resolved credentials, so wiring
+    tests can assert exactly what reached the adapter's own code.
+    """
+    stages = []
+
+    def prepare_execution(request, check):
+        stages.append('prepare')
+        return 'execution-context', None
+
+    def ensure_available(check):
+        stages.append('available')
+        return None
+
+    def produce(request, check, creds, client, context, started_at, stats, timings):
+        stages.append(('produce', context, creds))
+        if produce_error is not None:
+            raise produce_error
+        return dict(produce_result) if produce_result is not None else {'uploadId': 'upload-1', 'pageCount': 0}
+
+    return stages, prepare_execution, ensure_available, produce
+
+
+def run_produce_lifecycle(
+    delivery,
+    monkeypatch,
+    request=None,
+    *,
+    allowlist=frozenset({'SELECT 1 AS value'}),
+    produce_result=None,
+    produce_error=None,
+    http_client=None,
+):
+    patch_upload_credentials(monkeypatch)
+    stages, prepare, ensure_available, produce = recording_hooks(produce_result, produce_error)
+    client = http_client if http_client is not None else Uploads()
+    events = list(
+        rq.iter_remote_query_produce_events(
+            request if request is not None else produce_request(delivery),
+            object(),
+            allowlist=allowlist,
+            prepare_execution=prepare,
+            ensure_available=ensure_available,
+            produce=produce,
+            http_client=client,
+        )
+    )
+    return events, stages, client
+
+
+@pytest.mark.parametrize('request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff'])
+def test_parse_agent_rpc_request_rejects_malformed_json(request_json):
+    request, timings, failure = rq.parse_agent_rpc_request(request_json)
+
+    assert request is None
+    assert failure is not None
+    assert failure.event_type == 'error'
+    metadata = failure.metadata
+    assert metadata['status'] == 'FAILED'
+    assert metadata['error'] == {
+        'code': 'invalid_request',
+        'message': 'Invalid remote query request: request_json must be a valid JSON object.',
+        'retryable': False,
+    }
+    assert 'SECRET_DO_NOT_LOG' not in str(metadata)
+    # Even a malformed request reports its measured wall: the diagnostics object holds
+    # exactly the un-instrumented remainder.
+    assert metadata['executionDiagnostics']['contractVersion'] == 1
+    assert set(metadata['executionDiagnostics']['producer']) == {'totalMs', 'otherMs'}
+    assert isinstance(timings, rq.RemoteQueryProducerTimings)
+
+
+@pytest.mark.parametrize('request_json', ['[]', 'null', '"SECRET_DO_NOT_LOG"', '1'])
+def test_parse_agent_rpc_request_rejects_non_object_json(request_json):
+    request, _, failure = rq.parse_agent_rpc_request(request_json)
+
+    assert request is None
+    assert failure is not None
+    assert failure.metadata['error']['code'] == 'invalid_request'
+    assert failure.metadata['error']['message'] == 'Invalid remote query request: request_json must be a JSON object.'
+    assert 'SECRET_DO_NOT_LOG' not in str(failure.metadata)
+
+
+def test_parse_agent_rpc_request_returns_the_parsed_object_and_its_clock(delivery):
+    request, timings, failure = rq.parse_agent_rpc_request(json.dumps(produce_request(delivery)))
+
+    assert failure is None
+    assert isinstance(request, dict)
+    assert request['operation'] == 'produce_json_pages'
+    assert isinstance(timings, rq.RemoteQueryProducerTimings)
+
+
+def test_emit_agent_rpc_events_emits_each_event_in_order():
+    events = [rq.RemoteQueryEvent('metadata', {'n': 1}), rq.RemoteQueryEvent('final', {'n': 2})]
+    seen = []
+
+    rq.emit_agent_rpc_events(lambda *event: seen.append(event), iter(events))
+
+    assert [(event_type, json.loads(metadata)['n']) for event_type, metadata, _payload in seen] == [
+        ('metadata', 1),
+        ('final', 2),
+    ]
+
+
+def test_emit_agent_rpc_events_closes_the_generator_on_a_callback_failure():
+    """The generator's cleanup (page buffers, database resources) runs before the callback
+    failure propagates."""
+    cleanup = []
+
+    def events():
+        try:
+            yield rq.RemoteQueryEvent('metadata', {})
+        finally:
+            cleanup.append('closed')
+
+    def emit(event_type, metadata_json, payload):
+        raise RuntimeError('stop streaming')
+
+    with pytest.raises(RuntimeError, match='stop streaming'):
+        rq.emit_agent_rpc_events(emit, events())
+
+    assert cleanup == ['closed']
+
+
+def test_lifecycle_validates_the_request_before_any_hook_runs(delivery, monkeypatch):
+    """An unusable request is rejected without the supplied check being touched: request
+    validation precedes every adapter hook."""
+    request = produce_request(delivery)
+    request['password'] = 'SECRET_DO_NOT_LOG'
+
+    events, stages, _client = run_produce_lifecycle(delivery, monkeypatch, request=request)
+
+    (event,) = events
+    assert event.event_type == 'error'
+    assert event.metadata['error']['code'] == 'invalid_request'
+    assert 'password' in event.metadata['error']['message']
+    assert 'SECRET_DO_NOT_LOG' not in str(event.metadata)
+    assert stages == []
+
+
+def test_lifecycle_allowlist_gate_rejects_before_matching(delivery, monkeypatch):
+    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: True)
+
+    events, stages, _client = run_produce_lifecycle(
+        delivery, monkeypatch, request=produce_request(delivery, query='SELECT 2'), allowlist=frozenset()
+    )
+
+    (event,) = events
+    assert event.event_type == 'error'
+    assert event.metadata['error']['message'] == 'Invalid remote query request: query is not allowlisted.'
+    assert stages == []
+
+
+def test_lifecycle_reports_a_preparation_failure_without_starting_the_run(delivery, monkeypatch):
+    stages = []
+
+    def prepare_execution(request, check):
+        stages.append('prepare')
+        return None, rq.RemoteQueryFailure('target_not_found', 'no matched check', True)
+
+    patch_upload_credentials(monkeypatch)
+    events = list(
+        rq.iter_remote_query_produce_events(
+            produce_request(delivery),
+            object(),
+            allowlist=frozenset({'SELECT 1 AS value'}),
+            prepare_execution=prepare_execution,
+            ensure_available=lambda check: stages.append('available'),
+            produce=lambda *args: pytest.fail('produce must not run'),
+            http_client=Uploads(),
+        )
+    )
+
+    (event,) = events
+    assert event.event_type == 'error'
+    assert event.metadata['error'] == {'code': 'target_not_found', 'message': 'no matched check', 'retryable': True}
+    assert stages == ['prepare']
+
+
+def test_lifecycle_reports_missing_credentials_without_checking_availability(delivery, monkeypatch):
+    monkeypatch.setattr(rq.datadog_agent, 'get_config', lambda _key: None)
+    stages = []
+
+    def prepare_execution(request, check):
+        stages.append('prepare')
+        return 'execution-context', None
+
+    events = list(
+        rq.iter_remote_query_produce_events(
+            produce_request(delivery),
+            object(),
+            allowlist=frozenset({'SELECT 1 AS value'}),
+            prepare_execution=prepare_execution,
+            ensure_available=lambda check: pytest.fail('availability must not be checked without credentials'),
+            produce=lambda *args: pytest.fail('produce must not run'),
+            http_client=Uploads(),
+        )
+    )
+
+    (event,) = events
+    assert event.event_type == 'error'
+    assert event.metadata['error']['code'] == 'credentials_unavailable'
+    # Credentials resolve before the availability check: it never ran.
+    assert stages == ['prepare']
+
+
+def test_lifecycle_reports_an_unavailable_check_without_starting_the_run(delivery, monkeypatch):
+    stages = []
+
+    def prepare_execution(request, check):
+        stages.append('prepare')
+        return 'execution-context', None
+
+    def ensure_available(check):
+        stages.append('available')
+        return rq.RemoteQueryFailure('target_unavailable', 'connection pool is closed')
+
+    patch_upload_credentials(monkeypatch)
+    events = list(
+        rq.iter_remote_query_produce_events(
+            produce_request(delivery),
+            object(),
+            allowlist=frozenset({'SELECT 1 AS value'}),
+            prepare_execution=prepare_execution,
+            ensure_available=ensure_available,
+            produce=lambda *args: pytest.fail('produce must not run'),
+            http_client=Uploads(),
+        )
+    )
+
+    # No STARTED event: the run never began, and produce never ran.
+    (event,) = events
+    assert event.event_type == 'error'
+    assert event.metadata['error'] == {
+        'code': 'target_unavailable',
+        'message': 'connection pool is closed',
+        'retryable': False,
+    }
+    assert stages == ['prepare', 'available']
+
+
+def test_lifecycle_emits_started_then_final_with_the_run_receipt(delivery, monkeypatch):
+    receipt = {'uploadId': 'upload-1', 'pageCount': 2, 'totalRows': 7, 'totalBytes': 99}
+
+    events, stages, uploads = run_produce_lifecycle(delivery, monkeypatch, produce_result=receipt)
+
+    assert [event.event_type for event in events] == ['metadata', 'final']
+    started = events[0].metadata
+    assert started['status'] == 'STARTED'
+    assert started['operation'] == 'produce_json_pages'
+    assert started['resultDelivery']['uploadId'] == 'upload-1'
+    final = events[1].metadata
+    assert final['status'] == 'SUCCEEDED'
+    assert final['upload_receipt'] == receipt
+    assert 'stats' in final
+    assert 'executionDiagnostics' in final
+    assert [stage if isinstance(stage, str) else stage[0] for stage in stages] == ['prepare', 'available', 'produce']
+    # The preparation hook's execution context reaches the produce hook unchanged.
+    assert stages[2][1] == 'execution-context'
+    assert uploads.abort_calls == 0
+
+
+@pytest.mark.parametrize(
+    'carrier',
+    [None, {'traceId': '1234567890123456789', 'parentId': '9876543210987654321', 'samplingPriority': 2}],
+)
+def test_lifecycle_threads_the_request_trace_context_into_upload_credentials(delivery, monkeypatch, carrier):
+    extra = {'traceContext': carrier} if carrier is not None else {}
+
+    events, stages, _uploads = run_produce_lifecycle(delivery, monkeypatch, request=produce_request(delivery, **extra))
+
+    assert [event.event_type for event in events] == ['metadata', 'final']
+    _stage, context, creds = stages[-1]
+    assert context == 'execution-context'
+    expected = rq.RemoteQueryTraceContext.model_validate(carrier) if carrier is not None else None
+    assert creds.trace_context == expected
+
+
+def test_lifecycle_aborts_and_reports_a_sanitize_produce_failure(delivery, monkeypatch):
+    events, _stages, uploads = run_produce_lifecycle(
+        delivery,
+        monkeypatch,
+        produce_error=rq.RemoteQueryFailure('upload_failed', 'transient exhausted', True),
+    )
+
+    assert [event.event_type for event in events] == ['metadata', 'error']
+    error = events[-1].metadata
+    assert error['status'] == 'FAILED'
+    assert error['error'] == {'code': 'upload_failed', 'message': 'transient exhausted', 'retryable': True}
+    assert 'stats' in error
+    assert 'executionDiagnostics' in error
+    assert uploads.abort_calls == 1
+
+
+def test_lifecycle_maps_classified_driver_failures(delivery, monkeypatch):
+    class StatementCanceled(Exception):
+        pass
+
+    def classify_driver_failure(exception):
+        if isinstance(exception, StatementCanceled):
+            return rq.RemoteQueryFailure('timeout', 'canceled by the server', True)
+        return None
+
+    patch_upload_credentials(monkeypatch)
+    _, prepare, ensure_available, produce = recording_hooks(produce_error=StatementCanceled('SECRET_DO_NOT_LOG'))
+    uploads = Uploads()
+    events = list(
+        rq.iter_remote_query_produce_events(
+            produce_request(delivery),
+            object(),
+            allowlist=frozenset({'SELECT 1 AS value'}),
+            prepare_execution=prepare,
+            ensure_available=ensure_available,
+            produce=produce,
+            http_client=uploads,
+            classify_driver_failure=classify_driver_failure,
+        )
+    )
+
+    assert [event.event_type for event in events] == ['metadata', 'error']
+    error = events[-1].metadata
+    assert error['error'] == {'code': 'timeout', 'message': 'canceled by the server', 'retryable': True}
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert uploads.abort_calls == 1
+
+
+def test_lifecycle_reports_unclassified_failures_with_fixed_text(delivery, monkeypatch, caplog):
+    caplog.set_level(logging.DEBUG)
+    patch_upload_credentials(monkeypatch)
+    _, prepare, ensure_available, produce = recording_hooks(produce_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
+    uploads = Uploads()
+    events = list(
+        rq.iter_remote_query_produce_events(
+            produce_request(delivery),
+            object(),
+            allowlist=frozenset({'SELECT 1 AS value'}),
+            prepare_execution=prepare,
+            ensure_available=ensure_available,
+            produce=produce,
+            http_client=uploads,
+            classify_driver_failure=lambda _exception: None,
+        )
+    )
+
+    assert [event.event_type for event in events] == ['metadata', 'error']
+    error = events[-1].metadata
+    assert error['error'] == {'code': 'query_failed', 'message': 'Remote query execution failed.', 'retryable': False}
+    assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
+    assert 'Remote query execution failed' in caplog.text
+    assert uploads.abort_calls == 1
+
+
+def test_lifecycle_aborts_and_reraises_non_exception_termination(delivery, monkeypatch):
+    class Terminated(BaseException):
+        pass
+
+    patch_upload_credentials(monkeypatch)
+    _, prepare, ensure_available, produce = recording_hooks(produce_error=Terminated())
+    uploads = Uploads()
+
+    with pytest.raises(Terminated):
+        list(
+            rq.iter_remote_query_produce_events(
+                produce_request(delivery),
+                object(),
+                allowlist=frozenset({'SELECT 1 AS value'}),
+                prepare_execution=prepare,
+                ensure_available=ensure_available,
+                produce=produce,
+                http_client=uploads,
+            )
+        )
+    assert uploads.abort_calls == 1
+
+
+@pytest.mark.parametrize(
+    'is_cancelled, expect_cancelled',
+    [
+        (True, True),
+        (lambda: True, True),
+        (False, False),
+        (lambda: False, False),
+    ],
+)
+def test_raise_if_cancelled_honors_the_bool_and_callable_shapes(is_cancelled, expect_cancelled):
+    check = SimpleNamespace(is_cancelled=is_cancelled)
+
+    if expect_cancelled:
+        with pytest.raises(rq.RemoteQueryFailure) as failure:
+            rq.raise_if_cancelled(check)
+        assert failure.value.code == 'cancelled'
+        assert failure.value.retryable is True
+    else:
+        rq.raise_if_cancelled(check)
+
+
+def test_raise_if_cancelled_ignores_a_check_without_a_cancel_hook():
+    rq.raise_if_cancelled(SimpleNamespace())

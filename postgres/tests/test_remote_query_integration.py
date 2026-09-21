@@ -9,78 +9,24 @@ descriptor, the pinned session output settings, the single COPY execution, nativ
 records, bounded split/retry) without needing a live its-agent-intake.
 """
 
-import hashlib
 import json
-from types import SimpleNamespace
 
 import pytest
 
 from datadog_checks.base.utils import remote_queries as rq
 from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
 
+from .remote_query_fakes import (
+    FakeUploadClient,
+    assert_success,
+    event_metadata,
+    native_record,
+    patch_allowlist_disabled,
+)
+
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
 UPLOAD_ID = 'upload-01k'
-
-
-class FakeUploadClient:
-    def __init__(self, reject_first_page_too_large=False):
-        self.descriptor_bodies = []
-        self.put_page_calls = []
-        self.put_attempts = []
-        self.run_finalize_calls = 0
-        self.abort_calls = 0
-        self.reject_first_page_too_large = reject_first_page_too_large
-
-    def register_descriptor(self, creds, body):
-        self.descriptor_bodies.append(body)
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-            'sha256': hashlib.sha256(body).hexdigest(),
-        }
-
-    def put_source_page(self, creds, page, body):
-        payload = body.read()
-        self.put_attempts.append(page.batch_index)
-        if self.reject_first_page_too_large and page.batch_index == 0 and self.put_attempts.count(0) == 1:
-            raise rq.RemoteQueryFailure(
-                rq.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake rejected the final page size.'
-            )
-        self.put_page_calls.append(
-            SimpleNamespace(
-                batch_index=page.batch_index,
-                record_offset=page.record_offset,
-                source_bytes=page.source_bytes,
-                rows=page.rows,
-                payload=payload,
-            )
-        )
-        return {
-            'upload_id': creds.upload_id,
-            'batch_index': page.batch_index,
-            'record_offset': page.record_offset,
-            'source_rows': page.rows,
-            'status': 'accepted',
-        }
-
-    def finalize_run(self, creds, expected_page_count):
-        self.run_finalize_calls += 1
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len({call.batch_index for call in self.put_page_calls}),
-            'total_rows': sum(call.rows for call in self.put_page_calls),
-            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
-        }
-
-    def abort(self, creds):
-        self.abort_calls += 1
-
-    def pages(self):
-        return {call.batch_index: call.payload for call in self.put_page_calls}
 
 
 def patch_upload_credentials(monkeypatch):
@@ -92,10 +38,6 @@ def patch_upload_credentials(monkeypatch):
         return None
 
     monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
-
-
-def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
 
 
 def remote_query_request(pg_instance, query, include_schema=False, **limits):
@@ -127,10 +69,6 @@ def remote_query_request(pg_instance, query, include_schema=False, **limits):
     }
 
 
-def event_metadata(event):
-    return event.metadata
-
-
 def run_producer(request, check):
     client = FakeUploadClient()
     events = list(iter_agent_rpc_stream_events(request, check, client))
@@ -141,22 +79,6 @@ def run_producer_with_rejections(request, check):
     client = FakeUploadClient(reject_first_page_too_large=True)
     events = list(iter_agent_rpc_stream_events(request, check, client))
     return events, client
-
-
-def assert_success(events):
-    assert events[-1].event_type == 'final'
-    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
-    return event_metadata(events[-1])
-
-
-def native_field(text):
-    """The native COPY CSV field for one non-null text value: quoted, quotes doubled."""
-    return '"' + text.replace('"', '""') + '"'
-
-
-def native_record(*values):
-    """The expected native COPY CSV record for one row of native text values (None is NULL)."""
-    return (','.join(r'\N' if value is None else native_field(value) for value in values) + '\n').encode('utf-8')
 
 
 def assert_registered_descriptor(client, include_schema, columns):

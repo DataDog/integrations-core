@@ -145,10 +145,7 @@ class FakeUploadClient:
 
     def __init__(
         self,
-        run_finalize_response=None,
         put_page_response=None,
-        raise_on_put_page=None,
-        raise_on_run_finalize=None,
         put_log=None,
     ):
         # SimpleNamespace(batch_index, record_offset, source_bytes, rows, payload)
@@ -157,9 +154,6 @@ class FakeUploadClient:
         self.run_finalize_calls = 0
         self.finalize_expected_page_counts = []
         self.abort_calls = 0
-        self.raise_on_put_page = raise_on_put_page
-        self.raise_on_run_finalize = raise_on_run_finalize
-        self.run_finalize_response = run_finalize_response
         # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
         # mapping (or a callable taking the page metadata) to mutate or reject it.
         self.put_page_response = put_page_response
@@ -189,8 +183,6 @@ class FakeUploadClient:
         )
         if self.put_log is not None:
             self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
-        if self.raise_on_put_page is not None:
-            raise self.raise_on_put_page
         if self.put_page_response is not None:
             response = self.put_page_response
             if callable(response):
@@ -208,10 +200,6 @@ class FakeUploadClient:
     def finalize_run(self, creds, expected_page_count):
         self.run_finalize_calls += 1
         self.finalize_expected_page_counts.append(expected_page_count)
-        if self.raise_on_run_finalize is not None:
-            raise self.raise_on_run_finalize
-        if self.run_finalize_response is not None:
-            return self.run_finalize_response
         return {
             'upload_id': creds.upload_id,
             'page_count': len(self.put_page_calls),
@@ -549,31 +537,24 @@ def test_stream_accepts_max_schema_bytes_equal_to_max_file_bytes(monkeypatch):
     assert final['upload_receipt']['pageCount'] == 1
 
 
-@pytest.mark.parametrize('request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff'])
-def test_entry_rejects_malformed_json_without_echoing_input(caplog, request_json):
+@pytest.mark.parametrize(
+    'request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff', '[]', 'null', '"SECRET_DO_NOT_LOG"', '1']
+)
+def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, request_json):
+    # The entry-point wiring for the shared request parse: malformed and non-object JSON
+    # each emit exactly one fixed invalid_request event, never echoing the input.
     events = []
 
     execute_agent_rpc_stream_copy(request_json, make_check(), lambda *event: events.append(event))
 
     metadata = json.loads(events[-1][1])
+    assert len(events) == 1
     assert events[-1][0] == 'error'
     assert metadata['status'] == 'FAILED'
     assert metadata['error']['code'] == 'invalid_request'
-    assert 'SECRET_DO_NOT_LOG' not in str(events)
-    assert 'SECRET_DO_NOT_LOG' not in caplog.text
-
-
-@pytest.mark.parametrize('request_json', ['[]', 'null', '"SECRET_DO_NOT_LOG"', '1'])
-def test_entry_rejects_non_object_json_without_echoing_input(request_json):
-    events = []
-
-    execute_agent_rpc_stream_copy(request_json, make_check(), lambda *event: events.append(event))
-
-    metadata = json.loads(events[-1][1])
-    assert events[-1][0] == 'error'
-    assert metadata['error']['code'] == 'invalid_request'
     assert 'JSON object' in metadata['error']['message']
     assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 # ---------------------------------------------------------------------------
@@ -652,17 +633,6 @@ def test_stream_accepts_identity_and_binary_proof_queries(monkeypatch):
     patch_upload_credentials(monkeypatch)
     for query in (remote_query.REMOTE_QUERY_IDENTITY_QUERY, remote_query.REMOTE_QUERY_BINARY_QUERY):
         clickhouse_client = make_client(names=('v',), types=('String',), rows=[['x']])
-        request = valid_request(query=query)
-
-        events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-        assert_success(events)
-
-
-def test_stream_accepts_every_allowlisted_query(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    for query in sorted(remote_query.REMOTE_QUERY_QUERY_ALLOWLIST):
-        clickhouse_client = make_client(names=('payload',), types=('String',), rows=[['x']])
         request = valid_request(query=query)
 
         events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
@@ -1841,62 +1811,6 @@ def test_logical_type_mapping_is_deterministic(type_string, expected):
 
 
 # ---------------------------------------------------------------------------
-# Upload client HTTP contract
-# ---------------------------------------------------------------------------
-
-
-class CredsRecordingUploadClient(FakeUploadClient):
-    """FakeUploadClient that also records the credentials each upload call received."""
-
-    def __init__(self):
-        super().__init__()
-        self.seen_creds = []
-
-    def register_descriptor(self, creds, body):
-        self.seen_creds.append(creds)
-        return super().register_descriptor(creds, body)
-
-    def put_source_page(self, creds, page, body):
-        self.seen_creds.append(creds)
-        return super().put_source_page(creds, page, body)
-
-    def finalize_run(self, creds, expected_page_count):
-        self.seen_creds.append(creds)
-        return super().finalize_run(creds, expected_page_count)
-
-    def abort(self, creds):
-        self.seen_creds.append(creds)
-        return super().abort(creds)
-
-
-@pytest.mark.parametrize(
-    'carrier',
-    [None, {'traceId': '1234567890123456789', 'parentId': '9876543210987654321', 'samplingPriority': 2}],
-)
-def test_stream_threads_the_request_trace_context_into_upload_credentials(monkeypatch, carrier):
-    """The validated request carrier reaches the upload credentials unchanged: present
-    context rides on every upload call, absent context (mixed versions) leaves the
-    credentials without one."""
-    patch_upload_credentials(monkeypatch)
-    fake = CredsRecordingUploadClient()
-    request = valid_request()
-    if carrier is not None:
-        request['traceContext'] = carrier
-
-    events = collect_events(request, make_check(), upload_client=fake, clickhouse_client=make_client(rows=[[1]]))
-
-    assert_success(events)
-    expected_context = rq.RemoteQueryTraceContext.model_validate(carrier) if carrier is not None else None
-    # The descriptor registration, the page PUT, and the run finalize all saw the same
-    # threaded context.
-    assert [creds.trace_context for creds in fake.seen_creds] == [
-        expected_context,
-        expected_context,
-        expected_context,
-    ]
-
-
-# ---------------------------------------------------------------------------
 # Failure, timeout, and cancellation flows
 # ---------------------------------------------------------------------------
 
@@ -1916,81 +1830,6 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     assert [call.batch_index for call in fake.put_page_calls] == [0, 1]
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
-
-
-def test_stream_aborts_on_page_upload_failure(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = make_client(rows=[[1]])
-    fake = FakeUploadClient(
-        raise_on_put_page=rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
-    )
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'upload_failed')
-    assert len(fake.put_page_calls) == 1
-    assert fake.abort_calls == 1
-    assert fake.run_finalize_calls == 0
-    # The response stream is closed even though the query itself succeeded.
-    assert clickhouse_client.stream.closed
-
-
-def test_stream_fails_closed_on_page_receipt_identity_mismatch(monkeypatch):
-    """The acceptance receipt must echo the accepted page's identity exactly — session,
-    index, offset, and source rows; a mismatch fails the run."""
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
-    clickhouse_client = two_row_client()
-    fake = FakeUploadClient(
-        put_page_response=lambda page: {
-            'upload_id': UPLOAD_ID,
-            'batch_index': page.batch_index,
-            'record_offset': page.record_offset,
-            # A row count that disagrees with the accepted page: rejected.
-            'source_rows': page.rows + 1,
-            'status': 'accepted',
-        }
-    )
-
-    events = collect_events(request, make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    # The receipt disagrees on rows: page 1 is never produced, the session is aborted, and
-    # no partial receipt is emitted.
-    assert_failed_event(events, 'invalid_receipt')
-    assert [call.batch_index for call in fake.put_page_calls] == [0]
-    assert fake.run_finalize_calls == 0
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
-def test_stream_fails_closed_on_run_finalize_failure(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = make_client(rows=[[1]])
-    fake = FakeUploadClient(raise_on_run_finalize=rq.RemoteQueryFailure('upload_failed', 'run finalize rejected'))
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'upload_failed')
-    assert fake.run_finalize_calls == 1
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
-def test_stream_fails_closed_on_run_finalize_identity_mismatch(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = make_client(rows=[[1]])
-    fake = FakeUploadClient(run_finalize_response={'upload_id': 'other-upload'})
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'invalid_receipt')
-    assert fake.run_finalize_calls == 1
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
 
 
 def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
@@ -2136,27 +1975,6 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     assert_failed_event(events, 'cancelled')
     assert event_metadata(events[-1])['error']['retryable'] is True
     assert clickhouse_client.stream.closed
-
-
-def test_stream_proceeds_when_bool_is_cancelled_is_false(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    check = make_check()
-    check.is_cancelled = False
-
-    events = collect_events(valid_request(), check, clickhouse_client=make_client(rows=[[1]]))
-
-    assert_success(events)
-
-
-def test_stream_ignores_check_without_cancel_hook(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # make_check deliberately has no is_cancelled attribute.
-
-    events = collect_events(valid_request(), make_check(), clickhouse_client=make_client(rows=[[1]]))
-
-    assert_success(events)
 
 
 def test_stream_target_unavailable_when_check_cannot_create_clients(monkeypatch):

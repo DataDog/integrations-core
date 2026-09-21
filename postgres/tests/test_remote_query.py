@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import hashlib
 import json
 import logging
 import socket
@@ -19,6 +18,14 @@ from datadog_checks.postgres.remote_query import (
     execute_agent_rpc_stream_copy,
     iter_agent_resolve_events,
     iter_agent_rpc_stream_events,
+)
+
+from .remote_query_fakes import (
+    FakeUploadClient,
+    assert_success,
+    event_metadata,
+    native_record,
+    patch_allowlist_disabled,
 )
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -182,94 +189,6 @@ class FakePool:
         yield FakeConnection(self)
 
 
-class FakeUploadClient:
-    """Intake-side fake: one descriptor registration, page acceptance receipts, finalize totals.
-
-    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
-    acceptance — and the default finalize returns authoritative totals over the recorded
-    pages, so the producer's stats and compact receipt come from finalization.
-    """
-
-    def __init__(
-        self,
-        run_finalize_response=None,
-        put_page_response=None,
-        raise_on_put_page=None,
-        raise_on_run_finalize=None,
-        put_log=None,
-    ):
-        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, payload)
-        self.descriptor_bodies = []
-        self.put_page_calls = []
-        self.run_finalize_calls = 0
-        self.finalize_expected_page_counts = []
-        self.abort_calls = 0
-        self.raise_on_put_page = raise_on_put_page
-        self.raise_on_run_finalize = raise_on_run_finalize
-        self.run_finalize_response = run_finalize_response
-        # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
-        # mapping (or a callable taking the page metadata) to mutate or reject it.
-        self.put_page_response = put_page_response
-        self.put_log = put_log
-
-    def register_descriptor(self, creds, body):
-        self.descriptor_bodies.append(body)
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-            'sha256': hashlib.sha256(body).hexdigest(),
-        }
-
-    def put_source_page(self, creds, page, body):
-        payload = body.read()
-        self.put_page_calls.append(
-            SimpleNamespace(
-                batch_index=page.batch_index,
-                record_offset=page.record_offset,
-                source_bytes=page.source_bytes,
-                rows=page.rows,
-                payload=payload,
-            )
-        )
-        if self.put_log is not None:
-            self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
-        if self.raise_on_put_page is not None:
-            raise self.raise_on_put_page
-        if self.put_page_response is not None:
-            response = self.put_page_response
-            if callable(response):
-                response = response(page)
-        else:
-            response = {
-                'upload_id': creds.upload_id,
-                'batch_index': page.batch_index,
-                'record_offset': page.record_offset,
-                'source_rows': page.rows,
-                'status': 'accepted',
-            }
-        return response
-
-    def finalize_run(self, creds, expected_page_count):
-        self.run_finalize_calls += 1
-        self.finalize_expected_page_counts.append(expected_page_count)
-        if self.raise_on_run_finalize is not None:
-            raise self.raise_on_run_finalize
-        if self.run_finalize_response is not None:
-            return self.run_finalize_response
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len(self.put_page_calls),
-            'total_rows': sum(call.rows for call in self.put_page_calls),
-            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
-        }
-
-    def abort(self, creds):
-        self.abort_calls += 1
-
-
 class FakeAutodiscovery:
     """Stands in for the check's integration-owned PostgresAutodiscovery."""
 
@@ -375,10 +294,6 @@ def patch_upload_credentials(monkeypatch):
     monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
 
 
-def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
-
-
 class MutableClock:
     """A monotonic clock the fakes advance at deterministic phase boundaries.
 
@@ -478,22 +393,12 @@ def collect_events(request, check, client=None):
     return list(iter_agent_rpc_stream_events(request, check, client))
 
 
-def event_metadata(event):
-    return event.metadata
-
-
 def assert_failed_event(events, code, message_contains=None):
     assert events[-1].event_type == 'error'
     assert event_metadata(events[-1])['status'] == 'FAILED'
     assert event_metadata(events[-1])['error']['code'] == code
     if message_contains is not None:
         assert message_contains in event_metadata(events[-1])['error']['message']
-
-
-def assert_success(events):
-    assert events[-1].event_type == 'final'
-    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
-    return event_metadata(events[-1])
 
 
 def prefix_bytes(record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=None):
@@ -509,26 +414,6 @@ def prefix_bytes(record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=Non
 def assembled_pages(fake_client):
     """Each completed page's exact uploaded source bytes, keyed by batch index."""
     return {call.batch_index: call.payload for call in fake_client.put_page_calls}
-
-
-def native_field(value):
-    """The expected native COPY CSV field for one value, computed independently.
-
-    ``FORCE_QUOTE *`` quotes every non-null value — with internal quotes doubled — and
-    NULL is the sole unquoted field, the two-character \\N marker.
-    """
-    if value is None:
-        return '\\N'
-    if isinstance(value, bool):
-        value = 't' if value else 'f'
-    elif isinstance(value, bytes):
-        value = '\\x' + value.hex()
-    return '"{}"'.format(str(value).replace('"', '""'))
-
-
-def native_record(*values):
-    """The expected native COPY CSV record for one row of values."""
-    return (','.join(native_field(value) for value in values) + '\n').encode('utf-8')
 
 
 # ---------------------------------------------------------------------------
@@ -552,51 +437,26 @@ def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
-def test_entry_reports_the_measured_wall_for_malformed_json_request():
-    events = []
-
-    execute_agent_rpc_stream_copy('{"password": "SECRET_DO_NOT_LOG"', make_check(), lambda *event: events.append(event))
-
-    metadata = json.loads(events[-1][1])
-    # The malformed-request event gains only the diagnostics object: no stats (as today), and
-    # a producer section holding exactly what was measured before the parse failed.
-    assert set(metadata) == {'status', 'error', 'executionDiagnostics'}
-    diagnostics = metadata['executionDiagnostics']
-    assert set(diagnostics) == {'contractVersion', 'producer'}
-    assert diagnostics['contractVersion'] == 1
-    assert set(diagnostics['producer']) == {'totalMs', 'otherMs'}
-    assert diagnostics['producer']['totalMs'] >= 0
-    assert diagnostics['producer']['otherMs'] >= 0
-
-
-@pytest.mark.parametrize('request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff'])
-def test_entry_rejects_malformed_json_without_echoing_input(caplog, request_json):
+@pytest.mark.parametrize(
+    'request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff', '[]', 'null', '"SECRET_DO_NOT_LOG"', '1']
+)
+def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, request_json):
+    # The entry-point wiring for the shared request parse: malformed and non-object JSON
+    # each emit exactly one fixed invalid_request event, never echoing the input and
+    # never touching the check's database pool.
     pool = FakePool(rows=[(1,)])
     events = []
 
     execute_agent_rpc_stream_copy(request_json, make_check(pool=pool), lambda *event: events.append(event))
 
     metadata = json.loads(events[-1][1])
+    assert len(events) == 1
     assert events[-1][0] == 'error'
     assert metadata['status'] == 'FAILED'
     assert metadata['error']['code'] == 'invalid_request'
-    assert 'SECRET_DO_NOT_LOG' not in str(events)
-    assert 'SECRET_DO_NOT_LOG' not in caplog.text
-    assert pool.requested_dbnames == []
-
-
-@pytest.mark.parametrize('request_json', ['[]', 'null', '"SECRET_DO_NOT_LOG"', '1'])
-def test_entry_rejects_non_object_json_without_echoing_input(request_json):
-    pool = FakePool(rows=[(1,)])
-    events = []
-
-    execute_agent_rpc_stream_copy(request_json, make_check(pool=pool), lambda *event: events.append(event))
-
-    metadata = json.loads(events[-1][1])
-    assert events[-1][0] == 'error'
-    assert metadata['error']['code'] == 'invalid_request'
     assert 'JSON object' in metadata['error']['message']
     assert 'SECRET_DO_NOT_LOG' not in str(events)
+    assert 'SECRET_DO_NOT_LOG' not in caplog.text
     assert pool.requested_dbnames == []
 
 
@@ -1359,18 +1219,6 @@ def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wal
     assert remote_query._resolve_statement_timeout_ms(check, 99.0) == 1
 
 
-def test_producer_rolls_back_transaction_on_failure(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,), (2,)], copy_error=ValueError('copy broke'))
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'query_failed')
-    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
-
-
 def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -2087,52 +1935,6 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     assert fake.abort_calls == 0
 
 
-def test_stream_aborts_on_page_upload_failure(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    fake = FakeUploadClient(
-        raise_on_put_page=rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
-    )
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'upload_failed')
-    assert len(fake.put_page_calls) == 1
-    assert fake.abort_calls == 1
-    assert fake.run_finalize_calls == 0
-    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
-
-
-def test_stream_fails_closed_on_page_receipt_identity_mismatch(monkeypatch):
-    """The acceptance receipt must echo the accepted page's identity exactly — session,
-    index, offset, and source rows; a mismatch fails the run."""
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    request = two_row_boundary_request(monkeypatch)
-    pool = wide_row_pool()
-    fake = FakeUploadClient(
-        put_page_response=lambda page: {
-            'upload_id': UPLOAD_ID,
-            'batch_index': page.batch_index,
-            'record_offset': page.record_offset,
-            # A row count that disagrees with the accepted page: rejected.
-            'source_rows': page.rows + 1,
-            'status': 'accepted',
-        }
-    )
-
-    events = collect_events(request, make_check(pool=pool), client=fake)
-
-    # The receipt disagrees on rows: page 1 is never produced, the session is aborted, and
-    # no partial receipt is emitted.
-    assert_failed_event(events, 'invalid_receipt')
-    assert [call.batch_index for call in fake.put_page_calls] == [0]
-    assert fake.run_finalize_calls == 0
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
 def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -2165,6 +1967,8 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
     assert set(error) == {'status', 'error', 'stats', 'executionDiagnostics'}
     assert fake.abort_calls == 1
     assert fake.run_finalize_calls == 0
+    # The read-only transaction rolled back when the failed upload unwound produce.
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
     first_page_bytes = len(assembled_pages(fake)[0])
     assert error['stats'] == {
         'rowsEmitted': 1,
@@ -2198,34 +2002,6 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
             'pageUploadMaxMs': 625,
         },
     }
-
-
-def test_stream_fails_closed_on_run_finalize_failure(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    fake = FakeUploadClient(raise_on_run_finalize=rq.RemoteQueryFailure('upload_failed', 'run finalize rejected'))
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'upload_failed')
-    assert fake.run_finalize_calls == 1
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
-def test_stream_fails_closed_on_run_finalize_identity_mismatch(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    fake = FakeUploadClient(run_finalize_response={'upload_id': 'other-upload'})
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'invalid_receipt')
-    assert fake.run_finalize_calls == 1
-    assert fake.abort_calls == 1
-    assert 'upload_receipt' not in event_metadata(events[-1])
 
 
 def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
@@ -2300,29 +2076,6 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     assert_failed_event(events, 'cancelled')
     assert event_metadata(events[-1])['error']['retryable'] is True
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
-
-
-def test_stream_proceeds_when_bool_is_cancelled_is_false(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
-    check = make_check(pool=pool)
-    check.is_cancelled = False
-
-    events = collect_events(valid_request(), check, client=FakeUploadClient())
-
-    assert_success(events)
-
-
-def test_stream_ignores_check_without_cancel_hook(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # make_check deliberately has no is_cancelled attribute.
-    pool = FakePool(rows=[(1,)])
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
-
-    assert_success(events)
 
 
 def test_entry_propagates_callback_failure_without_upload(monkeypatch):
