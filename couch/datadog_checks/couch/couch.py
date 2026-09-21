@@ -174,15 +174,15 @@ class CouchDB1:
                 try:
                     db_stats = self.agent_check.get(url, tags)
                 except HTTPClientStatusError as e:
-                    # The auth-token seam raises without a response, so the status is unknowable there.
-                    if e.response is not None and e.response.status_code in (401, 403):
-                        self.db_exclude[server].append(dbName)
+                    if e.response is None or e.response.status_code not in (401, 403):
+                        raise
 
-                        self.agent_check.warning(
-                            'Database %s is not readable by the configured user. '
-                            'It will be added to the exclusion list. Please restart the agent to clear.',
-                            dbName,
-                        )
+                    self.db_exclude[server].append(dbName)
+                    self.agent_check.warning(
+                        'Database %s is not readable by the configured user. '
+                        'It will be added to the exclusion list. Please restart the agent to clear.',
+                        dbName,
+                    )
                     # _create_metric dereferences every value in this dict, so an unresolved database
                     # has to be left out entirely rather than stored as a None placeholder.
                     continue

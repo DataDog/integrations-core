@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientReadTimeoutError,
+    HTTPClientStatusError,
 )
 from datadog_checks.marathon import Marathon
 
@@ -138,6 +139,23 @@ def test_get_json_error_status_emits_critical_service_check(aggregator, fake_htt
     aggregator.assert_service_check('marathon.can_connect', status=Marathon.CRITICAL, tags=[f'url:{url}'], count=1)
 
 
+def test_get_json_status_error_without_response_emits_critical_service_check(aggregator, fake_http):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, HTTPClientStatusError('status unavailable'))
+
+    with pytest.raises(Exception, match='Got status unavailable when hitting'):
+        check.get_json(url, None, [])
+
+    aggregator.assert_service_check(
+        'marathon.can_connect',
+        status=Marathon.CRITICAL,
+        tags=[f'url:{url}'],
+        message=f'{url} returned a status of status unavailable',
+        count=1,
+    )
+
+
 def test_get_json_connection_error_emits_critical_service_check(aggregator, fake_http):
     check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
     url = 'http://localhost:8080/v2/apps'
@@ -185,3 +203,24 @@ def test_refresh_acs_token_error_status_emits_critical_service_check(aggregator,
         check.refresh_acs_token(acs_url, [])
 
     aggregator.assert_service_check('marathon.can_connect', status=Marathon.CRITICAL, tags=[f'url:{acs_url}'], count=1)
+
+
+def test_refresh_acs_token_status_error_without_response_emits_critical_service_check(aggregator, fake_http):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    acs_url = 'http://acs.example.com'
+    fake_http.register_response(
+        'POST',
+        f'{acs_url}/acs/api/v1/auth/login',
+        HTTPClientStatusError('status unavailable'),
+    )
+
+    with pytest.raises(Exception, match='Got status unavailable when hitting'):
+        check.refresh_acs_token(acs_url, [])
+
+    aggregator.assert_service_check(
+        'marathon.can_connect',
+        status=Marathon.CRITICAL,
+        tags=[f'url:{acs_url}'],
+        message=f'acs auth url {acs_url} returned a status of status unavailable',
+        count=1,
+    )

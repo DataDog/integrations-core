@@ -91,14 +91,15 @@ class Marathon(AgentCheck):
             token = r.json()['token']
             self.ACS_TOKEN = token
             return token
-        except HTTPClientStatusError:
+        except HTTPClientStatusError as e:
+            status = e.response.status_code if e.response is not None else str(e)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="acs auth url {} returned a status of {}".format(acs_url, r.status_code),
+                message="acs auth url {} returned a status of {}".format(acs_url, status),
                 tags=["url:{}".format(acs_url)] + tags,
             )
-            raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
+            raise Exception("Got %s when hitting %s" % (status, acs_url))
 
     def get_json(self, url, acs_url, tags=None):
         if tags is None:
@@ -131,14 +132,15 @@ class Marathon(AgentCheck):
             )
             raise Exception("Timeout when hitting {}".format(url))
 
-        except HTTPClientStatusError:
+        except HTTPClientStatusError as e:
+            status = e.response.status_code if e.response is not None else str(e)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} returned a status of {}".format(url, r.status_code),
+                message="{} returned a status of {}".format(url, status),
                 tags=["url:{}".format(url)] + tags,
             )
-            raise Exception("Got {} when hitting {}".format(r.status_code, url))
+            raise Exception("Got {} when hitting {}".format(status, url))
 
         except HTTPClientConnectionError:
             self.service_check(

@@ -56,31 +56,57 @@ def test_new_version_system_metrics(load_test_data):
     mock_agent_check.log.debug.assert_any_call("Skipping distribution events")
 
 
-def test_v1_status_error_without_response_skips_unresolved_database(fake_http):
+@pytest.mark.parametrize('status_code', [401, 403])
+def test_v1_unreadable_database_is_warned_and_excluded(fake_http, status_code):
     instance = deepcopy(common.BASIC_CONFIG)
     check = CouchDb(common.CHECK_NAME, {}, [instance])
     server = instance['server']
     fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
     fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
-    fake_http.register_response('GET', f'{server}/db1', HTTPClientStatusError('403 Client Error'))
+    fake_http.register_response('GET', f'{server}/db1', FakeHTTPResponse(status_code=status_code))
+    checker = CouchDB1(check)
 
-    data = CouchDB1(check).get_data(server, [])
+    data = checker.get_data(server, [])
 
     assert data['databases'] == {}
+    assert checker.db_exclude[server] == ['db1']
+    assert check.warnings == [
+        'Database db1 is not readable by the configured user. '
+        'It will be added to the exclusion list. Please restart the agent to clear.'
+    ]
+    fake_http.assert_all_responses_consumed()
+
+
+def test_v1_status_error_without_response_propagates(fake_http):
+    instance = deepcopy(common.BASIC_CONFIG)
+    check = CouchDb(common.CHECK_NAME, {}, [instance])
+    server = instance['server']
+    error = HTTPClientStatusError('status unavailable')
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
+    fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
+    fake_http.register_response('GET', f'{server}/db1', error)
+
+    with pytest.raises(HTTPClientStatusError, match='status unavailable') as exc_info:
+        CouchDB1(check).get_data(server, [])
+
+    assert exc_info.value is error
     assert not check.warnings
     fake_http.assert_all_responses_consumed()
 
 
-def test_v1_unresolved_database_still_emits_overall_stats(aggregator, fake_http):
+@pytest.mark.parametrize('status_code', [400, 404, 500])
+def test_v1_database_status_errors_other_than_auth_propagate(fake_http, status_code):
     instance = deepcopy(common.BASIC_CONFIG)
     check = CouchDb(common.CHECK_NAME, {}, [instance])
     server = instance['server']
-    overall_stats = {'httpd': {'requests': {'current': 12}}}
-    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result=overall_stats))
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
     fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
-    fake_http.register_response('GET', f'{server}/db1', HTTPClientStatusError('404 Client Error'))
+    fake_http.register_response('GET', f'{server}/db1', FakeHTTPResponse(status_code=status_code))
 
-    CouchDB1(check).check()
+    with pytest.raises(HTTPClientStatusError) as exc_info:
+        CouchDB1(check).get_data(server, [])
 
-    aggregator.assert_metric('couchdb.httpd.requests', 12, tags=[f'instance:{server}'], count=1)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == status_code
+    assert not check.warnings
     fake_http.assert_all_responses_consumed()
