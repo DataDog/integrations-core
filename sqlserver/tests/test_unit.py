@@ -10,6 +10,7 @@ import os
 import re
 import weakref
 from collections import namedtuple
+from pathlib import Path
 
 import mock
 import pytest
@@ -37,9 +38,11 @@ from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFract
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
+    DRIVER_CONFIG_DIR,
     Database,
     construct_use_statement,
     extract_sql_comments_and_procedure_name,
+    get_embedded_dir,
     get_unixodbc_sysconfig,
     is_non_empty_file,
     needs_comment_recovery,
@@ -1211,7 +1214,7 @@ def _mock_database_list_azure():
 
 def test_set_default_driver_conf():
     # Docker Agent with ODBCSYSINI env var
-    # The only case where we set ODBCSYSINI to the the default odbcinst.ini folder
+    # The only case where we set ODBCSYSINI to the default bundled odbcinst.ini folder
     with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI']):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
@@ -1220,9 +1223,10 @@ def test_set_default_driver_conf():
         with EnvVars({}, ignore=['ODBCSYSINI']):
             set_default_driver_conf()
             assert 'ODBCSYSINI' in os.environ, "ODBCSYSINI should be set"
-            assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
+            assert os.path.basename(os.environ['ODBCSYSINI']).startswith('datadog-sqlserver-odbc-')
+            assert is_non_empty_file(os.path.join(os.environ['ODBCSYSINI'], 'odbcinst.ini'))
 
-    # `set_default_driver_conf` have no effect on the cases below
+    # `set_default_driver_conf` has no effect on the cases below
     with EnvVars({'ODBCSYSINI': 'ABC', 'DOCKER_DD_AGENT': 'true'}):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
@@ -1239,19 +1243,43 @@ def test_set_default_driver_conf():
 
 
 @not_windows_ci
-def test_set_default_driver_conf_linux():
-    odbc_config_dir = os.path.expanduser('~')
-    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
+def test_set_default_driver_conf_linux(tmp_path):
+    embedded_dir = tmp_path / 'datadog-packages' / 'datadog-agent' / 'stable' / 'embedded'
+    odbc_config_dir = embedded_dir / 'etc'
+    odbc_config_dir.mkdir(parents=True)
+    odbc_ini = odbc_config_dir / 'odbc.ini'
+    odbc_ini.write_text('dummy-content', encoding='utf-8')
+    bundled_driver_config = Path(DRIVER_CONFIG_DIR, 'odbcinst.ini')
+    bundled_content = bundled_driver_config.read_text(encoding='utf-8')
+
+    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=str(odbc_config_dir)):
+        with mock.patch("datadog_checks.sqlserver.utils.get_embedded_dir", return_value=str(embedded_dir)):
+            with EnvVars({}, ignore=['ODBCSYSINI']):
+                set_default_driver_conf()
+                generated_config_dir = os.environ['ODBCSYSINI']
+
+                assert generated_config_dir != str(odbc_config_dir)
+                assert not (odbc_config_dir / 'odbcinst.ini').exists()
+                assert Path(generated_config_dir, 'odbc.ini').read_text(encoding='utf-8') == 'dummy-content'
+                generated_driver_config = Path(generated_config_dir, 'odbcinst.ini').read_text(encoding='utf-8')
+                assert f'Driver={embedded_dir}/lib/libtdsodbc.so' in generated_driver_config
+                assert f'Driver={embedded_dir}/msodbcsql/lib64/libmsodbcsql-18.3.so.3.1' in generated_driver_config
+                assert bundled_driver_config.read_text(encoding='utf-8') == bundled_content
+
+
+@not_windows_ci
+def test_set_default_driver_conf_linux_preserves_complete_user_config(tmp_path):
+    odbc_config_dir = tmp_path / 'embedded' / 'etc'
+    odbc_config_dir.mkdir(parents=True)
+    (odbc_config_dir / 'odbc.ini').write_text('user-dsn', encoding='utf-8')
+    (odbc_config_dir / 'odbcinst.ini').write_text('user-driver', encoding='utf-8')
+
+    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=str(odbc_config_dir)):
         with EnvVars({}, ignore=['ODBCSYSINI']):
-            odbc_inst = os.path.join(odbc_config_dir, "odbcinst.ini")
-            odbc_ini = os.path.join(odbc_config_dir, "odbc.ini")
-            for file in [odbc_inst, odbc_ini]:
-                if os.path.exists(file):
-                    os.remove(file)
-            with open(odbc_ini, "x") as file:
-                file.write("dummy-content")
             set_default_driver_conf()
-            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created when a non empty odbc.ini exists"
+            assert os.environ['ODBCSYSINI'] == str(odbc_config_dir)
+            assert (odbc_config_dir / 'odbc.ini').read_text(encoding='utf-8') == 'user-dsn'
+            assert (odbc_config_dir / 'odbcinst.ini').read_text(encoding='utf-8') == 'user-driver'
 
 
 @windows_ci
@@ -1639,16 +1667,23 @@ def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_pr
 
 
 def test_get_unixodbc_sysconfig():
-    etc_dir = os.path.sep
-    for dir in ["opt", "datadog-agent", "embedded", "bin", "python"]:
-        etc_dir = os.path.join(etc_dir, dir)
-    assert get_unixodbc_sysconfig(etc_dir).split(os.path.sep) == [
-        "",
-        "opt",
-        "datadog-agent",
-        "embedded",
-        "etc",
-    ], "incorrect unix odbc config dir"
+    python_executable = os.path.join(
+        os.path.sep, 'opt', 'datadog-packages', 'datadog-agent', '7.82.2-1', 'embedded', 'bin', 'python'
+    )
+    assert get_unixodbc_sysconfig(python_executable) == os.path.join(
+        os.path.sep, 'opt', 'datadog-packages', 'datadog-agent', '7.82.2-1', 'embedded', 'etc'
+    )
+
+
+def test_get_embedded_dir_resolves_stable_symlink(tmp_path):
+    version_dir = tmp_path / 'datadog-packages' / 'datadog-agent' / '7.82.2-1'
+    python_executable = version_dir / 'embedded' / 'bin' / 'python'
+    python_executable.parent.mkdir(parents=True)
+    python_executable.touch()
+    stable_dir = version_dir.parent / 'stable'
+    stable_dir.symlink_to(version_dir, target_is_directory=True)
+
+    assert get_embedded_dir(str(stable_dir / 'embedded' / 'bin' / 'python')) == str(version_dir / 'embedded')
 
 
 @pytest.mark.parametrize(

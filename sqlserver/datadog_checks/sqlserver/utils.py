@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 from typing import Dict, Optional, Sequence
 from xml.etree import ElementTree
 
@@ -14,6 +15,9 @@ from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 ODBC_INST_INI = 'odbcinst.ini'
+LEGACY_EMBEDDED_DIR = '/opt/datadog-agent/embedded'
+
+_generated_driver_config_dir = None
 
 DBM_COMMENT_MARKERS = (
     'ddps=',
@@ -65,8 +69,14 @@ def raise_if_cancelled(cancel_event):
         raise Exception("Job loop cancelled. Aborting query.")
 
 
+def get_embedded_dir(python_executable):
+    # Resolve Fleet's `stable` symlink so the generated driver paths keep pointing to
+    # the active version even if the compatibility symlink is later removed.
+    return os.path.dirname(os.path.dirname(os.path.realpath(python_executable)))
+
+
 def get_unixodbc_sysconfig(python_executable):
-    return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
+    return os.path.join(get_embedded_dir(python_executable), "etc")
 
 
 def is_non_empty_file(path):
@@ -81,6 +91,37 @@ def is_non_empty_file(path):
     return False
 
 
+def create_driver_config(embedded_dir, odbc_ini=None):
+    """Create an ODBC configuration that points to the active Agent package.
+
+    Fleet Automation installs the Agent in a versioned directory and removes the
+    legacy ``/opt/datadog-agent`` path. Package files are root-owned, so render the
+    driver configuration in an Agent-writable temporary directory rather than
+    modifying the bundled template in place.
+    """
+    global _generated_driver_config_dir
+
+    if _generated_driver_config_dir is None:
+        _generated_driver_config_dir = tempfile.TemporaryDirectory(prefix='datadog-sqlserver-odbc-')
+
+    config_dir = _generated_driver_config_dir.name
+    source = os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI)
+    destination = os.path.join(config_dir, ODBC_INST_INI)
+
+    with open(source, encoding='utf-8') as f:
+        content = f.read().replace(LEGACY_EMBEDDED_DIR, embedded_dir)
+    with open(destination, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    generated_odbc_ini = os.path.join(config_dir, 'odbc.ini')
+    if odbc_ini is not None:
+        shutil.copyfile(odbc_ini, generated_odbc_ini)
+    elif os.path.exists(generated_odbc_ini):
+        os.remove(generated_odbc_ini)
+
+    return config_dir
+
+
 def set_default_driver_conf():
     if Platform.is_containerized():
         # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
@@ -88,34 +129,27 @@ def set_default_driver_conf():
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
     elif Platform.is_linux():
         """
-        The agent running on Linux has msodbcsql18 and FreeTDS installed.
+        The Agent running on Linux has msodbcsql18 and FreeTDS installed.
         The default driver is msodbcsql18.
-        To best leverage the default driver, we set the ODBCSYSINI environment variable to the directory
-        containing the pre-configured odbcinst.ini file.
-        However, if the user has already configured the ODBCSYSINI environment variable,
-        OR if the user has already created or copied the odbcinst.ini file in the unixODBC sysconfig location,
-        we do not override the ODBCSYSINI environment variable.
+
+        Respect an explicit ODBCSYSINI or a complete configuration in the
+        embedded sysconfig directory. Otherwise, generate an odbcinst.ini whose
+        driver paths point to the active Agent embedded directory. This is needed
+        for Fleet Automation installations, which use a versioned package path
+        instead of /opt/datadog-agent.
         """
         if 'ODBCSYSINI' in os.environ:
-            # If ODBCSYSINI is already set in env, don't override it
             return
 
-        # linux_unixodbc_sysconfig is set to the agent embedded /etc directory
-        # this is a hacky way to get the path to the etc directory
-        # by getting the path to the python executable and get the directory above /bin/python
         linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
         odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        if is_non_empty_file(odbc_ini):
-            os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
-            odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
-            if not is_non_empty_file(odbc_inst_ini_sysconfig):
-                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
-                # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
-                # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
-                return
+        odbc_inst_ini = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
 
-        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
-        os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
+        if is_non_empty_file(odbc_ini) and is_non_empty_file(odbc_inst_ini):
+            os.environ['ODBCSYSINI'] = linux_unixodbc_sysconfig
+        else:
+            user_odbc_ini = odbc_ini if is_non_empty_file(odbc_ini) else None
+            os.environ['ODBCSYSINI'] = create_driver_config(get_embedded_dir(sys.executable), odbc_ini=user_odbc_ini)
 
         # required when using pyodbc with FreeTDS on Ubuntu 18.04
         # see https://stackoverflow.com/a/22988748/1258743
