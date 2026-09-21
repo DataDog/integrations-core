@@ -33,8 +33,8 @@ def decumulate_histogram_buckets(sample_data):
             if i == 0:
                 if context not in bucket_tuples_by_context_upper_bound:
                     bucket_tuples_by_context_upper_bound[context] = {}
-                if upper_b > 0:
-                    # positive buckets start at zero
+                if upper_b >= 0:
+                    # le=0 is valid per the OM spec; start non-negative buckets at zero, not -inf
                     bucket_tuples_by_context_upper_bound[context][upper_b] = (
                         0,
                         upper_b,
