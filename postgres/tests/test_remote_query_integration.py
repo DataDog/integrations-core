@@ -400,8 +400,6 @@ def test_remote_query_pins_the_session_time_zone_for_native_text(integration_che
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_remote_query_evaluates_the_query_values_exactly_once(integration_check, pg_instance, monkeypatch):
     """The never-fetched DECLARE plans the query without evaluating it; the single COPY
     evaluates it exactly once, proven by the run's own walls: the rows sleep a fixed total

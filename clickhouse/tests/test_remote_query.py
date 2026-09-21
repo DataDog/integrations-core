@@ -2357,8 +2357,15 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
     assert page_call.rows == 1
     assert fake.run_finalize_calls == 1
     # The single row is one CSV record: an independent reader recovers the canonical cell
-    # token, and its JSON value is the exact row.
-    (record,) = csv.reader([pages[0].decode('utf-8')])
+    # token, and its JSON value is the exact row. The payload fields run to 32 MiB, far
+    # past csv.reader's default 128 KiB field limit, so the limit is raised for this one
+    # decode and restored afterwards.
+    previous_field_limit = csv.field_size_limit()
+    csv.field_size_limit(max(previous_field_limit, 64 * 1024 * 1024))
+    try:
+        (record,) = csv.reader([pages[0].decode('utf-8')])
+    finally:
+        csv.field_size_limit(previous_field_limit)
     if expected_payload_bytes is not None:
         # The single payload column carries exactly the intended byte count of 'x' bytes.
         assert record == [json.dumps('x' * expected_payload_bytes)]
@@ -2367,6 +2374,11 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
         # and version strings ride through the pinned String value contract.
         assert len(record) == 3
         assert all(isinstance(json.loads(token), str) and json.loads(token) for token in record)
+    elif query == remote_query.REMOTE_QUERY_BINARY_QUERY:
+        # The binary payload is the exact three bytes NUL, 'a', 'b': the server renders
+        # the NUL as the JSON escape in the record's single field (the dedicated
+        # NUL-payload test pins the same token against the page bytes).
+        assert record == [json.dumps('\x00ab')]
     else:
         assert len(record) == 1
         assert json.loads(record[0]) == 1
