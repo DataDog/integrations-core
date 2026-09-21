@@ -10,6 +10,7 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 
 
 def setup_kyverno():
@@ -31,8 +32,9 @@ def setup_kyverno():
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_kyverno], sleep=30) as kubeconfig:
+        dd_save_state('kyverno_kubeconfig', kubeconfig)
         instances = [
             {'openmetrics_endpoint': 'http://kyverno-svc-metrics.kyverno.svc.cluster.local:8000/metrics'},
             {
@@ -55,7 +57,13 @@ def dd_environment():
             'agent_type': 'kubernetes',
             'kubernetes': {
                 'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'kyverno', 'data', 'auto_conf.yaml'),
             },
         }
 
         yield {'instances': instances}, metadata
+
+
+@pytest.fixture(scope='session')
+def kyverno_kubeconfig(dd_get_state):
+    return dd_get_state('kyverno_kubeconfig')

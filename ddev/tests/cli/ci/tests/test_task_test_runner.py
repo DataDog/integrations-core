@@ -9,6 +9,7 @@ import asyncio
 import base64
 import gzip
 import json
+import logging
 import secrets
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,8 @@ import pytest
 from pydantic import ValidationError
 
 from ddev.cli.ci.tests import messages
+from ddev.cli.ci.tests.dispatcher import DispatcherContext
+from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import Status, conclusion_to_status
@@ -45,6 +48,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
 )
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -112,26 +116,43 @@ def make_runner(
     pytest_args: str = "",
     is_fork: bool = False,
     artifact_client: FakeAsyncGitHubClient | None = None,
+    origin_run_url: str | None = None,
+    pr_number: int | None = None,
+    handler: logging.Handler | None = None,
+    context: DispatcherContext | None = None,
 ) -> TaskTestRunner:
-    options = TestRunnerOptions(
+    context = context or DispatcherContext(
         owner="DataDog",
         repo="integrations-core",
-        workflow_id="test-batch.yaml",
-        ref="master",
+        workflow="test-batch.yaml",
+        workflow_ref="master",
         head_sha="head-sha-aaa",
         checkout_sha="merge-sha-bbb",
-        concurrency_key="pr-123",
-        artifacts_base_path=tmp_path,
         head_branch="a-branch",
+        base_branch="master",
+        base_sha="base-sha-ccc",
+        pr_number=123,
+        is_fork=is_fork,
+    )
+    options = TestRunnerOptions(
+        owner=context.owner,
+        repo=context.repo,
+        workflow_id=context.workflow,
+        ref=context.workflow_ref,
+        run_fields=run_fields(context),
+        concurrency_key=context.concurrency_key,
+        artifacts_base_path=tmp_path,
         poll_interval_seconds=0.0,
         pytest_args=pytest_args,
-        is_fork=is_fork,
+        origin_run_url=origin_run_url,
+        pr_number=pr_number,
     )
     runner = TaskTestRunner(
         name="task-test-runner",
         client=client,  # type: ignore[arg-type]
         options=options,
         artifact_client=artifact_client or client,  # type: ignore[arg-type]
+        monitor=make_monitor('test-runner', handler=handler),
     )
     runner.bus = RecordingBus()  # type: ignore[assignment]
     return runner
@@ -277,7 +298,10 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
     assert kwargs["inputs"]["head_branch"] == "a-branch"
     assert kwargs["inputs"]["concurrency_key"] == "pr-123"
     assert kwargs["inputs"]["integrations"] == json.dumps(["ntp", "kafka"])
-    assert decode_job_list(kwargs["inputs"]["job_list"]) == [
+    assert kwargs["inputs"]["context"] == "pr"
+    jobs = decode_job_list(kwargs["inputs"]["job_list"])
+    additional_tags = [job.pop("additional_tags") for job in jobs]
+    assert jobs == [
         {
             "name": "j1",
             "target": "ntp",
@@ -307,6 +331,124 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             "artifact_name": "ntp_py3.13_linux",
         },
     ]
+    common_tags = (
+        "dispatcher.base_branch:master,dispatcher.base_sha:base-sha-ccc,dispatcher.batch.id:batch-1,"
+        "dispatcher.batch.job.e2e_tests:false,dispatcher.batch.job.environment:py3.13,"
+        "dispatcher.batch.job.integration:ntp,dispatcher.batch.job.minimum_base_package:false,"
+        "dispatcher.batch.job.name:{name},dispatcher.batch.job.platform:linux,"
+        "dispatcher.batch.job.python_version:3.13,dispatcher.batch.job.unit_tests:true,"
+        "dispatcher.checkout_sha:merge-sha-bbb,dispatcher.context:pr,dispatcher.pr.number:123,"
+        "dispatcher.run.is_fork:false,team:agent-integrations"
+    )
+    assert additional_tags == [common_tags.format(name="j1"), common_tags.format(name="j2")]
+
+
+@pytest.mark.parametrize(
+    ("context", "expected_context", "has_pr_tags"),
+    [
+        pytest.param(None, "pr", True, id="pull-request"),
+        pytest.param(
+            DispatcherContext(
+                owner="DataDog",
+                repo="integrations-core",
+                workflow="test-batch.yaml",
+                workflow_ref="master",
+                head_sha="master-sha",
+                checkout_sha="master-sha",
+                head_branch="master",
+            ),
+            "master",
+            False,
+            id="master",
+        ),
+        pytest.param(
+            DispatcherContext(
+                owner="DataDog",
+                repo="integrations-core",
+                workflow="test-batch.yaml",
+                workflow_ref="master",
+                head_sha="agent-sha",
+                checkout_sha="agent-sha",
+                head_branch="test-agent",
+                tags=("context:test-agent",),
+            ),
+            "test-agent",
+            False,
+            id="custom-context",
+        ),
+    ],
+)
+def test_run_identity_and_context_reach_workflow_and_job_tags(
+    tmp_path: Path,
+    context: DispatcherContext | None,
+    expected_context: str,
+    has_pr_tags: bool,
+):
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, context=context)
+
+    inputs = runner._build_inputs(make_batch("batch-context"))
+    [job] = decode_job_list(inputs["job_list"])
+    tags = job["additional_tags"].split(",")
+
+    assert inputs["context"] == expected_context
+    assert inputs["checkout_sha"] == (context.checkout_sha if context else "merge-sha-bbb")
+    assert inputs["head_sha"] == (context.head_sha if context else "head-sha-aaa")
+    assert inputs["head_branch"] == (context.head_branch if context else "a-branch")
+    assert f"dispatcher.context:{expected_context}" in tags
+    assert ("dispatcher.pr.number:123" in tags) is has_pr_tags
+    assert ("dispatcher.base_branch:master" in tags) is has_pr_tags
+    assert not any(tag.startswith(("git.", "dispatcher.head_sha", "dispatcher.head_branch")) for tag in tags)
+
+
+def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
+    context = DispatcherContext(
+        owner="DataDog",
+        repo="integrations-core",
+        workflow="test-batch.yaml",
+        workflow_ref="master",
+        head_sha="agent-sha",
+        checkout_sha="agent-sha",
+        head_branch="test-agent",
+        tags=("context:release,candidate\nunsafe\rvalue",),
+    )
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, context=context)
+
+    inputs = runner._build_inputs(make_batch("batch-context"))
+    [job] = decode_job_list(inputs["job_list"])
+
+    assert inputs["context"] == "release,candidate\nunsafe\rvalue"
+    assert "dispatcher.context:release_candidate_unsafe_value" in job["additional_tags"].split(",")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("origin_run_url", "pr_number", "expected"),
+    [
+        (
+            "https://github.com/DataDog/integrations-core/actions/runs/456",
+            123,
+            {
+                "origin_run_url": "https://github.com/DataDog/integrations-core/actions/runs/456",
+                "pr_number": "123",
+            },
+        ),
+        (None, None, {}),
+    ],
+)
+async def test_optional_navigation_context_reaches_the_batch_workflow(
+    tmp_path: Path, origin_run_url: str | None, pr_number: int | None, expected: dict[str, str]
+):
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    runner = make_runner(fake, tmp_path, origin_run_url=origin_run_url, pr_number=pr_number)
+
+    await runner.process_message(make_batch("batch-1"))
+
+    inputs = fake.calls_to("create_workflow_dispatch")[0].kwargs["inputs"]
+    assert {key: inputs[key] for key in expected} == expected
+    assert ("origin_run_url" in inputs) is (origin_run_url is not None)
+    assert ("pr_number" in inputs) is (pr_number is not None)
 
 
 @pytest.mark.asyncio
@@ -788,7 +930,7 @@ async def test_an_unparsable_response_reason_is_a_single_bounded_line(tmp_path: 
 
 
 @pytest.mark.asyncio
-async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Path):
     """All invalid fields must be visible from a single response failure."""
     unparsable = ValidationError.from_exception_data(
         title="WorkflowJobsList",
@@ -809,7 +951,8 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", running_run())
     fake.mock_response("list_workflow_jobs", unparsable)
-    runner = make_runner(fake, tmp_path)
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
 
     with pytest.raises(FatalProcessingError, match="batch-err") as exc_info:
         await runner.process_message(make_batch())
@@ -819,14 +962,15 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     assert "WorkflowJobsList" in reason
     assert "See logs for details." in reason
     assert exc_info.value.__cause__ is unparsable
-    assert "listing workflow jobs" in caplog.text
-    assert "batch-err" in caplog.text
-    assert "run 123" in caplog.text
-    assert caplog.text.count("jobs.0.steps.1.status") == 1
-    assert "paused" in caplog.text
-    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in caplog.text
-    assert caplog.text.count("jobs.2.id") == 1
-    assert "Field required" in caplog.text
+    log_text = '\n'.join(event['event'] for event in handler.events)
+    assert "listing workflow jobs" in log_text
+    assert "batch-err" in log_text
+    assert "run 123" in log_text
+    assert log_text.count("jobs.0.steps.1.status") == 1
+    assert "paused" in log_text
+    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in log_text
+    assert log_text.count("jobs.2.id") == 1
+    assert "Field required" in log_text
 
 
 # ---------------------------------------------------------------------------
@@ -870,6 +1014,23 @@ async def test_a_batch_that_failed_mid_poll_stays_cancellable(tmp_path: Path):
 
     await runner.cancel_dispatched_runs()
     assert [call.kwargs["run_id"] for call in fake.calls_to("cancel_workflow_run")] == [123]
+
+
+async def test_cancellation_reporting_identifies_the_batch_and_run_it_stops(tmp_path: Path):
+    """Cancellation logs identify the batch and workflow run being stopped."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("queued"), once=True)
+    fake.mock_response("get_workflow_run", RuntimeError("boom-mid-poll"), once=True)
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+
+    with pytest.raises(RuntimeError, match="boom-mid-poll"):
+        await runner.process_message(make_batch())
+
+    await runner.cancel_dispatched_runs()
+
+    cancelled = [event for event in handler.events if event["event"] == "Dispatched run cancelled"]
+    assert [(event["batch_id"], event["run_id"]) for event in cancelled] == [("batch-err", 123)]
 
 
 async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):

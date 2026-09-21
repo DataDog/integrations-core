@@ -162,6 +162,10 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'dispatcher.batch.job.name',
         test_tag=True,
     ),
+    'job_status': AttributeSpec(
+        'dispatcher.batch.job.status',
+        metric_tag=True,
+    ),
     'integration': AttributeSpec(
         'dispatcher.batch.job.integration',
         test_tag=True,
