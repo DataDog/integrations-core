@@ -200,7 +200,6 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     views=self._interface_views(),
                     base_tags=base_tags,
                     namespace=namespace,
-                    enrich_metadata=self._option('send_ndm_metadata', False),
                 )
 
             healthy &= self._run('interfaces', _interfaces)

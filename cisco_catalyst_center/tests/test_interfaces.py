@@ -10,6 +10,8 @@ issues one paginated call per enabled view and joins them on the interface ``id`
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
@@ -24,8 +26,23 @@ def _check(instance):
     return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
 
 
-def _client(instance, by_view):
-    return CatalystCenterClient(instance, http=ViewRoutedHttp(by_view))
+# The intent API sweep is unconditional, so every collect_interfaces call issues it. It takes no
+# `view` parameter, which is why it has to be routed by path.
+INTENT_INTERFACE_PATH = '/dna/intent/api/v1/interface'
+
+#: For tests whose subject is not the join. An appliance that returns no intent inventory is a
+#: real answer, and it leaves the data API record untouched.
+NO_INTENT: dict[str, Any] = {'response': []}
+
+
+def _client(instance, by_view, intent=None):
+    return CatalystCenterClient(
+        instance,
+        http=ViewRoutedHttp(
+            by_view,
+            by_path={INTENT_INTERFACE_PATH: intent if intent is not None else load_captured('intent_interface_global')},
+        ),
+    )
 
 
 CONFIG_ONLY = {
@@ -38,14 +55,17 @@ CONFIG_ONLY = {
 
 
 @pytest.mark.parametrize('views', [('configuration',), ('configuration', 'statistics')])
-def test_collect_interfaces_asks_for_exactly_the_views_it_was_given(instance, views):
+def test_collect_interfaces_asks_for_each_view_then_sweeps_the_intent_api(instance, views):
     # A view replaces the field set rather than extending it, so an unasked-for view is a whole
-    # extra paginated pass over every interface on the appliance.
+    # extra paginated pass over every interface on the appliance. The viewless trailing call is
+    # the intent sweep, which runs for everyone: it is the only source of `description`, and so
+    # the only way an appliance that leaves `isWan` null can have an uplink identified at all.
     client = _client(instance, CONFIG_ONLY)
 
     collect_interfaces(_check(instance), client, views=views)
 
-    assert [r['params']['view'] for r in client.http.requests] == list(views)
+    assert [r['params'].get('view') for r in client.http.requests] == [*views, None]
+    assert client.http.requests[-1]['url'].endswith(INTENT_INTERFACE_PATH)
 
 
 # -- the configuration view -------------------------------------------------------------
@@ -54,8 +74,9 @@ def test_collect_interfaces_asks_for_exactly_the_views_it_was_given(instance, vi
 def test_collect_interfaces_given_the_configuration_view_emits_status_and_speed_per_interface(aggregator, instance):
     # One recorded page of 57 interfaces, and what the collector makes of it. `speed` is the
     # derived value: the API documents it in Kbps and returns it as a string, so a 1 GbE port
-    # reporting "1000000" must land as 1_000_000_000. And isWan is null on every sandbox
-    # interface, where a tag of `uplink:None` would be worse than no tag at all.
+    # reporting "1000000" must land as 1_000_000_000. No sandbox interface sets isWan and none
+    # is described as an uplink, so every port here is unclassified -- which earns no `uplink`
+    # tag at all, rather than an `uplink:false` the data does not support.
     collect_interfaces(_check(instance), _client(instance, CONFIG_ONLY), views=('configuration',))
 
     aggregator.assert_metric('cisco_catalyst_center.interface.status', count=57)
@@ -105,14 +126,52 @@ def test_collect_interfaces_given_the_statistics_view_totals_throughput_per_devi
     # The brief asks for device-level rx/tx bps. Per-interface rates exist; this sums them per
     # device so the bullet is answerable without the caller doing arithmetic in a dashboard.
     # 10.10.20.176 reports three interfaces with a non-zero rxRate, totalling 733.0. No sandbox
-    # interface sets isWan, so there is no uplink subset to aggregate.
+    # interface sets isWan or is described as an uplink, so there is no subset to aggregate.
     collect_interfaces(_check(instance), _client(instance, CONFIG_ONLY), views=('configuration', 'statistics'))
 
     assert metric_values(aggregator, 'cisco_catalyst_center.device.throughput.rx', 'device_ip:10.10.20.176') == [733.0]
     aggregator.assert_metric('cisco_catalyst_center.device.uplink.throughput.rx', count=0)
 
 
-def test_collect_interfaces_given_an_uplink_tags_it_and_aggregates_its_throughput(aggregator, instance):
+@pytest.mark.parametrize(
+    ('is_wan', 'description', 'is_uplink'),
+    [
+        # `isWan` is the appliance's own judgement and wins in both directions, so a description
+        # can neither promote a port it has ruled out nor demote one it has flagged.
+        (True, 'access to printer', True),
+        (False, 'uplink to core', False),
+        # Null `isWan` is every interface the sandbox has ever returned. There the description is
+        # the brief's fallback, matched case-insensitively.
+        (None, 'Uplink to core', True),
+        # A false positive silently inflates uplink throughput, which is worse than a dark
+        # metric, so nothing short of the word itself counts.
+        (None, 'access to printer', False),
+        (None, None, False),
+    ],
+)
+def test_collect_interfaces_aggregates_an_interface_as_an_uplink(aggregator, instance, is_wan, description, is_uplink):
+    config = with_value(load_captured('data_interfaces_configuration'), 'response.0.isWan', is_wan)
+    config = with_value(config, 'response.0.description', description)
+
+    collect_interfaces(
+        _check(instance),
+        # Empty intent inventory: the join would otherwise overwrite the description under test.
+        _client(instance, dict(CONFIG_ONLY, configuration=config), intent=NO_INTENT),
+        views=('configuration', 'statistics'),
+    )
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.uplink.count', 'device_ip:10.10.20.176') == (
+        [1] if is_uplink else []
+    )
+    tagged = metric_values(aggregator, 'cisco_catalyst_center.interface.status', 'uplink:true')
+    assert bool(tagged) is is_uplink
+
+
+def test_collect_interfaces_uplink_throughput_sums_only_the_uplink_subset(aggregator, instance):
+    # The stated risk of the description fallback is a false positive silently inflating this
+    # number, so it has to be the uplink's own rate and not the device's. 10.10.20.176 reports
+    # 733.0 across three interfaces; GigabitEthernet0/0 -- response.0, the one flagged here --
+    # reports 275.0 of it.
     config = with_value(load_captured('data_interfaces_configuration'), 'response.0.isWan', True)
 
     collect_interfaces(
@@ -121,9 +180,9 @@ def test_collect_interfaces_given_an_uplink_tags_it_and_aggregates_its_throughpu
         views=('configuration', 'statistics'),
     )
 
-    assert metric_values(aggregator, 'cisco_catalyst_center.interface.status', 'uplink:true')
-    assert metric_values(aggregator, 'cisco_catalyst_center.device.uplink.count', 'device_ip:10.10.20.176') == [1]
-    assert metric_values(aggregator, 'cisco_catalyst_center.device.uplink.throughput.rx', 'device_ip:10.10.20.176')
+    device_ip = 'device_ip:10.10.20.176'
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.uplink.throughput.rx', device_ip) == [275.0]
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.throughput.rx', device_ip) == [733.0]
 
 
 # -- the PoE view -----------------------------------------------------------------------
@@ -154,7 +213,6 @@ def test_collect_interfaces_parses_watt_suffixed_poe_strings(aggregator, instanc
 # The data API's configuration view returns `macAddress` and `description` as null on every
 # interface, and the product brief specifies the intent API as the source for both. The intent
 # API's global interface endpoint returns them in bulk, keyed by the same interface UUIDs.
-INTENT_INTERFACE_PATH = '/dna/intent/api/v1/interface'
 
 # GigabitEthernet1/0/2 exercises all three cases at once: the data API leaves its macAddress
 # null, the intent record's `name` is empty (it uses `portName`), and the two APIs disagree
@@ -162,24 +220,12 @@ INTENT_INTERFACE_PATH = '/dna/intent/api/v1/interface'
 JOINED_INTERFACE = 'GigabitEthernet1/0/2'
 
 
-def _enriching_client(instance, intent_payload=None):
-    return CatalystCenterClient(
-        instance,
-        http=ViewRoutedHttp(
-            CONFIG_ONLY,
-            by_path={INTENT_INTERFACE_PATH: intent_payload or load_captured('intent_interface_global')},
-        ),
-    )
-
-
 def test_collect_interfaces_given_enrichment_fills_null_fields_without_overwriting_the_data_api(aggregator, instance):
     # The intent record carries an empty `name` and puts the port in `portName`, and the two APIs
     # disagree on trunk ports: the data API reports the configured access VLAN, intent reports 1.
     # So the join fills what the data API left null and keeps the data API authoritative for the
     # rest -- copying intent's fields wholesale would blank the interface tag on every match.
-    merged = collect_interfaces(
-        _check(instance), _enriching_client(instance), views=('configuration',), enrich_metadata=True
-    )
+    merged = collect_interfaces(_check(instance), _client(instance, CONFIG_ONLY), views=('configuration',))
 
     record = next(r for r in merged.values() if r.get('name') == JOINED_INTERFACE)
     assert record['macAddress'] == '52:54:00:07:29:d2'
@@ -188,13 +234,3 @@ def test_collect_interfaces_given_enrichment_fills_null_fields_without_overwriti
     # The intent inventory omits the 8 stack sub-interfaces the data API returns. They have no
     # metadata to gain, but they must not be dropped from the metrics either.
     aggregator.assert_metric(status, count=57)
-
-
-def test_collect_interfaces_given_enrichment_disabled_makes_no_intent_call(instance):
-    # The sweep exists to serve NDM metadata, which is off by default. Nobody who has not asked
-    # for it should pay an extra paginated pass over every interface.
-    client = _enriching_client(instance)
-
-    collect_interfaces(_check(instance), client, views=('configuration',), enrich_metadata=False)
-
-    assert not [r for r in client.http.requests if r['url'].endswith(INTENT_INTERFACE_PATH)]

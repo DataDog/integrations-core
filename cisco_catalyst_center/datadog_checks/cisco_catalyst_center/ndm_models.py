@@ -18,6 +18,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .emit import is_uplink
+
 INTEGRATION = 'cisco_catalyst_center'
 VENDOR = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
@@ -174,11 +176,12 @@ def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMeta
 def _port_role(record: dict[str, Any]) -> str | None:
     """Classify a port as uplink, access or trunk.
 
-    The brief derives this from ``interfaceType``, ``portMode`` and the description. ``isWan``
-    takes precedence when the appliance sets it, because that is the appliance's own judgement
-    about which link leaves the site rather than an inference from port mode.
+    The brief derives this from ``interfaceType``, ``portMode`` and the description. The uplink
+    decision itself belongs to :func:`~.emit.is_uplink`, so that the port role, the ``uplink``
+    tag and the device rollup always agree; anything it does not claim falls back to the
+    reported port mode.
     """
-    if record.get('isWan'):
+    if is_uplink(record):
         return 'uplink'
     port_mode = record.get('portMode')
     return str(port_mode) if port_mode else None

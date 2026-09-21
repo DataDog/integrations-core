@@ -54,7 +54,7 @@ from .constants import (
     TOPOLOGY_LINK_UP_VALUES,
     VIRTUAL_NETWORK_HEALTH_ENDPOINT,
 )
-from .emit import compact, emit_gauge, emit_score, emit_watts, tag, to_number
+from .emit import compact, emit_gauge, emit_score, emit_watts, is_uplink, tag, to_number
 from .errors import CatalystApiError
 from .metrics import (
     APPLICATION_METRICS,
@@ -208,12 +208,23 @@ def collect_devices(
 # -- interfaces -----------------------------------------------------------------------
 
 
+def _uplink_tag_value(record: dict[str, Any]) -> str | None:
+    """``true`` for an uplink, ``false`` only where the appliance actually said so.
+
+    An interface with no ``isWan`` and no matching description is unclassified, not known to be
+    an access port, so it gets no tag at all. Emitting ``uplink:false`` there would assert
+    something the data does not support -- the same mistake as emitting ``0`` for absent data.
+    """
+    if is_uplink(record):
+        return 'true'
+    return 'false' if record.get('isWan') is not None else None
+
+
 def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> list[str]:
     """Identity and configuration tags for one interface.
 
     Only the ``configuration`` view carries the descriptive fields, so the merged record is what
-    should be passed here. ``isWan`` is null on hardware that does not report it, and :func:`tag`
-    drops it rather than emitting ``uplink:None``.
+    should be passed here. See :func:`_uplink_tag_value` for when the ``uplink`` tag is omitted.
     """
     return compact(
         [
@@ -227,7 +238,7 @@ def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -
             tag('duplex', record.get('duplexOper')),
             tag('media_type', record.get('mediaType')),
             tag('vlan', record.get('vlanId')),
-            tag('uplink', str(record['isWan']).lower() if record.get('isWan') is not None else None),
+            tag('uplink', _uplink_tag_value(record)),
             tag('site_hierarchy', record.get('siteHierarchy')),
         ]
     )
@@ -278,12 +289,17 @@ def collect_interfaces(
     views: tuple[str, ...],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
-    enrich_metadata: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Collect port health, returning the merged records keyed by interface id.
 
     The records are returned rather than counted so that NDM metadata can be built from the same
     fetch instead of asking for every interface a second time.
+
+    The intent API sweep is unconditional. It is the only source of ``description``, which is in
+    turn the only uplink signal on hardware that leaves ``isWan`` null, so gating it behind
+    ``send_ndm_metadata`` -- a flag about NDM payloads -- left three uplink metrics and the
+    ``uplink`` tag unreachable for anyone who had not enabled NDM. It costs one more paginated
+    pass, the same order as one additional view.
 
     Args:
         check: The check instance.
@@ -291,14 +307,10 @@ def collect_interfaces(
         views: Which interface views to request, in merge order. ``configuration`` should come
             first so that later views cannot overwrite the descriptive fields.
         base_tags: Tags applied to every metric.
-        enrich_metadata: Also sweep the intent API for the metadata fields the data API leaves
-            null. Costs one more paginated pass, so it is driven by ``send_ndm_metadata``: the
-            fields it adds are consumed only by the NDM payload.
     """
     base_tags = base_tags or []
     merged = _merge_views(client, views)
-    if enrich_metadata:
-        _enrich_metadata(client, merged)
+    _enrich_metadata(client, merged)
 
     for record in merged.values():
         tags = base_tags + interface_tags(record, namespace)
@@ -335,9 +347,10 @@ def _emit_device_rollups(check: Any, records: Any, base_tags: list[str], namespa
     The brief asks for device-level throughput and for aggregate uplink throughput. Both are sums
     over interfaces, and doing them here means a dashboard does not have to.
 
-    Only interfaces the appliance has actually flagged via ``isWan`` count as uplinks. Guessing
-    from ``portMode`` would silently relabel every trunk port as an uplink, which on an access
-    switch is most of them.
+    Which interfaces count as uplinks is :func:`~.emit.is_uplink`'s decision, so this aggregate,
+    the ``uplink`` tag and the NDM port role cannot drift apart. ``portMode`` is deliberately not
+    part of that rule: it would relabel every trunk port as an uplink, which on an access switch
+    is most of them.
     """
     totals: dict[str, dict[str, float]] = {}
 
@@ -358,7 +371,7 @@ def _emit_device_rollups(check: Any, records: Any, base_tags: list[str], namespa
         bucket['rx'] += float(rx or 0)
         bucket['tx'] += float(tx or 0)
 
-        if record.get('isWan'):
+        if is_uplink(record):
             bucket['uplinks'] += 1
             bucket['uplink_rx'] += float(rx or 0)
             bucket['uplink_tx'] += float(tx or 0)

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Submission helpers that know which absent-data conventions Catalyst Center uses.
+"""Submission and field-interpretation helpers for Catalyst Center's absent-data conventions.
 
 Catalyst Center signals "no data" four different ways -- ``null``, ``-1``, ``{}``, and the empty
 string -- and which one appears depends on the field and the device family. Emitting ``0`` for
@@ -72,3 +72,25 @@ def tag(key: str, value: Any) -> str | None:
 def compact(tags: list[str | None]) -> list[str]:
     """Drop the Nones produced by :func:`tag`."""
     return [item for item in tags if item is not None]
+
+
+def is_uplink(record: dict[str, Any]) -> bool:
+    """Whether one merged interface record describes an uplink.
+
+    ``isWan`` is the appliance's own judgement about which link leaves the site, so it stays
+    primary: where it is set, its value decides and the description is never consulted. It is
+    null on every interface the DevNet sandbox exposes, and the product brief names the port
+    description as the fallback for exactly that case.
+
+    The match is deliberately narrow -- the substring ``uplink``, case-insensitively, and nothing
+    else. ``core``, ``dist`` and ``trunk`` are not uplink markers, and ``portMode`` is not
+    consulted at all: either would relabel ordinary trunk ports on an access switch and silently
+    inflate the uplink throughput aggregate. A wrong aggregate is worse than a dark metric.
+
+    One rule with three callers -- the ``uplink`` tag, the device rollup and the NDM port role --
+    so that they cannot drift apart.
+    """
+    is_wan = record.get('isWan')
+    if is_wan is not None:
+        return bool(is_wan)
+    return 'uplink' in (record.get('description') or '').lower()

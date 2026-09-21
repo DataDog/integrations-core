@@ -222,7 +222,10 @@ def test_check_given_ndm_enabled_sends_devices_in_the_metadata_event(dd_run_chec
             None: load_captured('data_network_devices'),
             'configuration': load_captured('data_interfaces_configuration'),
             'statistics': load_captured('data_interfaces_statistics'),
-        }
+        },
+        # The interface collector always sweeps the intent API; without a route for it the
+        # viewless request would be served the device payload above.
+        by_path={'/dna/intent/api/v1/interface': {'response': []}},
     )
 
     dd_run_check(check)
