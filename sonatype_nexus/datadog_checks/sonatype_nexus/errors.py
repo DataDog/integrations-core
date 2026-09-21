@@ -9,12 +9,13 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientRequestError,
     HTTPClientTimeoutError,
 )
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 
 class APIError(Exception):
     default_message = "An unknown API error occurred."
 
-    def __init__(self, message: str = None, response: Any = None):
+    def __init__(self, message: str = None, response: HTTPResponse | None = None):
         self.response = response
         super().__init__(message or self.default_message)
 
