@@ -123,11 +123,12 @@ bar = ["7.38.0"]
     ('previous_version', 'current_version', 'breaking'),
     [
         pytest.param('9.4.1', '10.0.0', True, id='major-upgrade-across-digit-boundary'),
-        pytest.param('10.0.0', '9.4.1', False, id='major-downgrade-across-digit-boundary'),
+        pytest.param('10.0.0', '9.4.1', True, id='major-downgrade-across-digit-boundary'),
         pytest.param('10.0.0', '10.1.0', False, id='minor-upgrade'),
+        pytest.param('10.0.0', '10.0.1', False, id='patch-upgrade'),
     ],
 )
-def test_major_upgrade_detection(
+def test_major_version_change_detection(
     repo_with_history: Repository, previous_version: str, current_version: str, breaking: bool
 ):
     # Regression for the missing NGINX 9 -> 10 breaking-change notice in #25291.

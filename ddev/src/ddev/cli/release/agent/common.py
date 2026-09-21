@@ -84,7 +84,7 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
 
             if old_ver and old_ver != ver:
                 # determine whether major version changed
-                breaking = int(old_ver.split('.')[0]) < int(ver.split('.')[0])
+                breaking = int(old_ver.split('.')[0]) != int(ver.split('.')[0])
                 changes_per_agent[current_tag][name] = (ver, False, breaking)
             elif not old_ver:
                 # New integration

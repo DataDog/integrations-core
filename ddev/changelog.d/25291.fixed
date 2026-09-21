@@ -1,1 +1,1 @@
-Fix missing breaking-change notices for major integration upgrades across digit boundaries in the Agent changelog.
+Fix breaking-change notices for integration major-version changes, including downgrades and transitions across digit boundaries.
