@@ -4,9 +4,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin
 
-import requests
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 
 class Marathon(AgentCheck):
@@ -88,14 +91,15 @@ class Marathon(AgentCheck):
             token = r.json()['token']
             self.ACS_TOKEN = token
             return token
-        except requests.exceptions.HTTPError:
+        except HTTPClientStatusError as e:
+            status = e.response.status_code if e.response is not None else str(e)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="acs auth url {} returned a status of {}".format(acs_url, r.status_code),
+                message="acs auth url {} returned a status of {}".format(acs_url, status),
                 tags=["url:{}".format(acs_url)] + tags,
             )
-            raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
+            raise Exception("Got %s when hitting %s" % (status, acs_url))
 
     def get_json(self, url, acs_url, tags=None):
         if tags is None:
@@ -114,26 +118,31 @@ class Marathon(AgentCheck):
                 self.refresh_acs_token(acs_url, tags)
                 r = self.http.get(url)
             r.raise_for_status()
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             # If there's a timeout
+            # options['timeout'] is a bare number unless read_timeout or connect_timeout is configured.
+            configured_timeout = self.http.options['timeout']
+            if isinstance(configured_timeout, tuple):
+                configured_timeout = configured_timeout[0]
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, self.http.options['timeout'][0]),
+                message="{} timed out after {} seconds.".format(url, configured_timeout),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))
 
-        except requests.exceptions.HTTPError:
+        except HTTPClientStatusError as e:
+            status = e.response.status_code if e.response is not None else str(e)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} returned a status of {}".format(url, r.status_code),
+                message="{} returned a status of {}".format(url, status),
                 tags=["url:{}".format(url)] + tags,
             )
-            raise Exception("Got {} when hitting {}".format(r.status_code, url))
+            raise Exception("Got {} when hitting {}".format(status, url))
 
-        except requests.exceptions.ConnectionError:
+        except HTTPClientConnectionError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

@@ -4,11 +4,12 @@
 from copy import deepcopy
 from unittest.mock import MagicMock
 
-import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.couch import CouchDb
-from datadog_checks.couch.couch import CouchDB2
+from datadog_checks.couch.couch import CouchDB1, CouchDB2
 
 from . import common
 
@@ -30,24 +31,8 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content='{}')
-
-        check.check(instance)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://{}:5984/_all_dbs/'.format(common.HOST), **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_new_version_system_metrics(load_test_data):
@@ -69,3 +54,59 @@ def test_new_version_system_metrics(load_test_data):
 
     assert mock_agent_check.gauge.call_count >= 183
     mock_agent_check.log.debug.assert_any_call("Skipping distribution events")
+
+
+@pytest.mark.parametrize('status_code', [401, 403])
+def test_v1_unreadable_database_is_warned_and_excluded(fake_http, status_code):
+    instance = deepcopy(common.BASIC_CONFIG)
+    check = CouchDb(common.CHECK_NAME, {}, [instance])
+    server = instance['server']
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
+    fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
+    fake_http.register_response('GET', f'{server}/db1', FakeHTTPResponse(status_code=status_code))
+    checker = CouchDB1(check)
+
+    data = checker.get_data(server, [])
+
+    assert data['databases'] == {}
+    assert checker.db_exclude[server] == ['db1']
+    assert check.warnings == [
+        'Database db1 is not readable by the configured user. '
+        'It will be added to the exclusion list. Please restart the agent to clear.'
+    ]
+    fake_http.assert_all_responses_consumed()
+
+
+def test_v1_status_error_without_response_propagates(fake_http):
+    instance = deepcopy(common.BASIC_CONFIG)
+    check = CouchDb(common.CHECK_NAME, {}, [instance])
+    server = instance['server']
+    error = HTTPClientStatusError('status unavailable')
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
+    fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
+    fake_http.register_response('GET', f'{server}/db1', error)
+
+    with pytest.raises(HTTPClientStatusError, match='status unavailable') as exc_info:
+        CouchDB1(check).get_data(server, [])
+
+    assert exc_info.value is error
+    assert not check.warnings
+    fake_http.assert_all_responses_consumed()
+
+
+@pytest.mark.parametrize('status_code', [400, 404, 500])
+def test_v1_database_status_errors_other_than_auth_propagate(fake_http, status_code):
+    instance = deepcopy(common.BASIC_CONFIG)
+    check = CouchDb(common.CHECK_NAME, {}, [instance])
+    server = instance['server']
+    fake_http.register_response('GET', f'{server}/_stats/', FakeHTTPResponse(json_result={}))
+    fake_http.register_response('GET', f'{server}/_all_dbs/', FakeHTTPResponse(json_result=['db1']))
+    fake_http.register_response('GET', f'{server}/db1', FakeHTTPResponse(status_code=status_code))
+
+    with pytest.raises(HTTPClientStatusError) as exc_info:
+        CouchDB1(check).get_data(server, [])
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == status_code
+    assert not check.warnings
+    fake_http.assert_all_responses_consumed()

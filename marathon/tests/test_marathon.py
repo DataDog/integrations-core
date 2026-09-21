@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
+from typing import Any
+
+from datadog_checks.marathon import Marathon
 
 APP_METRICS = [
     'marathon.backoffFactor',
@@ -27,20 +29,28 @@ Q_METRICS = [
 ]
 
 
-def test_default_configuration(aggregator, check, instance, apps, deployments, queue, groups):
-    def side_effect(url, acs_url, tags):
-        if "v2/apps" in url:
-            return apps
-        elif "v2/deployments" in url:
-            return deployments
-        elif "v2/queue" in url:
-            return queue
-        elif "v2/groups" in url:
-            return groups
-        else:
-            raise Exception("unknown url:" + url)
+def register_marathon_responses(
+    fake_http_response: Any,
+    server: str,
+    *,
+    apps: dict[str, Any],
+    deployments: list[dict[str, Any]],
+    queue: dict[str, Any],
+) -> None:
+    fake_http_response(f'{server}/v2/apps?embed=apps.counts', json_data=apps)
+    fake_http_response(f'{server}/v2/deployments', json_data=deployments)
+    fake_http_response(f'{server}/v2/queue', json_data=queue)
 
-    check.get_json = mock.MagicMock(side_effect=side_effect)
+
+def test_default_configuration(aggregator, instance, apps, deployments, queue, fake_http_response):
+    register_marathon_responses(
+        fake_http_response,
+        instance['url'],
+        apps=apps,
+        deployments=deployments,
+        queue=queue,
+    )
+    check = Marathon('marathon', {}, [instance])
     check.check(instance)
 
     aggregator.assert_metric('marathon.apps', value=2)
@@ -61,20 +71,15 @@ def test_default_configuration(aggregator, check, instance, apps, deployments, q
         aggregator.assert_metric(metric, at_least=1)
 
 
-def test_empty_responses(aggregator, check, instance):
-    def side_effect(url, acs_url, tags):
-        if "v2/apps" in url:
-            return {"apps": []}
-        elif "v2/deployments" in url:
-            return []
-        elif "v2/queue" in url:
-            return {"queue": []}
-        elif "v2/groups" in url:
-            return {"apps": []}
-        else:
-            raise Exception("unknown url:" + url)
-
-    check.get_json = mock.MagicMock(side_effect=side_effect)
+def test_empty_responses(aggregator, instance, fake_http_response):
+    register_marathon_responses(
+        fake_http_response,
+        instance['url'],
+        apps={"apps": []},
+        deployments=[],
+        queue={"queue": []},
+    )
+    check = Marathon('marathon', {}, [instance])
     check.check(instance)
 
     aggregator.assert_metric('marathon.apps', value=0)
@@ -82,20 +87,15 @@ def test_empty_responses(aggregator, check, instance):
     aggregator.assert_metric('marathon.deployments', value=0)
 
 
-def test_ensure_queue_count(aggregator, apps, check, instance):
-    def side_effect(url, acs_url, tags):
-        if "v2/apps" in url:
-            return apps
-        elif "v2/deployments" in url:
-            return []
-        elif "v2/queue" in url:
-            return {"queue": []}
-        elif "v2/groups" in url:
-            return {"apps": []}
-        else:
-            raise Exception("unknown url:" + url)
-
-    check.get_json = mock.MagicMock(side_effect=side_effect)
+def test_ensure_queue_count(aggregator, apps, instance, fake_http_response):
+    register_marathon_responses(
+        fake_http_response,
+        instance['url'],
+        apps=apps,
+        deployments=[],
+        queue={"queue": []},
+    )
+    check = Marathon('marathon', {}, [instance])
     check.check(instance)
 
     aggregator.assert_metric('marathon.apps', value=2)

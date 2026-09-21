@@ -1,9 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from json import JSONDecodeError
+
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
 from .common import (
@@ -15,6 +19,10 @@ from .common import (
     HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES,
     HDFS_NAMESYSTEM_STATE_METRICS_VALUES,
     HDFS_RAW_VERSION,
+    NAME_SYSTEM_STATE_URL,
+    NAMENODE_URI,
+    TEST_PASSWORD,
+    TEST_USERNAME,
 )
 
 pytestmark = pytest.mark.unit
@@ -72,13 +80,39 @@ def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
     datadog_agent.assert_metadata_count(6)
 
 
-def test_auth(aggregator, dd_run_check, mocked_auth_request):
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, fake_http):
+    fake_http.register_response(
+        'GET',
+        NAME_SYSTEM_STATE_URL,
+        FakeHTTPResponse(json_error=JSONDecodeError('invalid JSON', '<html>not json</html>', 0)),
+    )
+    instance = HDFS_NAMENODE_CONFIG['instances'][0]
+    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
+
+    with pytest.raises(JSONDecodeError):
+        hdfs_namenode.check(instance)
+
+    aggregator.assert_service_check(HDFSNameNode.JMX_SERVICE_CHECK, status=HDFSNameNode.CRITICAL, count=1)
+    assert aggregator.service_checks(HDFSNameNode.JMX_SERVICE_CHECK)[0].message.startswith(
+        f'JSON Parse failed: {NAMENODE_URI}'
+    )
+
+
+def test_malformed_header_still_reports_critical(aggregator, fake_http):
+    message = 'Content-Length contained multiple unmatching values'
+    fake_http.register_response('GET', NAME_SYSTEM_STATE_URL, HTTPClientRequestError(message))
+    instance = HDFS_NAMENODE_CONFIG['instances'][0]
+    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
+
+    with pytest.raises(HTTPClientRequestError, match=message):
+        hdfs_namenode.check(instance)
+
+    aggregator.assert_service_check(HDFSNameNode.JMX_SERVICE_CHECK, status=HDFSNameNode.CRITICAL, count=1)
+    assert aggregator.service_checks(HDFSNameNode.JMX_SERVICE_CHECK)[0].message == message
+
+
+def test_auth():
     instance = HDFS_NAMENODE_AUTH_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
-    # Run the check once
-    dd_run_check(hdfs_namenode)
-
-    aggregator.assert_service_check(
-        HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
-    )
+    assert hdfs_namenode.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)

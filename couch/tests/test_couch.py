@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -48,18 +47,17 @@ def test_bad_server(aggregator, check):
     with pytest.raises(errors.ConnectionError):
         # the server instance is invalid
         check.check({})
-        aggregator.assert_service_check(
-            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
-        )
+    aggregator.assert_service_check(
+        CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
+    )
 
 
 @pytest.mark.unit
-def test_bad_version(aggregator, check):
-    check.instance = common.BAD_CONFIG
-    check.get = mock.MagicMock(return_value={'version': '0.1.0'})
+def test_bad_version(aggregator, fake_http_response):
+    fake_http_response(common.BAD_CONFIG['server'], json_data={'version': '0.1.0'})
+    check = CouchDb(common.CHECK_NAME, {}, [common.BAD_CONFIG])
+
     with pytest.raises(errors.BadVersionError):
         # the server has an unsupported version
         check.check({})
-        aggregator.assert_service_check(
-            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
-        )
+    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=common.BAD_CONFIG_TAGS, count=1)

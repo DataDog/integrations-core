@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from copy import deepcopy
+from json import loads
+from pathlib import Path
 
 import pytest
-from mock import patch
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitFor
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
@@ -21,8 +21,6 @@ from .common import (
     MR_JOB_COUNTERS_URL,
     MR_JOBS_URL,
     MR_TASKS_URL,
-    TEST_PASSWORD,
-    TEST_USERNAME,
     YARN_APPS_URL_BASE,
     setup_mapreduce,
 )
@@ -51,55 +49,18 @@ def instance():
 
 
 @pytest.fixture
-def mocked_request():
-    with patch("requests.Session.get", new=requests_get_mock):
-        yield
-
-
-@pytest.fixture
-def mocked_auth_request():
-    with patch("requests.Session.get", new=requests_auth_mock):
-        yield
+def mocked_request(fake_http_response):
+    fixtures = {
+        f'{YARN_APPS_URL_BASE}?states=RUNNING&applicationTypes=MAPREDUCE': 'apps_metrics',
+        MR_JOBS_URL: 'job_metrics',
+        MR_JOB_COUNTERS_URL: 'job_counter_metrics',
+        MR_TASKS_URL: 'task_metrics',
+        CLUSTER_INFO_URL: 'cluster_info',
+    }
+    for url, fixture_name in fixtures.items():
+        payload = loads((Path(HERE) / 'fixtures' / fixture_name).read_text())
+        fake_http_response(url, json_data=payload)
 
 
 def get_custom_hosts():
     return [(host, '127.0.0.1') for host in MOCKED_E2E_HOSTS]
-
-
-def requests_get_mock(session, *args, **kwargs):
-    url = args[0]
-    # The parameter that creates the query params (kwargs) is an unordered dict,
-    #   so the query params can be in any order
-    if url.startswith(YARN_APPS_URL_BASE):
-        query = url[len(YARN_APPS_URL_BASE) :]
-        if query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]:
-            return MockResponse(file_path=os.path.join(HERE, "fixtures", "apps_metrics"))
-        else:
-            raise Exception(
-                "Apps URL must have the two query parameters: states=RUNNING and applicationTypes=MAPREDUCE"
-            )
-
-    if url == MR_JOBS_URL:
-        return MockResponse(file_path=os.path.join(HERE, "fixtures", "job_metrics"))
-
-    if url == MR_JOB_COUNTERS_URL:
-        return MockResponse(file_path=os.path.join(HERE, "fixtures", "job_counter_metrics"))
-
-    if url == MR_TASKS_URL:
-        return MockResponse(file_path=os.path.join(HERE, "fixtures", "task_metrics"))
-
-    if url == CLUSTER_INFO_URL:
-        return MockResponse(file_path=os.path.join(HERE, "fixtures", "cluster_info"))
-
-    raise Exception("There is no mock request for {}".format(url))
-
-
-def requests_auth_mock(session, *args, **kwargs):
-    # Make sure we're passing in authentication
-    assert 'auth' in kwargs, "Error, missing authentication"
-
-    # Make sure we've got the correct username and password
-    assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
-
-    # Return mocked request.get(...)
-    return requests_get_mock(session, *args, **kwargs)

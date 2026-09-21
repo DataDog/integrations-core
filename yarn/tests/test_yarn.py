@@ -5,8 +5,8 @@ import copy
 import re
 
 import pytest
-from requests.exceptions import SSLError
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError, HTTPClientSSLError
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
     APPLICATION_STATUS_SERVICE_CHECK,
@@ -19,11 +19,14 @@ from .common import (
     CUSTOM_TAGS,
     DEPRECATED_YARN_APP_METRICS_VALUES,
     RM_ADDRESS,
+    TEST_PASSWORD,
+    TEST_USERNAME,
     YARN_APP_METRICS_TAGS,
     YARN_APP_METRICS_VALUES,
     YARN_APPS_ALL_STATES,
     YARN_AUTH_CONFIG,
     YARN_CLUSTER_METRICS_TAGS,
+    YARN_CLUSTER_METRICS_URL,
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CLUSTER_TAG,
     YARN_COLLECT_APPS_ALL_STATES_CONFIG,
@@ -61,6 +64,7 @@ def test_check(aggregator, mocked_request):
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
         tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=4,
     )
 
     aggregator.assert_service_check(
@@ -249,54 +253,63 @@ def test_disable_legacy_cluster_tag(aggregator, mocked_request):
     )
 
 
-def test_auth(aggregator, mocked_auth_request):
+def test_auth():
     instance = YARN_AUTH_CONFIG['instances'][0]
-
-    # Instantiate YarnCheck
     yarn = YarnCheck('yarn', {}, [instance])
 
-    # Run the check once
-    yarn.check(instance)
+    assert yarn.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
 
-    # Make sure check is working
-    aggregator.assert_service_check(
-        SERVICE_CHECK_NAME,
-        status=YarnCheck.OK,
-        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-        count=4,
+
+@pytest.mark.parametrize(
+    ('config', 'expected_tls_verify'),
+    [
+        pytest.param(YARN_SSL_VERIFY_TRUE_CONFIG, True, id='enabled'),
+        pytest.param(YARN_SSL_VERIFY_FALSE_CONFIG, False, id='disabled'),
+    ],
+)
+def test_ssl_verification_configuration(config, expected_tls_verify):
+    instance = config['instances'][0]
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    assert yarn.http.options['verify'] is expected_tls_verify
+
+
+def test_ssl_verification_error(aggregator, fake_http):
+    fake_http.register_response(
+        'GET',
+        YARN_CLUSTER_METRICS_URL,
+        HTTPClientSSLError("certificate verification failed"),
     )
-
-
-def test_ssl_verification(aggregator, mocked_bad_cert_request):
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
-
-    # Instantiate YarnCheck
     yarn = YarnCheck('yarn', {}, [instance])
 
-    # Run the check on a config with a badly configured SSL certificate
-    try:
+    with pytest.raises(HTTPClientSSLError, match="certificate verification failed"):
         yarn.check(instance)
-    except SSLError:
-        aggregator.assert_service_check(
-            SERVICE_CHECK_NAME,
-            status=YarnCheck.CRITICAL,
-            tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-            count=1,
-        )
-        pass
-    else:
-        raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
 
-    # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
-    instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
-    yarn = YarnCheck('yarn', {}, [instance])
-    yarn.check(instance)
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
-        status=YarnCheck.OK,
+        status=YarnCheck.CRITICAL,
         tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-        count=4,
+        count=1,
     )
+
+
+def test_malformed_header_still_reports_critical(aggregator, fake_http):
+    message = 'Content-Length contained multiple unmatching values'
+    fake_http.register_response('GET', YARN_CLUSTER_METRICS_URL, HTTPClientRequestError(message))
+    instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    with pytest.raises(HTTPClientRequestError, match=message):
+        yarn.check(instance)
+
+    aggregator.assert_service_check(
+        SERVICE_CHECK_NAME,
+        status=YarnCheck.CRITICAL,
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=1,
+    )
+    assert aggregator.service_checks(SERVICE_CHECK_NAME)[0].message == message
 
 
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):

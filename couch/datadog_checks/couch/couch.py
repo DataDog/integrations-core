@@ -7,11 +7,10 @@ from __future__ import division
 import math
 from urllib.parse import quote, urljoin
 
-import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.utils.headers import headers
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
 from datadog_checks.couch import errors
 
 
@@ -43,7 +42,7 @@ class CouchDb(AgentCheck):
                     AgentCheck.OK,
                     tags=service_check_tags,
                 )
-        except requests.exceptions.Timeout as e:
+        except HTTPClientTimeoutError as e:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -51,7 +50,7 @@ class CouchDb(AgentCheck):
                 message="Request timeout: {0}, {1}".format(url, e),
             )
             raise
-        except requests.exceptions.HTTPError as e:
+        except HTTPClientStatusError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
@@ -172,21 +171,21 @@ class CouchDB1:
 
             for dbName in databases:
                 url = urljoin(server, quote(dbName, safe=''))
-                db_stats = None
                 try:
                     db_stats = self.agent_check.get(url, tags)
-                except requests.exceptions.HTTPError as e:
-                    couchdb['databases'][dbName] = None
-                    if (e.response.status_code == 403) or (e.response.status_code == 401):
-                        self.db_exclude[server].append(dbName)
+                except HTTPClientStatusError as e:
+                    if e.response is None or e.response.status_code not in (401, 403):
+                        raise
 
-                        self.agent_check.warning(
-                            'Database %s is not readable by the configured user. '
-                            'It will be added to the exclusion list. Please restart the agent to clear.',
-                            dbName,
-                        )
-                        del couchdb['databases'][dbName]
-                        continue
+                    self.db_exclude[server].append(dbName)
+                    self.agent_check.warning(
+                        'Database %s is not readable by the configured user. '
+                        'It will be added to the exclusion list. Please restart the agent to clear.',
+                        dbName,
+                    )
+                    # _create_metric dereferences every value in this dict, so an unresolved database
+                    # has to be left out entirely rather than stored as a None placeholder.
+                    continue
                 if db_stats is not None:
                     couchdb['databases'][dbName] = db_stats
         return couchdb
