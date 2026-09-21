@@ -84,11 +84,12 @@ def test_custom_query_unit_casing(aggregator, instance, check):
     aggregator.assert_metric('ibm_was.xdpm.total_memory', metric_type=aggregator.GAUGE)
 
 
-def test_critical_service_check(instance, check, aggregator):
+def test_critical_service_check(instance, check, aggregator, fake_http):
     instance['servlet_url'] = 'http://localhost:5678/wasPerfTool/servlet/perfservlet'
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
+    fake_http.register_response('GET', instance['servlet_url'], HTTPClientConnectionError('unreachable'))
 
-    with pytest.raises(HTTPClientConnectionError):
+    with pytest.raises(HTTPClientConnectionError, match='unreachable'):
         check = check(instance)
         check.check(instance)
 

@@ -76,8 +76,7 @@ def test_service_check_can_connect_failure(aggregator, instance, fake_http, exce
     fake_http.register_response('GET', 'http://hello-world.com:8899/status/properties', exception)
 
     with pytest.raises(CheckException):
-        properties = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
-        assert properties is None
+        check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
 
     aggregator.assert_service_check(
         'druid.service.can_connect',

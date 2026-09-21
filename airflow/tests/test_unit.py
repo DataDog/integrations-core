@@ -6,12 +6,19 @@ import pytest
 
 from datadog_checks.airflow import AirflowCheck
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 
 from . import common
 
 
-def test_service_checks_cannot_connect(aggregator):
+def test_service_checks_cannot_connect(aggregator, fake_http):
+    base_url = common.INSTANCE_WRONG_URL['url']
+    fake_http.register_response('GET', f'{base_url}/api/v1/version', HTTPClientConnectionError('unreachable'))
+    fake_http.register_response('GET', f'{base_url}/api/experimental/test', HTTPClientConnectionError('unreachable'))
     check = AirflowCheck('airflow', {}, [common.INSTANCE_WRONG_URL])
     check.check(None)
 
