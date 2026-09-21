@@ -13,7 +13,8 @@ import json
 
 import pytest
 
-from datadog_checks.base.utils import remote_queries as rq
+from datadog_checks.base.utils.remote_queries import events as rq_events
+from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
 
 from .remote_query_fakes import (
@@ -37,7 +38,7 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_KEY'
         return None
 
-    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
 
 
 def remote_query_request(pg_instance, query, include_schema=False, **limits):
@@ -375,10 +376,15 @@ def test_remote_query_final_page_too_large_splits_and_retries_without_requery(
         1
         + key_bound
         + 2 * len(names)
-        + (len(record) + record.count(b'\\') + 5 * controls + len(rq.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * len(names))
+        + (
+            len(record)
+            + record.count(b'\\')
+            + 5 * controls
+            + len(rq_pages.REMOTE_QUERY_REDACTED_MARKER_TOKEN) * len(names)
+        )
     )
     envelope = len(
-        rq.page_prefix(
+        rq_pages.page_prefix(
             run_id=RUN_ID,
             task_id=TASK_ID,
             record_offset=0,
@@ -389,7 +395,7 @@ def test_remote_query_final_page_too_large_splits_and_retries_without_requery(
     request = remote_query_request(
         pg_instance,
         'SELECT i FROM generate_series(1, 8) AS i',
-        maxFileBytes=envelope + len(rq.PAGE_SUFFIX) + 3 * record_bound + 2,
+        maxFileBytes=envelope + len(rq_pages.PAGE_SUFFIX) + 3 * record_bound + 2,
         maxRowBytes=64,
         maxSchemaBytes=1,
     )

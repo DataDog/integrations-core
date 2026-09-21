@@ -2,513 +2,50 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import csv
-import hashlib
+
 import json
 import logging
-import re
-from decimal import Decimal
-from types import SimpleNamespace
 
 import pytest
 import urllib3.exceptions
-from clickhouse_connect.driver.exceptions import DatabaseError, OperationalError
+from clickhouse_connect.driver.exceptions import DatabaseError
 
-from datadog_checks.base.utils import remote_queries as rq
+from datadog_checks.base.utils.remote_queries import events as rq_events
+from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.clickhouse import remote_query
-from datadog_checks.clickhouse.remote_query import (
-    execute_agent_rpc_stream_copy,
-    iter_agent_rpc_stream_events,
+from datadog_checks.clickhouse.remote_query import execute_agent_rpc_stream_copy
+
+from .remote_query_fakes import (
+    AGENT_HOSTNAME,
+    BASE_URL,
+    BOUND_ROW,
+    ROW_RECORD,
+    RUN_ID,
+    TASK_ID,
+    UPLOAD_ID,
+    ExplodingCheck,
+    FakeClickhouseClient,
+    FakeUploadClient,
+    assembled_pages,
+    assert_failed_event,
+    assert_success,
+    bounded_request,
+    collect_events,
+    compact_json_line,
+    csv_record,
+    event_metadata,
+    make_check,
+    make_client,
+    patch_allowlist_disabled,
+    patch_upload_credentials,
+    prefix_bytes,
+    quoted_numeric_rows_client,
+    raw_stream_body,
+    row_object_bound,
+    stream_body,
+    two_row_client,
+    valid_request,
 )
-
-RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
-TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
-UPLOAD_ID = 'upload-01k'
-BASE_URL = 'https://dd.datad0g.com/api/unstable/its-agent-intake'
-# The Agent-reported hostname every fake check carries, stamped into every page envelope.
-AGENT_HOSTNAME = 'rq-proof-agent-a'
-
-
-# ---------------------------------------------------------------------------
-# Fakes
-# ---------------------------------------------------------------------------
-
-
-def stream_body(names, types, rows):
-    """A JSONCompactEachRowWithNamesAndTypes body: names row, types row, then data rows."""
-    lines = [json.dumps(list(names)), json.dumps(list(types))]
-    lines.extend(json.dumps(list(row)) for row in rows)
-    return ('\n'.join(lines) + '\n').encode('utf-8')
-
-
-def raw_stream_body(*lines):
-    """A body from raw lines, for malformed-stream cases."""
-    return b'\n'.join(line if isinstance(line, bytes) else line.encode('utf-8') for line in lines) + b'\n'
-
-
-def compact_json_line(values):
-    """One stream line rendered with ClickHouse's compact JSON separators (no spaces).
-
-    The shared ``stream_body`` helper uses ``json.dumps`` default separators, whose spaces
-    do not exist on the real wire; byte-exact line arithmetic needs the compact form.
-    """
-    return json.dumps(list(values), separators=(',', ':')).encode('utf-8')
-
-
-class FakeStream:
-    """urllib3 HTTPResponse stand-in: bounded reads over the body, close tracking."""
-
-    def __init__(self, body, chunk_size=32, read_error=None, error_at=None, read_log=None):
-        self._body = body
-        self._offset = 0
-        self._chunk_size = chunk_size
-        self.read_count = 0
-        self.read_sizes = []
-        self.closed = False
-        self.read_error = read_error
-        self.error_at = error_at
-        self.read_log = read_log
-
-    def read(self, amount):
-        self.read_count += 1
-        self.read_sizes.append(amount)
-        if self.read_log is not None:
-            self.read_log.append(('read', self._offset))
-        if self.read_error is not None and (self.error_at is None or self.read_count >= self.error_at):
-            raise self.read_error
-        chunk = self._body[self._offset : self._offset + amount]
-        self._offset += len(chunk)
-        return chunk
-
-    def close(self):
-        self.closed = True
-
-    @property
-    def offset(self):
-        return self._offset
-
-    @property
-    def exhausted(self):
-        return self._offset >= len(self._body)
-
-
-class FakeClickhouseClient:
-    """Per-run client stand-in: one raw_stream call returning the configured stream."""
-
-    def __init__(
-        self,
-        body,
-        readonly_level=0,
-        chunk_size=32,
-        raw_stream_error=None,
-        read_error=None,
-        error_at=None,
-        read_log=None,
-    ):
-        self.server_settings = (
-            {'readonly': SimpleNamespace(value=str(readonly_level))} if readonly_level is not None else {}
-        )
-        self._body = body
-        self._chunk_size = chunk_size
-        self._raw_stream_error = raw_stream_error
-        self._read_error = read_error
-        self._error_at = error_at
-        self._read_log = read_log
-        self.raw_stream_calls = []
-        self.stream = None
-        self.closed = False
-
-    def raw_stream(self, query, settings=None, fmt=None):
-        self.raw_stream_calls.append({'query': query, 'settings': dict(settings or {}), 'fmt': fmt})
-        if self._raw_stream_error is not None:
-            raise self._raw_stream_error
-        self.stream = FakeStream(
-            self._body,
-            chunk_size=self._chunk_size,
-            read_error=self._read_error,
-            error_at=self._error_at,
-            read_log=self._read_log,
-        )
-        return self.stream
-
-    def close(self):
-        self.closed = True
-
-
-class FakeUploadClient:
-    """Intake-side fake: one descriptor registration, page acceptance receipts, finalize totals.
-
-    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
-    acceptance — and the default finalize returns authoritative totals over the recorded
-    pages, so the producer's stats and compact receipt come from finalization.
-    """
-
-    def __init__(
-        self,
-        put_page_response=None,
-        put_log=None,
-    ):
-        # SimpleNamespace(batch_index, record_offset, source_bytes, rows, payload)
-        self.descriptor_bodies = []
-        self.put_page_calls = []
-        self.run_finalize_calls = 0
-        self.finalize_expected_page_counts = []
-        self.abort_calls = 0
-        # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
-        # mapping (or a callable taking the page metadata) to mutate or reject it.
-        self.put_page_response = put_page_response
-        self.put_log = put_log
-
-    def register_descriptor(self, creds, body):
-        self.descriptor_bodies.append(body)
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-            'sha256': hashlib.sha256(body).hexdigest(),
-        }
-
-    def put_source_page(self, creds, page, body):
-        payload = body.read()
-        self.put_page_calls.append(
-            SimpleNamespace(
-                batch_index=page.batch_index,
-                record_offset=page.record_offset,
-                source_bytes=page.source_bytes,
-                rows=page.rows,
-                payload=payload,
-            )
-        )
-        if self.put_log is not None:
-            self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
-        if self.put_page_response is not None:
-            response = self.put_page_response
-            if callable(response):
-                response = response(page)
-        else:
-            response = {
-                'upload_id': creds.upload_id,
-                'batch_index': page.batch_index,
-                'record_offset': page.record_offset,
-                'source_rows': page.rows,
-                'status': 'accepted',
-            }
-        return response
-
-    def finalize_run(self, creds, expected_page_count):
-        self.run_finalize_calls += 1
-        self.finalize_expected_page_counts.append(expected_page_count)
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len(self.put_page_calls),
-            'total_rows': sum(call.rows for call in self.put_page_calls),
-            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
-        }
-
-    def abort(self, creds):
-        self.abort_calls += 1
-
-
-def make_check(
-    server='localhost',
-    port=8123,
-    db='default',
-    pool_manager=None,
-    check_database_identifier=None,
-    hostname=AGENT_HOSTNAME,
-):
-    check = SimpleNamespace(
-        _config=SimpleNamespace(server=server, port=port, db=db),
-        _pool_manager=pool_manager if pool_manager is not None else object(),
-        hostname=hostname,
-    )
-    if check_database_identifier is not None:
-        check.database_identifier = check_database_identifier
-    return check
-
-
-def make_client(names=('value',), types=('UInt8',), rows=(), readonly_level=0, **stream_kwargs):
-    return FakeClickhouseClient(stream_body(names, types, rows), readonly_level=readonly_level, **stream_kwargs)
-
-
-def valid_request(query='SELECT 1 AS value', include_schema=False, **extra):
-    target = {
-        'host': extra.pop('host', 'LOCALHOST.'),
-        'port': extra.pop('port', 8123),
-        'dbname': extra.pop('dbname', 'default'),
-    }
-    request = {
-        'operation': 'produce_json_pages',
-        'target': target,
-        'query': query,
-        'resultDelivery': valid_result_delivery(),
-    }
-    if include_schema:
-        request['includeSchema'] = True
-    request.update(extra)
-    return request
-
-
-def valid_result_delivery(**extra):
-    result_delivery = {
-        'runId': RUN_ID,
-        'taskId': TASK_ID,
-        'artifactVersion': 1,
-        'uploadId': UPLOAD_ID,
-        'baseUrl': BASE_URL,
-        'limits': valid_limits(),
-    }
-    result_delivery.update(extra)
-    return result_delivery
-
-
-def valid_limits(**extra):
-    limits = {
-        'maxFileBytes': 104857600,
-        'maxResultBytes': 10 * 1024**3,
-        'maxRowBytes': 16 * 1024**2,
-        'maxColumns': 1024,
-        'maxSchemaBytes': 1024**2,
-        'maxPages': 128,
-        'timeoutMs': 5000,
-    }
-    limits.update(extra)
-    return limits
-
-
-def bounded_request(query='SELECT 1 AS value', **limit_overrides):
-    """A request with small limits so page boundaries are cheap to exercise."""
-    limits = valid_limits(
-        maxFileBytes=1024, maxResultBytes=8192, maxRowBytes=64, maxColumns=8, maxSchemaBytes=256, maxPages=4
-    )
-    limits.update(limit_overrides)
-    # Overrides may shrink maxFileBytes below the default schema budget; the executor
-    # rejects a schema budget beyond the page budget, so keep the pair consistent.
-    limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
-    request = valid_request(query=query)
-    request['resultDelivery']['limits'] = limits
-    return request
-
-
-def patch_upload_credentials(monkeypatch):
-    def get_config(key):
-        if key == 'api_key':
-            return 'TEST_API_KEY'
-        if key == 'app_key':
-            return 'TEST_APP_KEY'
-        return None
-
-    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
-
-
-def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
-
-
-class MutableClock:
-    """A monotonic clock the fakes advance at deterministic phase boundaries.
-
-    Every advance below is a whole-millisecond dyadic fraction of a second, so the
-    accumulated float arithmetic stays exact and the expected buckets are integers.
-    """
-
-    def __init__(self):
-        self.now = 0.0
-
-    def monotonic(self):
-        return self.now
-
-    def advance_seconds(self, seconds):
-        self.now += seconds
-
-
-def instrument_clickhouse_fakes(monkeypatch, clock):
-    """Advance the mutable clock inside each fake at its phase's boundary.
-
-    Each advance lands wholly inside the producer phase that brackets it: client creation
-    and the stream open are database setup, every raw stream read is database fetch,
-    put_source_page is page upload, finalize_run is finalize, and the stream/client teardown
-    (outside every phase) is the otherMs remainder.
-    """
-    original_raw_stream = FakeClickhouseClient.raw_stream
-
-    def timed_raw_stream(self, query, settings=None, fmt=None):
-        clock.advance_seconds(0.25)
-        return original_raw_stream(self, query, settings, fmt)
-
-    monkeypatch.setattr(FakeClickhouseClient, 'raw_stream', timed_raw_stream)
-
-    original_read = FakeStream.read
-
-    def timed_read(self, amount):
-        clock.advance_seconds(0.375)
-        return original_read(self, amount)
-
-    monkeypatch.setattr(FakeStream, 'read', timed_read)
-
-    original_stream_close = FakeStream.close
-
-    def timed_stream_close(self):
-        clock.advance_seconds(0.125)
-        return original_stream_close(self)
-
-    monkeypatch.setattr(FakeStream, 'close', timed_stream_close)
-
-    original_client_close = FakeClickhouseClient.close
-
-    def timed_client_close(self):
-        clock.advance_seconds(0.125)
-        return original_client_close(self)
-
-    monkeypatch.setattr(FakeClickhouseClient, 'close', timed_client_close)
-
-    original_put_source_page = FakeUploadClient.put_source_page
-
-    def timed_put_source_page(self, creds, page, body):
-        clock.advance_seconds(0.5)
-        return original_put_source_page(self, creds, page, body)
-
-    monkeypatch.setattr(FakeUploadClient, 'put_source_page', timed_put_source_page)
-
-    original_finalize_run = FakeUploadClient.finalize_run
-
-    def timed_finalize_run(self, creds, expected_page_count):
-        clock.advance_seconds(0.25)
-        return original_finalize_run(self, creds, expected_page_count)
-
-    monkeypatch.setattr(FakeUploadClient, 'finalize_run', timed_finalize_run)
-
-
-class ExplodingCheck:
-    """A check that fails any test touching it: request validation must reject first."""
-
-    def __getattr__(self, name):
-        pytest.fail('check must not be touched before request validation completes')
-
-
-def collect_events(request, check, upload_client=None, clickhouse_client=None):
-    """Run the producer with fakes and collect its events.
-
-    ``clickhouse_client`` is injected as the per-run client factory result. With no
-    client injected, a default body (``SELECT 1 AS value``) is used, so tests that need a
-    specific result stream always pass one explicitly.
-    """
-    client_factory = None
-    if clickhouse_client is not None:
-
-        def client_factory(_check, _limits):
-            return clickhouse_client
-
-    if upload_client is None:
-        upload_client = FakeUploadClient()
-    return list(iter_agent_rpc_stream_events(request, check, upload_client, client_factory))
-
-
-def event_metadata(event):
-    return event.metadata
-
-
-def assert_failed_event(events, code, message_contains=None):
-    assert events[-1].event_type == 'error'
-    assert event_metadata(events[-1])['status'] == 'FAILED'
-    assert event_metadata(events[-1])['error']['code'] == code
-    if message_contains is not None:
-        assert message_contains in event_metadata(events[-1])['error']['message']
-
-
-def assert_success(events):
-    assert events[-1].event_type == 'final'
-    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
-    return event_metadata(events[-1])
-
-
-def prefix_bytes(record_offset=0, agent_hostname=AGENT_HOSTNAME, schema_json=None):
-    return rq.page_prefix(
-        run_id=RUN_ID,
-        task_id=TASK_ID,
-        record_offset=record_offset,
-        agent_hostname=agent_hostname,
-        schema_json=schema_json,
-    )
-
-
-def assembled_pages(fake_client):
-    """Each completed page's exact uploaded source bytes, keyed by batch index."""
-    return {call.batch_index: call.payload for call in fake_client.put_page_calls}
-
-
-def row_object_bound(row):
-    """The conservative final-JSON bound of one row object, computed independently.
-
-    Mirrors the intake envelope arithmetic without reusing the producer's implementation:
-    braces plus commas, each descriptor key plus its colon, and each scalar string or number
-    leaf at its own token length or the fixed redaction marker, whichever is larger.
-    """
-    bound = 2 + (len(row) - 1)
-    for name, value in row.items():
-        bound += len(json.dumps(name, ensure_ascii=False).encode('utf-8')) + 1
-        bound += rq.redactable_leaf_final_bound(json.dumps(value, ensure_ascii=False).encode('utf-8'))
-    return bound
-
-
-def csv_field(token):
-    """The expected CSV field for one canonical token, computed independently of the producer."""
-    if b'"' in token or b',' in token or b'\n' in token:
-        return b'"' + token.replace(b'"', b'""') + b'"'
-    return token
-
-
-def csv_record(tokens):
-    """The expected framed CSV record for one row of canonical tokens."""
-    return b','.join(csv_field(token) for token in tokens) + b'\n'
-
-
-# ---------------------------------------------------------------------------
-# Query pass-through to the driver (no integration-side SQL statement policy)
-# ---------------------------------------------------------------------------
-
-
-def test_stream_accepts_with_select_statement_when_allowlist_disabled(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = make_client(names=('x',), types=('UInt8',), rows=[[7]])
-    request = valid_request(query='WITH one AS (SELECT 7 AS x) SELECT x FROM one')
-
-    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-    final = assert_success(events)
-    assert final['upload_receipt']['totalRows'] == 1
-    assert clickhouse_client.raw_stream_calls[0]['query'] == request['query']
-
-
-def test_stream_passes_queries_verbatim_to_the_driver_without_a_statement_gate(monkeypatch):
-    """No integration-side SQL grammar check remains: mutation text the old statement
-    gate rejected reaches the driver's streaming call verbatim, and only the database
-    judges it. The fake client is the proof surface — a mutation query is never run
-    against a real server."""
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = make_client(names=('x',), types=('UInt8',), rows=[[7]])
-    request = valid_request(query='INSERT INTO t VALUES (1)')
-
-    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-    assert_success(events)
-    # The run proceeds to the streaming call, with the query unrewritten.
-    assert clickhouse_client.raw_stream_calls[0]['query'] == request['query']
-    assert clickhouse_client.raw_stream_calls[0]['fmt'] == remote_query.REMOTE_QUERY_STREAM_FORMAT
-
-
-# ---------------------------------------------------------------------------
-# Target normalization and validation
-# ---------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------
-# Request validation
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize('field', ['extra', 'password'])
@@ -520,21 +57,6 @@ def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
     assert_failed_event(events, 'invalid_request', field)
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
-
-
-def test_stream_accepts_max_schema_bytes_equal_to_max_file_bytes(monkeypatch):
-    # Equality is the boundary, not a violation: a schema budget equal to the page budget
-    # is valid, and the run proceeds with the header bound at its largest allowed value.
-    patch_upload_credentials(monkeypatch)
-    clickhouse_client = make_client(rows=[[1]])
-    request = valid_request(include_schema=True)
-    limits = request['resultDelivery']['limits']
-    limits['maxSchemaBytes'] = limits['maxFileBytes']
-
-    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-    final = assert_success(events)
-    assert final['upload_receipt']['pageCount'] == 1
 
 
 @pytest.mark.parametrize(
@@ -557,11 +79,6 @@ def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, reque
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
-# ---------------------------------------------------------------------------
-# Query allowlist
-# ---------------------------------------------------------------------------
-
-
 def test_stream_rejects_non_allowlisted_query_before_client_access():
     clickhouse_client = make_client(rows=[[1]])
     request = valid_request(query='SELECT currentDatabase()')
@@ -582,62 +99,6 @@ def test_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeyp
 
     final = assert_success(events)
     assert final['upload_receipt']['totalRows'] == 1
-
-
-def test_query_allowlist_holds_exactly_nine_proof_queries():
-    # The Agent-side allowlist mirrors these queries one for one, so the count and the
-    # three fixed queries are cross-repo contract, not local convenience.
-    assert len(remote_query.REMOTE_QUERY_QUERY_ALLOWLIST) == 9
-    for query in (
-        remote_query.REMOTE_QUERY_SEED_QUERY,
-        remote_query.REMOTE_QUERY_IDENTITY_QUERY,
-        remote_query.REMOTE_QUERY_BINARY_QUERY,
-    ):
-        assert query in remote_query.REMOTE_QUERY_QUERY_ALLOWLIST
-
-
-def test_proof_payload_queries_are_deterministic_bounded_and_exact():
-    # The intended sizes are the pinned power-of-two byte counts, 1 MiB through 32 MiB.
-    assert remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES == tuple(1024 * 1024 << shift for shift in range(6))
-    for size_bytes in remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES:
-        query = remote_query._proof_payload_query(size_bytes)
-        # Deterministic construction: one size builds one stable SQL string, and the
-        # allowlist carries exactly that string.
-        assert query == remote_query._proof_payload_query(size_bytes)
-        assert query in remote_query.REMOTE_QUERY_QUERY_ALLOWLIST
-        repeat_arguments = [int(match) for match in re.findall(r"repeat\('x', (\d+)\)", query)]
-        # Real servers reject repeat() counts above the hard 1,000,000 cap (Code 131).
-        assert repeat_arguments
-        assert all(argument <= remote_query.REMOTE_QUERY_REPEAT_CAP for argument in repeat_arguments)
-        # The concatenated parts sum to exactly the intended payload byte count.
-        assert sum(repeat_arguments) == size_bytes
-
-
-def test_proof_payload_query_rejects_non_positive_sizes():
-    with pytest.raises(ValueError):
-        remote_query._proof_payload_query(0)
-
-
-def test_stream_accepts_large_payload_proof_queries(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    for size_bytes in remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES:
-        clickhouse_client = make_client(names=('payload',), types=('String',), rows=[['x']])
-        request = valid_request(query=remote_query._proof_payload_query(size_bytes))
-
-        events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-        assert_success(events)
-
-
-def test_stream_accepts_identity_and_binary_proof_queries(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    for query in (remote_query.REMOTE_QUERY_IDENTITY_QUERY, remote_query.REMOTE_QUERY_BINARY_QUERY):
-        clickhouse_client = make_client(names=('v',), types=('String',), rows=[['x']])
-        request = valid_request(query=query)
-
-        events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-        assert_success(events)
 
 
 @pytest.mark.parametrize(
@@ -682,84 +143,6 @@ def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
     assert page == csv_record([b'"\\u0000ab"'])
 
 
-# ---------------------------------------------------------------------------
-# Target resolution
-# ---------------------------------------------------------------------------
-
-
-def test_stream_resolves_server_port_db_from_check_config(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    clickhouse_client = make_client(rows=[[1]])
-
-    events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)
-
-    assert_success(events)
-
-
-def test_stream_host_port_dbname_target_still_succeeds_when_check_has_database_identifier(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    clickhouse_client = make_client(rows=[[1]])
-    check = make_check(check_database_identifier='clickhouse-dbi')
-
-    events = collect_events(valid_request(), check, clickhouse_client=clickhouse_client)
-
-    assert_success(events)
-
-
-def test_stream_database_instance_match_runs_the_supplied_check(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    matching_client = make_client(rows=[[1]])
-    check = make_check(server='analytics.internal', db='analytics', check_database_identifier='Clickhouse/Primary-A')
-
-    request = valid_request()
-    request['target'] = {'database_instance': 'Clickhouse/Primary-A'}
-    events = collect_events(request, check, clickhouse_client=matching_client)
-
-    assert_success(events)
-    assert matching_client.raw_stream_calls
-
-
-def test_stream_database_instance_miss_fails_without_client_access():
-    clickhouse_client = make_client(rows=[[1]])
-    check = make_check(check_database_identifier='Clickhouse/Primary-A')
-
-    request = valid_request()
-    request['target'] = {'database_instance': 'Clickhouse/Primary-B'}
-    events = collect_events(request, check, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'target_not_found')
-    assert clickhouse_client.raw_stream_calls == []
-
-
-def test_stream_rejects_mixed_database_instance_and_host_selector_before_resolution():
-    request = valid_request()
-    request['target'] = {'database_instance': 'clickhouse-dbi', 'host': 'localhost'}
-
-    events = collect_events(request, ExplodingCheck())
-
-    assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
-
-
-def test_stream_rejects_empty_database_instance_before_resolution():
-    request = valid_request()
-    request['target'] = {'database_instance': ' clickhouse-dbi '}
-
-    events = collect_events(request, ExplodingCheck())
-
-    assert_failed_event(events, 'invalid_request', 'database_instance')
-
-
-def test_stream_uses_only_supplied_live_check_for_target_matching(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    request = valid_request(host='configured.internal')
-
-    events = collect_events(request, make_check(server='localhost'))
-    assert_failed_event(events, 'target_not_found')
-
-    events = collect_events(request, make_check(server='configured.internal'), clickhouse_client=make_client())
-    assert_success(events)
-
-
 def test_stream_requires_dbname_match_even_when_host_and_port_match():
     check = make_check(server='localhost', port=8123, db='default')
 
@@ -768,31 +151,16 @@ def test_stream_requires_dbname_match_even_when_host_and_port_match():
     assert_failed_event(events, 'target_not_found')
 
 
-def test_stream_missing_pool_manager_returns_target_unavailable(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    check = make_check()
-    check._pool_manager = None
-
-    events = collect_events(valid_request(), check)
-
-    assert_failed_event(events, 'target_unavailable')
-
-
 def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
     def get_config(key):
         return None
 
-    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
 
     events = collect_events(valid_request(), make_check())
 
     assert_failed_event(events, 'credentials_unavailable')
     assert events[0].event_type == 'error'
-
-
-# ---------------------------------------------------------------------------
-# Producer core: envelope, single execution, read-only settings, receipt
-# ---------------------------------------------------------------------------
 
 
 def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
@@ -1000,124 +368,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
     assert fake.run_finalize_calls == 1
 
 
-def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clock = MutableClock()
-    monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
-    instrument_clickhouse_fakes(monkeypatch, clock)
-    clickhouse_client = make_client(rows=[[1], [2]])
-    fake = FakeUploadClient()
-
-    def client_factory(_check, _timeout_seconds):
-        clock.advance_seconds(0.125)
-        return clickhouse_client
-
-    events = list(iter_agent_rpc_stream_events(valid_request(), make_check(), fake, client_factory))
-
-    final = assert_success(events)
-    # The final metadata gained exactly one key: the optional execution diagnostics.
-    assert set(final) == {'status', 'upload_receipt', 'stats', 'executionDiagnostics'}
-    producer = final['executionDiagnostics']['producer']
-    assert final['executionDiagnostics']['contractVersion'] == 1
-    # Two raw stream reads serve the whole result: the first chunk carries the header rows
-    # and both data rows; the second read returns the empty tail.
-    assert clickhouse_client.stream.read_count == 2
-    assert producer == {
-        'totalMs': 2125,
-        # Client creation (in the factory), the stream open, and the descriptor registration
-        # are setup.
-        'databaseSetupMs': 375,
-        # Every raw stream read is a fetch: two reads here.
-        'databaseFetchMs': 750,
-        # Real parse/encode work with this clock runs in well under a millisecond.
-        'encodeAndPageBuildMs': 0,
-        'pageUploadMs': 500,
-        'finalizeMs': 250,
-        # The stream and client teardown run outside every phase and land in the remainder.
-        'otherMs': 250,
-        'timeToFirstPageMs': 1625,
-        'pageCount': 1,
-        'rowCount': 2,
-        'byteCount': len(assembled_pages(fake)[0]),
-        'pageUploadMinMs': 500,
-        'pageUploadP50Ms': 500,
-        'pageUploadP95Ms': 500,
-        'pageUploadMaxMs': 500,
-    }
-    # The diagnostics total and stats.elapsedMs are the same wall.
-    assert final['stats']['elapsedMs'] == producer['totalMs']
-    # The injected upload client makes no HTTP attempts, so the attempt counters stay
-    # unmeasured (absent, never zero).
-    assert 'uploadAttemptCount' not in producer
-    assert 'uploadRetryCount' not in producer
-
-
-def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
-    clock = MutableClock()
-    monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
-    instrument_clickhouse_fakes(monkeypatch, clock)
-    # A two-page boundary whose second page upload fails: the first page is acknowledged
-    # and counted, the second attempt's wall is measured but never promoted.
-    request = two_row_boundary_request(monkeypatch, extra_bound_bytes=-1)
-    clickhouse_client = two_row_client()
-
-    def fail_second_page(page):
-        if page.batch_index == 1:
-            raise rq.RemoteQueryFailure('upload_failed', 'transient exhausted', retryable=True)
-        return {
-            'upload_id': UPLOAD_ID,
-            'batch_index': page.batch_index,
-            'record_offset': page.record_offset,
-            'source_rows': page.rows,
-            'status': 'accepted',
-        }
-
-    fake = FakeUploadClient(put_page_response=fail_second_page)
-
-    def client_factory(_check, _timeout_seconds):
-        clock.advance_seconds(0.125)
-        return clickhouse_client
-
-    events = list(iter_agent_rpc_stream_events(request, make_check(), fake, client_factory))
-
-    error = event_metadata(events[-1])
-    assert_failed_event(events, 'upload_failed')
-    # The error metadata gained exactly one key: the optional execution diagnostics.
-    assert set(error) == {'status', 'error', 'stats', 'executionDiagnostics'}
-    assert fake.run_finalize_calls == 0
-    assert fake.abort_calls == 1
-    assert clickhouse_client.stream.closed
-    assert clickhouse_client.closed
-    # The producer's conservative accounting for the accepted page: its final-JSON bound,
-    # not the smaller CSV source bytes it uploaded.
-    first_page_bound = len(prefix_bytes()) + len(rq.PAGE_SUFFIX) + row_object_bound(BOUND_ROW)
-    assert error['stats']['elapsedMs'] == 2375
-    assert error['executionDiagnostics'] == {
-        'contractVersion': 1,
-        'producer': {
-            'totalMs': 2375,
-            'databaseSetupMs': 375,
-            'databaseFetchMs': 750,
-            'encodeAndPageBuildMs': 0,
-            # Both upload walls are kept: the acknowledged page and the failed attempt's.
-            'pageUploadMs': 1000,
-            # finalizeMs is absent: finalize never ran. uploadAttemptCount/RetryCount are
-            # absent too: the injected client makes no HTTP attempts.
-            'otherMs': 250,
-            'timeToFirstPageMs': 1250,
-            'pageCount': 1,
-            'rowCount': 1,
-            'byteCount': first_page_bound,
-            # The distribution holds only the acknowledged page's wall.
-            'pageUploadMinMs': 500,
-            'pageUploadP50Ms': 500,
-            'pageUploadP95Ms': 500,
-            'pageUploadMaxMs': 500,
-        },
-    }
-
-
 def test_producer_rejects_header_missing_type_row(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = FakeClickhouseClient(raw_stream_body('["value"]'))
@@ -1152,41 +402,6 @@ def test_producer_rejects_malformed_header_rows(monkeypatch, header):
     assert fake.put_page_calls == []
 
 
-def test_producer_rejects_duplicate_result_column_names_before_row_data(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    clickhouse_client = make_client(names=('value', 'value'), types=('UInt8', 'UInt8'), rows=[[1, 1]])
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'duplicate_columns', 'value')
-    assert fake.put_page_calls == []
-
-
-def test_producer_rejects_duplicate_columns_even_with_schema_disabled(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    clickhouse_client = make_client(names=('v', 'v', 'v'), types=('UInt8', 'UInt8', 'UInt8'), rows=[[1, 2, 3]])
-
-    events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'duplicate_columns')
-
-
-def test_producer_rejects_columns_beyond_max_columns(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    clickhouse_client = make_client(names=('a', 'b', 'c'), types=('UInt8', 'UInt8', 'UInt8'), rows=[[1, 2, 3]])
-    request = bounded_request(maxColumns=2)
-
-    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'max_columns_exceeded')
-
-
-# ---------------------------------------------------------------------------
-# Schema production
-# ---------------------------------------------------------------------------
-
-
 def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -1208,7 +423,7 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     request['resultDelivery']['limits']['maxFileBytes'] = (
         len(prefix_bytes(schema_json=schema_json))
         + row_object_bound({'city': 'New York', 'country': 'USA'})
-        + len(rq.PAGE_SUFFIX)
+        + len(rq_pages.PAGE_SUFFIX)
     )
     fake = FakeUploadClient()
 
@@ -1298,35 +513,6 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
     assert_failed_event(events, 'max_file_bytes_exceeded', 'repeated schema')
 
 
-# ---------------------------------------------------------------------------
-# Page splitting, boundaries, and part bookkeeping
-# ---------------------------------------------------------------------------
-
-
-# One row ['aaaa'] over a single String column: a 24-byte final bound and a 9-byte framed
-# source record.
-BOUND_ROW = {'payload': 'aaaa'}
-ROW_RECORD = csv_record([b'"aaaa"'])
-
-
-def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
-    """A budget that fits exactly two bound rows in one page (minus the extra bytes)."""
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    prefix_len = len(prefix_bytes())
-    request = bounded_request()
-    limits = request['resultDelivery']['limits']
-    row_bound = row_object_bound(BOUND_ROW)
-    limits['maxFileBytes'] = prefix_len + row_bound + 1 + row_bound + len(rq.PAGE_SUFFIX) + extra_bound_bytes
-    # Same constraint as bounded_request: the schema budget must stay within the page budget.
-    limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
-    return request
-
-
-def two_row_client(**stream_kwargs):
-    return make_client(names=('payload',), types=('String',), rows=[['aaaa'], ['aaaa']], **stream_kwargs)
-
-
 def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -1360,14 +546,6 @@ def test_page_split_row_too_large_when_line_exceeds_the_buffer_ceiling(monkeypat
     assert stream.offset <= header_bound
     assert not stream.exhausted
     assert clickhouse_client.closed
-
-
-def quoted_numeric_rows_client(names, row, row_count):
-    """A client whose stream repeats one quoted-numeric row on the real compact wire."""
-    body = raw_stream_body(
-        compact_json_line(names), compact_json_line(('UInt64',) * len(names)), *[compact_json_line(row)] * row_count
-    )
-    return FakeClickhouseClient(body)
 
 
 def test_row_line_ceiling_reserves_quote_bytes_for_quoted_numeric_columns(monkeypatch):
@@ -1485,341 +663,11 @@ def test_page_upload_streams_before_the_result_stream_is_exhausted(monkeypatch):
     assert event_metadata(events[-1])['upload_receipt']['totalRows'] == 40000
 
 
-# ---------------------------------------------------------------------------
-# ClickHouse value contract (pinned, cross-language)
-# ---------------------------------------------------------------------------
-
-
-def encode_stream_tokens(names, types, values):
-    """One row's canonical cell tokens, one per described column."""
-    columns = remote_query.build_columns(list(names), list(types))
-    return [cell.token for cell in remote_query.encode_row(list(values), columns)]
-
-
-@pytest.mark.parametrize(
-    'type_string, value, expected_bound',
-    [
-        # Booleans and null are never scanned: their exact token bounds stay exact.
-        ('Bool', True, 4),
-        ('Bool', False, 5),
-        ('Nullable(String)', None, 4),
-        # Short integer, float, and decimal tokens reserve the twelve-byte marker intake
-        # substitutes for a matched number leaf, quoted big-int spellings included.
-        ('UInt8', 1, 12),
-        ('Int64', -42, 12),
-        ('Float64', Decimal('0.1'), 12),
-        ('Float64', '0.1', 12),
-        ('Decimal(38, 10)', Decimal('1.10'), 12),
-        # A number longer than the marker keeps its own token bytes.
-        ('UInt64', '18446744073709551615', 20),
-        # A short string leaf bounds to the twelve-byte redaction marker; a longer one keeps
-        # its own token length.
-        ('String', 'x', 12),
-        # Nested numbers contribute marker bounds inside arrays, maps, and JSON values,
-        # while nested booleans and null keep their exact tokens.
-        ('Array(UInt8)', [1, None], 2 + 12 + 1 + 4),
-        ('Map(String, UInt64)', {'k': 1}, 2 + 12 + 1 + 12),
-        ('JSON', {'nested': [1, True]}, 2 + 12 + 1 + 2 + 12 + 1 + 4),
-    ],
-)
-def test_cell_final_bounds_account_for_the_redaction_marker(type_string, value, expected_bound):
-    (cell,) = remote_query.encode_row([value], remote_query.build_columns(['v'], [type_string]))
-    assert cell.final_bound == expected_bound
-
-
-def test_value_contract_encodes_scalars_exactly():
-    assert encode_stream_tokens(('v',), ('UInt64',), [18446744073709551615]) == [b'18446744073709551615']
-    assert encode_stream_tokens(('v',), ('Int64',), [-42]) == [b'-42']
-    # Quoted 64-bit+ integers (servers that quote big ints) normalize back to numbers.
-    assert encode_stream_tokens(('v',), ('UInt64',), ['18446744073709551615']) == [b'18446744073709551615']
-    assert encode_stream_tokens(('v',), ('Int64',), ['-42']) == [b'-42']
-    # Unconvertible quoted text in a numeric column stays a string for the encoder to
-    # accept verbatim rather than corrupting; the same holds for a quoted integer spelling
-    # outside the JSON integer grammar (leading zeros), which must not become a number.
-    assert encode_stream_tokens(('v',), ('UInt64',), ['not-a-number']) == [b'"not-a-number"']
-    assert encode_stream_tokens(('v',), ('UInt64',), ['007']) == [b'"007"']
-    # Unquoted lexemes come off the parse hooks as raw numbers and keep their exact text:
-    # no int()/Decimal/repr round-trip may rewrite them (0.000000001 would become 1E-9,
-    # 1e-7 would lose its case, -0 would become 0).
-    assert encode_stream_tokens(('v',), ('Float64',), [remote_query.RawJsonNumber('0.000000001')]) == [b'0.000000001']
-    assert encode_stream_tokens(('v',), ('Float64',), [remote_query.RawJsonNumber('1e-7')]) == [b'1e-7']
-    assert encode_stream_tokens(('v',), ('Float64',), [remote_query.RawJsonNumber('1E+2')]) == [b'1E+2']
-    assert encode_stream_tokens(('v',), ('Int64',), [remote_query.RawJsonNumber('-0')]) == [b'-0']
-    # Quoted decimals keep their exact lexeme too: the grammar check removes only the
-    # quotes, it never re-renders the number.
-    assert encode_stream_tokens(('v',), ('Float64',), ['0.1']) == [b'0.1']
-    assert encode_stream_tokens(('v',), ('Decimal(9, 9)',), ['0.000000001']) == [b'0.000000001']
-    assert encode_stream_tokens(('v',), ('Decimal(38, 10)',), ['12345678901234567890.1234567890']) == [
-        b'12345678901234567890.1234567890'
-    ]
-    assert encode_stream_tokens(('v',), ('Nullable(Float64)',), [None]) == [b'null']
-    # Non-finite floats: the server renders them as null by default (a documented deviation
-    # from the Postgres "NaN"/"Infinity" string spellings); a server that quotes them
-    # (output_format_json_quote_denormals) delivers strings, which pass through verbatim
-    # rather than being reinterpreted.
-    assert encode_stream_tokens(('v',), ('Float64',), [None]) == [b'null']
-    assert encode_stream_tokens(('v',), ('Float64',), ['inf']) == [b'"inf"']
-    assert encode_stream_tokens(('v',), ('Float64',), ['-nan']) == [b'"-nan"']
-    # A String column holding digits is never reinterpreted as a number.
-    assert encode_stream_tokens(('v',), ('String',), ['12345']) == [b'"12345"']
-    # Booleans; legacy numeric spellings normalize by type, quoted or not.
-    assert encode_stream_tokens(('v',), ('Bool',), [True]) == [b'true']
-    assert encode_stream_tokens(('v',), ('Bool',), [0]) == [b'false']
-    assert encode_stream_tokens(('v',), ('Bool',), [1]) == [b'true']
-    assert encode_stream_tokens(('v',), ('Bool',), ['false']) == [b'false']
-    assert encode_stream_tokens(('v',), ('Bool',), ['0']) == [b'false']
-    assert encode_stream_tokens(('v',), ('Bool',), ['1']) == [b'true']
-    assert encode_stream_tokens(('v',), ('Bool',), [remote_query.RawJsonNumber('0')]) == [b'false']
-    assert encode_stream_tokens(('v',), ('Bool',), [remote_query.RawJsonNumber('1')]) == [b'true']
-    # Strings with JSON escapes survive verbatim.
-    assert encode_stream_tokens(('v',), ('String',), ['he said "hi"\nend']) == [b'"he said \\"hi\\"\\nend"']
-    assert encode_stream_tokens(('v',), ('Nullable(String)',), [None]) == [b'null']
-    # Temporal/UUID/IP families arrive as server-rendered strings.
-    assert encode_stream_tokens(('d',), ('Date',), ['2026-08-28']) == [b'"2026-08-28"']
-    assert encode_stream_tokens(('u',), ('UUID',), ['8b6fb1b5-94dd-447b-95a4-91f4ef118f4b']) == [
-        b'"8b6fb1b5-94dd-447b-95a4-91f4ef118f4b"'
-    ]
-
-
-def test_value_contract_encodes_composite_types_as_nested_json():
-    assert encode_stream_tokens(('a',), ('Array(String)',), [['x', None, 'y']]) == [b'["x",null,"y"]']
-    assert encode_stream_tokens(('m',), ('Map(String, UInt64)',), [{'k': 1}]) == [b'{"k":1}']
-    assert encode_stream_tokens(('t',), ('Tuple(UInt8, String)',), [None]) == [b'null']
-    assert encode_stream_tokens(('t',), ('Tuple(UInt8, String)',), [[1, 'x']]) == [b'[1,"x"]']
-    assert encode_stream_tokens(('j',), ('JSON',), [{'nested': [1, True]}]) == [b'{"nested":[1,true]}']
-    assert encode_stream_tokens(('n',), ('Array(Array(Nullable(UInt8)))',), [[[1, None], []]]) == [b'[[1,null],[]]']
-
-
-def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = make_client(
-        names=(
-            'null_value',
-            'bool_value',
-            'int_value',
-            'big_int_value',
-            'float_value',
-            'decimal_value',
-            'text_value',
-            'date_value',
-            'json_value',
-            'array_value',
-            'map_value',
-        ),
-        types=(
-            'Nullable(String)',
-            'Bool',
-            'Int64',
-            'UInt64',
-            'Float64',
-            'Decimal(38, 10)',
-            'String',
-            'Date',
-            'JSON',
-            'Array(Nullable(String))',
-            'Map(String, UInt64)',
-        ),
-        rows=[
-            [
-                None,
-                True,
-                42,
-                '18446744073709551615',
-                '0.1',
-                '12345678901234567890.1234567890',
-                'héllo "quoted"',
-                '2026-08-28',
-                {'nested': [1, None, True], 'price': 1.10},
-                ['x', None, ['y', 'z']],
-                {'a': 1},
-            ]
-        ],
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    # Every cell rides the page as its exact canonical JSON token, CSV-framed: the tokens
-    # pin exact numeric lexemes, typed normalization, temporal strings, nested JSON,
-    # arrays, and maps.
-    tokens = [
-        b'null',
-        b'true',
-        b'42',
-        b'18446744073709551615',
-        b'0.1',
-        b'12345678901234567890.1234567890',
-        '"héllo \\"quoted\\""'.encode('utf-8'),
-        b'"2026-08-28"',
-        b'{"nested":[1,null,true],"price":1.1}',
-        b'["x",null,["y","z"]]',
-        b'{"a":1}',
-    ]
-    assert page == csv_record(tokens)
-    descriptor = json.loads(fake.descriptor_bodies[0])
-    assert [
-        (column['column_name'], column['vendor_data_type'], column['logical_type']) for column in descriptor['columns']
-    ] == [
-        ('null_value', 'Nullable(String)', 'string'),
-        ('bool_value', 'Bool', 'boolean'),
-        ('int_value', 'Int64', 'integer'),
-        ('big_int_value', 'UInt64', 'integer'),
-        ('float_value', 'Float64', 'float'),
-        ('decimal_value', 'Decimal(38, 10)', 'decimal'),
-        ('text_value', 'String', 'string'),
-        ('date_value', 'Date', 'temporal'),
-        ('json_value', 'JSON', 'json'),
-        ('array_value', 'Array(Nullable(String))', 'json'),
-        ('map_value', 'Map(String, UInt64)', 'json'),
-    ]
-
-
-def test_value_contract_preserves_exact_server_numeric_lexemes(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # One row on the real compact wire whose numeric lexemes no int()/Decimal/repr
-    # round-trip could reproduce: a sub-1e-6 decimal, exponent spellings (case and sign),
-    # negative zero, and numbers nested inside a composite. The parse hooks carry every
-    # lexeme through byte-exact, and the quoted-spelling normalization removes only the
-    # quotes after the family's grammar check.
-    row_line = b'[0.000000001,"0.000000001",1e-7,-0,[0.000000001,1E+2]]'
-    clickhouse_client = FakeClickhouseClient(
-        raw_stream_body(
-            compact_json_line(('tiny', 'quoted_tiny', 'exponent', 'negative_zero', 'nested')),
-            compact_json_line(('Float64', 'Decimal(9, 9)', 'Float64', 'Int64', 'Array(Float64)')),
-            row_line,
-        )
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    assert page == csv_record(
-        [
-            b'0.000000001',
-            b'0.000000001',
-            b'1e-7',
-            b'-0',
-            b'[0.000000001,1E+2]',
-        ]
-    )
-
-
-def test_value_contract_rejects_row_lines_that_are_not_json_arrays(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = FakeClickhouseClient(raw_stream_body('["value"]', '["UInt8"]', '{"value": 1}'))
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'query_failed', 'not a JSON array')
-
-
-def test_value_contract_fails_closed_on_invalid_utf8_row_lines(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = FakeClickhouseClient(raw_stream_body('["value"]', '["String"]', b'["\xff\xfe"]'))
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'query_failed')
-    # The offending row bytes never appear in the emitted events.
-    assert b'\xff\xfe' not in json.dumps([event.metadata for event in events]).encode('utf-8', 'surrogateescape')
-
-
-def test_value_contract_rejects_row_width_mismatch(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = FakeClickhouseClient(raw_stream_body('["a", "b"]', '["UInt8", "UInt8"]', '[1]'))
-
-    events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'query_failed', 'row width')
-
-
-@pytest.mark.parametrize(
-    'type_string, expected',
-    [
-        ('UInt64', 'integer'),
-        ('Nullable(UInt64)', 'integer'),
-        ('LowCardinality(Nullable(Int128))', 'integer'),
-        ('SimpleAggregateFunction(sum, UInt64)', 'integer'),
-        ('Decimal(10, 2)', 'decimal'),
-        ('Decimal128(4)', 'decimal'),
-        ('Nullable(Decimal(38, 10))', 'decimal'),
-        ('Float64', 'float'),
-        ('Nullable(Float32)', 'float'),
-        ('Bool', 'bool'),
-        ('String', 'other'),
-        ('Array(UInt64)', 'other'),
-        ('Date', 'other'),
-        ('UUID', 'other'),
-    ],
-)
-def test_type_family_classifies_type_strings(type_string, expected):
-    assert remote_query.type_family(type_string) == expected
-
-
-def test_base_type_name_peels_wrappers():
-    assert remote_query.base_type_name('Nullable(LowCardinality(String))') == 'String'
-    # Wrappers peel transitively, through SimpleAggregateFunction's second argument too.
-    assert remote_query.base_type_name('SimpleAggregateFunction(any, Nullable(UInt8))') == 'UInt8'
-    assert remote_query.base_type_name('Array(String)') == 'Array(String)'
-
-
-@pytest.mark.parametrize(
-    'type_string, expected',
-    [
-        ('UInt64', 'integer'),
-        ('Int128', 'integer'),
-        ('Nullable(UInt64)', 'integer'),
-        ('LowCardinality(Nullable(Int128))', 'integer'),
-        ('SimpleAggregateFunction(sum, UInt64)', 'integer'),
-        ('Decimal(10, 2)', 'decimal'),
-        ('Decimal128(4)', 'decimal'),
-        ('Nullable(Decimal(38, 10))', 'decimal'),
-        ('Float64', 'float'),
-        ('Nullable(Float32)', 'float'),
-        ('Bool', 'boolean'),
-        ('String', 'string'),
-        ('FixedString(16)', 'string'),
-        ('Date', 'temporal'),
-        ('Date32', 'temporal'),
-        ('DateTime64(3)', 'temporal'),
-        ('UUID', 'string'),
-        ("Enum8('a' = 1)", 'string'),
-        ('IPv4', 'vendor'),
-        ('IPv6', 'vendor'),
-        ('JSON', 'json'),
-        ('Array(UInt64)', 'json'),
-        ('Map(String, UInt64)', 'json'),
-        ('Tuple(UInt8, String)', 'json'),
-        ('Nested(x UInt8)', 'json'),
-        ('AggregateFunction(any, UInt8)', 'vendor'),
-        ('Point', 'vendor'),
-    ],
-)
-def test_logical_type_mapping_is_deterministic(type_string, expected):
-    assert remote_query.logical_type_for_type_string(type_string) == expected
-
-
-# ---------------------------------------------------------------------------
-# Failure, timeout, and cancellation flows
-# ---------------------------------------------------------------------------
-
-
 def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
-    request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq.PAGE_SUFFIX))
+    request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq_pages.PAGE_SUFFIX))
     clickhouse_client = two_row_client()
     fake = FakeUploadClient()
 
@@ -1853,6 +701,17 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     assert clickhouse_client.closed
 
 
+def test_process_termination_aborts_upload_and_closes_stream(monkeypatch):
+    patch_upload_credentials(monkeypatch)
+    client = make_client(rows=[[1]], read_error=SystemExit(2))
+    uploads = FakeUploadClient()
+    with pytest.raises(SystemExit):
+        collect_events(valid_request(), make_check(), upload_client=uploads, clickhouse_client=client)
+    assert uploads.abort_calls == 1
+    assert client.closed
+    assert client.stream.closed
+
+
 def test_stream_maps_server_error_to_query_failed(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -1870,38 +729,6 @@ def test_stream_maps_server_error_to_query_failed(monkeypatch, caplog):
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
     assert fake.abort_calls == 1
-
-
-def test_stream_maps_transport_error_to_target_unavailable(monkeypatch, caplog):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    clickhouse_client = FakeClickhouseClient(
-        stream_body(('value',), ('UInt8',), [[1]]),
-        raw_stream_error=OperationalError('Error HTTPSConnectionPool ... SECRET_DO_NOT_LOG'),
-    )
-
-    caplog.set_level(logging.DEBUG)
-    events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'target_unavailable')
-    assert 'SECRET_DO_NOT_LOG' not in str(events)
-    assert 'SECRET_DO_NOT_LOG' not in caplog.text
-
-
-def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch, caplog):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-
-    def broken_factory(_check, _limits):
-        raise OperationalError('connection refused with SECRET_DO_NOT_LOG')
-
-    request = valid_request()
-    caplog.set_level(logging.DEBUG)
-    events = list(iter_agent_rpc_stream_events(request, make_check(), FakeUploadClient(), broken_factory))
-
-    assert_failed_event(events, 'target_unavailable')
-    assert 'SECRET_DO_NOT_LOG' not in str(events)
-    assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
 def test_stream_maps_mid_stream_connection_drop_to_retryable_timeout(monkeypatch, caplog):
@@ -1977,17 +804,6 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     assert clickhouse_client.stream.closed
 
 
-def test_stream_target_unavailable_when_check_cannot_create_clients(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
-    # No create_remote_query_client on the fake check and no factory injected.
-    request = valid_request()
-    events = list(iter_agent_rpc_stream_events(request, make_check(), FakeUploadClient(), None))
-
-    assert_failed_event(events, 'target_unavailable')
-    assert 'upload_receipt' not in event_metadata(events[-1])
-
-
 def test_entry_propagates_callback_failure_without_upload(monkeypatch):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
@@ -1997,206 +813,3 @@ def test_entry_propagates_callback_failure_without_upload(monkeypatch):
 
     with pytest.raises(RuntimeError, match='stop streaming'):
         execute_agent_rpc_stream_copy(json.dumps(valid_request()), make_check(), emit)
-
-
-# ---------------------------------------------------------------------------
-# Integration: focused cases against a real ClickHouse (docker fixture)
-# ---------------------------------------------------------------------------
-
-# Remote query execution needs the JSONCompactEachRowWithNamesAndTypes format, whose
-# WithNamesAndTypes variants only exist from 22.7 on (21.8 registers the plain format).
-UNSUPPORTED_REMOTE_QUERY_VERSIONS = {'18', '19', '20', '21.8'}
-
-
-def _is_remote_query_supported():
-    from .common import CLICKHOUSE_VERSION
-
-    if CLICKHOUSE_VERSION == 'latest':
-        return True
-    return CLICKHOUSE_VERSION not in UNSUPPORTED_REMOTE_QUERY_VERSIONS
-
-
-pytestmark_integration = pytest.mark.skipif(
-    not _is_remote_query_supported(),
-    reason='Remote queries need the JSONCompactEachRowWithNamesAndTypes format (ClickHouse 22.7+)',
-)
-
-
-def real_server_request(instance, query, include_schema=False):
-    """A request whose limits admit single-row multi-MiB proof payloads.
-
-    ``maxRowBytes``/``maxFileBytes`` are sized for one 32 MiB payload row plus its envelope,
-    and the timeout allows the largest payload to stream through.
-    """
-    limits = valid_limits(maxRowBytes=40 * 1024 * 1024, maxFileBytes=64 * 1024 * 1024, timeoutMs=30_000)
-    request = {
-        'operation': 'produce_json_pages',
-        'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
-        'query': query,
-        'resultDelivery': {
-            'runId': RUN_ID,
-            'taskId': TASK_ID,
-            'artifactVersion': 1,
-            'uploadId': UPLOAD_ID,
-            'baseUrl': BASE_URL,
-            'limits': limits,
-        },
-    }
-    if include_schema:
-        request['includeSchema'] = True
-    return request
-
-
-def patch_real_check(monkeypatch, instance):
-    """Configure Agent credentials and build a real check for the running fixture."""
-    from datadog_checks.clickhouse import ClickhouseCheck
-
-    def get_config(key):
-        if key == 'api_key':
-            return 'TEST_API_KEY'
-        if key == 'app_key':
-            return 'TEST_APP_KEY'
-        return None
-
-    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
-    return ClickhouseCheck('clickhouse', {}, [instance])
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytestmark_integration
-def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_clickhouse(instance, monkeypatch):
-    """End-to-end producer path against a real server: descriptor, CSV source page, receipt."""
-    check = patch_real_check(monkeypatch, instance)
-
-    request = {
-        'operation': 'produce_json_pages',
-        'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
-        'query': 'SELECT 1 AS value',
-        'includeSchema': True,
-        'resultDelivery': {
-            'runId': RUN_ID,
-            'taskId': TASK_ID,
-            'artifactVersion': 1,
-            'uploadId': UPLOAD_ID,
-            'baseUrl': BASE_URL,
-            'limits': valid_limits(),
-        },
-    }
-    fake = FakeUploadClient()
-
-    # No client factory is injected: the real check creates the per-run client itself.
-    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
-
-    final = assert_success(events)
-    pages = assembled_pages(fake)
-    assert list(pages) == [0]
-    assert pages[0] == b'1\n'
-    # One registration with the stream header's real type string and logical type, before
-    # any page is uploaded.
-    (descriptor_body,) = fake.descriptor_bodies
-    assert json.loads(descriptor_body)['columns'] == [
-        {
-            'column_name': 'value',
-            'vendor_data_type': 'UInt8',
-            'logical_type': 'integer',
-            'array_element_delimiter': None,
-        }
-    ]
-    # One complete page uploaded as one direct PUT: exact whole-page identity, rows exact.
-    (page_call,) = fake.put_page_calls
-    assert page_call.batch_index == 0
-    assert page_call.record_offset == 0
-    assert page_call.source_bytes == len(pages[0])
-    assert page_call.rows == 1
-    assert fake.run_finalize_calls == 1
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 1,
-        'totalRows': 1,
-        'totalBytes': len(pages[0]),
-    }
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytestmark_integration
-def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clickhouse(instance, monkeypatch):
-    """The binary proof query's NUL payload survives the real server's JSON stream exactly."""
-    check = patch_real_check(monkeypatch, instance)
-    fake = FakeUploadClient()
-
-    request = real_server_request(instance, remote_query.REMOTE_QUERY_BINARY_QUERY)
-    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
-
-    assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    # The payload is the exact three bytes NUL, 'a', 'b': the source page carries the
-    # cell's canonical token with the NUL escaped exactly as the server rendered it.
-    assert page == csv_record([b'"\\u0000ab"'])
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytestmark_integration
-@pytest.mark.parametrize(
-    'query, expected_payload_bytes, include_schema',
-    [
-        (remote_query.REMOTE_QUERY_SEED_QUERY, None, False),
-        (remote_query.REMOTE_QUERY_IDENTITY_QUERY, None, True),
-        (remote_query.REMOTE_QUERY_BINARY_QUERY, None, False),
-    ]
-    + [
-        (remote_query._proof_payload_query(size_bytes), size_bytes, False)
-        for size_bytes in remote_query.REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES
-    ],
-    ids=['seed', 'identity-schema', 'binary', '1mib', '2mib', '4mib', '8mib', '16mib', '32mib'],
-)
-def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
-    instance, monkeypatch, query, expected_payload_bytes, include_schema
-):
-    """Every allowlisted proof query executes on a real server and produces one exact row."""
-    check = patch_real_check(monkeypatch, instance)
-    fake = FakeUploadClient()
-
-    request = real_server_request(instance, query, include_schema=include_schema)
-    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
-
-    final = assert_success(events)
-    pages = assembled_pages(fake)
-    # Every proof query is a single row: one page uploaded as one direct PUT, bounded by
-    # maxFileBytes, with the exact whole-page identity declared on the request.
-    assert list(pages) == [0]
-    assert final['upload_receipt']['totalRows'] == 1
-    assert final['upload_receipt']['totalBytes'] == len(pages[0])
-    (page_call,) = fake.put_page_calls
-    assert page_call.source_bytes == len(pages[0])
-    assert page_call.source_bytes <= 64 * 1024 * 1024
-    assert page_call.rows == 1
-    assert fake.run_finalize_calls == 1
-    # The single row is one CSV record: an independent reader recovers the canonical cell
-    # token, and its JSON value is the exact row. The payload fields run to 32 MiB, far
-    # past csv.reader's default 128 KiB field limit, so the limit is raised for this one
-    # decode and restored afterwards.
-    previous_field_limit = csv.field_size_limit()
-    csv.field_size_limit(max(previous_field_limit, 64 * 1024 * 1024))
-    try:
-        (record,) = csv.reader([pages[0].decode('utf-8')])
-    finally:
-        csv.field_size_limit(previous_field_limit)
-    if expected_payload_bytes is not None:
-        # The single payload column carries exactly the intended byte count of 'x' bytes.
-        assert record == [json.dumps('x' * expected_payload_bytes)]
-    elif query == remote_query.REMOTE_QUERY_IDENTITY_QUERY:
-        # The identity query proves the matched server without a fixture: real host, user,
-        # and version strings ride through the pinned String value contract.
-        assert len(record) == 3
-        assert all(isinstance(json.loads(token), str) and json.loads(token) for token in record)
-    elif query == remote_query.REMOTE_QUERY_BINARY_QUERY:
-        # The binary payload is the exact three bytes NUL, 'a', 'b': the server renders
-        # the NUL as the JSON escape in the record's single field (the dedicated
-        # NUL-payload test pins the same token against the page bytes).
-        assert record == [json.dumps('\x00ab')]
-    else:
-        assert len(record) == 1
-        assert json.loads(record[0]) == 1

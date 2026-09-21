@@ -16,19 +16,15 @@ case. The producer phase diagnostics (``databaseSetupMs``, ``databaseFetchMs``,
 ``encodeAndPageBuildMs``, ``pageUploadMs``, …) and derived throughput are recorded in each
 benchmark's ``extra_info`` so before/after comparisons can target the phase under change.
 
-The optional ``RQ_SOURCE_PAGE_TARGET_FRACTION`` environment variable overrides the shared
-source-page target fraction for target-selection experiments; it has no effect on a
-producer that does not consult it.
 """
 
 import hashlib
 import json
-import os
 from types import SimpleNamespace
 
 import pytest
 
-from datadog_checks.base.utils import remote_queries as rq
+from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -118,20 +114,11 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_KEY'
         return None
 
-    monkeypatch.setattr(rq.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
 
 
 def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq, 'is_query_allowlist_enabled', lambda: False)
-
-
-def patch_source_page_target_fraction(monkeypatch):
-    """Apply the optional RQ_SOURCE_PAGE_TARGET_FRACTION experiment knob, when set."""
-    fraction = os.environ.get('RQ_SOURCE_PAGE_TARGET_FRACTION')
-    if fraction:
-        numerator, denominator = float(fraction).as_integer_ratio()
-        monkeypatch.setattr(rq, 'REMOTE_QUERY_SOURCE_PAGE_TARGET_NUM', numerator)
-        monkeypatch.setattr(rq, 'REMOTE_QUERY_SOURCE_PAGE_TARGET_DEN', denominator)
+    monkeypatch.setattr(rq_events, 'is_query_allowlist_enabled', lambda: False)
 
 
 def bench_request(pg_instance, rows, max_file_bytes, timeout_ms):
@@ -191,7 +178,6 @@ def record_benchmark_info(benchmark, client, final):
 def run_producer(benchmark, integration_check, pg_instance, monkeypatch, rows, max_file_bytes, rounds, timeout_ms):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    patch_source_page_target_fraction(monkeypatch)
     check = integration_check(pg_instance)
     request = bench_request(pg_instance, rows, max_file_bytes, timeout_ms)
 
