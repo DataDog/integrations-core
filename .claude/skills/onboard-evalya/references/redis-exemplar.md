@@ -49,11 +49,12 @@ Transferable rules:
 - The image tag is a **host-overridable env with a default**, the same pattern as `ACTIVITY_GEN`:
   `image: "redis:${REDIS_VERSION:-7.4}"`, read identically by every service (master, replica, seed,
   activity-gen) so the whole environment stays on one version. Copy this.
-- Credentials: the redis exemplar **hardcodes** the password (`--requirepass devops-best-friend`,
-  repeated in each service and the healthcheck). Do **not** copy that; parameterize it the same way
-  as the version — `--requirepass ${REDIS_PASSWORD:-devops-best-friend}`, one var read by every
-  service and the healthcheck, published via `provides.REDIS_PASSWORD`. This is the credential
-  convention the skill requires (SKILL.md step 4); the exemplar predates it.
+- Credentials: the redis exemplar uses a fixed default password (`--requirepass devops-best-friend`,
+  the same value in each service and the healthcheck) and publishes it via `provides.REDIS_PASSWORD`.
+  That is fine — a sane default lets the task run as-is with no env, which is the goal. Copy the
+  shape: one credential value used consistently across every service and the healthcheck, published
+  through `provides`. Making it a host-overridable env (`${REDIS_PASSWORD:-devops-best-friend}`) is
+  an optional nicety, not required.
 - The healthcheck must reflect *serving readiness*, not just process liveness, and authenticates
   with the same credential var.
 - Keep a minimal task (`redis-standalone`) next to the full one; not every consumer wants the
@@ -79,8 +80,8 @@ Four service kinds, each mapping to a metric class from SKILL.md step 2:
 Details worth copying: a `${REDIS_VERSION:-7.4}` version override; an `ACTIVITY_GEN=0` host-env
 escape hatch (container stays up, no traffic); no host port publish on the internal entrypoint
 (reach it over the compose network via the `provides` label) to avoid clashing with a local
-instance. Not worth copying: the hardcoded password — parameterize it (see the credentials rule
-above).
+instance; and a fixed default password published via `provides.REDIS_PASSWORD` so the task runs
+as-is (see the credentials rule above).
 
 ## activity-gen.sh contract
 
