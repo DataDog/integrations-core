@@ -11,6 +11,7 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 
@@ -77,6 +78,13 @@ def seed_mock_client(cluster_id="cluster_id"):
 def test_tls_config_legacy(legacy_config, kafka_client_config, value, check):
     kafka_consumer_check = check({legacy_config: value})
     assert getattr(kafka_consumer_check.config, kafka_client_config) == value
+
+
+def test_kafka_console_options_are_mutually_exclusive(check, kafka_instance):
+    kafka_instance.update({'enable_kafka_console': False, 'enable_cluster_monitoring': False})
+
+    with pytest.raises(ConfigurationError, match='cannot both be set'):
+        check(kafka_instance)
 
 
 @pytest.mark.parametrize(
@@ -275,6 +283,22 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
             'kafka_cluster_id:cluster_id',
         ],
     )
+
+
+def test_when_no_committed_offset_then_consumer_metrics_are_skipped(check, kafka_instance, dd_run_check, aggregator):
+    # Given: a partition with no committed offset, which librdkafka can surface as a negative
+    # logical offset (e.g. -1001 OFFSET_INVALID, or -2 OFFSET_BEGINNING) rather than a real offset.
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", -2)])]
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
+    dd_run_check(kafka_consumer_check)
+
+    # Then: the partition is skipped rather than reporting a negative offset and inflated lag
+    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
 
 
 def test_when_collect_consumer_group_state_is_enabled(check, kafka_instance, dd_run_check, aggregator):
@@ -741,7 +765,7 @@ def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator
 
 
 def test_report_lag_in_time_caps_left_extrapolation_without_low_watermark(kafka_instance, check, aggregator):
-    # With cluster monitoring off there is no low watermark, so the consumer offset is used as-is.
+    # With Kafka Console off there is no low watermark, so the consumer offset is used as-is.
     # When it predates every cached sample, the lag is still bounded by the left-extrapolation cap
     # (cache window + LAG_EXTRAPOLATION_LIMIT_SECONDS) rather than growing without limit.
     kafka_instance['data_streams_enabled'] = True
@@ -1053,9 +1077,10 @@ def _setup_failing_check(check, kafka_instance, dd_run_check):
     return kafka_consumer_check
 
 
-def test_connection_error_emits_dsm_event(check, kafka_instance, dd_run_check):
-    """A connection_error event is emitted when request_metadata_update fails and cluster monitoring is on."""
-    kafka_instance['enable_cluster_monitoring'] = True
+@pytest.mark.parametrize('kafka_console_option', ['enable_kafka_console', 'enable_cluster_monitoring'])
+def test_connection_error_emits_dsm_event(kafka_console_option, check, kafka_instance, dd_run_check):
+    """A connection_error event is emitted when request_metadata_update fails and Kafka Console is enabled."""
+    kafka_instance[kafka_console_option] = True
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
 
     events = _connection_error_events(kafka_consumer_check)
@@ -1067,7 +1092,7 @@ def test_connection_error_emits_dsm_event(check, kafka_instance, dd_run_check):
 
 def test_connection_error_includes_cluster_id_override(check, kafka_instance, dd_run_check):
     """connection_error event uses kafka_cluster_id_override when configured."""
-    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_instance['enable_kafka_console'] = True
     kafka_instance['kafka_cluster_id_override'] = 'my-cluster'
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
 
@@ -1076,15 +1101,15 @@ def test_connection_error_includes_cluster_id_override(check, kafka_instance, dd
     assert events[0]['kafka_cluster_id'] == 'my-cluster'
 
 
-def test_connection_error_not_emitted_without_cluster_monitoring(check, kafka_instance, dd_run_check):
-    """No connection_error event is emitted when cluster monitoring is disabled."""
+def test_connection_error_not_emitted_without_kafka_console(check, kafka_instance, dd_run_check):
+    """No connection_error event is emitted when Kafka Console is disabled."""
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
     assert not _connection_error_events(kafka_consumer_check)
 
 
 def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_instance, dd_run_check):
     """Sink failure during connection_error emission does not mask the original AdminClient error."""
-    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_instance['enable_kafka_console'] = True
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = seed_mock_client()
     kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')

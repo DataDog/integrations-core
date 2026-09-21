@@ -14,6 +14,7 @@ Named ``preview_`` so pytest does not collect it.
 
 from __future__ import annotations
 
+import os
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -135,6 +136,11 @@ def mixed() -> DispatcherProgress:
 
 
 def main(destination: Path):
+    # Simulate the Dispatcher metadata required by the running footer.
+    os.environ.setdefault("GITHUB_SERVER_URL", "https://github.com")
+    os.environ.setdefault("GITHUB_REPOSITORY", "DataDog/integrations-core")
+    os.environ.setdefault("GITHUB_RUN_ID", "12345")
+
     destination.mkdir(parents=True, exist_ok=True)
     scenarios = (
         ("01-initial", initial()),

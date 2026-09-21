@@ -28,6 +28,7 @@ from datadog_checks.postgres.config_models import InstanceConfig
 from .statements import (
     PG_STAT_STATEMENTS_COUNT_QUERY,
     PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4,
+    PG_STAT_STATEMENTS_COUNTER_COLUMNS,
     PG_STAT_STATEMENTS_DEALLOC,
     PG_STAT_STATEMENTS_METRICS_COLUMNS,
     PG_STAT_STATEMENTS_TIMING_COLUMNS,
@@ -88,6 +89,27 @@ def pgss_key(row: dict) -> PgssKey:
     return row['queryid'], row['dbid'], row['userid']
 
 
+def _merge_summary_stats(acc: dict, row: dict, acc_weight: float, row_weight: float) -> None:
+    """Fold *row*'s summary statistics into *acc*, in place.
+
+    Extremes combine exactly. The mean and standard deviation are averaged in proportion to how much
+    each statement ran during the interval, which approximates the true combined figures closely
+    enough for reporting: pg_stat_statements gives no way to recover the per-execution values these
+    were computed from.
+    """
+    if 'min_plan_time' in row:
+        acc['min_plan_time'] = min(acc.get('min_plan_time', row['min_plan_time']), row['min_plan_time'])
+    if 'max_plan_time' in row:
+        acc['max_plan_time'] = max(acc.get('max_plan_time', row['max_plan_time']), row['max_plan_time'])
+
+    total_weight = acc_weight + row_weight
+    if total_weight <= 0:
+        return
+    for col in ('mean_plan_time', 'stddev_plan_time'):
+        if col in row:
+            acc[col] = (acc.get(col, row[col]) * acc_weight + row[col] * row_weight) / total_weight
+
+
 def classify_query_text(text: str) -> TextKind:
     if text.startswith(DDIGNORE_COMMENT):
         # Queries the Agent tags for itself; monitoring artifacts rather than application traffic.
@@ -135,7 +157,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         self.tags: list[str] | None = None
 
         self._query_stats: QueryStats[PgssKey] = QueryStats(
-            counter_columns=PG_STAT_STATEMENTS_METRICS_COLUMNS,
+            counter_columns=PG_STAT_STATEMENTS_COUNTER_COLUMNS,
             key=pgss_key,
             execution_indicators=frozenset({'calls'}),
         )
@@ -404,17 +426,25 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
     @staticmethod
     def _merge_by_query_signature(rows: list[dict]) -> list[dict]:
-        """Merge rows sharing (query_signature, datname, rolname) by summing metric columns."""
+        """Merge rows sharing (query_signature, datname, rolname), consuming *rows*.
+
+        Counters add up; the summary statistics are combined with the operator matching what each
+        one measures, because a sum of minimums or of averages describes nothing.
+        """
         merged: dict[tuple, dict] = {}
-        metrics = PG_STAT_STATEMENTS_METRICS_COLUMNS
         for row in rows:
             key = _output_row_key(row)
-            if key in merged:
-                for col in metrics:
-                    if col in row:
-                        merged[key][col] = merged[key].get(col, 0) + row[col]
-            else:
+            existing = merged.get(key)
+            if existing is None:
                 merged[key] = row
+                continue
+
+            # Weights are read before the counters are summed, so they are the two rows' own
+            # interval call counts rather than a running total.
+            _merge_summary_stats(existing, row, existing.get('calls', 0), row.get('calls', 0))
+            for col in PG_STAT_STATEMENTS_COUNTER_COLUMNS:
+                if col in row:
+                    existing[col] = existing.get(col, 0) + row[col]
         return list(merged.values())
 
     # -- Main collection pipeline -----------------------------------------

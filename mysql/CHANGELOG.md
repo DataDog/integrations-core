@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 15.21.0 / 2026-09-02
+
+***Added***:
+
+* Add Data Observability async job for executing monitor queries delivered via Remote Configuration. ([#24798](https://github.com/DataDog/integrations-core/pull/24798))
+* Add the ``mysql.uptime`` metric, reporting the number of seconds the server has been up. ([#24802](https://github.com/DataDog/integrations-core/pull/24802))
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+
+***Fixed***:
+
+* Pin ``explain_json_format_version`` to 1 so that collected execution plans keep the version 1 JSON format on MySQL 9.5 and later, where version 2 became the default. ([#24294](https://github.com/DataDog/integrations-core/pull/24294))
+* Recommend the REFERENCES privilege in the MySQL schema collection insufficient-privileges warning and in the shipped sample configuration. ([#24739](https://github.com/DataDog/integrations-core/pull/24739))
+* Fix a crash in the query activity job when statement instruments have ``TIMED = NO`` and a thread has more than one ``events_statements_current`` row. ([#24843](https://github.com/DataDog/integrations-core/pull/24843))
+* Manage the DBM async jobs through the ``DatabaseCheck`` registry. ([#24936](https://github.com/DataDog/integrations-core/pull/24936))
+* Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#24999](https://github.com/DataDog/integrations-core/pull/24999))
+* Cache the Agent version instead of resolving it for every payload. ([#25022](https://github.com/DataDog/integrations-core/pull/25022))
+
 ## 15.20.0 / 2026-08-24
 
 ***Security***:

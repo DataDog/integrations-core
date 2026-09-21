@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from .client import COMMENT_BODY_LIMIT as COMMENT_BODY_LIMIT
     from .client import DEFAULT_BASE_URL as DEFAULT_BASE_URL
     from .client import GITHUB_API_VERSION as GITHUB_API_VERSION
+    from .client import MAX_PER_PAGE as MAX_PER_PAGE
     from .client import AsyncGitHubClient as AsyncGitHubClient
     from .client import GitHubResponse as GitHubResponse
     from .client import PaginationData as PaginationData
@@ -45,6 +46,7 @@ MODULE_BY_NAME: dict[str, str] = {
     'GITHUB_API_VERSION': 'client',
     'DEFAULT_BASE_URL': 'client',
     'COMMENT_BODY_LIMIT': 'client',
+    'MAX_PER_PAGE': 'client',
     'GitHubResponse': 'client',
     'PaginationData': 'client',
     'RetryPolicy': 'retry',

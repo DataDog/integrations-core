@@ -20,6 +20,8 @@ from .constants import (
     PARTITION_MAP,
     SACCT_MAP,
     SACCT_PARAMS,
+    SCONTROL_MISSING_SPOOLDIR_MSG,
+    SCONTROL_NO_STEPS_MSG,
     SCONTROL_PARAMS,
     SCONTROL_TAG_MAPPING,
     SDIAG_MAP,
@@ -41,6 +43,30 @@ def get_subprocess_output(cmd):
         return result.stdout, result.stderr, result.returncode
     except Exception as e:
         return None, f"Error running {cmd}: {e}", 1
+
+
+def classify_scontrol_failure(err: str) -> str:
+    """Classify a non-zero `scontrol listpid` exit as 'benign', 'config' or 'error'.
+
+    Every failure inside slurm's stepd_available() returns an empty step list, so scontrol
+    prints SCONTROL_NO_STEPS_MSG for an idle node, for a missing spool directory and for an
+    unreadable one alike. Only the idle node has that line as the whole of stderr, so it is
+    matched exactly: a substring match would also swallow EACCES, leaving the check
+    collecting nothing while reporting nothing.
+
+    The spool directory check must stay ahead of the fallthrough for the same reason -- its
+    stderr carries the no-steps line too.
+    """
+    stripped = (err or "").strip()
+    if stripped == SCONTROL_NO_STEPS_MSG:
+        return 'benign'
+    if SCONTROL_MISSING_SPOOLDIR_MSG in stripped:
+        return 'config'
+    return 'error'
+
+
+# Commands whose non-zero exits are not always failures. Anything absent stays an error.
+COMMAND_FAILURE_CLASSIFIERS = {'scontrol': classify_scontrol_failure}
 
 
 def parse_duration(time_str):
@@ -129,6 +155,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.scontrol_cmd = self.get_slurm_command('scontrol', SCONTROL_PARAMS)
             self.squeue_enrich_cmd = self.get_slurm_command('squeue', ["-j"])
 
+        # Commands that have already reported a static configuration problem, so that it
+        # is logged once rather than on every collection interval.
+        self._reported_config_failures = set()
+
         # Metric and Tag configuration
         self.last_run_time = None
         self.tags = self.instance.get('tags', [])
@@ -177,12 +207,32 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.log.debug("Running %s command: %s", name, cmd)
             out, err, ret = get_subprocess_output(cmd)
             if ret != 0:
-                self.log.error("Error running %s: %s", name, err)
+                self._log_command_failure(name, err)
             elif out:
                 self.log.debug("Processing %s output", name)
                 process_func(out)
             else:
                 self.log.debug("No output from %s", name)
+
+    def _log_command_failure(self, name: str, err: str) -> None:
+        """Log a non-zero command exit at a severity matching what actually went wrong."""
+        classifier = COMMAND_FAILURE_CLASSIFIERS.get(name)
+        outcome = classifier(err) if classifier else 'error'
+
+        if outcome == 'benign':
+            self.log.debug("Nothing for %s to collect on this node: %s", name, err.strip())
+        elif outcome == 'config':
+            if name in self._reported_config_failures:
+                self.log.debug("%s still cannot collect on this node: %s", name, err.strip())
+            else:
+                self._reported_config_failures.add(name)
+                self.log.warning(
+                    "%s cannot collect on this node until the configuration is corrected: %s",
+                    name,
+                    err.strip(),
+                )
+        else:
+            self.log.error("Error running %s: %s", name, err)
 
     def process_sinfo_partition(self, output):
         # test-queue*|N/A|1/2/0/3

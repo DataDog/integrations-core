@@ -16,11 +16,7 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
-from datadog_checks.kafka_consumer.constants import (
-    HIGH_WATERMARK,
-    KAFKA_INTERNAL_TOPICS,
-    OFFSET_INVALID,
-)
+from datadog_checks.kafka_consumer.constants import HIGH_WATERMARK, KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
 
@@ -92,7 +88,7 @@ class KafkaCheck(AgentCheck):
         try:
             self.client.request_metadata_update()
         except Exception as e:
-            if self.config._cluster_monitoring_enabled:
+            if self.config._kafka_console_enabled:
                 try:
                     self._send_cluster_monitoring_connection_error(str(e))
                 except Exception:
@@ -118,13 +114,13 @@ class KafkaCheck(AgentCheck):
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            # Cluster monitoring always requires highwater offsets (for topic.message_rate and other
+            # Kafka Console always requires highwater offsets (for topic.message_rate and other
             # cluster metadata metrics), so bypass the consumer context limit in that case.
-            if consumer_contexts_count < self._context_limit or self.config._cluster_monitoring_enabled:
+            if consumer_contexts_count < self._context_limit or self.config._kafka_console_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
-                # If cluster monitoring is enabled, always fetch all broker highwater marks
-                if self.config._cluster_monitoring_enabled or self.config._monitor_all_broker_highwatermarks:
+                # If Kafka Console is enabled, always fetch all broker highwater marks
+                if self.config._kafka_console_enabled or self.config._monitor_all_broker_highwatermarks:
                     partitions = None
                 else:
                     partitions = set()
@@ -133,7 +129,7 @@ class KafkaCheck(AgentCheck):
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
-                if self.config._cluster_monitoring_enabled:
+                if self.config._kafka_console_enabled:
                     topic_partitions = self.client.get_topic_partitions()
                     low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(topic_partitions)
                 if self._data_streams_enabled:
@@ -161,10 +157,10 @@ class KafkaCheck(AgentCheck):
             consumer_offsets,
             highwater_offsets,
         )
-        # When cluster monitoring is enabled, all offsets and lag metrics are reported regardless
+        # When Kafka Console is enabled, all offsets and lag metrics are reported regardless
         # of context count so that the full cluster picture is always available.
-        reporting_limit = float('inf') if self.config._cluster_monitoring_enabled else self._context_limit
-        if total_contexts >= self._context_limit and not self.config._cluster_monitoring_enabled:
+        reporting_limit = float('inf') if self.config._kafka_console_enabled else self._context_limit
+        if total_contexts >= self._context_limit and not self.config._kafka_console_enabled:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -188,7 +184,7 @@ class KafkaCheck(AgentCheck):
         )
 
         # Collect cluster metadata if enabled
-        if self.config._cluster_monitoring_enabled:
+        if self.config._kafka_console_enabled:
             connect_status = self._collect_connect_status(cluster_id)
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
 
@@ -271,7 +267,14 @@ class KafkaCheck(AgentCheck):
                 self.log.debug('RESULTS PARTITION: %s', partition)
                 self.log.debug('RESULTS OFFSET: %s', offset)
 
-                if offset == OFFSET_INVALID:
+                # A real committed offset is always a non-negative, monotonically increasing
+                # per-partition sequence number assigned by the broker. librdkafka reuses the
+                # same signed offset field for logical/sentinel values instead: OFFSET_BEGINNING
+                # (-2), OFFSET_END (-1), OFFSET_STORED (-1000), and OFFSET_INVALID (-1001) meaning
+                # "no committed offset". Checking `< 0` instead of `== OFFSET_INVALID` also covers
+                # any other negative sentinel librdkafka may return here.
+                # https://github.com/confluentinc/librdkafka/blob/master/src/rdkafka.h
+                if offset < 0:
                     continue
 
                 if (
