@@ -35,6 +35,16 @@ files:
       value:
         type: string
 
+    - name: send_ndm_metadata
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, and
+        topology) to be sent.
+      value:
+        type: boolean
+        example: false
+        default: false
+
     - name: namespace
       fleet_configurable: true
       description: |
@@ -119,6 +129,17 @@ files:
         example: true
         default: true
 
+    - name: collect_topology
+      fleet_configurable: true
+      description: |
+        Set to `true` to collect the CDP/LLDP-derived physical topology and the size of the site
+        hierarchy. The topology endpoint is not paginated, so a large fabric returns every link in
+        a single response.
+      value:
+        type: boolean
+        example: false
+        default: false
+
     - name: l3_topology_types
       fleet_configurable: true
       description: |
@@ -132,17 +153,6 @@ files:
           - ospf
         default:
           - ospf
-
-    - name: collect_topology
-      fleet_configurable: true
-      description: |
-        Set to `true` to collect the CDP/LLDP-derived physical topology and the size of the site
-        hierarchy. The topology endpoint is not paginated, so a large fabric returns every link in
-        a single response.
-      value:
-        type: boolean
-        example: false
-        default: false
 
     - name: collect_sda_fabric
       fleet_configurable: true
@@ -231,6 +241,10 @@ files:
       description: |
         Maximum number of pages to request from any single paginated endpoint in one collection
         cycle. Acts as a safety valve against runaway pagination.
+
+        Assurance event collection ignores this setting: it always caps at 10 pages per device
+        family group per cycle, to stay under that endpoint's lower rate limit and to bound how
+        many events one cycle can submit.
       value:
         type: integer
         minimum: 1
@@ -253,13 +267,3 @@ files:
           https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
           The default is 60 seconds. Catalyst Center recomputes assurance health on roughly a
           five-minute cycle, so more frequent runs do not yield fresher health scores.
-
-    - name: send_ndm_metadata
-      fleet_configurable: true
-      description: |
-        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, and
-        topology) to be sent.
-      value:
-        type: boolean
-        example: false
-        default: false

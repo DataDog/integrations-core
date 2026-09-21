@@ -106,7 +106,7 @@ class ViewRoutedHttp(ScriptedHttp):
 
 
 @pytest.fixture
-def check_instance() -> InstanceType:
+def instance() -> InstanceType:
     return {
         'catalyst_center_host': 'catalyst.example.com',
         'catalyst_center_username': 'observer',
@@ -136,8 +136,8 @@ def sleeps(monkeypatch: pytest.MonkeyPatch) -> list[float]:
 
 
 @pytest.fixture
-def client(check_instance: InstanceType, http_script: list[Any]) -> CatalystCenterClient:
-    return CatalystCenterClient(check_instance, http=ScriptedHttp(http_script))
+def client(instance: InstanceType, http_script: list[Any]) -> CatalystCenterClient:
+    return CatalystCenterClient(instance, http=ScriptedHttp(http_script))
 
 
 @pytest.fixture
@@ -172,8 +172,3 @@ def dd_environment() -> Iterator[None]:
     # integration, and the pytest plugin exits with NO E2E FIXTURE AVAILABLE when it is missing,
     # which fails the job. A no-op yield is the same thing guarddog, litellm and mac_audit_logs do.
     yield
-
-
-@pytest.fixture
-def instance(check_instance: InstanceType) -> InstanceType:
-    return check_instance

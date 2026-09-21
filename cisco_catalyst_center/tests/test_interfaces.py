@@ -10,6 +10,8 @@ issues one paginated call per enabled view and joins them on the interface ``id`
 
 from __future__ import annotations
 
+import pytest
+
 from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_interfaces
@@ -32,17 +34,13 @@ CONFIG_ONLY = {
 }
 
 
-def test_collect_interfaces_tags_metrics_with_the_snmp_compatible_device_id(aggregator, instance):
-    # Same meaning as on device metrics, so a port can be traced to its switch by one tag key.
-    collect_interfaces(_check(instance), _client(instance, CONFIG_ONLY), views=('configuration',))
-
-    aggregator.assert_metric_has_tag('cisco_catalyst_center.interface.status', 'device_id:default:10.10.20.176')
-
-
 def test_collect_interfaces_given_captured_config_emits_status_per_interface(aggregator, instance):
     collect_interfaces(_check(instance), _client(instance, CONFIG_ONLY), views=('configuration',))
 
     aggregator.assert_metric('cisco_catalyst_center.interface.status', count=57)
+    # `device_id` means the same thing here as on device metrics, so a port can be traced back to
+    # its switch by one tag key.
+    aggregator.assert_metric_has_tag('cisco_catalyst_center.interface.status', 'device_id:default:10.10.20.176')
 
 
 def test_collect_interfaces_converts_speed_from_kbps_to_bps(aggregator, instance):
@@ -51,6 +49,19 @@ def test_collect_interfaces_converts_speed_from_kbps_to_bps(aggregator, instance
     collect_interfaces(_check(instance), _client(instance, CONFIG_ONLY), views=('configuration',))
 
     assert 1_000_000_000 in metric_values(aggregator, 'cisco_catalyst_center.interface.speed')
+
+
+@pytest.mark.parametrize('unusable_speed', [{}, 'auto'])
+def test_collect_interfaces_given_unusable_speed_still_emits_the_other_interfaces(aggregator, instance, unusable_speed):
+    # `{}` is one of the four absent-data conventions emit.py documents, and `speed` is a string
+    # field, so a non-numeric value is reachable. Either one must cost that single metric, not
+    # abort the sweep and take every remaining interface's metrics with it.
+    payload = with_value(load_captured('data_interfaces_configuration'), 'response.0.speed', unusable_speed)
+    by_view = {**CONFIG_ONLY, 'configuration': payload}
+
+    collect_interfaces(_check(instance), _client(instance, by_view), views=('configuration',))
+
+    aggregator.assert_metric('cisco_catalyst_center.interface.status', count=57)
 
 
 def test_collect_interfaces_given_statistics_view_emits_throughput(aggregator, instance):

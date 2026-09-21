@@ -241,9 +241,10 @@ CLIENT_AGGREGATES: Final[tuple[tuple[str, str, str], ...]] = (
     ('macAddress', 'count', 'client.observed.count'),
 )
 
-# Which dimensions the appliance groups by. Only these eleven are accepted; notably `authType`
-# and `connectionStatus` are not among them, so counts by connection state or authentication type
-# are not obtainable this way.
+# Which dimensions to group the client aggregates by. The endpoint accepts eleven; these two are
+# the default because they keep the series count bounded. `authType` and `connectionStatus` are
+# not among the eleven, so counts by connection state or authentication type are not obtainable
+# this way.
 CLIENT_GROUP_BY_DEFAULT: Final[tuple[str, ...]] = ('ssid', 'band')
 
 # Dimensions the assurance-event breakdown is grouped on, as (record field, tag key).
@@ -311,6 +312,3 @@ DERIVED_METRIC_NAMES: Final[frozenset[str]] = frozenset(
         'event.count',
     }
 )
-
-# Numeric values the API returns as strings.
-STRING_NUMERIC_FIELDS: Final[frozenset[str]] = frozenset({'speed', 'ifIndex', 'interfaceIfIndex'})

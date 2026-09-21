@@ -29,6 +29,7 @@ from datadog_checks.cisco_catalyst_center import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_events
 from datadog_checks.cisco_catalyst_center.constants import EVENT_DEVICE_FAMILY_GROUPS, EVENT_WINDOW_MAX_SECONDS
+from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 
 from .common import load_captured, metric_values
 from .conftest import ScriptedHttp
@@ -128,7 +129,12 @@ def test_collect_events_asks_for_every_device_family_group(instance: InstanceTyp
     collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
 
     asked = [request['params']['deviceFamily'] for request in client.http.requests]
-    assert asked == [list(group) for group in EVENT_DEVICE_FAMILY_GROUPS]
+    assert asked == [
+        ['Switches and Hubs', 'Routers', 'Wireless Controller', 'Third Party Device'],
+        ['Unified AP'],
+        ['Wired Client'],
+        ['Wireless Client'],
+    ]
 
 
 def test_collect_events_asks_for_the_window_it_was_given(instance: InstanceType) -> None:
@@ -193,6 +199,19 @@ def test_collect_events_given_one_failing_group_still_collects_the_others(
     collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1') == [2]
+
+
+def test_collect_events_given_every_group_failing_raises_instead_of_reporting_success(
+    instance: InstanceType,
+) -> None:
+    # Losing one group is worth keeping the rest of the window, but losing all four means nothing
+    # was submitted at all -- there is nothing left to double-count by retrying, so this must raise
+    # rather than let the caller believe the window was collected and advance past it.
+    failure = {'status_code': 400, 'json': load_captured('error_device_family_mandatory')}
+    client = _client(instance, [failure] * len(EVENT_DEVICE_FAMILY_GROUPS))
+
+    with pytest.raises(CatalystApiError):
+        collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
 
 
 def test_collect_events_tags_only_the_bounded_dimensions(aggregator: AggregatorStub, instance: InstanceType) -> None:

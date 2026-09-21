@@ -28,42 +28,36 @@ def test_get_list_given_data_api_envelope_returns_response_items(client, respond
     assert devices[0]['name'] == 'sw1'
 
 
-def test_get_list_given_error_object_inside_response_list_raises(client, respond):
-    # 400-class errors arrive as a single-element list in the same slot real records use.
-    respond(load_captured('error_invalid_attribute'))
+#: Every shape Catalyst Center uses to report a failure, and what the client must surface for it.
+#: The appliance puts errors in the same ``response`` slot it uses for real records, so a client
+#: that reads only the HTTP status hands an error object to a collector, which iterates it without
+#: raising and records nothing.
+ERROR_ENVELOPES = [
+    # A 400-class error as a single-element list, in the slot real records use. Numeric errorCode.
+    ('error_invalid_attribute', 200, 'get_list', 'Invalid attribute provided', 14001),
+    # The slot `intent_stack` uses for a real object. errorCode here is a string, not an int.
+    ('error_bad_uuid_registered_route', 200, 'get_object', 'deviceId is not in UUID format', 'Bad request'),
+    # An unregistered route: a bare {"error": ...} with no `response` key at all, and no code.
+    ('error_route_not_found', 200, 'get_list', 'BAPI not found', None),
+    # HTTP 200 with an errorMessage and an empty response. raise_for_status() would pass this.
+    ('intent_application_health_missing_param', 200, 'get_list', 'must be provided', None),
+    # A real 400 carrying two errorCode 2046 entries, only the first of which explains anything.
+    # The body's sentence must win over the bare status.
+    ('error_invalid_time_window', 400, 'get_list', 'valid EndTime timestamp', 2046),
+]
+
+
+@pytest.mark.parametrize(('fixture', 'status_code', 'call', 'expected_message', 'expected_code'), ERROR_ENVELOPES)
+def test_request_given_an_error_envelope_raises_with_the_cisco_message(
+    client, respond_sequence, fixture, status_code, call, expected_message, expected_code
+):
+    respond_sequence([{'status_code': status_code, 'json': load_captured(fixture)}])
 
     with pytest.raises(CatalystApiError) as excinfo:
-        client.get_list('/dna/data/api/v1/networkDevices')
+        getattr(client, call)('/dna/data/api/v1/networkDevices')
 
-    assert excinfo.value.error_code == 14001
-    assert 'Invalid attribute provided' in str(excinfo.value)
-
-
-def test_get_object_given_error_object_in_response_raises(client, respond):
-    # The same slot `intent_stack` uses for a real object. errorCode here is a string.
-    respond(load_captured('error_bad_uuid_registered_route'))
-
-    with pytest.raises(CatalystApiError) as excinfo:
-        client.get_object('/dna/intent/api/v1/network-device/bogus/stack')
-
-    assert excinfo.value.error_code == 'Bad request'
-    assert 'not in UUID format' in str(excinfo.value)
-
-
-def test_get_list_given_routing_miss_envelope_raises(client, respond):
-    # An unregistered route returns a bare {"error": ...} with no `response` key at all.
-    respond(load_captured('error_route_not_found'))
-
-    with pytest.raises(CatalystApiError, match='BAPI not found'):
-        client.get_list('/dna/intent/api/v1/event')
-
-
-def test_get_list_given_soft_200_error_message_raises(client, respond):
-    # HTTP 200 with an errorMessage and an empty response. raise_for_status() would pass.
-    respond(load_captured('intent_application_health_missing_param'))
-
-    with pytest.raises(CatalystApiError, match='must be provided'):
-        client.get_list('/dna/intent/api/v1/application-health')
+    assert expected_message in str(excinfo.value)
+    assert excinfo.value.error_code == expected_code
 
 
 def test_get_object_given_real_object_returns_it(client, respond):
@@ -107,15 +101,6 @@ def test_get_list_given_short_first_page_makes_one_request(client, respond_seque
     assert len(requests) == 1
 
 
-def test_get_list_given_site_health_endpoint_uses_page_limit_of_twenty(client, respond_sequence):
-    # siteHealthSummaries caps at 20; asking for 500 returns errorCode 2005.
-    requests = respond_sequence([load_captured('data_site_health_summaries')])
-
-    client.get_list('/dna/data/api/v1/siteHealthSummaries')
-
-    assert requests[0]['params']['limit'] == 20
-
-
 @pytest.mark.parametrize(
     ('path', 'limit'),
     [
@@ -149,6 +134,7 @@ def test_request_given_expired_token_reauthenticates_and_retries_once(client, re
     assert len(devices) == 4
     assert client.auth_count == 2, 'expected one initial auth plus one refresh after the 401'
     assert len(requests) == 2
+    assert requests[1]['extra_headers']['X-Auth-Token'] == 'token-2', 'retry must not reuse the stale token'
 
 
 def test_request_given_repeated_401_raises_instead_of_looping(client, respond_sequence):
@@ -159,27 +145,6 @@ def test_request_given_repeated_401_raises_instead_of_looping(client, respond_se
         client.get_list('/dna/data/api/v1/networkDevices')
 
     assert client.auth_count == 2, 'must not re-authenticate indefinitely'
-
-
-def test_get_object_given_http_400_surfaces_the_cisco_message_not_just_the_status(client, respond_sequence):
-    # Live behaviour: the appliance sends errorCode/message/detail in the body of a 400. Reporting
-    # only "HTTP 400" discards the one sentence that says what is actually wrong.
-    respond_sequence([{'status_code': 400, 'json': load_captured('error_bad_uuid_registered_route')}])
-
-    with pytest.raises(CatalystApiError) as excinfo:
-        client.get_object('/dna/intent/api/v1/network-device/bogus-uuid/stack')
-
-    assert 'deviceId is not in UUID format' in str(excinfo.value)
-    assert excinfo.value.error_code == 'Bad request'
-
-
-def test_get_list_given_several_error_objects_reports_the_one_with_a_message(client, respond_sequence):
-    # Recorded live: a bad time window returns two errorCode 2046 entries and only the first
-    # carries the sentence explaining what is wrong.
-    respond_sequence([{'status_code': 400, 'json': load_captured('error_invalid_time_window')}])
-
-    with pytest.raises(CatalystApiError, match='valid EndTime timestamp'):
-        client.get_list('/dna/data/api/v1/interfaces')
 
 
 def test_get_list_given_http_500_without_a_body_still_raises(client, respond_sequence):
@@ -197,32 +162,15 @@ def test_get_list_sends_the_minted_token_as_x_auth_token(client, respond_sequenc
     assert requests[0]['extra_headers']['X-Auth-Token'] == 'token-1'
 
 
-def test_get_list_after_reauthentication_sends_the_new_token(client, respond_sequence):
-    unauthorized = {'status_code': 401, 'json': {'exp': 'token expired'}}
-    requests = respond_sequence([unauthorized, load_captured('data_network_devices')])
-
-    client.get_list('/dna/data/api/v1/networkDevices')
-
-    assert requests[1]['extra_headers']['X-Auth-Token'] == 'token-2', 'retry must not reuse the stale token'
-
-
-def test_get_list_given_429_retries_and_succeeds(client, respond_sequence, sleeps):
+def test_get_list_given_429_waits_for_the_retry_after_header_then_succeeds(client, respond_sequence, sleeps):
     # The documented limit varies 20-500 requests per minute per endpoint, so 429 is expected
     # traffic rather than an exceptional condition.
-    throttled = {'status_code': 429, 'json': {}, 'headers': {'Retry-After': '2'}}
+    throttled = {'status_code': 429, 'json': {}, 'headers': {'Retry-After': '7'}}
     respond_sequence([throttled, load_captured('data_network_devices')])
 
     devices = client.get_list('/dna/data/api/v1/networkDevices')
 
     assert len(devices) == 4
-
-
-def test_get_list_given_429_waits_for_the_retry_after_header(client, respond_sequence, sleeps):
-    throttled = {'status_code': 429, 'json': {}, 'headers': {'Retry-After': '7'}}
-    respond_sequence([throttled, load_captured('data_network_devices')])
-
-    client.get_list('/dna/data/api/v1/networkDevices')
-
     assert sleeps == [7.0], 'Retry-After must be honoured rather than replaced by a backoff guess'
 
 
@@ -273,9 +221,21 @@ def test_post_object_given_an_error_envelope_raises(client, respond_sequence):
         client.post_object('/dna/data/api/v1/clients/summaryAnalytics', body={})
 
 
-def test_client_given_host_with_scheme_does_not_double_prefix(check_instance):
-    check_instance['catalyst_center_host'] = 'https://catalyst.example.com'
+def test_post_object_given_429_retries_and_succeeds(client, respond_sequence, sleeps):
+    # `_post_body` and `_get_body` share `_send_with_throttle_retry`, so the back-off behaviour
+    # itself is covered by the GET tests above. What this pins is that POST is wired into it at
+    # all: the analytics endpoints sit under the same appliance-wide rate limit.
+    throttled = {'status_code': 429, 'json': {}, 'headers': {'Retry-After': '2'}}
+    respond_sequence([throttled, load_captured('data_clients_summary_analytics')])
 
-    client = CatalystCenterClient(check_instance, http=None)
+    payload = client.post_object('/dna/data/api/v1/clients/summaryAnalytics', body={'groupBy': ['ssid']})
+
+    assert 'aggregateAttributes' in payload
+
+
+def test_client_given_host_with_scheme_does_not_double_prefix(instance):
+    instance['catalyst_center_host'] = 'https://catalyst.example.com'
+
+    client = CatalystCenterClient(instance, http=None)
 
     assert client.base_url == 'https://catalyst.example.com'

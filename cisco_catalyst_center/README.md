@@ -1,13 +1,21 @@
-# Agent Check: cisco_catalyst_center
+# Agent Check: Cisco Catalyst Center
 
 ## Overview
 
-This check monitors [cisco_catalyst_center][1] through the Datadog Agent.
+This check monitors [Cisco Catalyst Center][1] through the Datadog Agent.
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+Cisco Catalyst Center (formerly DNA Center) is Cisco's platform for managing and monitoring
+enterprise campus and branch networks. This integration connects to the Catalyst Center API to
+collect device inventory, network assurance health, and topology data, giving you visibility into
+your Cisco campus network from within Datadog.
+
+The integration provides:
+
+- **Device and interface inventory**: reachability, hardware, and interface details for switches, routers, wireless controllers, and access points, with optional Network Device Monitoring metadata for pairing with the SNMP integration.
+- **Assurance health**: site, network, and client health scores, plus per-application traffic and performance.
+- **Assurance issues and events**: counts of open issues and, optionally, individual assurance events as Datadog events.
+- **Topology**: physical (CDP/LLDP), site, and layer 3 topology sizing.
+- **SD-Access and security**: fabric and virtual network health, plus rogue access point and aWIPS wireless intrusion counts.
 
 ## Setup
 
@@ -15,12 +23,12 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The cisco_catalyst_center check is included in the [Datadog Agent][2] package.
+The Cisco Catalyst Center check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `cisco_catalyst_center.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your cisco_catalyst_center performance data. See the [sample cisco_catalyst_center.d/conf.yaml][4] for all available configuration options.
+1. Edit the `cisco_catalyst_center.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cisco Catalyst Center performance data. See the [sample cisco_catalyst_center.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -49,7 +57,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-When `collect_events` is enabled, the cisco_catalyst_center integration submits each Catalyst Center
+When `collect_events` is enabled, the Cisco Catalyst Center integration submits each Catalyst Center
 assurance event as a Datadog event. The title is the event name, the body carries the reason,
 sub-reason, failure category and result reported by the appliance, and the alert type is derived from
 the event's syslog severity: Emergency through Error become errors, Warning becomes a warning, and
@@ -60,17 +68,17 @@ identifiers appear in the event body rather than as tags.
 
 ### Service checks
 
-The Cisco Catalyst Center integration does not include any service checks. Use the
-`cisco_catalyst_center.collection.success` metric to alert on collection failures: it is 1 when
-every enabled collector completed a cycle and 0 when any of them failed, and it is submitted on
-failed cycles as well as successful ones.
+The Cisco Catalyst Center integration does not include any service checks. To alert on collection
+failures, use the `cisco_catalyst_center.collection.success` metric: it is 1 when every enabled
+collector completed a cycle and 0 when any of them failed, and it is submitted on failed cycles as
+well as successful ones.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.cisco.com/site/us/en/products/networking/catalyst-center/index.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cisco_catalyst_center/datadog_checks/cisco_catalyst_center/data/conf.yaml.example

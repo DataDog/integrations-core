@@ -37,15 +37,6 @@ SWITCHES = [
 ]
 
 
-def test_collect_stacks_tags_metrics_with_the_snmp_compatible_device_id(aggregator, instance):
-    # Stack metrics hang off a device, so they carry the same device identity as the rest.
-    collect_stacks(_check(instance), _client(instance, [load_captured('intent_stack')]), SWITCHES[:1])
-
-    aggregator.assert_metric_has_tag(
-        'cisco_catalyst_center.device.stack.member.count', 'device_id:default:10.10.20.175'
-    )
-
-
 # -- stacks -----------------------------------------------------------------------
 
 
@@ -55,6 +46,10 @@ def test_collect_stacks_emits_member_count_per_switch(aggregator, instance):
     collect_stacks(_check(instance), _client(instance, [stack, stack]), SWITCHES)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.device.stack.member.count', 'device_name:sw1') == [1]
+    # Stack metrics hang off a device, so they carry the same device identity as the rest.
+    aggregator.assert_metric_has_tag(
+        'cisco_catalyst_center.device.stack.member.count', 'device_id:default:10.10.20.175'
+    )
 
 
 def test_collect_stacks_emits_member_state_tagged_by_role(aggregator, instance):
@@ -99,16 +94,12 @@ def test_collect_stacks_skips_devices_that_are_not_switches(aggregator, instance
 # -- aggregate client health ------------------------------------------------------
 
 
-def test_collect_client_health_emits_counts_by_client_type(aggregator, instance):
+def test_collect_client_health_given_no_clients_counts_zero_and_skips_the_score(aggregator, instance):
+    # The count is a real measurement even at zero. The score is not: scoreValue is -1 when
+    # Catalyst Center has no client data, and emitting that graphs a false health.
     collect_client_health(_check(instance), _client(instance, [load_captured('intent_client_health_empty')]))
 
     assert metric_values(aggregator, 'cisco_catalyst_center.client.count', 'client_type:ALL') == [0]
-
-
-def test_collect_client_health_skips_the_minus_one_score(aggregator, instance):
-    # scoreValue is -1 when Catalyst Center has no client data. Emitting it graphs a false health.
-    collect_client_health(_check(instance), _client(instance, [load_captured('intent_client_health_empty')]))
-
     aggregator.assert_metric('cisco_catalyst_center.client.health', count=0)
 
 

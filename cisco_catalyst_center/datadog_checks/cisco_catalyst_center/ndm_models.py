@@ -66,7 +66,6 @@ class DeviceMetadata(BaseModel):
     device_type: str = 'other'
     site_id: str = ''
     site_name: str = ''
-    stack_role: str | None = None
     namespace: str
 
 
@@ -117,7 +116,7 @@ def _int_or_none(value: Any) -> int | None:
         return None
 
 
-def create_device_metadata(record: dict[str, Any], namespace: str, stack_role: str | None = None) -> DeviceMetadata:
+def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMetadata:
     """Build the NDM device payload from one ``data/networkDevices`` record.
 
     Field names differ from those the product brief lists, because the brief maps against the
@@ -168,9 +167,6 @@ def create_device_metadata(record: dict[str, Any], namespace: str, stack_role: s
         device_type=DEVICE_FAMILY_TO_TYPE.get(record.get('deviceFamily') or '', 'other'),
         site_id=record.get('siteId') or '',
         site_name=_site_name(hierarchy),
-        # Cisco reports ACTIVE / STANDBY / MEMBER here, not the master/member the brief names.
-        # Only known for stackable families, and only once the stack collector has run.
-        stack_role=stack_role,
         namespace=namespace,
     )
 
@@ -200,6 +196,25 @@ def create_interface_metadata(record: dict[str, Any], namespace: str) -> Interfa
     name = record.get('name') or ''
     speed_kbps = _int_or_none(record.get('speed'))
 
+    # A status Catalyst Center did not report at all must stay distinguishable from one it
+    # reported as down -- collapsing the two would show an interface as down when the appliance
+    # never actually said so.
+    admin_status_raw = record.get('adminStatus')
+    if admin_status_raw in UP_VALUES:
+        admin_status = STATUS_UP
+    elif admin_status_raw:
+        admin_status = STATUS_DOWN
+    else:
+        admin_status = None
+
+    oper_status_raw = record.get('operStatus')
+    if oper_status_raw in UP_VALUES:
+        oper_status = STATUS_UP
+    elif oper_status_raw:
+        oper_status = STATUS_DOWN
+    else:
+        oper_status = OPER_STATUS_UNKNOWN
+
     return InterfaceMetadata(
         device_id=record.get('networkDeviceId') or '',
         raw_id=record.get('id') or '',
@@ -207,8 +222,8 @@ def create_interface_metadata(record: dict[str, Any], namespace: str) -> Interfa
         name=name,
         description=record.get('description') or '',
         mac_address=record.get('macAddress') or '',
-        admin_status=STATUS_UP if record.get('adminStatus') in UP_VALUES else STATUS_DOWN,
-        oper_status=STATUS_UP if record.get('operStatus') in UP_VALUES else STATUS_DOWN,
+        admin_status=admin_status,
+        oper_status=oper_status,
         speed=speed_kbps * KBPS_TO_BPS if speed_kbps is not None else None,
         vlan=_int_or_none(record.get('vlanId')),
         port_role=_port_role(record),

@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import random
 import time
-from typing import Any, TypeGuard
+from typing import Any, Callable, TypeGuard
 
 from .constants import (
     AUTH_ENDPOINT,
@@ -138,19 +138,18 @@ class CatalystCenterClient:
         delay = min(THROTTLE_BASE_DELAY_SECONDS * (2**attempt), THROTTLE_MAX_DELAY_SECONDS)
         return delay + random.uniform(0, delay / 2)
 
-    def _get_body(self, path: str, params: dict[str, Any] | None = None) -> Any:
-        """Issue one authenticated GET and return the whole validated body.
+    def _send_with_throttle_retry(self, path: str, send: Callable[[], Any]) -> Any:
+        """Call ``send`` to issue one request, retrying a bounded number of times on a 429.
 
-        Re-authenticates exactly once on a 401, retries a bounded number of times on a 429, and
-        raises on every other failure shape.
+        Shared by :meth:`_get_body` and :meth:`_post_body`, which differ only in how they build
+        the request and in what they do with a non-429 failure once this returns. ``send`` is
+        invoked after :meth:`_ensure_token`, so it always sees a fresh token.
         """
-        url = f'{self.base_url}{path}'
-
         for attempt in range(MAX_THROTTLE_RETRIES):
             self._ensure_token()
-            response = self.http.get(url, params=params, extra_headers=self._auth_headers())
+            response = send()
             if response.status_code != 429:
-                break
+                return response
             if attempt == MAX_THROTTLE_RETRIES - 1:
                 # Out of attempts. Sleeping now would only delay the error.
                 break
@@ -164,12 +163,22 @@ class CatalystCenterClient:
             )
             time.sleep(delay)
 
-        if response.status_code == 429:
-            raise CatalystApiError(
-                f'Catalyst Center rate limit not cleared for {path} after {MAX_THROTTLE_RETRIES} attempts',
-                error_code=429,
-                correlation_id=self._correlation_id(response),
-            )
+        raise CatalystApiError(
+            f'Catalyst Center rate limit not cleared for {path} after {MAX_THROTTLE_RETRIES} attempts',
+            error_code=429,
+            correlation_id=self._correlation_id(response),
+        )
+
+    def _get_body(self, path: str, params: dict[str, Any] | None = None) -> Any:
+        """Issue one authenticated GET and return the whole validated body.
+
+        Re-authenticates exactly once on a 401, retries a bounded number of times on a 429, and
+        raises on every other failure shape.
+        """
+        url = f'{self.base_url}{path}'
+        response = self._send_with_throttle_retry(
+            path, lambda: self.http.get(url, params=params, extra_headers=self._auth_headers())
+        )
 
         if response.status_code == 401:
             # The token aged out mid-cycle. Refresh once and retry with the new token; never loop.
@@ -314,12 +323,15 @@ class CatalystCenterClient:
     def _post_body(self, path: str, body: dict[str, Any]) -> Any:
         """Issue one authenticated POST and return the whole validated body.
 
-        The analytics endpoints are POST-only. Unlike :meth:`_get_body` this does not retry on a
-        401: an analytics query is not idempotent in cost, and a stale token surfacing here means
-        the cycle is already long enough that retrying is the wrong instinct.
+        Retries a bounded number of times on a 429, same as :meth:`_get_body`. Unlike
+        :meth:`_get_body` this does not retry on a 401: an analytics query is not idempotent in
+        cost, and a stale token surfacing here means the cycle is already long enough that
+        retrying is the wrong instinct.
         """
-        self._ensure_token()
-        response = self.http.post(f'{self.base_url}{path}', json=body, extra_headers=self._auth_headers())
+        url = f'{self.base_url}{path}'
+        response = self._send_with_throttle_retry(
+            path, lambda: self.http.post(url, json=body, extra_headers=self._auth_headers())
+        )
 
         if response.status_code >= 400:
             self._raise_from_status_body(response, path)

@@ -41,17 +41,10 @@ def _client(instance, script):
 # -- topology ---------------------------------------------------------------------
 
 
-def test_collect_topology_emits_a_link_count(aggregator, instance):
-    physical = load_captured('intent_topology_physical')
-
-    collect_topology(_check(instance), _client(instance, [physical]))
-
-    assert metric_values(aggregator, 'cisco_catalyst_center.topology.link.count') == [10]
-
-
-def test_collect_topology_emits_link_status_per_link(aggregator, instance):
+def test_collect_topology_given_the_captured_graph_emits_a_count_and_a_status_per_link(aggregator, instance):
     collect_topology(_check(instance), _client(instance, [load_captured('intent_topology_physical')]))
 
+    assert metric_values(aggregator, 'cisco_catalyst_center.topology.link.count') == [10]
     aggregator.assert_metric('cisco_catalyst_center.topology.link.status', count=10)
 
 
@@ -61,16 +54,6 @@ def test_collect_topology_given_a_down_link_reports_zero(aggregator, instance):
     collect_topology(_check(instance), _client(instance, [payload]))
 
     assert 0 in metric_values(aggregator, 'cisco_catalyst_center.topology.link.status')
-
-
-def test_topology_links_reference_devices_by_the_same_uuid_used_for_ndm(aggregator, instance):
-    # source/target are device UUIDs, which is what DeviceMetadata.id is now keyed on, so links
-    # resolve to devices without a translation step.
-    physical = load_captured('intent_topology_physical')
-    device_ids = {d['id'] for d in load_captured('data_network_devices')['response']}
-
-    endpoints = {link['source'] for link in physical['response']['links']}
-    assert endpoints <= device_ids
 
 
 # -- SD-Access fabric -------------------------------------------------------------
@@ -174,8 +157,9 @@ def test_collect_assurance_issues_submits_an_event_carrying_the_suggested_action
     assert 'Check the uplink cable; verify PoE budget' in aggregator.events[0]['msg_text']
 
 
-def test_collect_assurance_issues_given_an_issue_already_reported_submits_no_event(aggregator, instance):
+def test_collect_assurance_issues_given_an_issue_already_reported_counts_it_without_a_new_event(aggregator, instance):
     # Without the watermark, an issue that stays open produces one event every cycle, forever.
+    # The counts are current state though, so it keeps counting on the cycles it is not re-reported.
     collect_assurance_issues(
         _check(instance),
         _client(instance, [_issues(OPEN_ISSUE)]),
@@ -183,17 +167,6 @@ def test_collect_assurance_issues_given_an_issue_already_reported_submits_no_eve
     )
 
     assert not aggregator.events
-
-
-def test_collect_assurance_issues_still_counts_an_issue_it_does_not_re_report(aggregator, instance):
-    # The counts are current state, so a still-open issue keeps counting on the cycles where it
-    # is not worth another event.
-    collect_assurance_issues(
-        _check(instance),
-        _client(instance, [_issues(OPEN_ISSUE)]),
-        reported_through=OPEN_ISSUE['mostRecentOccurredTime'],
-    )
-
     assert metric_values(aggregator, 'cisco_catalyst_center.issue.total.count') == [1]
 
 

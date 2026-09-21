@@ -30,6 +30,12 @@ instances:
     #
     catalyst_center_password: <CATALYST_CENTER_PASSWORD>
 
+    ## @param send_ndm_metadata - boolean - optional - default: false
+    ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, and
+    ## topology) to be sent.
+    #
+    # send_ndm_metadata: false
+
     ## @param namespace - string - optional - default: default
     ## Namespace to use for NDM device metadata. This must match the namespace configured on the
     ## SNMP check polling the same devices. If the two differ, Catalyst Center and SNMP resolve to
@@ -81,19 +87,19 @@ instances:
     #
     # collect_client_experience: true
 
-    ## @param l3_topology_types - list of strings - optional - default: ['ospf']
-    ## Which layer 3 routing graphs to size, one request each. Only used when `collect_topology`
-    ## is enabled.
-    #
-    # l3_topology_types:
-    #   - ospf
-
     ## @param collect_topology - boolean - optional - default: false
     ## Set to `true` to collect the CDP/LLDP-derived physical topology and the size of the site
     ## hierarchy. The topology endpoint is not paginated, so a large fabric returns every link in
     ## a single response.
     #
     # collect_topology: false
+
+    ## @param l3_topology_types - list of strings - optional - default: ['ospf']
+    ## Which layer 3 routing graphs to size, one request each. Only used when `collect_topology`
+    ## is enabled.
+    #
+    # l3_topology_types:
+    #   - ospf
 
     ## @param collect_sda_fabric - boolean - optional - default: false
     ## Set to `true` to collect Cisco SD-Access fabric health, virtual network health, and a count
@@ -151,6 +157,10 @@ instances:
     ## @param max_pages - integer - optional - default: 1000
     ## Maximum number of pages to request from any single paginated endpoint in one collection
     ## cycle. Acts as a safety valve against runaway pagination.
+    ##
+    ## Assurance event collection ignores this setting: it always caps at 10 pages per device
+    ## family group per cycle, to stay under that endpoint's lower rate limit and to bound how
+    ## many events one cycle can submit.
     #
     # max_pages: 1000
 
@@ -517,9 +527,3 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param send_ndm_metadata - boolean - optional - default: false
-    ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, and
-    ## topology) to be sent.
-    #
-    # send_ndm_metadata: false

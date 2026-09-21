@@ -27,28 +27,17 @@ def _check(instance):
     return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
 
 
-def test_collect_devices_tags_metrics_with_the_snmp_compatible_device_id(aggregator, instance):
+def test_collect_devices_given_captured_switches_emits_health_per_device(aggregator, instance):
     # `device_id` must mean one thing across the whole integration: the {namespace}:{ip} form the
     # SNMP check also uses. The Catalyst Center UUID travels separately as `device_uuid`.
     collect_devices(_check(instance), _client(instance, load_captured('data_network_devices')), collect_wireless=False)
 
-    aggregator.assert_metric_has_tag('cisco_catalyst_center.device.health', 'device_id:default:10.10.20.175')
-
-
-def test_collect_devices_tags_metrics_with_the_catalyst_center_uuid(aggregator, instance):
-    payload = load_captured('data_network_devices')
-    uuid = payload['response'][0]['id']
-
-    collect_devices(_check(instance), _client(instance, payload), collect_wireless=False)
-
-    aggregator.assert_metric_has_tag('cisco_catalyst_center.device.health', f'device_uuid:{uuid}')
-
-
-def test_collect_devices_given_captured_switches_emits_health_per_device(aggregator, instance):
-    collect_devices(_check(instance), _client(instance, load_captured('data_network_devices')), collect_wireless=False)
-
     aggregator.assert_metric('cisco_catalyst_center.device.health', count=4)
     assert metric_values(aggregator, 'cisco_catalyst_center.device.health', 'device_name:sw1') == [10]
+    aggregator.assert_metric_has_tags(
+        'cisco_catalyst_center.device.health',
+        ['device_id:default:10.10.20.175', 'device_uuid:aa754801-8895-41e8-8ca5-27ee415c9c42'],
+    )
 
 
 def test_collect_devices_given_score_of_minus_one_skips_that_metric(aggregator, instance):

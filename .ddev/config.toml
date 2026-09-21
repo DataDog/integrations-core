@@ -48,6 +48,7 @@ hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
+cisco_catalyst_center = "Cisco Catalyst Center"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."

@@ -689,10 +689,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j7f33498:
+  jef39ca4:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: cisco_catalyst_center
+      job-name: Cisco Catalyst Center
       target: cisco_catalyst_center
       platform: linux
       runner: '["ubuntu-22.04"]'

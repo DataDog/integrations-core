@@ -54,7 +54,7 @@ from .constants import (
     TOPOLOGY_LINK_UP_VALUES,
     VIRTUAL_NETWORK_HEALTH_ENDPOINT,
 )
-from .emit import compact, emit_gauge, emit_score, emit_watts, tag
+from .emit import compact, emit_gauge, emit_score, emit_watts, tag, to_number
 from .errors import CatalystApiError
 from .metrics import (
     APPLICATION_METRICS,
@@ -233,7 +233,7 @@ def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -
     )
 
 
-def _merge_views(client: Any, views: tuple[str, ...], max_pages_guard: str) -> dict[str, dict[str, Any]]:
+def _merge_views(client: Any, views: tuple[str, ...]) -> dict[str, dict[str, Any]]:
     """Fetch each view and merge the results into one record per interface id.
 
     A view replaces the field set rather than extending it, so the only way to see an
@@ -296,7 +296,7 @@ def collect_interfaces(
             fields it adds are consumed only by the NDM payload.
     """
     base_tags = base_tags or []
-    merged = _merge_views(client, views, INTERFACES_ENDPOINT)
+    merged = _merge_views(client, views)
     if enrich_metadata:
         _enrich_metadata(client, merged)
 
@@ -312,9 +312,11 @@ def collect_interfaces(
             check.gauge('interface.admin_status', int(admin_status in INTERFACE_UP_STATES), tags=tags)
 
         # `speed` is documented in Kbps and returned as a string. NDM and this metric are bps.
-        speed_kbps = record.get('speed')
-        if speed_kbps not in (None, ''):
-            emit_gauge(check, 'interface.speed', float(speed_kbps) * KBPS_TO_BPS, tags)
+        # Coerced before scaling: multiplying first would raise on the absent-data shapes
+        # emit_gauge exists to skip, losing every interface after this one.
+        speed_kbps = to_number(record.get('speed'))
+        if speed_kbps is not None:
+            emit_gauge(check, 'interface.speed', speed_kbps * KBPS_TO_BPS, tags)
 
         for field, metric_name in INTERFACE_STATISTICS_METRICS.items():
             emit_gauge(check, metric_name, record.get(field), tags)
@@ -911,7 +913,10 @@ def collect_events(
     A group that fails is logged and skipped rather than aborting the sweep. That costs one window
     of that group's events, which is the lesser of two evils: the alternative is to fail the whole
     collection so the caller retries the window, which would double-count everything the groups
-    before it already submitted.
+    before it already submitted. That trade only makes sense when some group got through, though:
+    if every group fails, nothing was submitted for the window at all, so there is nothing left to
+    double-count by retrying -- that case raises instead, so the caller does not advance its
+    watermark and the window is retried next cycle rather than silently dropped.
 
     ``event.total.count`` comes from the total the appliance reports, not from the records that
     arrived, so it stays correct when a sweep is cut short by the page budget. The breakdown cannot
@@ -919,6 +924,7 @@ def collect_events(
     """
     tags = base_tags or []
     window = {'startTime': start_time, 'endTime': end_time}
+    any_group_succeeded = False
 
     for group in EVENT_DEVICE_FAMILY_GROUPS:
         try:
@@ -932,6 +938,8 @@ def collect_events(
         except CatalystApiError:
             check.log.warning('Could not read assurance events for %s', ', '.join(group), exc_info=True)
             continue
+
+        any_group_succeeded = True
 
         # Untagged, and submitted once per group. Counts sharing a name and tag set are summed,
         # so the four submissions add up to the whole window. The group is an artefact of the
@@ -958,6 +966,11 @@ def collect_events(
         fallback_timestamp = end_time // 1000
         for record in records:
             check.event(_event_payload(record, fallback_timestamp, tags))
+
+    if not any_group_succeeded:
+        raise CatalystApiError(
+            f'Could not read assurance events for any device family group in window {start_time}-{end_time}'
+        )
 
 
 # -- application visibility -----------------------------------------------------------

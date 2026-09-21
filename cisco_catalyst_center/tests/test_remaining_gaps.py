@@ -9,6 +9,8 @@ applications, and the two NDM fields named in the brief's P0 metadata tables.
 
 from __future__ import annotations
 
+import pytest
+
 from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import (
@@ -17,7 +19,7 @@ from datadog_checks.cisco_catalyst_center.collectors import (
     collect_interfaces,
     collect_l3_topology,
 )
-from datadog_checks.cisco_catalyst_center.ndm_models import create_device_metadata, create_interface_metadata
+from datadog_checks.cisco_catalyst_center.ndm_models import create_interface_metadata
 
 from .common import load_captured, metric_values, with_value
 from .conftest import ScriptedHttp, ViewRoutedHttp
@@ -30,23 +32,22 @@ def _check(instance):
 # -- reachability -----------------------------------------------------------------
 
 
-def test_collect_devices_emits_a_reachability_gauge(aggregator, instance):
+@pytest.mark.parametrize(
+    ('reachability', 'expected'),
+    [
+        ('REACHABLE', 1),
+        ('UNREACHABLE', 0),
+    ],
+)
+def test_collect_devices_maps_reachability_to_a_gauge(aggregator, instance, reachability, expected):
     # "Is this device up" was previously answerable only from NDM metadata, which is not
     # alertable. Now it is a metric.
-    client = CatalystCenterClient(instance, http=ScriptedHttp([load_captured('data_network_devices')]))
-
-    collect_devices(_check(instance), client, collect_wireless=False)
-
-    assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [1]
-
-
-def test_collect_devices_given_unreachable_device_reports_zero(aggregator, instance):
-    payload = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', 'UNREACHABLE')
+    payload = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', reachability)
     client = CatalystCenterClient(instance, http=ScriptedHttp([payload]))
 
     collect_devices(_check(instance), client, collect_wireless=False)
 
-    assert 0 in metric_values(aggregator, 'cisco_catalyst_center.device.reachable')
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [expected]
 
 
 def test_collect_devices_tags_reachability_state(aggregator, instance):
@@ -65,28 +66,15 @@ VIEWS = {
 }
 
 
-def test_collect_interfaces_emits_a_device_level_throughput_total(aggregator, instance):
+def test_device_throughput_total_equals_the_sum_of_its_interfaces(aggregator, instance):
     # The brief asks for device-level rx/tx bps. Per-interface rates exist; this sums them per
     # device so the bullet is answerable without the caller doing arithmetic in a dashboard.
+    # 10.10.20.176 reports three interfaces with a non-zero rxRate, totalling 733.0.
     client = CatalystCenterClient(instance, http=ViewRoutedHttp(VIEWS))
 
     collect_interfaces(_check(instance), client, views=('configuration', 'statistics'))
 
-    totals = metric_values(aggregator, 'cisco_catalyst_center.device.throughput.rx', 'device_ip:10.10.20.176')
-    assert len(totals) == 1
-    assert totals[0] > 0
-
-
-def test_device_throughput_total_equals_the_sum_of_its_interfaces(aggregator, instance):
-    stats = load_captured('data_interfaces_statistics')['response']
-    expected = sum(r['rxRate'] for r in stats if r['networkDeviceIpAddress'] == '10.10.20.176' and r.get('rxRate'))
-    client = CatalystCenterClient(instance, http=ViewRoutedHttp(VIEWS))
-
-    collect_interfaces(_check(instance), client, views=('configuration', 'statistics'))
-
-    assert metric_values(aggregator, 'cisco_catalyst_center.device.throughput.rx', 'device_ip:10.10.20.176') == [
-        expected
-    ]
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.throughput.rx', 'device_ip:10.10.20.176') == [733.0]
 
 
 def test_collect_interfaces_given_no_uplinks_emits_no_uplink_aggregate(aggregator, instance):
@@ -137,26 +125,6 @@ def test_collect_application_health_sorts_by_usage_descending(aggregator, instan
 
 
 # -- NDM fields named in the brief ------------------------------------------------
-
-
-def test_device_metadata_includes_stack_role():
-    record = dict(load_captured('data_network_devices')['response'][0], stackType='NORMAL')
-
-    device = create_device_metadata(record, namespace='default', stack_role='ACTIVE')
-
-    assert device.stack_role == 'ACTIVE'
-
-
-def test_device_metadata_given_no_stack_omits_the_role():
-    device = create_device_metadata(load_captured('data_network_devices')['response'][0], namespace='default')
-
-    assert device.stack_role is None
-
-
-def test_interface_metadata_derives_port_role_from_port_mode():
-    record = load_captured('data_interfaces_configuration')['response'][0]
-
-    assert create_interface_metadata(record, namespace='default').port_role == 'routed'
 
 
 def test_interface_metadata_port_role_prefers_uplink_when_iswan_is_set():

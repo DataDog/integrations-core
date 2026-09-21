@@ -16,8 +16,12 @@ from __future__ import annotations
 from typing import Any
 
 
-def _numeric(value: Any) -> float | None:
-    """Coerce to a number, accepting numeric strings. Returns None if it is not numeric."""
+def to_number(value: Any) -> float | None:
+    """Coerce to a number, accepting numeric strings. Returns None if it is not numeric.
+
+    Public because a caller that has to scale a value needs the number before it can submit it,
+    and must not reimplement which shapes count as absent.
+    """
     if isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
@@ -32,7 +36,7 @@ def _numeric(value: Any) -> float | None:
 
 def emit_gauge(check: Any, name: str, value: Any, tags: list[str]) -> None:
     """Submit a gauge, skipping absent data. Numeric strings are cast."""
-    numeric = _numeric(value)
+    numeric = to_number(value)
     if numeric is None:
         return
     check.gauge(name, numeric, tags=tags)
@@ -40,7 +44,7 @@ def emit_gauge(check: Any, name: str, value: Any, tags: list[str]) -> None:
 
 def emit_score(check: Any, name: str, value: Any, tags: list[str]) -> None:
     """Submit a 1-10 health score, additionally treating -1 as absent."""
-    numeric = _numeric(value)
+    numeric = to_number(value)
     if numeric is None or numeric == -1:
         return
     check.gauge(name, numeric, tags=tags)

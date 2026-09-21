@@ -75,6 +75,10 @@ def test_collect_client_experience_emits_signal_quality_per_group(aggregator, in
 
     assert metric_values(aggregator, 'cisco_catalyst_center.client.rssi.avg', 'ssid:corp', 'band:5GHZ') == [-58]
     assert metric_values(aggregator, 'cisco_catalyst_center.client.snr.avg', 'ssid:corp') == [34]
+    # Server-side aggregation exists precisely to bound the tag set. Asserting the exact keys --
+    # rather than only that client MAC is absent -- also catches a third dimension appearing.
+    rssi = aggregator.metrics('cisco_catalyst_center.client.rssi.avg')[0]
+    assert {tag.split(':', 1)[0] for tag in rssi.tags} == {'ssid', 'band'}
 
 
 def test_collect_client_experience_emits_onboarding_durations(aggregator, instance):
@@ -95,24 +99,6 @@ def test_collect_client_experience_emits_onboarding_durations(aggregator, instan
 
     assert metric_values(aggregator, 'cisco_catalyst_center.client.onboarding.duration') == [1500]
     assert metric_values(aggregator, 'cisco_catalyst_center.client.onboarding.dhcp.duration') == [250]
-
-
-def test_collect_client_experience_does_not_tag_by_client_mac(aggregator, instance):
-    # Aggregating server-side exists precisely to keep client MAC out of the tag set.
-    payload = with_value(
-        load_captured(EMPTY),
-        'response',
-        {
-            'attributes': None,
-            'groups': None,
-            'aggregateAttributes': [{'name': 'rssi', 'function': 'avg', 'value': -60}],
-        },
-    )
-
-    collect_client_experience(_check(instance), _client(instance, payload))
-
-    for metric in aggregator.metrics('cisco_catalyst_center.client.rssi.avg'):
-        assert not any(t.startswith(('client_mac:', 'mac_address:')) for t in metric.tags)
 
 
 def test_collect_client_experience_given_a_null_aggregate_value_skips_it(aggregator, instance):

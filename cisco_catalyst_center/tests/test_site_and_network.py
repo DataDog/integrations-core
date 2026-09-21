@@ -24,28 +24,19 @@ def _client(instance, payload):
 # -- site health ------------------------------------------------------------------
 
 
-def test_collect_site_health_emits_device_counts_per_site(aggregator, instance):
+def test_collect_site_health_given_the_captured_page_emits_the_expected_series(aggregator, instance):
+    # One recorded page of 20 sites, and what the collector makes of it. The site name is the one
+    # derived value in here: there is no siteName field, so the leaf of siteHierarchy is the name.
     collect_site_health(_check(instance), _client(instance, load_captured('data_site_health_summaries')))
 
-    aggregator.assert_metric('cisco_catalyst_center.site.device.count', at_least=20)
-
-
-def test_collect_site_health_uses_the_endpoint_page_limit_of_twenty(aggregator, instance):
-    # siteHealthSummaries rejects limit=500 with `2005 Value must be in the range 1-20`.
-    client = _client(instance, load_captured('data_site_health_summaries'))
-
-    collect_site_health(_check(instance), client)
-
-    assert client.http.requests[0]['params']['limit'] == 20
-
-
-def test_collect_site_health_derives_site_name_from_the_hierarchy(aggregator, instance):
-    # There is no siteName field. The leaf of siteHierarchy is the name.
-    collect_site_health(_check(instance), _client(instance, load_captured('data_site_health_summaries')))
-
+    aggregator.assert_metric('cisco_catalyst_center.site.device.count', count=160)
+    aggregator.assert_metric('cisco_catalyst_center.site.client.count', count=40)
+    aggregator.assert_metric('cisco_catalyst_center.site.issue.count', count=80)
     assert metric_values(
         aggregator, 'cisco_catalyst_center.site.device.count', 'site_name:Bhagalpur', 'device_family:access'
     )
+    aggregator.assert_metric_has_tag('cisco_catalyst_center.site.client.count', 'client_type:wireless')
+    aggregator.assert_metric_has_tag('cisco_catalyst_center.site.issue.count', 'priority:p1')
 
 
 def test_collect_site_health_given_colliding_site_names_keeps_them_separate(aggregator, instance):
@@ -61,18 +52,6 @@ def test_collect_site_health_given_colliding_site_names_keeps_them_separate(aggr
     assert len(by_name) == 2, 'two distinct sites share a name and must remain two series'
 
 
-def test_collect_site_health_tags_client_metrics_by_connection_type(aggregator, instance):
-    collect_site_health(_check(instance), _client(instance, load_captured('data_site_health_summaries')))
-
-    aggregator.assert_metric_has_tag('cisco_catalyst_center.site.client.count', 'client_type:wireless')
-
-
-def test_collect_site_health_emits_issue_counts_by_priority(aggregator, instance):
-    collect_site_health(_check(instance), _client(instance, load_captured('data_site_health_summaries')))
-
-    aggregator.assert_metric_has_tag('cisco_catalyst_center.site.issue.count', 'priority:p1')
-
-
 # -- network health ---------------------------------------------------------------
 
 
@@ -86,14 +65,10 @@ def test_collect_network_health_reads_the_top_level_score_not_a_time_bucket(aggr
     assert metric_values(aggregator, 'cisco_catalyst_center.network.health') == [100]
 
 
-def test_collect_network_health_emits_device_totals(aggregator, instance):
+def test_collect_network_health_given_the_captured_payload_emits_the_expected_series(aggregator, instance):
+    # The per-category breakdown hangs off `healthDistirubution`, which is genuinely misspelled
+    # in the API -- correcting the spelling here collects nothing.
     collect_network_health(_check(instance), _client(instance, load_captured('intent_network_health')))
 
     assert metric_values(aggregator, 'cisco_catalyst_center.network.device.total.count') == [4]
-
-
-def test_collect_network_health_reads_the_misspelled_distribution_key(aggregator, instance):
-    # `healthDistirubution` is genuinely misspelled in the API.
-    collect_network_health(_check(instance), _client(instance, load_captured('intent_network_health')))
-
     assert metric_values(aggregator, 'cisco_catalyst_center.network.category.health', 'category:Access') == [100]

@@ -57,15 +57,26 @@ def test_check_given_configured_tags_applies_them_to_metrics(
     aggregator.assert_metric_has_tags('cisco_catalyst_center.device.health', ['owner:netops', 'lab:devnet'])
 
 
+@pytest.mark.parametrize(
+    'error_fixture',
+    [
+        # A soft 200 is the nastiest case: the HTTP status is fine and only the body says otherwise.
+        'intent_application_health_missing_param',
+        'error_route_not_found',
+    ],
+)
 def test_check_given_api_error_reports_collection_failure(
-    dd_run_check: Callable[..., None], aggregator: AggregatorStub, check: CiscoCatalystCenterCheck
+    dd_run_check: Callable[..., None],
+    aggregator: AggregatorStub,
+    check: CiscoCatalystCenterCheck,
+    error_fixture: str,
 ) -> None:
-    # A soft 200 is the nastiest case: the HTTP status is fine and only the body says otherwise.
-    _serve(check, load_captured('intent_application_health_missing_param'))
+    _serve(check, load_captured(error_fixture))
 
     dd_run_check(check)
 
     aggregator.assert_metric('cisco_catalyst_center.collection.success', value=0)
+    aggregator.assert_metric('cisco_catalyst_center.device.health', count=0)
 
 
 def test_check_given_one_failing_collector_still_emits_the_others(
@@ -84,13 +95,3 @@ def test_check_given_one_failing_collector_still_emits_the_others(
 
     aggregator.assert_metric('cisco_catalyst_center.device.health', count=4)
     aggregator.assert_metric('cisco_catalyst_center.collection.success', value=0)
-
-
-def test_check_given_api_error_emits_no_device_metrics(
-    dd_run_check: Callable[..., None], aggregator: AggregatorStub, check: CiscoCatalystCenterCheck
-) -> None:
-    _serve(check, load_captured('error_route_not_found'))
-
-    dd_run_check(check)
-
-    aggregator.assert_metric('cisco_catalyst_center.device.health', count=0)
