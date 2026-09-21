@@ -4,11 +4,11 @@
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
-from .conftest import mock_http_responses
 
 
 def test_camel_case_to_joined_lower(instance):
@@ -59,6 +59,14 @@ def test__get_query_monitoring_data(instance_query):
     """
     couchbase = Couchbase('couchbase', {}, [instance_query])
     couchbase._get_query_monitoring_data()
+
+
+def test_query_monitoring_connection_error_is_nonfatal(instance_query, fake_http):
+    url = 'http://localhost:8093/admin/vitals'
+    fake_http.register_response('GET', url, HTTPClientConnectionError('connection refused'))
+    couchbase = Couchbase('couchbase', {}, [instance_query])
+
+    assert couchbase._get_query_monitoring_data() is None
 
 
 @pytest.mark.parametrize(
@@ -124,9 +132,7 @@ def test_extract_index_tags(instance, test_input, expected_tags):
     assert eval(str(test_output)) == expected_tags
 
 
-def test_unit(dd_run_check, check, instance, mocker, aggregator):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
-
+def test_unit(dd_run_check, check, instance, mocked_couchbase_http, aggregator):
     dd_run_check(check(instance))
 
     for metric in MOCKED_COUCHBASE_METRICS:
@@ -140,9 +146,7 @@ def test_unit(dd_run_check, check, instance, mocker, aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggregator):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
-
+def test_unit_query_metrics(dd_run_check, check, instance_query, mocked_couchbase_http, aggregator):
     dd_run_check(check(instance_query))
 
     for metric in MOCKED_COUCHBASE_METRICS + QUERY_STATS:

@@ -4,15 +4,15 @@
 
 import os
 from copy import deepcopy
+from json import loads
+from pathlib import Path
 
 import pytest
-from mock import patch
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
-from .common import FIXTURE_DIR, HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
+from .common import DATANODE_URI, FIXTURE_DIR, HERE, INSTANCE_INTEGRATION
 
 
 @pytest.fixture(scope="session")
@@ -36,37 +36,10 @@ def instance():
 
 
 @pytest.fixture
-def mocked_request():
-    with patch('requests.Session.get', new=requests_get_mock):
-        yield
-
-
-@pytest.fixture
-def mocked_metadata_request():
-    with patch('requests.Session.get', new=requests_metadata_mock):
-        yield
-
-
-@pytest.fixture
-def mocked_auth_request():
-    with patch('requests.Session.get', new=requests_auth_mock):
-        yield
-
-
-def requests_get_mock(*args, **kwargs):
-    return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_datanode_jmx.json'))
-
-
-def requests_metadata_mock(*args, **kwargs):
-    return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_datanode_info_jmx.json'))
-
-
-def requests_auth_mock(*args, **kwargs):
-    # Make sure we're passing in authentication
-    assert 'auth' in kwargs, "Error, missing authentication"
-
-    # Make sure we've got the correct username and password
-    assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
-
-    # Return mocked request.get(...)
-    return requests_get_mock(*args, **kwargs)
+def mocked_request(fake_http_response):
+    metadata_url = f'{DATANODE_URI}jmx?qry={HDFSDataNode.HDFS_DATANODE_VERSION_NAME}'
+    metrics_url = f'{DATANODE_URI}jmx?qry={HDFSDataNode.HDFS_DATANODE_BEAN_NAME}'
+    metadata = loads((Path(FIXTURE_DIR) / 'hdfs_datanode_info_jmx.json').read_text())
+    metrics = loads((Path(FIXTURE_DIR) / 'hdfs_datanode_jmx.json').read_text())
+    fake_http_response(metadata_url, json_data=metadata)
+    fake_http_response(metrics_url, json_data=metrics)

@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import os
 import subprocess
 import time
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 import requests
@@ -13,7 +15,6 @@ import requests
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev.http import MockResponse
 
 from .common import (
     BUCKET_NAME,
@@ -311,7 +312,8 @@ def bucket_stats():
     return stats['op']['lastTStamp'] != 0
 
 
-def mock_http_responses(url, **_params):
+@pytest.fixture
+def mocked_couchbase_http(fake_http_response):
     mapping = {
         'http://localhost:8091/pools/default': 'pools/default/default.json',
         'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
@@ -319,11 +321,6 @@ def mock_http_responses(url, **_params):
         'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
         'http://localhost:8093/admin/vitals': 'admin/vitals.json',
     }
-
-    metrics_file = mapping.get(url)
-
-    if not metrics_file:
-        pytest.fail("url `{url}` not registered".format(url=url))
-
-    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockResponse(content=f.read())
+    for url, fixture_name in mapping.items():
+        payload = json.loads((Path(HERE) / 'fixtures' / fixture_name).read_text())
+        fake_http_response(url, json_data=payload)

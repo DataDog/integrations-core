@@ -2,10 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from unittest.mock import MagicMock
 
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.marathon import Marathon
 
 from .common import INSTANCE_INTEGRATION
@@ -38,13 +42,13 @@ def test_process_apps_ko(check, aggregator):
     If the check can't hit the Marathon master Url, no metric should be
     collected
     """
-    check.get_apps_json = mock.MagicMock(return_value=None)
+    check.get_apps_json = MagicMock(return_value=None)
     check.process_apps('url', 'acs_url', [], [], None)
     assert len(aggregator.metric_names) == 0
 
 
 def test_process_apps(check, aggregator):
-    check.get_apps_json = mock.MagicMock(
+    check.get_apps_json = MagicMock(
         return_value={
             'apps': [
                 {'id': '/', 'version': '', 'backoffSeconds': 99},
@@ -107,20 +111,77 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Marathon('marathon', init_config, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
-        check.check(instance)
 
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)
+def test_get_json_timeout_emits_critical_service_check(aggregator, fake_http):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    assert not isinstance(check.http.options['timeout'], tuple)
+    url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, HTTPClientReadTimeoutError('read timed out'))
+
+    with pytest.raises(Exception, match='Timeout when hitting'):
+        check.get_json(url, None, [])
+
+    aggregator.assert_service_check('marathon.can_connect', status=Marathon.CRITICAL, tags=[f'url:{url}'], count=1)
+
+
+def test_get_json_error_status_emits_critical_service_check(aggregator, fake_http_response):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    url = 'http://localhost:8080/v2/apps'
+    fake_http_response(url, status_code=500)
+
+    with pytest.raises(Exception, match='Got 500 when hitting'):
+        check.get_json(url, None, [])
+
+    aggregator.assert_service_check('marathon.can_connect', status=Marathon.CRITICAL, tags=[f'url:{url}'], count=1)
+
+
+def test_get_json_connection_error_emits_critical_service_check(aggregator, fake_http):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, HTTPClientConnectionError('connection refused'))
+
+    with pytest.raises(Exception, match='Connection refused when hitting'):
+        check.get_json(url, None, [])
+
+    aggregator.assert_service_check('marathon.can_connect', status=Marathon.CRITICAL, tags=[f'url:{url}'], count=1)
+
+
+def test_get_json_success_emits_ok_service_check(aggregator, fake_http_response):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    url = 'http://localhost:8080/v2/apps'
+    fake_http_response(url, json_data={'apps': []})
+
+    assert check.get_json(url, None, []) == {'apps': []}
+
+    aggregator.assert_service_check('marathon.can_connect', status=Marathon.OK, tags=[f'url:{url}'], count=1)
+
+
+def test_get_json_refreshes_acs_token_when_unauthorized(fake_http_response):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    check.ACS_TOKEN = 'stale-token'
+    apps_url = 'http://localhost:8080/v2/apps'
+    acs_url = 'http://acs.example.com'
+    fake_http_response(apps_url, status_code=401)
+    fake_http_response(
+        f'{acs_url}/acs/api/v1/auth/login',
+        method='POST',
+        json_data={'token': 'refreshed-token'},
+    )
+    fake_http_response(apps_url, json_data={'apps': []})
+
+    assert check.get_json(apps_url, acs_url, []) == {'apps': []}
+    assert check.ACS_TOKEN == 'refreshed-token'
+
+
+def test_refresh_acs_token_error_status_emits_critical_service_check(aggregator, fake_http_response):
+    check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
+    acs_url = 'http://acs.example.com'
+    fake_http_response(f'{acs_url}/acs/api/v1/auth/login', method='POST', status_code=403)
+
+    with pytest.raises(Exception, match='Got 403 when hitting'):
+        check.refresh_acs_token(acs_url, [])
+
+    aggregator.assert_service_check('marathon.can_connect', status=Marathon.CRITICAL, tags=[f'url:{acs_url}'], count=1)
