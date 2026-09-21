@@ -895,17 +895,28 @@ def _target_from_check(check: 'ClickhouseCheck') -> rq.RemoteQueryTarget | None:
 
 
 # ---------------------------------------------------------------------------
-# Query allowlist
+# Shared-lifecycle hooks (target matching, availability) and entry points
 # ---------------------------------------------------------------------------
 
 
-def _is_query_allowed(query: str) -> bool:
-    return not rq.is_query_allowlist_enabled() or query in REMOTE_QUERY_QUERY_ALLOWLIST
+def _prepare_check_execution(
+    request: rq.RemoteQueryRequest, check: 'ClickhouseCheck'
+) -> tuple[None, rq.RemoteQueryFailure | None]:
+    """The execution-preparation hook: admit or reject the supplied check for the target."""
+    if not _check_matches_target(check, request.target):
+        return None, rq.RemoteQueryFailure(
+            'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
+        )
+    return None, None
 
 
-# ---------------------------------------------------------------------------
-# Event entry points
-# ---------------------------------------------------------------------------
+def _ensure_check_available(check: 'ClickhouseCheck') -> rq.RemoteQueryFailure | None:
+    """The availability hook: the matched check must expose its HTTP connection pool."""
+    if getattr(check, '_pool_manager', None) is None:
+        return rq.RemoteQueryFailure(
+            'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
+        )
+    return None
 
 
 def execute_agent_rpc_stream_copy(
@@ -919,30 +930,9 @@ def execute_agent_rpc_stream_copy(
     Diagnostics collection starts before the request JSON is parsed, so even a malformed
     request reports its measured wall.
     """
-    started_at = time.monotonic()
-    timings = rq.RemoteQueryProducerTimings(started_at)
-    try:
-        request = json.loads(request_json)
-    except (TypeError, ValueError):
-        rq.emit_event(
-            emit,
-            rq.failed_event(
-                'invalid_request',
-                'Invalid remote query request: request_json must be a valid JSON object.',
-                execution_diagnostics=timings.metadata(),
-            ),
-        )
-        return
-
-    if not isinstance(request, Mapping):
-        rq.emit_event(
-            emit,
-            rq.failed_event(
-                'invalid_request',
-                'Invalid remote query request: request_json must be a JSON object.',
-                execution_diagnostics=timings.metadata(),
-            ),
-        )
+    request, timings, failure = rq.parse_agent_rpc_request(request_json)
+    if failure is not None:
+        rq.emit_event(emit, failure)
         return
 
     _execute_upload_stream(request, check, emit, timings=timings)
@@ -957,13 +947,9 @@ def _execute_upload_stream(
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
-    events = iter_agent_rpc_stream_events(request, check, http_client, clickhouse_client_factory, timings)
-    try:
-        for event in events:
-            rq.emit_event(emit, event)
-    except BaseException:
-        events.close()
-        raise
+    rq.emit_agent_rpc_events(
+        emit, iter_agent_rpc_stream_events(request, check, http_client, clickhouse_client_factory, timings)
+    )
 
 
 def iter_agent_rpc_stream_events(
@@ -981,66 +967,18 @@ def iter_agent_rpc_stream_events(
     accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
     so both report one wall.
     """
-    started_at = time.monotonic() if timings is None else timings.started_at
-    if timings is None:
-        timings = rq.RemoteQueryProducerTimings(started_at)
-    try:
-        parsed_request = rq.RemoteQueryRequest.model_validate(request)
-    except ValidationError as e:
-        yield rq.failed_event(
-            'invalid_request',
-            rq.validation_message(e),
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
 
-    if not _is_query_allowed(parsed_request.query):
-        yield rq.failed_event(
-            'invalid_request',
-            'Invalid remote query request: query is not allowlisted.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    target = parsed_request.target
-    if not _check_matches_target(check, target):
-        yield rq.failed_event(
-            'target_not_found',
-            'No loaded ClickHouse integration instance matched target selector.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    creds = rq.resolve_upload_credentials(
-        parsed_request.result_delivery, started_at, trace_context=parsed_request.trace_context
-    )
-    if not creds.api_key or not creds.app_key:
-        yield rq.failed_event(
-            'credentials_unavailable',
-            'Remote query upload requires api_key and app_key to be configured on the Agent.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    if getattr(check, '_pool_manager', None) is None:
-        yield rq.failed_event(
-            'target_unavailable',
-            'Matched ClickHouse check HTTP connection pool is unavailable.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    client = http_client if http_client is not None else rq.RequestsUploadClient(timings=timings)
-    stats = rq.RemoteQueryRunStats()
-    yield rq.RemoteQueryEvent('metadata', rq.started_metadata(parsed_request))
-
-    try:
-        receipt = produce_remote_query(
+    def produce(
+        parsed_request: rq.RemoteQueryRequest,
+        check: 'ClickhouseCheck',
+        creds: rq.UploadCredentials,
+        client: rq.UploadClient,
+        _execution_context: Any,
+        started_at: float,
+        stats: rq.RemoteQueryRunStats,
+        timings: rq.RemoteQueryProducerTimings,
+    ) -> dict[str, Any]:
+        return produce_remote_query(
             parsed_request,
             check,
             creds,
@@ -1050,28 +988,14 @@ def iter_agent_rpc_stream_events(
             clickhouse_client_factory=clickhouse_client_factory,
             timings=timings,
         )
-    except rq.RemoteQueryFailure as e:
-        rq.safe_abort(client, creds)
-        yield rq.failed_event(
-            e.code,
-            e.message,
-            retryable=e.retryable,
-            stats=rq.stats_metadata(stats, started_at),
-            execution_diagnostics=timings.metadata(stats),
-        )
-        return
-    except BaseException as e:
-        rq.safe_abort(client, creds)
-        if not isinstance(e, Exception):
-            raise
-        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
-        LOGGER.error('Remote query execution failed')
-        yield rq.failed_event(
-            'query_failed',
-            'Remote query execution failed.',
-            stats=rq.stats_metadata(stats, started_at),
-            execution_diagnostics=timings.metadata(stats),
-        )
-        return
 
-    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at, timings))
+    yield from rq.iter_remote_query_produce_events(
+        request,
+        check,
+        allowlist=REMOTE_QUERY_QUERY_ALLOWLIST,
+        prepare_execution=_prepare_check_execution,
+        ensure_available=_ensure_check_available,
+        produce=produce,
+        http_client=http_client,
+        timings=timings,
+    )

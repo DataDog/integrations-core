@@ -15,6 +15,12 @@ exist yet — then decodes, redacts, and writes the final JSON pages. The produc
 constructs a final JSON envelope, never claims its source bytes are final artifact
 metadata, and reads the run's authoritative totals only from intake's finalization.
 Only metadata and the compact receipt return through the Agent's native callback.
+
+The shared agent-bridge request parsing and produce lifecycle also lives here: adapters
+supply their per-check target matching and execution preparation, their availability
+check, their produce callable, and their driver-failure classification as explicit hooks,
+while request validation, the allowlist gate, credential resolution, event emission, and
+the failure tail with its upload abort run once for every adapter.
 """
 
 from __future__ import annotations
@@ -2175,3 +2181,233 @@ def validation_message(error: ValidationError) -> str:
 
 def validation_location(location: tuple[Any, ...]) -> str:
     return '.'.join(str(part) for part in location)
+
+
+# ---------------------------------------------------------------------------
+# Shared agent bridge request and produce lifecycle
+# ---------------------------------------------------------------------------
+
+# The adapter hooks the shared produce lifecycle takes. Each is a plain callable, not a
+# registration: an adapter supplies its own matching, availability, produce, and
+# driver-failure classification, and everything common runs once here.
+RemoteQueryExecutionPreparer = Callable[[RemoteQueryRequest, Any], tuple[Any, 'RemoteQueryFailure | None']]
+RemoteQueryAvailabilityCheck = Callable[[Any], 'RemoteQueryFailure | None']
+RemoteQueryProduce = Callable[
+    [
+        RemoteQueryRequest,
+        Any,
+        UploadCredentials,
+        UploadClient,
+        Any,
+        float,
+        RemoteQueryRunStats,
+        RemoteQueryProducerTimings,
+    ],
+    Mapping[str, Any],
+]
+RemoteQueryDriverFailureClassifier = Callable[[Exception], 'RemoteQueryFailure | None']
+
+
+def parse_agent_rpc_request(
+    request_json: str | bytes | bytearray,
+) -> tuple[Mapping[str, Any] | None, RemoteQueryProducerTimings, RemoteQueryEvent | None]:
+    """Parse the bridge's request JSON with the run clock already running.
+
+    Returns the parsed request object, the run's timing accumulator, and a failure event
+    when the request is not a usable JSON object — malformed JSON or a non-object value:
+    exactly one of the request and the failure event is set. Diagnostics collection
+    starts before the parse so even a malformed request reports its measured wall.
+    """
+    started_at = time.monotonic()
+    timings = RemoteQueryProducerTimings(started_at)
+    try:
+        request = json.loads(request_json)
+    except (TypeError, ValueError):
+        return (
+            None,
+            timings,
+            failed_event(
+                'invalid_request',
+                'Invalid remote query request: request_json must be a valid JSON object.',
+                execution_diagnostics=timings.metadata(),
+            ),
+        )
+    if not isinstance(request, Mapping):
+        return (
+            None,
+            timings,
+            failed_event(
+                'invalid_request',
+                'Invalid remote query request: request_json must be a JSON object.',
+                execution_diagnostics=timings.metadata(),
+            ),
+        )
+    return request, timings, None
+
+
+def emit_agent_rpc_events(emit: RemoteQueryEmit, events: Iterator[RemoteQueryEvent]) -> None:
+    """Pump one event iterator into the Agent's emit callback.
+
+    A callback failure (or any exception the generator raises) first closes the generator
+    so its own cleanup — page buffers, database resources — runs, then propagates.
+    """
+    try:
+        for event in events:
+            emit_event(emit, event)
+    except BaseException:
+        events.close()
+        raise
+
+
+def _query_admitted_by_allowlist(query: str, allowlist: frozenset[str]) -> bool:
+    """Whether the query passes the POC exact-query allowlist gate.
+
+    The gate is a rollout mechanism, not a security control: disabled, every query is
+    admitted; enabled, only the exact allowlisted strings run.
+    """
+    return not is_query_allowlist_enabled() or query in allowlist
+
+
+def iter_remote_query_produce_events(
+    request: Any,
+    check: Any,
+    *,
+    allowlist: frozenset[str],
+    prepare_execution: RemoteQueryExecutionPreparer,
+    ensure_available: RemoteQueryAvailabilityCheck,
+    produce: RemoteQueryProduce,
+    http_client: UploadClient | None = None,
+    timings: RemoteQueryProducerTimings | None = None,
+    classify_driver_failure: RemoteQueryDriverFailureClassifier | None = None,
+) -> Iterator[RemoteQueryEvent]:
+    """The shared produce lifecycle for one remote query run on the supplied check.
+
+    The integration adapters supply their own pieces as explicit hooks — per-check target
+    matching and execution preparation, the matched check's availability check, the
+    produce callable, and an optional classifier for driver exceptions that escape
+    produce — while everything common runs once here: request validation, the exact-query
+    allowlist gate, upload credential resolution, the STARTED/final/error event contract,
+    the run stats and producer-timings plumbing, and the failure tail with its best-effort
+    upload abort. Driver-specific semantics stay adapter-owned: the shared tail never
+    flattens distinct error codes or retryability, and a non-``Exception`` termination
+    signal aborts the upload and is re-raised, never swallowed into an ordinary query
+    failure.
+
+    Hook contracts:
+
+    - ``prepare_execution(request, check)`` answers whether the supplied check admits the
+      request's target. It returns ``(execution context, None)`` — the context is an
+      opaque adapter value threaded to ``produce``, such as the resolved Postgres
+      execution database — or ``(None, failure)`` whose code, message, and retryability
+      the failure event carries verbatim.
+    - ``ensure_available(check)`` answers the matched check's readiness for the run (its
+      connection pool or client factory) as a ``RemoteQueryFailure`` or None; it runs
+      after upload credentials resolve.
+    - ``produce(request, check, creds, client, context, started_at, stats, timings)``
+      executes the query exactly once and returns the compact run receipt, raising
+      ``RemoteQueryFailure`` for any sanitized failure.
+    - ``classify_driver_failure(exception)`` maps a driver exception that escaped
+      ``produce`` to its sanitized ``RemoteQueryFailure``, or None when the exception is
+      not the driver's own; an unclassified exception becomes the fixed ``query_failed``
+      error, logged without its text.
+    """
+    started_at = time.monotonic() if timings is None else timings.started_at
+    if timings is None:
+        timings = RemoteQueryProducerTimings(started_at)
+    try:
+        parsed_request = RemoteQueryRequest.model_validate(request)
+    except ValidationError as e:
+        yield failed_event(
+            'invalid_request',
+            validation_message(e),
+            elapsed_ms=elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    if not _query_admitted_by_allowlist(parsed_request.query, allowlist):
+        yield failed_event(
+            'invalid_request',
+            'Invalid remote query request: query is not allowlisted.',
+            elapsed_ms=elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    execution_context, preparation_failure = prepare_execution(parsed_request, check)
+    if preparation_failure is not None:
+        yield failed_event(
+            preparation_failure.code,
+            preparation_failure.message,
+            retryable=preparation_failure.retryable,
+            elapsed_ms=elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    creds = resolve_upload_credentials(
+        parsed_request.result_delivery, started_at, trace_context=parsed_request.trace_context
+    )
+    if not creds.api_key or not creds.app_key:
+        yield failed_event(
+            'credentials_unavailable',
+            'Remote query upload requires api_key and app_key to be configured on the Agent.',
+            elapsed_ms=elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    availability_failure = ensure_available(check)
+    if availability_failure is not None:
+        yield failed_event(
+            availability_failure.code,
+            availability_failure.message,
+            retryable=availability_failure.retryable,
+            elapsed_ms=elapsed_ms(started_at),
+            execution_diagnostics=timings.metadata(),
+        )
+        return
+
+    client = http_client if http_client is not None else RequestsUploadClient(timings=timings)
+    stats = RemoteQueryRunStats()
+    yield RemoteQueryEvent('metadata', started_metadata(parsed_request))
+
+    try:
+        receipt = produce(parsed_request, check, creds, client, execution_context, started_at, stats, timings)
+    except RemoteQueryFailure as e:
+        safe_abort(client, creds)
+        yield failed_event(
+            e.code,
+            e.message,
+            retryable=e.retryable,
+            stats=stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
+        return
+    except Exception as e:
+        safe_abort(client, creds)
+        if classify_driver_failure is not None:
+            driver_failure = classify_driver_failure(e)
+            if driver_failure is not None:
+                yield failed_event(
+                    driver_failure.code,
+                    driver_failure.message,
+                    retryable=driver_failure.retryable,
+                    stats=stats_metadata(stats, started_at),
+                    execution_diagnostics=timings.metadata(stats),
+                )
+                return
+        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
+        LOGGER.error('Remote query execution failed')
+        yield failed_event(
+            'query_failed',
+            'Remote query execution failed.',
+            stats=stats_metadata(stats, started_at),
+            execution_diagnostics=timings.metadata(stats),
+        )
+        return
+    except BaseException:
+        safe_abort(client, creds)
+        raise
+
+    yield RemoteQueryEvent('final', succeeded_metadata(receipt, stats, started_at, timings))

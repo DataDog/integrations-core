@@ -35,7 +35,6 @@ reachability alone.
 
 from __future__ import annotations
 
-import json
 import logging
 import time
 import uuid
@@ -619,17 +618,62 @@ def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Query allowlist
+# Shared-lifecycle hooks (matching, availability, driver failures) and entry points
 # ---------------------------------------------------------------------------
 
 
-def _is_query_allowed(query: str) -> bool:
-    return not rq.is_query_allowlist_enabled() or query in REMOTE_QUERY_QUERY_ALLOWLIST
+def _prepare_check_execution(
+    request: rq.RemoteQueryRequest, check: 'PostgreSql'
+) -> tuple[str | None, rq.RemoteQueryFailure | None]:
+    """The execution-preparation hook: the matching authority plus the execution database.
+
+    The same match the resolve verdict answers, and the same resolved database — the two
+    operations can never disagree. The returned execution context is the database the
+    supplied check admits for the target.
+    """
+    target = request.target
+    try:
+        if _match_check_for_target(target, check) is None:
+            return None, rq.RemoteQueryFailure(
+                'target_not_found', 'No loaded Postgres integration instance matched target selector.'
+            )
+    except rq.RemoteQueryFailure as e:
+        return None, e
+    execution_dbname = _resolved_dbname(target, check)
+    if execution_dbname is None:
+        return None, rq.RemoteQueryFailure(
+            'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
+        )
+    return execution_dbname, None
 
 
-# ---------------------------------------------------------------------------
-# Event entry points
-# ---------------------------------------------------------------------------
+def _ensure_check_available(check: 'PostgreSql') -> rq.RemoteQueryFailure | None:
+    """The availability hook: the matched check must expose an open connection pool."""
+    db_pool = getattr(check, 'db_pool', None)
+    if db_pool is None:
+        return rq.RemoteQueryFailure(
+            'credentials_unavailable', 'Matched Postgres check does not expose a connection pool.'
+        )
+    if getattr(db_pool, 'is_closed', lambda: False)():
+        return rq.RemoteQueryFailure('target_unavailable', 'Matched Postgres check connection pool is closed.')
+    return None
+
+
+def _classify_driver_failure(exception: Exception) -> rq.RemoteQueryFailure | None:
+    """The driver-failure hook: map psycopg's own exceptions to sanitized run failures."""
+    if isinstance(exception, psycopg_errors.QueryCanceled):
+        # SQLSTATE class 57014: the server canceled the statement (statement timeout or an
+        # explicit cancel); both are retryable query timeouts for the run.
+        return rq.RemoteQueryFailure(
+            'timeout',
+            'Remote query was canceled by the server (statement timeout or cancellation).',
+            retryable=True,
+        )
+    if isinstance(exception, RuntimeError):
+        # The connection pool manager refuses a closed pool with RuntimeError at
+        # acquisition time, inside the produce call.
+        return rq.RemoteQueryFailure('target_unavailable', 'Matched Postgres check connection pool is unavailable.')
+    return None
 
 
 def execute_agent_rpc_stream_copy(
@@ -645,30 +689,9 @@ def execute_agent_rpc_stream_copy(
     Diagnostics collection starts before the request JSON is parsed, so even a malformed
     request reports its measured wall.
     """
-    started_at = time.monotonic()
-    timings = rq.RemoteQueryProducerTimings(started_at)
-    try:
-        request = json.loads(request_json)
-    except (TypeError, ValueError):
-        rq.emit_event(
-            emit,
-            rq.failed_event(
-                'invalid_request',
-                'Invalid remote query request: request_json must be a valid JSON object.',
-                execution_diagnostics=timings.metadata(),
-            ),
-        )
-        return
-
-    if not isinstance(request, Mapping):
-        rq.emit_event(
-            emit,
-            rq.failed_event(
-                'invalid_request',
-                'Invalid remote query request: request_json must be a JSON object.',
-                execution_diagnostics=timings.metadata(),
-            ),
-        )
+    request, timings, failure = rq.parse_agent_rpc_request(request_json)
+    if failure is not None:
+        rq.emit_event(emit, failure)
         return
 
     if request.get('operation') == 'resolve_target':
@@ -686,24 +709,12 @@ def _execute_upload_stream(
     timings: rq.RemoteQueryProducerTimings | None = None,
 ) -> None:
     """Drive the producer with the default (or injected) upload client and emit its events."""
-    events = iter_agent_rpc_stream_events(request, check, http_client, timings)
-    try:
-        for event in events:
-            rq.emit_event(emit, event)
-    except BaseException:
-        events.close()
-        raise
+    rq.emit_agent_rpc_events(emit, iter_agent_rpc_stream_events(request, check, http_client, timings))
 
 
 def _execute_resolve_stream(request: Mapping[str, Any], check: 'PostgreSql', emit: rq.RemoteQueryEmit) -> None:
     """Drive the per-check resolver and emit its verdict events."""
-    events = iter_agent_resolve_events(request, check)
-    try:
-        for event in events:
-            rq.emit_event(emit, event)
-    except BaseException:
-        events.close()
-        raise
+    rq.emit_agent_rpc_events(emit, iter_agent_resolve_events(request, check))
 
 
 def iter_agent_resolve_events(request: Any, check: 'PostgreSql') -> Iterator[rq.RemoteQueryEvent]:
@@ -768,146 +779,19 @@ def iter_agent_rpc_stream_events(
     zero/one/many selection across loaded checks is the Agent's own responsibility.
     ``timings`` collects the producer execution diagnostics; when absent a fresh
     accumulator owns the run, and its ``started_at`` is shared with ``stats.elapsedMs``
-    so both report one wall.
+    so both report one wall. The produce hook is ``produce_remote_query`` itself: its
+    ``(request, check, creds, client, execution_dbname, started_at, stats, timings)``
+    signature matches the shared lifecycle's produce call exactly, with the preparation
+    hook's resolved database as the execution context.
     """
-    started_at = time.monotonic() if timings is None else timings.started_at
-    if timings is None:
-        timings = rq.RemoteQueryProducerTimings(started_at)
-    try:
-        parsed_request = rq.RemoteQueryRequest.model_validate(request)
-    except ValidationError as e:
-        yield rq.failed_event(
-            'invalid_request',
-            rq.validation_message(e),
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    if not _is_query_allowed(parsed_request.query):
-        yield rq.failed_event(
-            'invalid_request',
-            'Invalid remote query request: query is not allowlisted.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    target = parsed_request.target
-    try:
-        if _match_check_for_target(target, check) is None:
-            yield rq.failed_event(
-                'target_not_found',
-                'No loaded Postgres integration instance matched target selector.',
-                elapsed_ms=rq.elapsed_ms(started_at),
-                execution_diagnostics=timings.metadata(),
-            )
-            return
-    except rq.RemoteQueryFailure as e:
-        yield rq.failed_event(
-            e.code,
-            e.message,
-            retryable=e.retryable,
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    # The same selection authority as resolve: the resolved database is the database
-    # execution runs on, and the two operations can never disagree.
-    execution_dbname = _resolved_dbname(target, check)
-    if execution_dbname is None:
-        yield rq.failed_event(
-            'target_unavailable',
-            'Matched Postgres check does not expose a configured database name.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    creds = rq.resolve_upload_credentials(
-        parsed_request.result_delivery, started_at, trace_context=parsed_request.trace_context
+    yield from rq.iter_remote_query_produce_events(
+        request,
+        check,
+        allowlist=REMOTE_QUERY_QUERY_ALLOWLIST,
+        prepare_execution=_prepare_check_execution,
+        ensure_available=_ensure_check_available,
+        produce=produce_remote_query,
+        http_client=http_client,
+        timings=timings,
+        classify_driver_failure=_classify_driver_failure,
     )
-    if not creds.api_key or not creds.app_key:
-        yield rq.failed_event(
-            'credentials_unavailable',
-            'Remote query upload requires api_key and app_key to be configured on the Agent.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    db_pool = getattr(check, 'db_pool', None)
-    if db_pool is None:
-        yield rq.failed_event(
-            'credentials_unavailable',
-            'Matched Postgres check does not expose a connection pool.',
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-    if getattr(db_pool, 'is_closed', lambda: False)():
-        yield rq.failed_event(
-            'target_unavailable',
-            'Matched Postgres check connection pool is closed.',
-            retryable=False,
-            elapsed_ms=rq.elapsed_ms(started_at),
-            execution_diagnostics=timings.metadata(),
-        )
-        return
-
-    client = http_client if http_client is not None else rq.RequestsUploadClient(timings=timings)
-    stats = rq.RemoteQueryRunStats()
-    yield rq.RemoteQueryEvent('metadata', rq.started_metadata(parsed_request))
-
-    try:
-        receipt = produce_remote_query(
-            parsed_request, check, creds, client, execution_dbname, started_at, stats, timings
-        )
-    except rq.RemoteQueryFailure as e:
-        rq.safe_abort(client, creds)
-        yield rq.failed_event(
-            e.code,
-            e.message,
-            retryable=e.retryable,
-            stats=rq.stats_metadata(stats, started_at),
-            execution_diagnostics=timings.metadata(stats),
-        )
-        return
-    except psycopg_errors.QueryCanceled:
-        # SQLSTATE class 57014: the server canceled the statement (statement timeout or an
-        # explicit cancel); both are retryable query timeouts for the run.
-        rq.safe_abort(client, creds)
-        yield rq.failed_event(
-            'timeout',
-            'Remote query was canceled by the server (statement timeout or cancellation).',
-            retryable=True,
-            stats=rq.stats_metadata(stats, started_at),
-            execution_diagnostics=timings.metadata(stats),
-        )
-        return
-    except RuntimeError:
-        rq.safe_abort(client, creds)
-        yield rq.failed_event(
-            'target_unavailable',
-            'Matched Postgres check connection pool is unavailable.',
-            retryable=False,
-            stats=rq.stats_metadata(stats, started_at),
-            execution_diagnostics=timings.metadata(stats),
-        )
-        return
-    except BaseException as e:
-        rq.safe_abort(client, creds)
-        if not isinstance(e, Exception):
-            raise
-        # Fixed text only: an unexpected exception can carry raw row fragments or query text.
-        LOGGER.error('Remote query execution failed')
-        yield rq.failed_event(
-            'query_failed',
-            'Remote query execution failed.',
-            stats=rq.stats_metadata(stats, started_at),
-            execution_diagnostics=timings.metadata(stats),
-        )
-        return
-
-    yield rq.RemoteQueryEvent('final', rq.succeeded_metadata(receipt, stats, started_at, timings))
