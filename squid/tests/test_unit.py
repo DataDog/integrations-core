@@ -104,3 +104,16 @@ def test_host_https(instance, fake_http, fake_http_response):
         check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
         check.check(instance)
         assert fake_http.requests[0].url == expected_url
+
+
+@pytest.mark.parametrize(
+    'credential_config',
+    [
+        {'cachemgr_username': 'datadog_user', 'cachemgr_password': 'datadog_pass'},
+        {'username': 'datadog_user', 'password': 'datadog_pass'},
+    ],
+)
+def test_http_credential_remapping(credential_config):
+    check = SquidCheck(common.CHECK_NAME, {}, {}, [credential_config])
+
+    assert check.http.options['auth'] == ('datadog_user', 'datadog_pass')
