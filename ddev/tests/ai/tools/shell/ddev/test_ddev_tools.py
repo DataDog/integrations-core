@@ -15,34 +15,18 @@ from ddev.ai.tools.shell.ddev.validate import DdevValidateInput, DdevValidateToo
 
 # --- ddev create ---
 
-VALID_CREATE_INPUT = {
-    "integration": "my_check",
-    "display_name": "My Check",
-    "metrics_prefix": "my_check.",
-    "platforms": ["linux", "windows", "mac_os"],
-}
-
 
 def test_create_cmd():
-    cmd = DdevCreateTool().cmd(DdevCreateInput(**VALID_CREATE_INPUT))
+    # The display name is passed through verbatim; `ddev create` normalizes it to
+    # snake_case for the directory/package/metrics prefix while keeping it exact in the manifest.
+    cmd = DdevCreateTool().cmd(DdevCreateInput(**{"integration": "HPE Aruba Edge"}))
     assert cmd == [
         "ddev",
         "--no-interactive",
         "create",
         "check",
-        "--display-name",
-        "My Check",
-        "--metrics-prefix",
-        "my_check.",
-        "--platforms",
-        "linux,windows,mac_os",
-        "my_check",
+        "HPE Aruba Edge",
     ]
-
-
-def test_create_cmd_platforms_joined():
-    cmd = DdevCreateTool().cmd(DdevCreateInput(**{**VALID_CREATE_INPUT, "platforms": ["linux", "mac_os"]}))
-    assert cmd[cmd.index("--platforms") + 1] == "linux,mac_os"
 
 
 # --- ddev test ---
