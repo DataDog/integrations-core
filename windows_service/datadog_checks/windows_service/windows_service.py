@@ -416,6 +416,7 @@ class WindowsService(AgentCheck):
                 tags.append('service:{}'.format(reported_name))
 
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
+            self.gauge('windows_service.status', status, tags=tags)
             self.log.debug('service state for %s %s', service_name, status)
             self.gauge('windows_service.uptime', service_uptime, tags=tags)
             # Send 1 for windows_service.state so the user can sum by the windows_service_state tag
@@ -443,6 +444,7 @@ class WindowsService(AgentCheck):
                     tags.append('service:{}'.format(service))
 
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
+                self.gauge('windows_service.status', status, tags=tags)
                 self.log.debug('service state for %s %s', service, status)
                 self.gauge('windows_service.uptime', 0, tags=tags)
                 self.gauge('windows_service.state', 1, tags=tags)
