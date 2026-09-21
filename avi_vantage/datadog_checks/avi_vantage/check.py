@@ -7,7 +7,9 @@ from urllib.parse import urlencode
 
 from datadog_checks.avi_vantage import metrics
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.headers import DEFAULT_ACCEPT
 
 from .config_models import ConfigMixin
 
@@ -18,6 +20,19 @@ RESOURCE_METRICS = {
     'serviceengine': metrics.SERVICE_ENGINE_METRICS,
 }
 LABELS_REMAPPER = {'type': 'avi_type', 'tenant': 'avi_tenant'}
+
+
+class AviVantageScraper(OpenMetricsScraper):
+    def send_request(self, **kwargs):
+        """Scrape using the Accept header the client already carries, without negotiating one.
+
+        The check hands this scraper its own authenticated client once the scraper is built, and the
+        controller is queried with whatever that client sends. Negotiating an exposition format here
+        would instead pick which representation the controller is asked to return.
+        """
+        extra_headers = kwargs.setdefault('extra_headers', {})
+        extra_headers.setdefault('Accept', self.http.get_header('Accept', DEFAULT_ACCEPT))
+        return super().send_request(**kwargs)
 
 
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -72,7 +87,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @contextmanager
     def login(self):
-        self.http._session = None
+        self.http.close()
         login_url = self.base_url + "/login"
         logout_url = self.base_url + "/logout"
         try:
@@ -87,7 +102,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.service_check("can_connect", AgentCheck.OK, tags=self.config.tags)
 
         yield
-        csrf_token = self.http.session.cookies.get('csrftoken')
+        csrf_token = self.http.get_cookie('csrftoken')
         if csrf_token:
             logout_resp = self.http.post(
                 logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url}
@@ -102,7 +117,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.set_metadata('version', version)
 
     def create_scraper(self, config):
-        scraper = super(AviVantageCheck, self).create_scraper(config)
+        scraper = AviVantageScraper(self, self.get_config_with_defaults(config))
         scraper.http = self.http
         return scraper
 

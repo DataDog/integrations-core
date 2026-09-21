@@ -257,6 +257,18 @@ def instance_remote_fetch_intermediate_certs():
 
 
 @pytest.fixture
+def instance_remote_fetch_intermediate_certs_mtls():
+    return {
+        'server': 'mtls.mock',
+        'fetch_intermediate_certs': True,
+        'tls_cert': '/etc/certs/client.pem',
+        'tls_private_key': '/etc/certs/client.key',
+        'tls_private_key_password': 'hunter2',
+        'tls_ciphers': ['ECDHE-RSA-AES256-GCM-SHA384'],
+    }
+
+
+@pytest.fixture
 def instance_remote_send_cert_duration():
     return {'server': 'https://valid.mock', 'send_cert_duration': True, 'tls_ca_cert': CA_CERT}
 

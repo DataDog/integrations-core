@@ -11,6 +11,7 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Callable, Dict, List, Literal, Mapping, Optional, Tuple, overload  # noqa: F401
+from unittest.mock import PropertyMock, create_autospec, seal
 
 import pytest
 
@@ -381,6 +382,14 @@ def mock_response():
 
 
 @pytest.fixture
+def mock_http_response_cls():
+    """Rich MockHTTPResponse constructor for remainder migrations (file_path/json_data helpers)."""
+    from datadog_checks.dev.http import MockHTTPResponse
+
+    yield MockHTTPResponse
+
+
+@pytest.fixture
 def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
         kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
@@ -444,6 +453,94 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
         return response
 
     return register_response
+
+
+@pytest.fixture
+def mock_http(mocker):
+    """Autospec HTTPClient for remainder migrations not yet on fake_http_response."""
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.headers import set_header
+    from datadog_checks.base.utils.http_protocol import HTTPClient
+
+    client = create_autospec(HTTPClient)
+    cookie_return_value_unset = object()
+
+    # create_autospec does not materialize attributes declared only as annotations on the protocol,
+    # and seal() below turns any later attribute access into an AttributeError, so options has to be
+    # a real dict assigned here. Its 'headers' value is the same object get_header and set_header
+    # read, so mutating options['headers'] directly stays visible through those methods.
+    header_state: dict[str, str] = {}
+    client.options = {
+        'auth': None,
+        'cert': None,
+        'headers': header_state,
+        'proxies': None,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
+    # Empty, matching a client built with no tls_ configuration. A test that needs it populates it.
+    client.tls_config = {}
+    client.trust_env = True
+    client.ignore_tls_warning = False
+    client.persist_connections = False
+
+    def _get_header(name, default=None):
+        found = default
+        for key, value in client.options['headers'].items():
+            if key.lower() == name.lower():
+                found = value
+        return found
+
+    def _set_header(name, value):
+        # The client's own helper, so the double cannot drift from the surface it stands in for.
+        set_header(client.options['headers'], name, value)
+
+    def _get_cookie(name: str, default: str | None = None) -> str | None:
+        return_value = client.get_cookie.return_value
+        return default if return_value is cookie_return_value_unset else return_value
+
+    def _disable_auth():
+        client.options['auth'] = 'suppressed'
+
+    client.get_header.side_effect = _get_header
+    client.set_header.side_effect = _set_header
+    client.disable_auth.side_effect = _disable_auth
+    # No no_proxy rules are configured on the mock, matching a client built without them. A test that
+    # needs bypass behavior overrides this return_value.
+    client.should_bypass_proxy.return_value = False
+    client.get_cookie.return_value = cookie_return_value_unset
+    client.get_cookie.side_effect = _get_cookie
+    client.close.return_value = None
+    seal(client)
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
+    return client
+
+
+@pytest.fixture
+def mock_openmetrics_http(mock_http, mocker):
+    """OpenMetrics HTTP mock with dual interception:
+
+    - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
+    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck HTTP client patches; the
+      get_http_handler patch is unused on this path.
+    """
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
+
+
+@pytest.fixture
+def mock_prometheus_http(mock_http, mocker):
+    """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
+    mocker.patch(
+        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
 
 
 @pytest.fixture

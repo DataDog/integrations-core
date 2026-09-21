@@ -3,21 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from json import JSONDecodeError as StdJSONDecodeError
 from typing import TYPE_CHECKING, Any, Dict, List  # noqa: F401
 from xmlrpc.client import ServerProxy
 
 import yaml
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http import requests
 
 from .metrics import build_metric
 
 if TYPE_CHECKING:
-    from datadog_checks.base.utils.http import ResponseWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 
-def _safely_process_metrics_response(data: ResponseWrapper) -> dict[str, dict]:
+def _safely_process_metrics_response(data: HTTPResponse) -> dict[str, dict]:
     # Responses can be wrongly formatted for older versions of the hypervisor,
     # it's missing double quotes " around the field names. Use yaml to parse the response
     # if json parsing fails.
@@ -25,7 +25,7 @@ def _safely_process_metrics_response(data: ResponseWrapper) -> dict[str, dict]:
     # See https://github.com/yaml/pyyaml/issues/443
     try:
         return data.json()
-    except requests.exceptions.JSONDecodeError:
+    except StdJSONDecodeError:
         return yaml.load(data.content, Loader=yaml.SafeLoader)
 
 

@@ -13,7 +13,7 @@ import requests
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse  # noqa: F401
 
 from .common import (
     BUCKET_NAME,
@@ -326,4 +326,4 @@ def mock_http_responses(url, **_params):
         pytest.fail("url `{url}` not registered".format(url=url))
 
     with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockResponse(content=f.read())
+        return MockHTTPResponse(content=f.read())

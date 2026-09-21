@@ -6,7 +6,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base.utils.common import ensure_unicode
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kubernetes_state import KubernetesState
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -216,23 +216,8 @@ ZERO_METRICS = [
 ]
 
 
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly
-    returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-        self.encoding = 'utf-8'
-
-    def iter_lines(self, **_):
-        for elt in self.content.split(b"\n"):
-            yield ensure_unicode(elt)
-
-    def close(self):
-        pass
+def mock_response(content: bytes, content_type: str = 'text/plain') -> MockHTTPResponse:
+    return MockHTTPResponse(content=content, headers={'Content-Type': content_type})
 
 
 def mock_from_file(fname):
@@ -252,7 +237,7 @@ def instance():
 
 def _check(instance, mock_file="prometheus.txt"):
     check = KubernetesState(CHECK_NAME, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file(mock_file), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(mock_from_file(mock_file)))
     return check
 
 
@@ -747,7 +732,7 @@ def test_extract_timestamp(check):
 def test_job_counts(aggregator, instance):
     check = KubernetesState(CHECK_NAME, {}, [instance])
     payload = mock_from_file("prometheus.txt")
-    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(payload))
 
     for _ in range(2):
         check.check(instance)
@@ -845,7 +830,7 @@ def test_job_counts(aggregator, instance):
         b'kube_job_status_succeeded{job_name="test",namespace="default"} 0',
     )
 
-    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(payload))
     check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
@@ -883,7 +868,7 @@ def test_job_counts(aggregator, instance):
         b'kube_job_status_succeeded{job_name="test",namespace="default"} 1',
     )
 
-    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(payload))
     check.check(instance)
     # Test if we now have two as the value for the same job
     aggregator.assert_metric(
@@ -898,7 +883,7 @@ def test_job_counts(aggregator, instance):
         b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 1',
     )
 
-    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(payload))
     check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
@@ -917,7 +902,7 @@ def test_job_counts(aggregator, instance):
 def test_keep_ksm_labels_desactivated(aggregator, instance):
     instance['keep_ksm_labels'] = False
     check = KubernetesState(CHECK_NAME, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(mock_from_file("prometheus.txt")))
     check.check(instance)
     for _ in range(2):
         check.check(instance)
@@ -928,7 +913,7 @@ def test_keep_ksm_labels_desactivated(aggregator, instance):
 
 def test_experimental_labels(aggregator, instance):
     check = KubernetesState(CHECK_NAME, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(mock_from_file("prometheus.txt")))
     for _ in range(2):
         check.check(instance)
 
@@ -936,7 +921,7 @@ def test_experimental_labels(aggregator, instance):
 
     instance['experimental_metrics'] = True
     check = KubernetesState(CHECK_NAME, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(mock_from_file("prometheus.txt")))
     for _ in range(2):
         check.check(instance)
 
@@ -959,7 +944,7 @@ def test_telemetry(aggregator, instance):
     instance['experimental_metrics'] = True
 
     check = KubernetesState(CHECK_NAME, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=mock_response(mock_from_file("prometheus.txt")))
 
     endpoint = instance['kube_state_url']
     scraper_config = check.config_map[endpoint]

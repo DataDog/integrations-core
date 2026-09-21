@@ -15,7 +15,7 @@ import json
 from typing import Callable, List, Optional, Union
 from urllib.parse import urljoin
 
-import requests
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 from .client import VoltDBError
 
@@ -60,13 +60,15 @@ class HttpClient(object):
     def __init__(
         self,
         url: str,
-        http_get: Callable[..., requests.Response],
+        http_get: Callable[..., HTTPResponse],
         username: str,
         password: str,
         password_hashed: bool = False,
     ) -> None:
         self._api_url = urljoin(url, '/api/1.0/')
-        self._auth = VoltDBAuth(username, password, password_hashed)
+        self._username = username
+        self._password = password
+        self._password_field = 'Hashedpassword' if password_hashed else 'Password'
         self._http_get = http_get
 
     def call_procedure(self, procedure: str, params: Union[str, list, None] = None) -> HttpResponse:
@@ -81,7 +83,12 @@ class HttpClient(object):
         if parameters:
             query['Parameters'] = parameters
 
-        response = self._http_get(self._api_url, auth=self._auth, params=query)  # SKIP_HTTP_VALIDATION
+        # VoltDB expects credentials as query params.
+        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
+        query['User'] = self._username
+        query[self._password_field] = self._password
+
+        response = self._http_get(self._api_url, params=query)  # SKIP_HTTP_VALIDATION
         response.raise_for_status()
         return HttpResponse(response.json())
 
@@ -90,21 +97,5 @@ class HttpClient(object):
             raise VoltDBError(response.status, response.statusString)
 
     def close(self) -> None:
-        # Connection pooling is handled by the underlying requests Session.
+        # Connection pooling is handled by the Agent's HTTP client.
         return None
-
-
-class VoltDBAuth(requests.auth.AuthBase):
-    def __init__(self, username: str, password: str, password_hashed: bool) -> None:
-        self._username = username
-        self._password = password
-        self._password_hashed = password_hashed
-
-    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
-        # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
-        params = {
-            'User': self._username,
-            'Hashedpassword' if self._password_hashed else 'Password': self._password,
-        }
-        r.prepare_url(r.url, params)
-        return r

@@ -291,40 +291,37 @@ def test_qos_metrics_omit_overlay_tag_without_traffic_class_mapping(dd_run_check
 
 def test_login_appliance_csrf_token():
     http = MagicMock()
-    http.session.cookies = {'edgeosCsrfToken': 'mytoken'}
-    http.session.headers = {}
+    http.get_cookie.side_effect = lambda name: {'edgeosCsrfToken': 'mytoken'}.get(name)
     http.post.return_value = MagicMock(raise_for_status=MagicMock())
     logger = MagicMock()
 
     client = ApplianceClient(http, '10.0.0.1', logger)
     client.login('admin', 'pass')
 
-    assert http.session.headers.get('X-XSRF-TOKEN') == 'mytoken'
+    http.set_header.assert_called_once_with('X-XSRF-TOKEN', 'mytoken')
 
 
 def test_login_appliance_session_id_fallback():
     http = MagicMock()
-    http.session.cookies = {'vxoaSessionID': 'sess123'}
-    http.session.headers = {}
+    http.get_cookie.side_effect = lambda name: {'vxoaSessionID': 'sess123'}.get(name)
     http.post.return_value = MagicMock(raise_for_status=MagicMock())
     logger = MagicMock()
 
     client = ApplianceClient(http, '10.0.0.1', logger)
     client.login('admin', 'pass')
 
-    assert http.session.headers.get('vxoaSessionID') == 'sess123'
+    http.set_header.assert_called_once_with('vxoaSessionID', 'sess123')
 
 
 def test_login_orchestrator_csrf_token():
     http = MagicMock()
-    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
-    http.session.headers = {}
+    http.get_cookie.side_effect = lambda name: {'orchCsrfToken': 'orchtoken'}.get(name)
     http.post.return_value = MagicMock(raise_for_status=MagicMock())
 
     client = OrchestratorClient(http, '10.0.0.1')
     client.login('admin', 'pass')
 
-    assert http.session.headers.get('X-XSRF-TOKEN') == 'orchtoken'
+    http.set_header.assert_called_once_with('X-XSRF-TOKEN', 'orchtoken')
 
 
 @pytest.mark.parametrize(
@@ -344,8 +341,7 @@ def test_login_orchestrator_csrf_token():
 )
 def test_request_retries_once_on_401(client_factory, login_url):
     http = MagicMock()
-    http.session.cookies = {}
-    http.session.headers = {}
+    http.get_cookie.return_value = None
     http.post.return_value = MagicMock(raise_for_status=MagicMock())
     http.get.side_effect = [
         MagicMock(status_code=401, raise_for_status=MagicMock()),

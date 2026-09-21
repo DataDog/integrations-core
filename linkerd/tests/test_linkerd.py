@@ -4,8 +4,8 @@
 import os
 
 import pytest
-import requests_mock
 
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.linkerd import LinkerdCheck
 
 from .common import (
@@ -31,14 +31,15 @@ def get_response(filename):
     return response
 
 
-def test_linkerd(aggregator, dd_run_check):
+def test_linkerd(aggregator, dd_run_check, mock_openmetrics_http):
     """
     Test the full check
     """
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(
+        content=get_response('linkerd.txt'), headers={'Content-Type': 'text/plain'}
+    )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
-    with requests_mock.Mocker() as metric_request:
-        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
-        dd_run_check(check)
+    dd_run_check(check)
 
     for metric in LINKERD_FIXTURE_VALUES:
         aggregator.assert_metric(metric, LINKERD_FIXTURE_VALUES[metric])
@@ -52,11 +53,12 @@ def test_linkerd(aggregator, dd_run_check):
     )
 
 
-def test_linkerd_v2(aggregator, dd_run_check):
+def test_linkerd_v2(aggregator, dd_run_check, mock_openmetrics_http):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(
+        content=get_response('linkerd_v2.txt'), headers={'Content-Type': 'text/plain'}
+    )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
-    with requests_mock.Mocker() as metric_request:
-        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
-        dd_run_check(check)
+    dd_run_check(check)
 
     for metric_name, metric_type in EXPECTED_METRICS_V2.items():
         aggregator.assert_metric(metric_name, metric_type=metric_type)
@@ -68,8 +70,10 @@ def test_linkerd_v2(aggregator, dd_run_check):
     )
 
 
-def test_linkerd_v2_new(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('linkerd_v2.txt'))
+def test_linkerd_v2_new(aggregator, dd_run_check, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(
+        file_path=get_fixture_path('linkerd_v2.txt'), headers={'Content-Type': 'text/plain'}
+    )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE_NEW])
     dd_run_check(check)
 
@@ -83,12 +87,11 @@ def test_linkerd_v2_new(aggregator, dd_run_check, mock_http_response):
     )
 
 
-def test_openmetrics_error(monkeypatch, dd_run_check):
+def test_openmetrics_error(dd_run_check, mock_openmetrics_http):
+    mock_openmetrics_http.get.side_effect = Exception("test error")
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
-    with requests_mock.Mocker() as metric_request:
-        metric_request.get('http://fake.tld/prometheus', exc="Exception")
-        with pytest.raises(Exception):
-            dd_run_check(check)
+    with pytest.raises(Exception):
+        dd_run_check(check)
 
 
 @pytest.mark.e2e

@@ -3,10 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from xml.etree.ElementTree import ParseError
 
-import requests
 from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 from . import metrics, validation
 
@@ -122,7 +126,7 @@ class IbmWasCheck(AgentCheck):
             resp = self.http.get(self.url)
             resp.raise_for_status()
             self.submit_service_checks(AgentCheck.OK)
-        except (requests.HTTPError, requests.ConnectionError) as e:
+        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientTimeoutError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", self.url, e
             )
