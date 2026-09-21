@@ -121,10 +121,11 @@ def get_response(check, resource, **kwargs):
         else:
             check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload
-    except HTTPClientStatusError:
-        if resp.status_code in (401, 403):
+    except HTTPClientStatusError as e:
+        status = e.response.status_code if e.response is not None else str(e)
+        if status in (401, 403):
             check.log.error("Access denied. Enable guest authentication or check user permissions.")
-        check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)
+        check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, status)
         raise
     except Exception as e:
         check.log.exception("Couldn't fetch resource %s, unhandled exception %s", resource_name, str(e))

@@ -6,7 +6,14 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.teamcity.common import filter_build_configs, filter_items, filter_projects, normalize_server_url
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
+from datadog_checks.teamcity.common import (
+    filter_build_configs,
+    filter_items,
+    filter_projects,
+    get_response,
+    normalize_server_url,
+)
 from datadog_checks.teamcity.teamcity_rest import TeamCityRest
 
 from .common import (
@@ -368,3 +375,17 @@ def test_config(extra_config, expected_http_kwargs):
 
     for key, value in expected_http_kwargs.items():
         assert check.http.options[key] == value
+
+
+def test_get_response_status_error_without_response(fake_http, rest_instance, teamcity_rest_check, caplog):
+    check = teamcity_rest_check(rest_instance)
+    resource_url = f'{check.base_url}/app/rest/projects'
+    error = HTTPClientStatusError('status unavailable')
+    fake_http.register_response('GET', resource_url, error)
+
+    with pytest.raises(HTTPClientStatusError, match='status unavailable') as exc_info:
+        get_response(check, 'projects')
+
+    assert exc_info.value is error
+    assert "Couldn't fetch resource projects, got code status unavailable" in caplog.text
+    fake_http.assert_all_responses_consumed()
