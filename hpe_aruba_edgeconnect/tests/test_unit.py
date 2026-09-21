@@ -522,7 +522,7 @@ def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, m
     assert emitted == [f'{NS}.orchestrator.reachability']
     aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
     assert aggregator.get_event_platform_events('network-devices-metadata') == []
-    orch.get_appliances.assert_not_called()
+    assert orch._http.requests == []
     assert check._orch_client is None
 
 

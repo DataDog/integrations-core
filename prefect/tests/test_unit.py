@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientConnectTimeoutError,
@@ -613,12 +613,18 @@ pytestmark = [pytest.mark.usefixtures("mock_prefect_client"), pytest.mark.unit]
 
 
 def test_paginate_events_rejects_external_next_page():
-    http = Mock()
-    http.post.return_value = FakeHTTPResponse(
-        json_result={
-            "events": [{"id": "event-1"}],
-            "next_page": "http://attacker.example/evil",
-        },
+    http = FakeHTTPClient()
+    initial_url = "http://prefect.local/api/events/filter"
+    http.register_response(
+        "POST",
+        initial_url,
+        FakeHTTPResponse(
+            json_result={
+                "events": [{"id": "event-1"}],
+                "next_page": "http://attacker.example/evil",
+            },
+        ),
+        match_options={"json": {}},
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -626,7 +632,7 @@ def test_paginate_events_rejects_external_next_page():
     events = client.paginate_events("/events/filter", {})
 
     assert events == [{"id": "event-1"}]
-    http.get.assert_not_called()
+    assert [request.url for request in http.requests] == [initial_url]
     log.error.assert_called_once()
     args = log.error.call_args[0]
     assert args[0] == "Could not collect next page of events: %s, data is incomplete"
@@ -635,18 +641,29 @@ def test_paginate_events_rejects_external_next_page():
 
 
 def test_paginate_events_allows_same_host_absolute_next_page():
-    http = Mock()
-    http.post.return_value = FakeHTTPResponse(
-        json_result={
-            "events": [{"id": "event-1"}],
-            "next_page": "http://prefect.local/api/events/filter?page=2",
-        },
+    http = FakeHTTPClient()
+    initial_url = "http://prefect.local/api/events/filter"
+    next_url = "http://prefect.local/api/events/filter?page=2"
+    http.register_response(
+        "POST",
+        initial_url,
+        FakeHTTPResponse(
+            json_result={
+                "events": [{"id": "event-1"}],
+                "next_page": next_url,
+            },
+        ),
+        match_options={"json": {}},
     )
-    http.get.return_value = FakeHTTPResponse(
-        json_result={
-            "events": [{"id": "event-2"}],
-            "next_page": None,
-        },
+    http.register_response(
+        "GET",
+        next_url,
+        FakeHTTPResponse(
+            json_result={
+                "events": [{"id": "event-2"}],
+                "next_page": None,
+            },
+        ),
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -654,7 +671,7 @@ def test_paginate_events_allows_same_host_absolute_next_page():
     events = client.paginate_events("/events/filter", {})
 
     assert events == [{"id": "event-1"}, {"id": "event-2"}]
-    http.get.assert_called_once_with("http://prefect.local/api/events/filter?page=2")
+    assert [request.url for request in http.requests] == [initial_url, next_url]
 
 
 @pytest.fixture()
