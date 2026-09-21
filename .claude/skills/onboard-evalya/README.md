@@ -12,7 +12,7 @@ Invoke with `/onboard-evalya <integration>` (or ask to "onboard <x> to evalya").
 |---|---|
 | `SKILL.md` | The agent-facing workflow (what the model executes). |
 | `references/redis-exemplar.md` | Annotated walkthrough of the redisdb fixture. |
-| `references/coverage-loop.md` | The emitted-vs-target diff mechanism, the `-t 2` rule, multi-instance handling. |
+| `references/coverage-loop.md` | The non-zero-vs-target diff mechanism, the `-t 2` rule, multi-instance handling. |
 | `scripts/asset_metrics.py` | Deterministic extractor: dashboard + monitor metrics joined to `metadata.csv`. |
 
 ## Workflow
@@ -63,11 +63,11 @@ The only cycle is step 5 (the coverage loop); everything else is linear.
    │   stand up fixture                         │
    │        │                                   │
    │        ▼                                   │
-   │   run check ──► emitted set                │  ddev env agent … check -t 2 --json
+   │   run check ──► non-zero metrics           │  ddev env agent … check -t 2 --json
    │        │        (multi-instance:           │  (-t 2 MANDATORY: OpenMetrics
    │        │         one per role/endpoint)    │   counters need 2 scrapes)
    │        ▼                                   │
-   │   diff  uncovered = target − emitted       │
+   │   diff  uncovered = target − non-zero       │  (metric at 0 = still uncovered)
    │        │                                   │
    │        ├─ empty? ─────────────── yes ──────┼──►┐
    │        │                                   │   │

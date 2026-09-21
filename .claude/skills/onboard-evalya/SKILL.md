@@ -7,7 +7,8 @@ description: Use when the user asks to onboard, add, or set up an integration fo
 
 Build a `<integration>-full` evalya fixture that spins up a live instance plus a workload that
 drives the integration's check to emit **100% of the metrics used in its OOTB dashboards and
-recommended monitors**. The
+recommended monitors, with non-zero values** — a metric stuck at `0` means the workload never
+exercised the code path behind it, so it does not count as covered. The
 canonical exemplar is `redisdb/tests/` (`evalya.yaml`, `compose/full-coverage.compose`,
 `activity-gen.sh`, `proxy/`). Read `references/redis-exemplar.md` before authoring; it is the
 pattern this skill reproduces.
@@ -69,10 +70,15 @@ span multiple topologies (e.g. mongo needs both a replica set for `oplog.*`/`rep
 for `chunks.*`), the single `<integration>-full` fixture must use the richest topology that covers
 their union. Group them:
 
-- **Always emitted** on a healthy idle instance (most gauges).
+- **Always emitted** on a healthy idle instance (most gauges) — but often at `0` when idle; still
+  drive them to a representative non-zero value where one is meaningful (memory in use, connected
+  clients, key count).
 - **State-dependent** — need seeding (replication configured, a database/collection present, a
   slow query logged, an eviction, a connected client). These drive the one-shot `seed`.
 - **Rate/counter** — zero on an idle instance; need *continuous* traffic. These drive `activity-gen`.
+- **Zero-by-nature** — correct value in a healthy fixture is `0` (error/failure counters,
+  `*_down_since` gauges). Accept `0` here, but you must name each one and why; do not let unnoticed
+  zeros hide behind this category.
 - **Un-emittable by OSS** — need an injection layer. Pause and consult the user (see exemplar's
   `proxy/`); do not build one unprompted.
 
@@ -113,13 +119,16 @@ Follow `references/redis-exemplar.md`. Produce, under `<integration>/tests/`:
 Mechanism and exact commands: `references/coverage-loop.md`. In short:
 
 1. Stand up the fixture and point the Agent at it.
-2. Run the check and capture emitted metric names:
+2. Run the check and capture emitted metric names **and their values**:
    `ddev env agent <integration> <env> check <integration> --json` (verify the JSON shape at
    runtime; fall back to `references/coverage-loop.md`'s alternatives if the flag differs).
-3. Diff emitted names against the achievable target. For each uncovered metric, escalate in this
-   order and re-run:
+3. A metric counts as covered only when it reports a **non-zero** value in some scrape; a metric
+   seen only at `0` is a gap, not a win (see `references/coverage-loop.md`). Diff the non-zero
+   emitted set against the achievable target. For each uncovered metric — absent or zero-only —
+   escalate in this order and re-run:
    1. **Live workload** — extend `seed` (state) or `activity-gen` (traffic). Always prefer this;
-      a live-produced metric is the strongest evidence.
+      a live-produced non-zero value is the strongest evidence. For a zero-only metric, add the
+      specific operation that increments it (a slow query, an eviction, a failed login, replica lag).
    2. **Fixture-backed injection** — when a metric genuinely cannot be produced live (OSS build
       can't emit it, a managed-service-only field, a version-gated metric), reuse the integration's
       existing recorded payloads under `<integration>/tests/fixtures/` instead of hand-authoring
@@ -128,9 +137,10 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
       an injecting proxy as in `references/redis-exemplar.md`); for HTTP-API checks, replay the
       recorded responses from a small mock. This exercises the check's real parsing and mapping,
       but the values are frozen, so it is a fallback, not the default.
-4. Repeat until the gap is empty or every remaining metric is documented as unreachable (with the
-   reason — no live path and no fixture data covers it). Do not claim 100% without the diff showing
-   it. Mark which metrics are **fixture-backed** rather than live; that distinction is part of an
+4. Repeat until every target metric is non-zero, or is documented as zero-by-nature or unreachable
+   (with the reason — no workload increments it, or no live/fixture path covers it). Do not claim
+   100% without the diff showing non-zero values. Mark which metrics are **fixture-backed** rather
+   than live, and which sit at `0`; that distinction is part of an
    honest coverage report, since a served recording is weaker evidence than a live scrape and can
    drift from the check across versions.
 
@@ -149,8 +159,8 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 
 ## Guardrails
 
-- State each uncovered metric and the concrete workload change that will cover it before editing —
-  no speculative traffic.
+- State each uncovered metric (absent or zero-only) and the concrete workload change that will drive
+  it non-zero before editing — no speculative traffic.
 - If coverage stalls because a metric needs un-emittable data, prefer serving the integration's
   existing `tests/fixtures/` recordings (see step 5) over hand-authoring canned data; a bespoke
   proxy built from scratch is a deliberate, user-approved step, not a default. Either way, mark the

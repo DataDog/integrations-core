@@ -16,9 +16,19 @@ ddev env agent <integration> <env> check <integration> --json
 ```
 
 `<env>` is one of the names from `ddev env show <integration>`. The JSON contains an aggregator
-dump; the metric names live under the `aggregator.metrics[].metric` entries (confirm the exact
-shape at runtime — it has changed across Agent versions). Extract the distinct metric names and
-diff against the target.
+dump; each `aggregator.metrics[]` entry carries the name (`.metric`) and its value (the last point,
+`.points[-1][1]`, or a `.value` field — confirm the exact shape at runtime, it has changed across
+Agent versions). Extract `(name, value)` per metric, not just the name.
+
+**Coverage means non-zero, not merely present.** A metric emitted at `0` proves the check's mapping
+fires but not that the fixture exercises the code path behind it — an idle instance emits most
+counters and many gauges at `0`. Treat a metric that appears only with value `0` as **not yet
+covered** and drive the workload until it reports a non-zero value. Aggregate across scrapes: a
+metric is covered once any scrape in the run reports it non-zero. The escape hatch is a metric whose
+only correct value in a healthy fixture is `0` — error/failure counters with nothing failing,
+`*_down_since`-style gauges, deprecated-feature counters. Those are covered at `0`, but you must name
+each one and why, exactly like a documented-unreachable metric; never let a silent `0` pass as
+coverage.
 
 **Run OpenMetrics checks at least twice (`-t 2`).** A single `agent check` scrape emits **zero**
 monotonic counters — the OpenMetrics v2 base check needs a previous sample to submit a `.count`
@@ -82,17 +92,22 @@ this early: if two target metric groups require mutually exclusive deployment ty
 fixture can never reach 100% no matter the workload.
 
 1. Stand up the fixture (A or B).
-2. Run the oracle, extract emitted metric names.
-3. `uncovered = achievable_target - emitted`.
-4. If empty → done. Otherwise, for each uncovered metric, escalate:
+2. Run the oracle, extract `(name, value)` per emitted metric.
+3. `covered = target metrics seen non-zero in any scrape`; `uncovered = achievable_target - covered`.
+   A metric present only at `0` stays in `uncovered` — it is a gap, not a win.
+4. If empty → done. Otherwise, for each uncovered metric (absent, or zero-only), escalate:
    - state-dependent → extend `seed`; rate/counter → extend `activity-gen`; make one targeted
-     change and re-run from step 2;
+     change and re-run from step 2. For a zero-only metric, the fix is almost always workload: drive
+     the operation that increments it (a slow query, an eviction, a failed auth, a replica lag) so it
+     leaves `0`;
    - genuinely not producible live (OSS can't emit it, managed-service-only, version-gated) →
      fixture-backed injection (below);
+   - correct value in a healthy fixture is genuinely `0` (error/down counters with nothing wrong) →
+     document it as zero-by-nature, with the reason;
    - neither path covers it → document as unreachable.
-5. Stop when every target metric is either covered (live or fixture-backed) **or**
-   documented-unreachable with a concrete reason (cross-integration `system.*`, no fixture data
-   exists, etc.).
+5. Stop when every target metric is either covered non-zero (live or fixture-backed), documented
+   zero-by-nature, **or** documented-unreachable with a concrete reason (cross-integration
+   `system.*`, no fixture data exists, etc.). A metric sitting at `0` with no note is an open gap.
 
 ## Fixture-backed injection (fallback)
 
@@ -126,8 +141,9 @@ traffic before concluding they are uncovered.
 
 ## Reporting
 
-Report coverage as `<covered>/<achievable>` with the command that produced the emitted set, split
-live vs fixture-backed, and list any documented-unreachable metrics with their reason. Example:
-`24/24 target metrics emitted (ddev env agent redisdb <env> check redisdb --json); 24 live, 0
-fixture-backed, 0 unreachable.` Name the fixture-backed metrics explicitly so a reviewer knows which
-came from a recording rather than a live scrape.
+Report coverage as `<covered>/<achievable>` counting only metrics seen **non-zero**, with the
+command that produced the values, split live vs fixture-backed, and list every metric left at `0`
+with its reason (zero-by-nature or unreachable). Example:
+`24/24 target metrics non-zero (ddev env agent redisdb <env> check redisdb -t 2 --json); 24 live, 0
+fixture-backed, 0 zero-by-nature, 0 unreachable.` Name the fixture-backed and any zero-valued metrics
+explicitly — a reviewer needs to see which came from a recording and which never left `0`.
