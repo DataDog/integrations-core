@@ -6,7 +6,7 @@ import subprocess
 
 import pytest
 
-from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, DockerAgent
+from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, DEFAULT_CMD_PORT, DockerAgent
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path
@@ -241,6 +241,83 @@ class TestStart:
                 stderr=subprocess.STDOUT,
             ),
         ]
+
+    def test_docker_network(
+        self,
+        app,
+        temp_dir,
+        default_hostname,
+        get_integration,
+        docker_path,
+        mocker,
+    ):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+        find_free_port = mocker.patch('ddev.e2e.agent.docker._find_free_port')
+
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        integration = 'cilium'
+        environment = 'py3.13-1.11'
+        metadata = {'docker_network': 'kind'}
+
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        find_free_port.assert_not_called()
+        assert run.call_args_list == [
+            mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
+            mocker.call(
+                [
+                    docker_path,
+                    'run',
+                    '-d',
+                    '--name',
+                    f'dd_{integration}_{environment}',
+                    '--network',
+                    'kind',
+                    '-v',
+                    '/proc:/host/proc',
+                    '-v',
+                    f'{config_file.parent}:/etc/datadog-agent/conf.d/{integration}.d',
+                    '-e',
+                    'DD_AGENT_TELEMETRY_ENABLED=false',
+                    '-e',
+                    'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                    '-e',
+                    'DD_APM_ENABLED=false',
+                    '-e',
+                    f'DD_CMD_PORT={DEFAULT_CMD_PORT}',
+                    '-e',
+                    'DD_EXPVAR_PORT=5000',
+                    '-e',
+                    f'DD_HOSTNAME={default_hostname}',
+                    '-e',
+                    'DD_TELEMETRY_ENABLED=1',
+                    'registry.datadoghq.com/agent-dev:master-py3',
+                ],
+                shell=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            ),
+        ]
+
+    def test_docker_network_rejects_windows_agent(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+    ):
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        metadata = {'docker_network': 'kind', 'docker_platform': 'windows'}
+        agent = DockerAgent(app, get_integration('cilium'), 'py3.13-1.11', metadata, config_file)
+
+        with pytest.raises(ValueError, match='Custom Docker networks are not supported for Windows Agent containers'):
+            agent.start(agent_build='', local_packages={}, env_vars={})
 
     def test_no_config_file(
         self,

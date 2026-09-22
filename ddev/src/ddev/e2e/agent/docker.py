@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 # `start_commands` to exhaust the job timeout. Point apt at the generic archive instead.
 APT_MIRRORLIST_FILE = '/etc/apt/mirrorlist.main'
 APT_MIRROR = 'http://archive.ubuntu.com/ubuntu'
+DEFAULT_CMD_PORT = '5001'
 
 
 @contextmanager
@@ -174,8 +175,14 @@ class DockerAgent(AgentInterface):
         # Set Agent hostname for CI
         env_vars[AgentEnvVars.HOSTNAME] = _get_hostname()
 
-        # Run API on a random free port
-        env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
+        docker_network = self.metadata.get('docker_network')
+        if self._is_windows_container and docker_network:
+            raise ValueError('Custom Docker networks are not supported for Windows Agent containers')
+
+        # Host-networked containers need a unique API port because they share the host's network
+        # namespace. Containers attached to a Docker network have an isolated namespace and can use
+        # the Agent's standard command port without racing host processes for an ephemeral port.
+        env_vars[AgentEnvVars.CMD_PORT] = DEFAULT_CMD_PORT if docker_network else str(_find_free_port())
 
         # Disable trace Agent by default (can be overridden by user-provided env_vars)
         env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
@@ -249,7 +256,7 @@ class DockerAgent(AgentInterface):
         # Windows containers accessing the host network must use `docker.for.win.localhost` or `host.docker.internal`:
         # https://docs.docker.com/docker-for-windows/networking/#use-cases-and-workarounds
         if not self._is_windows_container:
-            command.extend(['--network', 'host'])
+            command.extend(['--network', docker_network or 'host'])
 
         for volume in volumes:
             command.extend(['-v', volume])
