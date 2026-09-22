@@ -25,7 +25,6 @@ from pydantic import ValidationError
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
-from datadog_checks.base.utils.remote_queries import handler as rq_handler
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
@@ -463,8 +462,6 @@ class PostgresRemoteQueryHandler:
     Resolve and execute share one matching authority (`_match_check_for_target`), so both
     operations report identical verdicts for the same target and check state.
     """
-
-    operations = rq_handler.REMOTE_QUERY_OPERATIONS
 
     def __init__(self, check: 'PostgreSql') -> None:
         self._check = check

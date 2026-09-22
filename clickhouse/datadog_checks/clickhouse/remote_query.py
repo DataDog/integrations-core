@@ -98,7 +98,6 @@ from pydantic import ValidationError
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
-from datadog_checks.base.utils.remote_queries import handler as rq_handler
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
@@ -741,7 +740,7 @@ def _run_streamed_query(
 
 
 # ---------------------------------------------------------------------------
-# Remote query capability handler: execution composed with one check
+# Remote query capability handler: resolve and execute composed with one check
 # ---------------------------------------------------------------------------
 
 
@@ -749,25 +748,69 @@ class ClickhouseRemoteQueryHandler:
     """The remote-query capability of one loaded ClickHouse check.
 
     `AgentCheck.run_remote_query` dispatches here through `ClickhouseCheck.get_remote_query_handler`,
-    which composes one handler with the check per bridge call. Execution creates a dedicated
+    which composes one handler with the check per bridge call. Resolve answers the Agent's
+    target sweep from the check's configuration alone; execution creates a dedicated
     per-run client from the check's connection configuration and streams the result exactly
-    once; the handler holds only the check it serves, never request state. Target resolution
-    is not part of this capability: `operations` advertises execution only.
-    """
+    once. The handler holds only the check it serves, never request state.
 
-    operations = frozenset((rq_handler.REMOTE_QUERY_OPERATION_PRODUCE_JSON_PAGES,))
+    Resolve and execute share one matching authority (`_check_matches_target`), so both
+    operations report identical verdicts for the same target and check state.
+    """
 
     def __init__(self, check: 'ClickhouseCheck') -> None:
         self._check = check
 
     def resolve(self, request: Any) -> Iterator[rq_contract.RemoteQueryEvent]:
-        """Fail closed: this capability does not resolve targets.
+        """Tell the Agent whether this loaded ClickHouse check owns the requested target.
 
-        `operations` never advertises `resolve_target`, so the dispatcher never routes target
-        resolution here; a direct call still answers with the closed vocabulary error rather
-        than pretending to resolve.
+        The Agent calls this once per loaded ClickHouse check while resolving a target. Each
+        call yields exactly one verdict: a MATCHED `final` event containing the check's
+        sanitized effective identity, or an `error` event. The Agent aggregates those
+        verdicts to distinguish zero, one, or multiple matching checks and routes execution
+        to the unique match.
+
+        Matching uses the same `_check_matches_target` authority as execution. This method
+        never runs customer SQL, probes the requested database, creates a query client,
+        uploads results, or binds a later execution to this response; execution re-matches
+        the target before dispatch. An invalid request produces an error other than
+        `target_not_found`, so the Agent fails the whole resolution instead of silently
+        skipping this check.
         """
-        yield rq_events.failed_event('unsupported_operation', 'Check does not support remote query resolution.')
+        started_at = time.monotonic()
+        try:
+            parsed_request = rq_contract.RemoteQueryResolveRequest.model_validate(request)
+        except ValidationError as e:
+            yield rq_events.failed_event(
+                'invalid_request', rq_contract.validation_message(e), elapsed_ms=rq_events.elapsed_ms(started_at)
+            )
+            return
+
+        target = parsed_request.target
+        if not self._check_matches_target(target):
+            yield rq_events.failed_event(
+                'target_not_found',
+                'No loaded ClickHouse integration instance matched target selector.',
+                elapsed_ms=rq_events.elapsed_ms(started_at),
+            )
+            return
+
+        resolved_dbname = self._resolved_dbname(target)
+        if resolved_dbname is None:
+            yield rq_events.failed_event(
+                'target_unavailable',
+                'Matched ClickHouse check does not expose a configured database name.',
+                elapsed_ms=rq_events.elapsed_ms(started_at),
+            )
+            return
+
+        endpoint = self._endpoint_from_check()
+        yield rq_events.matched_resolve_event(
+            host=endpoint[0] if endpoint is not None else None,
+            port=endpoint[1] if endpoint is not None else None,
+            configured_dbname=self._db_from_check(),
+            resolved_dbname=resolved_dbname,
+            database_instance=getattr(self._check, 'database_identifier', None),
+        )
 
     def execute(
         self,
@@ -989,7 +1032,7 @@ class ClickhouseRemoteQueryHandler:
         return factory(send_receive_timeout=timeout_seconds)
 
     def _check_matches_target(self, target: rq_contract.RemoteQueryTarget) -> bool:
-        """Whether the composed check admits the target.
+        """The matching authority shared by resolve and execute, on the composed check alone.
 
         A database_instance selector matches by rendered identifier; a tuple selector matches
         the check's configured endpoint and database. Selecting zero, one, or many matching
@@ -1011,3 +1054,36 @@ class ClickhouseRemoteQueryHandler:
             return rq_contract.RemoteQueryTarget(host=config.server, port=config.port, dbname=config.db)
         except (AttributeError, ValidationError):
             return None
+
+    def _resolved_dbname(self, target: rq_contract.RemoteQueryTarget) -> str | None:
+        """The database a matched check admits for the target.
+
+        A tuple target's dbname is part of match identity and is the admitted database. A
+        database_instance selector identifies one loaded check and admits its materialized
+        configured database, never a request-named other one; None means the matched check
+        cannot name a database at all.
+        """
+        if target.database_instance is not None:
+            return self._db_from_check()
+        return target.dbname
+
+    def _endpoint_from_check(self) -> tuple[str, int] | None:
+        """The check's endpoint identity: normalized configured server and effective port.
+
+        A check whose configuration does not expose a usable endpoint (missing config,
+        non-string server, non-integer port) has no endpoint identity, so the matched verdict
+        omits host and port rather than guessing them.
+        """
+        config = getattr(self._check, '_config', None)
+        server = getattr(config, 'server', None)
+        port = getattr(config, 'port', None)
+        if not isinstance(server, str) or not isinstance(port, int) or isinstance(port, bool):
+            return None
+        try:
+            return rq_contract.normalize_host(server), port
+        except ValueError:
+            return None
+
+    def _db_from_check(self) -> str | None:
+        config = getattr(self._check, '_config', None)
+        return getattr(config, 'db', None)

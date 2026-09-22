@@ -418,6 +418,43 @@ def assert_failed_event(events, code, message_contains=None):
         assert message_contains in event_metadata(events[-1])['error']['message']
 
 
+def resolve_request(**target):
+    """A strict resolve_target request: operation and target only."""
+    if 'database_instance' in target:
+        selector = {'database_instance': target['database_instance']}
+    else:
+        selector = {
+            'host': target.pop('host', 'LOCALHOST.'),
+            'port': target.pop('port', 8123),
+            'dbname': target.pop('dbname', 'default'),
+        }
+    return {'operation': 'resolve_target', 'target': selector}
+
+
+def collect_resolve_events(request, check):
+    return list(ClickhouseRemoteQueryHandler(check).resolve(request))
+
+
+def assert_matched_verdict(events):
+    """A verdict is exactly one MATCHED final event with no payload and no STARTED event."""
+    assert len(events) == 1
+    event = events[0]
+    assert event.event_type == 'final'
+    assert event.payload == b''
+    metadata = event_metadata(event)
+    assert metadata['status'] == 'MATCHED'
+    return metadata['match']
+
+
+def forbidding_client_factory():
+    """A check-side client factory that fails any test touching it: resolve must not create clients."""
+
+    def factory(**_kwargs):
+        pytest.fail('resolve must not create a query client')
+
+    return factory
+
+
 def assert_success(events):
     assert events[-1].event_type == 'final'
     assert event_metadata(events[-1])['status'] == 'SUCCEEDED'

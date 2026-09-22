@@ -1634,11 +1634,12 @@ class AgentCheck(object):
     def run_remote_query(self, request_json: str | bytes | bytearray, emit: RemoteQueryEmit) -> None:
         """Agent bridge entry point for the optional remote-query capability.
 
-        The dispatcher acquires one optional handler through `get_remote_query_handler`
-        and dispatches through it: the handler's `operations` advertises the operations
-        it supports, and its `resolve`/`execute` implement them. Requests are decoded
-        JSON objects; the handler validates its operation's schema before accessing
-        database state. Only metadata events cross `emit`, never rows.
+        The dispatcher validates the request's operation against the closed Remote Query
+        vocabulary, then acquires one optional handler through `get_remote_query_handler`
+        and dispatches directly through it: handler presence alone gates the capability,
+        because a handler implements the complete protocol — resolve and execute. Requests
+        are decoded JSON objects; the handler validates its operation's schema before
+        accessing database state. Only metadata events cross `emit`, never rows.
 
         The Agent pins this loaded check for the call and prevents calls after shutdown.
         This path is independent of scheduled `check()` runs: implementations must use
@@ -1672,12 +1673,12 @@ class AgentCheck(object):
             )
             return
         handler = self.get_remote_query_handler()
-        if handler is None or operation not in handler.operations:
+        if handler is None:
             emit_event(
                 emit,
                 failed_event(
                     'unsupported_operation',
-                    'Check does not support this remote query operation.',
+                    'Check does not support remote queries.',
                     execution_diagnostics=timings.metadata(),
                 ),
             )

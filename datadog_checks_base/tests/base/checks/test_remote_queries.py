@@ -16,7 +16,6 @@ from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerT
 class QueryHandler:
     """A remote-query capability handler used to exercise the base dispatch."""
 
-    operations = frozenset({'resolve_target', 'produce_json_pages'})
     execution_closed = False
 
     def resolve(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
@@ -75,16 +74,6 @@ def test_dispatches_to_the_handler(operation: str):
         assert json.loads(events[0][1])['query'] == request['query']
         assert 'executionDiagnostics' in json.loads(events[-1][1])
         assert check.handler.execution_closed
-
-
-def test_operation_must_be_explicitly_advertised():
-    """A handler that does not advertise an operation must not have it dispatched."""
-    check = QueryCheck()
-    check.handler.operations = frozenset({'produce_json_pages'})
-    events = []
-    check.run_remote_query('{"operation":"resolve_target"}', lambda *event: events.append(event))
-    assert len(events) == 1
-    assert json.loads(events[0][1])['error']['code'] == 'unsupported_operation'
 
 
 def test_emit_failure_closes_execution():

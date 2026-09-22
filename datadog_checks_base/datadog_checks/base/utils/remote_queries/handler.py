@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
-from typing import AbstractSet, Any, Protocol
+from typing import Any, Protocol
 
 from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
 from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
@@ -23,16 +23,14 @@ REMOTE_QUERY_OPERATIONS = frozenset((REMOTE_QUERY_OPERATION_RESOLVE_TARGET, REMO
 class RemoteQueryHandler(Protocol):
     """The remote-query capability of one loaded check, composed with it.
 
-    `AgentCheck.get_remote_query_handler` returns one handler per bridge call. Handlers are
-    cheap to construct and hold the check they serve, never check-global or process-global
-    request state: every request owns its call. `operations` advertises the supported
-    operations, and the dispatcher consults it before dispatching, so `resolve`/`execute`
-    are reached only for advertised operations. Requests are decoded JSON objects; each
-    method validates its operation's schema before accessing database state, and only
-    metadata events cross the Agent's emit callback, never rows.
+    `AgentCheck.get_remote_query_handler` returns one handler per bridge call, and its
+    presence is the sole capability gate: a handler implements the complete closed Remote
+    Query protocol — resolve and execute — while None means the check has no Remote Query
+    capability at all. Handlers are cheap to construct and hold the check they serve, never
+    check-global or process-global request state: every request owns its call. Requests are
+    decoded JSON objects; each method validates its operation's schema before accessing
+    database state, and only metadata events cross the Agent's emit callback, never rows.
     """
-
-    operations: AbstractSet[str]
 
     def resolve(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
         """Yield the per-check target verdict without executing customer SQL or uploading data."""

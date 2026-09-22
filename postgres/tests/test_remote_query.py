@@ -6,6 +6,8 @@
 import json
 import logging
 import socket
+import subprocess
+import sys
 from contextlib import contextmanager
 from types import SimpleNamespace
 
@@ -192,6 +194,21 @@ def test_entry_rejects_unknown_operation_without_pool_access(runtime_check):
     assert events[-1][0] == 'error'
     assert metadata['error']['code'] == 'invalid_request'
     assert pool.requested_dbnames == []
+
+
+def test_importing_the_check_does_not_import_the_remote_query_runtime():
+    """Ordinary monitoring startup stays free of the optional remote-query runtime: the
+    capability hook builds its handler behind a function-local import, so importing the
+    check module alone must not import it.
+
+    The assertion runs in a fresh interpreter because this suite (in any test ordering)
+    imports the runtime module into its own `sys.modules`.
+    """
+    code = (
+        "import sys; from datadog_checks.postgres import PostgreSql; "
+        "assert 'datadog_checks.postgres.remote_query' not in sys.modules"
+    )
+    subprocess.run([sys.executable, '-c', code], check=True)
 
 
 def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
