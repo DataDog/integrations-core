@@ -216,6 +216,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         lint_env = {
             'detached': True,
             'installer': 'uv',
+            # Without this, Hatch inherits the interpreter that ddev itself runs under, so linting
+            # targets whatever Python the developer installed ddev with rather than the version CI
+            # uses. Keep in sync with the `python` value in: /ddev/hatch.toml
+            'python': '3.13',
             'scripts': {
                 'style': [
                     self.formatter_command('--diff --check', settings_dir),
@@ -239,7 +243,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'dependencies': [
                 'ruff==0.11.10',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==2.11.5',
+                'pydantic==2.13.4',
                 # uv-managed venvs do not seed pip, but mypy's --install-types
                 # shells out to `python -m pip install` for missing type stubs.
                 'pip',
