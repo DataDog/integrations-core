@@ -29,4 +29,4 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.value.example: http://localhost:8085/metrics
+        openmetrics_endpoint.value.example: http://%%host%%:8085/metrics
