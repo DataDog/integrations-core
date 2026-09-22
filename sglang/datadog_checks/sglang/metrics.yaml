@@ -9,6 +9,8 @@ process_start_time_seconds: process.start_time_seconds
 process_cpu_seconds: process.cpu_seconds
 process_open_fds: process.open_fds
 process_max_fds: process.max_fds
+# Recent SGLang releases namespace this prometheus_client process metric.
+sglang:process_cpu_seconds: process.cpu_seconds
 
 # API-server metrics.
 sglang:routing_keys_active: routing_keys.active

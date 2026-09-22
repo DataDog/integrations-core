@@ -41,6 +41,7 @@ METRICS = [
     'spec_decode.accept_rate',
     'startup.seconds',
     'weight_load.seconds',
+    'process.cpu_seconds.count',
 ]
 
 HISTOGRAMS = [

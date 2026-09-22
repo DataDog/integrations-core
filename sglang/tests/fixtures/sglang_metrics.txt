@@ -57,6 +57,9 @@ sglang:engine_startup_time{model_name="facebook/opt-125m",tp_rank="0"} 9.2
 # HELP sglang:engine_load_weights_time Time taken to load model weights.
 # TYPE sglang:engine_load_weights_time gauge
 sglang:engine_load_weights_time{model_name="facebook/opt-125m",tp_rank="0"} 1.4
+# HELP sglang:process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE sglang:process_cpu_seconds_total counter
+sglang:process_cpu_seconds_total 28.3
 # HELP sglang:time_to_first_token_seconds Time to first token in seconds.
 # TYPE sglang:time_to_first_token_seconds histogram
 sglang:time_to_first_token_seconds_bucket{le="0.1",model_name="facebook/opt-125m"} 1
