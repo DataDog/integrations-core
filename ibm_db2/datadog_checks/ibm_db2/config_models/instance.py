@@ -12,7 +12,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
@@ -44,6 +44,16 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class QueryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, gt=0.0)
+    enabled: Optional[bool] = None
+    run_sync: Optional[bool] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -53,6 +63,7 @@ class InstanceConfig(BaseModel):
     connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     db: str
+    dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
@@ -62,6 +73,7 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool] = None
     password: str
     port: Optional[int] = None
+    query_metrics: Optional[QueryMetrics] = None
     security: Optional[Literal['none', 'ssl']] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

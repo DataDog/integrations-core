@@ -36,7 +36,9 @@ files:
         value:
           type: string
       - name: host
-        description: The hostname used to connect to a remote or uncataloged database.
+        description: |
+          The hostname used to connect to a remote or uncataloged database.
+          Required when Database Monitoring is enabled.
         fleet_configurable: true
         value:
           type: string
@@ -73,6 +75,44 @@ files:
         value:
           type: integer
           example: 10
+
+      - name: dbm
+        description: |
+          Enable Database Monitoring to collect query execution counts and execution times.
+          Requires an explicit `host` and collects the configured database on the connected Db2 member.
+        fleet_configurable: true
+        value:
+          type: boolean
+          example: false
+      - name: query_metrics
+        description: Configure collection of query metrics.
+        fleet_configurable: true
+        options:
+          - name: enabled
+            description: |
+              Enable collection of query metrics. Requires `dbm: true`.
+            fleet_configurable: true
+            value:
+              type: boolean
+              example: true
+          - name: collection_interval
+            description: |
+              The query metric collection interval in seconds. Must be greater than zero.
+              Each collection queries `MON_GET_PKG_CACHE_STMT` on the connected Db2 member.
+            fleet_configurable: true
+            value:
+              type: number
+              example: 10
+              exclusiveMinimum: 0
+          - name: run_sync
+            hidden: true
+            description: |
+              Run query metrics collection synchronously for testing. Do not use in production because it
+              blocks the main check thread.
+            fleet_configurable: false
+            value:
+              type: boolean
+              example: false
 
       - template: instances/db
         overrides:

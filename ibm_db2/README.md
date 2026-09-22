@@ -120,6 +120,46 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6].
 
+##### Database Monitoring
+
+Database Monitoring collects query execution counts and execution times for the configured database on the connected Db2 member. It polls the package cache, so statements evicted between collections may be missed.
+
+1. In addition to the monitoring permissions above, grant the monitoring user permission to execute [MON_GET_PKG_CACHE_STMT][18]. Run the following statement while connected to the database, replacing `<MONITORING_USER>` with the monitoring user:
+
+   ```sql
+   GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <MONITORING_USER>;
+   ```
+
+2. Ensure [activity metrics collection][19] is enabled. To enable it for all workloads, run the following command as a database administrator, replacing `<DATABASE_NAME>` with the database name:
+
+   ```text
+   db2 update db cfg for <DATABASE_NAME> using MON_ACT_METRICS BASE
+   ```
+
+   Alternatively, enable `COLLECT ACTIVITY METRICS BASE` on the workloads to monitor. Query metrics only cover executions for which activity metrics were collected.
+
+3. Enable Database Monitoring in `ibm_db2.d/conf.yaml`. An explicit `host` is required:
+
+   ```yaml
+   instances:
+     - db: <DATABASE_NAME>
+       host: <HOSTNAME>
+       port: 50000
+       username: <MONITORING_USER>
+       password: <PASSWORD>
+       dbm: true
+   ```
+
+   Query metrics are enabled automatically with a 10-second collection interval. To customize collection, add the following optional block to the instance:
+
+   ```yaml
+   query_metrics:
+     enabled: true
+     collection_interval: 10
+   ```
+
+4. [Restart the Agent][6].
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
@@ -287,3 +327,5 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
 [16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/
 [17]: https://www.ibm.com/docs/en/db2oc?topic=views-monitor-procedures-functions
+[18]: https://www.ibm.com/docs/en/db2/11.5.x?topic=mmr-mon-get-pkg-cache-stmt-table-function-get-package-cache-statement-metrics
+[19]: https://www.ibm.com/docs/en/db2/11.5.x?topic=parameters-mon-act-metrics-monitoring-activity-metrics

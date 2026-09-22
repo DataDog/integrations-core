@@ -4,11 +4,13 @@
 from __future__ import division
 
 from itertools import chain
+from math import isfinite
 from time import time as timestamp
 
 from requests import ConnectionError
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.platform import Platform
 
@@ -23,10 +25,12 @@ if Platform.is_windows():
 import ibm_db
 
 from . import queries
+from .statements import Db2StatementMetrics
 from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
-class IbmDb2Check(AgentCheck):
+class IbmDb2Check(DatabaseCheck):
+    DBMS = 'ibm_db2'
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
@@ -46,6 +50,9 @@ class IbmDb2Check(AgentCheck):
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
+        self.tag_manager.set_tags_from_list(self._tags, replace=True)
+        self._dbms_version = None
+        self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
 
         # Track table space state changes
         self._table_space_states = {}
@@ -72,6 +79,52 @@ class IbmDb2Check(AgentCheck):
             self.query_transaction_log,
             self.query_custom,
         )
+        if self._dbm_enabled:
+            if not self._host:
+                raise ConfigurationError('Database Monitoring requires an explicit host')
+            query_metrics = self.instance.get('query_metrics') or {}
+            try:
+                collection_interval = float(query_metrics.get('collection_interval', 10))
+            except (TypeError, ValueError) as e:
+                raise ConfigurationError('query_metrics.collection_interval must be a positive finite number') from e
+            if not isfinite(collection_interval) or collection_interval <= 0:
+                raise ConfigurationError('query_metrics.collection_interval must be a positive finite number')
+            if is_affirmative(query_metrics.get('enabled', True)):
+                self.register_async_job(
+                    Db2StatementMetrics(
+                        self,
+                        collection_interval=collection_interval,
+                        run_sync=is_affirmative(query_metrics.get('run_sync', False)),
+                    )
+                )
+
+    @property
+    def reported_hostname(self) -> str | None:
+        return self._host or None
+
+    @property
+    def database_identifier_template(self) -> str:
+        return '$host:$port'
+
+    @property
+    def database_identifier_params(self) -> dict:
+        host = self._host or ''
+        if ':' in host and not host.startswith('['):
+            host = f'[{host}]'
+        return {'host': host, 'port': self._port}
+
+    @property
+    def dbms_version(self) -> str:
+        return self._dbms_version or 'unknown'
+
+    @property
+    def cloud_metadata(self) -> dict:
+        return {}
+
+    def shutdown(self) -> None:
+        if self._conn is not None:
+            connection, self._conn = self._conn, None
+            ibm_db.close(connection)
 
     def check(self, instance):
         if self._conn is None:
@@ -90,8 +143,13 @@ class IbmDb2Check(AgentCheck):
                 self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
                 continue
 
-    @AgentCheck.metadata_entrypoint
+        self.run_async_jobs(self.tags)
+
     def collect_metadata(self):
+        metadata_enabled = self.is_metadata_collection_enabled()
+        # DBM payloads need the server version even when Agent inventory collection is disabled.
+        if not metadata_enabled and not self._dbm_enabled:
+            return
         try:
             raw_version = get_version(self._conn)
         except Exception as e:
@@ -99,8 +157,10 @@ class IbmDb2Check(AgentCheck):
             return
 
         if raw_version:
-            version_parts = self.parse_version(raw_version)
-            self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
+            self._dbms_version = raw_version
+            if metadata_enabled:
+                version_parts = self.parse_version(raw_version)
+                self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
 
             self.log.debug('Found ibm_db2 version: %s', raw_version)
         else:
@@ -609,6 +669,8 @@ class IbmDb2Check(AgentCheck):
 
     def iter_rows(self, query, method):
         # https://github.com/ibmdb/python-ibmdb/wiki/APIs
+        if self._dbm_enabled:
+            query = f'{queries.DDIGNORE_COMMENT} {query}'
         try:
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
