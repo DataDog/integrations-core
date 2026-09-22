@@ -46,12 +46,12 @@ class WorkflowJobConclusion(StrEnum):
 
 
 class JobStepStatus(StrEnum):
-    """The status of a single step within a workflow job.
+    """The status of a step within a workflow job.
 
-    The `job` schema's `steps` items declare `status` as
-    `enum: [queued, in_progress, completed]` (a narrower set than the job's own
-    status). Their `conclusion` is a nullable string with no `enum`, so it stays
-    a plain `str`.
+    The API returns `pending` for post-job steps, although its published schema omits it.
+    Observed response:
+    https://github.com/DataDog/integrations-core/actions/runs/34215910364/job/102398685006
+
     Reference:
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
     """
@@ -59,6 +59,7 @@ class JobStepStatus(StrEnum):
     QUEUED = auto()
     IN_PROGRESS = auto()
     COMPLETED = auto()
+    PENDING = auto()
 
 
 class WorkflowRun(BaseModel):

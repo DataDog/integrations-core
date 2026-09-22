@@ -247,6 +247,13 @@ go_memstats_sys_bytes 7.5580416e+07
 # HELP go_threads Number of OS threads created.
 # TYPE go_threads gauge
 go_threads 11
+# HELP instrumentation_controller__reconciliations Number of DatadogInstrumentation section reconciliation attempts by outcome.
+# TYPE instrumentation_controller__reconciliations counter
+instrumentation_controller__reconciliations{section="checks",status="success"} 3
+instrumentation_controller__reconciliations{section="logs",status="error"} 1
+# HELP instrumentation_controller__resources Number of DatadogInstrumentation resources tracked by the controller.
+# TYPE instrumentation_controller__resources gauge
+instrumentation_controller__resources 3
 # HELP jsonstream__blocked_time Total time spent waiting for the compressor to be available
 # TYPE jsonstream__blocked_time counter
 jsonstream__blocked_time 6.1130524e+07

@@ -1,1 +1,0 @@
-Cache parameterized-query explain failures caused by ambiguous function calls so they aren't re-attempted on every collection.

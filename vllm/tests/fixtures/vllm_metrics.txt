@@ -176,3 +176,48 @@ vllm:avg_prompt_throughput_toks_per_s{model_name="facebook/opt-125m"} 0.0
 # HELP vllm:avg_generation_throughput_toks_per_s Average generation throughput in tokens/s.
 # TYPE vllm:avg_generation_throughput_toks_per_s gauge
 vllm:avg_generation_throughput_toks_per_s{model_name="facebook/opt-125m"} 0.0
+# HELP vllm:estimated_flops_per_gpu_total Estimated floating-point operations per GPU.
+# TYPE vllm:estimated_flops_per_gpu_total counter
+vllm:estimated_flops_per_gpu_total{model_name="facebook/opt-125m"} 1000000
+# HELP vllm:external_prefix_cache_hits_total External prefix cache hits in tokens.
+# TYPE vllm:external_prefix_cache_hits_total counter
+vllm:external_prefix_cache_hits_total{model_name="facebook/opt-125m"} 8
+# HELP vllm:external_prefix_cache_queries_total External prefix cache queries in tokens.
+# TYPE vllm:external_prefix_cache_queries_total counter
+vllm:external_prefix_cache_queries_total{model_name="facebook/opt-125m"} 10
+# HELP vllm:prompt_tokens_cached_total Number of cached prompt tokens.
+# TYPE vllm:prompt_tokens_cached_total counter
+vllm:prompt_tokens_cached_total{model_name="facebook/opt-125m"} 8
+# HELP vllm:request_decode_time_seconds Decode time per request.
+# TYPE vllm:request_decode_time_seconds histogram
+vllm:request_decode_time_seconds_bucket{le="1.0",model_name="facebook/opt-125m"} 1
+vllm:request_decode_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+vllm:request_decode_time_seconds_count{model_name="facebook/opt-125m"} 1
+vllm:request_decode_time_seconds_sum{model_name="facebook/opt-125m"} 0.4
+# HELP vllm:request_prefill_kv_computed_tokens New KV tokens computed during prefill.
+# TYPE vllm:request_prefill_kv_computed_tokens histogram
+vllm:request_prefill_kv_computed_tokens_bucket{le="10",model_name="facebook/opt-125m"} 1
+vllm:request_prefill_kv_computed_tokens_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+vllm:request_prefill_kv_computed_tokens_count{model_name="facebook/opt-125m"} 1
+vllm:request_prefill_kv_computed_tokens_sum{model_name="facebook/opt-125m"} 8
+# HELP vllm:request_prefill_time_seconds Prefill time per request.
+# TYPE vllm:request_prefill_time_seconds histogram
+vllm:request_prefill_time_seconds_bucket{le="1.0",model_name="facebook/opt-125m"} 1
+vllm:request_prefill_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+vllm:request_prefill_time_seconds_count{model_name="facebook/opt-125m"} 1
+vllm:request_prefill_time_seconds_sum{model_name="facebook/opt-125m"} 0.1
+# HELP vllm:request_queue_time_seconds Queue time per request.
+# TYPE vllm:request_queue_time_seconds histogram
+vllm:request_queue_time_seconds_bucket{le="1.0",model_name="facebook/opt-125m"} 1
+vllm:request_queue_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+vllm:request_queue_time_seconds_count{model_name="facebook/opt-125m"} 1
+vllm:request_queue_time_seconds_sum{model_name="facebook/opt-125m"} 0.2
+# HELP vllm:spec_decode_num_accepted_tokens_total Accepted speculative tokens.
+# TYPE vllm:spec_decode_num_accepted_tokens_total counter
+vllm:spec_decode_num_accepted_tokens_total{model_name="facebook/opt-125m"} 6
+# HELP vllm:spec_decode_num_accepted_tokens_per_pos_total Accepted tokens per draft position.
+# TYPE vllm:spec_decode_num_accepted_tokens_per_pos_total counter
+vllm:spec_decode_num_accepted_tokens_per_pos_total{model_name="facebook/opt-125m",position="0"} 5
+# HELP vllm:spec_decode_num_draft_tokens_total Draft speculative tokens.
+# TYPE vllm:spec_decode_num_draft_tokens_total counter
+vllm:spec_decode_num_draft_tokens_total{model_name="facebook/opt-125m"} 10

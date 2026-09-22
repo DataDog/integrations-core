@@ -284,9 +284,17 @@ class AgentCheck(object):
         # everywhere just yet. It's complicated... See: https://github.com/DataDog/integrations-core/pull/5573
         instance = instances[0] if instances else None
 
-        self.check_id = ''
         self.provider = ''
         self.name = name  # type: str
+
+        # Built before `check_id` is assigned below, because its setter forwards the value here.
+        # Held separately from `self.log` because subclasses are free to replace that with a logger
+        # of their own, as `PrometheusScraperMixin` does.
+        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
+        self._log_adapter = CheckLoggingAdapter(logger)
+        self.log = self._log_adapter
+
+        self.check_id = ''
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
         self.instance = instance  # type: InstanceType
@@ -306,9 +314,6 @@ class AgentCheck(object):
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
-
-        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
-        self.log = CheckLoggingAdapter(logger, self)
 
         metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
         if not isinstance(metric_patterns, dict):
@@ -466,6 +471,21 @@ class AgentCheck(object):
             return self.DEFAULT_METRIC_LIMIT
 
         return limit
+
+    @property
+    def check_id(self) -> str:
+        """
+        The Agent's identifier for this check instance, in the form ``<name>:<instance hash>``.
+
+        Empty until the Agent assigns it, which happens after construction and before the first run.
+        """
+        return self._check_id
+
+    @check_id.setter
+    def check_id(self, value: str) -> None:
+        self._check_id = value
+        # The adapter tags every log record with the id, so it needs the value as soon as we have it.
+        self._log_adapter.set_check_id(value)
 
     @property
     def http(self) -> RequestsWrapper:
@@ -1641,6 +1661,15 @@ class AgentCheck(object):
                 else:
                     self.check(instance)
 
+                if self.metric_limiter:
+                    try:
+                        reached_limit = self.metric_limiter.reached_limit
+                        observed_count = self.metric_limiter.count
+                        limit = self.metric_limiter.limit
+                        self._on_metric_limit_state(reached_limit, observed_count, limit)
+                    except Exception:
+                        self.log.debug('Error handling metric limit state', exc_info=True)
+
             error_report = ''
         except Exception as e:
             message = self.sanitize(str(e))
@@ -1661,6 +1690,10 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        """Called once per run for checks with an active metric limiter."""
+        pass
 
     def run_check_initializations(self):
         while self.check_initializations:
@@ -1857,6 +1890,8 @@ class AgentCheck(object):
     # Remediation *Remediation `protobuf:"bytes,11,opt,name=remediation,proto3" json:"remediation,omitempty"`
     # // Tags are additional labels for the issue
     # Tags []string `protobuf:"bytes,12,rep,name=tags,proto3" json:"tags,omitempty"`
+    # // IssueType snake_case version of issue name
+    # IssueType string `protobuf:"bytes,14,opt,name=issue_type,json=issueType,proto3" json:"issue_type,omitempty"`
 
     # Remediation should be a dict with the following keys:
     # - summary: str
@@ -1871,6 +1906,7 @@ class AgentCheck(object):
         self,
         id: str,
         issue_name: str,
+        issue_type: str,
         title: str = None,
         description: str = None,
         category: str = None,
@@ -1879,14 +1915,17 @@ class AgentCheck(object):
         remediation: dict = None,
         tags: list = None,
     ):
-        # Issue ID and Name are required
+        # Issue ID, Name, and Type are required
         if not id:
             raise ValueError("Issue ID is required")
         if not issue_name:
             raise ValueError("Issue Name is required")
+        if not issue_type:
+            raise ValueError("Issue Type is required")
         issue = {
             'id': id,
             'issue_name': issue_name,
+            'issue_type': issue_type,
             'title': title,
             'description': description,
             'category': category,

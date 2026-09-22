@@ -49,6 +49,18 @@ def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[
     return env_vars or None
 
 
+def _sync_restored_config(app: Application, agent: AgentInterface) -> None:
+    import sys
+
+    original_error = sys.exception()
+    try:
+        agent.sync_config()
+    except Exception as e:
+        if original_error is None:
+            raise
+        app.display_warning(f'Unable to restore the Agent configuration: {e}')
+
+
 @click.command(
     short_help='Invoke the Agent', context_settings={'help_option_names': [], 'ignore_unknown_options': True}
 )
@@ -79,9 +91,8 @@ def agent(
     """
     import subprocess
 
-    from ddev.e2e.agent import get_agent_interface
+    from ddev.e2e.agent import create_agent_interface
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EMetadata
     from ddev.utils.fs import Path
 
     integration = app.repo.integrations.get(intg_name)
@@ -91,8 +102,7 @@ def agent(
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
+    agent = create_agent_interface(app, integration, environment, metadata, env_data.config_file)
 
     full_args = list(args)
     trigger_run = False
@@ -131,6 +141,7 @@ def agent(
             app.abort(str(e))
         finally:
             env_data.config_file.unlink()
+            _sync_restored_config(app, agent)
     else:
         temp_config_file = env_data.config_file.parent / f'{env_data.config_file.name}.bak.example'
         env_data.config_file.replace(temp_config_file)
@@ -141,3 +152,4 @@ def agent(
             app.abort(str(e))
         finally:
             temp_config_file.replace(env_data.config_file)
+            _sync_restored_config(app, agent)

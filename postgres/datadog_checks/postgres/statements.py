@@ -20,17 +20,14 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
 from .util import (
+    DDIGNORE_COMMENT,
+    INSUFFICIENT_PRIVILEGE,
     DatabaseConfigurationError,
     parse_shared_preload_libraries,
     payload_pg_version,
     warning_with_tags,
 )
 from .version_utils import V9_4, V14
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 STATEMENTS_QUERY = """
 SELECT {cols}
@@ -39,8 +36,8 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query != '<insufficient privilege>'
-  AND query NOT LIKE '/* DDIGNORE */%%'
+  WHERE query != '{insufficient_privilege}'
+  AND query NOT LIKE '{ddignore_comment}%%'
   {queryid_filter}
   {filters}
   {extra_clauses}
@@ -59,6 +56,8 @@ def statements_query(**kwargs):
         filters=filters,
         extra_clauses=extra_clauses,
         queryid_filter="",
+        insufficient_privilege=INSUFFICIENT_PRIVILEGE,
+        ddignore_comment=DDIGNORE_COMMENT,
     )
 
 
@@ -84,7 +83,17 @@ PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17 = frozenset(
     }
 )
 
-PG_STAT_STATEMENTS_METRICS_COLUMNS = (
+# Summary statistics over a statement's whole lifetime rather than running totals
+PG_STAT_STATEMENTS_SUMMARY_COLUMNS = frozenset(
+    {
+        'min_plan_time',
+        'max_plan_time',
+        'mean_plan_time',
+        'stddev_plan_time',
+    }
+)
+
+PG_STAT_STATEMENTS_COUNTER_COLUMNS = (
     frozenset(
         {
             'calls',
@@ -105,15 +114,13 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = (
             'wal_fpi',
             'wal_bytes',
             'total_plan_time',
-            'min_plan_time',
-            'max_plan_time',
-            'mean_plan_time',
-            'stddev_plan_time',
         }
     )
     | PG_STAT_STATEMENTS_TIMING_COLUMNS
     | PG_STAT_STATEMENTS_TIMING_COLUMNS_LT_17
 )
+
+PG_STAT_STATEMENTS_METRICS_COLUMNS = PG_STAT_STATEMENTS_COUNTER_COLUMNS | PG_STAT_STATEMENTS_SUMMARY_COLUMNS
 
 PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
     {
@@ -140,6 +147,48 @@ def _row_key(row):
     :return: a tuple uniquely identifying this row
     """
     return row['query_signature'], row['datname'], row['rolname']
+
+
+def _merge_summary_stats(acc: dict, row: dict, acc_weight: float, row_weight: float) -> None:
+    """Fold the summary statistics of ``row`` into ``acc``, in place."""
+    if 'min_plan_time' in row:
+        acc['min_plan_time'] = min(acc.get('min_plan_time', row['min_plan_time']), row['min_plan_time'])
+    if 'max_plan_time' in row:
+        acc['max_plan_time'] = max(acc.get('max_plan_time', row['max_plan_time']), row['max_plan_time'])
+
+    # The mean and standard deviation are averaged in proportion to how much
+    # each statement ran, which approximates the true combined figures closely enough for reporting:
+    # pg_stat_statements gives no way to recover the per-execution values these were computed from.
+    total_weight = acc_weight + row_weight
+    if total_weight <= 0:
+        return
+    for col in ('mean_plan_time', 'stddev_plan_time'):
+        if col in row:
+            acc[col] = (acc.get(col, row[col]) * acc_weight + row[col] * row_weight) / total_weight
+
+
+def _merge_rows_by_signature(rows: list[dict]) -> list[dict]:
+    """Merge rows sharing a signature, consuming ``rows``.
+
+    compute_derivative_rows collapses duplicates too, but only by summing, and a sum of minimums or
+    of averages describes nothing. Rows therefore reach it already merged, each summary statistic
+    combined with the operator that matches what it measures.
+    """
+    merged: dict[tuple, dict] = {}
+    for row in rows:
+        key = _row_key(row)
+        existing = merged.get(key)
+        if existing is None:
+            merged[key] = row
+            continue
+
+        # Weights are read before the counters are summed, so they are the two rows' own call
+        # counts rather than a running total.
+        _merge_summary_stats(existing, row, existing.get('calls', 0), row.get('calls', 0))
+        for col in PG_STAT_STATEMENTS_COUNTER_COLUMNS:
+            if col in row:
+                existing[col] = existing.get(col, 0) + row[col]
+    return list(merged.values())
 
 
 class PostgresStatementMetrics(DBMAsyncJob):
@@ -187,7 +236,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
 
-    def _shutdown(self):
+    def shutdown(self) -> None:
         self._check = None
         self._full_statement_text_cache = None
         self._state = None
@@ -256,7 +305,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
-                'ddagentversion': datadog_agent.get_version(),
+                'ddagentversion': self._check.agent_version,
                 'service': self._config.service,
             }
 
@@ -505,8 +554,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
 
+        rows = _merge_rows_by_signature(rows)
+
         available_columns = set(rows[0].keys())
-        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        metric_columns = available_columns & PG_STAT_STATEMENTS_COUNTER_COLUMNS
 
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key, execution_indicators=['calls'])
         self._check.gauge(
@@ -559,7 +610,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

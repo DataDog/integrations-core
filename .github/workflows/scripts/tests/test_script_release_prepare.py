@@ -249,6 +249,7 @@ class TestMain:
         runner_temp.mkdir()
 
         env = {
+            "CREATE_TAGS": "true",
             "DRY_RUN": "false",
             "SELECTED_PACKAGES": "",
             "SOURCE_REPO": "integrations-extras",
@@ -319,6 +320,55 @@ class TestMain:
         assert outputs["has_packages"] == "true"
         assert outputs["has_new_tags"] == "false"
         assert json.loads(outputs["new_tags"]) == []
+
+    def test_create_tags_false_skips_tagging_and_detects_existing_tags(self, monkeypatch, tmp_path):
+        github_output, _, _ = self._setup_env(
+            monkeypatch,
+            tmp_path,
+            extra={"CREATE_TAGS": "false"},
+        )
+        pkgs = ["postgres"]
+        with patch("release_prepare._tag") as mock_tag, \
+             patch("release_prepare.get_all_packages", return_value=pkgs), \
+             patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
+             patch("release_prepare.validate_packages", return_value=_stable_result()):
+            release_prepare.main()
+        mock_tag.assert_not_called()
+        outputs = self._read_outputs(github_output)
+        assert json.loads(outputs["packages"]) == pkgs
+        assert json.loads(outputs["new_tags"]) == []
+        assert outputs["has_new_tags"] == "false"
+
+    def test_create_tags_false_auto_detect_with_no_tags_fails(self, monkeypatch, tmp_path, capsys):
+        self._setup_env(monkeypatch, tmp_path, extra={"CREATE_TAGS": "false"})
+        with patch("release_prepare._tag") as mock_tag, \
+             patch("release_prepare.get_all_packages", return_value=["postgres"]), \
+             patch(
+                 "release_prepare.resolve_packages",
+                 return_value=([], "auto-detect from tags at HEAD"),
+             ), \
+             pytest.raises(SystemExit) as exc_info:
+            release_prepare.main()
+        assert exc_info.value.code == 1
+        assert "no release tags point at the supplied source ref" in capsys.readouterr().err.lower()
+        mock_tag.assert_not_called()
+
+    def test_create_tags_false_allows_explicit_packages_without_tags(self, monkeypatch, tmp_path):
+        github_output, _, _ = self._setup_env(
+            monkeypatch,
+            tmp_path,
+            extra={"CREATE_TAGS": "false", "SELECTED_PACKAGES": '["postgres"]'},
+        )
+        with patch("release_prepare._tag") as mock_tag, \
+             patch("release_prepare.get_all_packages", return_value=["postgres"]), \
+             patch(
+                 "release_prepare.resolve_packages",
+                 return_value=(["postgres"], 'manual (["postgres"])'),
+             ), \
+             patch("release_prepare.validate_packages", return_value=_stable_result()):
+            release_prepare.main()
+        mock_tag.assert_not_called()
+        assert json.loads(self._read_outputs(github_output)["packages"]) == ["postgres"]
 
     def test_tag_failure_exits_before_detect(self, monkeypatch, tmp_path):
         self._setup_env(monkeypatch, tmp_path)

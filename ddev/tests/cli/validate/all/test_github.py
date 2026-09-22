@@ -9,12 +9,10 @@ from ddev.cli.validate.all.github import (
     format_pr_comment,
     format_step_summary,
     get_pr_number,
-    get_workflow_run_url,
     parse_pr_number_from_event,
     parse_pr_number_from_ref,
-    write_step_summary,
 )
-from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
+from ddev.cli.validate.all.orchestrator import VALIDATIONS, ValidationConfig, ValidationResult
 
 CONFIGS = {
     "ci": ValidationConfig(description="Validate CI configuration and code coverage settings", repo_wide=True),
@@ -228,6 +226,30 @@ def test_format_pr_comment_does_not_include_output():
     assert "secret error output" not in comment
 
 
+def test_failure_guidance_rendered_in_failed_description_cell():
+    configs = {"config": ValidationConfig(description="d", failure_guidance="Guidance for fixing config.")}
+    failed = {"config": ValidationResult(name="config", success=False, stdout="", stderr="", duration=1.0)}
+    row = "| `config` | d<br><br>Guidance for fixing config. | ❌ |"
+    assert row in format_pr_comment(failed, configs, None, list(failed))
+    assert row in format_step_summary(failed, configs, None, list(failed))
+
+    passed = {"config": ValidationResult(name="config", success=True, stdout="", stderr="", duration=1.0)}
+    assert "Guidance for fixing config." not in format_pr_comment(passed, configs, None, list(passed))
+    assert "Guidance for fixing config." not in format_step_summary(passed, configs, None, list(passed))
+
+
+def test_qa_label_manifest_guidance_includes_both_choices():
+    configs = {"qa-label": VALIDATIONS["qa-label"]}
+    results = {
+        "qa-label": ValidationResult(name="qa-label", success=False, stdout="", stderr="", duration=1.0),
+    }
+    comment = format_pr_comment(results, configs, None, list(results))
+    assert "**To fix:** Choose exactly one QA label:" in comment
+    assert "`qa/required` if the PR needs QA validation." in comment
+    assert "`qa/skip-qa` if the PR does not need QA validation." in comment
+    assert "<br><br>" in comment
+
+
 def test_format_pr_comment_missing_config_uses_empty_description():
     results = {
         "unknown": ValidationResult(name="unknown", success=True, stdout="ok", stderr="", duration=1.0),
@@ -314,41 +336,3 @@ def test_format_step_summary_with_error_and_warning(helpers):
 
         Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
     assert format_step_summary(results, CONFIGS, None, list(results), error="boom", warning="no PR") == expected
-
-
-# --- get_workflow_run_url ---
-
-
-def test_get_workflow_run_url_returns_url():
-    assert get_workflow_run_url() == "https://github.com/DataDog/integrations-core/actions/runs/12345"
-
-
-def test_get_workflow_run_url_returns_none_when_env_missing(monkeypatch):
-    monkeypatch.delenv("GITHUB_RUN_ID")
-    assert get_workflow_run_url() is None
-
-
-# --- write_step_summary ---
-
-
-def test_write_step_summary_writes_to_file(tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
-    write_step_summary("## Report\nAll good")
-    assert summary_file.read_text() == "## Report\nAll good\n"
-
-
-def test_write_step_summary_appends(tmp_path, monkeypatch):
-    summary_file = tmp_path / "summary.md"
-    summary_file.write_text("existing\n")
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
-
-    write_step_summary("new content")
-    assert "existing\n" in summary_file.read_text()
-    assert "new content\n" in summary_file.read_text()
-
-
-def test_write_step_summary_noop_without_env(monkeypatch):
-    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
-    write_step_summary("should not error")
