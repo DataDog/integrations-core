@@ -10,7 +10,7 @@ import logging
 import os
 import re
 from collections import deque
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator, Mapping
 from os.path import basename
 from pathlib import Path
 from typing import (
@@ -69,6 +69,8 @@ if TYPE_CHECKING:
     from datadog_checks.base.utils.discovery import Service
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
+    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEmit, RemoteQueryEvent
+    from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
 
 inspect: _module_inspect = lazy_loader.load('inspect')
 traceback: _module_traceback = lazy_loader.load('traceback')
@@ -1617,6 +1619,75 @@ class AgentCheck(object):
         tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', tag)
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
+
+    # Opt in per operation; ordinary monitoring checks support neither operation.
+    remote_query_operations: frozenset[str] = frozenset()
+
+    def run_remote_query(self, request_json: str | bytes | bytearray, emit: RemoteQueryEmit) -> None:
+        """Agent bridge entry point for the optional remote-query capability.
+
+        Integrations declare `remote_query_operations` and implement the corresponding
+        `resolve_remote_query` / `execute_remote_query` hooks, not this dispatcher.
+        Requests are decoded JSON objects; each hook validates its operation's schema
+        before accessing database state. Only metadata events cross `emit`, never rows.
+
+        The Agent pins this loaded check for the call and prevents calls after shutdown.
+        This path is independent of scheduled `check()` runs: implementations must use
+        concurrency-safe database resources, honor the run deadline and `is_cancelled`,
+        and release resources when the event generator is closed (including emit failure).
+        """
+        # Keep the optional runtime out of ordinary monitoring check startup.
+        from datadog_checks.base.utils.remote_queries.events import (
+            emit_agent_rpc_events,
+            emit_event,
+            failed_event,
+            parse_agent_rpc_request,
+        )
+
+        request, timings, failure = parse_agent_rpc_request(request_json)
+        if failure is not None:
+            emit_event(emit, failure)
+            return
+        assert request is not None
+        operation = request.get('operation')
+        if operation not in ('resolve_target', 'produce_json_pages'):
+            emit_event(
+                emit,
+                failed_event(
+                    'invalid_request', 'Unknown remote query operation.', execution_diagnostics=timings.metadata()
+                ),
+            )
+            return
+        if operation not in self.remote_query_operations:
+            emit_event(
+                emit,
+                failed_event(
+                    'unsupported_operation',
+                    'Check does not support this remote query operation.',
+                    execution_diagnostics=timings.metadata(),
+                ),
+            )
+            return
+        events = (
+            self.resolve_remote_query(request)
+            if operation == 'resolve_target'
+            else self.execute_remote_query(request, timings)
+        )
+        emit_agent_rpc_events(emit, events)
+
+    def resolve_remote_query(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
+        """Yield the per-check target verdict without executing customer SQL or uploading data."""
+        from datadog_checks.base.utils.remote_queries.events import failed_event
+
+        yield failed_event('unsupported_operation', 'Check does not support remote query resolution.')
+
+    def execute_remote_query(
+        self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings
+    ) -> Iterator[RemoteQueryEvent]:
+        """Yield STARTED then a final receipt or error; upload result bytes outside the bridge."""
+        from datadog_checks.base.utils.remote_queries.events import failed_event
+
+        yield failed_event('unsupported_operation', 'Check does not support remote query execution.')
 
     def check(self, instance):
         # type: (InstanceType) -> None

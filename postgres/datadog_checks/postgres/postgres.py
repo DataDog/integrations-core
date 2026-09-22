@@ -1,12 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import annotations
+
 import contextlib
 import copy
 import functools
 import os
 from collections import defaultdict
+from collections.abc import Iterator, Mapping
 from time import time
+from typing import TYPE_CHECKING, Any
 
 import psycopg
 from cachetools import TTLCache
@@ -99,6 +103,10 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
+    from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
+
 MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
@@ -116,6 +124,19 @@ class PostgreSql(DatabaseCheck):
     METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
     HA_SUPPORTED = True
+    remote_query_operations = frozenset({'resolve_target', 'produce_json_pages'})
+
+    def resolve_remote_query(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
+        from .remote_query import iter_agent_resolve_events
+
+        return iter_agent_resolve_events(request, self)
+
+    def execute_remote_query(
+        self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings
+    ) -> Iterator[RemoteQueryEvent]:
+        from .remote_query import iter_agent_rpc_stream_events
+
+        return iter_agent_rpc_stream_events(request, self, timings=timings)
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)

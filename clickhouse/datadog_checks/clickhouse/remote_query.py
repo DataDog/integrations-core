@@ -17,8 +17,8 @@ callback carries only `metadata`/`final`/`error` events, and the final event car
 only the compact run receipt.
 
 The request, event, receipt, descriptor, and intake-upload contracts mirror the Postgres
-executor so the Agent bridge (`datadog_checks.clickhouse.remote_query` ->
-`execute_agent_rpc_stream_copy`) and its-agent-intake treat both integrations uniformly.
+executor so the standard check remote-query interface and its-agent-intake treat both
+integrations uniformly.
 The integration-specific parts are the internal source format, the read-only posture, and
 the value normalization documented below. The public result contract is unchanged: ITS and
 its consumers see the same RFC-format JSON page artifact (labeled contract_version "1.0.0") and events
@@ -888,27 +888,8 @@ def _target_from_check(check: 'ClickhouseCheck') -> rq_contract.RemoteQueryTarge
 
 
 # ---------------------------------------------------------------------------
-# Agent entry points
+# Check capability implementation
 # ---------------------------------------------------------------------------
-
-
-def execute_agent_rpc_stream_copy(
-    request_json: str | bytes | bytearray, check: 'ClickhouseCheck', emit: rq_contract.RemoteQueryEmit
-) -> None:
-    """Execute a remote query request and emit page producer events.
-
-    The entry point name is kept for the Agent's rtloader bridge, which resolves this
-    function by name. Emits `metadata` (STARTED), then one `final` (SUCCEEDED with the
-    compact receipt) or `error` (FAILED) event; bulk page bytes never cross the callback.
-    Diagnostics collection starts before the request JSON is parsed, so even a malformed
-    request reports its measured wall.
-    """
-    request, timings, failure = rq_events.parse_agent_rpc_request(request_json)
-    if failure is not None:
-        rq_events.emit_event(emit, failure)
-        return
-
-    rq_events.emit_agent_rpc_events(emit, iter_agent_rpc_stream_events(request, check, timings=timings))
 
 
 def iter_agent_rpc_stream_events(

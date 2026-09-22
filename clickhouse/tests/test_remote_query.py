@@ -14,8 +14,7 @@ from clickhouse_connect.driver.exceptions import DatabaseError
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
-from datadog_checks.clickhouse import remote_query
-from datadog_checks.clickhouse.remote_query import execute_agent_rpc_stream_copy
+from datadog_checks.clickhouse import ClickhouseCheck, remote_query
 
 from .remote_query_fakes import (
     AGENT_HOSTNAME,
@@ -50,6 +49,11 @@ from .remote_query_fakes import (
 )
 
 
+@pytest.fixture
+def runtime_check():
+    return ClickhouseCheck('clickhouse', {}, [{'server': 'localhost', 'port': 8123, 'db': 'default'}])
+
+
 @pytest.fixture(autouse=True)
 def null_native_producer_tracing(monkeypatch):
     """Keep native ddtrace producer spans out of every test in this module.
@@ -81,12 +85,12 @@ def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
 @pytest.mark.parametrize(
     'request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff', '[]', 'null', '"SECRET_DO_NOT_LOG"', '1']
 )
-def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, request_json):
+def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, request_json, runtime_check):
     # The entry-point wiring for the shared request parse: malformed and non-object JSON
     # each emit exactly one fixed invalid_request event, never echoing the input.
     events = []
 
-    execute_agent_rpc_stream_copy(request_json, make_check(), lambda *event: events.append(event))
+    runtime_check.run_remote_query(request_json, lambda *event: events.append(event))
 
     metadata = json.loads(events[-1][1])
     assert len(events) == 1
@@ -96,6 +100,24 @@ def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, reque
     assert 'JSON object' in metadata['error']['message']
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
+
+
+def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
+    # The actual loaded check must reach its client factory and upload producer.
+    patch_upload_credentials(monkeypatch)
+    client = FakeUploadClient()
+    database_client = make_client(rows=[[1]])
+    monkeypatch.setattr(remote_query.rq_upload, 'RequestsUploadClient', lambda **kwargs: client)
+    monkeypatch.setattr(runtime_check, 'create_remote_query_client', lambda **kwargs: database_client)
+    events = []
+
+    runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
+
+    assert [event[0] for event in events] == ['metadata', 'final']
+    assert json.loads(events[-1][1])['status'] == 'SUCCEEDED'
+    assert all(event[2] == b'' for event in events)
+    assert len(database_client.raw_stream_calls) == 1
+    assert client.run_finalize_calls == 1
 
 
 def test_stream_rejects_non_allowlisted_query_before_client_access():
@@ -823,7 +845,7 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     assert clickhouse_client.stream.closed
 
 
-def test_entry_propagates_callback_failure_without_upload(monkeypatch):
+def test_entry_propagates_callback_failure_without_upload(monkeypatch, runtime_check):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
 
@@ -831,7 +853,7 @@ def test_entry_propagates_callback_failure_without_upload(monkeypatch):
         raise RuntimeError('stop streaming')
 
     with pytest.raises(RuntimeError, match='stop streaming'):
-        execute_agent_rpc_stream_copy(json.dumps(valid_request()), make_check(), emit)
+        runtime_check.run_remote_query(json.dumps(valid_request()), emit)
 
 
 # ---------------------------------------------------------------------------

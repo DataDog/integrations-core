@@ -15,9 +15,8 @@ import pytest
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
-from datadog_checks.postgres import remote_query
+from datadog_checks.postgres import PostgreSql, remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
-from datadog_checks.postgres.remote_query import execute_agent_rpc_stream_copy
 
 from .remote_query_fakes import (
     AGENT_HOSTNAME,
@@ -48,6 +47,13 @@ from .remote_query_fakes import (
     valid_request,
     wide_row_pool,
 )
+
+
+@pytest.fixture
+def runtime_check():
+    check = PostgreSql('postgres', {}, [{'host': 'localhost', 'dbname': 'datadog_test', 'username': 'datadog'}])
+    check.db_pool = FakePool(rows=[(1,)])
+    return check
 
 
 @pytest.fixture(autouse=True)
@@ -81,14 +87,14 @@ def test_stream_rejects_unknown_request_fields_before_resolution(caplog, field):
 @pytest.mark.parametrize(
     'request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff', '[]', 'null', '"SECRET_DO_NOT_LOG"', '1']
 )
-def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, request_json):
+def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, request_json, runtime_check):
     # The entry-point wiring for the shared request parse: malformed and non-object JSON
     # each emit exactly one fixed invalid_request event, never echoing the input and
     # never touching the check's database pool.
-    pool = FakePool(rows=[(1,)])
+    pool = runtime_check.db_pool
     events = []
 
-    execute_agent_rpc_stream_copy(request_json, make_check(pool=pool), lambda *event: events.append(event))
+    runtime_check.run_remote_query(request_json, lambda *event: events.append(event))
 
     metadata = json.loads(events[-1][1])
     assert len(events) == 1
@@ -159,11 +165,11 @@ def test_stream_missing_pool_returns_credentials_unavailable(monkeypatch):
     assert_failed_event(events, 'credentials_unavailable')
 
 
-def test_entry_dispatches_resolve_target_by_operation():
-    check = make_check(check_database_identifier='Postgres/Primary-A')
+def test_entry_dispatches_resolve_target_by_operation(runtime_check):
+    runtime_check._database_identifier = 'Postgres/Primary-A'
     events = []
 
-    execute_agent_rpc_stream_copy(json.dumps(resolve_request()), check, lambda *event: events.append(event))
+    runtime_check.run_remote_query(json.dumps(resolve_request()), lambda *event: events.append(event))
 
     assert len(events) == 1
     event_type, metadata_json, payload = events[0]
@@ -174,18 +180,34 @@ def test_entry_dispatches_resolve_target_by_operation():
     assert metadata['match']['databaseInstance'] == 'Postgres/Primary-A'
 
 
-def test_entry_rejects_unknown_operation_without_pool_access():
-    pool = FakePool(rows=[(1,)])
+def test_entry_rejects_unknown_operation_without_pool_access(runtime_check):
+    pool = runtime_check.db_pool
     request = valid_request()
     request['operation'] = 'bogus_operation'
     events = []
 
-    execute_agent_rpc_stream_copy(json.dumps(request), make_check(pool=pool), lambda *event: events.append(event))
+    runtime_check.run_remote_query(json.dumps(request), lambda *event: events.append(event))
 
     metadata = json.loads(events[-1][1])
     assert events[-1][0] == 'error'
     assert metadata['error']['code'] == 'invalid_request'
     assert pool.requested_dbnames == []
+
+
+def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
+    # The actual loaded check must reach the producer with its own configured pool.
+    patch_upload_credentials(monkeypatch)
+    client = FakeUploadClient()
+    monkeypatch.setattr(remote_query.rq_upload, 'RequestsUploadClient', lambda **kwargs: client)
+    events = []
+
+    runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
+
+    assert [event[0] for event in events] == ['metadata', 'final']
+    assert json.loads(events[-1][1])['status'] == 'SUCCEEDED'
+    assert all(event[2] == b'' for event in events)
+    assert runtime_check.db_pool.requested_dbnames == ['datadog_test']
+    assert client.run_finalize_calls == 1
 
 
 def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
@@ -832,16 +854,16 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
 
 
-def test_entry_propagates_callback_failure_without_upload(monkeypatch):
+def test_entry_propagates_callback_failure_without_upload(monkeypatch, runtime_check):
     patch_upload_credentials(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
-    pool = FakePool(rows=[(1,)])
+    pool = runtime_check.db_pool
 
     def emit(event_type, metadata_json, payload):
         raise RuntimeError('stop streaming')
 
     with pytest.raises(RuntimeError, match='stop streaming'):
-        execute_agent_rpc_stream_copy(json.dumps(valid_request()), make_check(pool=pool), emit)
+        runtime_check.run_remote_query(json.dumps(valid_request()), emit)
 
     # The callback failed on the STARTED metadata event, before any page bytes existed.
     assert pool.requested_dbnames == []

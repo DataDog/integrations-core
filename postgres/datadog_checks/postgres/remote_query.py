@@ -704,33 +704,8 @@ def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Agent entry points
+# Check capability implementation
 # ---------------------------------------------------------------------------
-
-
-def execute_agent_rpc_stream_copy(
-    request_json: str | bytes | bytearray, check: 'PostgreSql', emit: rq_contract.RemoteQueryEmit
-) -> None:
-    """Execute a remote query request and emit its events, dispatching by operation.
-
-    The entry point name is kept for the Agent's rtloader bridge, which resolves this
-    function by name. `produce_json_pages` drives the page producer and emits `metadata`
-    (STARTED), then one `final` (SUCCEEDED with the compact receipt) or `error` (FAILED)
-    event; bulk page bytes never cross the callback. `resolve_target` drives the
-    side-effect-free resolver and emits one `final` (MATCHED verdict) or `error` event.
-    Diagnostics collection starts before the request JSON is parsed, so even a malformed
-    request reports its measured wall.
-    """
-    request, timings, failure = rq_events.parse_agent_rpc_request(request_json)
-    if failure is not None:
-        rq_events.emit_event(emit, failure)
-        return
-
-    if request.get('operation') == 'resolve_target':
-        rq_events.emit_agent_rpc_events(emit, iter_agent_resolve_events(request, check))
-        return
-
-    rq_events.emit_agent_rpc_events(emit, iter_agent_rpc_stream_events(request, check, timings=timings))
 
 
 def iter_agent_resolve_events(request: Any, check: 'PostgreSql') -> Iterator[rq_contract.RemoteQueryEvent]:
