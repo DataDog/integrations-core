@@ -353,7 +353,10 @@ class TestStart:
         app,
         temp_dir,
         get_integration,
+        mocker,
     ):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
         config_file = temp_dir / 'config' / 'config.yaml'
         config_file.parent.mkdir()
         config_file.touch()
@@ -363,6 +366,8 @@ class TestStart:
 
         with pytest.raises(ValueError, match='Custom Docker networks are not supported for Windows Agent containers'):
             agent.start(agent_build='', local_packages={}, env_vars={})
+
+        run.assert_not_called()
 
     def test_no_config_file(
         self,
