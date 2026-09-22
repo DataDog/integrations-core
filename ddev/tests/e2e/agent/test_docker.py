@@ -303,6 +303,51 @@ class TestStart:
             ),
         ]
 
+    def test_docker_network_host(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        docker_path,
+        free_port,
+        mocker,
+    ):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        metadata = {'docker_network': 'host'}
+        agent = DockerAgent(app, get_integration('postgres'), 'py3.12', metadata, config_file)
+        agent.start(agent_build='', local_packages={}, env_vars={})
+
+        command = run.call_args_list[1].args[0]
+        assert command[command.index('--network') + 1] == 'host'
+        assert f'DD_CMD_PORT={free_port}' in command
+        assert f'DD_CMD_PORT={DEFAULT_CMD_PORT}' not in command
+
+    def test_docker_network_rejects_shared_container_namespace(
+        self,
+        app,
+        temp_dir,
+        get_integration,
+        mocker,
+    ):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        config_file = temp_dir / 'config' / 'config.yaml'
+        config_file.parent.mkdir()
+        config_file.touch()
+
+        metadata = {'docker_network': 'container:another-agent'}
+        agent = DockerAgent(app, get_integration('postgres'), 'py3.12', metadata, config_file)
+
+        with pytest.raises(ValueError, match='share another container network namespace'):
+            agent.start(agent_build='', local_packages={}, env_vars={})
+
+        run.assert_not_called()
+
     def test_docker_network_rejects_windows_agent(
         self,
         app,

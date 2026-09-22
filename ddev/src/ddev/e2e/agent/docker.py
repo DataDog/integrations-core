@@ -176,13 +176,16 @@ class DockerAgent(AgentInterface):
         env_vars[AgentEnvVars.HOSTNAME] = _get_hostname()
 
         docker_network = self.metadata.get('docker_network')
+        if docker_network and docker_network.startswith('container:'):
+            raise ValueError('Docker network modes that share another container network namespace are not supported')
         if self._is_windows_container and docker_network:
             raise ValueError('Custom Docker networks are not supported for Windows Agent containers')
 
         # Host-networked containers need a unique API port because they share the host's network
-        # namespace. Containers attached to a Docker network have an isolated namespace and can use
-        # the Agent's standard command port without racing host processes for an ephemeral port.
-        env_vars[AgentEnvVars.CMD_PORT] = DEFAULT_CMD_PORT if docker_network else str(_find_free_port())
+        # namespace. Containers attached to an isolated Docker network can use the Agent's standard
+        # command port without racing host processes for an ephemeral port.
+        uses_host_network = not docker_network or docker_network == 'host'
+        env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port()) if uses_host_network else DEFAULT_CMD_PORT
 
         # Disable trace Agent by default (can be overridden by user-provided env_vars)
         env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
