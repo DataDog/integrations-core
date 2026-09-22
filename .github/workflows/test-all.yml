@@ -69,7 +69,7 @@ permissions:
 
 jobs:
   jd316aba:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ddev on Linux
       target: ddev
@@ -85,12 +85,11 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     if: ${{ inputs.skip-ddev-tests == false }}
   jb232c8c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Datadog Checks Base on Linux
       target: datadog_checks_base
@@ -106,11 +105,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j77217e9:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Datadog Checks Dev on Linux
       target: datadog_checks_dev
@@ -126,11 +124,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8cdb65b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Datadog Checks Downloader on Linux
       target: datadog_checks_downloader
@@ -146,11 +143,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j02a4c95:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ActiveMQ
       target: activemq
@@ -166,11 +162,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jb4c5802:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ActiveMQ XML
       target: activemq_xml
@@ -186,11 +181,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jce7999e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Aerospike
       target: aerospike
@@ -206,11 +200,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jd58222c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Airflow
       target: airflow
@@ -226,11 +219,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jaaddf5e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Amazon Kafka
       target: amazon_msk
@@ -246,11 +238,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9c53fc8:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Ambari
       target: ambari
@@ -266,11 +257,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j87ec402:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Apache
       target: apache
@@ -286,11 +276,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j89811be:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Appgate SDP
       target: appgate_sdp
@@ -306,11 +295,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jacbd843:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ArangoDB
       target: arangodb
@@ -326,11 +314,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3650884:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Argo Rollouts
       target: argo_rollouts
@@ -346,11 +333,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j14e797c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Argo Workflows
       target: argo_workflows
@@ -366,11 +352,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j92d42de:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ArgoCD
       target: argocd
@@ -386,11 +371,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j924327f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Avi Vantage
       target: avi_vantage
@@ -406,11 +390,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jeb3e097:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: AWS Neuron
       target: aws_neuron
@@ -426,11 +409,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8d83b0b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Azure IoT Edge
       target: azure_iot_edge
@@ -446,11 +428,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5a8a3b3:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: BentoML
       target: bentoml
@@ -466,11 +447,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jfcf4b1a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Boundary
       target: boundary
@@ -486,11 +466,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j2883ff0:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Btrfs
       target: btrfs
@@ -506,11 +485,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j481d7ae:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cacti
       target: cacti
@@ -526,11 +504,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j47ac8c7:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Calico
       target: calico
@@ -546,11 +523,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je3297e4:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cassandra
       target: cassandra
@@ -566,11 +542,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf75679d:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cassandra Nodetool
       target: cassandra_nodetool
@@ -586,11 +561,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j17d78bd:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Celery
       target: celery
@@ -606,11 +580,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jdffb064:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Ceph
       target: ceph
@@ -626,11 +599,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je6bb20d:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: cert-manager
       target: cert_manager
@@ -646,11 +618,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jeb29398:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cilium
       target: cilium
@@ -666,11 +637,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3de8d1a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cisco ACI
       target: cisco_aci
@@ -686,11 +656,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jafd4d40:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Citrix Hypervisor
       target: citrix_hypervisor
@@ -706,11 +675,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jdee91dd:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ClickHouse
       target: clickhouse
@@ -727,8 +695,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     strategy:
       matrix:
@@ -746,7 +713,7 @@ jobs:
         - py3.13-26.3
       fail-fast: false
   j4131274:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cloud Foundry API
       target: cloud_foundry_api
@@ -762,11 +729,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j26f9a18:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Cloudera
       target: cloudera
@@ -782,11 +748,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j7faf392:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: CockroachDB
       target: cockroachdb
@@ -802,11 +767,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j89ec795:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Confluent Platform
       target: confluent_platform
@@ -822,11 +786,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j13a53db:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Consul
       target: consul
@@ -842,11 +805,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j7c68dcb:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Control-M
       target: control_m
@@ -862,11 +824,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jb67436a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: CoreDNS
       target: coredns
@@ -882,11 +843,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j483e815:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: CouchDB
       target: couch
@@ -902,11 +862,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1e84c35:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Couchbase
       target: couchbase
@@ -922,11 +881,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja3692a6:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: CRI-O
       target: crio
@@ -942,11 +900,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j2d21154:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Datadog Cluster Agent
       target: datadog_cluster_agent
@@ -962,11 +919,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j69f9754:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: dcgm
       target: dcgm
@@ -982,11 +938,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc346754:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Dell Powerflex
       target: dell_powerflex
@@ -1002,11 +957,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc8f84c3:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Directory
       target: directory
@@ -1022,11 +976,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j4b2fe2b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Disk on Linux
       target: disk
@@ -1042,11 +995,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3e27604:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: DNS on Linux
       target: dns_check
@@ -1062,11 +1014,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j297b771:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: DO Query Actions
       target: do_query_actions
@@ -1082,11 +1033,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j274814f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Druid
       target: druid
@@ -1102,11 +1052,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9eb6aa6:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: DuckDB
       target: duckdb
@@ -1122,11 +1071,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j7545925:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Dynamo
       target: dynamo
@@ -1142,11 +1090,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j562bfe5:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Amazon ECS Fargate
       target: ecs_fargate
@@ -1162,11 +1109,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j72f26c1:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: EKS Fargate
       target: eks_fargate
@@ -1182,11 +1128,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j31c819b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Elasticsearch
       target: elastic
@@ -1202,11 +1147,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j93163a5:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Envoy
       target: envoy
@@ -1222,11 +1166,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc4fef15:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ESXi
       target: esxi
@@ -1242,11 +1185,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc38cbd9:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: etcd
       target: etcd
@@ -1262,11 +1204,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1856b23:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: External DNS
       target: external_dns
@@ -1282,11 +1223,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6e7cb83:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Falco
       target: falco
@@ -1302,11 +1242,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j7f02532:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: flink
       target: flink
@@ -1322,11 +1261,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j4f2c848:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Fluentd
       target: fluentd
@@ -1342,11 +1280,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6134697:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: fluxcd
       target: fluxcd
@@ -1362,11 +1299,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5018b0d:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Fly.io
       target: fly_io
@@ -1382,11 +1318,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc364450:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: FoundationDB
       target: foundationdb
@@ -1402,11 +1337,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3becdbc:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Gearman
       target: gearmand
@@ -1422,11 +1356,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j4ea3f09:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Gitlab
       target: gitlab
@@ -1442,11 +1375,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j563739d:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Gitlab Runner
       target: gitlab_runner
@@ -1462,11 +1394,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j16f5513:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: GlusterFS
       target: glusterfs
@@ -1482,11 +1413,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3399e09:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Go Expvar
       target: go_expvar
@@ -1502,11 +1432,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j0a5a061:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: GuardDog
       target: guarddog
@@ -1522,11 +1451,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1fede0e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Gunicorn
       target: gunicorn
@@ -1542,11 +1470,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5979923:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: HAProxy
       target: haproxy
@@ -1562,11 +1489,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8a8c654:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Harbor
       target: harbor
@@ -1582,11 +1508,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9cb9f66:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Hazelcast
       target: hazelcast
@@ -1602,11 +1527,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j240a78b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: HDFS Datanode
       target: hdfs_datanode
@@ -1622,11 +1546,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j00a0dd6:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: HDFS Namenode
       target: hdfs_namenode
@@ -1642,11 +1565,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jaf48338:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Hive
       target: hive
@@ -1662,11 +1584,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je66898a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: HiveMQ
       target: hivemq
@@ -1682,11 +1603,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j0be27fe:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: HPE Aruba EdgeConnect
       target: hpe_aruba_edgeconnect
@@ -1702,11 +1622,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j56d6f32:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: HTTP
       target: http_check
@@ -1722,11 +1641,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j95a2b08:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Hudi
       target: hudi
@@ -1742,11 +1660,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc3781e1:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Hugging Face TGI
       target: hugging_face_tgi
@@ -1762,11 +1679,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5a9585a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: IBM ACE
       target: ibm_ace
@@ -1782,11 +1698,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j60f59ae:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: IBM Db2
       target: ibm_db2
@@ -1802,11 +1717,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9accedb:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: IBM i
       target: ibm_i
@@ -1822,11 +1736,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf4d06ee:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: IBM MQ on Linux
       target: ibm_mq
@@ -1842,11 +1755,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j203c004:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: IBM Spectrum LSF
       target: ibm_spectrum_lsf
@@ -1862,11 +1774,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j440815a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: IBM WAS
       target: ibm_was
@@ -1882,11 +1793,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j0676988:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Ignite
       target: ignite
@@ -1902,11 +1812,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5dc7466:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Impala
       target: impala
@@ -1922,11 +1831,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf082b3f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Infiniband
       target: infiniband
@@ -1942,11 +1850,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j0839eef:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: InterSystems IRIS
       target: intersystems_iris
@@ -1962,11 +1869,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j0c16521:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Istio
       target: istio
@@ -1982,11 +1888,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j46da136:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: JBoss_WildFly
       target: jboss_wildfly
@@ -2002,11 +1907,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je4a5f92:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kafka
       target: kafka
@@ -2022,11 +1926,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf06de9b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kafka Actions
       target: kafka_actions
@@ -2042,11 +1945,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jeaad214:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kafka Consumer
       target: kafka_consumer
@@ -2062,11 +1964,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j77f29c1:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Karpenter
       target: karpenter
@@ -2082,11 +1983,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j2cb7ef0:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Keda
       target: keda
@@ -2102,11 +2002,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jaee58c5:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kong
       target: kong
@@ -2122,11 +2021,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja001417:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: KrakenD
       target: krakend
@@ -2142,11 +2040,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j92491f1:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubernetes API server metrics
       target: kube_apiserver_metrics
@@ -2162,11 +2059,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1ce0516:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubernetes Controller Manager
       target: kube_controller_manager
@@ -2182,11 +2078,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j19a1b27:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kube DNS
       target: kube_dns
@@ -2202,11 +2097,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jd1817b8:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kube metrics server
       target: kube_metrics_server
@@ -2222,11 +2116,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5a98c4e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kube Proxy
       target: kube_proxy
@@ -2242,11 +2135,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jeebd4ae:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubernetes Scheduler
       target: kube_scheduler
@@ -2262,11 +2154,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j89c297c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubeflow
       target: kubeflow
@@ -2282,11 +2173,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j24a5cff:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubelet
       target: kubelet
@@ -2302,11 +2192,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j045310a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubernetes Cluster Autoscaler
       target: kubernetes_cluster_autoscaler
@@ -2322,11 +2211,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jba841f0:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kubernetes State
       target: kubernetes_state
@@ -2342,11 +2230,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jb0447e6:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: KubeVirt API
       target: kubevirt_api
@@ -2362,11 +2249,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc4c1032:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: KubeVirt Controller
       target: kubevirt_controller
@@ -2382,11 +2268,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j4f368cf:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: KubeVirt Handler
       target: kubevirt_handler
@@ -2402,11 +2287,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3c620e6:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kueue
       target: kueue
@@ -2422,11 +2306,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j739f9be:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kuma
       target: kuma
@@ -2442,11 +2325,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j61e565f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Kyoto Tycoon
       target: kyototycoon
@@ -2462,11 +2344,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6900ead:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: kyverno
       target: kyverno
@@ -2482,11 +2363,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1c6adb2:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Lighttpd
       target: lighttpd
@@ -2502,11 +2382,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8b3b099:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Linkerd
       target: linkerd
@@ -2522,11 +2401,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j29dcd3a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Linux proc extras
       target: linux_proc_extras
@@ -2542,11 +2420,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3d7d527:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: LiteLLM
       target: litellm
@@ -2562,11 +2439,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jefcf576:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: LPARStats
       target: lparstats
@@ -2582,11 +2458,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je63e92c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Lustre
       target: lustre
@@ -2602,11 +2477,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc1b3d1e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Mac Audit Logs
       target: mac_audit_logs
@@ -2622,11 +2496,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja15251c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: MapR
       target: mapr
@@ -2642,11 +2515,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j141298e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: MapReduce
       target: mapreduce
@@ -2662,11 +2534,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j75f52a9:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Marathon
       target: marathon
@@ -2682,11 +2553,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8d5404b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: MarkLogic
       target: marklogic
@@ -2702,11 +2572,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5b70138:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Memcached
       target: mcache
@@ -2722,11 +2591,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jbdadec9:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Mesos Master
       target: mesos_master
@@ -2742,11 +2610,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j062aeb0:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Milvus
       target: milvus
@@ -2762,11 +2629,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j91231ff:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: MongoDB
       target: mongo
@@ -2783,8 +2649,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     strategy:
       matrix:
@@ -2812,7 +2677,7 @@ jobs:
         - py3.13-8.0-standalone-newyork
       fail-fast: false
   j211906c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: MySQL
       target: mysql
@@ -2829,8 +2694,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     strategy:
       matrix:
@@ -2852,7 +2716,7 @@ jobs:
         - py3.13-percona-8.4
       fail-fast: false
   j636396f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: n8n
       target: n8n
@@ -2868,11 +2732,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5df646e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Nagios
       target: nagios
@@ -2888,11 +2751,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jfc1e031:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Network on Linux
       target: network
@@ -2908,11 +2770,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6a5b846:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: NFSstat
       target: nfsstat
@@ -2928,11 +2789,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j93fea02:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: NGINX
       target: nginx
@@ -2948,11 +2808,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja114815:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: NGINX Ingress Controller
       target: nginx_ingress_controller
@@ -2968,11 +2827,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j71c1491:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Apache NiFi
       target: nifi
@@ -2988,11 +2846,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jcc7e1d2:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Nutanix
       target: nutanix
@@ -3008,11 +2865,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jb705691:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: nvidia_nim
       target: nvidia_nim
@@ -3028,11 +2884,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j74dc677:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Nvidia Triton
       target: nvidia_triton
@@ -3048,11 +2903,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jc2a0c60:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Octopus Deploy
       target: octopus_deploy
@@ -3068,11 +2922,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j2cf0a0a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: OpenLDAP
       target: openldap
@@ -3088,11 +2941,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jaaa5727:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: OpenMetrics
       target: openmetrics
@@ -3108,11 +2960,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j88ddb5b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: OpenStack
       target: openstack
@@ -3128,11 +2979,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j65171af:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: OpenStack Controller
       target: openstack_controller
@@ -3148,11 +2998,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j4a8166b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: PGBouncer
       target: pgbouncer
@@ -3168,11 +3017,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jaa8b34b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: PHP-FPM
       target: php_fpm
@@ -3188,11 +3036,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j54fefc0:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Postfix
       target: postfix
@@ -3208,11 +3055,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j44368ad:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Postgres
       target: postgres
@@ -3229,8 +3075,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     strategy:
       matrix:
@@ -3256,7 +3101,7 @@ jobs:
         - py3.13-18.0-C
       fail-fast: false
   j8e38a40:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: PowerDNS Recursor
       target: powerdns_recursor
@@ -3272,11 +3117,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8f01991:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Prefect
       target: prefect
@@ -3292,11 +3136,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jaeea6e0:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Presto
       target: presto
@@ -3312,11 +3155,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je083bd8:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Process
       target: process
@@ -3332,11 +3174,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jbfa97cf:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Prometheus
       target: prometheus
@@ -3352,11 +3193,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf882f09:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Proxmox
       target: proxmox
@@ -3372,11 +3212,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jbb39de2:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ProxySQL
       target: proxysql
@@ -3392,11 +3231,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5987374:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Pulsar
       target: pulsar
@@ -3412,11 +3250,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jcc156e5:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Quarkus
       target: quarkus
@@ -3432,11 +3269,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j694032b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: RabbitMQ
       target: rabbitmq
@@ -3452,11 +3288,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jcc172a7:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Ray
       target: ray
@@ -3472,11 +3307,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja7f6415:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Redis
       target: redisdb
@@ -3492,11 +3326,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j47000ee:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: RethinkDB
       target: rethinkdb
@@ -3512,11 +3345,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jdeada9f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Riak
       target: riak
@@ -3532,11 +3364,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j21f86cb:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: RiakCS
       target: riakcs
@@ -3552,11 +3383,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j111b452:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: SAP HANA
       target: sap_hana
@@ -3572,11 +3402,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6a5cfa3:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Scylla
       target: scylla
@@ -3592,11 +3421,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6600bce:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Silk
       target: silk
@@ -3612,11 +3440,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jdeebd5c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Silverstripe CMS
       target: silverstripe_cms
@@ -3632,11 +3459,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j02f6aa9:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: SingleStore
       target: singlestore
@@ -3652,11 +3478,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1e78283:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Slurm
       target: slurm
@@ -3672,11 +3497,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j06ca546:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: SNMP
       target: snmp
@@ -3692,11 +3516,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j2d7c8f5:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Solr
       target: solr
@@ -3712,11 +3535,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9485e6f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: SonarQube
       target: sonarqube
@@ -3732,11 +3554,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3835902:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: sonatype_nexus
       target: sonatype_nexus
@@ -3752,11 +3573,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j529bc3b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Spark
       target: spark
@@ -3772,11 +3592,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j3a8e004:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: SQL Server on Linux
       target: sqlserver
@@ -3793,8 +3612,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     strategy:
       matrix:
@@ -3815,7 +3633,7 @@ jobs:
         - py3.13-linux-2022-tokyo
       fail-fast: false
   jaf4b616:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Squid
       target: squid
@@ -3831,11 +3649,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j01c4d3c:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: SSH
       target: ssh_check
@@ -3851,11 +3668,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j2981dbe:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: StatsD
       target: statsd
@@ -3871,11 +3687,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j6f0ded4:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Strimzi
       target: strimzi
@@ -3891,11 +3706,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jfe7ceb7:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Supabase
       target: supabase
@@ -3911,11 +3725,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf04a052:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Supervisord
       target: supervisord
@@ -3931,11 +3744,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jde3891f:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: System Core
       target: system_core
@@ -3951,11 +3763,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j64445e6:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: System Swap
       target: system_swap
@@ -3971,11 +3782,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j1eeafd2:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: TCP on Linux
       target: tcp_check
@@ -3991,11 +3801,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8217a3a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: TeamCity
       target: teamcity
@@ -4011,11 +3820,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf4a7e97:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Tekton
       target: tekton
@@ -4031,11 +3839,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je68b3b9:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Teleport
       target: teleport
@@ -4051,11 +3858,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j840fec7:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Temporal
       target: temporal
@@ -4071,11 +3877,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jeefbe37:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Teradata
       target: teradata
@@ -4091,11 +3896,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jb4a6940:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: tibco_ems
       target: tibco_ems
@@ -4111,11 +3915,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jd1c18ec:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: TLS
       target: tls
@@ -4131,11 +3934,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9438e1d:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Tomcat
       target: tomcat
@@ -4151,11 +3953,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j4baeba2:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: TorchServe
       target: torchserve
@@ -4171,11 +3972,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j41a575a:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Traefik Mesh
       target: traefik_mesh
@@ -4191,11 +3991,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j8a1b5bb:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Traffic Server
       target: traffic_server
@@ -4211,11 +4010,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jfc2bf01:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Twemproxy
       target: twemproxy
@@ -4231,11 +4029,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jd0626ef:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Twistlock
       target: twistlock
@@ -4251,11 +4048,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j0c8fc90:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Varnish
       target: varnish
@@ -4271,11 +4067,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j5d55c41:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Vault
       target: vault
@@ -4291,11 +4086,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jf929c3b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Velero
       target: velero
@@ -4311,11 +4105,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j9981b0b:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Vertica
       target: vertica
@@ -4331,11 +4124,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jeae0788:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: vLLM
       target: vllm
@@ -4351,11 +4143,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   jb120af1:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: VoltDB
       target: voltdb
@@ -4372,8 +4163,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
     strategy:
       matrix:
@@ -4388,7 +4178,7 @@ jobs:
         - py3.13-10.0-without-tls-http
       fail-fast: false
   j269c8a5:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: vSphere
       target: vsphere
@@ -4404,11 +4194,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   je95095e:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Weaviate
       target: weaviate
@@ -4424,11 +4213,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   j40e5c98:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: WebLogic
       target: weblogic
@@ -4444,11 +4232,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja6bc642:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: Yarn
       target: yarn
@@ -4464,11 +4251,10 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
   ja446cea:
-    uses: ./.github/workflows/test-target.yml
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@master
     with:
       job-name: ZooKeeper
       target: zk
@@ -4484,6 +4270,5 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
     secrets: inherit
