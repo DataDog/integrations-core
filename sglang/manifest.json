@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor request performance, token throughput, and KV cache efficiency of SGLang inference servers",
+    "description": "Monitor SGLang request performance, token throughput, and KV cache efficiency",
     "title": "SGLang",
     "media": [],
     "classifier_tags": [
