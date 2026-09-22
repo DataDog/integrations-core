@@ -211,15 +211,18 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return str(self.root.parent)
 
     def get_initial_config(self):
+        # Sourced from the maintained baseline rather than hardcoded so that
+        # `ddev meta scripts update-python-config` carries the lint environment along with
+        # everything else it rewrites. Without an explicit `python`, Hatch would inherit the
+        # interpreter ddev itself runs under, making linting depend on how ddev was installed.
+        from ddev.repo.constants import PYTHON_VERSION
+
         settings_dir = self.ruff_settings_dir()
 
         lint_env = {
             'detached': True,
             'installer': 'uv',
-            # Without this, Hatch inherits the interpreter that ddev itself runs under, so linting
-            # targets whatever Python the developer installed ddev with rather than the version CI
-            # uses. Keep in sync with the `python` value in: /ddev/hatch.toml
-            'python': '3.13',
+            'python': PYTHON_VERSION,
             'scripts': {
                 'style': [
                     self.formatter_command('--diff --check', settings_dir),
