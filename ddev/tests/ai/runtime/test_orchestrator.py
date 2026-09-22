@@ -192,6 +192,20 @@ async def test_on_initialize_submits_initial_phase_trigger(core_dir, make_orches
     orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_initialize()
 
+
+async def test_on_initialize_resolves_integration_root_from_runtime_variables(core_dir, make_orchestrator, tmp_path):
+    orchestrator, _, _ = make_orchestrator(core_dir, runtime_variables={"integration": "My Check"})
+    await orchestrator.on_initialize()
+
+    assert orchestrator._resources._integration_root == tmp_path / "my_check"
+
+
+async def test_on_initialize_integration_root_is_none_without_integration_input(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+    await orchestrator.on_initialize()
+
+    assert orchestrator._resources._integration_root is None
+
     assert not orchestrator._queue.empty()
     msg = orchestrator._queue.get_nowait()
     assert isinstance(msg, PhaseTrigger)

@@ -7,6 +7,7 @@ tools:
   - read_file
   - create_file
   - edit_file
+  - delete_file
   - copy_path
   - list_files
   - grep

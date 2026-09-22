@@ -98,6 +98,39 @@ def test_record_does_not_cross_agents(registry: FileRegistry, tmp_path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# forget
+# ---------------------------------------------------------------------------
+
+
+def test_forget_removes_known_path(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "hello")
+
+    registry.forget(OWNER_A, path)
+
+    assert registry.is_known(OWNER_A, path) is False
+
+
+def test_forget_only_affects_the_given_owner(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "hello")
+    registry.record(OWNER_B, path, "hello")
+
+    registry.forget(OWNER_A, path)
+
+    assert registry.is_known(OWNER_A, path) is False
+    assert registry.is_known(OWNER_B, path) is True
+
+
+def test_forget_unknown_path_is_a_no_op(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+
+    registry.forget(OWNER_A, path)  # must not raise
+
+    assert registry.is_known(OWNER_A, path) is False
+
+
+# ---------------------------------------------------------------------------
 # path normalization
 # ---------------------------------------------------------------------------
 

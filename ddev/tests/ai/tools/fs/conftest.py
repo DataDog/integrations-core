@@ -2,11 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from ddev.ai.tools.fs.append_file import AppendFileTool
 from ddev.ai.tools.fs.copy_path import CopyPathTool
 from ddev.ai.tools.fs.create_file import CreateFileTool
+from ddev.ai.tools.fs.delete_file import DeleteFileTool
 from ddev.ai.tools.fs.edit_file import EditFileTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -49,6 +52,18 @@ def edit_tool(registry: FileRegistry, owner_id: str) -> EditFileTool:
 @pytest.fixture
 def append_tool(registry: FileRegistry, owner_id: str) -> AppendFileTool:
     return AppendFileTool(registry, owner_id)
+
+
+@pytest.fixture
+def integration_root(tmp_path) -> Path:
+    root = tmp_path / "my_integration"
+    root.mkdir()
+    return root
+
+
+@pytest.fixture
+def delete_tool(registry: FileRegistry, owner_id: str, integration_root: Path) -> DeleteFileTool:
+    return DeleteFileTool(registry, owner_id, integration_root)
 
 
 @pytest.fixture

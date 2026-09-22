@@ -105,7 +105,25 @@ def test_build_runtime_propagates_context_to_tool_registry(file_registry, mocker
         file_registry=file_registry,
         agent_config=config,
         process_factory=sentinel_process_factory,
+        integration_root=None,
     )
+
+
+def test_runtime_factory_forwards_integration_root_to_tool_registry(file_registry, tmp_path):
+    integration_root = tmp_path / "my_integration"
+    provider = MagicMock()
+    provider.build_agent.return_value = MagicMock()
+    provider_registry = AgentProviderRegistry()
+    provider_registry.register("test", provider)
+    factory = AgentRuntimeFactory(
+        provider_registry=provider_registry, file_registry=file_registry, integration_root=integration_root
+    )
+    config = make_agent_config(provider="test", tools=["delete_file"])
+
+    runtime = build_runtime(factory, config, scope=AgentScope("p1", AgentRole.PHASE, "p1"))
+
+    tool = runtime.tool_registry._tools["delete_file"]
+    assert tool._integration_root == integration_root
 
 
 def test_build_runtime_reuses_shared_file_registry(file_registry):

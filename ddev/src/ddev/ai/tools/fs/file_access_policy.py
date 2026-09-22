@@ -140,3 +140,13 @@ class FileAccessPolicy:
         if not resolved.is_relative_to(self._write_root):
             raise FileAccessError(f"Write denied: {resolved} is outside write root {self._write_root}")
         return resolved
+
+    def matches_deny_pattern(self, path: str | Path) -> bool:
+        """Whether path matches a configured deny pattern, regardless of write_root.
+
+        ``assert_writable`` does not check deny patterns — inside write_root, writes to
+        e.g. ``.env`` are intentionally allowed. Callers that must enforce deny patterns
+        even inside write_root (e.g. ``delete_file``, since deletion is irreversible) use
+        this directly instead.
+        """
+        return self._is_denied(canonicalize_path(path))

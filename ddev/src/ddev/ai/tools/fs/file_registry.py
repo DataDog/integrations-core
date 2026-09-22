@@ -19,7 +19,8 @@ class FileRegistry:
     same file are serialized regardless of which owner initiated them.
 
     _hashes layout: {owner_id: {normalized_path: sha256_hex}}.
-    _locks and _hashes grow for the registry's lifetime and are never evicted.
+    _locks grow for the registry's lifetime and are never evicted. _hashes entries
+    are removed only via ``forget``, e.g. when the owner deletes the path.
     """
 
     def __init__(self, policy: FileAccessPolicy) -> None:
@@ -42,6 +43,14 @@ class FileRegistry:
 
     def is_known(self, owner_id: str, path: str) -> bool:
         return self._normalize(path) in self._hashes.get(owner_id, {})
+
+    def forget(self, owner_id: str, path: str) -> None:
+        """Remove path from this owner's known set, e.g. after the owner deletes it.
+
+        Only clears the deleting owner's own entry: another owner's knowledge of the
+        same path is a separate, independent record and is unaffected.
+        """
+        self._hashes.get(owner_id, {}).pop(self._normalize(path), None)
 
     def verify(self, owner_id: str, path: str, content: str) -> bool:
         """Check whether content matches what this agent last recorded for path."""

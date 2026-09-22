@@ -226,6 +226,26 @@ def test_from_names_fs_tools_share_file_registry(tmp_path):
     assert all(r is registries[0] for r in registries)
 
 
+def test_from_names_threads_integration_root_to_delete_file_tool(tmp_path):
+    integration_root = tmp_path / "my_integration"
+    registry = ToolRegistry.from_names(
+        ["delete_file"],
+        scope=SCOPE,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
+        agent_config=make_agent_config(tools=["delete_file"]),
+        process_factory=PROCESS_FACTORY,
+        integration_root=integration_root,
+    )
+
+    tool = registry._tools["delete_file"]
+    assert tool._integration_root == integration_root
+
+
+def test_from_names_defaults_integration_root_to_none(tmp_path):
+    registry = from_names(["delete_file"], tmp_path)
+    assert registry._tools["delete_file"]._integration_root is None
+
+
 # ---------------------------------------------------------------------------
 # read_only manifest annotations and filter_read_only
 # ---------------------------------------------------------------------------

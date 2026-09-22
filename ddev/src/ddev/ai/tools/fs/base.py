@@ -23,6 +23,9 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
     def _register(self, path: str, content: str) -> None:
         self._registry.record(self._owner_id, path, content)
 
+    def _forget(self, path: str) -> None:
+        self._registry.forget(self._owner_id, path)
+
     def _assert_writable(self, path: str) -> Path:
         return self._registry.policy.assert_writable(path)
 
@@ -40,3 +43,9 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
         if not self._registry.verify(self._owner_id, path, content):
             return "", ToolResult(success=False, error=f"File '{path}' has changed since last read. Re-read and retry.")
         return content, None
+
+    def _assert_known(self, path: str) -> ToolResult | None:
+        """Verify the owner has previously read or created this path, without reading its content."""
+        if not self._registry.is_known(self._owner_id, path):
+            return ToolResult(success=False, error=f"Not authorized to modify '{path}'.")
+        return None

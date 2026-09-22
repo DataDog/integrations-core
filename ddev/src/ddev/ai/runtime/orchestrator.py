@@ -13,6 +13,7 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
+from ddev.ai.runtime.integration_root import resolve_integration_root
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
@@ -44,8 +45,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
         ``provider_registry`` is the same configured registry used to validate agent
         definitions and constructs provider-specific agents on demand.
 
-        ``file_access_policy`` must have ``write_root`` set to the integration
-        output directory so that agent writes are confined to that path.
+        ``file_access_policy`` bounds agent writes to its configured ``write_root``,
+        which in production is the whole repository rather than a per-integration
+        directory; tools that need a narrower boundary (e.g. ``delete_file``) get
+        one separately, resolved from ``runtime_variables['integration']`` (see
+        ``ddev.ai.runtime.integration_root``).
 
         """
         max_timeout = runtime_variables.get("max_timeout")
@@ -93,6 +97,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             file_access_policy=self._file_access_policy,
             agents=self._resolved_flow.agents,
             callbacks=run_callbacks,
+            integration_root=resolve_integration_root(self._file_access_policy.write_root, self._runtime_variables),
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,

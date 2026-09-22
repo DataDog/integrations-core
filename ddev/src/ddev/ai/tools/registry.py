@@ -6,6 +6,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from importlib import import_module
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from anthropic.types import ToolParam
@@ -30,6 +31,7 @@ class ToolContext:
     scope: AgentScope
     agent_config: AgentConfig
     process_factory: ReActProcessFactory
+    integration_root: Path | None = None
 
     @property
     def policy(self) -> FileAccessPolicy:
@@ -46,6 +48,10 @@ def _file_registry_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
 
 def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
     return tool_cls(ctx.policy)
+
+
+def _delete_file_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+    return tool_cls(ctx.file_registry, ctx.scope.owner_id, ctx.integration_root)
 
 
 def _spawn_subagent_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
@@ -80,6 +86,7 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory, read_only=False),
     "edit_file": ToolSpec("fs.edit_file", "EditFileTool", factory=_file_registry_factory, read_only=False),
     "append_file": ToolSpec("fs.append_file", "AppendFileTool", factory=_file_registry_factory, read_only=False),
+    "delete_file": ToolSpec("fs.delete_file", "DeleteFileTool", factory=_delete_file_factory, read_only=False),
     "copy_path": ToolSpec("fs.copy_path", "CopyPathTool", factory=_file_policy_factory, read_only=False),
     "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory, read_only=True),
     "list_files": ToolSpec("shell.list_files", "ListFilesTool", read_only=True),
@@ -140,6 +147,7 @@ class ToolRegistry:
         file_registry: FileRegistry,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
+        integration_root: Path | None = None,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
@@ -148,12 +156,17 @@ class ToolRegistry:
         each owner must still read-before-write on its own.
 
         ``process_factory`` is only consumed by tools that spawn child agents.
+
+        ``integration_root`` is only consumed by tools scoped to the current
+        integration's directory (e.g. ``delete_file``); it is None when the run
+        has no resolvable integration name, and those tools must fail closed.
         """
         ctx = ToolContext(
             file_registry=file_registry,
             scope=scope,
             agent_config=agent_config,
             process_factory=process_factory,
+            integration_root=integration_root,
         )
         tools: list[ToolProtocol] = []
         native_tool_names: list[str] = []
