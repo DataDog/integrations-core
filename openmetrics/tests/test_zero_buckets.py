@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Coverage for OpenMetrics histogram buckets whose smallest threshold is zero.
@@ -192,7 +192,10 @@ def _diagnostics(intake, exporter):
 
 
 @pytest.mark.e2e
-def test_zero_bucket_distributions_reach_intake(dd_get_state):
+def test_zero_bucket_distributions_reach_intake(dd_agent_check, dd_get_state):
+    # Requesting dd_agent_check makes the plugin skip this test during regular
+    # unit runs. The returned one-shot check runner is intentionally unused:
+    # this test exercises the already-running Agent daemon and fake intake.
     state = dd_get_state('zero_buckets')
     assert state, 'missing zero_buckets state; the E2E environment did not start'
     exporter = ExporterControl(state['exporter_url'])
