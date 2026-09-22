@@ -112,18 +112,17 @@ LOGGER = logging.getLogger(__name__)
 # Code 131 (TOO_LARGE_STRING_SIZE), and no setting lifts it, verified on 22.7, 24.8, and
 # 26.3. Proof payloads larger than the cap concatenate bounded repeat() parts instead.
 REMOTE_QUERY_REPEAT_CAP = 1_000_000
-# Exactly nine proof queries, mirrored one for one by the Agent-side allowlist: the seed,
-# the identity/schema query, one binary-sensitive UTF-8 payload, and six single-row payload
-# queries at the pinned power-of-two sizes. The fixture proof queries are absent on
-# purpose: they need harness-created tables (Postgres `cities`/`remote_query_identity`);
-# hostName()/currentUser()/version() prove the matched server without any fixture.
+# Exactly nine proof queries: the seed, the identity/schema query, one binary-sensitive
+# UTF-8 payload, and six single-row payload queries at the pinned power-of-two sizes. The
+# Postgres fixture proof queries are absent on purpose: they need harness-created tables
+# (`cities`/`remote_query_identity`); hostName()/currentUser()/version() prove the matched
+# server without any fixture.
 REMOTE_QUERY_SEED_QUERY = 'SELECT 1 AS value'
 REMOTE_QUERY_IDENTITY_QUERY = 'SELECT hostName() AS host, currentUser() AS user, version() AS version'
 # Binary-sensitive but valid-UTF-8 payload: a NUL byte followed by ASCII text. Real servers
 # render the NUL as `\u0000` in the stream format, so the row is valid JSON, the pinned
 # value contract accepts it, and the page preserves the payload exactly. A non-UTF-8 payload
-# (such as `unhex('00ff80')`) is rejected by the value contract by design, so it cannot
-# appear on the allowlist.
+# (such as `unhex('00ff80')`) is rejected by the value contract by design.
 REMOTE_QUERY_BINARY_QUERY = "SELECT unhex('006162') AS payload"
 # The pinned proof payload sizes in bytes: 1, 2, 4, 8, 16, and 32 MiB.
 REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES = (1048576, 2097152, 4194304, 8388608, 16777216, 33554432)
@@ -135,9 +134,8 @@ def _proof_payload_query(size_bytes: int) -> str:
     Every repeat() count must stay within the server's hard 1,000,000 cap (see
     REMOTE_QUERY_REPEAT_CAP), so a payload of `size_bytes` is the concatenation of
     `size_bytes // 1,000,000` million-byte parts and one remainder part when the size is
-    not a multiple of the cap. The construction is a pure function of `size_bytes`, so the
-    Agent-side allowlist mirrors the resulting strings byte-for-byte by reproducing this
-    algorithm; hand-maintained large SQL strings would drift instead.
+    not a multiple of the cap. The construction is a pure function of `size_bytes`, so
+    distinct payload sizes reproduce distinct deterministic strings.
     """
     if size_bytes <= 0:
         raise ValueError('Proof payload size must be a positive byte count.')
@@ -146,12 +144,6 @@ def _proof_payload_query(size_bytes: int) -> str:
     if remainder:
         parts.append(remainder)
     return "SELECT concat({}) AS payload".format(', '.join("repeat('x', {})".format(part) for part in parts))
-
-
-REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
-    (REMOTE_QUERY_SEED_QUERY, REMOTE_QUERY_IDENTITY_QUERY, REMOTE_QUERY_BINARY_QUERY)
-    + tuple(_proof_payload_query(size_bytes) for size_bytes in REMOTE_QUERY_PROOF_PAYLOAD_SIZES_BYTES)
-)
 
 
 # One-stream row format: the first line is the column names, the second the ClickHouse type
@@ -825,8 +817,8 @@ class ClickhouseRemoteQueryHandler:
         """Execute on the composed check; emit only status and the intake receipt.
 
         The produce hook is `_produce_remote_query` itself, its adapter-owned phase boundaries
-        opening the native producer spans. Once the request is admitted — validation and the
-        allowlist — the run opens its native producer spans fail-open through
+        opening the native producer spans. Once the request is admitted through validation,
+        the run opens its native producer spans fail-open through
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
@@ -839,7 +831,7 @@ class ClickhouseRemoteQueryHandler:
         tracing = rq_tracing.NULL_PRODUCER_TRACING
         try:
             try:
-                parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
+                parsed = rq_events.validate_request(request)
                 # Native producer spans cover every admitted run — the admission failures below
                 # included — as a root span on the request's trace context, additive to the
                 # timing accumulator and the event contract, fail-open through every boundary.

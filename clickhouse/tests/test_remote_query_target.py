@@ -25,7 +25,6 @@ from .remote_query_fakes import (
     forbidding_client_factory,
     make_check,
     make_client,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     resolve_request,
     stream_body,
@@ -89,7 +88,6 @@ def test_stream_missing_pool_manager_returns_target_unavailable(monkeypatch):
 
 def test_stream_maps_transport_error_to_target_unavailable(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1]]),
         raw_stream_error=OperationalError('Error HTTPSConnectionPool ... SECRET_DO_NOT_LOG'),
@@ -105,7 +103,6 @@ def test_stream_maps_transport_error_to_target_unavailable(monkeypatch, caplog):
 
 def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
 
     def broken_factory(_check, _limits):
         raise OperationalError('connection refused with SECRET_DO_NOT_LOG')
@@ -125,7 +122,6 @@ def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch, 
 
 def test_stream_target_unavailable_when_check_cannot_create_clients(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # No create_remote_query_client on the fake check and no factory injected.
     request = valid_request()
     events = list(ClickhouseRemoteQueryHandler(make_check()).execute(request, http_client=FakeUploadClient()))

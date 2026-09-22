@@ -14,9 +14,9 @@ from types import SimpleNamespace
 import psycopg.errors as psycopg_errors
 import pytest
 
-from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
+from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.postgres import PostgreSql, remote_query
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 
@@ -41,7 +41,6 @@ from .remote_query_fakes import (
     event_metadata,
     make_check,
     native_record,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     prefix_bytes,
     resolve_request,
@@ -109,18 +108,9 @@ def test_entry_rejects_unusable_request_json_without_echoing_input(caplog, reque
     assert pool.requested_dbnames == []
 
 
-def test_stream_rejects_non_allowlisted_query_before_pool_access():
-    pool = FakePool(rows=[(1,)])
-    request = valid_request(query='SELECT current_database()')
-
-    events = collect_events(request, make_check(pool=pool))
-
-    assert_failed_event(events, 'invalid_request', 'query is not allowlisted')
-    assert pool.requested_dbnames == []
-
-
-def test_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeypatch):
-    patch_allowlist_disabled(monkeypatch)
+def test_stream_executes_arbitrary_query_end_to_end(monkeypatch):
+    """A query outside the proof fixtures runs the whole pipeline: contract validation is
+    the only admission gate, so the run reaches the check's database pool."""
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[('datadog_test',)])
     request = valid_request(query='SELECT current_database()')
@@ -147,7 +137,7 @@ def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
     def get_config(key):
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
     pool = FakePool(rows=[(1,)])
 
     events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
@@ -229,7 +219,6 @@ def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
 
 def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,), (2,)])
     fake = FakeUploadClient()
 
@@ -275,7 +264,6 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
 
 def test_producer_writes_exact_source_page_csv_and_descriptor(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
 
@@ -305,7 +293,6 @@ def test_producer_writes_exact_source_page_csv_and_descriptor(monkeypatch):
 def test_producer_stamps_agent_reported_hostname_from_the_check_instance(monkeypatch):
     """The descriptor carries the check instance's Agent-reported hostname, never the machine's socket name."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
     # By construction this value differs from the machine's socket name on every host, so a
@@ -324,7 +311,6 @@ def test_producer_stamps_agent_reported_hostname_from_the_check_instance(monkeyp
 
 def test_producer_executes_query_exactly_once_in_read_only_transaction_with_timeout(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A constant clock keeps the remaining-wall derivation of the statement timeout exact.
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
     pool = FakePool(rows=[(1,)])
@@ -366,7 +352,6 @@ def test_producer_executes_query_exactly_once_in_read_only_transaction_with_time
 
 def test_producer_caps_instance_timeout_at_the_producer_wall(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
@@ -385,7 +370,6 @@ def test_producer_caps_instance_timeout_at_the_producer_wall(monkeypatch):
 
 def test_producer_honors_instance_timeout_shorter_than_the_wall(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: 100.0)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
@@ -403,7 +387,6 @@ def test_producer_honors_instance_timeout_shorter_than_the_wall(monkeypatch):
 
 def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     fake = FakeUploadClient()
     check = make_check(pool=pool, remote_queries=RemoteQueries(timeout_ms=300_000))
@@ -453,7 +436,6 @@ def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wal
 
 def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[])
     fake = FakeUploadClient()
 
@@ -473,7 +455,6 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
 
 def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[], vendor_types={(23, -1): 'integer'})
     fake = FakeUploadClient()
 
@@ -510,7 +491,6 @@ def test_producer_splits_pages_by_the_source_page_target(monkeypatch):
     intake stays authoritative for the transformed final page — so records split purely by
     source bytes, schema or not."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     columns = [
         FakeColumn('city', 1043, 255),
         FakeColumn('country', 1043, 255),
@@ -552,7 +532,6 @@ def test_producer_splits_pages_by_the_source_page_target(monkeypatch):
 
 def test_producer_enforces_max_schema_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], vendor_types={(23, -1): 'integer'})
     request = bounded_request(maxSchemaBytes=4, maxFileBytes=1024)
     request['includeSchema'] = True
@@ -564,7 +543,6 @@ def test_producer_enforces_max_schema_bytes(monkeypatch):
 
 def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], vendor_types={(23, -1): 'integer'})
     # The schema-bearing minimal frame cannot fit even an empty page.
     request = bounded_request(maxFileBytes=len(prefix_bytes()) - 1, maxRowBytes=8)
@@ -577,7 +555,6 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
 
 def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # maxRowBytes bounds one native source record: the 170-byte record for the wide row
     # cannot fit 169.
     request = bounded_request(maxRowBytes=len(BOUND_RECORD) - 1)
@@ -593,7 +570,6 @@ def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch)
 @pytest.mark.parametrize('rows_per_block', [1, 500])
 def test_page_upload_streams_before_the_copy_is_exhausted(monkeypatch, rows_per_block):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     order_log = []
     request = bounded_request(maxPages=128, maxResultBytes=64 * 1024)
 
@@ -632,7 +608,6 @@ def test_page_upload_streams_before_the_copy_is_exhausted(monkeypatch, rows_per_
 
 def test_descriptor_is_registered_before_the_first_source_record(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     order_log = []
     pool = FakePool(rows=[(1,)], read_log=order_log)
     fake = FakeUploadClient(put_log=order_log)
@@ -662,7 +637,6 @@ def test_producer_frames_native_records_across_block_boundaries(monkeypatch, chu
     block, and embedded commas, quotes, and newlines all arrive as one whole, verbatim
     source page."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     first = native_record('a,b', 'He said "Hi"', 'line1\nline2')
     second = native_record(None, '', '\\N')
 
@@ -692,7 +666,6 @@ def test_producer_rejects_incomplete_or_oversized_copy_records(monkeypatch, bloc
     """A COPY stream that ends inside a record never produces a page for it: the run fails
     closed after the read-only transaction rolls back."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
 
     def block_provider():
         yield block
@@ -714,7 +687,6 @@ def test_producer_rejects_incomplete_or_oversized_copy_records(monkeypatch, bloc
 
 def test_producer_emits_native_copy_records_verbatim(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # One record covering the native families' raw text: NULL, empty string, a literal
     # \N, booleans, an integer, a quoted value with commas and quotes, and a multibyte
     # string. The page must carry the records byte for byte: the producer never decodes,
@@ -777,7 +749,6 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
 
 def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
@@ -820,7 +791,6 @@ def test_source_byte_limit_stops_upload_before_exceeding_result_budget(monkeypat
 
 def test_stream_maps_server_statement_cancellation_to_timeout(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
 
     pool = FakePool(
         rows=[(1,)],
@@ -839,7 +809,6 @@ def test_stream_maps_unexpected_execution_failure_to_fixed_query_failed(monkeypa
     text can carry raw row fragments or query text, so neither the event nor the logs
     echo it."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], copy_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
     fake = FakeUploadClient()
 
@@ -857,7 +826,6 @@ def test_stream_maps_unexpected_execution_failure_to_fixed_query_failed(monkeypa
 @pytest.mark.parametrize('is_cancelled', [lambda: True, True], ids=['callable', 'bool'])
 def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     check = make_check(pool=pool)
     # Both runtime shapes: the Agent check object carries a bool ``is_cancelled`` attribute;
@@ -873,7 +841,6 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
 
 def test_entry_propagates_callback_failure_without_upload(monkeypatch, runtime_check):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = runtime_check.db_pool
 
     def emit(event_type, metadata_json, payload):
@@ -978,7 +945,6 @@ def test_producer_brackets_the_abort_and_fails_the_root_on_a_produce_failure(mon
     closes the root with the same failure code the event carries, never echoing the
     exception's text on any span."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], copy_error=ValueError('SECRET_DO_NOT_LOG row fragment'))
     fake = FakeUploadClient()
     tracing = RecordingTracing()

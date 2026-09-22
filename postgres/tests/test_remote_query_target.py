@@ -22,7 +22,6 @@ from .remote_query_fakes import (
     collect_resolve_events,
     event_metadata,
     make_check,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     resolve_request,
     valid_request,
@@ -331,7 +330,6 @@ def test_resolve_and_execute_share_the_same_matching_authority(monkeypatch):
     """The resolve verdict must predict execution: a target that resolves MATCHED on one
     check executes on it, and one that resolves target_not_found never executes."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)])
     autodiscovery = FakeAutodiscovery(databases=['dogs_0'])
     check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)

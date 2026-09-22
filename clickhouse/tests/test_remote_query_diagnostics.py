@@ -20,7 +20,6 @@ from .remote_query_fakes import (
     instrument_clickhouse_fakes,
     make_check,
     make_client,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     prefix_bytes,
     row_object_bound,
@@ -32,7 +31,6 @@ from .remote_query_fakes import (
 
 def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clock = MutableClock()
     monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
     instrument_clickhouse_fakes(monkeypatch, clock)

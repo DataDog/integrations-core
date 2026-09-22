@@ -13,8 +13,8 @@ import json
 
 import pytest
 
-from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
+from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 from .remote_query_fakes import (
@@ -22,7 +22,6 @@ from .remote_query_fakes import (
     assert_success,
     event_metadata,
     native_record,
-    patch_allowlist_disabled,
 )
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -38,7 +37,7 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_KEY'
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
 
 
 def remote_query_request(pg_instance, query, include_schema=False, **limits):
@@ -152,7 +151,6 @@ def test_remote_query_native_csv_keeps_value_spellings_distinguishable(integrati
     """NULL, empty string, and a literal \\N stay distinct bytes, and embedded commas,
     quotes, CR/LF, and UTF-8 ride the record raw."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     check = integration_check(pg_instance)
     with check.db_pool.get_connection(pg_instance['dbname']) as conn, conn.cursor() as cur:
         cur.execute('SHOW server_encoding')
@@ -206,7 +204,6 @@ def test_remote_query_native_csv_type_families(integration_check, pg_instance, m
     UTC timestamptz, ISO dates, postgres intervals, hex bytea, and the server's exact
     numeric spellings (floats in shortest round-trip text)."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     check = integration_check(pg_instance)
     request = remote_query_request(
         pg_instance,
@@ -300,7 +297,6 @@ def test_remote_query_pins_the_session_time_zone_for_native_text(integration_che
     """The producer's UTC pin overrides the pooled session's ambient time zone inside its
     read-only transaction, and the closing ROLLBACK restores the session state."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     check = integration_check(pg_instance)
     dbname = pg_instance['dbname']
     with check.db_pool.get_connection(dbname) as conn, conn.cursor() as cur:
@@ -329,7 +325,6 @@ def test_remote_query_evaluates_the_query_values_exactly_once(integration_check,
     in the database, so exactly one evaluation fits the measured fetch and run walls while
     a second evaluation (a cursor fetch or a double COPY) would exceed them."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     check = integration_check(pg_instance)
     request = remote_query_request(
         pg_instance,
@@ -364,7 +359,6 @@ def test_remote_query_final_page_too_large_splits_and_retries_without_requery(
     half and retries the same page index byte-identically — every row is still declared
     exactly once across the page PUTs, in order, from the one buffered COPY result."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     check = integration_check(pg_instance)
     # A budget that fits exactly three records per page (their bounds plus the two
     # in-page separators).
@@ -466,8 +460,7 @@ def test_remote_query_select_one_and_zero_row_schema_page(integration_check, pg_
         ],
     )
 
-    # The zero-row query is not allowlisted; the E2E producer path is under test here.
-    patch_allowlist_disabled(monkeypatch)
+    # The zero-row query exercises the same E2E producer path with an empty result.
     zero_row_request = remote_query_request(pg_instance, 'SELECT 1 AS value WHERE 1 = 0', include_schema=True)
     zero_events, zero_client = run_producer(zero_row_request, check)
 

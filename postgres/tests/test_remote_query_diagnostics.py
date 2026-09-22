@@ -18,7 +18,6 @@ from .remote_query_fakes import (
     event_metadata,
     instrument_postgres_fakes,
     make_check,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     two_row_boundary_request,
     valid_request,
@@ -28,7 +27,6 @@ from .remote_query_fakes import (
 
 def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clock = MutableClock()
     monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
     instrument_postgres_fakes(monkeypatch, clock)
@@ -74,7 +72,6 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
 
 def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clock = MutableClock()
     monkeypatch.setattr(remote_query.time, 'monotonic', clock.monotonic)
     instrument_postgres_fakes(monkeypatch, clock)

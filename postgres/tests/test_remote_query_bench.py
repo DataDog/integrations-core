@@ -24,7 +24,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from datadog_checks.base.utils.remote_queries import events as rq_events
+from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -114,11 +114,7 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_KEY'
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
-
-
-def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq_events, 'is_query_allowlist_enabled', lambda: False)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
 
 
 def bench_request(pg_instance, rows, max_file_bytes, timeout_ms):
@@ -177,7 +173,6 @@ def record_benchmark_info(benchmark, client, final):
 
 def run_producer(benchmark, integration_check, pg_instance, monkeypatch, rows, max_file_bytes, rounds, timeout_ms):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     check = integration_check(pg_instance)
     request = bench_request(pg_instance, rows, max_file_bytes, timeout_ms)
 

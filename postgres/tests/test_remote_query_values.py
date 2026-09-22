@@ -20,7 +20,6 @@ from .remote_query_fakes import (
     collect_events,
     make_check,
     native_record,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     valid_request,
 )
@@ -30,7 +29,6 @@ def test_producer_resolves_vendor_types_even_when_schema_is_not_requested(monkey
     """The descriptor needs every vendor type name, schema or not: the catalog lookup always
     runs, and include_schema stays false in the registered descriptor."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], vendor_types={(23, -1): 'integer'})
     fake = FakeUploadClient()
 
@@ -46,7 +44,6 @@ def test_producer_resolves_vendor_types_even_when_schema_is_not_requested(monkey
 
 def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     columns = [
         FakeColumn('a', 1043, 255),
         FakeColumn('b', 1043, 255),
@@ -98,7 +95,6 @@ def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(mon
 
 def test_producer_rejects_duplicate_result_column_names_before_row_data(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     columns = [FakeColumn('value', 23), FakeColumn('value', 23)]
     pool = FakePool(rows=[(1, 1)], description=columns)
     fake = FakeUploadClient()
@@ -113,7 +109,6 @@ def test_producer_rejects_duplicate_result_column_names_before_row_data(monkeypa
 
 def test_producer_rejects_duplicate_columns_even_with_schema_disabled(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     columns = [FakeColumn('v', 23), FakeColumn('v', 23), FakeColumn('v', 23)]
     pool = FakePool(rows=[(1, 2, 3)], description=columns)
 
@@ -124,7 +119,6 @@ def test_producer_rejects_duplicate_columns_even_with_schema_disabled(monkeypatc
 
 def test_producer_rejects_columns_beyond_max_columns(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     columns = [FakeColumn('a', 23), FakeColumn('b', 23), FakeColumn('c', 23)]
     pool = FakePool(rows=[(1, 2, 3)], description=columns)
     request = bounded_request(maxColumns=2)
@@ -140,7 +134,6 @@ def test_producer_fails_closed_on_unresolvable_vendor_types(monkeypatch, include
     lookup fails the run before any row is read, any descriptor is registered, or any page
     is uploaded."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(rows=[(1,)], vendor_types={})
     fake = FakeUploadClient()
 
@@ -156,7 +149,6 @@ def test_producer_fails_closed_on_unresolvable_vendor_types(monkeypatch, include
 @pytest.mark.parametrize('include_schema', [False, True])
 def test_producer_fails_closed_when_description_lacks_type_modifiers(monkeypatch, include_schema):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     column = FakeColumn('value', 23)
     column._fmod = None
     pool = FakePool(rows=[(1,)], description=[column], vendor_types={})
@@ -215,7 +207,6 @@ def test_logical_type_mapping_is_deterministic(type_oid, vendor_data_type, expec
 
 def test_producer_carries_the_catalog_array_element_delimiter(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A box[] column: box's own pg_type.typdelim is the semicolon, so the descriptor must
     # declare it — intake splits the native {(...);(...)} literal on that and nothing else.
     record = native_record('{(1,2);(3,4)}')
@@ -244,7 +235,6 @@ def test_producer_carries_the_catalog_array_element_delimiter(monkeypatch):
 @pytest.mark.parametrize('delimiter', ['"', ' ', '\\', '{', '}'])
 def test_producer_fails_closed_on_structural_element_delimiters(monkeypatch, delimiter):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A catalog element delimiter that is structural to the array literal grammar cannot be
     # described: the run fails closed before any COPY or page.
     pool = FakePool(
@@ -271,7 +261,6 @@ def test_producer_fails_closed_on_structural_element_delimiters(monkeypatch, del
 )
 def test_producer_fails_closed_on_a_rendered_array_without_catalog_resolution(monkeypatch, vendor_types):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     pool = FakePool(
         copy_blocks=[native_record('{a}')],
         description=[FakeColumn('array_value', 1009)],
@@ -288,7 +277,6 @@ def test_producer_fails_closed_on_a_rendered_array_without_catalog_resolution(mo
 
 def test_producer_describes_a_domain_over_array_without_a_delimiter(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A domain over an array renders as the bare domain name, so the closed wire grammar
     # classifies it with the vendor family: no delimiter, the exact server text, matching
     # the decoder's own name-based classification.

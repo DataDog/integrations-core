@@ -35,23 +35,6 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-REMOTE_QUERY_QUERY_ALLOWLIST = frozenset(
-    (
-        'SELECT 1 AS value',
-        'SELECT city, country FROM cities ORDER BY city',
-        'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, '
-        'expected_postgres_port, expected_dbname, marker FROM remote_query_identity',
-        "SELECT decode('00ff80', 'hex') AS payload",
-        "SELECT repeat('x', 1048576) AS payload",
-        "SELECT repeat('x', 2097152) AS payload",
-        "SELECT repeat('x', 4194304) AS payload",
-        "SELECT repeat('x', 8388608) AS payload",
-        "SELECT repeat('x', 16777216) AS payload",
-        "SELECT repeat('x', 33554432) AS payload",
-        'SELECT i, repeat(\'x\', 1000) AS payload FROM generate_series(1, 3000) AS i',
-    )
-)
-
 
 @dataclass(frozen=True)
 class ResultColumn:
@@ -534,8 +517,8 @@ class PostgresRemoteQueryHandler:
         """Execute on the composed check; emit only status and the intake receipt.
 
         The produce hook is `_produce_remote_query` itself, its adapter-owned phase boundaries
-        opening the native producer spans. Once the request is admitted — validation and the
-        allowlist — the run opens its native producer spans fail-open through
+        opening the native producer spans. Once the request is admitted through validation,
+        the run opens its native producer spans fail-open through
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
@@ -548,7 +531,7 @@ class PostgresRemoteQueryHandler:
         tracing = rq_tracing.NULL_PRODUCER_TRACING
         try:
             try:
-                parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
+                parsed = rq_events.validate_request(request)
                 # Native producer spans cover every admitted run — the admission failures below
                 # included — as a root span on the request's trace context, additive to the
                 # timing accumulator and the event contract, fail-open through every boundary.

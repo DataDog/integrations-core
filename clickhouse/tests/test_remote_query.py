@@ -11,9 +11,9 @@ import pytest
 import urllib3.exceptions
 from clickhouse_connect.driver.exceptions import DatabaseError
 
-from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
+from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.clickhouse import ClickhouseCheck, remote_query
 
 from .remote_query_fakes import (
@@ -37,7 +37,6 @@ from .remote_query_fakes import (
     event_metadata,
     make_check,
     make_client,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     prefix_bytes,
     quoted_numeric_rows_client,
@@ -120,19 +119,10 @@ def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
     assert client.run_finalize_calls == 1
 
 
-def test_stream_rejects_non_allowlisted_query_before_client_access():
-    clickhouse_client = make_client(rows=[[1]])
-    request = valid_request(query='SELECT currentDatabase()')
-
-    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'invalid_request', 'query is not allowlisted')
-    assert clickhouse_client.raw_stream_calls == []
-
-
-def test_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeypatch):
+def test_stream_executes_arbitrary_query_end_to_end(monkeypatch):
+    """A query outside the proof fixtures runs the whole pipeline: contract validation is
+    the only admission gate, so the stream reaches the dedicated client."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(names=('database',), types=('String',), rows=[['datadog_test']])
     request = valid_request(query='SELECT currentDatabase()')
 
@@ -140,26 +130,6 @@ def test_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeyp
 
     final = assert_success(events)
     assert final['upload_receipt']['totalRows'] == 1
-
-
-@pytest.mark.parametrize(
-    'query',
-    [
-        # Within the repeat cap and executable on a real server, but not allowlisted.
-        "SELECT repeat('x', 1000000) AS payload",
-        # The same 1 MiB total as an allowlisted query but built differently: the allowlist
-        # matches exact query strings, not payload sizes.
-        "SELECT concat(repeat('x', 500000), repeat('x', 548576)) AS payload",
-    ],
-)
-def test_stream_rejects_nearby_non_allowlisted_queries(query):
-    clickhouse_client = make_client(rows=[[1]])
-    request = valid_request(query=query)
-
-    events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
-
-    assert_failed_event(events, 'invalid_request', 'query is not allowlisted')
-    assert clickhouse_client.raw_stream_calls == []
 
 
 def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
@@ -196,7 +166,7 @@ def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
     def get_config(key):
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
 
     events = collect_events(valid_request(), make_check())
 
@@ -304,7 +274,6 @@ def test_producer_executes_query_exactly_once_verbatim_with_readonly_settings(mo
 
 def test_client_and_server_timeouts_derive_from_the_remaining_wall(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     captured = {}
 
     def create_remote_query_client(send_receive_timeout=None):
@@ -445,7 +414,6 @@ def test_producer_rejects_malformed_header_rows(monkeypatch, header):
 
 def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(
         names=('city', 'country'), types=('String', 'String'), rows=[['New York', 'USA'], ['Paris', 'France']]
     )
@@ -556,7 +524,6 @@ def test_producer_enforces_max_file_bytes_for_schema_bearing_pages(monkeypatch):
 
 def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # maxRowBytes bounds one framed source record: the 9-byte record for ['aaaa'] cannot fit 8.
     request = bounded_request(maxRowBytes=len(ROW_RECORD) - 1)
     clickhouse_client = two_row_client()
@@ -570,7 +537,6 @@ def test_page_split_row_too_large_when_record_exceeds_max_row_bytes(monkeypatch)
 
 def test_page_split_row_too_large_when_line_exceeds_the_buffer_ceiling(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A single row line far beyond the row budget: the run fails during the read, without
     # buffering the whole line and without reading the rest of the stream.
     big_value = 'x' * 4096
@@ -591,7 +557,6 @@ def test_page_split_row_too_large_when_line_exceeds_the_buffer_ceiling(monkeypat
 
 def test_row_line_ceiling_reserves_quote_bytes_for_quoted_numeric_columns(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # Servers that quote 64-bit integers (output_format_json_quote_64bit_integers) deliver
     # each value as a JSON string, and the declared column type normalizes it back to its
     # unquoted number token, so a row line runs two quote bytes per column longer than its
@@ -637,7 +602,6 @@ def test_row_line_ceiling_reserves_quote_bytes_for_quoted_numeric_columns(monkey
 
 def test_stream_fails_closed_on_row_line_larger_than_any_read_chunk(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A row line far larger than the 256 KiB read chunk: the buffered line never grows
     # without bound and the run fails deterministically (never truncated silently).
     big_value = 'x' * (512 * 1024)
@@ -655,7 +619,6 @@ def test_stream_fails_closed_on_row_line_larger_than_any_read_chunk(monkeypatch)
 
 def test_stream_fails_closed_on_oversized_header_row(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # A column name far beyond the header bound (the larger of the schema and row
     # budgets): the header row fails deterministically instead of being buffered whole.
     big_alias = 'a' * (64 * 1024)
@@ -673,7 +636,6 @@ def test_stream_fails_closed_on_oversized_header_row(monkeypatch):
 
 def test_page_upload_streams_before_the_result_stream_is_exhausted(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     order_log = []
     request = bounded_request(
         maxFileBytes=1024,
@@ -706,7 +668,6 @@ def test_page_upload_streams_before_the_result_stream_is_exhausted(monkeypatch):
 
 def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq_pages.PAGE_SUFFIX))
     clickhouse_client = two_row_client()
@@ -723,7 +684,6 @@ def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):
 
 def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(rows=[[1], [2], [3]])
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
@@ -755,7 +715,6 @@ def test_process_termination_aborts_upload_and_closes_stream(monkeypatch):
 
 def test_stream_maps_server_error_to_query_failed(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1]]),
         raw_stream_error=DatabaseError('Code: 60. DB::Exception: Table default.SECRET_DO_NOT_LOG does not exist'),
@@ -774,7 +733,6 @@ def test_stream_maps_server_error_to_query_failed(monkeypatch, caplog):
 
 def test_stream_maps_mid_stream_connection_drop_to_retryable_timeout(monkeypatch, caplog):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1], [2], [3]]),
         read_error=urllib3.exceptions.ProtocolError('Connection broken: SECRET_DO_NOT_LOG'),
@@ -792,7 +750,6 @@ def test_stream_maps_mid_stream_connection_drop_to_retryable_timeout(monkeypatch
 
 def test_stream_maps_mid_stream_read_timeout_to_retryable_timeout(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1], [2], [3]]),
         read_error=urllib3.exceptions.ReadTimeoutError(None, 'http://test', 'timed out'),
@@ -808,7 +765,6 @@ def test_stream_maps_unexpected_source_failure_to_fixed_query_failed(monkeypatch
     """An unexpected mid-stream failure maps to the fixed query_failed error: the exception
     can carry raw row fragments, so neither the event nor the logs echo its text."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1], [2], [3], [4], [5]]),
         read_error=ValueError('SECRET_DO_NOT_LOG row fragment'),
@@ -831,7 +787,6 @@ def test_stream_maps_unexpected_source_failure_to_fixed_query_failed(monkeypatch
 @pytest.mark.parametrize('is_cancelled', [lambda: True, True], ids=['callable', 'bool'])
 def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(rows=[[1], [2]])
     check = make_check()
     # Both runtime shapes: the Agent check object carries a bool ``is_cancelled`` attribute;
@@ -847,7 +802,6 @@ def test_stream_reports_cancellation_as_retryable(monkeypatch, is_cancelled):
 
 def test_entry_propagates_callback_failure_without_upload(monkeypatch, runtime_check):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
 
     def emit(event_type, metadata_json, payload):
         raise RuntimeError('stop streaming')
@@ -915,7 +869,6 @@ def recording_tracing_factory(tracing):
 
 def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq_pages.PAGE_SUFFIX))
     clickhouse_client = two_row_client()
@@ -957,7 +910,6 @@ def test_producer_brackets_the_abort_and_fails_the_root_on_a_produce_failure(mon
     closes the root with the same failure code the event carries, never echoing the
     exception's text on any span."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(
         stream_body(('value',), ('UInt8',), [[1], [2], [3]]),
         read_error=urllib3.exceptions.ProtocolError('Connection broken: SECRET_DO_NOT_LOG'),

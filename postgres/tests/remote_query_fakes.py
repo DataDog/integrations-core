@@ -14,7 +14,6 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
-from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
@@ -129,10 +128,6 @@ def native_field(value: Any) -> str:
 def native_record(*values: Any) -> bytes:
     """The expected native COPY CSV record for one row of values."""
     return (','.join(native_field(value) for value in values) + '\n').encode('utf-8')
-
-
-def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq_events, 'is_query_allowlist_enabled', lambda: False)
 
 
 def event_metadata(event):
@@ -410,7 +405,7 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_APP_KEY'
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
 
 
 class MutableClock:
@@ -572,7 +567,6 @@ BOUND_RECORD = native_record('a' * 167)  # 170 bytes
 def two_row_boundary_request(monkeypatch):
     """A budget whose source-page target closes exactly one wide record per page."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     return bounded_request(maxFileBytes=200, maxRowBytes=200, maxSchemaBytes=1, maxPages=128, maxResultBytes=64 * 1024)
 
 

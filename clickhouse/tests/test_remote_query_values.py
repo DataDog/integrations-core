@@ -21,7 +21,6 @@ from .remote_query_fakes import (
     csv_record,
     make_check,
     make_client,
-    patch_allowlist_disabled,
     patch_upload_credentials,
     raw_stream_body,
     valid_request,
@@ -140,7 +139,6 @@ def test_cell_final_bounds_account_for_the_redaction_marker(type_string, value, 
 
 def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = make_client(
         names=(
             'null_value',
@@ -227,7 +225,6 @@ def test_value_contract_producer_emits_pinned_source_page_csv(monkeypatch):
 
 def test_value_contract_preserves_exact_server_numeric_lexemes(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     # One row on the real compact wire whose numeric lexemes no int()/Decimal/repr
     # round-trip could reproduce: a sub-1e-6 decimal, exponent spellings (case and sign),
     # negative zero, and numbers nested inside a composite. The parse hooks carry every
@@ -260,7 +257,6 @@ def test_value_contract_preserves_exact_server_numeric_lexemes(monkeypatch):
 
 def test_value_contract_rejects_row_lines_that_are_not_json_arrays(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(raw_stream_body('["value"]', '["UInt8"]', '{"value": 1}'))
     fake = FakeUploadClient()
 
@@ -271,7 +267,6 @@ def test_value_contract_rejects_row_lines_that_are_not_json_arrays(monkeypatch):
 
 def test_value_contract_fails_closed_on_invalid_utf8_row_lines(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(raw_stream_body('["value"]', '["String"]', b'["\xff\xfe"]'))
     fake = FakeUploadClient()
 
@@ -284,7 +279,6 @@ def test_value_contract_fails_closed_on_invalid_utf8_row_lines(monkeypatch):
 
 def test_value_contract_rejects_row_width_mismatch(monkeypatch):
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     clickhouse_client = FakeClickhouseClient(raw_stream_body('["a", "b"]', '["UInt8", "UInt8"]', '[1]'))
 
     events = collect_events(valid_request(), make_check(), clickhouse_client=clickhouse_client)

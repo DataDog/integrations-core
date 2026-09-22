@@ -8,7 +8,7 @@ import json
 
 import pytest
 
-from datadog_checks.base.utils.remote_queries import events as rq_events
+from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.clickhouse import remote_query
 from datadog_checks.clickhouse.remote_query import ClickhouseRemoteQueryHandler
 
@@ -77,7 +77,7 @@ def patch_real_check(monkeypatch, instance):
             return 'TEST_APP_KEY'
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
     return ClickhouseCheck('clickhouse', {}, [instance])
 
 
@@ -171,10 +171,10 @@ def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clic
     ],
     ids=['seed', 'identity-schema', 'binary', '1mib', '2mib', '4mib', '8mib', '16mib', '32mib'],
 )
-def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
+def test_remote_query_proof_queries_execute_against_real_clickhouse(
     instance, monkeypatch, query, expected_payload_bytes, include_schema
 ):
-    """Every allowlisted proof query executes on a real server and produces one exact row."""
+    """Every proof query executes on a real server and produces one exact row."""
     check = patch_real_check(monkeypatch, instance)
     fake = FakeUploadClient()
 

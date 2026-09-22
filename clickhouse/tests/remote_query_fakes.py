@@ -11,8 +11,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
+from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.clickhouse.remote_query import ClickhouseRemoteQueryHandler
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
@@ -296,11 +296,7 @@ def patch_upload_credentials(monkeypatch):
             return 'TEST_APP_KEY'
         return None
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', get_config)
-
-
-def patch_allowlist_disabled(monkeypatch):
-    monkeypatch.setattr(rq_events, 'is_query_allowlist_enabled', lambda: False)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
 
 
 class MutableClock:
@@ -511,7 +507,6 @@ ROW_RECORD = csv_record([b'"aaaa"'])
 def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
     """A budget that fits exactly two bound rows in one page (minus the extra bytes)."""
     patch_upload_credentials(monkeypatch)
-    patch_allowlist_disabled(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request()
     limits = request['resultDelivery']['limits']

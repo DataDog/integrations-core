@@ -15,9 +15,6 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from datadog_checks.base.agent import datadog_agent
-from datadog_checks.base.config import is_affirmative
-
 from .contract import (
     RemoteQueryEmit,
     RemoteQueryEvent,
@@ -29,12 +26,6 @@ from .contract import (
 from .timing import RemoteQueryProducerTimings
 
 LOGGER = logging.getLogger(__name__)
-
-
-REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.enable_query_allowlist'
-
-
-REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES = frozenset(('false', 'no', '0', 'n', 'off'))
 
 
 def raise_if_timed_out(deadline: float) -> None:
@@ -57,23 +48,6 @@ def raise_if_cancelled(check: Any) -> None:
     cancelled = is_cancelled() if callable(is_cancelled) else is_cancelled
     if cancelled:
         raise RemoteQueryFailure('cancelled', 'Remote query run was cancelled.', retryable=True)
-
-
-def is_query_allowlist_enabled() -> bool:
-    try:
-        config_value = datadog_agent.get_config(REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY)
-    except Exception:
-        # Fixed text only: the config layer's exception can quote configuration values.
-        LOGGER.debug('Unable to read remote query allowlist configuration')
-        return True
-
-    if config_value is None:
-        return True
-    if isinstance(config_value, str):
-        normalized_value = config_value.strip().lower()
-        return normalized_value not in REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES
-
-    return is_affirmative(config_value)
 
 
 def started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
@@ -211,14 +185,11 @@ def emit_agent_rpc_events(emit: RemoteQueryEmit, events: Iterator[RemoteQueryEve
         raise
 
 
-def validate_request(request: Any, allowlist: frozenset[str]) -> RemoteQueryRequest:
+def validate_request(request: Any) -> RemoteQueryRequest:
     try:
-        parsed = RemoteQueryRequest.model_validate(request)
+        return RemoteQueryRequest.model_validate(request)
     except ValidationError as error:
         raise RemoteQueryFailure('invalid_request', validation_message(error)) from None
-    if is_query_allowlist_enabled() and parsed.query not in allowlist:
-        raise RemoteQueryFailure('invalid_request', 'Invalid remote query request: query is not allowlisted.')
-    return parsed
 
 
 def query_failure_event(

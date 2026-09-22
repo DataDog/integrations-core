@@ -14,23 +14,16 @@ from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 
-@pytest.mark.parametrize('value,expected', [(None, True), (' yes ', True), ('false', False), (False, False)])
-def test_allowlist_default_and_config(monkeypatch, value, expected):
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', lambda _: value)
-    assert rq_events.is_query_allowlist_enabled() is expected
-
-
-def test_agent_config_read_failures_log_fixed_text_only(monkeypatch, caplog):
-    """Both config-reading helpers swallow read failures into fixed debug text: the config
+def test_agent_config_read_failure_logs_fixed_text_only(monkeypatch, caplog):
+    """The config-reading helper swallows read failures into fixed debug text: the config
     layer's exception can quote configuration values."""
     caplog.set_level(logging.DEBUG)
 
     def broken_get_config(key):
         raise Exception('SECRET_DO_NOT_LOG in the config layer')
 
-    monkeypatch.setattr(rq_events.datadog_agent, 'get_config', broken_get_config)
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', broken_get_config)
     assert rq_upload.get_agent_config('api_key') == ''
-    assert rq_events.is_query_allowlist_enabled() is True
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
@@ -65,6 +58,39 @@ def test_parse_agent_rpc_request_rejects_non_object_json(request_json):
     assert failure.metadata['error']['code'] == 'invalid_request'
     assert failure.metadata['error']['message'] == 'Invalid remote query request: request_json must be a JSON object.'
     assert 'SECRET_DO_NOT_LOG' not in str(failure.metadata)
+
+
+VALID_REQUEST = {
+    'operation': 'produce_json_pages',
+    'target': {'host': 'LOCALHOST.', 'port': 5432, 'dbname': 'datadog_test'},
+    'query': 'SELECT 1 AS value',
+    'resultDelivery': {
+        'runId': '383d34aa-0766-472f-9e27-9190d9a52ab6',
+        'taskId': '603f58a7-04cf-4ffe-860b-3885457f885c',
+        'artifactVersion': 1,
+        'uploadId': 'upload-01k',
+        'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
+        'limits': {
+            'maxFileBytes': 1024,
+            'maxResultBytes': 8192,
+            'maxRowBytes': 64,
+            'maxColumns': 8,
+            'maxSchemaBytes': 256,
+            'maxPages': 4,
+            'timeoutMs': 5000,
+        },
+    },
+}
+
+
+def test_validate_request_accepts_an_arbitrary_valid_query():
+    """Contract validation is the only request gate: any well-formed request, whatever its
+    query text, is admitted."""
+    request = dict(VALID_REQUEST, query="SELECT 'hello world' AS message")
+
+    parsed = rq_events.validate_request(request)
+
+    assert parsed.query == "SELECT 'hello world' AS message"
 
 
 def test_emit_agent_rpc_events_closes_the_generator_on_a_callback_failure():
