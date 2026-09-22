@@ -36,6 +36,7 @@ from ddev.cli.ci.tests.pr_comment import (
     ALERT_RUNNING_NOTE,
     CANCELLED_HEADING,
     FAILED_HEADING,
+    SHUTDOWN_ALERTS,
     TIMED_OUT_HEADING,
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState
@@ -268,7 +269,8 @@ def test_progress_reaches_the_comment_before_artifact_collection_finishes(
         owner: str, repo: str, comment_id: int, body: str, **kwargs: Any
     ) -> GitHubResponse[IssueComment]:
         result = await update_comment(owner, repo, comment_id, body, **kwargs)
-        if "📥 collecting artifacts" in body:
+        # The chip the batch strip draws while a batch's results are still being collected.
+        if "📥" in body:
             collecting_reported.set()
         return result
 
@@ -435,8 +437,10 @@ def test_a_timed_out_run_reports_itself_and_cancels_what_it_started(
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
     terminal_body = client.last_call("update_issue_comment").kwargs["body"]
     assert TIMED_OUT_HEADING in terminal_body
-    assert "max_timeout" in terminal_body
-    assert "Dispatcher tests · in progress" not in terminal_body
+    # A deadline explains itself, so the terminal alert is one sentence and carries no reason.
+    assert SHUTDOWN_ALERTS[ShutdownKind.TIMED_OUT] in terminal_body
+    assert "max_timeout" not in terminal_body
+    assert "Dispatcher tests: in progress" not in terminal_body
     assert ALERT_RUNNING_NOTE not in terminal_body
     assert TIMED_OUT_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
 
@@ -509,7 +513,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
         assert CANCELLED_HEADING not in call.kwargs["body"]
     terminal_body = client.last_call("update_issue_comment").kwargs["body"]
     assert FAILED_HEADING in terminal_body
-    assert "Dispatcher tests · in progress" not in terminal_body
+    assert "Dispatcher tests: in progress" not in terminal_body
     assert ALERT_RUNNING_NOTE not in terminal_body
     assert "listing workflow jobs (batch batch-02, run 456)" in terminal_body
     summary = step_summary.read_text(encoding="utf-8")
