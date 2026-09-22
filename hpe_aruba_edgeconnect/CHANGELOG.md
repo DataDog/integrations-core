@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.1.0-beta.1 / 2026-09-22
+
+***Added***:
+
+* Add an `orchestrator_login_type` option so the Orchestrator can authenticate accounts defined on a RADIUS or TACACS+ server. ([#25296](https://github.com/DataDog/integrations-core/pull/25296))
+
 ## 1.0.1 / 2026-07-08 / Agent 7.82.0
 
 ***Fixed***:
