@@ -102,12 +102,16 @@ files:
     - name: collect_stacks
       fleet_configurable: true
       description: |
-        Set to `false` to skip switch stack membership and member health. This is the only
-        per-device request the check makes, issued once per stackable switch.
+        Set to `true` to collect switch stack membership and member health. Off by default
+        because it is the only per-device request the check makes: one call per stackable
+        switch on every cycle, so its cost grows with the size of the fleet. To collect it on
+        a large fleet without paying that on every health cycle, enable it on a second
+        instance that has every other collector disabled and a long `min_collection_interval`,
+        and give that instance its own `tags` entry so the two stay distinguishable.
       value:
         type: boolean
-        example: true
-        default: true
+        example: false
+        default: false
 
     - name: collect_site_health
       fleet_configurable: true

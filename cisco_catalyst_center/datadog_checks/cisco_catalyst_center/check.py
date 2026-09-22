@@ -28,6 +28,7 @@ from .collectors import (
     collect_site_topology,
     collect_stacks,
     collect_topology,
+    list_sites,
 )
 from .config_models import ConfigMixin
 from .constants import EVENT_DEFAULT_LOOKBACK_MINUTES, EVENT_WINDOW_MAX_SECONDS, L3_TOPOLOGY_TYPES
@@ -278,12 +279,18 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
 
         if self.config.collect_application_health:
             if not sites:
-                self.log.warning(
-                    'collect_application_health needs the site list, which comes from '
-                    'collect_site_health; enable it or no application metrics will be collected'
-                )
-            # Costs one request per site, so it reuses the sites already collected rather than
-            # re-listing the hierarchy.
+                # networkApplications rejects a request without a site, so with no site list there
+                # is nothing to ask for -- and the cycle would report success having collected no
+                # application metrics at all. Enumerate the hierarchy here instead; that happens
+                # when site health is switched off, since it is otherwise the only call that
+                # lists sites.
+                def _list_sites() -> None:
+                    nonlocal sites
+                    sites = list_sites(self.client)
+
+                healthy &= self._run('site list', _list_sites)
+
+            # One request per site on top of that, so the cost scales with the hierarchy.
             healthy &= self._run(
                 'application health',
                 lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),

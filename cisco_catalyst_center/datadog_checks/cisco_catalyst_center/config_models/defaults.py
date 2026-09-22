@@ -57,7 +57,7 @@ def instance_collect_site_health():
 
 
 def instance_collect_stacks():
-    return True
+    return False
 
 
 def instance_collect_topology():

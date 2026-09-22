@@ -388,18 +388,21 @@ def _emit_device_rollups(
         if not bucket.device_uuid:
             bucket.device_uuid = record.get('networkDeviceId') or None
 
-        rx, tx = record.get('rxRate'), record.get('txRate')
+        # to_number, not float(): the statistics view is absent for some interfaces and the
+        # appliance spells absence several ways. A bare float() turns `{}` or `''` into a 0 that
+        # emit_gauge suppressed at the per-interface level, and raises on any other non-numeric.
+        rx, tx = to_number(record.get('rxRate')), to_number(record.get('txRate'))
         if rx is None and tx is None:
-            # No statistics view for this interface; it contributes nothing to a throughput sum.
+            # No statistics for this interface; it contributes nothing to a throughput sum.
             continue
         bucket.seen = True
-        bucket.rx += float(rx or 0)
-        bucket.tx += float(tx or 0)
+        bucket.rx += rx or 0.0
+        bucket.tx += tx or 0.0
 
         if is_uplink(record):
             bucket.uplinks += 1
-            bucket.uplink_rx += float(rx or 0)
-            bucket.uplink_tx += float(tx or 0)
+            bucket.uplink_rx += rx or 0.0
+            bucket.uplink_tx += tx or 0.0
 
     for device_ip, bucket in totals.items():
         if not bucket.seen:
@@ -439,6 +442,15 @@ def site_tags(record: dict[str, Any]) -> list[str]:
     )
 
 
+def list_sites(client: CatalystCenterClient) -> list[dict[str, Any]]:
+    """List the site hierarchy.
+
+    Separate from `collect_site_health` because application health needs a site on every request
+    but the user may have site metrics switched off.
+    """
+    return client.get_list(SITE_HEALTH_SUMMARIES_ENDPOINT)
+
+
 def collect_site_health(
     check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None
 ) -> list[dict[str, Any]]:
@@ -448,7 +460,7 @@ def collect_site_health(
     is the only call that enumerates them.
     """
     base_tags = base_tags or []
-    records = client.get_list(SITE_HEALTH_SUMMARIES_ENDPOINT)
+    records = list_sites(client)
 
     for record in records:
         tags = base_tags + site_tags(record)
@@ -525,8 +537,11 @@ def collect_stacks(
     """Collect stack membership.
 
     This is the only per-device fan-out in the P0 set, so it is bounded to stackable families
-    rather than issued for every managed device. Stack membership changes on human timescales,
-    which is why the caller is expected to run it on a longer interval than the health cycle.
+    rather than issued for every managed device -- and it is off by default for the same reason
+    every other fan-out is. Stack membership changes on human timescales, so a large fleet should
+    run this on a second instance with a long `min_collection_interval` rather than on the health
+    cycle. Caching it here instead would be wrong: `member.state` and `port.status` are fault
+    signals, and re-emitting a stale `1` for either reports a healthy stack that is not.
 
     A device that fails is logged and skipped: one unreachable switch must not cost the whole
     cycle.
