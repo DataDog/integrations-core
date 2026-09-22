@@ -7,7 +7,7 @@ import logging
 
 from clickhouse_connect.driver.exceptions import OperationalError
 
-from datadog_checks.clickhouse.remote_query import iter_agent_rpc_stream_events
+from datadog_checks.clickhouse.remote_query import ClickhouseRemoteQueryHandler
 
 from .remote_query_fakes import (
     FakeClickhouseClient,
@@ -104,7 +104,11 @@ def test_stream_maps_client_creation_failure_to_target_unavailable(monkeypatch, 
 
     request = valid_request()
     caplog.set_level(logging.DEBUG)
-    events = list(iter_agent_rpc_stream_events(request, make_check(), FakeUploadClient(), broken_factory))
+    events = list(
+        ClickhouseRemoteQueryHandler(make_check()).execute(
+            request, http_client=FakeUploadClient(), clickhouse_client_factory=broken_factory
+        )
+    )
 
     assert_failed_event(events, 'target_unavailable')
     assert 'SECRET_DO_NOT_LOG' not in str(events)
@@ -116,7 +120,7 @@ def test_stream_target_unavailable_when_check_cannot_create_clients(monkeypatch)
     patch_allowlist_disabled(monkeypatch)
     # No create_remote_query_client on the fake check and no factory injected.
     request = valid_request()
-    events = list(iter_agent_rpc_stream_events(request, make_check(), FakeUploadClient(), None))
+    events = list(ClickhouseRemoteQueryHandler(make_check()).execute(request, http_client=FakeUploadClient()))
 
     assert_failed_event(events, 'target_unavailable')
     assert 'upload_receipt' not in event_metadata(events[-1])

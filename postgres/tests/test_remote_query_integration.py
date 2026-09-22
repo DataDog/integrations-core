@@ -15,7 +15,7 @@ import pytest
 
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
-from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
+from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 from .remote_query_fakes import (
     FakeUploadClient,
@@ -72,13 +72,13 @@ def remote_query_request(pg_instance, query, include_schema=False, **limits):
 
 def run_producer(request, check):
     client = FakeUploadClient()
-    events = list(iter_agent_rpc_stream_events(request, check, client))
+    events = list(PostgresRemoteQueryHandler(check).execute(request, http_client=client))
     return events, client
 
 
 def run_producer_with_rejections(request, check):
     client = FakeUploadClient(reject_first_page_too_large=True)
-    events = list(iter_agent_rpc_stream_events(request, check, client))
+    events = list(PostgresRemoteQueryHandler(check).execute(request, http_client=client))
     return events, client
 
 

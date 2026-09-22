@@ -419,19 +419,19 @@ def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wal
 
     # An override larger than the wall is capped: it may shorten the run, never lengthen it.
     check = make_check(remote_queries=SimpleNamespace(timeout_ms=300_000))
-    assert remote_query._resolve_statement_timeout_ms(check, deadline) == 5_000
+    assert remote_query.PostgresRemoteQueryHandler(check)._resolve_statement_timeout_ms(deadline) == 5_000
 
     # An override shorter than the remaining wall is honored as the statement timeout.
     check = make_check(remote_queries=SimpleNamespace(timeout_ms=3_000))
-    assert remote_query._resolve_statement_timeout_ms(check, deadline) == 3_000
+    assert remote_query.PostgresRemoteQueryHandler(check)._resolve_statement_timeout_ms(deadline) == 3_000
 
     # Without a positive instance override, the remaining wall applies.
     check = make_check(remote_queries=SimpleNamespace(timeout_ms=None))
-    assert remote_query._resolve_statement_timeout_ms(check, deadline) == 5_000
+    assert remote_query.PostgresRemoteQueryHandler(check)._resolve_statement_timeout_ms(deadline) == 5_000
 
     # An expired wall must not disable the database-side protection: the remainder clamps
     # to 1 ms instead of reaching a zero statement timeout.
-    assert remote_query._resolve_statement_timeout_ms(check, 99.0) == 1
+    assert remote_query.PostgresRemoteQueryHandler(check)._resolve_statement_timeout_ms(99.0) == 1
 
 
 def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):

@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
 from time import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import clickhouse_connect
 from clickhouse_connect.driver import httputil
@@ -43,8 +42,7 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
-    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
-    from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
+    from .remote_query import ClickhouseRemoteQueryHandler
 
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
@@ -55,14 +53,17 @@ class ClickhouseCheck(DatabaseCheck):
 
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
-    remote_query_operations = frozenset({'produce_json_pages'})
 
-    def execute_remote_query(
-        self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings
-    ) -> Iterator[RemoteQueryEvent]:
-        from .remote_query import iter_agent_rpc_stream_events
+    def get_remote_query_handler(self) -> 'ClickhouseRemoteQueryHandler':
+        """One remote-query capability handler composed with this check, created per bridge call.
 
-        return iter_agent_rpc_stream_events(request, self, timings=timings)
+        The function-local import keeps the optional remote-query runtime out of ordinary
+        monitoring startup; the handler itself is cheap to construct and holds only this
+        check, never request state.
+        """
+        from .remote_query import ClickhouseRemoteQueryHandler
+
+        return ClickhouseRemoteQueryHandler(self)
 
     def __init__(self, name, init_config, instances):
         super(ClickhouseCheck, self).__init__(name, init_config, instances)

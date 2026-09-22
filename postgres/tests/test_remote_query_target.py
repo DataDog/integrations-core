@@ -9,8 +9,7 @@ import psycopg.errors as psycopg_errors
 import pytest
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
-from datadog_checks.postgres import remote_query
-from datadog_checks.postgres.remote_query import iter_agent_resolve_events
+from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 from .remote_query_fakes import (
     FakeAutodiscovery,
@@ -224,7 +223,7 @@ def test_scope_failure_wrapper_keeps_no_path_back_to_the_discovery_exception():
     check = make_check(dbname='postgres', autodiscovery=autodiscovery)
 
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        remote_query.database_in_monitoring_scope(check, 'dogs_1')
+        PostgresRemoteQueryHandler(check)._database_in_monitoring_scope('dogs_1')
 
     assert failure.value.code == 'target_unavailable'
     assert failure.value.retryable
@@ -337,12 +336,14 @@ def test_resolve_and_execute_share_the_same_matching_authority(monkeypatch):
     autodiscovery = FakeAutodiscovery(databases=['dogs_0'])
     check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)
 
-    assert_matched_verdict(list(iter_agent_resolve_events(resolve_request(dbname='dogs_0'), check)))
+    assert_matched_verdict(list(PostgresRemoteQueryHandler(check).resolve(resolve_request(dbname='dogs_0'))))
     events = collect_events(valid_request(dbname='dogs_0'), check, client=FakeUploadClient())
     assert_success(events)
     assert pool.requested_dbnames == ['dogs_0']
 
-    assert_failed_event(list(iter_agent_resolve_events(resolve_request(dbname='dogs_9'), check)), 'target_not_found')
+    assert_failed_event(
+        list(PostgresRemoteQueryHandler(check).resolve(resolve_request(dbname='dogs_9'))), 'target_not_found'
+    )
     events = collect_events(valid_request(dbname='dogs_9'), check, client=FakeUploadClient())
     assert_failed_event(events, 'target_not_found')
     assert pool.requested_dbnames == ['dogs_0']

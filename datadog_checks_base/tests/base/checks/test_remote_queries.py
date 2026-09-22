@@ -13,15 +13,16 @@ from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
 from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
 
 
-class QueryCheck(AgentCheck):
-    remote_query_operations = frozenset({'resolve_target', 'produce_json_pages'})
+class QueryHandler:
+    """A remote-query capability handler used to exercise the base dispatch."""
 
-    def resolve_remote_query(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
+    operations = frozenset({'resolve_target', 'produce_json_pages'})
+    execution_closed = False
+
+    def resolve(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
         yield RemoteQueryEvent('final', {'status': 'MATCHED', 'target': request['target']})
 
-    def execute_remote_query(
-        self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings
-    ) -> Iterator[RemoteQueryEvent]:
+    def execute(self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings) -> Iterator[RemoteQueryEvent]:
         try:
             yield RemoteQueryEvent('metadata', {'status': 'STARTED', 'query': request['query']})
             yield RemoteQueryEvent('final', {'status': 'SUCCEEDED', 'executionDiagnostics': timings.metadata()})
@@ -29,10 +30,20 @@ class QueryCheck(AgentCheck):
             self.execution_closed = True
 
 
-def test_monitoring_check_rejects_remote_queries():
-    """Ordinary checks must fail explicitly, without entering their monitoring loop."""
+class QueryCheck(AgentCheck):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super(QueryCheck, self).__init__(*args, **kwargs)
+        self.handler = QueryHandler()
+
+    def get_remote_query_handler(self) -> QueryHandler:
+        return self.handler
+
+
+@pytest.mark.parametrize('operation', ['resolve_target', 'produce_json_pages'])
+def test_monitoring_check_rejects_remote_queries(operation: str):
+    """Ordinary checks have no handler and must fail explicitly, without entering their monitoring loop."""
     events = []
-    AgentCheck().run_remote_query('{"operation":"produce_json_pages"}', lambda *event: events.append(event))
+    AgentCheck().run_remote_query(json.dumps({'operation': operation}), lambda *event: events.append(event))
     assert len(events) == 1
     assert events[0][0] == 'error'
     assert json.loads(events[0][1])['error']['code'] == 'unsupported_operation'
@@ -40,8 +51,8 @@ def test_monitoring_check_rejects_remote_queries():
 
 
 @pytest.mark.parametrize('request_json', ['{', '[]', '{"operation": []}', '{"operation": "unknown"}'])
-def test_invalid_request_does_not_enter_check_hooks(request_json: str):
-    """Reject malformed requests before invoking a database-specific implementation."""
+def test_invalid_request_does_not_reach_the_handler(request_json: str):
+    """Reject malformed requests before invoking the capability handler."""
     events = []
     QueryCheck().run_remote_query(request_json, lambda *event: events.append(event))
     assert len(events) == 1
@@ -49,8 +60,8 @@ def test_invalid_request_does_not_enter_check_hooks(request_json: str):
 
 
 @pytest.mark.parametrize('operation', ['resolve_target', 'produce_json_pages'])
-def test_dispatches_to_check_hook(operation: str):
-    """The selected operation must reach the loaded check with the decoded request."""
+def test_dispatches_to_the_handler(operation: str):
+    """The selected operation must reach the handler with the decoded request."""
     request = {'operation': operation, 'target': {'dbname': 'warehouse'}, 'query': 'SELECT 1'}
     events = []
     check = QueryCheck()
@@ -63,13 +74,13 @@ def test_dispatches_to_check_hook(operation: str):
         assert [event[0] for event in events] == ['metadata', 'final']
         assert json.loads(events[0][1])['query'] == request['query']
         assert 'executionDiagnostics' in json.loads(events[-1][1])
-        assert check.execution_closed
+        assert check.handler.execution_closed
 
 
-def test_operation_must_be_explicitly_supported():
-    """An execution-only check must not enter a resolution hook."""
+def test_operation_must_be_explicitly_advertised():
+    """A handler that does not advertise an operation must not have it dispatched."""
     check = QueryCheck()
-    check.remote_query_operations = frozenset({'produce_json_pages'})
+    check.handler.operations = frozenset({'produce_json_pages'})
     events = []
     check.run_remote_query('{"operation":"resolve_target"}', lambda *event: events.append(event))
     assert len(events) == 1
@@ -85,4 +96,4 @@ def test_emit_failure_closes_execution():
 
     with pytest.raises(RuntimeError, match='consumer stopped'):
         check.run_remote_query('{"operation":"produce_json_pages", "query":"SELECT 1"}', emit)
-    assert check.execution_closed
+    assert check.handler.execution_closed

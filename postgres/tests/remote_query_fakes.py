@@ -17,7 +17,7 @@ from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
-from datadog_checks.postgres.remote_query import iter_agent_resolve_events, iter_agent_rpc_stream_events
+from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 
 class FakeUploadClient:
@@ -509,7 +509,7 @@ class ExplodingCheck:
 
 
 def collect_events(request, check, client=None):
-    return list(iter_agent_rpc_stream_events(request, check, client))
+    return list(PostgresRemoteQueryHandler(check).execute(request, http_client=client))
 
 
 def assert_failed_event(events, code, message_contains=None):
@@ -549,7 +549,7 @@ def resolve_request(**target):
 
 
 def collect_resolve_events(request, check):
-    return list(iter_agent_resolve_events(request, check))
+    return list(PostgresRemoteQueryHandler(check).resolve(request))
 
 
 def assert_matched_verdict(events):

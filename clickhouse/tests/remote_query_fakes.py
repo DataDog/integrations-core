@@ -13,7 +13,7 @@ import pytest
 
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
-from datadog_checks.clickhouse.remote_query import iter_agent_rpc_stream_events
+from datadog_checks.clickhouse.remote_query import ClickhouseRemoteQueryHandler
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 
@@ -399,7 +399,11 @@ def collect_events(request, check, upload_client=None, clickhouse_client=None):
 
     if upload_client is None:
         upload_client = FakeUploadClient()
-    return list(iter_agent_rpc_stream_events(request, check, upload_client, client_factory))
+    return list(
+        ClickhouseRemoteQueryHandler(check).execute(
+            request, http_client=upload_client, clickhouse_client_factory=client_factory
+        )
+    )
 
 
 def event_metadata(event):

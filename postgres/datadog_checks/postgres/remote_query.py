@@ -25,6 +25,7 @@ from pydantic import ValidationError
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
+from datadog_checks.base.utils.remote_queries import handler as rq_handler
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
@@ -348,7 +349,7 @@ def native_copy_sql(query: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Producer: one validated query execution through the native COPY CSV path
+# Native COPY CSV page writer
 # ---------------------------------------------------------------------------
 
 
@@ -444,427 +445,438 @@ class CopyPageWriter:
         self._scan_pos = self._record_start = self._quote_parity = 0
 
 
-def produce_remote_query(
-    request: rq_contract.RemoteQueryRequest,
-    check: 'PostgreSql',
-    creds: rq_upload.UploadCredentials,
-    client: rq_upload.UploadClient,
-    execution_dbname: str,
-    started_at: float,
-    stats: rq_contract.RemoteQueryRunStats,
-    timings: rq_timing.RemoteQueryProducerTimings | None = None,
-    tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
-) -> dict[str, Any]:
-    """Execute the validated query once, natively, and return the compact run receipt.
-
-    The query's values are evaluated exactly once: a named server-side cursor DECLAREs it
-    inside the existing read-only transaction with the effective statement timeout applied
-    — the smaller of the instance-configured `remote_queries.timeout_ms` and the remaining
-    run-wide wall, where the wall is the delivered `limits.timeout_ms` that no instance
-    setting may lengthen — but is never fetched, so the DECLARE only plans and its
-    description yields the column metadata; the single `COPY (query) TO STDOUT` then
-    evaluates the query and streams its native CSV records. Session output settings are
-    pinned in the same transaction, the vendor-type lookup and descriptor registration both
-    precede the first record, and CopyPageWriter frames the native blocks,
-    buffers one bounded source page, and uploads it without re-querying.
-
-    Producer phases: connection acquisition through descriptor registration and the COPY
-    dispatch is database setup, each `copy.read` call is a database fetch, record
-    framing and page buffering are encode and page build (with any upload triggers nested
-    inside it), and page uploads and finalize are accounted by the shared source-page
-    writer. Everything else — timeout resolution, the pre-read guards, transaction
-    teardown — lands in `otherMs`. The native producer spans open at exactly these phase
-    boundaries — `tracing` is fail-open and additive to the timing accumulator, and
-    every span boundary here is the accumulator's own.
-    """
-    delivery = request.result_delivery
-    limits = delivery.limits
-    # The delivered timeout is the run-wide monotonic hard wall; the instance-configured
-    # remote_queries.timeout_ms may shorten the statement timeout below it but never
-    # replace or lengthen the wall.
-    deadline = started_at + limits.timeout_ms / 1000
-    statement_timeout_ms = _resolve_statement_timeout_ms(check, deadline)
-    timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
-    tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
-
-    def guard() -> None:
-        rq_events.raise_if_timed_out(deadline)
-        rq_events.raise_if_cancelled(check)
-
-    cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
-    # The setup phase spans pool connection acquisition through descriptor registration and
-    # the COPY dispatch, and ends before the first data read; the connection and cursor
-    # contexts outlive the phase, so it is entered and exited explicitly. The inline exit
-    # marks the boundary before the record loop; the spanning `finally` re-exits it
-    # (idempotently) so a setup interrupted mid-flight still reports its partial wall. The
-    # setup span enters and exits at the same boundaries.
-    setup_phase = timings.enter_phase('database_setup')
-    setup_span = tracing.enter_phase('database_setup')
-    try:
-        with check.db_pool.get_connection(execution_dbname) as conn:
-            with conn.cursor() as control:
-                in_transaction = False
-                try:
-                    control.execute('BEGIN READ ONLY')
-                    in_transaction = True
-                    # SET statements do not accept bind parameters, so the timeout is inlined; it
-                    # is a validated positive int resolved from the instance override and the
-                    # remaining wall, never raw text.
-                    control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
-                    for session_setting in POSTGRES_COPY_SESSION_SETTINGS:
-                        control.execute(session_setting)
-                    with conn.cursor(name=cursor_name) as described_cursor:
-                        # The DECLARE plans the query and yields its result description —
-                        # including for zero-row results — without fetching: no value is
-                        # evaluated here, only by the COPY below.
-                        described_cursor.execute(request.query)
-                        columns = described_columns(described_cursor)
-                        validate_columns(columns, limits.max_columns)
-                        # The descriptor needs every vendor type name, schema or not: it is
-                        # registered once, before any result record is read.
-                        type_map = resolve_vendor_types(control, columns)
-                        descriptor = build_upload_descriptor(request, columns, type_map, check.hostname)
-                        # The executing check's Agent-reported hostname: the descriptor carries it
-                        # so intake stamps the envelope with the agent node identity Fleet reports,
-                        # never socket.gethostname().
-                        writer = CopyPageWriter(delivery, creds, client, descriptor, guard, stats, timings, tracing)
-                        guard()
-                        with conn.cursor() as stream_cursor:
-                            with stream_cursor.copy(native_copy_sql(request.query)) as copy:
-                                # Setup ends here: the first copy.read below is its own phase.
-                                timings.exit_phase(setup_phase)
-                                tracing.exit_phase(setup_span)
-                                try:
-                                    with timings.phase('encode_and_page_build'), tracing.phase('encode_and_page_build'):
-                                        while True:
-                                            # One fetch phase per read, entered and exited
-                                            # explicitly like the setup phase above: the
-                                            # per-record loop is the hot path, and a phase
-                                            # context manager per read costs more than the
-                                            # read itself.
-                                            fetch_phase = timings.enter_phase('database_fetch')
-                                            # The fetch region span opens lazily: one span per
-                                            # page's worth of reads, bounded by maxPages.
-                                            tracing.enter_fetch()
-                                            try:
-                                                block = copy.read()
-                                            finally:
-                                                timings.exit_phase(fetch_phase)
-                                            if not block:
-                                                break
-                                            guard()
-                                            writer.feed_native_copy_block(block)
-                                        # Fail closed unless the COPY stream ended exactly at a
-                                        # record boundary; the final page close and the run
-                                        # finalize below are their own phases.
-                                        writer.finish_native_copy_stream()
-                                    return writer.finish()
-                                finally:
-                                    # Release the page even if record framing or the copy fails.
-                                    writer.discard()
-                finally:
-                    if in_transaction:
-                        try:
-                            control.execute('ROLLBACK')
-                        except Exception:
-                            # Fixed text only: the driver's exception can quote connection strings
-                            # or identifiers embedded in its message.
-                            LOGGER.debug('Unable to roll back remote query read-only transaction')
-    finally:
-        timings.exit_phase(setup_phase)
-        tracing.exit_phase(setup_span)
-
-
-def _resolve_statement_timeout_ms(check: 'PostgreSql', deadline: float) -> int:
-    """Resolve the statement timeout that protects the customer database for this run.
-
-    `deadline` is the run-wide hard wall derived from the delivered `limits.timeout_ms`:
-    it covers target resolution, query execution, page construction, upload, and retries,
-    and instance configuration can never lengthen it. The instance config
-    `remote_queries.timeout_ms` stays a customer-database protection with per-instance
-    granularity (a warehouse instance can allow minutes while an OLTP instance allows
-    seconds), but it may only shorten the run: the effective statement timeout is the smaller
-    of the positive instance value and the remaining wall, and the wall's remainder applies
-    when the instance does not configure one. The value is resolved locally per run; the
-    delivery limits object is never mutated.
-    """
-    config = getattr(check, '_config', None)
-    instance_timeout_ms = getattr(getattr(config, 'remote_queries', None), 'timeout_ms', None)
-    remaining_ms = rq_events.remaining_wall_ms(deadline)
-    if isinstance(instance_timeout_ms, int) and instance_timeout_ms > 0:
-        return min(instance_timeout_ms, remaining_ms)
-    return remaining_ms
-
-
 # ---------------------------------------------------------------------------
-# Target resolution
+# Remote query capability handler: resolve and execute composed with one check
 # ---------------------------------------------------------------------------
 
 
-def _match_check_for_target(target: rq_contract.RemoteQueryTarget, check: 'PostgreSql') -> 'PostgreSql | None':
-    """The matching authority shared by resolve and execute, on the supplied check alone.
+class PostgresRemoteQueryHandler:
+    """The remote-query capability of one loaded Postgres check.
 
-    A database_instance selector matches by rendered identifier. A tuple selector matches
-    only when the check's normalized configured endpoint equals the request and its
-    effective monitoring scope includes the requested database. Returns the matched check
-    or None; raises RemoteQueryFailure when the scope cannot be established — fail-closed
-    and visible, never a silent no-match. Selecting zero, one, or many matching checks
-    across the Agent's loaded checks is the Agent's own responsibility, so both operations
-    report identical verdicts for the same target and check state.
+    `AgentCheck.run_remote_query` dispatches here through `PostgreSql.get_remote_query_handler`,
+    which composes one handler with the check per bridge call. Matching and execution read the
+    check's configured identity and monitoring scope, and execution runs through the check's
+    own concurrency-safe connection pool. The handler holds only the check it serves — no
+    check-global or process-global request state — so concurrent bridge calls share nothing
+    but the check's own pool.
+
+    Resolve and execute share one matching authority (`_match_check_for_target`), so both
+    operations report identical verdicts for the same target and check state.
     """
-    if target.database_instance is not None:
-        return check if getattr(check, 'database_identifier', None) == target.database_instance else None
-    return check if _target_matches_scope(check, target) else None
 
+    operations = rq_handler.REMOTE_QUERY_OPERATIONS
 
-def _resolved_dbname(target: rq_contract.RemoteQueryTarget, check: 'PostgreSql') -> str | None:
-    """The database a matched check admits for the target.
+    def __init__(self, check: 'PostgreSql') -> None:
+        self._check = check
 
-    A tuple target's dbname is part of match identity and is the admitted database. A
-    database_instance selector identifies one loaded check and admits its materialized
-    configured database, never a request-named other one; None means the matched check
-    cannot name a database at all.
-    """
-    if target.database_instance is not None:
-        return _dbname_from_check(check)
-    return target.dbname
+    def resolve(self, request: Any) -> Iterator[rq_contract.RemoteQueryEvent]:
+        """Tell the Agent whether this loaded Postgres check owns the requested target.
 
+        The Agent calls this once per loaded Postgres check while resolving a target. Each call
+        yields exactly one verdict: a MATCHED `final` event containing the check's sanitized
+        effective identity, or an `error` event. The Agent aggregates those verdicts to
+        distinguish zero, one, or multiple matching checks and routes execution to the unique
+        match.
 
-def _target_matches_scope(check: 'PostgreSql', target: rq_contract.RemoteQueryTarget) -> bool:
-    """A tuple target matches only inside one check's effective monitoring scope.
-
-    The requested dbname is part of match identity, never an execution parameter resolved after
-    selection: a different database on the same reachable server is not a match, and neither an
-    out-of-scope database nor a nonexistent one is probed to distinguish them.
-    """
-    return _endpoint_from_check(check) == (target.host, target.port) and database_in_monitoring_scope(
-        check, target.dbname
-    )
-
-
-def _endpoint_from_check(check: 'PostgreSql') -> tuple[str, int] | None:
-    """The check's endpoint identity: normalized configured host and effective port.
-
-    A check whose configuration does not expose a usable endpoint (missing config, non-string
-    host, non-integer port) has no endpoint identity and matches no tuple target.
-    """
-    config = getattr(check, '_config', None)
-    host = getattr(config, 'host', None)
-    port = getattr(config, 'port', None)
-    if not isinstance(host, str) or not isinstance(port, int) or isinstance(port, bool):
-        return None
-    try:
-        return rq_contract.normalize_host(host), port
-    except ValueError:
-        return None
-
-
-def _dbname_from_check(check: 'PostgreSql') -> str | None:
-    config = getattr(check, '_config', None)
-    return getattr(config, 'dbname', None)
-
-
-def database_in_monitoring_scope(check: 'PostgreSql', dbname: str) -> bool:
-    """Answer whether one database lies inside a loaded check's effective monitoring scope.
-
-    Single integration-owned source of truth for Remote Query database targeting, consumed by
-    target matching and execution alike. The scope is the check's materialized `config.dbname`
-    — an explicit `dbname`, else the `postgres` default, else
-    `database_autodiscovery.global_view_db`, exactly as the integration's own `build_config`
-    materialized it — plus, when database autodiscovery is enabled, the current database set
-    admitted by the check's own autodiscovery implementation with its existing include/exclude
-    filters, refresh cycle, and `max_databases` bound. Defaulting and filtering stay
-    integration-owned: this helper never reimplements them and never probes the requested
-    database, so a database that exists but is out of scope and a database that does not exist
-    are indistinguishable by design.
-
-    Raises RemoteQueryFailure(target_unavailable, retryable) when the admitted discovery set
-    cannot be determined: an unknown scope fails closed and visible, never as a silent
-    no-match.
-    """
-    configured_dbname = _dbname_from_check(check)
-    if configured_dbname is not None and dbname == configured_dbname:
-        return True
-    autodiscovery = getattr(check, 'autodiscovery', None)
-    if autodiscovery is None:
-        return False
-    try:
-        return dbname in autodiscovery.get_items()
-    except Exception:
-        # The caught exception neither reaches the message nor rides the wrapper's
-        # exception chain: discovery failures can quote connection strings, identifiers, or
-        # other server detail, so a traceback log of the wrapper must not recover them.
-        # Classification and retryability are what the event carries, not the underlying
-        # text.
-        raise rq_contract.RemoteQueryFailure(
-            'target_unavailable',
-            "Unable to determine the matched check's autodiscovered database scope.",
-            retryable=True,
-        ) from None
-
-
-# ---------------------------------------------------------------------------
-# Check capability implementation
-# ---------------------------------------------------------------------------
-
-
-def iter_agent_resolve_events(request: Any, check: 'PostgreSql') -> Iterator[rq_contract.RemoteQueryEvent]:
-    """Tell the Agent whether this loaded Postgres check owns the requested target.
-
-    The Agent calls this once per loaded Postgres check while resolving a target. Each call
-    yields exactly one verdict: a MATCHED `final` event containing the check's sanitized
-    effective identity, or an `error` event. The Agent aggregates those verdicts to
-    distinguish zero, one, or multiple matching checks and routes execution to the unique
-    match.
-
-    Matching uses the same `_match_check_for_target` authority as execution, including the
-    check's current database-autodiscovery scope. This function never runs customer SQL,
-    probes the requested database, uploads results, or binds a later execution to this
-    response; execution resolves the target again before dispatch. An invalid request or an
-    undeterminable eligible set produces an error other than `target_not_found`, so the
-    Agent fails the whole resolution instead of silently skipping this check.
-    """
-    started_at = time.monotonic()
-    try:
-        parsed_request = rq_contract.RemoteQueryResolveRequest.model_validate(request)
-    except ValidationError as e:
-        yield rq_events.failed_event(
-            'invalid_request', rq_contract.validation_message(e), elapsed_ms=rq_events.elapsed_ms(started_at)
-        )
-        return
-
-    target = parsed_request.target
-    try:
-        if _match_check_for_target(target, check) is None:
+        Matching uses the same `_match_check_for_target` authority as execution, including the
+        check's current database-autodiscovery scope. This method never runs customer SQL,
+        probes the requested database, uploads results, or binds a later execution to this
+        response; execution resolves the target again before dispatch. An invalid request or an
+        undeterminable eligible set produces an error other than `target_not_found`, so the
+        Agent fails the whole resolution instead of silently skipping this check.
+        """
+        started_at = time.monotonic()
+        try:
+            parsed_request = rq_contract.RemoteQueryResolveRequest.model_validate(request)
+        except ValidationError as e:
             yield rq_events.failed_event(
-                'target_not_found',
-                'No loaded Postgres integration instance matched target selector.',
+                'invalid_request', rq_contract.validation_message(e), elapsed_ms=rq_events.elapsed_ms(started_at)
+            )
+            return
+
+        target = parsed_request.target
+        try:
+            if self._match_check_for_target(target) is None:
+                yield rq_events.failed_event(
+                    'target_not_found',
+                    'No loaded Postgres integration instance matched target selector.',
+                    elapsed_ms=rq_events.elapsed_ms(started_at),
+                )
+                return
+        except rq_contract.RemoteQueryFailure as e:
+            yield rq_events.failed_event(
+                e.code, e.message, retryable=e.retryable, elapsed_ms=rq_events.elapsed_ms(started_at)
+            )
+            return
+
+        resolved_dbname = self._resolved_dbname(target)
+        if resolved_dbname is None:
+            yield rq_events.failed_event(
+                'target_unavailable',
+                'Matched Postgres check does not expose a configured database name.',
                 elapsed_ms=rq_events.elapsed_ms(started_at),
             )
             return
-    except rq_contract.RemoteQueryFailure as e:
-        yield rq_events.failed_event(
-            e.code, e.message, retryable=e.retryable, elapsed_ms=rq_events.elapsed_ms(started_at)
+
+        endpoint = self._endpoint_from_check()
+        yield rq_events.matched_resolve_event(
+            host=endpoint[0] if endpoint is not None else None,
+            port=endpoint[1] if endpoint is not None else None,
+            configured_dbname=self._dbname_from_check(),
+            resolved_dbname=resolved_dbname,
+            database_instance=getattr(self._check, 'database_identifier', None),
         )
-        return
 
-    resolved_dbname = _resolved_dbname(target, check)
-    if resolved_dbname is None:
-        yield rq_events.failed_event(
-            'target_unavailable',
-            'Matched Postgres check does not expose a configured database name.',
-            elapsed_ms=rq_events.elapsed_ms(started_at),
-        )
-        return
+    def execute(
+        self,
+        request: Any,
+        timings: rq_timing.RemoteQueryProducerTimings | None = None,
+        *,
+        http_client: rq_upload.UploadClient | None = None,
+    ) -> Iterator[rq_contract.RemoteQueryEvent]:
+        """Execute on the composed check; emit only status and the intake receipt.
 
-    endpoint = _endpoint_from_check(check)
-    yield rq_events.matched_resolve_event(
-        host=endpoint[0] if endpoint is not None else None,
-        port=endpoint[1] if endpoint is not None else None,
-        configured_dbname=_dbname_from_check(check),
-        resolved_dbname=resolved_dbname,
-        database_instance=getattr(check, 'database_identifier', None),
-    )
-
-
-def iter_agent_rpc_stream_events(
-    request: Any,
-    check: 'PostgreSql',
-    http_client: rq_upload.UploadClient | None = None,
-    timings: rq_timing.RemoteQueryProducerTimings | None = None,
-) -> Iterator[rq_contract.RemoteQueryEvent]:
-    """Execute on the supplied check; emit only status and the intake receipt.
-
-    The produce hook is `produce_remote_query` itself, its adapter-owned phase boundaries
-    opening the native producer spans. Once the request is admitted — validation and the
-    allowlist — the run opens its native producer spans fail-open through
-    `open_remote_query_producer_tracing`: a root span on the request's trace context
-    covering the admission failures below, the abort span around the failure tail's upload
-    abort, and the terminal status; every span failure is swallowed without changing an
-    event, a receipt, a retry, or an error.
-    """
-    timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
-    stats = None
-    client = None
-    creds = None
-    tracing = rq_tracing.NULL_PRODUCER_TRACING
-    try:
+        The produce hook is `_produce_remote_query` itself, its adapter-owned phase boundaries
+        opening the native producer spans. Once the request is admitted — validation and the
+        allowlist — the run opens its native producer spans fail-open through
+        `open_remote_query_producer_tracing`: a root span on the request's trace context
+        covering the admission failures below, the abort span around the failure tail's upload
+        abort, and the terminal status; every span failure is swallowed without changing an
+        event, a receipt, a retry, or an error.
+        """
+        timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+        stats = None
+        client = None
+        creds = None
+        tracing = rq_tracing.NULL_PRODUCER_TRACING
         try:
-            parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
-            # Native producer spans cover every admitted run — the admission failures below
-            # included — as a root span on the request's trace context, additive to the
-            # timing accumulator and the event contract, fail-open through every boundary.
-            tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'postgres')
-            tracing.open_root(parsed.result_delivery)
-            if _match_check_for_target(parsed.target, check) is None:
-                raise rq_contract.RemoteQueryFailure(
-                    'target_not_found', 'No loaded Postgres integration instance matched target selector.'
-                )
-            execution_dbname = _resolved_dbname(parsed.target, check)
-            if execution_dbname is None:
-                raise rq_contract.RemoteQueryFailure(
-                    'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
-                )
-            creds = rq_upload.resolve_upload_credentials(
-                parsed.result_delivery, timings.started_at, parsed.trace_context
-            )
-            if not creds.api_key or not creds.app_key:
-                raise rq_contract.RemoteQueryFailure(
-                    'credentials_unavailable',
-                    'Remote query upload requires api_key and app_key to be configured on the Agent.',
-                )
-            pool = getattr(check, 'db_pool', None)
-            if pool is None:
-                raise rq_contract.RemoteQueryFailure(
-                    'credentials_unavailable', 'Matched Postgres check does not expose a connection pool.'
-                )
-            if pool.is_closed():
-                raise rq_contract.RemoteQueryFailure(
-                    'target_unavailable', 'Matched Postgres check connection pool is closed.'
-                )
-            client = (
-                http_client
-                if http_client is not None
-                else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
-            )
-            stats = rq_contract.RemoteQueryRunStats()
-            yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
             try:
-                receipt = produce_remote_query(
-                    parsed, check, creds, client, execution_dbname, timings.started_at, stats, timings, tracing
+                parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
+                # Native producer spans cover every admitted run — the admission failures below
+                # included — as a root span on the request's trace context, additive to the
+                # timing accumulator and the event contract, fail-open through every boundary.
+                tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'postgres')
+                tracing.open_root(parsed.result_delivery)
+                if self._match_check_for_target(parsed.target) is None:
+                    raise rq_contract.RemoteQueryFailure(
+                        'target_not_found', 'No loaded Postgres integration instance matched target selector.'
+                    )
+                execution_dbname = self._resolved_dbname(parsed.target)
+                if execution_dbname is None:
+                    raise rq_contract.RemoteQueryFailure(
+                        'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
+                    )
+                creds = rq_upload.resolve_upload_credentials(
+                    parsed.result_delivery, timings.started_at, parsed.trace_context
                 )
-            except psycopg_errors.QueryCanceled:
-                raise rq_contract.RemoteQueryFailure(
-                    'timeout', 'Remote query was canceled by the server (statement timeout or cancellation).', True
-                ) from None
-            except RuntimeError:
-                raise rq_contract.RemoteQueryFailure(
-                    'target_unavailable', 'Matched Postgres check connection pool is unavailable.'
-                ) from None
-        except BaseException as error:
-            if client is not None:
-                with tracing.abort_span():
-                    rq_upload.safe_abort(client, creds)
-            # The root span's counters mirror the stats the failure event carries; the
-            # failure classification rides the same closed event error-code vocabulary, and
-            # an admission failure before the run's stats exist carries all-zero counters.
-            terminal_stats = stats if stats is not None else rq_contract.RemoteQueryRunStats()
-            if not isinstance(error, Exception):
-                # The stream was terminated mid-run (cancellation or an emit callback
-                # failure): the root span closes with a fixed classification and the signal
-                # re-raises, never swallowed into an ordinary query failure.
-                tracing.fail('interrupted', terminal_stats)
-                raise
-            tracing.fail(
-                error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
+                if not creds.api_key or not creds.app_key:
+                    raise rq_contract.RemoteQueryFailure(
+                        'credentials_unavailable',
+                        'Remote query upload requires api_key and app_key to be configured on the Agent.',
+                    )
+                pool = getattr(self._check, 'db_pool', None)
+                if pool is None:
+                    raise rq_contract.RemoteQueryFailure(
+                        'credentials_unavailable', 'Matched Postgres check does not expose a connection pool.'
+                    )
+                if pool.is_closed():
+                    raise rq_contract.RemoteQueryFailure(
+                        'target_unavailable', 'Matched Postgres check connection pool is closed.'
+                    )
+                client = (
+                    http_client
+                    if http_client is not None
+                    else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
+                )
+                stats = rq_contract.RemoteQueryRunStats()
+                yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
+                try:
+                    receipt = self._produce_remote_query(
+                        parsed, creds, client, execution_dbname, timings.started_at, stats, timings, tracing
+                    )
+                except psycopg_errors.QueryCanceled:
+                    raise rq_contract.RemoteQueryFailure(
+                        'timeout', 'Remote query was canceled by the server (statement timeout or cancellation).', True
+                    ) from None
+                except RuntimeError:
+                    raise rq_contract.RemoteQueryFailure(
+                        'target_unavailable', 'Matched Postgres check connection pool is unavailable.'
+                    ) from None
+            except BaseException as error:
+                if client is not None:
+                    with tracing.abort_span():
+                        rq_upload.safe_abort(client, creds)
+                # The root span's counters mirror the stats the failure event carries; the
+                # failure classification rides the same closed event error-code vocabulary, and
+                # an admission failure before the run's stats exist carries all-zero counters.
+                terminal_stats = stats if stats is not None else rq_contract.RemoteQueryRunStats()
+                if not isinstance(error, Exception):
+                    # The stream was terminated mid-run (cancellation or an emit callback
+                    # failure): the root span closes with a fixed classification and the signal
+                    # re-raises, never swallowed into an ordinary query failure.
+                    tracing.fail('interrupted', terminal_stats)
+                    raise
+                tracing.fail(
+                    error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
+                )
+                yield rq_events.query_failure_event(error, timings, stats)
+                return
+            tracing.succeed(stats)
+            yield rq_contract.RemoteQueryEvent(
+                'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
             )
-            yield rq_events.query_failure_event(error, timings, stats)
-            return
-        tracing.succeed(stats)
-        yield rq_contract.RemoteQueryEvent(
-            'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
+        finally:
+            # The run's only flush, best-effort: the root span finishes here at the latest and
+            # the singleton is never shut down.
+            tracing.close()
+
+    def _produce_remote_query(
+        self,
+        request: rq_contract.RemoteQueryRequest,
+        creds: rq_upload.UploadCredentials,
+        client: rq_upload.UploadClient,
+        execution_dbname: str,
+        started_at: float,
+        stats: rq_contract.RemoteQueryRunStats,
+        timings: rq_timing.RemoteQueryProducerTimings | None = None,
+        tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
+    ) -> dict[str, Any]:
+        """Execute the validated query once, natively, and return the compact run receipt.
+
+        The query's values are evaluated exactly once: a named server-side cursor DECLAREs it
+        inside the existing read-only transaction with the effective statement timeout applied
+        — the smaller of the instance-configured `remote_queries.timeout_ms` and the remaining
+        run-wide wall, where the wall is the delivered `limits.timeout_ms` that no instance
+        setting may lengthen — but is never fetched, so the DECLARE only plans and its
+        description yields the column metadata; the single `COPY (query) TO STDOUT` then
+        evaluates the query and streams its native CSV records. Session output settings are
+        pinned in the same transaction, the vendor-type lookup and descriptor registration both
+        precede the first record, and CopyPageWriter frames the native blocks,
+        buffers one bounded source page, and uploads it without re-querying.
+
+        Producer phases: connection acquisition through descriptor registration and the COPY
+        dispatch is database setup, each `copy.read` call is a database fetch, record
+        framing and page buffering are encode and page build (with any upload triggers nested
+        inside it), and page uploads and finalize are accounted by the shared source-page
+        writer. Everything else — timeout resolution, the pre-read guards, transaction
+        teardown — lands in `otherMs`. The native producer spans open at exactly these phase
+        boundaries — `tracing` is fail-open and additive to the timing accumulator, and
+        every span boundary here is the accumulator's own.
+        """
+        delivery = request.result_delivery
+        limits = delivery.limits
+        # The delivered timeout is the run-wide monotonic hard wall; the instance-configured
+        # remote_queries.timeout_ms may shorten the statement timeout below it but never
+        # replace or lengthen the wall.
+        deadline = started_at + limits.timeout_ms / 1000
+        statement_timeout_ms = self._resolve_statement_timeout_ms(deadline)
+        timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+        tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
+
+        def guard() -> None:
+            rq_events.raise_if_timed_out(deadline)
+            rq_events.raise_if_cancelled(self._check)
+
+        cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
+        # The setup phase spans pool connection acquisition through descriptor registration and
+        # the COPY dispatch, and ends before the first data read; the connection and cursor
+        # contexts outlive the phase, so it is entered and exited explicitly. The inline exit
+        # marks the boundary before the record loop; the spanning `finally` re-exits it
+        # (idempotently) so a setup interrupted mid-flight still reports its partial wall. The
+        # setup span enters and exits at the same boundaries.
+        setup_phase = timings.enter_phase('database_setup')
+        setup_span = tracing.enter_phase('database_setup')
+        try:
+            with self._check.db_pool.get_connection(execution_dbname) as conn:
+                with conn.cursor() as control:
+                    in_transaction = False
+                    try:
+                        control.execute('BEGIN READ ONLY')
+                        in_transaction = True
+                        # SET statements do not accept bind parameters, so the timeout is inlined; it
+                        # is a validated positive int resolved from the instance override and the
+                        # remaining wall, never raw text.
+                        control.execute('SET LOCAL statement_timeout = {}'.format(statement_timeout_ms))
+                        for session_setting in POSTGRES_COPY_SESSION_SETTINGS:
+                            control.execute(session_setting)
+                        with conn.cursor(name=cursor_name) as described_cursor:
+                            # The DECLARE plans the query and yields its result description —
+                            # including for zero-row results — without fetching: no value is
+                            # evaluated here, only by the COPY below.
+                            described_cursor.execute(request.query)
+                            columns = described_columns(described_cursor)
+                            validate_columns(columns, limits.max_columns)
+                            # The descriptor needs every vendor type name, schema or not: it is
+                            # registered once, before any result record is read.
+                            type_map = resolve_vendor_types(control, columns)
+                            descriptor = build_upload_descriptor(request, columns, type_map, self._check.hostname)
+                            # The executing check's Agent-reported hostname: the descriptor carries it
+                            # so intake stamps the envelope with the agent node identity Fleet reports,
+                            # never socket.gethostname().
+                            writer = CopyPageWriter(delivery, creds, client, descriptor, guard, stats, timings, tracing)
+                            guard()
+                            with conn.cursor() as stream_cursor:
+                                with stream_cursor.copy(native_copy_sql(request.query)) as copy:
+                                    # Setup ends here: the first copy.read below is its own phase.
+                                    timings.exit_phase(setup_phase)
+                                    tracing.exit_phase(setup_span)
+                                    try:
+                                        with (
+                                            timings.phase('encode_and_page_build'),
+                                            tracing.phase('encode_and_page_build'),
+                                        ):
+                                            while True:
+                                                # One fetch phase per read, entered and exited
+                                                # explicitly like the setup phase above: the
+                                                # per-record loop is the hot path, and a phase
+                                                # context manager per read costs more than the
+                                                # read itself.
+                                                fetch_phase = timings.enter_phase('database_fetch')
+                                                # The fetch region span opens lazily: one span per
+                                                # page's worth of reads, bounded by maxPages.
+                                                tracing.enter_fetch()
+                                                try:
+                                                    block = copy.read()
+                                                finally:
+                                                    timings.exit_phase(fetch_phase)
+                                                if not block:
+                                                    break
+                                                guard()
+                                                writer.feed_native_copy_block(block)
+                                            # Fail closed unless the COPY stream ended exactly at a
+                                            # record boundary; the final page close and the run
+                                            # finalize below are their own phases.
+                                            writer.finish_native_copy_stream()
+                                        return writer.finish()
+                                    finally:
+                                        # Release the page even if record framing or the copy fails.
+                                        writer.discard()
+                    finally:
+                        if in_transaction:
+                            try:
+                                control.execute('ROLLBACK')
+                            except Exception:
+                                # Fixed text only: the driver's exception can quote connection strings
+                                # or identifiers embedded in its message.
+                                LOGGER.debug('Unable to roll back remote query read-only transaction')
+        finally:
+            timings.exit_phase(setup_phase)
+            tracing.exit_phase(setup_span)
+
+    def _resolve_statement_timeout_ms(self, deadline: float) -> int:
+        """Resolve the statement timeout that protects the customer database for this run.
+
+        `deadline` is the run-wide hard wall derived from the delivered `limits.timeout_ms`:
+        it covers target resolution, query execution, page construction, upload, and retries,
+        and instance configuration can never lengthen it. The instance config
+        `remote_queries.timeout_ms` stays a customer-database protection with per-instance
+        granularity (a warehouse instance can allow minutes while an OLTP instance allows
+        seconds), but it may only shorten the run: the effective statement timeout is the smaller
+        of the positive instance value and the remaining wall, and the wall's remainder applies
+        when the instance does not configure one. The value is resolved locally per run; the
+        delivery limits object is never mutated.
+        """
+        config = getattr(self._check, '_config', None)
+        instance_timeout_ms = getattr(getattr(config, 'remote_queries', None), 'timeout_ms', None)
+        remaining_ms = rq_events.remaining_wall_ms(deadline)
+        if isinstance(instance_timeout_ms, int) and instance_timeout_ms > 0:
+            return min(instance_timeout_ms, remaining_ms)
+        return remaining_ms
+
+    def _match_check_for_target(self, target: rq_contract.RemoteQueryTarget) -> 'PostgreSql | None':
+        """The matching authority shared by resolve and execute, on the composed check alone.
+
+        A database_instance selector matches by rendered identifier. A tuple selector matches
+        only when the check's normalized configured endpoint equals the request and its
+        effective monitoring scope includes the requested database. Returns the matched check
+        or None; raises RemoteQueryFailure when the scope cannot be established — fail-closed
+        and visible, never a silent no-match. Selecting zero, one, or many matching checks
+        across the Agent's loaded checks is the Agent's own responsibility, so both operations
+        report identical verdicts for the same target and check state.
+        """
+        if target.database_instance is not None:
+            return (
+                self._check if getattr(self._check, 'database_identifier', None) == target.database_instance else None
+            )
+        return self._check if self._target_matches_scope(target) else None
+
+    def _resolved_dbname(self, target: rq_contract.RemoteQueryTarget) -> str | None:
+        """The database a matched check admits for the target.
+
+        A tuple target's dbname is part of match identity and is the admitted database. A
+        database_instance selector identifies one loaded check and admits its materialized
+        configured database, never a request-named other one; None means the matched check
+        cannot name a database at all.
+        """
+        if target.database_instance is not None:
+            return self._dbname_from_check()
+        return target.dbname
+
+    def _target_matches_scope(self, target: rq_contract.RemoteQueryTarget) -> bool:
+        """A tuple target matches only inside one check's effective monitoring scope.
+
+        The requested dbname is part of match identity, never an execution parameter resolved after
+        selection: a different database on the same reachable server is not a match, and neither an
+        out-of-scope database nor a nonexistent one is probed to distinguish them.
+        """
+        return self._endpoint_from_check() == (target.host, target.port) and self._database_in_monitoring_scope(
+            target.dbname
         )
-    finally:
-        # The run's only flush, best-effort: the root span finishes here at the latest and
-        # the singleton is never shut down.
-        tracing.close()
+
+    def _database_in_monitoring_scope(self, dbname: str) -> bool:
+        """Answer whether one database lies inside a loaded check's effective monitoring scope.
+
+        Single integration-owned source of truth for Remote Query database targeting, consumed by
+        target matching and execution alike. The scope is the check's materialized `config.dbname`
+        — an explicit `dbname`, else the `postgres` default, else
+        `database_autodiscovery.global_view_db`, exactly as the integration's own `build_config`
+        materialized it — plus, when database autodiscovery is enabled, the current database set
+        admitted by the check's own autodiscovery implementation with its existing include/exclude
+        filters, refresh cycle, and `max_databases` bound. Defaulting and filtering stay
+        integration-owned: this helper never reimplements them and never probes the requested
+        database, so a database that exists but is out of scope and a database that does not exist
+        are indistinguishable by design.
+
+        Raises RemoteQueryFailure(target_unavailable, retryable) when the admitted discovery set
+        cannot be determined: an unknown scope fails closed and visible, never as a silent
+        no-match.
+        """
+        configured_dbname = self._dbname_from_check()
+        if configured_dbname is not None and dbname == configured_dbname:
+            return True
+        autodiscovery = getattr(self._check, 'autodiscovery', None)
+        if autodiscovery is None:
+            return False
+        try:
+            return dbname in autodiscovery.get_items()
+        except Exception:
+            # The caught exception neither reaches the message nor rides the wrapper's
+            # exception chain: discovery failures can quote connection strings, identifiers, or
+            # other server detail, so a traceback log of the wrapper must not recover them.
+            # Classification and retryability are what the event carries, not the underlying
+            # text.
+            raise rq_contract.RemoteQueryFailure(
+                'target_unavailable',
+                "Unable to determine the matched check's autodiscovered database scope.",
+                retryable=True,
+            ) from None
+
+    def _endpoint_from_check(self) -> tuple[str, int] | None:
+        """The check's endpoint identity: normalized configured host and effective port.
+
+        A check whose configuration does not expose a usable endpoint (missing config, non-string
+        host, non-integer port) has no endpoint identity and matches no tuple target.
+        """
+        config = getattr(self._check, '_config', None)
+        host = getattr(config, 'host', None)
+        port = getattr(config, 'port', None)
+        if not isinstance(host, str) or not isinstance(port, int) or isinstance(port, bool):
+            return None
+        try:
+            return rq_contract.normalize_host(host), port
+        except ValueError:
+            return None
+
+    def _dbname_from_check(self) -> str | None:
+        config = getattr(self._check, '_config', None)
+        return getattr(config, 'dbname', None)

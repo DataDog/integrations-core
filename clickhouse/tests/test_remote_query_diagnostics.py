@@ -6,7 +6,7 @@
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.clickhouse import remote_query
-from datadog_checks.clickhouse.remote_query import iter_agent_rpc_stream_events
+from datadog_checks.clickhouse.remote_query import ClickhouseRemoteQueryHandler
 
 from .remote_query_fakes import (
     BOUND_ROW,
@@ -43,7 +43,11 @@ def test_producer_reports_phase_diagnostics_for_a_successful_run(monkeypatch):
         clock.advance_seconds(0.125)
         return clickhouse_client
 
-    events = list(iter_agent_rpc_stream_events(valid_request(), make_check(), fake, client_factory))
+    events = list(
+        ClickhouseRemoteQueryHandler(make_check()).execute(
+            valid_request(), http_client=fake, clickhouse_client_factory=client_factory
+        )
+    )
 
     final = assert_success(events)
     # The final metadata gained exactly one key: the optional execution diagnostics.
@@ -109,7 +113,11 @@ def test_mid_run_failure_reports_honest_partial_diagnostics(monkeypatch):
         clock.advance_seconds(0.125)
         return clickhouse_client
 
-    events = list(iter_agent_rpc_stream_events(request, make_check(), fake, client_factory))
+    events = list(
+        ClickhouseRemoteQueryHandler(make_check()).execute(
+            request, http_client=fake, clickhouse_client_factory=client_factory
+        )
+    )
 
     error = event_metadata(events[-1])
     assert_failed_event(events, 'upload_failed')

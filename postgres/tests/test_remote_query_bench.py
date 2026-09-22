@@ -4,7 +4,7 @@
 
 """Benchmarks for the native COPY CSV source-page producer against a real compose Postgres.
 
-Each benchmark drives the normal ``iter_agent_rpc_stream_events`` path — the never-fetched
+Each benchmark drives the normal ``PostgresRemoteQueryHandler.execute`` path — the never-fetched
 DECLARE descriptor, the single ``COPY ... TO STDOUT``, record framing, page buffering, and
 page uploads — with a discard upload client: every page body is read and dropped, a
 structurally valid receipt is returned, and no HTTP request is made, so the measured wall is
@@ -25,7 +25,7 @@ from types import SimpleNamespace
 import pytest
 
 from datadog_checks.base.utils.remote_queries import events as rq_events
-from datadog_checks.postgres.remote_query import iter_agent_rpc_stream_events
+from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 RUN_ID = '383d34aa-0766-472f-9e27-9190d9a52ab6'
 TASK_ID = '603f58a7-04cf-4ffe-860b-3885457f885c'
@@ -183,7 +183,7 @@ def run_producer(benchmark, integration_check, pg_instance, monkeypatch, rows, m
 
     def produce_once():
         client = DiscardUploadClient()
-        events = list(iter_agent_rpc_stream_events(request, check, client))
+        events = list(PostgresRemoteQueryHandler(check).execute(request, http_client=client))
         return client, events[-1].metadata
 
     client, final = benchmark.pedantic(produce_once, rounds=rounds, iterations=1)

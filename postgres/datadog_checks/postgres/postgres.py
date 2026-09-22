@@ -8,9 +8,8 @@ import copy
 import functools
 import os
 from collections import defaultdict
-from collections.abc import Iterator, Mapping
 from time import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import psycopg
 from cachetools import TTLCache
@@ -104,8 +103,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 if TYPE_CHECKING:
-    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
-    from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
+    from .remote_query import PostgresRemoteQueryHandler
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -124,19 +122,17 @@ class PostgreSql(DatabaseCheck):
     METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
     HA_SUPPORTED = True
-    remote_query_operations = frozenset({'resolve_target', 'produce_json_pages'})
 
-    def resolve_remote_query(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
-        from .remote_query import iter_agent_resolve_events
+    def get_remote_query_handler(self) -> 'PostgresRemoteQueryHandler':
+        """One remote-query capability handler composed with this check, created per bridge call.
 
-        return iter_agent_resolve_events(request, self)
+        The function-local import keeps the optional remote-query runtime out of ordinary
+        monitoring startup; the handler itself is cheap to construct and holds only this
+        check, never request state.
+        """
+        from .remote_query import PostgresRemoteQueryHandler
 
-    def execute_remote_query(
-        self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings
-    ) -> Iterator[RemoteQueryEvent]:
-        from .remote_query import iter_agent_rpc_stream_events
-
-        return iter_agent_rpc_stream_events(request, self, timings=timings)
+        return PostgresRemoteQueryHandler(self)
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)

@@ -98,6 +98,7 @@ from pydantic import ValidationError
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
+from datadog_checks.base.utils.remote_queries import handler as rq_handler
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
@@ -739,247 +740,274 @@ def _run_streamed_query(
                 LOGGER.debug('Unable to close the remote query response stream')
 
 
-def produce_remote_query(
-    request: rq_contract.RemoteQueryRequest,
-    check: 'ClickhouseCheck',
-    creds: rq_upload.UploadCredentials,
-    client: rq_upload.UploadClient,
-    started_at: float,
-    stats: rq_contract.RemoteQueryRunStats,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
-    timings: rq_timing.RemoteQueryProducerTimings | None = None,
-    tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
-) -> dict[str, Any]:
-    """Execute the validated query once and return the compact run receipt.
+# ---------------------------------------------------------------------------
+# Remote query capability handler: execution composed with one check
+# ---------------------------------------------------------------------------
 
-    The query runs exactly once, through a dedicated client whose query retries are
-    disabled; it is never wrapped in a probe and never executed twice. Row lines are read
-    from the streamed response incrementally and encoded one row at a time.
 
-    Producer phases: client creation, stream open, header/column building, and descriptor
-    registration are database setup; every raw stream read is a database fetch; the row loop
-    is encode and page build (with any upload `add_row` triggers nested inside it); page
-    uploads and finalize are accounted by the shared source-page writer. The native
-    producer spans open at exactly these phase boundaries — `tracing` is fail-open and
-    additive to the timing accumulator.
+class ClickhouseRemoteQueryHandler:
+    """The remote-query capability of one loaded ClickHouse check.
+
+    `AgentCheck.run_remote_query` dispatches here through `ClickhouseCheck.get_remote_query_handler`,
+    which composes one handler with the check per bridge call. Execution creates a dedicated
+    per-run client from the check's connection configuration and streams the result exactly
+    once; the handler holds only the check it serves, never request state. Target resolution
+    is not part of this capability: `operations` advertises execution only.
     """
-    delivery = request.result_delivery
-    limits = delivery.limits
-    deadline = started_at + limits.timeout_ms / 1000
-    timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
-    tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
 
-    def guard() -> None:
-        rq_events.raise_if_timed_out(deadline)
-        rq_events.raise_if_cancelled(check)
+    operations = frozenset((rq_handler.REMOTE_QUERY_OPERATION_PRODUCE_JSON_PAGES,))
 
-    clickhouse_client = None
-    try:
-        factory = clickhouse_client_factory if clickhouse_client_factory is not None else _default_client_factory
+    def __init__(self, check: 'ClickhouseCheck') -> None:
+        self._check = check
+
+    def resolve(self, request: Any) -> Iterator[rq_contract.RemoteQueryEvent]:
+        """Fail closed: this capability does not resolve targets.
+
+        `operations` never advertises `resolve_target`, so the dispatcher never routes target
+        resolution here; a direct call still answers with the closed vocabulary error rather
+        than pretending to resolve.
+        """
+        yield rq_events.failed_event('unsupported_operation', 'Check does not support remote query resolution.')
+
+    def execute(
+        self,
+        request: Any,
+        timings: rq_timing.RemoteQueryProducerTimings | None = None,
+        *,
+        http_client: rq_upload.UploadClient | None = None,
+        clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
+    ) -> Iterator[rq_contract.RemoteQueryEvent]:
+        """Execute on the composed check; emit only status and the intake receipt.
+
+        The produce hook is `_produce_remote_query` itself, its adapter-owned phase boundaries
+        opening the native producer spans. Once the request is admitted — validation and the
+        allowlist — the run opens its native producer spans fail-open through
+        `open_remote_query_producer_tracing`: a root span on the request's trace context
+        covering the admission failures below, the abort span around the failure tail's upload
+        abort, and the terminal status; every span failure is swallowed without changing an
+        event, a receipt, a retry, or an error.
+        """
+        timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+        stats = None
+        client = None
+        creds = None
+        tracing = rq_tracing.NULL_PRODUCER_TRACING
         try:
-            # The first database-setup segment: client creation. The send/receive timeout
-            # derives from the remaining wall, not the full delivered budget, so a client
-            # created late cannot wait past the run-wide deadline.
-            with timings.phase('database_setup'), tracing.phase('database_setup'):
-                clickhouse_client = factory(check, max(1, math.ceil(deadline - time.monotonic())))
-        except rq_contract.RemoteQueryFailure:
-            raise
-        except Exception:
-            # A connection-level failure: the matched instance could not be reached or refused
-            # the request. Never echo the underlying text or traceback (either can quote
-            # identifiers or credentials embedded in connection error strings).
-            LOGGER.debug('Remote query client creation failed')
-            raise rq_contract.RemoteQueryFailure(
-                'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
-            ) from None
-        try:
-            receipt = _run_streamed_query(
-                request, clickhouse_client, creds, client, check.hostname, guard, stats, deadline, timings, tracing
-            )
-        except rq_contract.RemoteQueryFailure:
-            raise
-        except clickhouse_errors.OperationalError:
-            # A transport-level failure: the request never got a usable server response.
-            LOGGER.debug('Remote query transport failed')
-            raise rq_contract.RemoteQueryFailure(
-                'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
-            ) from None
-        except (
-            TimeoutError,
-            ConnectionError,
-            urllib3.exceptions.ReadTimeoutError,
-            urllib3.exceptions.ProtocolError,
-        ):
-            # The stream died mid-read: server-side cancellation (max_execution_time or
-            # cancel-on-close) or a dropped connection. Both are retryable for the run.
-            LOGGER.debug('Remote query stream failed mid-stream')
-            raise rq_contract.RemoteQueryFailure(
-                'timeout',
-                'The remote query stream was interrupted (server cancellation or connection failure).',
-                True,
-            ) from None
-        except clickhouse_errors.DatabaseError:
-            # The server answered with an error (bad SQL, missing table, permissions), or
-            # the client refused a request-level setting. The instance is reachable, the
-            # run is not. Never echo the underlying message: it can quote query text.
-            LOGGER.debug('Remote query rejected by the server')
-            raise rq_contract.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
-        except Exception:
-            # Fixed text only: an unexpected exception can carry raw row fragments or query
-            # text.
-            LOGGER.error('Remote query execution failed')
-            raise rq_contract.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
-        return receipt
-    finally:
-        # The streamed response is owned and closed by _run_streamed_query; the client owns
-        # no pool of its own, so closing it is a no-op for the shared connection pool.
-        if clickhouse_client is not None:
             try:
-                clickhouse_client.close()
-            except Exception:
-                LOGGER.debug('Unable to close the remote query client')
+                parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
+                # Native producer spans cover every admitted run — the admission failures below
+                # included — as a root span on the request's trace context, additive to the
+                # timing accumulator and the event contract, fail-open through every boundary.
+                tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'clickhouse')
+                tracing.open_root(parsed.result_delivery)
+                if not self._check_matches_target(parsed.target):
+                    raise rq_contract.RemoteQueryFailure(
+                        'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
+                    )
+                creds = rq_upload.resolve_upload_credentials(
+                    parsed.result_delivery, timings.started_at, parsed.trace_context
+                )
+                if not creds.api_key or not creds.app_key:
+                    raise rq_contract.RemoteQueryFailure(
+                        'credentials_unavailable',
+                        'Remote query upload requires api_key and app_key to be configured on the Agent.',
+                    )
+                if getattr(self._check, '_pool_manager', None) is None:
+                    raise rq_contract.RemoteQueryFailure(
+                        'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
+                    )
+                client = (
+                    http_client
+                    if http_client is not None
+                    else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
+                )
+                stats = rq_contract.RemoteQueryRunStats()
+                yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
+                receipt = self._produce_remote_query(
+                    parsed,
+                    creds,
+                    client,
+                    timings.started_at,
+                    stats,
+                    clickhouse_client_factory=clickhouse_client_factory,
+                    timings=timings,
+                    tracing=tracing,
+                )
+            except BaseException as error:
+                if client is not None:
+                    with tracing.abort_span():
+                        rq_upload.safe_abort(client, creds)
+                # The root span's counters mirror the stats the failure event carries; the
+                # failure classification rides the same closed event error-code vocabulary, and
+                # an admission failure before the run's stats exist carries all-zero counters.
+                terminal_stats = stats if stats is not None else rq_contract.RemoteQueryRunStats()
+                if not isinstance(error, Exception):
+                    # The stream was terminated mid-run (cancellation or an emit callback
+                    # failure): the root span closes with a fixed classification and the signal
+                    # re-raises, never swallowed into an ordinary query failure.
+                    tracing.fail('interrupted', terminal_stats)
+                    raise
+                tracing.fail(
+                    error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
+                )
+                yield rq_events.query_failure_event(error, timings, stats)
+                return
+            tracing.succeed(stats)
+            yield rq_contract.RemoteQueryEvent(
+                'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
+            )
+        finally:
+            # The run's only flush, best-effort: the root span finishes here at the latest and
+            # the singleton is never shut down.
+            tracing.close()
 
+    def _produce_remote_query(
+        self,
+        request: rq_contract.RemoteQueryRequest,
+        creds: rq_upload.UploadCredentials,
+        client: rq_upload.UploadClient,
+        started_at: float,
+        stats: rq_contract.RemoteQueryRunStats,
+        clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
+        timings: rq_timing.RemoteQueryProducerTimings | None = None,
+        tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
+    ) -> dict[str, Any]:
+        """Execute the validated query once and return the compact run receipt.
 
-def _default_client_factory(check: 'ClickhouseCheck', timeout_seconds: int) -> ClickhouseClient:
-    """Create the per-run client from the matched check.
+        The query runs exactly once, through a dedicated client whose query retries are
+        disabled; it is never wrapped in a probe and never executed twice. Row lines are read
+        from the streamed response incrementally and encoded one row at a time.
 
-    `timeout_seconds` is the remaining run wall, so the send/receive timeout bounds a
-    single silent socket read inside the run deadline rather than the check's own (short)
-    `read_timeout`; the client-side deadline guard remains the authoritative cumulative
-    bound.
-    """
-    factory = getattr(check, 'create_remote_query_client', None)
-    if factory is None:
-        raise rq_contract.RemoteQueryFailure(
-            'target_unavailable', 'The matched ClickHouse check cannot create a remote query client.'
-        )
-    return factory(send_receive_timeout=timeout_seconds)
+        Producer phases: client creation, stream open, header/column building, and descriptor
+        registration are database setup; every raw stream read is a database fetch; the row loop
+        is encode and page build (with any upload `add_row` triggers nested inside it); page
+        uploads and finalize are accounted by the shared source-page writer. The native
+        producer spans open at exactly these phase boundaries — `tracing` is fail-open and
+        additive to the timing accumulator.
+        """
+        delivery = request.result_delivery
+        limits = delivery.limits
+        deadline = started_at + limits.timeout_ms / 1000
+        timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+        tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
 
+        def guard() -> None:
+            rq_events.raise_if_timed_out(deadline)
+            rq_events.raise_if_cancelled(self._check)
 
-# ---------------------------------------------------------------------------
-# Target resolution
-# ---------------------------------------------------------------------------
-
-
-def _check_matches_target(check: 'ClickhouseCheck', target: rq_contract.RemoteQueryTarget) -> bool:
-    """Whether the supplied check admits the target.
-
-    A database_instance selector matches by rendered identifier; a tuple selector matches
-    the check's configured endpoint and database. Selecting zero, one, or many matching
-    checks across the Agent's loaded checks is the Agent's own responsibility; this
-    predicate answers for the one check the bridge supplied.
-    """
-    if target.database_instance is not None:
-        return getattr(check, 'database_identifier', None) == target.database_instance
-    return _target_from_check(check) == target
-
-
-def _target_from_check(check: 'ClickhouseCheck') -> rq_contract.RemoteQueryTarget | None:
-    config = getattr(check, '_config', None)
-    if config is None:
-        return None
-
-    try:
-        # The wire contract is {host, port, dbname}; the ClickHouse instance config spells
-        # them {server, port, db}.
-        return rq_contract.RemoteQueryTarget(host=config.server, port=config.port, dbname=config.db)
-    except (AttributeError, ValidationError):
-        return None
-
-
-# ---------------------------------------------------------------------------
-# Check capability implementation
-# ---------------------------------------------------------------------------
-
-
-def iter_agent_rpc_stream_events(
-    request: Any,
-    check: 'ClickhouseCheck',
-    http_client: rq_upload.UploadClient | None = None,
-    clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
-    timings: rq_timing.RemoteQueryProducerTimings | None = None,
-) -> Iterator[rq_contract.RemoteQueryEvent]:
-    """Execute on the supplied check; emit only status and the intake receipt.
-
-    The produce hook is `produce_remote_query` itself, its adapter-owned phase boundaries
-    opening the native producer spans. Once the request is admitted — validation and the
-    allowlist — the run opens its native producer spans fail-open through
-    `open_remote_query_producer_tracing`: a root span on the request's trace context
-    covering the admission failures below, the abort span around the failure tail's upload
-    abort, and the terminal status; every span failure is swallowed without changing an
-    event, a receipt, a retry, or an error.
-    """
-    timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
-    stats = None
-    client = None
-    creds = None
-    tracing = rq_tracing.NULL_PRODUCER_TRACING
-    try:
+        clickhouse_client = None
         try:
-            parsed = rq_events.validate_request(request, REMOTE_QUERY_QUERY_ALLOWLIST)
-            # Native producer spans cover every admitted run — the admission failures below
-            # included — as a root span on the request's trace context, additive to the
-            # timing accumulator and the event contract, fail-open through every boundary.
-            tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'clickhouse')
-            tracing.open_root(parsed.result_delivery)
-            if not _check_matches_target(check, parsed.target):
-                raise rq_contract.RemoteQueryFailure(
-                    'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
-                )
-            creds = rq_upload.resolve_upload_credentials(
-                parsed.result_delivery, timings.started_at, parsed.trace_context
-            )
-            if not creds.api_key or not creds.app_key:
-                raise rq_contract.RemoteQueryFailure(
-                    'credentials_unavailable',
-                    'Remote query upload requires api_key and app_key to be configured on the Agent.',
-                )
-            if getattr(check, '_pool_manager', None) is None:
-                raise rq_contract.RemoteQueryFailure(
-                    'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
-                )
-            client = (
-                http_client
-                if http_client is not None
-                else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
-            )
-            stats = rq_contract.RemoteQueryRunStats()
-            yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
-            receipt = produce_remote_query(
-                parsed,
-                check,
-                creds,
-                client,
-                timings.started_at,
-                stats,
-                clickhouse_client_factory=clickhouse_client_factory,
-                timings=timings,
-                tracing=tracing,
-            )
-        except BaseException as error:
-            if client is not None:
-                with tracing.abort_span():
-                    rq_upload.safe_abort(client, creds)
-            # The root span's counters mirror the stats the failure event carries; the
-            # failure classification rides the same closed event error-code vocabulary, and
-            # an admission failure before the run's stats exist carries all-zero counters.
-            terminal_stats = stats if stats is not None else rq_contract.RemoteQueryRunStats()
-            if not isinstance(error, Exception):
-                # The stream was terminated mid-run (cancellation or an emit callback
-                # failure): the root span closes with a fixed classification and the signal
-                # re-raises, never swallowed into an ordinary query failure.
-                tracing.fail('interrupted', terminal_stats)
+            try:
+                # The first database-setup segment: client creation. The send/receive timeout
+                # derives from the remaining wall, not the full delivered budget, so a client
+                # created late cannot wait past the run-wide deadline.
+                with timings.phase('database_setup'), tracing.phase('database_setup'):
+                    timeout_seconds = max(1, math.ceil(deadline - time.monotonic()))
+                    if clickhouse_client_factory is not None:
+                        clickhouse_client = clickhouse_client_factory(self._check, timeout_seconds)
+                    else:
+                        clickhouse_client = self._default_client_factory(timeout_seconds)
+            except rq_contract.RemoteQueryFailure:
                 raise
-            tracing.fail(
-                error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
+            except Exception:
+                # A connection-level failure: the matched instance could not be reached or refused
+                # the request. Never echo the underlying text or traceback (either can quote
+                # identifiers or credentials embedded in connection error strings).
+                LOGGER.debug('Remote query client creation failed')
+                raise rq_contract.RemoteQueryFailure(
+                    'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
+                ) from None
+            try:
+                receipt = _run_streamed_query(
+                    request,
+                    clickhouse_client,
+                    creds,
+                    client,
+                    self._check.hostname,
+                    guard,
+                    stats,
+                    deadline,
+                    timings,
+                    tracing,
+                )
+            except rq_contract.RemoteQueryFailure:
+                raise
+            except clickhouse_errors.OperationalError:
+                # A transport-level failure: the request never got a usable server response.
+                LOGGER.debug('Remote query transport failed')
+                raise rq_contract.RemoteQueryFailure(
+                    'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
+                ) from None
+            except (
+                TimeoutError,
+                ConnectionError,
+                urllib3.exceptions.ReadTimeoutError,
+                urllib3.exceptions.ProtocolError,
+            ):
+                # The stream died mid-read: server-side cancellation (max_execution_time or
+                # cancel-on-close) or a dropped connection. Both are retryable for the run.
+                LOGGER.debug('Remote query stream failed mid-stream')
+                raise rq_contract.RemoteQueryFailure(
+                    'timeout',
+                    'The remote query stream was interrupted (server cancellation or connection failure).',
+                    True,
+                ) from None
+            except clickhouse_errors.DatabaseError:
+                # The server answered with an error (bad SQL, missing table, permissions), or
+                # the client refused a request-level setting. The instance is reachable, the
+                # run is not. Never echo the underlying message: it can quote query text.
+                LOGGER.debug('Remote query rejected by the server')
+                raise rq_contract.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
+            except Exception:
+                # Fixed text only: an unexpected exception can carry raw row fragments or query
+                # text.
+                LOGGER.error('Remote query execution failed')
+                raise rq_contract.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
+            return receipt
+        finally:
+            # The streamed response is owned and closed by _run_streamed_query; the client owns
+            # no pool of its own, so closing it is a no-op for the shared connection pool.
+            if clickhouse_client is not None:
+                try:
+                    clickhouse_client.close()
+                except Exception:
+                    LOGGER.debug('Unable to close the remote query client')
+
+    def _default_client_factory(self, timeout_seconds: int) -> ClickhouseClient:
+        """Create the per-run client from the matched check.
+
+        `timeout_seconds` is the remaining run wall, so the send/receive timeout bounds a
+        single silent socket read inside the run deadline rather than the check's own (short)
+        `read_timeout`; the client-side deadline guard remains the authoritative cumulative
+        bound.
+        """
+        factory = getattr(self._check, 'create_remote_query_client', None)
+        if factory is None:
+            raise rq_contract.RemoteQueryFailure(
+                'target_unavailable', 'The matched ClickHouse check cannot create a remote query client.'
             )
-            yield rq_events.query_failure_event(error, timings, stats)
-            return
-        tracing.succeed(stats)
-        yield rq_contract.RemoteQueryEvent(
-            'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
-        )
-    finally:
-        # The run's only flush, best-effort: the root span finishes here at the latest and
-        # the singleton is never shut down.
-        tracing.close()
+        return factory(send_receive_timeout=timeout_seconds)
+
+    def _check_matches_target(self, target: rq_contract.RemoteQueryTarget) -> bool:
+        """Whether the composed check admits the target.
+
+        A database_instance selector matches by rendered identifier; a tuple selector matches
+        the check's configured endpoint and database. Selecting zero, one, or many matching
+        checks across the Agent's loaded checks is the Agent's own responsibility; this
+        predicate answers for the one check the bridge supplied.
+        """
+        if target.database_instance is not None:
+            return getattr(self._check, 'database_identifier', None) == target.database_instance
+        return self._target_from_check() == target
+
+    def _target_from_check(self) -> rq_contract.RemoteQueryTarget | None:
+        config = getattr(self._check, '_config', None)
+        if config is None:
+            return None
+
+        try:
+            # The wire contract is {host, port, dbname}; the ClickHouse instance config spells
+            # them {server, port, db}.
+            return rq_contract.RemoteQueryTarget(host=config.server, port=config.port, dbname=config.db)
+        except (AttributeError, ValidationError):
+            return None

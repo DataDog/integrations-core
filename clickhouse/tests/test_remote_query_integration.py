@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.clickhouse import remote_query
-from datadog_checks.clickhouse.remote_query import iter_agent_rpc_stream_events
+from datadog_checks.clickhouse.remote_query import ClickhouseRemoteQueryHandler
 
 from .remote_query_fakes import (
     BASE_URL,
@@ -105,7 +105,7 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
     fake = FakeUploadClient()
 
     # No client factory is injected: the real check creates the per-run client itself.
-    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
+    events = list(ClickhouseRemoteQueryHandler(check).execute(request, http_client=fake))
 
     final = assert_success(events)
     pages = assembled_pages(fake)
@@ -146,7 +146,7 @@ def test_remote_query_binary_proof_query_preserves_nul_payload_against_real_clic
     fake = FakeUploadClient()
 
     request = real_server_request(instance, remote_query.REMOTE_QUERY_BINARY_QUERY)
-    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
+    events = list(ClickhouseRemoteQueryHandler(check).execute(request, http_client=fake))
 
     assert_success(events)
     (page,) = assembled_pages(fake).values()
@@ -179,7 +179,7 @@ def test_remote_query_allowlisted_proof_queries_execute_against_real_clickhouse(
     fake = FakeUploadClient()
 
     request = real_server_request(instance, query, include_schema=include_schema)
-    events = list(iter_agent_rpc_stream_events(request, check, fake, None))
+    events = list(ClickhouseRemoteQueryHandler(check).execute(request, http_client=fake))
 
     final = assert_success(events)
     pages = assembled_pages(fake)

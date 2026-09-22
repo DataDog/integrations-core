@@ -10,7 +10,7 @@ import logging
 import os
 import re
 from collections import deque
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable
 from os.path import basename
 from pathlib import Path
 from typing import (
@@ -69,8 +69,8 @@ if TYPE_CHECKING:
     from datadog_checks.base.utils.discovery import Service
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
-    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEmit, RemoteQueryEvent
-    from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
+    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEmit
+    from datadog_checks.base.utils.remote_queries.handler import RemoteQueryHandler
 
 inspect: _module_inspect = lazy_loader.load('inspect')
 traceback: _module_traceback = lazy_loader.load('traceback')
@@ -1620,16 +1620,25 @@ class AgentCheck(object):
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
 
-    # Opt in per operation; ordinary monitoring checks support neither operation.
-    remote_query_operations: frozenset[str] = frozenset()
+    def get_remote_query_handler(self) -> RemoteQueryHandler | None:
+        """The check's composed remote-query capability, or None when it has none.
+
+        Integrations that support remote queries return one handler here, composed with
+        the check; the hook may use a function-local import so ordinary monitoring
+        startup never imports the optional remote-query runtime. A fresh, cheap handler
+        per bridge call is expected: handlers hold the check they serve, never shared
+        request state.
+        """
+        return None
 
     def run_remote_query(self, request_json: str | bytes | bytearray, emit: RemoteQueryEmit) -> None:
         """Agent bridge entry point for the optional remote-query capability.
 
-        Integrations declare `remote_query_operations` and implement the corresponding
-        `resolve_remote_query` / `execute_remote_query` hooks, not this dispatcher.
-        Requests are decoded JSON objects; each hook validates its operation's schema
-        before accessing database state. Only metadata events cross `emit`, never rows.
+        The dispatcher acquires one optional handler through `get_remote_query_handler`
+        and dispatches through it: the handler's `operations` advertises the operations
+        it supports, and its `resolve`/`execute` implement them. Requests are decoded
+        JSON objects; the handler validates its operation's schema before accessing
+        database state. Only metadata events cross `emit`, never rows.
 
         The Agent pins this loaded check for the call and prevents calls after shutdown.
         This path is independent of scheduled `check()` runs: implementations must use
@@ -1643,6 +1652,10 @@ class AgentCheck(object):
             failed_event,
             parse_agent_rpc_request,
         )
+        from datadog_checks.base.utils.remote_queries.handler import (
+            REMOTE_QUERY_OPERATION_RESOLVE_TARGET,
+            REMOTE_QUERY_OPERATIONS,
+        )
 
         request, timings, failure = parse_agent_rpc_request(request_json)
         if failure is not None:
@@ -1650,7 +1663,7 @@ class AgentCheck(object):
             return
         assert request is not None
         operation = request.get('operation')
-        if operation not in ('resolve_target', 'produce_json_pages'):
+        if not isinstance(operation, str) or operation not in REMOTE_QUERY_OPERATIONS:
             emit_event(
                 emit,
                 failed_event(
@@ -1658,7 +1671,8 @@ class AgentCheck(object):
                 ),
             )
             return
-        if operation not in self.remote_query_operations:
+        handler = self.get_remote_query_handler()
+        if handler is None or operation not in handler.operations:
             emit_event(
                 emit,
                 failed_event(
@@ -1669,25 +1683,11 @@ class AgentCheck(object):
             )
             return
         events = (
-            self.resolve_remote_query(request)
-            if operation == 'resolve_target'
-            else self.execute_remote_query(request, timings)
+            handler.resolve(request)
+            if operation == REMOTE_QUERY_OPERATION_RESOLVE_TARGET
+            else handler.execute(request, timings)
         )
         emit_agent_rpc_events(emit, events)
-
-    def resolve_remote_query(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
-        """Yield the per-check target verdict without executing customer SQL or uploading data."""
-        from datadog_checks.base.utils.remote_queries.events import failed_event
-
-        yield failed_event('unsupported_operation', 'Check does not support remote query resolution.')
-
-    def execute_remote_query(
-        self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings
-    ) -> Iterator[RemoteQueryEvent]:
-        """Yield STARTED then a final receipt or error; upload result bytes outside the bridge."""
-        from datadog_checks.base.utils.remote_queries.events import failed_event
-
-        yield failed_event('unsupported_operation', 'Check does not support remote query execution.')
 
     def check(self, instance):
         # type: (InstanceType) -> None
