@@ -265,8 +265,7 @@ def test_resolve_verdict_reports_sanitized_match_identity():
 
 
 def test_resolve_verdict_reports_autodiscovered_database_with_configured_dbname():
-    """The verdict distinguishes the admitted database from the configured one: the Agent
-    binds both into its fingerprint."""
+    """The verdict distinguishes the requested autodiscovered database from the configured one."""
     pool = FakePool(rows=[(1,)])
     autodiscovery = FakeAutodiscovery(databases=['dogs_0', 'dogs_1'])
     check = make_check(dbname='postgres', pool=pool, autodiscovery=autodiscovery)

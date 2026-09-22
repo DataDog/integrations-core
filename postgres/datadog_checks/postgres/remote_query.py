@@ -734,15 +734,20 @@ def execute_agent_rpc_stream_copy(
 
 
 def iter_agent_resolve_events(request: Any, check: 'PostgreSql') -> Iterator[rq_contract.RemoteQueryEvent]:
-    """Yield the per-check resolve verdict: one MATCHED `final` event or one `error` event.
+    """Tell the Agent whether this loaded Postgres check owns the requested target.
 
-    Resolve evaluates the target against the supplied check's effective monitoring scope
-    with the same matching authority as execute, then reports the sanitized match identity
-    the Agent aggregates across its loaded checks and binds into its match fingerprint.
-    It is side-effect free: no customer SQL, no result delivery, no upload, and no probe of
-    the requested database. An invalid request or an undeterminable eligible set is an
-    error other than target_not_found, so the Agent fails its aggregate resolution instead
-    of skipping the check.
+    The Agent calls this once per loaded Postgres check while resolving a target. Each call
+    yields exactly one verdict: a MATCHED `final` event containing the check's sanitized
+    effective identity, or an `error` event. The Agent aggregates those verdicts to
+    distinguish zero, one, or multiple matching checks and routes execution to the unique
+    match.
+
+    Matching uses the same `_match_check_for_target` authority as execution, including the
+    check's current database-autodiscovery scope. This function never runs customer SQL,
+    probes the requested database, uploads results, or binds a later execution to this
+    response; execution resolves the target again before dispatch. An invalid request or an
+    undeterminable eligible set produces an error other than `target_not_found`, so the
+    Agent fails the whole resolution instead of silently skipping this check.
     """
     started_at = time.monotonic()
     try:
