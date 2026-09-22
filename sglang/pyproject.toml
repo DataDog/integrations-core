@@ -29,7 +29,9 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=37.36.0",
+    # 37.39.0 is the first release with convention-based metrics.yaml discovery for
+    # OpenMetricsBaseCheckV2, which this check relies on to load its metric mappings.
+    "datadog-checks-base>=37.39.0",
 ]
 dynamic = [
     "version",
