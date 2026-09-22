@@ -1,0 +1,9 @@
+services:
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "30000:30000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/sglang_metrics.txt:/usr/share/caddy/sglang_metrics

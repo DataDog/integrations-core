@@ -1,0 +1,200 @@
+{
+  "title": "SGLang Overview",
+  "description": "Monitor SGLang request load, latency percentiles, token throughput, and KV cache efficiency.",
+  "layout_type": "ordered",
+  "template_variables": [
+    {
+      "name": "scope",
+      "prefix": null,
+      "default": "*"
+    },
+    {
+      "name": "model_name",
+      "prefix": "model_name",
+      "default": "*"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "type": "note",
+        "content": "## SGLang\nRequest performance, model throughput, scheduler pressure, and KV cache efficiency. Latency histograms are submitted as distributions, enabling p50, p95, and p99 queries.",
+        "background_color": "vivid_purple",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Running and waiting requests",
+        "requests": [
+          {
+            "q": "sum:sglang.num_requests.running{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "sum:sglang.num_requests.waiting{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Requests per second",
+        "requests": [
+          {
+            "q": "sum:sglang.requests.count{$scope,model_name:$model_name} by {model_name}.as_rate()",
+            "display_type": "bars"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Token throughput",
+        "requests": [
+          {
+            "q": "sum:sglang.prompt_tokens.count{$scope,model_name:$model_name} by {model_name}.as_rate()",
+            "display_type": "line"
+          },
+          {
+            "q": "sum:sglang.generation_tokens.count{$scope,model_name:$model_name} by {model_name}.as_rate()",
+            "display_type": "line"
+          },
+          {
+            "q": "avg:sglang.generation_throughput.tokens_per_second{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Time to first token",
+        "requests": [
+          {
+            "q": "p50:sglang.time_to_first_token.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "p95:sglang.time_to_first_token.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "p99:sglang.time_to_first_token.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Inter-token latency",
+        "requests": [
+          {
+            "q": "p50:sglang.inter_token_latency.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "p95:sglang.inter_token_latency.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "p99:sglang.inter_token_latency.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "End-to-end request latency",
+        "requests": [
+          {
+            "q": "p50:sglang.e2e_request_latency.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "p95:sglang.e2e_request_latency.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "p99:sglang.e2e_request_latency.seconds{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "KV cache usage and hit rate",
+        "requests": [
+          {
+            "q": "avg:sglang.kv_cache.usage{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "avg:sglang.kv_cache.hit_rate{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Scheduler utilization",
+        "requests": [
+          {
+            "q": "avg:sglang.scheduler.utilization{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "area"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Speculative decoding acceptance",
+        "requests": [
+          {
+            "q": "avg:sglang.spec_decode.accept_rate{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          },
+          {
+            "q": "avg:sglang.spec_decode.accept_length{$scope,model_name:$model_name} by {model_name}",
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "SGLang process memory",
+        "requests": [
+          {
+            "q": "avg:sglang.process.resident_memory_bytes{$scope}",
+            "display_type": "line"
+          },
+          {
+            "q": "avg:sglang.process.virtual_memory_bytes{$scope}",
+            "display_type": "line"
+          }
+        ]
+      }
+    }
+  ]
+}
