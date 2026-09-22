@@ -1,0 +1,1 @@
+Pin the generated lint environment to Python 3.13 and resync its pydantic pin with datadog_checks_base, fixing dependency sync failures when ddev runs under Python 3.14.
