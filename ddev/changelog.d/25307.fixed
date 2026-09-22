@@ -1,0 +1,1 @@
+Pin the generated lint environment to the maintained Python version and resync its pydantic pin with datadog_checks_base, fixing dependency sync failures when ddev runs under a newer interpreter than the one CI uses.
