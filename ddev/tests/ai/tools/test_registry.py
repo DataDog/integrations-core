@@ -226,24 +226,43 @@ def test_from_names_fs_tools_share_file_registry(tmp_path):
     assert all(r is registries[0] for r in registries)
 
 
-def test_from_names_threads_integration_root_to_delete_file_tool(tmp_path):
+async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
     integration_root = tmp_path / "my_integration"
+    integration_root.mkdir()
+    file_registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
     registry = ToolRegistry.from_names(
         ["delete_file"],
         scope=SCOPE,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
+        file_registry=file_registry,
         agent_config=make_agent_config(tools=["delete_file"]),
         process_factory=PROCESS_FACTORY,
         integration_root=integration_root,
     )
 
-    tool = registry._tools["delete_file"]
-    assert tool._integration_root == integration_root
+    inside = integration_root / "inside.txt"
+    inside.write_text("x", encoding="utf-8")
+    file_registry.record(OWNER_ID, str(inside), "x")
+    outside = tmp_path / "outside.txt"
+    outside.write_text("x", encoding="utf-8")
+    file_registry.record(OWNER_ID, str(outside), "x")
+
+    outside_result = await registry.run("delete_file", {"path": str(outside)})
+    assert outside_result.success is False
+    assert "outside the integration directory" in outside_result.error
+    assert outside.exists()
+
+    inside_result = await registry.run("delete_file", {"path": str(inside)})
+    assert inside_result.success is True
+    assert not inside.exists()
 
 
-def test_from_names_defaults_integration_root_to_none(tmp_path):
+async def test_from_names_defaults_integration_root_to_none(tmp_path):
     registry = from_names(["delete_file"], tmp_path)
-    assert registry._tools["delete_file"]._integration_root is None
+
+    result = await registry.run("delete_file", {"path": str(tmp_path / "anything.txt")})
+
+    assert result.success is False
+    assert "no resolved integration directory" in result.error
 
 
 # ---------------------------------------------------------------------------

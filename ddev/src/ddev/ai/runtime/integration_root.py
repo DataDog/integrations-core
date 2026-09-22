@@ -29,9 +29,9 @@ def resolve_integration_root(repo_root: Path, runtime_variables: RuntimeVariable
 
     # Imported lazily: `ddev.cli` eagerly imports `ddev.cli.meta.ai`, which imports back
     # into `ddev.ai`, so importing it at module load time here would risk a circular import.
-    from ddev.cli.create._naming import is_valid_integration_name, normalize_package_name
+    from ddev.cli.create._naming import is_creatable_integration_name, normalize_package_name
 
-    if not is_valid_integration_name(integration):
+    if not is_creatable_integration_name(integration):
         return None
 
     normalized = normalize_package_name(integration).strip("_")

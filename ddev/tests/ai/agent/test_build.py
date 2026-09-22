@@ -109,8 +109,9 @@ def test_build_runtime_propagates_context_to_tool_registry(file_registry, mocker
     )
 
 
-def test_runtime_factory_forwards_integration_root_to_tool_registry(file_registry, tmp_path):
+async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(file_registry, tmp_path):
     integration_root = tmp_path / "my_integration"
+    integration_root.mkdir()
     provider = MagicMock()
     provider.build_agent.return_value = MagicMock()
     provider_registry = AgentProviderRegistry()
@@ -119,11 +120,25 @@ def test_runtime_factory_forwards_integration_root_to_tool_registry(file_registr
         provider_registry=provider_registry, file_registry=file_registry, integration_root=integration_root
     )
     config = make_agent_config(provider="test", tools=["delete_file"])
+    scope = AgentScope("p1", AgentRole.PHASE, "p1")
 
-    runtime = build_runtime(factory, config, scope=AgentScope("p1", AgentRole.PHASE, "p1"))
+    runtime = build_runtime(factory, config, scope=scope)
 
-    tool = runtime.tool_registry._tools["delete_file"]
-    assert tool._integration_root == integration_root
+    inside = integration_root / "inside.txt"
+    inside.write_text("x", encoding="utf-8")
+    file_registry.record(scope.owner_id, str(inside), "x")
+    outside = tmp_path / "outside.txt"
+    outside.write_text("x", encoding="utf-8")
+    file_registry.record(scope.owner_id, str(outside), "x")
+
+    outside_result = await runtime.tool_registry.run("delete_file", {"path": str(outside)})
+    assert outside_result.success is False
+    assert "outside the integration directory" in outside_result.error
+    assert outside.exists()
+
+    inside_result = await runtime.tool_registry.run("delete_file", {"path": str(inside)})
+    assert inside_result.success is True
+    assert not inside.exists()
 
 
 def test_build_runtime_reuses_shared_file_registry(file_registry):

@@ -34,3 +34,12 @@ def test_resolve_integration_root_rejects_path_separators(tmp_path, value) -> No
     normalization and let `integration` name an arbitrary directory outside the
     intended integration root."""
     assert resolve_integration_root(tmp_path, {"integration": value}) is None
+
+
+@pytest.mark.parametrize("value", ["datadog_operator", "Datadog Checks", "DATADOG-anything"])
+def test_resolve_integration_root_rejects_reserved_datadog_prefix(tmp_path, value) -> None:
+    """`ddev create` itself rejects any name starting with `datadog`
+    (`ddev/cli/create/_common.py:_validate_integration_name`); a value like
+    "datadog_operator" would otherwise normalize to an existing, unrelated repository
+    directory and grant delete_file access to it."""
+    assert resolve_integration_root(tmp_path, {"integration": value}) is None

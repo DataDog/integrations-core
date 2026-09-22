@@ -18,6 +18,18 @@ def is_valid_integration_name(name: str) -> bool:
     return bool(VALID_INTEGRATION_NAME.match(name))
 
 
+def is_creatable_integration_name(name: str) -> bool:
+    """Return True iff `ddev create` would accept `name` as a new integration name.
+
+    This is the full policy `_validate_integration_name` (`ddev/cli/create/_common.py`)
+    enforces: the character-set check above, plus the reserved `datadog` prefix. Callers
+    outside the CLI (e.g. resolving an integration's directory ahead of scaffolding) must
+    use this rather than `is_valid_integration_name` alone, or a name that only fails the
+    reserved-prefix rule would slip through unrejected.
+    """
+    return is_valid_integration_name(name) and not name.lower().startswith('datadog')
+
+
 def normalize_package_name(name: str) -> str:
     """Lowercase and collapse separators to underscore (used for directory and Python package names)."""
     return re.sub(r'[-_. ]+', '_', name).lower()
