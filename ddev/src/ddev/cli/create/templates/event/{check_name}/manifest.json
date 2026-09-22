@@ -29,10 +29,9 @@
         "source_type_name": "{integration_name}",
         "events": {{
           "creates_events": true
-        }},
+        }}
     }},
     "monitors": {{}},
     "saved_views": {{}}
   }},{pricing_plan}{terms}{author_info}
 }}
-

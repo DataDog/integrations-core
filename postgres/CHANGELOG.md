@@ -29,7 +29,7 @@
 * Build and cache relation queries once instead of rebuilding them for each database on every check run. ([#25052](https://github.com/DataDog/integrations-core/pull/25052))
 * Collect per-database autodiscovery metrics in a single pass over the discovered databases to reduce connection pool churn. ([#25061](https://github.com/DataDog/integrations-core/pull/25061))
 
-## 23.11.0 / 2026-08-05
+## 23.11.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:
 
