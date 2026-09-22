@@ -12,18 +12,43 @@ from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPEN
 from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
 
 from datadog_checks.base import ensure_unicode
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_docker_hostname
 
-from .common import HERE, INSTANCE
+from .common import HERE
+from .zero_buckets import EXPORTER_PORT, FAKEINTAKE_PORT, build_instances
 
 
 @pytest.fixture(scope="session")
-def dd_environment():
+def dd_environment(dd_save_state):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     log_patterns = ['Server is ready to receive web requests']
 
-    with docker_run(compose_file, log_patterns=log_patterns, sleep=10):
-        yield INSTANCE
+    hostname = get_docker_hostname()
+    exporter_url = f'http://{hostname}:{EXPORTER_PORT}'
+    fakeintake_url = f'http://{hostname}:{FAKEINTAKE_PORT}'
+
+    endpoints = [
+        f'{fakeintake_url}/fakeintake/health',
+        f'{exporter_url}/control/stats',
+    ]
+
+    with docker_run(compose_file, log_patterns=log_patterns, endpoints=endpoints, sleep=10):
+        dd_save_state(
+            'zero_buckets',
+            {
+                'exporter_url': exporter_url,
+                'fakeintake_url': fakeintake_url,
+            },
+        )
+        # The Agent daemon scrapes the zero-buckets exporter with both
+        # distribution variants (plain and with counters) and forwards to the
+        # fake intake, so tests can assert on what actually left the host.
+        yield (
+            {'instances': build_instances(hostname, EXPORTER_PORT)},
+            {
+                'env_vars': {'DD_DD_URL': fakeintake_url},
+            },
+        )
 
 
 @pytest.fixture

@@ -5,3 +5,20 @@ services:
      - ./config:/etc/prometheus
     ports:
      - 9090:9090
+
+  # Phase-controllable exporter serving the zero-bound histogram fixtures for
+  # the zero-bucket E2E test. See zero-buckets/exporter.py.
+  zero-buckets-exporter:
+    image: python:3.13-alpine
+    volumes:
+      - ./zero-buckets/exporter.py:/app/exporter.py:ro
+    command: ["python", "/app/exporter.py"]
+    ports:
+      - "8999:8999"
+
+  # Local catch-all intake so the zero-bucket E2E test can assert on the
+  # payloads the Agent daemon actually forwarded (sketches and series).
+  zero-buckets-fakeintake:
+    image: datadog/fakeintake:latest
+    ports:
+      - "8107:80"
