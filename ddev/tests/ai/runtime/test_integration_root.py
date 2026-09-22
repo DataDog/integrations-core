@@ -26,3 +26,11 @@ def test_resolve_integration_root_missing_input_fails_closed(tmp_path) -> None:
 @pytest.mark.parametrize("value", ["", "   ", "---", None, 123])
 def test_resolve_integration_root_invalid_value_fails_closed(tmp_path, value) -> None:
     assert resolve_integration_root(tmp_path, {"integration": value}) is None
+
+
+@pytest.mark.parametrize("value", ["ddev/src", "../escape", "/etc", "a/b/c"])
+def test_resolve_integration_root_rejects_path_separators(tmp_path, value) -> None:
+    """normalize_package_name only touches `-_. `, so a slash would otherwise survive
+    normalization and let `integration` name an arbitrary directory outside the
+    intended integration root."""
+    assert resolve_integration_root(tmp_path, {"integration": value}) is None

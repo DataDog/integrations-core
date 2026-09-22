@@ -11,8 +11,6 @@ from ddev.ai.tools.fs.delete_file import DeleteFileTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
-from .conftest import OWNER_ID
-
 
 @pytest.fixture
 async def known_file_in_root(create_tool: CreateFileTool, integration_root: Path) -> Path:
@@ -21,20 +19,24 @@ async def known_file_in_root(create_tool: CreateFileTool, integration_root: Path
     return f
 
 
-def test_tool_name(registry: FileRegistry, integration_root: Path):
-    assert DeleteFileTool(registry, OWNER_ID, integration_root).name == "delete_file"
+def test_tool_name(registry: FileRegistry, owner_id: str, integration_root: Path):
+    assert DeleteFileTool(registry, owner_id, integration_root).name == "delete_file"
 
 
-async def test_delete_file_success(delete_tool: DeleteFileTool, registry: FileRegistry, known_file_in_root: Path):
+async def test_delete_file_success(
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, known_file_in_root: Path
+):
     result = await delete_tool.run({"path": str(known_file_in_root)})
 
     assert result.success is True
     assert not known_file_in_root.exists()
-    assert registry.is_known(OWNER_ID, str(known_file_in_root)) is False
+    assert registry.is_known(owner_id, str(known_file_in_root)) is False
 
 
-async def test_delete_file_fails_closed_without_integration_root(registry: FileRegistry, known_file_in_root: Path):
-    tool = DeleteFileTool(registry, OWNER_ID, None)
+async def test_delete_file_fails_closed_without_integration_root(
+    registry: FileRegistry, owner_id: str, known_file_in_root: Path
+):
+    tool = DeleteFileTool(registry, owner_id, None)
 
     result = await tool.run({"path": str(known_file_in_root)})
 
@@ -47,13 +49,14 @@ async def test_delete_file_fails_closed_without_integration_root(registry: FileR
 async def test_delete_file_refuses_outside_integration_root(
     delete_tool: DeleteFileTool,
     registry: FileRegistry,
+    owner_id: str,
     integration_root: Path,
     tmp_path: Path,
     use_dotdot_escape: bool,
 ):
     outside = tmp_path / "outside.txt"
     outside.write_text("x", encoding="utf-8")
-    registry.record(OWNER_ID, str(outside), "x")
+    registry.record(owner_id, str(outside), "x")
     path = str(integration_root / ".." / "outside.txt") if use_dotdot_escape else str(outside)
 
     result = await delete_tool.run({"path": path})
@@ -64,13 +67,13 @@ async def test_delete_file_refuses_outside_integration_root(
 
 
 async def test_delete_file_refuses_symlinked_parent_escape(
-    delete_tool: DeleteFileTool, registry: FileRegistry, integration_root: Path, tmp_path: Path
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, integration_root: Path, tmp_path: Path
 ):
     outside = tmp_path / "outside_dir"
     outside.mkdir()
     target = outside / "secret.txt"
     target.write_text("x", encoding="utf-8")
-    registry.record(OWNER_ID, str(target), "x")
+    registry.record(owner_id, str(target), "x")
 
     link = integration_root / "linked"
     link.symlink_to(outside)
@@ -83,11 +86,11 @@ async def test_delete_file_refuses_symlinked_parent_escape(
 
 
 async def test_delete_file_refuses_directory(
-    delete_tool: DeleteFileTool, registry: FileRegistry, integration_root: Path
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, integration_root: Path
 ):
     d = integration_root / "subdir"
     d.mkdir()
-    registry.record(OWNER_ID, str(d), "")
+    registry.record(owner_id, str(d), "")
 
     result = await delete_tool.run({"path": str(d)})
 
@@ -97,11 +100,11 @@ async def test_delete_file_refuses_directory(
 
 
 async def test_delete_file_refuses_symlink_to_file(
-    delete_tool: DeleteFileTool, registry: FileRegistry, integration_root: Path, known_file_in_root: Path
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, integration_root: Path, known_file_in_root: Path
 ):
     link = integration_root / "link.py"
     link.symlink_to(known_file_in_root)
-    registry.record(OWNER_ID, str(link), "")
+    registry.record(owner_id, str(link), "")
 
     result = await delete_tool.run({"path": str(link)})
 
@@ -122,17 +125,31 @@ async def test_delete_file_refuses_unknown_file(delete_tool: DeleteFileTool, int
     assert f.exists()
 
 
-async def test_delete_file_refuses_file_only_another_owner_read(registry: FileRegistry, integration_root: Path):
+async def test_delete_file_refuses_file_only_another_owner_read(
+    registry: FileRegistry, owner_id: str, integration_root: Path
+):
     f = integration_root / "shared.py"
     f.write_text("x", encoding="utf-8")
     registry.record("other-agent", str(f), "x")
 
-    tool = DeleteFileTool(registry, OWNER_ID, integration_root)
+    tool = DeleteFileTool(registry, owner_id, integration_root)
     result = await tool.run({"path": str(f)})
 
     assert result.success is False
     assert "Not authorized" in result.error
     assert f.exists()
+
+
+async def test_delete_file_refuses_stale_content(delete_tool: DeleteFileTool, known_file_in_root: Path):
+    """The registry's is_known check alone doesn't catch a file changed since it was last
+    read or created; the current content must be verified before it is destroyed."""
+    known_file_in_root.write_text("changed externally\n", encoding="utf-8")
+
+    result = await delete_tool.run({"path": str(known_file_in_root)})
+
+    assert result.success is False
+    assert "Re-read and retry" in result.error
+    assert known_file_in_root.exists()
 
 
 @pytest.mark.parametrize(
@@ -149,12 +166,12 @@ async def test_delete_file_refuses_file_only_another_owner_read(registry: FileRe
     ],
 )
 async def test_delete_file_refuses_protected_structural_paths(
-    delete_tool: DeleteFileTool, registry: FileRegistry, integration_root: Path, relative: str
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, integration_root: Path, relative: str
 ):
     f = integration_root / relative
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text("x", encoding="utf-8")
-    registry.record(OWNER_ID, str(f), "x")
+    registry.record(owner_id, str(f), "x")
 
     result = await delete_tool.run({"path": str(f)})
 
@@ -164,18 +181,18 @@ async def test_delete_file_refuses_protected_structural_paths(
 
 
 @pytest.mark.parametrize("filename", [".env", "secret.pem", "private.key"])
-async def test_delete_file_refuses_deny_pattern_files(tmp_path: Path, filename: str):
+async def test_delete_file_refuses_deny_pattern_files(owner_id: str, tmp_path: Path, filename: str):
     # Deny patterns must be enforced even inside write_root/integration_root, unlike
     # ordinary writes, so this uses the default deny patterns rather than the
     # `permissive_policy` fixture (which disables them for the other tests in this module).
     integration_root = tmp_path / "my_integration"
     integration_root.mkdir()
     registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    tool = DeleteFileTool(registry, OWNER_ID, integration_root)
+    tool = DeleteFileTool(registry, owner_id, integration_root)
 
     f = integration_root / filename
     f.write_text("secret", encoding="utf-8")
-    registry.record(OWNER_ID, str(f), "secret")
+    registry.record(owner_id, str(f), "secret")
 
     result = await tool.run({"path": str(f)})
 
@@ -185,10 +202,10 @@ async def test_delete_file_refuses_deny_pattern_files(tmp_path: Path, filename: 
 
 
 async def test_delete_file_missing_path_is_an_error(
-    delete_tool: DeleteFileTool, registry: FileRegistry, integration_root: Path
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, integration_root: Path
 ):
     f = integration_root / "gone.py"
-    registry.record(OWNER_ID, str(f), "x")
+    registry.record(owner_id, str(f), "x")
 
     result = await delete_tool.run({"path": str(f)})
 
@@ -197,11 +214,11 @@ async def test_delete_file_missing_path_is_an_error(
 
 
 async def test_delete_file_oserror_on_unlink(
-    delete_tool: DeleteFileTool, registry: FileRegistry, known_file_in_root: Path
+    delete_tool: DeleteFileTool, registry: FileRegistry, owner_id: str, known_file_in_root: Path
 ):
     with patch("pathlib.Path.unlink", side_effect=PermissionError("permission denied")):
         result = await delete_tool.run({"path": str(known_file_in_root)})
 
     assert result.success is False
     assert result.error is not None
-    assert registry.is_known(OWNER_ID, str(known_file_in_root)) is True
+    assert registry.is_known(owner_id, str(known_file_in_root)) is True

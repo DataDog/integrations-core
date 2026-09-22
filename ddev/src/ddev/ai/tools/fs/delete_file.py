@@ -88,9 +88,6 @@ class DeleteFileTool(FileRegistryTool[DeleteFileInput]):
         if path.is_dir():
             return ToolResult(success=False, error=f"Delete denied: {path} is a directory")
 
-        if fail := self._assert_known(str(path)):
-            return fail
-
         if is_protected_structural_path(path.relative_to(self._integration_root)):
             return ToolResult(success=False, error=f"Delete denied: {path} is a protected structural file")
 
@@ -98,6 +95,12 @@ class DeleteFileTool(FileRegistryTool[DeleteFileInput]):
             return ToolResult(success=False, error=f"Delete denied by policy: {path}")
 
         async with self._registry.lock_for(str(path)):
+            # Verified under the same lock create/edit/append use for their own mutations,
+            # so a concurrent write to this path can't slip in between the check and the
+            # unlink below and get silently destroyed.
+            _, fail = self._read_verified(str(path))
+            if fail:
+                return fail
             try:
                 path.unlink()
             except FileNotFoundError:
