@@ -76,7 +76,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 When `collect_events` is enabled, the Cisco Catalyst Center integration submits each Catalyst Center
 assurance event as a Datadog event. The title is the event name, the body carries the reason,
-sub-reason, failure category and result reported by the appliance, and the alert type is derived from
+sub-reason, failure category, and result reported by the appliance, and the alert type is derived from
 the event's syslog severity: Emergency through Error become errors, Warning becomes a warning, and
 Notice and Info become informational.
 
