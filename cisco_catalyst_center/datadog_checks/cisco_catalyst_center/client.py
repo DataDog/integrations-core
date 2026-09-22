@@ -67,10 +67,17 @@ class CatalystCenterClient:
 
     @staticmethod
     def _normalize_host(host: str) -> str:
-        """Accept a bare hostname or a full URL, always return an https base URL."""
+        """Accept a bare hostname or a full URL, always return an https base URL.
+
+        ``spec.yaml`` tells users not to include a scheme, but a user who includes ``http://``
+        anyway gets upgraded rather than silently sent over an unencrypted connection: the
+        docstring's guarantee holds even when the input ignores the documented contract.
+        """
         host = host.rstrip('/')
-        if host.startswith(('http://', 'https://')):
-            return host
+        for scheme in ('https://', 'http://'):
+            if host.startswith(scheme):
+                host = host[len(scheme) :]
+                break
         return f'https://{host}'
 
     def _resolve_refresh_buffer(self, buffer_seconds: int) -> int:
@@ -169,6 +176,27 @@ class CatalystCenterClient:
             correlation_id=self._correlation_id(response),
         )
 
+    def _retry_once_on_unauthorized(self, path: str, response: Any, send: Callable[[], Any]) -> Any:
+        """Refresh the token once and retry ``send`` if ``response`` is a 401; otherwise pass it through.
+
+        Shared by :meth:`_get_body` and :meth:`_post_body`. Both already call :meth:`_ensure_token`
+        before every attempt, so a 401 reaching here means the server disagrees with the client's
+        belief that the token is still valid -- a condition equally possible after a GET or a POST.
+        Refreshes and retries exactly once; never loops.
+        """
+        if response.status_code != 401:
+            return response
+
+        self._authenticate()
+        response = send()
+        if response.status_code == 401:
+            raise CatalystApiError(
+                f'Catalyst Center rejected authentication twice for {path}',
+                error_code=401,
+                correlation_id=self._correlation_id(response),
+            )
+        return response
+
     def _get_body(self, path: str, params: dict[str, Any] | None = None) -> Any:
         """Issue one authenticated GET and return the whole validated body.
 
@@ -176,20 +204,12 @@ class CatalystCenterClient:
         raises on every other failure shape.
         """
         url = f'{self.base_url}{path}'
-        response = self._send_with_throttle_retry(
-            path, lambda: self.http.get(url, params=params, extra_headers=self._auth_headers())
-        )
 
-        if response.status_code == 401:
-            # The token aged out mid-cycle. Refresh once and retry with the new token; never loop.
-            self._authenticate()
-            response = self.http.get(url, params=params, extra_headers=self._auth_headers())
-            if response.status_code == 401:
-                raise CatalystApiError(
-                    f'Catalyst Center rejected authentication twice for {path}',
-                    error_code=401,
-                    correlation_id=self._correlation_id(response),
-                )
+        def send() -> Any:
+            return self.http.get(url, params=params, extra_headers=self._auth_headers())
+
+        response = self._send_with_throttle_retry(path, send)
+        response = self._retry_once_on_unauthorized(path, response, send)
 
         if response.status_code >= 400:
             # The body of a 4xx carries Cisco's own errorCode, message and detail, and that
@@ -323,15 +343,16 @@ class CatalystCenterClient:
     def _post_body(self, path: str, body: dict[str, Any]) -> Any:
         """Issue one authenticated POST and return the whole validated body.
 
-        Retries a bounded number of times on a 429, same as :meth:`_get_body`. Unlike
-        :meth:`_get_body` this does not retry on a 401: an analytics query is not idempotent in
-        cost, and a stale token surfacing here means the cycle is already long enough that
-        retrying is the wrong instinct.
+        Re-authenticates exactly once on a 401 and retries a bounded number of times on a 429,
+        same as :meth:`_get_body`.
         """
         url = f'{self.base_url}{path}'
-        response = self._send_with_throttle_retry(
-            path, lambda: self.http.post(url, json=body, extra_headers=self._auth_headers())
-        )
+
+        def send() -> Any:
+            return self.http.post(url, json=body, extra_headers=self._auth_headers())
+
+        response = self._send_with_throttle_retry(path, send)
+        response = self._retry_once_on_unauthorized(path, response, send)
 
         if response.status_code >= 400:
             self._raise_from_status_body(response, path)
@@ -422,18 +443,4 @@ class CatalystCenterClient:
         payload = self._get(path, params)
         if not isinstance(payload, dict):
             raise CatalystApiError(f'Expected an object from {path}, got {type(payload).__name__}')
-        return payload
-
-    def get_scalar(self, path: str, params: dict[str, Any] | None = None) -> int:
-        """Fetch a count endpoint, whose response field is a bare integer."""
-        payload = self._get(path, params)
-        if not isinstance(payload, int):
-            raise CatalystApiError(f'Expected an integer from {path}, got {type(payload).__name__}')
-        return payload
-
-    def get_bare_array(self, path: str, params: dict[str, Any] | None = None) -> list[Any]:
-        """Fetch an endpoint that answers with a naked JSON array and no envelope."""
-        payload = self._get(path, params)
-        if not isinstance(payload, list):
-            raise CatalystApiError(f'Expected an array from {path}, got {type(payload).__name__}')
         return payload

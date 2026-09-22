@@ -4,11 +4,12 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 
 import pytest
 
 from datadog_checks.base.types import InstanceType
+from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 
 AUTH_PATH = '/dna/system/api/v1/auth/token'
@@ -24,6 +25,17 @@ class _Response:
 
     def json(self) -> Any:
         return self._payload
+
+
+def _to_response(item: Any) -> _Response:
+    """Build a response from a script entry.
+
+    A plain value becomes a 200 with that value as the body. The ``{'status_code': ...,
+    'json': ...}`` shape overrides both, so a script can also inject a failure.
+    """
+    if isinstance(item, dict) and 'status_code' in item and 'json' in item:
+        return _Response(item['json'], item['status_code'], item.get('headers'))
+    return _Response(item)
 
 
 class ScriptedHttp:
@@ -56,9 +68,7 @@ class ScriptedHttp:
 
     def _next(self, exhausted: Any = None) -> _Response:
         item = self._script.pop(0) if self._script else (exhausted or self.EXHAUSTED)
-        if isinstance(item, dict) and 'status_code' in item and 'json' in item:
-            return _Response(item['json'], item['status_code'], item.get('headers'))
-        return _Response(item)
+        return _to_response(item)
 
     def get(self, url: str, params: dict[str, Any] | None = None, **options: Any) -> _Response:
         self.requests.append({'url': url, 'params': params or {}, 'extra_headers': options.get('extra_headers', {})})
@@ -89,6 +99,10 @@ class ViewRoutedHttp(ScriptedHttp):
     ``by_path`` routes on the request path instead, for collectors that also read a second
     endpoint. It is checked first, because that endpoint takes no ``view`` parameter and would
     otherwise fall through to the ``None`` view.
+
+    Either mapping's values may also be the ``{'status_code': ..., 'json': ...}`` override shape
+    :class:`ScriptedHttp` uses, to inject a failure for one specific path or view without
+    disturbing every other endpoint the same cycle touches.
     """
 
     def __init__(self, by_view: dict[str | None, Any], by_path: dict[str, Any] | None = None) -> None:
@@ -101,8 +115,8 @@ class ViewRoutedHttp(ScriptedHttp):
         self.requests.append({'url': url, 'params': params, 'extra_headers': options.get('extra_headers', {})})
         for path, payload in self._by_path.items():
             if url.endswith(path):
-                return _Response(payload)
-        return _Response(self._by_view[params.get('view')])
+                return _to_response(payload)
+        return _to_response(self._by_view[params.get('view')])
 
 
 @pytest.fixture
@@ -116,9 +130,31 @@ def instance() -> InstanceType:
 
 
 @pytest.fixture
+def check(instance: InstanceType) -> CiscoCatalystCenterCheck:
+    return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
+
+
+@pytest.fixture
 def http_script() -> list[Any]:
     """Overridden indirectly by the ``respond`` helpers."""
     return []
+
+
+@pytest.fixture
+def clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[float], None]:
+    """Freeze the clock the window arithmetic reads, and return a way to advance it.
+
+    Time is a system boundary, and here it is the input under test. Two calls landing in the same
+    millisecond are indistinguishable from a cycle whose window came out empty, so a test on the
+    real clock would be asserting on how fast it happened to run.
+    """
+    current = {'seconds': 1_755_000_000.0}
+    monkeypatch.setattr('datadog_checks.cisco_catalyst_center.check.time.time', lambda: current['seconds'])
+
+    def advance(seconds: float) -> None:
+        current['seconds'] += seconds
+
+    return advance
 
 
 @pytest.fixture

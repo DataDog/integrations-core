@@ -148,8 +148,9 @@ def test_interface_metadata_given_a_captured_interface_returns_the_expected_payl
         'raw_id_type': 'interface_uuid',
         'id_tags': ['interface:GigabitEthernet0/0'],
         'name': 'GigabitEthernet0/0',
-        # The data API returns both of these as null on every interface; the intent API is the
-        # source, and only when metadata enrichment is switched on.
+        # The data API returns both of these as null on every interface. The intent API sweep in
+        # collect_interfaces fills them in; this test calls create_interface_metadata directly on
+        # the raw data-API record, bypassing that sweep.
         'description': '',
         'mac_address': '',
         'admin_status': STATUS_UP,

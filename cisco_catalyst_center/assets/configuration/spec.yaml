@@ -149,6 +149,10 @@ files:
         type: array
         items:
           type: string
+          enum:
+            - ospf
+            - isis
+            - static
         example:
           - ospf
         default:
@@ -180,7 +184,11 @@ files:
         Set to `true` to poll Cisco Catalyst Center assurance events. Each event is submitted as a
         Datadog event carrying its diagnosis, and the same events are counted by severity, device
         family, event type and device. Each cycle polls only the window since the previous one, so
-        an event is submitted exactly once.
+        an event is submitted once per continuous Agent run.
+
+        The resume point is kept in memory: an Agent restart forgets it and re-polls
+        `events_initial_lookback_minutes`, re-submitting events already reported before the
+        restart. `event.count` and `event.total.count` double-count that window when this happens.
 
         If Catalyst Center is already configured to notify Datadog directly, leave this disabled:
         both paths submit the same events, so enabling both submits everything twice.

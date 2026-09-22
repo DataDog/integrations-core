@@ -30,7 +30,7 @@ from .collectors import (
     collect_topology,
 )
 from .config_models import ConfigMixin
-from .constants import EVENT_DEFAULT_LOOKBACK_MINUTES, EVENT_WINDOW_MAX_SECONDS
+from .constants import EVENT_DEFAULT_LOOKBACK_MINUTES, EVENT_WINDOW_MAX_SECONDS, L3_TOPOLOGY_TYPES
 from .errors import CatalystApiError
 from .ndm_models import (
     DeviceMetadata,
@@ -61,10 +61,6 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             self._client = CatalystCenterClient(self.instance, http=self.http, log=self.log)
         return self._client
 
-    def _option(self, name: str, default: Any) -> Any:
-        value = self.instance.get(name)
-        return default if value is None else value
-
     def _interface_views(self) -> tuple[str, ...]:
         """Which interface views to request.
 
@@ -73,9 +69,9 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         paginated call -- which is why statistics and PoE are separately switchable.
         """
         views = ['configuration']
-        if self._option('collect_interface_statistics', True):
+        if self.config.collect_interface_statistics:
             views.append('statistics')
-        if self._option('collect_interface_poe', False):
+        if self.config.collect_interface_poe:
             views.append('poE')
         return tuple(views)
 
@@ -92,7 +88,10 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         """
         now = int(time.time() * 1000)
         if self._events_polled_through is None:
-            lookback = int(self._option('events_initial_lookback_minutes', EVENT_DEFAULT_LOOKBACK_MINUTES))
+            # Read directly from the instance rather than `self.config`: this method is exercised
+            # in tests against a check built without running the `run()` lifecycle, so the config
+            # model (populated by a `check_initializations` step `run()` triggers) is not there yet.
+            lookback = self.instance.get('events_initial_lookback_minutes') or EVENT_DEFAULT_LOOKBACK_MINUTES
             start = now - lookback * 60 * 1000
         else:
             start = self._events_polled_through
@@ -163,8 +162,11 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # The instance's `tags` option is a convention every integration honours, so it is
         # folded in ahead of anything this check derives itself.
         base_tags = list(self.instance.get('tags') or [])
-        base_tags.append(f'catalyst_center_host:{self.client.base_url}')
-        namespace = self._option('namespace', 'default')
+        # The tag must echo back what the user configured, not the client's normalized base URL:
+        # `spec.yaml` tells users not to include a scheme, so the normalized, https-prefixed URL
+        # can never equal the configured value.
+        base_tags.append(f'catalyst_center_host:{self.instance["catalyst_center_host"]}')
+        namespace = self.config.namespace or 'default'
 
         devices: list[dict[str, Any]] = []
 
@@ -173,7 +175,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             devices = collect_devices(
                 self,
                 self.client,
-                collect_wireless=bool(self._option('collect_wireless', False)),
+                collect_wireless=bool(self.config.collect_wireless),
                 base_tags=base_tags,
                 namespace=namespace,
             )
@@ -183,14 +185,14 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # needs, and if it fails there is nothing to fan out over anyway.
         healthy = self._run('devices', _devices)
 
-        if devices and self._option('collect_stacks', True):
+        if devices and self.config.collect_stacks:
             healthy &= self._run(
                 'stacks', lambda: collect_stacks(self, self.client, devices, base_tags=base_tags, namespace=namespace)
             )
 
         interfaces: dict[str, dict[str, Any]] = {}
 
-        if self._option('collect_interfaces', True):
+        if self.config.collect_interfaces:
 
             def _interfaces() -> None:
                 nonlocal interfaces
@@ -206,7 +208,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
 
         sites: list[dict[str, Any]] = []
 
-        if self._option('collect_site_health', True):
+        if self.config.collect_site_health:
 
             def _sites() -> None:
                 nonlocal sites
@@ -218,7 +220,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         healthy &= self._run('network health', lambda: collect_network_health(self, self.client, base_tags=base_tags))
         healthy &= self._run('client health', lambda: collect_client_health(self, self.client, base_tags=base_tags))
 
-        if self._option('collect_client_experience', True):
+        if self.config.collect_client_experience:
             # One POST, aggregated on the appliance, so no per-client series.
             healthy &= self._run(
                 'client experience',
@@ -226,10 +228,12 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             )
 
         # -- P1 domains, all gated off by default -------------------------------------
-        if self._option('collect_topology', False):
+        if self.config.collect_topology:
             healthy &= self._run('topology', lambda: collect_topology(self, self.client, base_tags=base_tags))
             healthy &= self._run('site topology', lambda: collect_site_topology(self, self.client, base_tags=base_tags))
-            for topology_type in self._option('l3_topology_types', ['ospf']):
+            # constants.py's first entry is the documented default, keeping spec.yaml and this
+            # fallback from silently disagreeing about which graph type is collected out of the box.
+            for topology_type in self.config.l3_topology_types or (L3_TOPOLOGY_TYPES[0],):
                 # partial rather than a lambda: it binds topology_type eagerly, so the loop
                 # variable cannot be rebound before _run invokes the collector.
                 healthy &= self._run(
@@ -237,13 +241,13 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     partial(collect_l3_topology, self, self.client, topology_type, base_tags=base_tags),
                 )
 
-        if self._option('collect_sda_fabric', False):
+        if self.config.collect_sda_fabric:
             healthy &= self._run(
                 'SD-Access fabric',
                 lambda: collect_sda_fabric(self, self.client, devices, base_tags=base_tags),
             )
 
-        if self._option('collect_assurance_issues', False):
+        if self.config.collect_assurance_issues:
 
             def _issues() -> None:
                 # Only advanced on success, so a failed cycle re-reports rather than skipping.
@@ -256,7 +260,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
 
             healthy &= self._run('assurance issues', _issues)
 
-        if self._option('collect_events', False):
+        if self.config.collect_events:
             window = self._event_window()
             if window is not None:
                 start_time, end_time = window
@@ -272,7 +276,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     # retrying would double-count the groups that did submit.
                     self._events_polled_through = end_time
 
-        if self._option('collect_application_health', False):
+        if self.config.collect_application_health:
             if not sites:
                 self.log.warning(
                     'collect_application_health needs the site list, which comes from '
@@ -285,10 +289,10 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
             )
 
-        if self._option('collect_security', False):
+        if self.config.collect_security:
             healthy &= self._run('security', lambda: collect_security(self, self.client, base_tags=base_tags))
 
-        if self._option('send_ndm_metadata', False):
+        if self.config.send_ndm_metadata:
             healthy &= self._run('NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace))
 
         # A metric rather than a service check: new integrations in this repository do not ship

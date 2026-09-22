@@ -12,14 +12,17 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.cisco_catalyst_center import CiscoCatalystCenterCheck
+from datadog_checks.cisco_catalyst_center.constants import (
+    ASSURANCE_EVENTS_ENDPOINT,
+    CLIENT_HEALTH_ENDPOINT,
+    INTENT_INTERFACES_ENDPOINT,
+    NETWORK_DEVICES_ENDPOINT,
+    NETWORK_HEALTH_ENDPOINT,
+    SITE_HEALTH_SUMMARIES_ENDPOINT,
+)
 
 from .common import load_captured
-from .conftest import ScriptedHttp
-
-
-@pytest.fixture
-def check(instance: InstanceType) -> CiscoCatalystCenterCheck:
-    return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
+from .conftest import ScriptedHttp, ViewRoutedHttp
 
 
 def _serve(check: CiscoCatalystCenterCheck, payload) -> None:
@@ -83,13 +86,84 @@ def test_check_given_one_failing_collector_still_emits_the_others(
     dd_run_check: Callable[..., None], aggregator: AggregatorStub, check: CiscoCatalystCenterCheck
 ) -> None:
     # Devices succeed, then site health fails. Losing one domain must not cost the rest of the
-    # cycle -- otherwise an unreachable corner of the API blinds the whole integration.
-    devices = load_captured('data_network_devices')
+    # cycle -- otherwise an unreachable corner of the API blinds the whole integration. Routing by
+    # path, rather than a fixed-position script, ties the failure to site health specifically, so
+    # the test still targets the right collector if another one's request count changes.
     failure = {'status_code': 500, 'json': {}}
-    # devices, stacks (4 switches), interfaces (configuration + statistics), then site health.
-    check.client.http = ScriptedHttp([devices, *[{'response': {}}] * 4, {'response': []}, {'response': []}, failure])
+    check.client.http = ViewRoutedHttp(
+        by_view={'configuration': {'response': []}, 'statistics': {'response': []}},
+        by_path={
+            NETWORK_DEVICES_ENDPOINT: load_captured('data_network_devices'),
+            '/stack': {'response': {}},
+            INTENT_INTERFACES_ENDPOINT: {'response': []},
+            SITE_HEALTH_SUMMARIES_ENDPOINT: failure,
+            NETWORK_HEALTH_ENDPOINT: {},
+            CLIENT_HEALTH_ENDPOINT: {'response': []},
+        },
+    )
 
     dd_run_check(check)
 
     aggregator.assert_metric('cisco_catalyst_center.device.health', count=4)
     aggregator.assert_metric('cisco_catalyst_center.collection.success', value=0)
+
+
+def test_check_given_two_cycles_polls_consecutive_windows(
+    dd_run_check: Callable[..., None], instance: InstanceType, clock: Callable[[float], None]
+) -> None:
+    # Only the events collector matters here; everything else is switched off so the scripted
+    # HTTP responses don't have to account for calls this test has no opinion on.
+    instance.update(
+        collect_stacks=False,
+        collect_interfaces=False,
+        collect_site_health=False,
+        collect_client_experience=False,
+        collect_events=True,
+    )
+    check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
+    empty_list = {'response': [], 'version': '1.0'}
+    empty_events_page = {'response': [], 'version': '1.0', 'page': {'limit': 20, 'offset': 1, 'count': 0}}
+    # Per cycle: devices, network health, client health, then one call per event device-family group.
+    one_cycle = [empty_list, empty_list, empty_list, *[empty_events_page] * 4]
+    check.client.http = ScriptedHttp([*one_cycle, *one_cycle])
+
+    dd_run_check(check)
+    # Real time barely moves between two calls this fast; without a frozen, advanced clock the
+    # second cycle's window can collide with the first's and get skipped as an inverted window,
+    # which would falsely look identical to consecutive windows never being asserted at all.
+    clock(60)
+    dd_run_check(check)
+
+    event_requests = [r for r in check.client.http.requests if r['url'].endswith(ASSURANCE_EVENTS_ENDPOINT)]
+    first_cycle_ends = {r['params']['endTime'] for r in event_requests[:4]}
+    second_cycle_starts = {r['params']['startTime'] for r in event_requests[4:]}
+    assert first_cycle_ends == second_cycle_starts, 'second cycle must resume exactly where the first one ended'
+
+
+def test_check_given_two_cycles_reports_a_still_open_issue_once(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # `_issues_reported_through` is meant to carry the watermark `collect_assurance_issues` returns
+    # from one cycle into the next, so an issue that stays open is reported as an event once, not
+    # on every cycle it remains open. Nothing exercises that hand-off through two real
+    # `dd_run_check` cycles -- the collector-level watermark logic itself is already covered
+    # directly in test_p1_collectors.py.
+    instance.update(
+        collect_stacks=False,
+        collect_interfaces=False,
+        collect_site_health=False,
+        collect_client_experience=False,
+        collect_assurance_issues=True,
+    )
+    check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
+    empty_list = {'response': [], 'version': '1.0'}
+    issue = {'issueId': 'issue-1', 'mostRecentOccurredTime': 1_700_000_000_000}
+    issues_page = {'response': [issue], 'version': '1.0'}
+    # Per cycle: devices, network health, client health, then assurance issues.
+    one_cycle = [empty_list, empty_list, empty_list, issues_page]
+    check.client.http = ScriptedHttp([*one_cycle, *one_cycle])
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert len(aggregator.events) == 1, 'an issue that is still open on the second cycle must not get a second event'

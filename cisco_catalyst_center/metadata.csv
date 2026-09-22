@@ -1,15 +1,15 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 cisco_catalyst_center.application.health,gauge,,,,Per-application health score from 1 to 10 at a site.,1,cisco_catalyst_center,application health,,"application,site_id"
-cisco_catalyst_center.application.jitter,gauge,,,,Application jitter in milliseconds.,-1,cisco_catalyst_center,application jitter,,"application,site_id"
-cisco_catalyst_center.application.latency.client,gauge,,,,Client-side network latency in milliseconds.,-1,cisco_catalyst_center,app client latency,,"application,site_id"
-cisco_catalyst_center.application.latency.network,gauge,,,,Network latency for the application in milliseconds.,-1,cisco_catalyst_center,app network latency,,"application,site_id"
-cisco_catalyst_center.application.latency.server,gauge,,,,Server-side network latency in milliseconds.,-1,cisco_catalyst_center,app server latency,,"application,site_id"
-cisco_catalyst_center.application.latency.server_app,gauge,,,,Application server processing latency in milliseconds.,-1,cisco_catalyst_center,app server proc latency,,"application,site_id"
+cisco_catalyst_center.application.jitter,gauge,,millisecond,,Application jitter in milliseconds.,-1,cisco_catalyst_center,application jitter,,"application,site_id"
+cisco_catalyst_center.application.latency.client,gauge,,millisecond,,Client-side network latency in milliseconds.,-1,cisco_catalyst_center,app client latency,,"application,site_id"
+cisco_catalyst_center.application.latency.network,gauge,,millisecond,,Network latency for the application in milliseconds.,-1,cisco_catalyst_center,app network latency,,"application,site_id"
+cisco_catalyst_center.application.latency.server,gauge,,millisecond,,Server-side network latency in milliseconds.,-1,cisco_catalyst_center,app server latency,,"application,site_id"
+cisco_catalyst_center.application.latency.server_app,gauge,,millisecond,,Application server processing latency in milliseconds.,-1,cisco_catalyst_center,app server proc latency,,"application,site_id"
 cisco_catalyst_center.application.packet_loss,gauge,,percent,,Percentage of application packets lost.,-1,cisco_catalyst_center,application packet loss,,"application,site_id"
-cisco_catalyst_center.application.throughput,gauge,,,,Application throughput in bits per second.,0,cisco_catalyst_center,application throughput,,"application,site_id"
+cisco_catalyst_center.application.throughput,gauge,,bit,second,Application throughput in bits per second.,0,cisco_catalyst_center,application throughput,,"application,site_id"
 cisco_catalyst_center.application.usage,gauge,,byte,,Data transferred by the application at a site.,0,cisco_catalyst_center,application usage,,"application,site_id"
 cisco_catalyst_center.client.count,gauge,,,,Clients of a given connection type.,0,cisco_catalyst_center,client count,,client_type
-cisco_catalyst_center.client.data_rate.avg,gauge,,,,Average client data rate in bits per second.,1,cisco_catalyst_center,client data rate,,"ssid,band"
+cisco_catalyst_center.client.data_rate.avg,gauge,,bit,second,Average client data rate in bits per second.,1,cisco_catalyst_center,client data rate,,"ssid,band"
 cisco_catalyst_center.client.health,gauge,,,,Client health score from 1 to 10 for a connection type.,1,cisco_catalyst_center,client health,,client_type
 cisco_catalyst_center.client.observed.count,gauge,,,,Distinct clients observed in the group.,0,cisco_catalyst_center,clients observed,,"ssid,band"
 cisco_catalyst_center.client.onboarding.assoc.duration,gauge,,millisecond,,Average time spent in the association phase of onboarding.,-1,cisco_catalyst_center,assoc duration,,"ssid,band"
@@ -17,7 +17,7 @@ cisco_catalyst_center.client.onboarding.auth.duration,gauge,,millisecond,,Averag
 cisco_catalyst_center.client.onboarding.dhcp.duration,gauge,,millisecond,,Average time spent acquiring an address via DHCP.,-1,cisco_catalyst_center,dhcp duration,,"ssid,band"
 cisco_catalyst_center.client.onboarding.duration,gauge,,millisecond,,Average time for a client to complete onboarding.,-1,cisco_catalyst_center,onboarding duration,,"ssid,band"
 cisco_catalyst_center.client.onboarding.duration.max,gauge,,millisecond,,Longest time for a client to complete onboarding.,-1,cisco_catalyst_center,onboarding max,,"ssid,band"
-cisco_catalyst_center.client.rssi.avg,gauge,,,,Average client received signal strength in dBm.,1,cisco_catalyst_center,client rssi,,"ssid,band"
+cisco_catalyst_center.client.rssi.avg,gauge,,decibel-milliwatt,,Average client received signal strength in dBm.,1,cisco_catalyst_center,client rssi,,"ssid,band"
 cisco_catalyst_center.client.snr.avg,gauge,,,,Average client signal-to-noise ratio in dB.,1,cisco_catalyst_center,client snr,,"ssid,band"
 cisco_catalyst_center.client.unique.count,gauge,,,,Unique clients of a given connection type.,0,cisco_catalyst_center,client unique count,,client_type
 cisco_catalyst_center.client.usage,gauge,,byte,,Data transferred by clients in the group.,0,cisco_catalyst_center,client usage,,"ssid,band"
@@ -27,7 +27,7 @@ cisco_catalyst_center.device.ap.count,gauge,,,,Number of access points registere
 cisco_catalyst_center.device.ap.radio.air_quality,gauge,,percent,,Radio channel air quality.,1,cisco_catalyst_center,radio air quality,,"device_name,radio_band,radio_slot"
 cisco_catalyst_center.device.ap.radio.client.count,gauge,,,,Number of clients associated with the radio.,0,cisco_catalyst_center,radio client count,,"device_name,radio_band,radio_slot"
 cisco_catalyst_center.device.ap.radio.interference,gauge,,percent,,Radio channel interference.,-1,cisco_catalyst_center,radio interference,,"device_name,radio_band,radio_slot"
-cisco_catalyst_center.device.ap.radio.noise,gauge,,,,Radio channel noise floor in dBm.,-1,cisco_catalyst_center,radio noise,,"device_name,radio_band,radio_slot"
+cisco_catalyst_center.device.ap.radio.noise,gauge,,decibel-milliwatt,,Radio channel noise floor in dBm.,-1,cisco_catalyst_center,radio noise,,"device_name,radio_band,radio_slot"
 cisco_catalyst_center.device.ap.radio.traffic_utilization,gauge,,percent,,Radio channel utilization attributable to Wi-Fi traffic.,-1,cisco_catalyst_center,radio traffic utilization,,"device_name,radio_band,radio_slot"
 cisco_catalyst_center.device.ap.radio.utilization,gauge,,percent,,Total radio channel utilization.,-1,cisco_catalyst_center,radio utilization,,"device_name,radio_band,radio_slot"
 cisco_catalyst_center.device.client.count,gauge,,,,Number of clients connected to the device.,0,cisco_catalyst_center,client count,,"device_name,device_family"
@@ -62,13 +62,13 @@ cisco_catalyst_center.device.stack.member.count,gauge,,,,Number of switches in t
 cisco_catalyst_center.device.stack.member.priority,gauge,,,,Stack member election priority.,0,cisco_catalyst_center,stack member priority,,"device_name,stack_member"
 cisco_catalyst_center.device.stack.member.state,gauge,,,,Stack member readiness where 1 means READY and 0 means any other state.,1,cisco_catalyst_center,stack member state,,"device_name,stack_role"
 cisco_catalyst_center.device.stack.port.status,gauge,,,,Stack port synchronization where 1 means in sync and 0 means out of sync.,1,cisco_catalyst_center,stack port status,,"device_name,stack_port"
-cisco_catalyst_center.device.temperature.avg,gauge,,,,Average temperature across the device sensors in degrees Celsius.,-1,cisco_catalyst_center,avg temperature,,device_name
-cisco_catalyst_center.device.temperature.max,gauge,,,,Maximum temperature across the device sensors in degrees Celsius.,-1,cisco_catalyst_center,max temperature,,device_name
-cisco_catalyst_center.device.throughput.rx,gauge,,,,Sum of inbound throughput across the device interfaces in bits per second.,0,cisco_catalyst_center,device rx throughput,,device_ip
-cisco_catalyst_center.device.throughput.tx,gauge,,,,Sum of outbound throughput across the device interfaces in bits per second.,0,cisco_catalyst_center,device tx throughput,,device_ip
+cisco_catalyst_center.device.temperature.avg,gauge,,degree celsius,,Average temperature across the device sensors in degrees Celsius.,-1,cisco_catalyst_center,avg temperature,,device_name
+cisco_catalyst_center.device.temperature.max,gauge,,degree celsius,,Maximum temperature across the device sensors in degrees Celsius.,-1,cisco_catalyst_center,max temperature,,device_name
+cisco_catalyst_center.device.throughput.rx,gauge,,bit,second,Sum of inbound throughput across the device interfaces in bits per second.,0,cisco_catalyst_center,device rx throughput,,device_ip
+cisco_catalyst_center.device.throughput.tx,gauge,,bit,second,Sum of outbound throughput across the device interfaces in bits per second.,0,cisco_catalyst_center,device tx throughput,,device_ip
 cisco_catalyst_center.device.uplink.count,gauge,,,,Interfaces on the device identified as WAN uplinks.,0,cisco_catalyst_center,uplink count,,device_ip
-cisco_catalyst_center.device.uplink.throughput.rx,gauge,,,,Inbound throughput across the device uplinks in bits per second.,0,cisco_catalyst_center,uplink rx throughput,,device_ip
-cisco_catalyst_center.device.uplink.throughput.tx,gauge,,,,Outbound throughput across the device uplinks in bits per second.,0,cisco_catalyst_center,uplink tx throughput,,device_ip
+cisco_catalyst_center.device.uplink.throughput.rx,gauge,,bit,second,Inbound throughput across the device uplinks in bits per second.,0,cisco_catalyst_center,uplink rx throughput,,device_ip
+cisco_catalyst_center.device.uplink.throughput.tx,gauge,,bit,second,Outbound throughput across the device uplinks in bits per second.,0,cisco_catalyst_center,uplink tx throughput,,device_ip
 cisco_catalyst_center.device.uptime,gauge,,second,,Time since the device last rebooted.,0,cisco_catalyst_center,uptime,,device_name
 cisco_catalyst_center.device.utilization.score,gauge,,,,Utilization health score across the device radios from 1 to 10.,1,cisco_catalyst_center,radio utilization score,,device_name
 cisco_catalyst_center.device.wan_link.utilization,gauge,,percent,,WAN link utilization for the device.,-1,cisco_catalyst_center,wan link utilization,,device_name
@@ -96,11 +96,11 @@ cisco_catalyst_center.fabric.vn.health,gauge,,percent,,Percentage of virtual net
 cisco_catalyst_center.fabric.vn.services.health,gauge,,percent,,Percentage of virtual network services in good health.,1,cisco_catalyst_center,vn services health,,virtual_network
 cisco_catalyst_center.fabric.vn.status.health,gauge,,percent,,Percentage of virtual network devices with healthy status.,1,cisco_catalyst_center,vn status health,,virtual_network
 cisco_catalyst_center.interface.admin_status,gauge,,,,Interface administrative state where 1 means up and 0 means down.,1,cisco_catalyst_center,interface admin status,,"device_ip,interface"
-cisco_catalyst_center.interface.poe.power_admin_max,gauge,,,,Administratively configured maximum power for this port in watts.,0,cisco_catalyst_center,poe power admin max,,"device_ip,interface"
-cisco_catalyst_center.interface.poe.power_budget,gauge,,,,Power budgeted to the powered device on this port in watts.,0,cisco_catalyst_center,poe power budget,,"device_ip,interface"
-cisco_catalyst_center.interface.poe.power_consumed,gauge,,,,Power drawn by the powered device on this port in watts.,0,cisco_catalyst_center,poe power consumed,,"device_ip,interface"
-cisco_catalyst_center.interface.poe.power_max_drawn,gauge,,,,Highest power drawn by the powered device on this port in watts.,0,cisco_catalyst_center,poe power max drawn,,"device_ip,interface"
-cisco_catalyst_center.interface.poe.power_remaining,gauge,,,,Power still available to this port in watts.,1,cisco_catalyst_center,poe power remaining,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_admin_max,gauge,,watt,,Administratively configured maximum power for this port in watts.,0,cisco_catalyst_center,poe power admin max,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_budget,gauge,,watt,,Power budgeted to the powered device on this port in watts.,0,cisco_catalyst_center,poe power budget,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_consumed,gauge,,watt,,Power drawn by the powered device on this port in watts.,0,cisco_catalyst_center,poe power consumed,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_max_drawn,gauge,,watt,,Highest power drawn by the powered device on this port in watts.,0,cisco_catalyst_center,poe power max drawn,,"device_ip,interface"
+cisco_catalyst_center.interface.poe.power_remaining,gauge,,watt,,Power still available to this port in watts.,1,cisco_catalyst_center,poe power remaining,,"device_ip,interface"
 cisco_catalyst_center.interface.rx.discard,gauge,,percent,,Percentage of inbound packets discarded.,-1,cisco_catalyst_center,interface rx discard,,"device_ip,interface"
 cisco_catalyst_center.interface.rx.error,gauge,,percent,,Percentage of inbound packets with errors.,-1,cisco_catalyst_center,interface rx error,,"device_ip,interface"
 cisco_catalyst_center.interface.rx.rate,gauge,,bit,second,Inbound throughput on the interface.,0,cisco_catalyst_center,interface rx rate,,"device_ip,interface"
@@ -129,8 +129,10 @@ cisco_catalyst_center.network.device.poor.count,gauge,,,,Monitored devices in po
 cisco_catalyst_center.network.device.total.count,gauge,,,,Total devices known to Catalyst Center.,0,cisco_catalyst_center,network device total,,catalyst_center_host
 cisco_catalyst_center.network.device.unhealthy.count,gauge,,,,Monitored devices reported as unhealthy.,-1,cisco_catalyst_center,network device unhealthy,,catalyst_center_host
 cisco_catalyst_center.network.health,gauge,,,,Latest overall network health score from 1 to 10.,1,cisco_catalyst_center,network health,,catalyst_center_host
-cisco_catalyst_center.security.rogue.count,gauge,,,,Detected rogue access points and clients.,-1,cisco_catalyst_center,rogue count,,threat_level
-cisco_catalyst_center.security.threat.count,gauge,,,,aWIPS wireless intrusion threats detected.,-1,cisco_catalyst_center,threat count,,threat_type
+cisco_catalyst_center.security.rogue.count,gauge,,,,Detected rogue access points and clients grouped by one dimension.,-1,cisco_catalyst_center,rogue count,,threat_level
+cisco_catalyst_center.security.rogue.total.count,gauge,,,,Detected rogue access points and clients across the whole deployment.,-1,cisco_catalyst_center,rogue total,,catalyst_center_host
+cisco_catalyst_center.security.threat.count,gauge,,,,aWIPS wireless intrusion threats detected grouped by one dimension.,-1,cisco_catalyst_center,threat count,,threat_type
+cisco_catalyst_center.security.threat.total.count,gauge,,,,aWIPS wireless intrusion threats detected across the whole deployment.,-1,cisco_catalyst_center,threat total,,catalyst_center_host
 cisco_catalyst_center.site.client.count,gauge,,,,Clients at the site of a given connection type.,0,cisco_catalyst_center,site client count,,"site_name,client_type"
 cisco_catalyst_center.site.client.data_usage,gauge,,byte,,Data transferred by clients at the site.,0,cisco_catalyst_center,site client data usage,,site_name
 cisco_catalyst_center.site.client.health.count,gauge,,,,Clients of a given connection type at the site in good health.,1,cisco_catalyst_center,site client type healthy,,"site_name,client_type"

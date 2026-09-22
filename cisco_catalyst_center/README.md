@@ -35,8 +35,13 @@ No additional installation is needed on your server.
 ### Event collection
 
 Set `collect_events: true` in `cisco_catalyst_center.d/conf.yaml` to collect Catalyst Center
-assurance events. Each cycle polls the window since the previous one, so an event is submitted
-exactly once.
+assurance events. Each cycle polls the window since the previous one, so an event is submitted once
+per continuous Agent run.
+
+The resume point is kept in memory, not on disk: restarting the Agent forgets it, and the next cycle
+falls back to polling `events_initial_lookback_minutes` again. Events already reported before the
+restart that still fall inside that window are submitted a second time. The `cisco_catalyst_center.event.count`
+and `.event.total.count` metrics have no protection against this and double-count that window.
 
 Polling costs four requests per cycle at minimum, delays each event by up to one collection
 interval, and submits at most 800 events per cycle. Events that occur while the Agent is stopped for
@@ -44,6 +49,16 @@ more than seven days cannot be recovered, because that is the widest window the 
 
 If Catalyst Center is already configured to notify Datadog directly, leave this disabled. Both paths
 carry the same events, so enabling both submits everything twice.
+
+### Network Device Monitoring
+
+Set `send_ndm_metadata: true` in `cisco_catalyst_center.d/conf.yaml` to send device, interface, and
+topology metadata to [Network Device Monitoring][9] (NDM).
+
+The `namespace` option must match the namespace configured on the SNMP check polling the same
+devices. If the two differ, Catalyst Center and SNMP resolve to different NDM devices instead of
+merging into one, and neither integration reports it: the symptom is two half-populated devices in
+the NDM device list rather than an error.
 
 ### Validation
 
@@ -86,3 +101,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cisco_catalyst_center/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/network_monitoring/devices/setup

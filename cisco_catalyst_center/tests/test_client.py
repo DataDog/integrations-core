@@ -68,19 +68,6 @@ def test_get_object_given_real_object_returns_it(client, respond):
     assert 'deviceId' in stack
 
 
-def test_get_scalar_given_count_envelope_returns_int(client, respond):
-    respond(load_captured('intent_network_device_count'))
-
-    assert client.get_scalar('/dna/intent/api/v1/network-device/count') == 4
-
-
-def test_get_bare_array_given_unwrapped_list_returns_items(client, respond):
-    # Some intent endpoints return a naked JSON array with no envelope whatsoever.
-    respond(load_captured('intent_event_series'))
-
-    assert len(client.get_bare_array('/dna/intent/api/v1/event-series')) == 20
-
-
 def test_get_list_given_full_first_page_requests_offset_one_then_next(client, respond_sequence):
     # Offset is 1-based; Catalyst Center rejects offset=0 with errorCode 2511.
     full = {'response': [{'id': n} for n in range(500)], 'version': '1.0'}
@@ -209,8 +196,42 @@ def test_post_object_given_429_retries_and_succeeds(client, respond_sequence, sl
     assert 'aggregateAttributes' in payload
 
 
+def test_post_object_given_expired_token_reauthenticates_and_retries_once(client, respond_sequence):
+    # `_post_body` and `_get_body` share `_retry_once_on_unauthorized`, so this pins that POST is
+    # wired into it at all: an analytics query's token can age out mid-cycle exactly like a GET's.
+    unauthorized = {'status_code': 401, 'json': {'exp': 'token expired at X , now Y'}}
+    requests = respond_sequence([unauthorized, load_captured('data_clients_summary_analytics')])
+
+    payload = client.post_object('/dna/data/api/v1/clients/summaryAnalytics', body={'groupBy': ['ssid']})
+
+    assert 'aggregateAttributes' in payload
+    assert client.auth_count == 2, 'expected one initial auth plus one refresh after the 401'
+    assert len(requests) == 2
+    assert requests[1]['extra_headers']['X-Auth-Token'] == 'token-2', 'retry must not reuse the stale token'
+
+
+def test_post_object_given_repeated_401_raises_instead_of_looping(client, respond_sequence):
+    unauthorized = {'status_code': 401, 'json': {'exp': 'token expired'}}
+    respond_sequence([unauthorized, unauthorized])
+
+    with pytest.raises(CatalystApiError, match='authentication'):
+        client.post_object('/dna/data/api/v1/clients/summaryAnalytics', body={})
+
+    assert client.auth_count == 2, 'must not re-authenticate indefinitely'
+
+
 def test_client_given_host_with_scheme_does_not_double_prefix(instance):
     instance['catalyst_center_host'] = 'https://catalyst.example.com'
+
+    client = CatalystCenterClient(instance, http=None)
+
+    assert client.base_url == 'https://catalyst.example.com'
+
+
+def test_client_given_host_with_http_scheme_upgrades_to_https(instance):
+    # `spec.yaml` documents HTTPS as always-on; a host that ignores its "do not include a
+    # scheme" instruction and supplies `http://` must not get an unencrypted connection instead.
+    instance['catalyst_center_host'] = 'http://catalyst.example.com'
 
     client = CatalystCenterClient(instance, http=None)
 

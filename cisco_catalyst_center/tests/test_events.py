@@ -30,6 +30,7 @@ from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_events
 from datadog_checks.cisco_catalyst_center.constants import EVENT_DEVICE_FAMILY_GROUPS, EVENT_WINDOW_MAX_SECONDS
 from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import load_captured, metric_values
 from .conftest import ScriptedHttp
@@ -81,10 +82,6 @@ DETAILED_EVENT: dict[str, Any] = {
 }
 
 
-def _check(instance: InstanceType) -> CiscoCatalystCenterCheck:
-    return CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
-
-
 def _client(instance: InstanceType, script: list[Any]) -> CatalystCenterClient:
     return CatalystCenterClient(instance, http=ScriptedHttp(script))
 
@@ -101,34 +98,17 @@ def _page(records: list[dict[str, Any]], total: int) -> dict[str, Any]:
     return {'response': records, 'version': '1.0', 'page': {'limit': 20, 'offset': 1, 'count': total}}
 
 
-@pytest.fixture
-def clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[float], None]:
-    """Freeze the clock the window arithmetic reads, and return a way to advance it.
-
-    Time is a system boundary, and here it is the input under test. Two calls landing in the same
-    millisecond are indistinguishable from a cycle whose window came out empty, so a test on the
-    real clock would be asserting on how fast it happened to run.
-    """
-    current = {'seconds': 1_755_000_000.0}
-    monkeypatch.setattr('datadog_checks.cisco_catalyst_center.check.time.time', lambda: current['seconds'])
-
-    def advance(seconds: float) -> None:
-        current['seconds'] += seconds
-
-    return advance
-
-
 # -- the request contract ---------------------------------------------------------------
 
 
 def test_collect_events_asks_for_every_device_family_group_over_the_given_window(
-    instance: InstanceType,
+    instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # deviceFamily is mandatory and the endpoint refuses to mix its four groups in one request
     # (errorCode 2600), so a sweep that skipped a group would never see its events at all.
     client = _client(instance, [])
 
-    collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
+    collect_events(check, client, WINDOW_START, WINDOW_END)
 
     asked = [request['params']['deviceFamily'] for request in client.http.requests]
     assert asked == [
@@ -145,19 +125,19 @@ def test_collect_events_asks_for_every_device_family_group_over_the_given_window
 
 
 def test_collect_events_given_no_events_emits_a_total_of_zero(
-    aggregator: AggregatorStub, instance: InstanceType
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # Zero events is the healthy steady state and a real measurement, so it is reported rather than
     # left as a gap. One submission per family group.
     client = _client(instance, [load_captured('data_assurance_events_empty')])
 
-    collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
+    collect_events(check, client, WINDOW_START, WINDOW_END)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.event.total.count') == [0, 0, 0, 0]
 
 
 def test_collect_events_given_three_records_breaks_them_down_and_emits_one_event_each(
-    aggregator: AggregatorStub, instance: InstanceType
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # The counts say how many; the events say which. Dropping to counts alone discards 65 of the
     # 69 fields on each record, and the diagnosis is in those fields.
@@ -165,41 +145,42 @@ def test_collect_events_given_three_records_breaks_them_down_and_emits_one_event
     # The counts are submitted as counts rather than gauges because events are a delta over a
     # window, not a level: a gauge would report only the most recent window and would not sum
     # across the timeframe a dashboard is showing.
-    collect_events(_check(instance), _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
+    collect_events(check, _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1') == [2]
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'event_name:AP Coverage Hole') == [1]
     aggregator.assert_metric('cisco_catalyst_center.event.total.count', metric_type=aggregator.COUNT)
     aggregator.assert_metric('cisco_catalyst_center.event.count', metric_type=aggregator.COUNT)
     assert len(aggregator.events) == len(EVENTS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_collect_events_given_a_truncated_sweep_reports_the_appliance_total(
-    aggregator: AggregatorStub, instance: InstanceType
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # The page budget can cut a sweep short during an event storm. Counting the records that
     # arrived would report a number that reads healthy while being arbitrarily low, so the total
     # comes from page.count instead.
-    collect_events(_check(instance), _client(instance, [_page(EVENTS, 4096)]), WINDOW_START, WINDOW_END)
+    collect_events(check, _client(instance, [_page(EVENTS, 4096)]), WINDOW_START, WINDOW_END)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.event.total.count')[0] == 4096
 
 
 def test_collect_events_given_one_failing_group_still_collects_the_others(
-    aggregator: AggregatorStub, instance: InstanceType
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # Failing the whole sweep would make the caller retry the window, double-counting whatever the
     # earlier groups already submitted. So a group that fails is skipped instead.
     failure = {'status_code': 400, 'json': load_captured('error_device_family_mandatory')}
     client = _client(instance, [failure, _page(EVENTS, 3)])
 
-    collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
+    collect_events(check, client, WINDOW_START, WINDOW_END)
 
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1') == [2]
 
 
 def test_collect_events_given_every_group_failing_raises_instead_of_reporting_success(
-    instance: InstanceType,
+    instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # Losing one group is worth keeping the rest of the window, but losing all four means nothing
     # was submitted at all -- there is nothing left to double-count by retrying, so this must raise
@@ -208,15 +189,17 @@ def test_collect_events_given_every_group_failing_raises_instead_of_reporting_su
     client = _client(instance, [failure] * len(EVENT_DEVICE_FAMILY_GROUPS))
 
     with pytest.raises(CatalystApiError):
-        collect_events(_check(instance), client, WINDOW_START, WINDOW_END)
+        collect_events(check, client, WINDOW_START, WINDOW_END)
 
 
-def test_collect_events_tags_only_the_bounded_dimensions(aggregator: AggregatorStub, instance: InstanceType) -> None:
+def test_collect_events_tags_only_the_bounded_dimensions(
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
+) -> None:
     # The same record carries clientMac, ipv4 and username. A tag on any of them turns one event
     # into one series, which is unbounded cardinality for a question nobody asks per client.
     records = [{**EVENTS[0], 'clientMac': 'aa:bb:cc:dd:ee:ff', 'ipv4': '10.0.0.9', 'username': 'jsmith'}]
 
-    collect_events(_check(instance), _client(instance, [_page(records, 1)]), WINDOW_START, WINDOW_END)
+    collect_events(check, _client(instance, [_page(records, 1)]), WINDOW_START, WINDOW_END)
 
     keys = {
         tag.split(':', 1)[0]
@@ -230,20 +213,22 @@ def test_collect_events_tags_only_the_bounded_dimensions(aggregator: AggregatorS
 
 
 def test_collect_events_given_a_detailed_record_emits_the_expected_datadog_event(
-    aggregator: AggregatorStub, instance: InstanceType
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     """One record in, one Datadog event out, asserted whole.
 
-    Four things carry the weight. `timestamp` is seconds: the appliance reports epoch
+    Five things carry the weight. `timestamp` is seconds: the appliance reports epoch
     milliseconds, and submitting those unconverted dates every event to the year 57000, which
     silently empties the event stream for the window being viewed. `aggregation_key` is the
     appliance's own id, which is what lets a re-polled window collapse instead of showing each
     event twice. `msg_text` carries what a metric dimension cannot hold -- free text, and the
-    per-client fields. And there is no `host` key at all: Catalyst Center device names are not
+    per-client fields. There is no `host` key at all: Catalyst Center device names are not
     Datadog hostnames, so setting one would invent a host in the infrastructure list, and the
-    device travels as a tag instead.
+    device travels as a tag instead. And the fixture's `severity` is deliberately `0`
+    (Emergency): a plain truthiness check drops a `0` tag value, so this is the case that would
+    silently lose the most severe events' `severity` tag if that check crept back in.
     """
-    collect_events(_check(instance), _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
+    collect_events(check, _client(instance, [_page([DETAILED_EVENT], 1)]), WINDOW_START, WINDOW_END)
 
     assert aggregator.events == [
         {
@@ -260,6 +245,7 @@ def test_collect_events_given_a_detailed_record_emits_the_expected_datadog_event
             'event_type': 'cisco_catalyst_center_assurance',
             'source_type_name': 'cisco_catalyst_center',
             'tags': [
+                'severity:0',
                 'device_family:Unified AP',
                 'event_name:AP Disconnected',
                 'device_name:ap-7',
@@ -282,23 +268,27 @@ def test_collect_events_given_a_detailed_record_emits_the_expected_datadog_event
     ],
 )
 def test_collect_events_maps_syslog_severity_to_alert_type(
-    aggregator: AggregatorStub, instance: InstanceType, severity: object, expected: str
+    aggregator: AggregatorStub,
+    instance: InstanceType,
+    check: CiscoCatalystCenterCheck,
+    severity: object,
+    expected: str,
 ) -> None:
     record = {**DETAILED_EVENT, 'severity': severity}
 
-    collect_events(_check(instance), _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+    collect_events(check, _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
 
     assert aggregator.events[0]['alert_type'] == expected
 
 
 def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(
-    aggregator: AggregatorStub, instance: InstanceType
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:
     # The latest moment the event could have happened, and it keeps the event inside the window a
     # user is looking at rather than at the epoch.
     record = {key: value for key, value in DETAILED_EVENT.items() if key != 'timestamp'}
 
-    collect_events(_check(instance), _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+    collect_events(check, _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
 
     assert aggregator.events[0]['timestamp'] == WINDOW_END // 1000
 
@@ -307,12 +297,10 @@ def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(
 
 
 def test_event_window_given_a_previous_cycle_starts_where_it_ended(
-    instance: InstanceType, clock: Callable[[float], None]
+    check: CiscoCatalystCenterCheck, clock: Callable[[float], None]
 ) -> None:
     # Overlapping windows are the one failure that corrupts the metric invisibly: every event in
     # the overlap is counted twice, and nothing in the data says so.
-    check = _check(instance)
-
     _, first_end = _window(check)
     check._events_polled_through = first_end
     clock(60)
@@ -322,11 +310,10 @@ def test_event_window_given_a_previous_cycle_starts_where_it_ended(
 
 
 def test_event_window_given_a_long_outage_clamps_to_the_widest_accepted_window(
-    instance: InstanceType, clock: Callable[[float], None]
+    check: CiscoCatalystCenterCheck, clock: Callable[[float], None]
 ) -> None:
     # An Agent restarted after a long stop resumes from a cursor the endpoint will not accept: a
     # window wider than seven days answers errorCode 14005 and so collects nothing at all.
-    check = _check(instance)
     check._events_polled_through = 1_000  # epoch milliseconds, so somewhere in 1970
 
     start, end = _window(check)
@@ -335,10 +322,9 @@ def test_event_window_given_a_long_outage_clamps_to_the_widest_accepted_window(
 
 
 def test_event_window_given_a_cursor_in_the_future_skips_the_cycle(
-    instance: InstanceType, clock: Callable[[float], None]
+    check: CiscoCatalystCenterCheck, clock: Callable[[float], None]
 ) -> None:
     # An inverted window is rejected outright, and an empty one has nothing to report.
-    check = _check(instance)
     check._events_polled_through = 4_000_000_000_000  # year 2096
 
     assert check._event_window() is None
@@ -348,7 +334,7 @@ def test_event_window_given_a_configured_lookback_uses_it_for_the_first_cycle(
     instance: InstanceType,
 ) -> None:
     instance['events_initial_lookback_minutes'] = 60
-    check = _check(instance)
+    check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
 
     start, end = _window(check)
 

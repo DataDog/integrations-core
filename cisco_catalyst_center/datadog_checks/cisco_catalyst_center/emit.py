@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from datadog_checks.base import AgentCheck
+
 
 def to_number(value: Any) -> float | None:
     """Coerce to a number, accepting numeric strings. Returns None if it is not numeric.
@@ -34,7 +36,7 @@ def to_number(value: Any) -> float | None:
     return None
 
 
-def emit_gauge(check: Any, name: str, value: Any, tags: list[str]) -> None:
+def emit_gauge(check: AgentCheck, name: str, value: Any, tags: list[str]) -> None:
     """Submit a gauge, skipping absent data. Numeric strings are cast."""
     numeric = to_number(value)
     if numeric is None:
@@ -42,7 +44,7 @@ def emit_gauge(check: Any, name: str, value: Any, tags: list[str]) -> None:
     check.gauge(name, numeric, tags=tags)
 
 
-def emit_score(check: Any, name: str, value: Any, tags: list[str]) -> None:
+def emit_score(check: AgentCheck, name: str, value: Any, tags: list[str]) -> None:
     """Submit a 1-10 health score, additionally treating -1 as absent."""
     numeric = to_number(value)
     if numeric is None or numeric == -1:
@@ -50,7 +52,7 @@ def emit_score(check: Any, name: str, value: Any, tags: list[str]) -> None:
     check.gauge(name, numeric, tags=tags)
 
 
-def emit_watts(check: Any, name: str, value: Any, tags: list[str]) -> None:
+def emit_watts(check: AgentCheck, name: str, value: Any, tags: list[str]) -> None:
     """Submit a PoE power reading given as a unit-suffixed string such as ``"10.5W"``."""
     if not isinstance(value, str):
         emit_gauge(check, name, value, tags)

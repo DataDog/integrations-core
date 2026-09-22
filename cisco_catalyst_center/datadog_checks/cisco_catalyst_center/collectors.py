@@ -13,8 +13,12 @@ four separate per-device fan-outs is one paginated request.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
+from datadog_checks.base import AgentCheck
+
+from .client import CatalystCenterClient
 from .constants import (
     ASSURANCE_EVENTS_ENDPOINT,
     ASSURANCE_ISSUES_ENDPOINT,
@@ -122,7 +126,7 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
     )
 
 
-def _collect_radios(check: Any, record: dict[str, Any], base_tags: list[str]) -> None:
+def _collect_radios(check: AgentCheck, record: dict[str, Any], base_tags: list[str]) -> None:
     """Emit per-radio KPIs from ``apDetails.radios[]``.
 
     ``apDetails`` is null on every non-AP record and ``radios`` can be null on an AP that has not
@@ -151,8 +155,8 @@ def _collect_radios(check: Any, record: dict[str, Any], base_tags: list[str]) ->
 
 
 def collect_devices(
-    check: Any,
-    client: Any,
+    check: AgentCheck,
+    client: CatalystCenterClient,
     collect_wireless: bool,
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
@@ -244,7 +248,7 @@ def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -
     )
 
 
-def _merge_views(client: Any, views: tuple[str, ...]) -> dict[str, dict[str, Any]]:
+def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[str, dict[str, Any]]:
     """Fetch each view and merge the results into one record per interface id.
 
     A view replaces the field set rather than extending it, so the only way to see an
@@ -261,7 +265,7 @@ def _merge_views(client: Any, views: tuple[str, ...]) -> dict[str, dict[str, Any
     return merged
 
 
-def _enrich_metadata(client: Any, merged: dict[str, dict[str, Any]]) -> None:
+def _enrich_metadata(client: CatalystCenterClient, merged: dict[str, dict[str, Any]]) -> None:
     """Fill the interface metadata fields the data API leaves null, from the intent API.
 
     The product brief sources every NDM interface field from the intent API, but the data API is
@@ -274,7 +278,10 @@ def _enrich_metadata(client: Any, merged: dict[str, dict[str, Any]]) -> None:
     unchanged rather than being dropped.
     """
     for record in client.get_list(INTENT_INTERFACES_ENDPOINT):
-        target = merged.get(record.get('id'))
+        interface_id = record.get('id')
+        if interface_id is None:
+            continue
+        target = merged.get(interface_id)
         if target is None:
             continue
         for field in INTENT_INTERFACE_METADATA_FIELDS:
@@ -284,8 +291,8 @@ def _enrich_metadata(client: Any, merged: dict[str, dict[str, Any]]) -> None:
 
 
 def collect_interfaces(
-    check: Any,
-    client: Any,
+    check: AgentCheck,
+    client: CatalystCenterClient,
     views: tuple[str, ...],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
@@ -341,7 +348,9 @@ def collect_interfaces(
     return merged
 
 
-def _emit_device_rollups(check: Any, records: Any, base_tags: list[str], namespace: str) -> None:
+def _emit_device_rollups(
+    check: AgentCheck, records: Iterable[dict[str, Any]], base_tags: list[str], namespace: str
+) -> None:
     """Roll per-interface rates up to per-device and per-uplink totals.
 
     The brief asks for device-level throughput and for aggregate uplink throughput. Both are sums
@@ -412,7 +421,9 @@ def site_tags(record: dict[str, Any]) -> list[str]:
     )
 
 
-def collect_site_health(check: Any, client: Any, base_tags: list[str] | None = None) -> list[dict[str, Any]]:
+def collect_site_health(
+    check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None
+) -> list[dict[str, Any]]:
     """Collect per-site rollups, returning the site records.
 
     The records are returned because application health needs a site on every request, and this
@@ -464,7 +475,7 @@ def collect_site_health(check: Any, client: Any, base_tags: list[str] | None = N
 # -- network health -------------------------------------------------------------------
 
 
-def collect_network_health(check: Any, client: Any, base_tags: list[str] | None = None) -> None:
+def collect_network_health(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the global rollup.
 
     Everything of interest is a top-level sibling of ``response``; ``response`` itself is a
@@ -487,8 +498,8 @@ def collect_network_health(check: Any, client: Any, base_tags: list[str] | None 
 
 
 def collect_stacks(
-    check: Any,
-    client: Any,
+    check: AgentCheck,
+    client: CatalystCenterClient,
     devices: list[dict[str, Any]],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
@@ -557,7 +568,7 @@ def collect_stacks(
 # -- aggregate client health ------------------------------------------------------------
 
 
-def collect_client_health(check: Any, client: Any, base_tags: list[str] | None = None) -> None:
+def collect_client_health(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the org-level client score distribution.
 
     One bulk call, no per-client fan-out. ``scoreValue`` is ``-1`` when Catalyst Center has no
@@ -581,7 +592,7 @@ def collect_client_health(check: Any, client: Any, base_tags: list[str] | None =
 # -- client experience ----------------------------------------------------------------
 
 
-def _emit_aggregates(check: Any, aggregates: list[dict[str, Any]] | None, tags: list[str]) -> None:
+def _emit_aggregates(check: AgentCheck, aggregates: list[dict[str, Any]] | None, tags: list[str]) -> None:
     """Emit one metric per requested (field, function) pair.
 
     A requested aggregate can come back with ``value: null`` when the underlying field has no
@@ -593,8 +604,8 @@ def _emit_aggregates(check: Any, aggregates: list[dict[str, Any]] | None, tags: 
 
 
 def collect_client_experience(
-    check: Any,
-    client: Any,
+    check: AgentCheck,
+    client: CatalystCenterClient,
     group_by: tuple[str, ...] = CLIENT_GROUP_BY_DEFAULT,
     base_tags: list[str] | None = None,
 ) -> None:
@@ -627,7 +638,9 @@ def collect_client_experience(
 # -- topology -------------------------------------------------------------------------
 
 
-def collect_topology(check: Any, client: Any, base_tags: list[str] | None = None) -> dict[str, Any]:
+def collect_topology(
+    check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None
+) -> dict[str, Any]:
     """Collect the CDP/LLDP-derived physical topology, returning it for NDM link building.
 
     ``source`` and ``target`` on each link are device UUIDs, which is what the NDM device record
@@ -660,7 +673,7 @@ def collect_topology(check: Any, client: Any, base_tags: list[str] | None = None
     return {'links': links, 'nodes': nodes}
 
 
-def collect_site_topology(check: Any, client: Any, base_tags: list[str] | None = None) -> None:
+def collect_site_topology(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the size of the site hierarchy.
 
     The brief asks for site topology as hierarchy plus device-to-site mapping. The mapping already
@@ -672,7 +685,9 @@ def collect_site_topology(check: Any, client: Any, base_tags: list[str] | None =
     check.gauge('topology.site.count', len(topology.get('sites') or []), tags=tags)
 
 
-def collect_l3_topology(check: Any, client: Any, topology_type: str, base_tags: list[str] | None = None) -> None:
+def collect_l3_topology(
+    check: AgentCheck, client: CatalystCenterClient, topology_type: str, base_tags: list[str] | None = None
+) -> None:
     """Collect the L3 routing graph size for one topology type.
 
     The brief names OSPF, IS-IS and static. Only counts are emitted: the graph itself belongs in
@@ -688,7 +703,7 @@ def collect_l3_topology(check: Any, client: Any, topology_type: str, base_tags: 
 
 
 def collect_sda_fabric(
-    check: Any, client: Any, devices: list[dict[str, Any]], base_tags: list[str] | None = None
+    check: AgentCheck, client: CatalystCenterClient, devices: list[dict[str, Any]], base_tags: list[str] | None = None
 ) -> None:
     """Collect fabric health and node roles.
 
@@ -741,7 +756,7 @@ def _group_counts(records: list[dict[str, Any]], field: str) -> dict[str, int]:
 
 
 def _count_by(
-    check: Any, metric_name: str, records: list[dict[str, Any]], field: str, tag_key: str, tags: list[str]
+    check: AgentCheck, metric_name: str, records: list[dict[str, Any]], field: str, tag_key: str, tags: list[str]
 ) -> None:
     """Emit a per-value breakdown of ``records`` grouped on one field."""
     for value, count in _group_counts(records, field).items():
@@ -796,8 +811,8 @@ def _issue_payload(record: dict[str, Any], base_tags: list[str]) -> dict[str, An
 
 
 def collect_assurance_issues(
-    check: Any,
-    client: Any,
+    check: AgentCheck,
+    client: CatalystCenterClient,
     base_tags: list[str] | None = None,
     reported_through: int | None = None,
 ) -> int | None:
@@ -890,7 +905,7 @@ def _event_payload(record: dict[str, Any], fallback_timestamp: int, base_tags: l
         'msg_title': str(record.get('name') or 'Catalyst Center assurance event'),
         'msg_text': _event_body(record),
         'alert_type': _event_alert_type(record),
-        'tags': base_tags + [f'{tag_key}:{record[field]}' for field, tag_key in EVENT_TAG_FIELDS if record.get(field)],
+        'tags': base_tags + compact([tag(tag_key, record.get(field)) for field, tag_key in EVENT_TAG_FIELDS]),
     }
     if record.get('id'):
         payload['aggregation_key'] = str(record['id'])
@@ -898,8 +913,8 @@ def _event_payload(record: dict[str, Any], fallback_timestamp: int, base_tags: l
 
 
 def collect_events(
-    check: Any,
-    client: Any,
+    check: AgentCheck,
+    client: CatalystCenterClient,
     start_time: int,
     end_time: int,
     base_tags: list[str] | None = None,
@@ -990,7 +1005,7 @@ def collect_events(
 
 
 def collect_application_health(
-    check: Any, client: Any, sites: list[dict[str, Any]], base_tags: list[str] | None = None
+    check: AgentCheck, client: CatalystCenterClient, sites: list[dict[str, Any]], base_tags: list[str] | None = None
 ) -> None:
     """Collect per-application health and traffic, one call per site.
 
@@ -1034,7 +1049,7 @@ def collect_application_health(
 # -- security -------------------------------------------------------------------------
 
 
-def collect_security(check: Any, client: Any, base_tags: list[str] | None = None) -> None:
+def collect_security(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect rogue device and aWIPS threat counts.
 
     Both are wireless-edge features, so both report nothing on a wired-only deployment. Zero is
@@ -1043,9 +1058,9 @@ def collect_security(check: Any, client: Any, base_tags: list[str] | None = None
     tags = base_tags or []
 
     rogues = client.get_list(SECURITY_ROGUE_ENDPOINT)
-    check.gauge('security.rogue.count', len(rogues), tags=tags)
+    check.gauge('security.rogue.total.count', len(rogues), tags=tags)
     _count_by(check, 'security.rogue.count', rogues, 'threatLevel', 'threat_level', tags)
 
     threats = client.get_list(SECURITY_THREATS_ENDPOINT)
-    check.gauge('security.threat.count', len(threats), tags=tags)
+    check.gauge('security.threat.total.count', len(threats), tags=tags)
     _count_by(check, 'security.threat.count', threats, 'threatType', 'threat_type', tags)

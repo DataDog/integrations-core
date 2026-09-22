@@ -96,7 +96,7 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
-    l3_topology_types: Optional[tuple[str, ...]] = None
+    l3_topology_types: Optional[tuple[Literal['ospf', 'isis', 'static'], ...]] = None
     log_requests: Optional[bool] = None
     max_pages: Optional[int] = Field(None, ge=1)
     metric_patterns: Optional[MetricPatterns] = None
