@@ -13,7 +13,7 @@ sglang.disaggregation.kv_transfer.gigabytes_per_second,gauge,,gigabyte,second,KV
 sglang.disaggregation.kv_transfer.latency_milliseconds,gauge,,millisecond,,KV cache transfer latency.,0,sglang,,,
 sglang.disaggregation.kv_transfer.megabytes,gauge,,megabyte,,KV cache data transferred.,0,sglang,,,
 sglang.disaggregation.prefill_bootstrap_queue,gauge,,,,Requests in the prefill bootstrap queue.,0,sglang,,,
-sglang.disaggregation.prefill_inflight_queue,gauge,,,,Requests currently being prefetched.,0,sglang,,,
+sglang.disaggregation.prefill_inflight_queue,gauge,,,,Requests in the prefill inflight queue.,0,sglang,,,
 sglang.disaggregation.prefill_preallocation_queue,gauge,,,,Requests waiting for prefill preallocation.,0,sglang,,,
 sglang.disaggregation.prefill_retries.count,count,,,,Total number of retried prefill requests.,0,sglang,,,
 sglang.disaggregation.transfer_failures.count,count,,,,Total number of failed KV transfer requests.,0,sglang,,,

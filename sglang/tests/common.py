@@ -53,6 +53,7 @@ HISTOGRAMS = [
     'request.generation_tokens',
 ]
 
+# Histograms are submitted as distributions under the base metric name.
 METRICS.extend(f'{metric}.{suffix}' for metric in HISTOGRAMS for suffix in ('count', 'sum'))
 METRICS = [f'sglang.{metric}' for metric in METRICS]
 HISTOGRAMS = [f'sglang.{metric}' for metric in HISTOGRAMS]

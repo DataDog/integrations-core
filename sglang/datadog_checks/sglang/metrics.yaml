@@ -9,7 +9,8 @@ process_start_time_seconds: process.start_time_seconds
 process_cpu_seconds: process.cpu_seconds
 process_open_fds: process.open_fds
 process_max_fds: process.max_fds
-# Recent SGLang releases namespace this prometheus_client process metric.
+# Compatibility alias: SGLang releases expose either the unprefixed prometheus_client metric or
+# the namespaced metric, not both.
 sglang:process_cpu_seconds: process.cpu_seconds
 
 # API-server metrics.
@@ -71,7 +72,8 @@ sglang:spec_num_steps: spec_decode.steps
 sglang:spec_num_draft_tokens: spec_decode.draft_tokens
 sglang:spec_verify_calls: spec_decode.verify_calls
 
-# Model startup and optional GPU-efficiency metrics.
+# Model startup and optional GPU-efficiency metrics. The startup and weight-load pairs below are
+# compatibility aliases for different SGLang releases; a release exposes one name from each pair.
 sglang:engine_startup_time: startup.seconds
 sglang:engine_load_weights_time: weight_load.seconds
 sglang:startup_time_seconds: startup.seconds

@@ -165,7 +165,9 @@ instances:
     # include_labels: []
 
     ## @param rename_labels - mapping - optional
-    ## A mapping of label names to their new names.
+    ## A mapping of SGLang label names to their Datadog tag names. By default, the integration
+    ## renames SGLang's `endpoint` label to `http_endpoint` to avoid colliding with the
+    ## OpenMetrics endpoint tag added by the Agent.
     #
     # rename_labels:
     #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>

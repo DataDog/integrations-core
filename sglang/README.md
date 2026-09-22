@@ -66,6 +66,9 @@ Run the [Agent status command][6] and look for `sglang` under the Checks section
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+The integration renames SGLang's `endpoint` metric label to the `http_endpoint` Datadog tag. This
+avoids colliding with the `endpoint` tag that identifies the configured OpenMetrics endpoint.
+
 ### Events
 
 The SGLang integration does not include any events.

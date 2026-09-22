@@ -38,3 +38,7 @@ files:
           sending histogram buckets as Datadog distribution metrics.
 
           This integration enables this option by default.
+        rename_labels.description: |
+          A mapping of SGLang label names to their Datadog tag names. By default, the integration
+          renames SGLang's `endpoint` label to `http_endpoint` to avoid colliding with the
+          OpenMetrics endpoint tag added by the Agent.
