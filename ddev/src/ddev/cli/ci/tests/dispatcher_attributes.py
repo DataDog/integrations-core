@@ -68,7 +68,6 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
     'pr_number': AttributeSpec(
         'dispatcher.pr.number',
         test_tag=True,
-        metric_tag=True,
     ),
     'is_fork': AttributeSpec(
         'dispatcher.run.is_fork',

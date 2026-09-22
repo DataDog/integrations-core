@@ -65,7 +65,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
 )
 from tests.helpers.github_async import DEFAULT_COMMENT_ID, DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
-from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 # Every test here runs a Dispatcher to completion, and `on_finalize` writes the run summary. Without
 # this the reports land in the real job summary whenever the suite runs inside a workflow.
@@ -748,7 +748,11 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
     stream = StringIO()
     console_handler = logging.StreamHandler(stream)
     console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS))
-    monitoring = MonitoringRuntime(console_handler=console_handler, metrics_sink=sink)
+    monitoring = MonitoringRuntime(
+        console_handler=console_handler,
+        metrics_sink=sink,
+        metrics_tag_projector=projector_for("batch_id", "tag", "component"),
+    )
     monitoring.set_run_fields(**run_fields(CONTEXT))
 
     dispatcher = build_dispatcher(
@@ -765,8 +769,8 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
 
     assert sink.records
     for record in sink.records:
-        assert record.fields["batch_id"] == record.tags["tag"]
-        assert record.fields["component"] == "test-gatherer"
+        assert record.tags["batch_id"] == record.tags["tag"]
+        assert record.tags["component"] == "test-gatherer"
     queued = [line for line in stream.getvalue().splitlines() if "Queued planned batches" in line]
     assert len(queued) == 1
     assert "component=dispatcher" in queued[0]
