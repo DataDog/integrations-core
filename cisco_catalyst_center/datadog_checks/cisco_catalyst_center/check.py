@@ -88,10 +88,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         """
         now = int(time.time() * 1000)
         if self._events_polled_through is None:
-            # Read directly from the instance rather than `self.config`: this method is exercised
-            # in tests against a check built without running the `run()` lifecycle, so the config
-            # model (populated by a `check_initializations` step `run()` triggers) is not there yet.
-            lookback = self.instance.get('events_initial_lookback_minutes') or EVENT_DEFAULT_LOOKBACK_MINUTES
+            lookback = self.config.events_initial_lookback_minutes or EVENT_DEFAULT_LOOKBACK_MINUTES
             start = now - lookback * 60 * 1000
         else:
             start = self._events_polled_through
