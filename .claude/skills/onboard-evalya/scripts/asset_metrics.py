@@ -13,7 +13,9 @@ Datadog queries name a metric with an aggregator prefix, e.g. ``avg:redis.stats.
 (dashboards) or ``avg(last_5m):avg:redis.mem.used{*}`` (monitors); that ``agg:metric{`` shape is
 what we extract. Formula queries and newer widgets store the metric bare, so the aggregator is
 optional. A single pattern covers dashboard ``q``/``queries[].query`` fields and monitor
-``definition.query`` alike.
+``definition.query`` alike. Only *metric* queries are read: a query's sibling ``data_source`` must
+be ``metrics`` (dashboards) and a monitor's ``type`` must be a metric alert, so log/APM/RUM/DSM
+widgets sharing the same ``query`` key do not leak non-metric tokens into the target.
 
 Usage:
     python asset_metrics.py <INTEGRATION_DIR>
@@ -52,16 +54,39 @@ _AGG = r"(?:avg|sum|min|max|count|last|pct|percentile|median|stddev|normalize|we
 _METRIC_QUERY = re.compile(rf"(?:{_AGG})?([a-z_][a-z0-9_.]*\.[a-z0-9_.]+)\s*\{{", re.IGNORECASE)
 
 # Query strings live under these keys in dashboard widgets and monitor definitions.
-_QUERY_KEYS = {"q", "query"}
+_QUERY_KEYS = ("q", "query")
+
+# We only care about metric queries. A dashboard widget query object carries a `data_source`
+# (`metrics`, `logs`, `rum`, `data_streams`, …); keep only `metrics`. A monitor's `definition`
+# carries a `type` instead; keep only metric-based alert types. Without this, log/APM/DSM queries
+# stored under the same `query` key leak metric-shaped tokens into the coverage target.
+_METRIC_MONITOR_TYPES = {"query alert", "metric alert"}
+
+
+def _is_metric_query(container: dict, key: str) -> bool:
+    """Whether the `q`/`query` string on this dict is a metrics query.
+
+    Decided by the sibling `data_source` (dashboard formula/timeseries queries) or `type` (monitor
+    definitions). Legacy `q` and any query with neither sibling are assumed to be metrics — those
+    shapes only ever carried metric queries.
+    """
+    data_source = container.get("data_source")
+    if data_source is not None:
+        return data_source == "metrics"
+    monitor_type = container.get("type")
+    if monitor_type is not None and key == "query":
+        return monitor_type in _METRIC_MONITOR_TYPES
+    return True
 
 
 def _walk_query_strings(node: object) -> list[str]:
-    """Recursively collect every string value stored under a query key."""
+    """Recursively collect metric query strings; skip non-metric (logs/APM/DSM) queries."""
     found: list[str] = []
     if isinstance(node, dict):
         for key, value in node.items():
             if key in _QUERY_KEYS and isinstance(value, str):
-                found.append(value)
+                if _is_metric_query(node, key):
+                    found.append(value)
             else:
                 found.extend(_walk_query_strings(value))
     elif isinstance(node, list):
