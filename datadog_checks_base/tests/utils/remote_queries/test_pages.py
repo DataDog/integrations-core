@@ -160,7 +160,7 @@ def test_page_prefix_emits_valid_non_ascii_as_raw_utf8():
         agent_hostname='agent-hôte',
         schema_json=None,
     )
-    assert prefix.startswith(b'{"contract_version":1,"crawl_id":"r\xc3\xbcn-1",')
+    assert prefix.startswith(b'{"contract_version":"1.0.0","crawl_id":"r\xc3\xbcn-1",')
     assert b'"task_id":"t\xc3\xa4sk-1"' in prefix
     assert b'"agent_hostname":"agent-h\xc3\xb4te"' in prefix
     assert b'"data":[' in prefix

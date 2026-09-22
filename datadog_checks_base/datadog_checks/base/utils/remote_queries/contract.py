@@ -34,7 +34,16 @@ REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 100 * 1024 * 1024 * 1024
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
 
 
+# The transport artifact version: the sole accepted `resultDelivery.artifactVersion` value
+# the backend injects with the upload instructions.
 REMOTE_QUERY_ARTIFACT_VERSION = 1
+
+
+# The consumer-visible final page contract version, an exact semver string mirrored from
+# intake's final page writer. The RFC-format page contract labels every page
+# `contract_version` with this string; the producer emits the same bytes only to bound the
+# final pages it asks intake to build.
+REMOTE_QUERY_PAGE_CONTRACT_VERSION = '1.0.0'
 
 
 REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION = 'csv-json-cell-v1'

@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .contract import (
-    REMOTE_QUERY_ARTIFACT_VERSION,
+    REMOTE_QUERY_PAGE_CONTRACT_VERSION,
     RemoteQueryFailure,
     RemoteQueryResultDelivery,
     RemoteQueryRunStats,
@@ -85,7 +85,9 @@ def page_prefix(
     """The envelope bytes through the opening of `data`, with no trailing space."""
     head = b''.join(
         (
-            b'{"contract_version":%d,"crawl_id":' % REMOTE_QUERY_ARTIFACT_VERSION,
+            b'{"contract_version":',
+            canonical_json_bytes(REMOTE_QUERY_PAGE_CONTRACT_VERSION),
+            b',"crawl_id":',
             canonical_json_bytes(run_id),
             b',"task_id":',
             canonical_json_bytes(task_id),
