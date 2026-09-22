@@ -137,9 +137,56 @@ class TestNfsstat:
         )
         check.log.warning.assert_has_calls(
             [
-                mock.call('Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', 1),
-                mock.call('Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', 1),
+                mock.call(
+                    'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d. (%s mounted on %s)',
+                    1,
+                    '192.168.34.1:/exports/nfs/datadog/one',
+                    '/mnt/datadog/one',
+                ),
+                mock.call(
+                    'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d. (%s mounted on %s)',
+                    1,
+                    '192.168.34.1:/exports/nfs/datadog/two',
+                    '/mnt/datadog/two',
+                ),
             ]
+        )
+
+    @pytest.mark.unit
+    def test_check_omits_device_with_incomplete_latest_sample(self, aggregator):
+        instance = self.INSTANCES['main']
+        check = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
+        check.log = mock.MagicMock()
+
+        device_name = '192.168.34.1:/exports/nfs/datadog/one'
+        mount = '/mnt/datadog/one'
+        with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
+            complete_report = ensure_unicode(f.read()).split('192.168.34.1:/exports/nfs/datadog/two', 1)[0]
+
+        incomplete_report = (
+            f'{device_name} mounted on {mount}:\n\n           ops/s       rpc bklog\n         111.507           0.000\n'
+        )
+        with mock.patch(
+            'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
+            return_value=(complete_report + incomplete_report, '', 0),
+        ):
+            check.check(instance)
+
+        aggregator.assert_metric(
+            'system.nfs.ops',
+            tags=[
+                'optional:tag1',
+                'nfs_server:192.168.34.1',
+                'nfs_export:/exports/nfs/datadog/one',
+                'nfs_mount:/mnt/datadog/one',
+            ],
+            count=0,
+        )
+        check.log.warning.assert_called_once_with(
+            'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d. (%s mounted on %s)',
+            3,
+            device_name,
+            mount,
         )
 
 

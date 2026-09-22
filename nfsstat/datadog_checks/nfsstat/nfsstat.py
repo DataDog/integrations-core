@@ -25,6 +25,15 @@ def _get_bundled_nfsiostat_command(nfsiostat_path: str) -> list[str] | None:
     return None
 
 
+def _get_device_key(device_data: list[list[str]]) -> tuple[str, str] | None:
+    """Return the source and mount from an nfsiostat sample header."""
+    if not device_data or len(device_data[0]) < 4:
+        return None
+
+    device_header = device_data[0]
+    return device_header[0], device_header[-1][:-1]
+
+
 class NfsStatCheck(AgentCheck):
     metric_prefix = 'system.nfs.'
 
@@ -61,9 +70,19 @@ class NfsStatCheck(AgentCheck):
 
         def add_device(device_data: list[list[str]]) -> None:
             if len(device_data) < 7:
-                self.log.warning(
-                    'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', len(device_data)
-                )
+                device_key = _get_device_key(device_data)
+                if device_key:
+                    # Do not submit the previous report when the current sample is incomplete.
+                    latest_devices.pop(device_key, None)
+                    self.log.warning(
+                        'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d. (%s mounted on %s)',
+                        len(device_data),
+                        *device_key,
+                    )
+                else:
+                    self.log.warning(
+                        'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', len(device_data)
+                    )
                 return
 
             device = Device(device_data, self.log)
