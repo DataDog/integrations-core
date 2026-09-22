@@ -2,13 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-import os
-
-import mock
 import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
+
+from .common import make_mock_metrics
 
 customtag = "custom:tag"
 
@@ -20,19 +18,8 @@ instance = {
 
 
 @pytest.fixture()
-def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.25.3.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"},
-        ),
-    ):
-        yield
+def mock_get(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.25.3.txt')
 
 
 class TestKubeAPIServerMetrics:

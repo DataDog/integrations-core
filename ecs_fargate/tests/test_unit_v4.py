@@ -37,17 +37,15 @@ def test_no_config(aggregator, dd_run_check):
 
 
 @pytest.mark.integration
-def test_successful_check_linux_v4(check, aggregator, dd_run_check):
+def test_successful_check_linux_v4(check, aggregator, dd_run_check, mock_http):
     """
     Testing successful fargate check on Linux on ECS ENDPOINT API v4.
     """
 
-    with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux_v4
-    ):
-        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags_v4):
-            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
-                dd_run_check(check)
+    mock_http.get.side_effect = mocked_requests_get_linux_v4
+    with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags_v4):
+        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+            dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 

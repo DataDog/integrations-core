@@ -3,13 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
+import importlib
 import json
 import os
 import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
-from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
+from typing import Any, Callable, Dict, List, Literal, Mapping, Optional, Tuple, overload  # noqa: F401
+from unittest.mock import PropertyMock, create_autospec, seal
 
 import pytest
 
@@ -34,6 +36,9 @@ from datadog_checks.dev._env import (
 __aggregator = None
 __datadog_agent = None
 MockResponse = None
+
+_DEFAULT_MOCK_METHOD = 'requests.Session.get'
+FAKE_HTTP_JSON_UNSET = object()
 
 
 @pytest.fixture
@@ -369,29 +374,183 @@ def dd_default_hostname():
 
 @pytest.fixture
 def mock_response():
-    # Lazily import `requests` as it may be costly under certain conditions
     global MockResponse
     if MockResponse is None:
-        from datadog_checks.dev.http import MockResponse
+        MockResponse = importlib.import_module('datadog_checks.dev.http_legacy').MockResponse
 
     yield MockResponse
 
 
 @pytest.fixture
+def mock_http_response_cls():
+    """Rich MockHTTPResponse constructor for remainder migrations (file_path/json_data helpers)."""
+    from datadog_checks.dev.http import MockHTTPResponse
+
+    yield MockHTTPResponse
+
+
+@pytest.fixture
 def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.Session.get'), return_value=mock_response(*args, **kwargs)
+        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
     )
+
+
+def _create_fake_http_client_factory(fake_http: Any) -> Any:
+    def create_client(*_args: Any, **_kwargs: Any) -> Any:
+        return fake_http.create_client()
+
+    return create_client
+
+
+@pytest.fixture
+def fake_http(mocker):
+    """Install a base-owned HTTP fake on checks created by the test."""
+    AgentCheck = importlib.import_module('datadog_checks.base').AgentCheck
+    FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
+    client = FakeHTTPClient()
+
+    mocker.patch.object(
+        AgentCheck,
+        'create_http_client',
+        autospec=True,
+        side_effect=_create_fake_http_client_factory(client),
+    )
+    return client
+
+
+@pytest.fixture
+def fake_http_response(fake_http: Any) -> Callable[..., Any]:
+    """Build and register a response on the base-owned HTTP fake.
+
+    The ``json_data`` argument sets both the serialized body and parsed result unless ``json_result`` is overridden.
+    """
+    FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
+
+    def register_response(
+        url: str,
+        content: bytes | str = b'',
+        *,
+        method: str = 'GET',
+        json_data: Any = FAKE_HTTP_JSON_UNSET,
+        status_code: int = 200,
+        encoding: str = 'utf-8',
+        match_options: Mapping[str, Any] | None = None,
+        **overrides: Any,
+    ) -> Any:
+        if json_data is not FAKE_HTTP_JSON_UNSET:
+            content = json.dumps(json_data).encode(encoding)
+            overrides.setdefault('json_result', json_data)
+
+        body = content.encode(encoding) if isinstance(content, str) else content
+        response = FakeHTTPResponse(
+            status_code=status_code,
+            content=body,
+            encoding=encoding,
+            **overrides,
+        )
+        fake_http.register_response(method, url, response, match_options=match_options)
+        return response
+
+    return register_response
+
+
+@pytest.fixture
+def mock_http(mocker):
+    """Autospec HTTPClient for remainder migrations not yet on fake_http_response."""
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.headers import set_header
+    from datadog_checks.base.utils.http_protocol import HTTPClient
+
+    client = create_autospec(HTTPClient)
+    cookie_return_value_unset = object()
+
+    # create_autospec does not materialize attributes declared only as annotations on the protocol,
+    # and seal() below turns any later attribute access into an AttributeError, so options has to be
+    # a real dict assigned here. Its 'headers' value is the same object get_header and set_header
+    # read, so mutating options['headers'] directly stays visible through those methods.
+    header_state: dict[str, str] = {}
+    client.options = {
+        'auth': None,
+        'cert': None,
+        'headers': header_state,
+        'proxies': None,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
+    # Empty, matching a client built with no tls_ configuration. A test that needs it populates it.
+    client.tls_config = {}
+    client.trust_env = True
+    client.ignore_tls_warning = False
+    client.persist_connections = False
+
+    def _get_header(name, default=None):
+        found = default
+        for key, value in client.options['headers'].items():
+            if key.lower() == name.lower():
+                found = value
+        return found
+
+    def _set_header(name, value):
+        # The client's own helper, so the double cannot drift from the surface it stands in for.
+        set_header(client.options['headers'], name, value)
+
+    def _get_cookie(name: str, default: str | None = None) -> str | None:
+        return_value = client.get_cookie.return_value
+        return default if return_value is cookie_return_value_unset else return_value
+
+    def _disable_auth():
+        client.options['auth'] = 'suppressed'
+
+    client.get_header.side_effect = _get_header
+    client.set_header.side_effect = _set_header
+    client.disable_auth.side_effect = _disable_auth
+    # No no_proxy rules are configured on the mock, matching a client built without them. A test that
+    # needs bypass behavior overrides this return_value.
+    client.should_bypass_proxy.return_value = False
+    client.get_cookie.return_value = cookie_return_value_unset
+    client.get_cookie.side_effect = _get_cookie
+    client.close.return_value = None
+    seal(client)
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
+    return client
+
+
+@pytest.fixture
+def mock_openmetrics_http(mock_http, mocker):
+    """OpenMetrics HTTP mock with dual interception:
+
+    - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
+    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck HTTP client patches; the
+      get_http_handler patch is unused on this path.
+    """
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
+
+
+@pytest.fixture
+def mock_prometheus_http(mock_http, mocker):
+    """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
+    mocker.patch(
+        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
 
 
 @pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         *,
         mode: Literal["default"],
-        default_response: MockResponse,
+        default_response: Any,
         method: str = ...,
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
@@ -399,7 +558,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
     ): ...
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         *,
         mode: Literal["cycle", "exhaust"],
         default_response: None = None,
@@ -409,10 +568,10 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         strict: bool = ...,
     ): ...
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[Any]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
-        default_response: MockResponse | None = None,
-        method: str = 'requests.Session.get',
+        default_response: Any = None,
+        method: str = _DEFAULT_MOCK_METHOD,
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
@@ -447,7 +606,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
                 else:
-                    return MockResponse(status_code=404)
+                    return mock_response(status_code=404)
             else:
                 try:
                     return next(queues[url])

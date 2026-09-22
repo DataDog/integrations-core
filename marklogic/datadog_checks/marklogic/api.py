@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict  # noqa: F401
 
-from datadog_checks.base.utils.http import RequestsWrapper  # noqa: F401
+from datadog_checks.base.utils.http_protocol import HTTPClient  # noqa: F401
 
 from .constants import BASE_ENDPOINT
 
 
 class MarkLogicApi(object):
     def __init__(self, http, api_url):
-        # type: (RequestsWrapper, str) -> None
+        # type: (HTTPClient, str) -> None
         self._http = http
 
         # Remove a possible trailing '/', added by BASE_ENDPOINT

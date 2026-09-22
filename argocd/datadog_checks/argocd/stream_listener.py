@@ -17,9 +17,7 @@ from .resources_constants import (
 )
 
 if TYPE_CHECKING:
-    from requests import Response
-
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPResponse
 
     from .check import ArgocdCheck
     from .resources import ArgocdResourceCollector
@@ -53,7 +51,7 @@ class ArgocdApplicationStreamListener:
         auth_token: str | None,
         backoff_max_seconds: int,
         read_timeout_seconds: int,
-        http: "RequestsWrapper",
+        http: "HTTPClient",
     ) -> None:
         self.check = check
         self._collector = collector
@@ -65,7 +63,7 @@ class ArgocdApplicationStreamListener:
         self._stop = threading.Event()
         self._connected = threading.Event()
         self._thread: threading.Thread | None = None
-        self._response: Response | None = None
+        self._response: HTTPResponse | None = None
 
     def start(self) -> None:
         if self.is_alive():
@@ -130,8 +128,8 @@ class ArgocdApplicationStreamListener:
             "timeout": (CONNECT_TIMEOUT_SECONDS, self._read_timeout),
         }
         # Pass a dedicated genresources token only when set, via extra_headers (merges with configured
-        # headers). Omit it otherwise: even an empty extra_headers makes RequestsWrapper snapshot the default
-        # headers before its auth_token handler writes the inherited token, which would drop that auth.
+        # headers). Omit it otherwise: even empty extra_headers forces a per-request header override before
+        # inherited auth headers are applied, which would drop that auth.
         headers = auth_headers(self._auth_token)
         if headers:
             kwargs["extra_headers"] = headers

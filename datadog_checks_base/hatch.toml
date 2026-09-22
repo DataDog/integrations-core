@@ -1,5 +1,13 @@
 [env.collectors.datadog-checks]
-check-types = false
+# Type checking is scoped to the backend-neutral HTTP contract and its implementations.
+# follow-imports=silent confines reporting to mypy-files rather than the whole import graph.
+check-types = true
+mypy-args = ["--follow-imports=silent"]
+mypy-files = [
+  "datadog_checks/base/utils/http_protocol.py",
+  "datadog_checks/base/utils/requests_adapter.py",
+  "datadog_checks/base/stubs/http.py",
+]
 
 
 [[envs.default.matrix]]

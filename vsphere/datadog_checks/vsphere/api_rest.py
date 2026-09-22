@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterator, List, Set  # noqa: F401
 from pyVmomi import vim
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
 from datadog_checks.vsphere.types import ResourceTags, TagAssociation  # noqa: F401
@@ -167,7 +167,7 @@ class VSphereRestClient(object):
         if deprecated_api:
             self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
             self.endpoints = self.API_ENDPOINTS['deprecated']
-        self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
+        self._http = create_http_client(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None
@@ -176,7 +176,7 @@ class VSphereRestClient(object):
         if not session_token:
             raise APIResponseError("Failed to retrieve session token")
 
-        self._http.options['headers']['vmware-api-session-id'] = session_token
+        self._http.set_header('vmware-api-session-id', session_token)
 
     def session_create(self):
         # type: () -> str

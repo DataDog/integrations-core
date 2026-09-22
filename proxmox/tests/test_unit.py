@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
 
@@ -61,11 +61,11 @@ def test_no_tags(dd_run_check, aggregator, instance):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/api2/json/version': MockResponse(status_code=500)}},
+            {'http_error': {'/api2/json/version': MockHTTPResponse(status_code=500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/version': MockResponse(status_code=404)}},
+            {'http_error': {'/api2/json/version': MockHTTPResponse(status_code=404)}},
             id='404',
         ),
     ],
@@ -74,7 +74,7 @@ def test_no_tags(dd_run_check, aggregator, instance):
 @pytest.mark.usefixtures('mock_http_get')
 def test_api_down(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
-    with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match=r'HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -273,7 +273,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(status_code=500)
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockHTTPResponse(status_code=500)
                 }
             },
             id='500',
@@ -281,7 +281,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(status_code=404)
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockHTTPResponse(status_code=404)
                 }
             },
             id='404',
@@ -289,7 +289,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockHTTPResponse(
                         status_code=200, json_data={"data": None, "message": "No QEMU guest agent configured\n"}
                     )
                 }
@@ -487,7 +487,7 @@ def test_cpu_count_metrics_skip_powered_off_vm(dd_run_check, aggregator, instanc
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(
+                    '/api2/json/cluster/resources': MockHTTPResponse(
                         status_code=200,
                         json_data=cluster_resources_with_offline_node(),
                     )
@@ -512,7 +512,7 @@ def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance)
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(
+                    '/api2/json/cluster/resources': MockHTTPResponse(
                         status_code=200,
                         json_data=cluster_resources_with_vm_maxcpu(None),
                     )
@@ -525,7 +525,7 @@ def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance)
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(
+                    '/api2/json/cluster/resources': MockHTTPResponse(
                         status_code=200,
                         json_data=cluster_resources_with_vm_maxcpu(0),
                     )
@@ -638,7 +638,7 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/api2/json/cluster/metrics/export': MockResponse(status_code=501)}},
+            {'http_error': {'/api2/json/cluster/metrics/export': MockHTTPResponse(status_code=501)}},
             id='501',
         ),
     ],

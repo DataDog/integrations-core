@@ -15,8 +15,8 @@ base_tags = [
 ]
 
 
-def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, mock_http):
+    mock_http.get.side_effect = mock_http_responses
     check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(
@@ -35,8 +35,8 @@ def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, i
     )
 
 
-def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mock_http):
+    mock_http.get.side_effect = mock_http_responses
 
     check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
 

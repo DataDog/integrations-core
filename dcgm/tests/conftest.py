@@ -3,8 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
-import os
-from unittest import mock
+from pathlib import Path
 
 import pytest
 
@@ -40,28 +39,25 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(fake_http, fake_http_response, instance):
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        (Path(__file__).parent / 'fixtures' / 'metrics.txt').read_bytes(),
+        match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
+    )
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_label_remap():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'label_remap.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_label_remap(fake_http, fake_http_response, instance):
+    for _ in range(2):
+        fake_http_response(
+            instance['openmetrics_endpoint'],
+            (Path(__file__).parent / 'fixtures' / 'label_remap.txt').read_bytes(),
+            match_options={'stream': True},
+            headers={'Content-Type': 'text/plain'},
+        )
+    yield
+    fake_http.assert_all_responses_consumed()

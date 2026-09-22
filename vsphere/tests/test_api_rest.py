@@ -9,7 +9,7 @@ from mock import MagicMock, patch
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
+from datadog_checks.vsphere.api_rest import VSphereRestAPI, VSphereRestClient
 from datadog_checks.vsphere.config import VSphereConfig
 
 from .common import build_rest_api_client
@@ -239,12 +239,28 @@ def test_rest_api_config(init_config, instance_config, expected_shared_rest_api_
     assert check._config.shared_rest_api_options == expected_shared_rest_api_options
 
 
+def test_rest_client_is_built_from_rest_api_options(realtime_instance):
+    """vsphere's REST options have to be a set the shared client constructor accepts and maps.
+
+    Tag collection is the only consumer, and it reports a construction failure as nothing more than a
+    runtime log line, so the construction itself is what needs covering.
+    """
+    realtime_instance['ssl_capath'] = '/etc/vsphere-ca.crt'
+    config = VSphereConfig(realtime_instance, {'rest_api_options': {'timeout': 15}}, logger)
+
+    client = VSphereRestClient(config, logger, deprecated_api=False)
+
+    assert client._http.options['auth'] == (config.username, config.password)
+    assert client._http.options['verify'] == '/etc/vsphere-ca.crt'
+    assert client._http.options['timeout'] == (15.0, 15.0)
+
+
 @pytest.mark.usefixtures("mock_rest_api")
 def test_create_session(realtime_instance):
     config = VSphereConfig(realtime_instance, {}, logger)
     mock_api = build_rest_api_client(config, logger)
 
-    assert mock_api._client._http.options['headers']['vmware-api-session-id'] == "dummy-token"
+    assert mock_api._client._http.get_header('vmware-api-session-id') == "dummy-token"
 
 
 @pytest.mark.usefixtures("mock_rest_api")
