@@ -53,7 +53,8 @@ def save_linkerd_controller_pod_ip() -> None:
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_linkerd_cluster]) as kubeconfig:
+    kind_config = os.path.join(HERE, 'kind', 'kind-linkerd.yaml')
+    with kind_run(conditions=[setup_linkerd_cluster], kind_config=kind_config) as kubeconfig:
         compose_file = os.path.join(HERE, "compose", "docker-compose.yaml")
         with docker_run(
             compose_file=compose_file,
