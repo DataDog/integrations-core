@@ -74,15 +74,18 @@ STACKABLE_DEVICE_FAMILIES: Final[frozenset[str]] = frozenset({'Switches and Hubs
 STACK_MEMBER_READY_STATES: Final[frozenset[str]] = frozenset({'READY'})
 STACK_PORT_OK_VALUES: Final[frozenset[str]] = frozenset({'Yes', 'yes', 'true', 'True'})
 
-# Values the data API reports for a reachable device. The legacy endpoint answers in title
-# case (`Reachable`) while the data API answers in upper case, so both are accepted.
-DEVICE_REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', 'reachable'})
+# Values Catalyst Center uses for a reachable device, shared by every endpoint that reports
+# reachability: the legacy endpoint answers in title case (`Reachable`) while the data API answers
+# in upper case, so both are accepted.
+REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', 'reachable'})
 
 # L3 topology types the brief names.
 L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')
 
-# Values Catalyst Center uses for a topology link that is up.
-TOPOLOGY_LINK_UP_VALUES: Final[frozenset[str]] = frozenset({'up', 'UP', 'Up'})
+# Values Catalyst Center uses for a device, interface, or topology link that is up, shared by
+# every endpoint that reports one. Everything else counts as down, so a state the appliance
+# invents later reads as down rather than crashing or reading as healthy.
+UP_VALUES: Final[frozenset[str]] = frozenset({'up', 'UP', 'Up'})
 
 # -- assurance issues -----------------------------------------------------------------
 #

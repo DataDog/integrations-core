@@ -7,7 +7,7 @@ The client owns three things collectors should never see: the token lifecycle, p
 arithmetic, and the response envelope.
 
 The envelope is the reason this layer exists. Catalyst Center returns errors in the same
-``response`` slot it uses for real data, in at least six shapes, and one of them is an object
+`response` slot it uses for real data, in at least six shapes, and one of them is an object
 sitting exactly where a real object goes. A collector handed that error would iterate its keys
 without raising anything and quietly record nothing. So the unwrapping happens once, here, and
 each accessor knows the shape it expects.
@@ -69,7 +69,7 @@ class CatalystCenterClient:
     def _normalize_host(host: str) -> str:
         """Accept a bare hostname or a full URL, always return an https base URL.
 
-        ``spec.yaml`` tells users not to include a scheme, but a user who includes ``http://``
+        `spec.yaml` tells users not to include a scheme, but a user who includes `http://`
         anyway gets upgraded rather than silently sent over an unencrypted connection: the
         docstring's guarantee holds even when the input ignores the documented contract.
         """
@@ -100,7 +100,25 @@ class CatalystCenterClient:
     # -- authentication ---------------------------------------------------------------
 
     def _authenticate(self) -> None:
-        response = self.http.post(f'{self.base_url}{AUTH_ENDPOINT}', auth=(self._username, self._password))
+        """Obtain a fresh token, retrying a bounded number of times on a 429.
+
+        Deliberately does not call `_ensure_token()` or share `_send_with_throttle_retry()`:
+        `_ensure_token()` calls this method whenever there is no token yet, so routing this retry
+        through either one would recurse before the first token exists.
+        """
+        for attempt in range(MAX_THROTTLE_RETRIES):
+            response = self.http.post(f'{self.base_url}{AUTH_ENDPOINT}', auth=(self._username, self._password))
+            if response.status_code != 429 or attempt == MAX_THROTTLE_RETRIES - 1:
+                break
+            delay = self._throttle_delay(response, attempt)
+            self.log.warning(
+                'Catalyst Center rate limited authentication (attempt %s/%s); waiting %.1fs',
+                attempt + 1,
+                MAX_THROTTLE_RETRIES,
+                delay,
+            )
+            time.sleep(delay)
+
         if response.status_code >= 400:
             raise CatalystApiError(
                 'Catalyst Center authentication failed',
@@ -131,7 +149,7 @@ class CatalystCenterClient:
     def _throttle_delay(self, response: Any, attempt: int) -> float:
         """How long to wait after a 429.
 
-        Cisco's own ``Retry-After`` is preferred when present, since it reflects the appliance's
+        Cisco's own `Retry-After` is preferred when present, since it reflects the appliance's
         actual budget window; otherwise back off exponentially with jitter so that several
         collectors throttled at once do not retry in lockstep.
         """
@@ -146,11 +164,11 @@ class CatalystCenterClient:
         return delay + random.uniform(0, delay / 2)
 
     def _send_with_throttle_retry(self, path: str, send: Callable[[], Any]) -> Any:
-        """Call ``send`` to issue one request, retrying a bounded number of times on a 429.
+        """Call `send` to issue one request, retrying a bounded number of times on a 429.
 
-        Shared by :meth:`_get_body` and :meth:`_post_body`, which differ only in how they build
-        the request and in what they do with a non-429 failure once this returns. ``send`` is
-        invoked after :meth:`_ensure_token`, so it always sees a fresh token.
+        Shared by `_get_body()` and `_post_body()`, which differ only in how they build
+        the request and in what they do with a non-429 failure once this returns. `send` is
+        invoked after `_ensure_token()`, so it always sees a fresh token.
         """
         for attempt in range(MAX_THROTTLE_RETRIES):
             self._ensure_token()
@@ -177,9 +195,9 @@ class CatalystCenterClient:
         )
 
     def _retry_once_on_unauthorized(self, path: str, response: Any, send: Callable[[], Any]) -> Any:
-        """Refresh the token once and retry ``send`` if ``response`` is a 401; otherwise pass it through.
+        """Refresh the token once and retry `send` if `response` is a 401; otherwise pass it through.
 
-        Shared by :meth:`_get_body` and :meth:`_post_body`. Both already call :meth:`_ensure_token`
+        Shared by `_get_body()` and `_post_body()`. Both already call `_ensure_token()`
         before every attempt, so a 401 reaching here means the server disagrees with the client's
         belief that the token is still valid -- a condition equally possible after a GET or a POST.
         Refreshes and retries exactly once; never loops.
@@ -239,7 +257,7 @@ class CatalystCenterClient:
     def _is_error_object(candidate: Any) -> TypeGuard[dict[str, Any]]:
         """An error object carries errorCode and nothing a real record would carry.
 
-        Matching on the exact key set rather than the presence of ``errorCode`` alone keeps a
+        Matching on the exact key set rather than the presence of `errorCode` alone keeps a
         legitimate record that happens to have a similarly named field from being mistaken for
         a failure.
         """
@@ -257,7 +275,7 @@ class CatalystCenterClient:
     def _error_from_body(self, body: Any, path: str, correlation_id: str | None) -> CatalystApiError | None:
         """Return the error this body describes, or None if it describes data.
 
-        Kept separate from :meth:`_unwrap` so that an HTTP failure carrying an uninformative body
+        Kept separate from `_unwrap()` so that an HTTP failure carrying an uninformative body
         still reports its status code rather than a misleading complaint about the body's shape.
         """
         if not isinstance(body, dict):
@@ -295,7 +313,7 @@ class CatalystCenterClient:
         """Validate the body and return it whole, raising on every failure shape seen on the wire.
 
         Returns the parsed body -- a dict for an enveloped response, or a list for the endpoints
-        that answer with a bare JSON array. Extracting ``response`` from it is the caller's job,
+        that answer with a bare JSON array. Extracting `response` from it is the caller's job,
         because some endpoints put their payload beside that key rather than inside it.
         """
         body = response.json()
@@ -314,7 +332,7 @@ class CatalystCenterClient:
         return body
 
     def _payload_of(self, body: Any, path: str) -> Any:
-        """Extract the ``response`` payload from an already-validated body."""
+        """Extract the `response` payload from an already-validated body."""
         if isinstance(body, list):
             return body
         if 'response' not in body:
@@ -322,16 +340,16 @@ class CatalystCenterClient:
         return body['response']
 
     def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
-        """Fetch an endpoint and return the contents of its ``response`` key."""
+        """Fetch an endpoint and return the contents of its `response` key."""
         return self._payload_of(self._get_body(path, params), path)
 
     @staticmethod
     def _collection_total(body: Any) -> int | None:
         """The size of the whole matching collection, when the appliance reports one.
 
-        ``page.count`` is the collection total rather than the page size, which makes it the only
+        `page.count` is the collection total rather than the page size, which makes it the only
         way to tell a complete sweep from one that stopped early. Endpoints that answer without a
-        ``page`` object report None.
+        `page` object report None.
         """
         if not isinstance(body, dict):
             return None
@@ -344,7 +362,7 @@ class CatalystCenterClient:
         """Issue one authenticated POST and return the whole validated body.
 
         Re-authenticates exactly once on a 401 and retries a bounded number of times on a 429,
-        same as :meth:`_get_body`.
+        same as `_get_body()`.
         """
         url = f'{self.base_url}{path}'
 
@@ -360,10 +378,10 @@ class CatalystCenterClient:
         return self._unwrap(response, path)
 
     def post_object(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
-        """Run an analytics query and return its ``response`` object.
+        """Run an analytics query and return its `response` object.
 
-        The summary and top-N endpoints answer with an object holding ``attributes``,
-        ``aggregateAttributes`` and ``groups`` -- each of which is ``null`` rather than empty when
+        The summary and top-N endpoints answer with an object holding `attributes`,
+        `aggregateAttributes` and `groups` -- each of which is `null` rather than empty when
         there is no data, so callers must guard accordingly.
         """
         body_payload = self._post_body(path, body)
@@ -378,10 +396,10 @@ class CatalystCenterClient:
         return payload
 
     def get_envelope(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Fetch an endpoint whose payload sits beside ``response`` rather than inside it.
+        """Fetch an endpoint whose payload sits beside `response` rather than inside it.
 
-        ``intent/network-health`` is the case that requires this: its totals and its per-category
-        distribution are top-level siblings, while ``response`` holds a time-bucketed series.
+        `intent/network-health` is the case that requires this: its totals and its per-category
+        distribution are top-level siblings, while `response` holds a time-bucketed series.
         """
         body = self._get_body(path, params)
         if not isinstance(body, dict):
@@ -399,15 +417,15 @@ class CatalystCenterClient:
 
         Pagination is 1-based, and the page size is a property of the endpoint rather than
         something a caller chooses, so it is looked up here instead of being an argument.
-        Termination is on a short page: ``page.count`` is the collection total, not the page
+        Termination is on a short page: `page.count` is the collection total, not the page
         size, so terminating on it either truncates or loops forever.
 
         The total is returned alongside the records because they can legitimately disagree. A
-        sweep that hits ``max_pages`` returns fewer records than the appliance says exist, and a
+        sweep that hits `max_pages` returns fewer records than the appliance says exist, and a
         caller counting the records it got would report a number that reads healthy while being
-        arbitrarily low. It is None for endpoints that answer without a ``page`` object.
+        arbitrarily low. It is None for endpoints that answer without a `page` object.
 
-        ``max_pages`` overrides the instance-wide cap for callers whose endpoint has a much
+        `max_pages` overrides the instance-wide cap for callers whose endpoint has a much
         smaller page size, and so a much higher request cost per record.
         """
         limit = ENDPOINT_PAGE_LIMITS.get(path, DEFAULT_PAGE_LIMIT)

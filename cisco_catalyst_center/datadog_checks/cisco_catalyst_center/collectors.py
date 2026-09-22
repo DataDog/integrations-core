@@ -5,7 +5,7 @@
 
 One module while there are two of them. It splits when the third arrives.
 
-The device collector is the load-bearing one: a single ``data/networkDevices`` call returns
+The device collector is the load-bearing one: a single `data/networkDevices` call returns
 switches, routers, access points and controllers together, each carrying its own health scores,
 its AP configuration and per-radio KPIs, and its fabric role. What the product brief describes as
 four separate per-device fan-outs is one paginated request.
@@ -13,7 +13,9 @@ four separate per-device fan-outs is one paginated request.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import Any
 
 from datadog_checks.base import AgentCheck
@@ -24,7 +26,6 @@ from .constants import (
     ASSURANCE_ISSUES_ENDPOINT,
     CLIENT_HEALTH_ENDPOINT,
     CLIENTS_SUMMARY_ANALYTICS_ENDPOINT,
-    DEVICE_REACHABLE_VALUES,
     EVENT_DEFAULT_ALERT_TYPE,
     EVENT_DEFAULT_MAX_PAGES,
     EVENT_DETAIL_FIELDS,
@@ -47,6 +48,7 @@ from .constants import (
     NETWORK_DEVICES_ENDPOINT,
     NETWORK_HEALTH_ENDPOINT,
     PHYSICAL_TOPOLOGY_ENDPOINT,
+    REACHABLE_VALUES,
     SECURITY_ROGUE_ENDPOINT,
     SECURITY_THREATS_ENDPOINT,
     SITE_HEALTH_SUMMARIES_ENDPOINT,
@@ -55,7 +57,7 @@ from .constants import (
     STACK_MEMBER_READY_STATES,
     STACK_PORT_OK_VALUES,
     STACKABLE_DEVICE_FAMILIES,
-    TOPOLOGY_LINK_UP_VALUES,
+    UP_VALUES,
     VIRTUAL_NETWORK_HEALTH_ENDPOINT,
 )
 from .emit import compact, emit_gauge, emit_score, emit_watts, is_uplink, tag, to_number
@@ -71,7 +73,6 @@ from .metrics import (
     FABRIC_SITE_METRICS,
     INTERFACE_POE_WATT_METRICS,
     INTERFACE_STATISTICS_METRICS,
-    INTERFACE_UP_STATES,
     NETWORK_CATEGORY_METRICS,
     NETWORK_HEALTH_DISTRIBUTION_KEY,
     NETWORK_HEALTH_METRICS,
@@ -93,9 +94,9 @@ DEFAULT_NAMESPACE = 'default'
 def device_identity_tags(namespace: str, management_ip: Any, device_uuid: Any) -> list[str | None]:
     """The two identity tags every device-scoped metric carries.
 
-    ``device_id`` is the ``{namespace}:{ip}`` form the Agent's SNMP check also uses, so one tag
-    key means one thing across both halves of the pairing. ``device_uuid`` carries Catalyst
-    Center's own ``instanceUuid``, which is what the NDM device record is keyed on.
+    `device_id` is the `{namespace}:{ip}` form the Agent's SNMP check also uses, so one tag
+    key means one thing across both halves of the pairing. `device_uuid` carries Catalyst
+    Center's own `instanceUuid`, which is what the NDM device record is keyed on.
 
     Both are emitted because they answer different questions and neither is derivable from the
     other: the UUID is stable and always present, the IP form is what correlates with SNMP.
@@ -127,9 +128,9 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
 
 
 def _collect_radios(check: AgentCheck, record: dict[str, Any], base_tags: list[str]) -> None:
-    """Emit per-radio KPIs from ``apDetails.radios[]``.
+    """Emit per-radio KPIs from `apDetails.radios[]`.
 
-    ``apDetails`` is null on every non-AP record and ``radios`` can be null on an AP that has not
+    `apDetails` is null on every non-AP record and `radios` can be null on an AP that has not
     reported yet, so both are treated as absent rather than iterated.
     """
     ap_details = record.get('apDetails') or {}
@@ -168,11 +169,11 @@ def collect_devices(
 
     Args:
         check: The check instance, used for metric submission.
-        client: An authenticated :class:`~.client.CatalystCenterClient`.
+        client: An authenticated `CatalystCenterClient`.
         collect_wireless: Whether to fan out into per-radio metrics. Off by default because the
             radio mapping is derived from Cisco's schema and has not been validated against a
             live controller.
-        base_tags: Tags applied to every metric, carrying the instance's configured ``tags``.
+        base_tags: Tags applied to every metric, carrying the instance's configured `tags`.
     """
     records = client.get_list(NETWORK_DEVICES_ENDPOINT)
     base_tags = base_tags or []
@@ -184,7 +185,7 @@ def collect_devices(
         # the NDM payload, which is inventory rather than something you can alert on.
         reachability = record.get('reachabilityHealthStatus')
         if reachability is not None:
-            check.gauge('device.reachable', int(reachability in DEVICE_REACHABLE_VALUES), tags=tags)
+            check.gauge('device.reachable', int(reachability in REACHABLE_VALUES), tags=tags)
 
         for field, metric_name in DEVICE_METRICS.items():
             emit_gauge(check, metric_name, record.get(field), tags)
@@ -213,11 +214,11 @@ def collect_devices(
 
 
 def _uplink_tag_value(record: dict[str, Any]) -> str | None:
-    """``true`` for an uplink, ``false`` only where the appliance actually said so.
+    """`true` for an uplink, `false` only where the appliance actually said so.
 
-    An interface with no ``isWan`` and no matching description is unclassified, not known to be
-    an access port, so it gets no tag at all. Emitting ``uplink:false`` there would assert
-    something the data does not support -- the same mistake as emitting ``0`` for absent data.
+    An interface with no `isWan` and no matching description is unclassified, not known to be
+    an access port, so it gets no tag at all. Emitting `uplink:false` there would assert
+    something the data does not support -- the same mistake as emitting `0` for absent data.
     """
     if is_uplink(record):
         return 'true'
@@ -227,8 +228,8 @@ def _uplink_tag_value(record: dict[str, Any]) -> str | None:
 def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> list[str]:
     """Identity and configuration tags for one interface.
 
-    Only the ``configuration`` view carries the descriptive fields, so the merged record is what
-    should be passed here. See :func:`_uplink_tag_value` for when the ``uplink`` tag is omitted.
+    Only the `configuration` view carries the descriptive fields, so the merged record is what
+    should be passed here. See `_uplink_tag_value()` for when the `uplink` tag is omitted.
     """
     return compact(
         [
@@ -253,7 +254,7 @@ def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[s
 
     A view replaces the field set rather than extending it, so the only way to see an
     interface's configuration and its throughput together is to ask twice and join. The join key
-    is ``id``; every view returns it.
+    is `id`; every view returns it.
     """
     merged: dict[str, dict[str, Any]] = {}
     for view in views:
@@ -272,7 +273,7 @@ def _enrich_metadata(client: CatalystCenterClient, merged: dict[str, dict[str, A
     the only place interface throughput, errors and PoE exist, so the collector reads both and
     joins them. That join is free: both APIs identify an interface by the same UUID.
 
-    Only :data:`INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record
+    Only `INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record
     actually carries a value -- see the constant for why a wholesale merge is wrong. Interfaces
     the intent inventory omits, such as stack sub-interfaces, keep their data API record
     unchanged rather than being dropped.
@@ -302,16 +303,16 @@ def collect_interfaces(
     The records are returned rather than counted so that NDM metadata can be built from the same
     fetch instead of asking for every interface a second time.
 
-    The intent API sweep is unconditional. It is the only source of ``description``, which is in
-    turn the only uplink signal on hardware that leaves ``isWan`` null, so gating it behind
-    ``send_ndm_metadata`` -- a flag about NDM payloads -- left three uplink metrics and the
-    ``uplink`` tag unreachable for anyone who had not enabled NDM. It costs one more paginated
+    The intent API sweep is unconditional. It is the only source of `description`, which is in
+    turn the only uplink signal on hardware that leaves `isWan` null, so gating it behind
+    `send_ndm_metadata` -- a flag about NDM payloads -- left three uplink metrics and the
+    `uplink` tag unreachable for anyone who had not enabled NDM. It costs one more paginated
     pass, the same order as one additional view.
 
     Args:
         check: The check instance.
         client: An authenticated client.
-        views: Which interface views to request, in merge order. ``configuration`` should come
+        views: Which interface views to request, in merge order. `configuration` should come
             first so that later views cannot overwrite the descriptive fields.
         base_tags: Tags applied to every metric.
     """
@@ -324,11 +325,11 @@ def collect_interfaces(
 
         oper_status = record.get('operStatus')
         if oper_status is not None:
-            check.gauge('interface.status', int(oper_status in INTERFACE_UP_STATES), tags=tags)
+            check.gauge('interface.status', int(oper_status in UP_VALUES), tags=tags)
 
         admin_status = record.get('adminStatus')
         if admin_status is not None:
-            check.gauge('interface.admin_status', int(admin_status in INTERFACE_UP_STATES), tags=tags)
+            check.gauge('interface.admin_status', int(admin_status in UP_VALUES), tags=tags)
 
         # `speed` is documented in Kbps and returned as a string. NDM and this metric are bps.
         # Coerced before scaling: multiplying first would raise on the absent-data shapes
@@ -348,6 +349,22 @@ def collect_interfaces(
     return merged
 
 
+@dataclass
+class _DeviceThroughput:
+    """Per-device accumulator for `_emit_device_rollups`.
+
+    `uplinks` is a count and `seen` is a flag; neither is a rate, unlike the other four fields.
+    """
+
+    rx: float = 0.0
+    tx: float = 0.0
+    uplink_rx: float = 0.0
+    uplink_tx: float = 0.0
+    uplinks: int = 0
+    seen: bool = False
+    device_uuid: str | None = None
+
+
 def _emit_device_rollups(
     check: AgentCheck, records: Iterable[dict[str, Any]], base_tags: list[str], namespace: str
 ) -> None:
@@ -356,46 +373,47 @@ def _emit_device_rollups(
     The brief asks for device-level throughput and for aggregate uplink throughput. Both are sums
     over interfaces, and doing them here means a dashboard does not have to.
 
-    Which interfaces count as uplinks is :func:`~.emit.is_uplink`'s decision, so this aggregate,
-    the ``uplink`` tag and the NDM port role cannot drift apart. ``portMode`` is deliberately not
+    Which interfaces count as uplinks is `is_uplink()`'s decision, so this aggregate,
+    the `uplink` tag and the NDM port role cannot drift apart. `portMode` is deliberately not
     part of that rule: it would relabel every trunk port as an uplink, which on an access switch
     is most of them.
     """
-    totals: dict[str, dict[str, float]] = {}
+    totals: dict[str, _DeviceThroughput] = {}
 
     for record in records:
         device_ip = record.get('networkDeviceIpAddress')
         if not device_ip:
             continue
-        bucket = totals.setdefault(
-            device_ip,
-            {'rx': 0.0, 'tx': 0.0, 'uplink_rx': 0.0, 'uplink_tx': 0.0, 'uplinks': 0.0, 'seen': 0.0},
-        )
+        bucket = totals.setdefault(device_ip, _DeviceThroughput())
+        if not bucket.device_uuid:
+            bucket.device_uuid = record.get('networkDeviceId') or None
 
         rx, tx = record.get('rxRate'), record.get('txRate')
         if rx is None and tx is None:
             # No statistics view for this interface; it contributes nothing to a throughput sum.
             continue
-        bucket['seen'] = 1.0
-        bucket['rx'] += float(rx or 0)
-        bucket['tx'] += float(tx or 0)
+        bucket.seen = True
+        bucket.rx += float(rx or 0)
+        bucket.tx += float(tx or 0)
 
         if is_uplink(record):
-            bucket['uplinks'] += 1
-            bucket['uplink_rx'] += float(rx or 0)
-            bucket['uplink_tx'] += float(tx or 0)
+            bucket.uplinks += 1
+            bucket.uplink_rx += float(rx or 0)
+            bucket.uplink_tx += float(tx or 0)
 
     for device_ip, bucket in totals.items():
-        if not bucket['seen']:
+        if not bucket.seen:
             continue
-        tags = base_tags + compact([*device_identity_tags(namespace, device_ip, None), tag('device_ip', device_ip)])
-        check.gauge('device.throughput.rx', bucket['rx'], tags=tags)
-        check.gauge('device.throughput.tx', bucket['tx'], tags=tags)
+        tags = base_tags + compact(
+            [*device_identity_tags(namespace, device_ip, bucket.device_uuid), tag('device_ip', device_ip)]
+        )
+        check.gauge('device.throughput.rx', bucket.rx, tags=tags)
+        check.gauge('device.throughput.tx', bucket.tx, tags=tags)
 
-        if bucket['uplinks']:
-            check.gauge('device.uplink.count', bucket['uplinks'], tags=tags)
-            check.gauge('device.uplink.throughput.rx', bucket['uplink_rx'], tags=tags)
-            check.gauge('device.uplink.throughput.tx', bucket['uplink_tx'], tags=tags)
+        if bucket.uplinks:
+            check.gauge('device.uplink.count', bucket.uplinks, tags=tags)
+            check.gauge('device.uplink.throughput.rx', bucket.uplink_rx, tags=tags)
+            check.gauge('device.uplink.throughput.tx', bucket.uplink_tx, tags=tags)
 
 
 # -- site health ----------------------------------------------------------------------
@@ -404,9 +422,9 @@ def _emit_device_rollups(
 def site_tags(record: dict[str, Any]) -> list[str]:
     """Identity tags for one site.
 
-    There is no ``siteName`` field, so the name is the leaf of ``siteHierarchy``. Names are not
-    unique -- the sandbox alone has two sites that collide -- so ``site_id`` is the identity and
-    ``site_name`` is for display.
+    There is no `siteName` field, so the name is the leaf of `siteHierarchy`. Names are not
+    unique -- the sandbox alone has two sites that collide -- so `site_id` is the identity and
+    `site_name` is for display.
     """
     hierarchy = (record.get('siteHierarchy') or '').strip()
     parts = [segment for segment in hierarchy.split('/') if segment]
@@ -478,8 +496,8 @@ def collect_site_health(
 def collect_network_health(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the global rollup.
 
-    Everything of interest is a top-level sibling of ``response``; ``response`` itself is a
-    time-bucketed array. Reading ``response[0].healthScore`` would pick an arbitrary bucket and
+    Everything of interest is a top-level sibling of `response`; `response` itself is a
+    time-bucketed array. Reading `response[0].healthScore` would pick an arbitrary bucket and
     look correct for as long as the bucket and the latest score happen to agree.
     """
     tags = base_tags or []
@@ -503,8 +521,8 @@ def collect_stacks(
     devices: list[dict[str, Any]],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
-) -> int:
-    """Collect stack membership, returning how many devices were queried.
+) -> None:
+    """Collect stack membership.
 
     This is the only per-device fan-out in the P0 set, so it is bounded to stackable families
     rather than issued for every managed device. Stack membership changes on human timescales,
@@ -514,7 +532,6 @@ def collect_stacks(
     cycle.
     """
     base_tags = base_tags or []
-    queried = 0
 
     for device in devices:
         if device.get('deviceFamily') not in STACKABLE_DEVICE_FAMILIES:
@@ -524,7 +541,6 @@ def collect_stacks(
         if device_id is None:
             continue
 
-        queried += 1
         tags = base_tags + compact(
             [
                 *device_identity_tags(namespace, device.get('managementIpAddress'), device_id),
@@ -562,8 +578,6 @@ def collect_stacks(
             if sync_ok is not None:
                 check.gauge('device.stack.port.status', int(str(sync_ok) in STACK_PORT_OK_VALUES), tags=port_tags)
 
-    return queried
-
 
 # -- aggregate client health ------------------------------------------------------------
 
@@ -571,8 +585,8 @@ def collect_stacks(
 def collect_client_health(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the org-level client score distribution.
 
-    One bulk call, no per-client fan-out. ``scoreValue`` is ``-1`` when Catalyst Center has no
-    client data, so it goes through :func:`emit_score` while the counts do not -- a client count
+    One bulk call, no per-client fan-out. `scoreValue` is `-1` when Catalyst Center has no
+    client data, so it goes through `emit_score()` while the counts do not -- a client count
     of zero is a real measurement.
     """
     base_tags = base_tags or []
@@ -595,8 +609,8 @@ def collect_client_health(check: AgentCheck, client: CatalystCenterClient, base_
 def _emit_aggregates(check: AgentCheck, aggregates: list[dict[str, Any]] | None, tags: list[str]) -> None:
     """Emit one metric per requested (field, function) pair.
 
-    A requested aggregate can come back with ``value: null`` when the underlying field has no
-    data, which :func:`emit_gauge` drops.
+    A requested aggregate can come back with `value: null` when the underlying field has no
+    data, which `emit_gauge()` drops.
     """
     by_key = {(a.get('name'), a.get('function')): a.get('value') for a in aggregates or []}
     for field, function, metric_name in CLIENT_AGGREGATES:
@@ -612,10 +626,10 @@ def collect_client_experience(
     """Collect client signal quality and onboarding timings, aggregated by the appliance.
 
     One POST, no per-client fan-out and no client MAC in the tag set. See
-    :data:`~.metrics.CLIENT_AGGREGATES` for why the aggregation happens server-side.
+    `CLIENT_AGGREGATES` for why the aggregation happens server-side.
 
-    Every slot in the response -- ``attributes``, ``aggregateAttributes``, ``groups`` -- is
-    ``null`` rather than empty when there is no client data, so each is guarded.
+    Every slot in the response -- `attributes`, `aggregateAttributes`, `groups` -- is
+    `null` rather than empty when there is no client data, so each is guarded.
     """
     base_tags = base_tags or []
     body = {
@@ -638,13 +652,10 @@ def collect_client_experience(
 # -- topology -------------------------------------------------------------------------
 
 
-def collect_topology(
-    check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None
-) -> dict[str, Any]:
-    """Collect the CDP/LLDP-derived physical topology, returning it for NDM link building.
+def collect_topology(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
+    """Collect the CDP/LLDP-derived physical topology and emit link status.
 
-    ``source`` and ``target`` on each link are device UUIDs, which is what the NDM device record
-    is keyed on, so links resolve to devices without a translation step.
+    `source` and `target` on each link are device UUIDs, the same id NDM device metadata uses.
 
     This endpoint is not paginated. A large fabric returns every link in one response, so treat
     it as a single large read rather than a cheap one.
@@ -653,7 +664,6 @@ def collect_topology(
     topology = client.get_object(PHYSICAL_TOPOLOGY_ENDPOINT)
 
     links = topology.get('links') or []
-    nodes = topology.get('nodes') or []
     check.gauge('topology.link.count', len(links), tags=tags)
 
     for link in links:
@@ -668,16 +678,14 @@ def collect_topology(
                 tag('target_interface', link.get('endPortName')),
             ]
         )
-        check.gauge('topology.link.status', int(status in TOPOLOGY_LINK_UP_VALUES), tags=link_tags)
-
-    return {'links': links, 'nodes': nodes}
+        check.gauge('topology.link.status', int(status in UP_VALUES), tags=link_tags)
 
 
 def collect_site_topology(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the size of the site hierarchy.
 
     The brief asks for site topology as hierarchy plus device-to-site mapping. The mapping already
-    rides on every device record as ``siteId`` and ``siteHierarchy``, so this contributes only the
+    rides on every device record as `siteId` and `siteHierarchy`, so this contributes only the
     hierarchy size.
     """
     tags = base_tags or []
@@ -690,8 +698,8 @@ def collect_l3_topology(
 ) -> None:
     """Collect the L3 routing graph size for one topology type.
 
-    The brief names OSPF, IS-IS and static. Only counts are emitted: the graph itself belongs in
-    NDM topology links rather than in metrics, and the physical topology already supplies those.
+    The brief names OSPF, IS-IS and static. Only counts are emitted here; the graph itself is not
+    submitted anywhere by this integration.
     """
     tags = (base_tags or []) + [f'topology_type:{topology_type}']
     topology = client.get_object(L3_TOPOLOGY_ENDPOINT_TEMPLATE.format(topology_type=topology_type))
@@ -707,20 +715,17 @@ def collect_sda_fabric(
 ) -> None:
     """Collect fabric health and node roles.
 
-    The brief routes node status through ``sda/edge-device`` and ``sda/border-device``, which
-    answer 400 with no list mode. ``fabricDetails`` on the bulk device record carries the same
+    The brief routes node status through `sda/edge-device` and `sda/border-device`, which
+    answer 400 with no list mode. `fabricDetails` on the bulk device record carries the same
     information at no extra cost, so roles are counted from records already in hand.
     """
     tags = base_tags or []
 
-    role_counts: dict[str, int] = {}
-    for device in devices:
-        fabric = device.get('fabricDetails') or {}
-        # Casing is inconsistent in the API's own examples (['Border', 'edge']), so normalise it
-        # rather than emit two tags for one role.
-        for role in fabric.get('fabricRole') or []:
-            normalized = str(role).lower()
-            role_counts[normalized] = role_counts.get(normalized, 0) + 1
+    # Casing is inconsistent in the API's own examples (['Border', 'edge']), so normalise it
+    # rather than emit two tags for one role.
+    role_counts = Counter(
+        str(role).lower() for device in devices for role in (device.get('fabricDetails') or {}).get('fabricRole') or []
+    )
 
     for role, count in sorted(role_counts.items()):
         check.gauge('fabric.device.count', count, tags=tags + [f'fabric_role:{role}'])
@@ -740,25 +745,20 @@ def collect_sda_fabric(
 
 
 def _group_counts(records: list[dict[str, Any]], field: str) -> dict[str, int]:
-    """Count ``records`` by the value of one field, in sorted key order.
+    """Count `records` by the value of one field, in sorted key order.
 
     Records whose value is absent are skipped rather than grouped under a placeholder. Both of
     Catalyst Center's absent-data conventions for a string count as absent, matching
-    :func:`~.emit.tag`: an empty tag value is never a useful dimension to query on.
+    `tag()`: an empty tag value is never a useful dimension to query on.
     """
-    counts: dict[str, int] = {}
-    for record in records:
-        value = record.get(field)
-        if value is None or value == '':
-            continue
-        counts[str(value)] = counts.get(str(value), 0) + 1
+    counts = Counter(str(value) for record in records if (value := record.get(field)) not in (None, ''))
     return dict(sorted(counts.items()))
 
 
 def _count_by(
     check: AgentCheck, metric_name: str, records: list[dict[str, Any]], field: str, tag_key: str, tags: list[str]
 ) -> None:
-    """Emit a per-value breakdown of ``records`` grouped on one field."""
+    """Emit a per-value breakdown of `records` grouped on one field."""
     for value, count in _group_counts(records, field).items():
         check.gauge(metric_name, count, tags=tags + [f'{tag_key}:{value}'])
 
@@ -766,8 +766,8 @@ def _count_by(
 def _issue_alert_type(record: dict[str, Any]) -> str:
     """Map a Catalyst Center issue priority onto a Datadog alert type.
 
-    P1 is the most severe, the inverse of the syslog scale :func:`_event_alert_type` reads. An
-    unrecognised or absent value becomes ``info`` rather than ``error``.
+    P1 is the most severe, the inverse of the syslog scale `_event_alert_type()` reads. An
+    unrecognised or absent value becomes `info` rather than `error`.
     """
     priority = record.get('priority')
     if not isinstance(priority, str):
@@ -779,7 +779,7 @@ def _issue_body(record: dict[str, Any]) -> str:
     """Assemble the diagnosis text, skipping fields the appliance left empty.
 
     No assurance issue has ever been observed on the sandbox, so the *rendering* of
-    ``suggestedActions`` is the least certain part of this: the published schema names the field
+    `suggestedActions` is the least certain part of this: the published schema names the field
     but not its type. If it turns out to be structured rather than free text, this is the line to
     revisit, and a real payload should be captured as a fixture at the same time.
     """
@@ -789,8 +789,8 @@ def _issue_body(record: dict[str, Any]) -> str:
 def _issue_payload(record: dict[str, Any], base_tags: list[str]) -> dict[str, Any]:
     """Build one Datadog event from one assurance issue record.
 
-    ``host`` is left unset for the same reason as assurance events: a Catalyst Center device name
-    is not a Datadog hostname. ``aggregation_key`` is the appliance's own issue id, so the
+    `host` is left unset for the same reason as assurance events: a Catalyst Center device name
+    is not a Datadog hostname. `aggregation_key` is the appliance's own issue id, so the
     successive occurrences of one long-lived issue collapse into a single thread.
     """
     occurred = record.get('mostRecentOccurredTime')
@@ -818,21 +818,22 @@ def collect_assurance_issues(
 ) -> int | None:
     """Collect open issues as counts, and newly-occurring ones as Datadog events.
 
-    Returns the newest ``mostRecentOccurredTime`` seen, which the caller stores and hands back on
+    Returns the newest `mostRecentOccurredTime` seen, which the caller stores and hands back on
     the next cycle.
 
     The counts and the events are deliberately not symmetrical. Counts describe current state, so
     every open issue is counted on every cycle. Events describe something happening, and an issue
     stays open and is returned again until it clears -- so submitting one per cycle would turn a
-    single unresolved problem into an unbounded stream. ``reported_through`` is the watermark that
+    single unresolved problem into an unbounded stream. `reported_through` is the watermark that
     holds each occurrence to one event.
 
-    An issue the appliance gives no ``mostRecentOccurredTime`` for cannot be placed against that
-    watermark, so it is reported only while there is no watermark yet. Re-reporting it every cycle
-    instead would reintroduce exactly the stream the watermark exists to prevent.
+    An issue the appliance gives no `mostRecentOccurredTime` for cannot be placed against that
+    watermark. With nothing to compare against, it is resubmitted on every cycle for as long as
+    the watermark stays unset -- not just once at startup -- and then, once any other issue
+    establishes a watermark, it stops being reported at all, timestamped or not.
 
-    ``suggestedActions`` arrives in this same response, so the brief's separate
-    ``issue-enrichment-details`` call is unnecessary. It is free text, which no metric tag can
+    `suggestedActions` arrives in this same response, so the brief's separate
+    `issue-enrichment-details` call is unnecessary. It is free text, which no metric tag can
     carry, so the event body is where it lands.
     """
     tags = base_tags or []
@@ -864,8 +865,8 @@ def collect_assurance_issues(
 def _event_alert_type(record: dict[str, Any]) -> str:
     """Map a Catalyst Center syslog severity onto a Datadog alert type.
 
-    Severity 0 is the most severe. An unrecognised or absent value becomes ``info`` rather than
-    ``error``, so a scale change on the appliance cannot manufacture alerts.
+    Severity 0 is the most severe. An unrecognised or absent value becomes `info` rather than
+    `error`, so a scale change on the appliance cannot manufacture alerts.
     """
     severity = record.get('severity')
     if not isinstance(severity, int):
@@ -889,11 +890,11 @@ def _event_body(record: dict[str, Any]) -> str:
 def _event_payload(record: dict[str, Any], fallback_timestamp: int, base_tags: list[str]) -> dict[str, Any]:
     """Build one Datadog event from one assurance event record.
 
-    ``host`` is deliberately left unset. Catalyst Center device names are not Datadog hostnames, and
+    `host` is deliberately left unset. Catalyst Center device names are not Datadog hostnames, and
     setting one that does not resolve invents a host in the infrastructure list; the device is
     carried as a tag and in the body instead.
 
-    ``aggregation_key`` is the appliance's own event id, which is what lets the stream collapse the
+    `aggregation_key` is the appliance's own event id, which is what lets the stream collapse the
     duplicates a re-polled window produces.
     """
     timestamp = record.get('timestamp')
@@ -934,9 +935,9 @@ def collect_events(
     windows must not overlap, or every event is counted more than once. Both bounds are epoch
     milliseconds.
 
-    Four requests is the floor. ``deviceFamily`` is mandatory, and its values fall into four groups
+    Four requests is the floor. `deviceFamily` is mandatory, and its values fall into four groups
     the endpoint refuses to mix, so each group is its own sweep -- see
-    :data:`EVENT_DEVICE_FAMILY_GROUPS`.
+    `EVENT_DEVICE_FAMILY_GROUPS`.
 
     A group that fails is logged and skipped rather than aborting the sweep. That costs one window
     of that group's events, which is the lesser of two evils: the alternative is to fail the whole
@@ -946,7 +947,7 @@ def collect_events(
     double-count by retrying -- that case raises instead, so the caller does not advance its
     watermark and the window is retried next cycle rather than silently dropped.
 
-    ``event.total.count`` comes from the total the appliance reports, not from the records that
+    `event.total.count` comes from the total the appliance reports, not from the records that
     arrived, so it stays correct when a sweep is cut short by the page budget. The breakdown cannot
     be -- it is derived from records -- so a truncated sweep is warned about loudly.
     """
@@ -1009,8 +1010,8 @@ def collect_application_health(
 ) -> None:
     """Collect per-application health and traffic, one call per site.
 
-    ``siteId`` is mandatory here -- omitting it returns ``errorCode 14029``, whose message reads
-    ``siteIds`` while the accepted parameter is singular. So this is a genuine per-site fan-out
+    `siteId` is mandatory here -- omitting it returns `errorCode 14029`, whose message reads
+    `siteIds` while the accepted parameter is singular. So this is a genuine per-site fan-out
     whose cost scales with the hierarchy, which is why it is gated off by default.
 
     A site that fails is logged and skipped rather than aborting the sweep.

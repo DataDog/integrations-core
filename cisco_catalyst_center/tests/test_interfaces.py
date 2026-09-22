@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Interface collector tests.
 
-The interfaces endpoint exposes four views -- ``configuration``, ``statistics``, ``stackPort``
-and ``poE`` -- and a view *replaces* the field set rather than extending it. So the collector
-issues one paginated call per enabled view and joins them on the interface ``id``.
+The interfaces endpoint exposes four views -- `configuration`, `statistics`, `stackPort`
+and `poE` -- and a view *replaces* the field set rather than extending it. So the collector
+issues one paginated call per enabled view and joins them on the interface `id`.
 """
 
 from __future__ import annotations
@@ -17,8 +17,7 @@ import pytest
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_interfaces
 
-from .common import load_captured, metric_values, with_value
-from .conftest import ViewRoutedHttp
+from .common import ViewRoutedHttp, load_captured, metric_values, with_value
 
 # The intent API sweep is unconditional, so every collect_interfaces call issues it. It takes no
 # `view` parameter, which is why it has to be routed by path.
@@ -101,6 +100,23 @@ def test_collect_interfaces_given_unusable_speed_still_emits_the_other_interface
     collect_interfaces(check, _client(instance, by_view), views=('configuration',))
 
     aggregator.assert_metric('cisco_catalyst_center.interface.status', count=57)
+
+
+@pytest.mark.parametrize(('oper_status', 'expected'), [('UP', 1), ('Up', 1), ('DOWN', 0)])
+def test_collect_interfaces_given_operstatus_case_variants_reports_status_correctly(
+    aggregator, instance, check, oper_status, expected
+):
+    # The data API and the legacy endpoint disagree on case (`UP` vs `Up`), and a states set
+    # missing one variant would silently read a healthy port as down rather than raising.
+    config = with_value(load_captured('data_interfaces_configuration'), 'response.0.operStatus', oper_status)
+
+    collect_interfaces(check, _client(instance, dict(CONFIG_ONLY, configuration=config)), views=('configuration',))
+
+    # All four sandbox switches have a GigabitEthernet0/0; device_ip narrows to the one whose
+    # record `with_value` actually modified.
+    assert metric_values(
+        aggregator, 'cisco_catalyst_center.interface.status', 'interface:GigabitEthernet0/0', 'device_ip:10.10.20.176'
+    ) == [expected]
 
 
 # -- the statistics view ----------------------------------------------------------------

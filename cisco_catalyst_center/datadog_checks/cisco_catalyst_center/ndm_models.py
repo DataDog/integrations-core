@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Network Device Monitoring metadata payloads.
 
-The device id is ``{namespace}:{managementIpAddress}``, which is the same identity the Agent's
-SNMP check computes. That is deliberate and is the whole point of the pairing: Catalyst Center
-supplies inventory, health and RF context while SNMP supplies high-resolution counters, and the
-two only merge into one device in the NDM view if the ids agree exactly. A namespace mismatch
-does not error -- it silently produces two half-populated devices.
+The device id is Catalyst Center's own `instanceUuid`, present on every record even when
+`managementIpAddress` is not -- an access point reporting through a controller may have no IP,
+and an IP-derived id would collapse every such device onto a single record. The Agent's SNMP
+check identifies the same hardware as `{namespace}:{managementIpAddress}`, so that form is
+carried as the `device_id` tag rather than used as the id itself. This is what lines the two
+sources up in the NDM view; the namespace must match the SNMP check's, or the tag-based pairing
+silently fails to join them.
 """
 
 from __future__ import annotations
@@ -18,6 +20,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .constants import REACHABLE_VALUES, UP_VALUES
 from .emit import is_uplink
 
 INTEGRATION = 'cisco_catalyst_center'
@@ -32,11 +35,6 @@ STATUS_DOWN = 2
 OPER_STATUS_UNKNOWN = 4
 
 KBPS_TO_BPS = 1000
-
-# Values the data API uses for a reachable device. The legacy endpoint answers `Reachable` in
-# title case while the data API answers `REACHABLE`, so both are accepted.
-REACHABLE_VALUES = frozenset({'REACHABLE', 'Reachable', 'reachable'})
-UP_VALUES = frozenset({'UP', 'up', 'Up'})
 
 # The device types NDM understands. Anything unmapped becomes 'other' rather than being invented,
 # since an unrecognised value is dropped downstream.
@@ -119,12 +117,12 @@ def _int_or_none(value: Any) -> int | None:
 
 
 def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMetadata:
-    """Build the NDM device payload from one ``data/networkDevices`` record.
+    """Build the NDM device payload from one `data/networkDevices` record.
 
     Field names differ from those the product brief lists, because the brief maps against the
-    legacy inventory endpoint: the data API has ``name`` rather than ``hostname``, ``osType``
-    rather than ``softwareType``, and ``reachabilityHealthStatus`` rather than
-    ``reachabilityStatus``.
+    legacy inventory endpoint: the data API has `name` rather than `hostname`, `osType`
+    rather than `softwareType`, and `reachabilityHealthStatus` rather than
+    `reachabilityStatus`.
     """
     management_ip = record.get('managementIpAddress') or ''
     hierarchy = record.get('siteHierarchy')
@@ -176,8 +174,8 @@ def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMeta
 def _port_role(record: dict[str, Any]) -> str | None:
     """Classify a port as uplink, access or trunk.
 
-    The brief derives this from ``interfaceType``, ``portMode`` and the description. The uplink
-    decision itself belongs to :func:`~.emit.is_uplink`, so that the port role, the ``uplink``
+    The brief derives this from `interfaceType`, `portMode` and the description. The uplink
+    decision itself belongs to `is_uplink()`, so that the port role, the `uplink`
     tag and the device rollup always agree; anything it does not claim falls back to the
     reported port mode.
     """
@@ -188,13 +186,13 @@ def _port_role(record: dict[str, Any]) -> str | None:
 
 
 def create_interface_metadata(record: dict[str, Any], namespace: str) -> InterfaceMetadata:
-    """Build the NDM interface payload from one merged ``data/interfaces`` record.
+    """Build the NDM interface payload from one merged `data/interfaces` record.
 
-    ``device_id`` is the parent device's instanceUuid, matching the id assigned in
-    :func:`create_device_metadata`. The interface record already carries it as
-    ``networkDeviceId``, so the parent is resolved directly rather than joined through an IP.
+    `device_id` is the parent device's instanceUuid, matching the id assigned in
+    `create_device_metadata()`. The interface record already carries it as
+    `networkDeviceId`, so the parent is resolved directly rather than joined through an IP.
 
-    ``speed`` is documented in Kbps and returned as a string, while NDM expects bits per second.
+    `speed` is documented in Kbps and returned as a string, while NDM expects bits per second.
     """
     name = record.get('name') or ''
     speed_kbps = _int_or_none(record.get('speed'))

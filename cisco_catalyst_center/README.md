@@ -43,6 +43,10 @@ falls back to polling `events_initial_lookback_minutes` again. Events already re
 restart that still fall inside that window are submitted a second time. The `cisco_catalyst_center.event.count`
 and `.event.total.count` metrics have no protection against this and double-count that window.
 
+Events can also be lost rather than duplicated: if one device family's request fails, or a sweep is
+cut short by the per-cycle page budget, the window still advances and is not retried on the next
+cycle, so those events are gone rather than double-counted.
+
 Polling costs four requests per cycle at minimum, delays each event by up to one collection
 interval, and submits at most 800 events per cycle. Events that occur while the Agent is stopped for
 more than seven days cannot be recovered, because that is the widest window the endpoint serves.
@@ -52,8 +56,8 @@ carry the same events, so enabling both submits everything twice.
 
 ### Network Device Monitoring
 
-Set `send_ndm_metadata: true` in `cisco_catalyst_center.d/conf.yaml` to send device, interface, and
-topology metadata to [Network Device Monitoring][9] (NDM).
+Set `send_ndm_metadata: true` in `cisco_catalyst_center.d/conf.yaml` to send device and interface
+metadata to [Network Device Monitoring][9] (NDM).
 
 The `namespace` option must match the namespace configured on the SNMP check polling the same
 devices. If the two differ, Catalyst Center and SNMP resolve to different NDM devices instead of

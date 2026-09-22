@@ -5,16 +5,10 @@
 
 from __future__ import annotations
 
-from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_client_health, collect_stacks
 
+from .common import client_from_script as _client
 from .common import load_captured, metric_values, with_value
-from .conftest import ScriptedHttp
-
-
-def _client(instance, script):
-    return CatalystCenterClient(instance, http=ScriptedHttp(script))
-
 
 SWITCHES = [
     {

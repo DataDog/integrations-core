@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Submission and field-interpretation helpers for Catalyst Center's absent-data conventions.
 
-Catalyst Center signals "no data" four different ways -- ``null``, ``-1``, ``{}``, and the empty
-string -- and which one appears depends on the field and the device family. Emitting ``0`` for
+Catalyst Center signals "no data" four different ways -- `null`, `-1`, `{}`, and the empty
+string -- and which one appears depends on the field and the device family. Emitting `0` for
 any of them reads as a healthy zero on a graph.
 
-There are two helpers rather than one so that the ``-1`` rule stays confined to scores. A radio
+There are two helpers rather than one so that the `-1` rule stays confined to scores. A radio
 noise floor is legitimately around -95 dBm, and a blanket sentinel filter would silently drop it.
 """
 
@@ -53,7 +53,7 @@ def emit_score(check: AgentCheck, name: str, value: Any, tags: list[str]) -> Non
 
 
 def emit_watts(check: AgentCheck, name: str, value: Any, tags: list[str]) -> None:
-    """Submit a PoE power reading given as a unit-suffixed string such as ``"10.5W"``."""
+    """Submit a PoE power reading given as a unit-suffixed string such as `"10.5W"`."""
     if not isinstance(value, str):
         emit_gauge(check, name, value, tags)
         return
@@ -61,7 +61,7 @@ def emit_watts(check: AgentCheck, name: str, value: Any, tags: list[str]) -> Non
 
 
 def tag(key: str, value: Any) -> str | None:
-    """Build a ``key:value`` tag, or None when there is nothing worth tagging.
+    """Build a `key:value` tag, or None when there is nothing worth tagging.
 
     Returning None rather than an empty tag lets callers filter in one place; an empty string
     is one of the values Catalyst Center uses for absent data.
@@ -72,24 +72,24 @@ def tag(key: str, value: Any) -> str | None:
 
 
 def compact(tags: list[str | None]) -> list[str]:
-    """Drop the Nones produced by :func:`tag`."""
+    """Drop the Nones produced by `tag()`."""
     return [item for item in tags if item is not None]
 
 
 def is_uplink(record: dict[str, Any]) -> bool:
     """Whether one merged interface record describes an uplink.
 
-    ``isWan`` is the appliance's own judgement about which link leaves the site, so it stays
+    `isWan` is the appliance's own judgement about which link leaves the site, so it stays
     primary: where it is set, its value decides and the description is never consulted. It is
     null on every interface the DevNet sandbox exposes, and the product brief names the port
     description as the fallback for exactly that case.
 
-    The match is deliberately narrow -- the substring ``uplink``, case-insensitively, and nothing
-    else. ``core``, ``dist`` and ``trunk`` are not uplink markers, and ``portMode`` is not
+    The match is deliberately narrow -- the substring `uplink`, case-insensitively, and nothing
+    else. `core`, `dist` and `trunk` are not uplink markers, and `portMode` is not
     consulted at all: either would relabel ordinary trunk ports on an access switch and silently
     inflate the uplink throughput aggregate. A wrong aggregate is worse than a dark metric.
 
-    One rule with three callers -- the ``uplink`` tag, the device rollup and the NDM port role --
+    One rule with three callers -- the `uplink` tag, the device rollup and the NDM port role --
     so that they cannot drift apart.
     """
     is_wan = record.get('isWan')

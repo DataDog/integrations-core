@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import pytest
 
-from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import (
     collect_application_health,
     collect_assurance_issues,
@@ -28,13 +27,8 @@ from datadog_checks.cisco_catalyst_center.collectors import (
     collect_topology,
 )
 
+from .common import client_from_script as _client
 from .common import load_captured, metric_values, with_value
-from .conftest import ScriptedHttp
-
-
-def _client(instance, script):
-    return CatalystCenterClient(instance, http=ScriptedHttp(script))
-
 
 # -- topology ---------------------------------------------------------------------
 
@@ -253,21 +247,6 @@ def test_collect_security_counts_rogues_by_threat_level(aggregator, instance, ch
     collect_security(check, _client(instance, script))
 
     assert metric_values(aggregator, 'cisco_catalyst_center.security.rogue.count', 'threat_level:High') == [2]
-
-
-def test_collect_security_reports_the_deployment_total_once_under_its_own_metric_name(aggregator, instance, check):
-    rogues = with_value(
-        load_captured('intent_security_rogue_empty'),
-        'response',
-        [
-            {'threatLevel': 'High', 'macAddress': 'aa:bb', 'ssid': 'evil'},
-            {'threatLevel': 'High', 'macAddress': 'cc:dd'},
-        ],
-    )
-    script = [rogues, load_captured('intent_security_threats_empty')]
-
-    collect_security(check, _client(instance, script))
-
     # Regression guard: the total used to be submitted under the same name as the per-threat_level
     # breakdown, so a query without a group-by silently summed both and doubled the real count.
     assert metric_values(aggregator, 'cisco_catalyst_center.security.rogue.total.count') == [2]

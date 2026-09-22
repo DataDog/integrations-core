@@ -8,22 +8,16 @@ the tag set, which at the scale of the named accounts is tens of thousands of se
 nobody queries per-device. Catalyst Center can do the aggregation itself, so this asks the
 appliance to group by SSID and band and emits at that cardinality instead.
 
-The sandbox has zero clients, so the appliance answers with ``null`` in every slot -- not empty
+The sandbox has zero clients, so the appliance answers with `null` in every slot -- not empty
 lists. That distinction is the main thing these tests pin.
 """
 
 from __future__ import annotations
 
-from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_client_experience
 
+from .common import client_from_payload as _client
 from .common import load_captured, metric_values, with_value
-from .conftest import ScriptedHttp
-
-
-def _client(instance, payload):
-    return CatalystCenterClient(instance, http=ScriptedHttp([payload]))
-
 
 EMPTY = 'data_clients_summary_analytics'
 

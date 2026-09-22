@@ -95,10 +95,6 @@ INTERFACE_POE_WATT_METRICS: Final[dict[str, str]] = {
     'pdMaxPowerDrawn': 'interface.poe.power_max_drawn',
 }
 
-# Values Catalyst Center uses for an interface that is up. Everything else counts as down, so a
-# state the appliance invents later reads as down rather than crashing or reading as healthy.
-INTERFACE_UP_STATES: Final[frozenset[str]] = frozenset({'UP', 'up'})
-
 # siteHealthSummaries. Device counts are reported per family with a shared naming shape --
 # `<family>DeviceCount` / `<family>DeviceGoodHealthCount` -- so the family becomes a tag rather
 # than being baked into the metric name.

@@ -6,9 +6,9 @@
 The DevNet sandbox reports zero assurance events in every device family over any window it will
 accept, so there is no captured recording of a populated response. What *is* captured is the shape
 of the endpoint's contract -- the empty envelope and its rejection messages -- and the records used
-here are built on that shape from the ``Event`` schema in Cisco's published AssuranceEvents spec.
+here are built on that shape from the `Event` schema in Cisco's published AssuranceEvents spec.
 
-That split is the one ``tests/common.py`` describes for wireless: the field names are trusted
+That split is the one `tests/common.py` describes for wireless: the field names are trusted
 because they come from the schema, the values are not, and nothing here asserts that a value
 resembles what a real appliance would report.
 
@@ -26,20 +26,19 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.cisco_catalyst_center import CiscoCatalystCenterCheck
-from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_events
 from datadog_checks.cisco_catalyst_center.constants import EVENT_DEVICE_FAMILY_GROUPS, EVENT_WINDOW_MAX_SECONDS
 from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from .common import client_from_script as _client
 from .common import load_captured, metric_values
-from .conftest import ScriptedHttp
 
 # One hour, in the epoch milliseconds the endpoint expects.
 WINDOW_START = 1_755_000_000_000
 WINDOW_END = 1_755_003_600_000
 
-#: Keys taken from the ``Event`` schema. Only the fields the breakdown groups on are present,
+#: Keys taken from the `Event` schema. Only the fields the breakdown groups on are present,
 #: because they are the only ones the collector reads.
 EVENTS: list[dict[str, Any]] = [
     {
@@ -82,10 +81,6 @@ DETAILED_EVENT: dict[str, Any] = {
 }
 
 
-def _client(instance: InstanceType, script: list[Any]) -> CatalystCenterClient:
-    return CatalystCenterClient(instance, http=ScriptedHttp(script))
-
-
 def _window(check: CiscoCatalystCenterCheck) -> tuple[int, int]:
     """The window the check would poll next, asserting that there is one to poll."""
     window = check._event_window()
@@ -94,7 +89,7 @@ def _window(check: CiscoCatalystCenterCheck) -> tuple[int, int]:
 
 
 def _page(records: list[dict[str, Any]], total: int) -> dict[str, Any]:
-    """An assuranceEvents envelope. ``page.count`` is the collection total, not the page size."""
+    """An assuranceEvents envelope. `page.count` is the collection total, not the page size."""
     return {'response': records, 'version': '1.0', 'page': {'limit': 20, 'offset': 1, 'count': total}}
 
 

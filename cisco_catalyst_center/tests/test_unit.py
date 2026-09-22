@@ -20,15 +20,15 @@ from datadog_checks.cisco_catalyst_center.constants import (
     NETWORK_HEALTH_ENDPOINT,
     SITE_HEALTH_SUMMARIES_ENDPOINT,
 )
+from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import load_captured
-from .conftest import ScriptedHttp, ViewRoutedHttp
+from .common import ScriptedHttp, ViewRoutedHttp, load_captured
 
 
 def _serve(check: CiscoCatalystCenterCheck, payload) -> None:
     """Point the check's client at a scripted HTTP layer.
 
-    ``AgentCheck.http`` is read-only, so the swap happens one level down on the client, which is
+    `AgentCheck.http` is read-only, so the swap happens one level down on the client, which is
     also the more honest boundary: everything above the socket still runs.
     """
     check.client.http = ScriptedHttp([payload])
@@ -43,6 +43,7 @@ def test_check_given_reachable_appliance_reports_collection_success(
 
     aggregator.assert_metric('cisco_catalyst_center.collection.success', value=1)
     aggregator.assert_metric('cisco_catalyst_center.device.count', value=4)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_check_given_configured_tags_applies_them_to_metrics(

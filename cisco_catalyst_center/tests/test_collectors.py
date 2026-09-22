@@ -5,7 +5,7 @@
 
 The switch cases run against verbatim sandbox recordings. The access point and controller cases
 run against a synthetic payload whose keys come from Cisco's schema and whose values were chosen
-by hand -- see ``tests/fixtures/wireless_synthetic/GENERATOR.py``. Assert on structure and
+by hand -- see `tests/fixtures/wireless_synthetic/GENERATOR.py`. Assert on structure and
 plumbing there, never on a value being realistic.
 """
 
@@ -13,16 +13,10 @@ from __future__ import annotations
 
 import pytest
 
-from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.collectors import collect_devices
 
+from .common import client_from_payload as _client
 from .common import load_captured, load_wireless_synthetic, metric_values, with_value
-from .conftest import ScriptedHttp
-
-
-def _client(instance, payload):
-    return CatalystCenterClient(instance, http=ScriptedHttp([payload]))
-
 
 # -- switches, from the sandbox recording -----------------------------------------
 

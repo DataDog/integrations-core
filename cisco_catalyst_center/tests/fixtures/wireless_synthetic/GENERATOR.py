@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Regenerate the synthetic access point and controller payload.
 
-Run from this directory: ``python GENERATOR.py``
+Run from this directory: `python GENERATOR.py`
 
 Why this exists as a script rather than a hand-edited JSON file: the field *names* must come
 from Cisco's schema, not from a developer's memory of it, and a reviewer needs to be able to
@@ -11,15 +11,15 @@ tell which parts were observed and which were invented.
 
 Construction:
 
-* Every key outside ``apDetails`` is copied from a real captured switch record, so the common
+* Every key outside `apDetails` is copied from a real captured switch record, so the common
   device shape matches what the appliance actually returns rather than what the spec claims.
-  The two differ -- the runtime record carries ``reachabilityHealthStatus``, which the spec
-  omits, and the spec names a ``macAddr`` interface field that runtime does not return.
-* ``apDetails`` and its nested ``radios`` come from ``ApConfigurationDetails`` and ``RadioKpi``
-  in ``CE_Cat_Center_Org-AssuranceNetworkDevices-1.0.2-resolved.yaml``.
+  The two differ -- the runtime record carries `reachabilityHealthStatus`, which the spec
+  omits, and the spec names a `macAddr` interface field that runtime does not return.
+* `apDetails` and its nested `radios` come from `ApConfigurationDetails` and `RadioKpi`
+  in `CE_Cat_Center_Org-AssuranceNetworkDevices-1.0.2-resolved.yaml`.
 
 Values are hand-chosen to be physically plausible. Cisco's schema examples are not: the example
-for ``RadioKpi.noise`` is ``10`` on a field documented in dBm, where a real 5 GHz noise floor is
+for `RadioKpi.noise` is `10` on a field documented in dBm, where a real 5 GHz noise floor is
 near -95. Distinct values are used per radio and per field so that a swapped tag mapping fails a
 test instead of passing on coincidentally equal numbers.
 

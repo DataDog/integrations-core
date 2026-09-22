@@ -64,7 +64,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
     def _interface_views(self) -> tuple[str, ...]:
         """Which interface views to request.
 
-        ``configuration`` comes first so that later views cannot overwrite the descriptive
+        `configuration` comes first so that later views cannot overwrite the descriptive
         fields. A view replaces the field set rather than extending it, so each one costs its own
         paginated call -- which is why statistics and PoE are separately switchable.
         """
@@ -82,7 +82,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         an event is counted exactly once whatever the collection interval is. Polling a fixed
         lookback instead would recount every event on every cycle.
 
-        The first cycle has no predecessor and reaches back ``events_initial_lookback_minutes``.
+        The first cycle has no predecessor and reaches back `events_initial_lookback_minutes`.
         After that the start is clamped to the widest window the endpoint accepts, which is what an
         Agent restarted after a long outage runs into.
         """
@@ -117,7 +117,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         """Run one collector, containing its failure.
 
         A single unreachable domain must not cost the whole cycle: losing site health should not
-        also lose device health. ``collection.success`` reflects whether *anything* failed, so a
+        also lose device health. `collection.success` reflects whether *anything* failed, so a
         partial collection is still visible rather than silently degraded.
         """
         try:
@@ -164,8 +164,11 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         base_tags = list(self.instance.get('tags') or [])
         # The tag must echo back what the user configured, not the client's normalized base URL:
         # `spec.yaml` tells users not to include a scheme, so the normalized, https-prefixed URL
-        # can never equal the configured value.
-        base_tags.append(f'catalyst_center_host:{self.instance["catalyst_center_host"]}')
+        # can never equal the configured value. `self.config` carries the configured string
+        # unchanged -- normalization is the client's job, not the config model's -- and by this
+        # point in the lifecycle it is already validated, so there is no reason to read the raw
+        # instance dict instead.
+        base_tags.append(f'catalyst_center_host:{self.config.catalyst_center_host}')
         namespace = self.config.namespace or 'default'
 
         devices: list[dict[str, Any]] = []

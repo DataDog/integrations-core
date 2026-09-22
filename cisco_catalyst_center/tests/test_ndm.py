@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """NDM metadata payloads.
 
-The device id is the load-bearing field: it must be `{namespace}:{management_ip}`, identical to
-what the SNMP check computes for the same device. If the two disagree, Catalyst Center and SNMP
-resolve to different NDM devices and the pairing the product brief is built on silently
-delivers half its value.
+The `device_id` tag is the load-bearing field: it must be `{namespace}:{management_ip}`,
+identical to what the SNMP check computes for the same device. The id itself is Catalyst
+Center's own `instanceUuid` and never needs to agree with SNMP, but if the tag's namespace
+disagrees, Catalyst Center and SNMP resolve to different NDM devices and the pairing the product
+brief is built on silently delivers half its value.
 """
 
 from __future__ import annotations
@@ -27,8 +28,7 @@ from datadog_checks.cisco_catalyst_center.ndm_models import (
     create_interface_metadata,
 )
 
-from .common import load_captured, load_wireless_synthetic
-from .conftest import ScriptedHttp, ViewRoutedHttp
+from .common import ScriptedHttp, ViewRoutedHttp, load_captured, load_wireless_synthetic
 
 
 def _device_record():

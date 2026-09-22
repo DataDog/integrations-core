@@ -4,7 +4,7 @@
 """Client-level tests: authentication, envelope unwrapping, and pagination.
 
 These exercise the layer between HTTP and the collectors. The envelope tests matter most:
-Catalyst Center returns errors in the same ``response`` slot it uses for real data, so a
+Catalyst Center returns errors in the same `response` slot it uses for real data, so a
 client that only checks the HTTP status hands an error object to a collector, which iterates
 it without raising and records nothing. That failure is silent and survives code review.
 """
@@ -16,7 +16,7 @@ import pytest
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 
-from .common import load_captured
+from .common import ScriptedHttp, load_captured
 
 
 def test_get_list_given_data_api_envelope_returns_response_items(client, respond):
@@ -29,7 +29,7 @@ def test_get_list_given_data_api_envelope_returns_response_items(client, respond
 
 
 #: Every shape Catalyst Center uses to report a failure, and what the client must surface for it.
-#: The appliance puts errors in the same ``response`` slot it uses for real records, so a client
+#: The appliance puts errors in the same `response` slot it uses for real records, so a client
 #: that reads only the HTTP status hands an error object to a collector, which iterates it without
 #: raising and records nothing.
 ERROR_ENVELOPES = [
@@ -164,6 +164,24 @@ def test_get_list_given_persistent_429_backs_off_then_gives_up(client, respond_s
     assert len(requests) == 3, 'bounded attempts; a throttled appliance must not be retried forever'
     assert len(sleeps) == 2, 'no point waiting after the final attempt, only between them'
     assert sleeps[1] > sleeps[0], 'each successive wait should be longer'
+
+
+def test_authenticate_given_429_waits_then_succeeds(instance, sleeps):
+    # `_authenticate()` cannot share `_send_with_throttle_retry()`: that helper calls
+    # `_ensure_token()` before every attempt, and `_ensure_token()` calls `_authenticate()`
+    # whenever there is no token yet, so routing this retry through it would recurse on the very
+    # first authentication. Its own loop needs pinning separately from the GET/POST tests above.
+    http = ScriptedHttp(
+        [load_captured('data_network_devices')],
+        auth_script=[{'status_code': 429, 'json': {}, 'headers': {'Retry-After': '3'}}],
+    )
+    client = CatalystCenterClient(instance, http=http)
+
+    devices = client.get_list('/dna/data/api/v1/networkDevices')
+
+    assert len(devices) == 4
+    assert client.auth_count == 1, 'the throttled attempt must not count as a successful authentication'
+    assert sleeps == [3.0], 'Retry-After must be honoured for authentication the same as for GET/POST'
 
 
 def test_post_object_sends_the_body_and_the_auth_token(client, respond_sequence):

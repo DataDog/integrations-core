@@ -8,10 +8,10 @@ from __future__ import annotations
 class CatalystApiError(Exception):
     """Raised when Catalyst Center reports a failure, whatever envelope it arrives in.
 
-    ``error_code`` is deliberately untyped: the API returns an integer for validation failures
-    (``14001``) and a string for request-level ones (``"Bad request"``).
+    `error_code` is deliberately untyped: the API returns an integer for validation failures
+    (`14001`) and a string for request-level ones (`"Bad request"`).
 
-    ``correlation_id`` is the value of the ``x-correlation-id`` response header. Cisco TAC asks
+    `correlation_id` is the value of the `x-correlation-id` response header. Cisco TAC asks
     for it by name, and it is the only handle they accept when investigating a failed call, so
     it is carried on every error rather than only logged.
     """

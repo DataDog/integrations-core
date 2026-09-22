@@ -14,13 +14,13 @@ So the field names are pinned here, transcribed from:
     Assurance/CE_Cat_Center_Org-AssuranceNetworkDevices-1.0.2-resolved.yaml
 
 That repository publishes no license, so the schema is transcribed as field names rather than
-vendored. Regenerate with ``tests/fixtures/wireless_synthetic/GENERATOR.py`` and update these
+vendored. Regenerate with `tests/fixtures/wireless_synthetic/GENERATOR.py` and update these
 sets if Cisco changes the schema.
 
 Two directions are checked, and both matter:
 
 * No fixture key is absent from the schema. Catches an invented field.
-* Every metric the collector reads is a real schema field. Catches a typo in ``metrics.py`` that
+* Every metric the collector reads is a real schema field. Catches a typo in `metrics.py` that
   would otherwise silently emit nothing.
 """
 

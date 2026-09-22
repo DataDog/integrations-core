@@ -38,8 +38,8 @@ files:
     - name: send_ndm_metadata
       fleet_configurable: true
       description: |
-        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, and
-        topology) to be sent.
+        Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces)
+        to be sent.
       value:
         type: boolean
         example: false
@@ -79,10 +79,11 @@ files:
     - name: collect_interface_statistics
       fleet_configurable: true
       description: |
-        Set to `false` to skip interface throughput, error and discard rates. These come from a
-        separate `statistics` view on the interfaces endpoint, so disabling this removes one
-        paginated call per collection cycle. This is the first thing to turn off if the appliance
-        starts returning HTTP 429.
+        Set to `false` to skip interface throughput, error and discard rates, and the
+        device-level `device.throughput.*` and `device.uplink.*` rollups derived from them.
+        These come from a separate `statistics` view on the interfaces endpoint, so disabling
+        this removes one paginated call per collection cycle. This is the first thing to turn
+        off if the appliance starts returning HTTP 429.
       value:
         type: boolean
         example: true
@@ -172,7 +173,8 @@ files:
       fleet_configurable: true
       description: |
         Set to `true` to collect counts of open assurance issues by severity, priority, category
-        and status.
+        and status. Each issue not seen on a prior cycle is also submitted as a Datadog event,
+        with an alert type derived from the issue's priority.
       value:
         type: boolean
         example: false
@@ -189,6 +191,10 @@ files:
         The resume point is kept in memory: an Agent restart forgets it and re-polls
         `events_initial_lookback_minutes`, re-submitting events already reported before the
         restart. `event.count` and `event.total.count` double-count that window when this happens.
+
+        Events can also be lost rather than duplicated: if one device family's request fails, or a
+        sweep is cut short by the per-cycle page budget, the window still advances and is not
+        retried, so those events are gone rather than double-counted.
 
         If Catalyst Center is already configured to notify Datadog directly, leave this disabled:
         both paths submit the same events, so enabling both submits everything twice.

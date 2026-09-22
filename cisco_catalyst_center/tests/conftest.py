@@ -12,111 +12,7 @@ from datadog_checks.base.types import InstanceType
 from datadog_checks.cisco_catalyst_center.check import CiscoCatalystCenterCheck
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 
-AUTH_PATH = '/dna/system/api/v1/auth/token'
-
-
-class _Response:
-    """Minimal stand-in for a ``requests.Response``."""
-
-    def __init__(self, payload: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> None:
-        self._payload = payload
-        self.status_code = status_code
-        self.headers: dict[str, str] = {'x-correlation-id': 'test-correlation-id', **(headers or {})}
-
-    def json(self) -> Any:
-        return self._payload
-
-
-def _to_response(item: Any) -> _Response:
-    """Build a response from a script entry.
-
-    A plain value becomes a 200 with that value as the body. The ``{'status_code': ...,
-    'json': ...}`` shape overrides both, so a script can also inject a failure.
-    """
-    if isinstance(item, dict) and 'status_code' in item and 'json' in item:
-        return _Response(item['json'], item['status_code'], item.get('headers'))
-    return _Response(item)
-
-
-class ScriptedHttp:
-    """Fake HTTP layer that replays a script and records what was asked of it.
-
-    This is the only mock in the client tests. It sits exactly at the network boundary, so
-    everything above it -- envelope unwrapping, pagination arithmetic, token lifecycle -- runs
-    for real.
-    """
-
-    def __init__(self, script: list[Any]) -> None:
-        self._script = list(script)
-        self.requests: list[dict[str, Any]] = []
-        self.auth_calls = 0
-
-    #: Returned once the script is exhausted. A fake that replayed its last payload forever would
-    #: make any collection whose size is an exact multiple of the page limit paginate endlessly --
-    #: which is a defect in the fake, not in the client, since a real appliance answers the
-    #: follow-up page with an empty list.
-    EXHAUSTED: dict[str, Any] = {'response': [], 'version': '1.0'}
-
-    #: The analytics endpoints are POST and answer with an object, not a list, and every slot in
-    #: it is null rather than empty when there is no data. A single exhaustion payload cannot
-    #: stand in for both shapes, so the fake mirrors the one the verb actually returns.
-    EXHAUSTED_OBJECT: dict[str, Any] = {
-        'response': {'attributes': None, 'aggregateAttributes': None, 'groups': None},
-        'page': {'limit': 100, 'count': 0},
-        'version': '1.0',
-    }
-
-    def _next(self, exhausted: Any = None) -> _Response:
-        item = self._script.pop(0) if self._script else (exhausted or self.EXHAUSTED)
-        return _to_response(item)
-
-    def get(self, url: str, params: dict[str, Any] | None = None, **options: Any) -> _Response:
-        self.requests.append({'url': url, 'params': params or {}, 'extra_headers': options.get('extra_headers', {})})
-        return self._next()
-
-    def post(self, url: str, **options: Any) -> _Response:
-        if url.endswith(AUTH_PATH):
-            self.auth_calls += 1
-            return _Response({'Token': f'token-{self.auth_calls}'})
-        self.requests.append(
-            {
-                'url': url,
-                'params': options.get('params') or {},
-                'json': options.get('json'),
-                'extra_headers': options.get('extra_headers', {}),
-            }
-        )
-        return self._next(self.EXHAUSTED_OBJECT)
-
-
-class ViewRoutedHttp(ScriptedHttp):
-    """Serves a different payload depending on the ``view`` query parameter.
-
-    The interfaces endpoint returns a different field set per view, so a collector that reads
-    several views issues several calls. Routing on the parameter keeps the test honest about
-    which call produced which fields.
-
-    ``by_path`` routes on the request path instead, for collectors that also read a second
-    endpoint. It is checked first, because that endpoint takes no ``view`` parameter and would
-    otherwise fall through to the ``None`` view.
-
-    Either mapping's values may also be the ``{'status_code': ..., 'json': ...}`` override shape
-    :class:`ScriptedHttp` uses, to inject a failure for one specific path or view without
-    disturbing every other endpoint the same cycle touches.
-    """
-
-    def __init__(self, by_view: dict[str | None, Any], by_path: dict[str, Any] | None = None) -> None:
-        super().__init__([])
-        self._by_view = by_view
-        self._by_path = by_path or {}
-
-    def get(self, url: str, params: dict[str, Any] | None = None, **options: Any) -> _Response:
-        params = params or {}
-        self.requests.append({'url': url, 'params': params, 'extra_headers': options.get('extra_headers', {})})
-        for path, payload in self._by_path.items():
-            if url.endswith(path):
-                return _to_response(payload)
-        return _to_response(self._by_view[params.get('view')])
+from .common import ScriptedHttp
 
 
 @pytest.fixture
@@ -136,7 +32,7 @@ def check(instance: InstanceType) -> CiscoCatalystCenterCheck:
 
 @pytest.fixture
 def http_script() -> list[Any]:
-    """Overridden indirectly by the ``respond`` helpers."""
+    """Overridden indirectly by the `respond` helpers."""
     return []
 
 
