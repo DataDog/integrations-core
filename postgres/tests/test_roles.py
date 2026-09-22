@@ -51,6 +51,7 @@ def role_catalog(roles_instance):
                 CREATE ROLE dd_role_obs_grantor NOLOGIN;
                 CREATE ROLE dd_role_obs_granted NOLOGIN;
                 CREATE ROLE dd_role_obs_never_expires NOLOGIN VALID UNTIL 'infinity';
+                CREATE ROLE dd_role_obs_bypass_rls NOLOGIN BYPASSRLS;
                 GRANT dd_role_obs_reader TO datadog;
                 GRANT dd_role_obs_reader TO dd_role_obs_member WITH ADMIN OPTION;
                 GRANT dd_role_obs_reader TO dd_role_obs_grantor WITH ADMIN OPTION;
@@ -94,6 +95,11 @@ def role_catalog(roles_instance):
                     LANGUAGE sql SECURITY DEFINER
                     AS 'SELECT count(*) FROM dd_role_obs.items';
                 ALTER FUNCTION dd_role_obs.count_items() OWNER TO dd_role_obs_owner;
+                CREATE AGGREGATE dd_role_obs.item_total(integer) (
+                    SFUNC = int4pl, STYPE = integer, INITCOND = '0'
+                );
+                ALTER AGGREGATE dd_role_obs.item_total(integer) OWNER TO dd_role_obs_owner;
+                GRANT EXECUTE ON FUNCTION dd_role_obs.item_total(integer) TO dd_role_obs_reader;
                 DO $$
                 BEGIN
                     IF current_setting('server_version_num')::integer >= 150000 THEN
@@ -125,7 +131,9 @@ def role_catalog(roles_instance):
                 DROP OWNED BY dd_role_obs_grantor;
                 DROP OWNED BY dd_role_obs_granted;
                 DROP OWNED BY dd_role_obs_never_expires;
+                DROP OWNED BY dd_role_obs_bypass_rls;
                 DROP OWNED BY dd_role_obs_owner;
+                DROP ROLE IF EXISTS dd_role_obs_bypass_rls;
                 DROP ROLE IF EXISTS dd_role_obs_never_expires;
                 DROP ROLE IF EXISTS dd_role_obs_granted;
                 DROP ROLE IF EXISTS dd_role_obs_grantor;
@@ -222,6 +230,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'can_create_db',
         'can_login',
         'is_replication',
+        'can_bypass_rls',
         'conn_limit',
         'valid_until',
     }
@@ -232,11 +241,15 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'admin_option',
         'member_can_inherit',
     }
-    assert all('bypass_rls' not in role for role in role_event['roles'])
     reader = next(role for role in role_event['roles'] if role['role_name'] == 'dd_role_obs_reader')
     assert reader['can_inherit'] is False
     assert reader['conn_limit'] == 3
     assert reader['valid_until'] == '2030-01-01T00:00:00+00:00'
+    assert reader['can_bypass_rls'] is False
+    assert (
+        next(role for role in role_event['roles'] if role['role_name'] == 'dd_role_obs_bypass_rls')['can_bypass_rls']
+        is True
+    )
     assert (
         next(role for role in role_event['roles'] if role['role_name'] == 'dd_role_obs_never_expires')['valid_until']
         == 'infinity'
@@ -330,6 +343,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
             for privilege in privilege_event['default_privileges']
         )
     expected_object_types = {
+        'aggregate',
         'foreign_table',
         'function',
         'materialized_view',
@@ -345,6 +359,20 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     assert any(
         obj['schema_name'] == 'dd_role_obs' and obj['object_name'] == 'count_items()' and obj['is_security_definer']
         for obj in privilege_event['objects']
+    )
+    assert any(
+        obj['schema_name'] == 'dd_role_obs'
+        and obj['object_name'] == 'item_total(integer)'
+        and obj['object_type'] == 'aggregate'
+        for obj in privilege_event['objects']
+    )
+    assert any(
+        privilege['schema_name'] == 'dd_role_obs'
+        and privilege['object_name'] == 'item_total(integer)'
+        and privilege['object_type'] == 'aggregate'
+        and privilege['grantee_name'] == 'dd_role_obs_reader'
+        and privilege['privilege'] == 'EXECUTE'
+        for privilege in privilege_event['object_privileges']
     )
     invoker_view = next(
         obj

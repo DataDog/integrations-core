@@ -27,6 +27,7 @@ SELECT r.rolname::text AS role_name,
        r.rolcreatedb AS can_create_db,
        r.rolcanlogin AS can_login,
        r.rolreplication AS is_replication,
+       r.rolbypassrls AS can_bypass_rls,
        r.rolconnlimit AS conn_limit,
        pg_catalog.to_json(r.rolvaliduntil) AS valid_until
 FROM pg_catalog.pg_roles AS r
@@ -227,7 +228,11 @@ FROM (
     UNION ALL
 
     SELECT current_database()::text AS database_name,
-           CASE WHEN routine.prokind = 'p' THEN 'procedure' ELSE 'function' END AS object_type,
+           CASE routine.prokind
+               WHEN 'p' THEN 'procedure'
+               WHEN 'a' THEN 'aggregate'
+               ELSE 'function'
+           END AS object_type,
            namespace.nspname::text AS schema_name,
            (
                routine.proname
@@ -259,7 +264,7 @@ FROM (
       ON grantee.oid = acl.grantee
     LEFT JOIN pg_catalog.pg_roles AS grantor
       ON grantor.oid = acl.grantor
-    WHERE routine.prokind IN ('f', 'p', 'w')
+    WHERE routine.prokind IN ('f', 'p', 'a', 'w')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
@@ -362,7 +367,11 @@ FROM (
     UNION ALL
 
     SELECT current_database()::text AS database_name,
-           CASE WHEN routine.prokind = 'p' THEN 'procedure' ELSE 'function' END AS object_type,
+           CASE routine.prokind
+               WHEN 'p' THEN 'procedure'
+               WHEN 'a' THEN 'aggregate'
+               ELSE 'function'
+           END AS object_type,
            namespace.nspname::text AS schema_name,
            (
                routine.proname
@@ -380,7 +389,7 @@ FROM (
       ON namespace.oid = routine.pronamespace
     JOIN pg_catalog.pg_roles AS owner
       ON owner.oid = routine.proowner
-    WHERE routine.prokind IN ('f', 'p', 'w')
+    WHERE routine.prokind IN ('f', 'p', 'a', 'w')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
