@@ -29,7 +29,7 @@ from datadog_checks.downloader.exceptions import (
     TargetNotFoundError,
 )
 
-from ._v2_synth_repo import build_delegated_repo, serve_directory
+from ._v2_synth_repo import build_delegated_repo, serve_directory, serve_flaky_directory
 
 pytestmark = pytest.mark.offline
 
@@ -343,25 +343,25 @@ def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr(TUFPointerDownloader, '_bootstrap_metadata_dir', fake_bootstrap)
 
 
+def _make_pointer_target(project: str, version: str) -> tuple[str, bytes, dict]:
+    wheel = b'synthetic wheel for delegation test'
+    wheel_name = f'{project.replace("-", "_")}-{version}-py3-none-any.whl'
+    pointer = {
+        'digest': hashlib.sha256(wheel).hexdigest(),
+        'length': len(wheel),
+        'version': version,
+        'repository': REPO_URL,
+        'wheel_path': f'/wheels/{project}/{wheel_name}',
+    }
+    return wheel_name, wheel, pointer
+
+
 class TestDelegationTraversal:
     """Test v2 target resolution through delegated TUF metadata."""
 
-    @staticmethod
-    def _make_pointer_target(project: str, version: str) -> tuple[str, bytes, dict]:
-        wheel = b'synthetic wheel for delegation test'
-        wheel_name = f'{project.replace("-", "_")}-{version}-py3-none-any.whl'
-        pointer = {
-            'digest': hashlib.sha256(wheel).hexdigest(),
-            'length': len(wheel),
-            'version': version,
-            'repository': REPO_URL,
-            'wheel_path': f'/wheels/{project}/{wheel_name}',
-        }
-        return wheel_name, wheel, pointer
-
     def test_resolves_through_paths_delegation_without_naming_role(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        _, _, pointer = self._make_pointer_target(project, version)
+        _, _, pointer = _make_pointer_target(project, version)
 
         repo = tmp_path / 'repo'
         build_delegated_repo(
@@ -379,7 +379,7 @@ class TestDelegationTraversal:
     def test_resolves_through_hash_prefix_delegation(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
         target_path = f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json'
-        _, _, pointer = self._make_pointer_target(project, version)
+        _, _, pointer = _make_pointer_target(project, version)
 
         prefix = hashlib.sha256(target_path.encode()).hexdigest()[:2]
 
@@ -398,7 +398,7 @@ class TestDelegationTraversal:
 
     def test_unmatched_target_path_raises_not_found(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        _, _, pointer = self._make_pointer_target(project, version)
+        _, _, pointer = _make_pointer_target(project, version)
 
         repo = tmp_path / 'repo'
         build_delegated_repo(
@@ -413,6 +413,39 @@ class TestDelegationTraversal:
             downloader = TUFPointerDownloader(repository_url=url)
             with pytest.raises(TargetNotFoundError, match='datadog-redis'):
                 downloader.get_pointer('datadog-redis', version=version)
+
+
+class TestTransientMetadataError:
+    """The v2 downloader retries transient 5xx errors from the TUF metadata server."""
+
+    def _build_repo(self, tmp_path, monkeypatch, project: str, version: str) -> tuple[Path, dict]:
+        _, _, pointer = _make_pointer_target(project, version)
+        repo = tmp_path / 'repo'
+        build_delegated_repo(
+            repo,
+            delegated_targets={f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/{project}/*'],
+        )
+        _patch_bootstrap_to_use(repo, monkeypatch)
+        return repo, pointer
+
+    def test_get_pointer_survives_transient_5xx_on_metadata_fetch(self, monkeypatch, tmp_path):
+        project, version = 'datadog-postgres', '14.0.0'
+        repo, pointer = self._build_repo(tmp_path, monkeypatch, project, version)
+
+        with serve_flaky_directory(repo, fail_path='/metadata/timestamp.json', fail_count=2) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            assert downloader.get_pointer(project, version=version) == pointer
+
+    def test_get_pointer_raises_once_retries_are_exhausted(self, monkeypatch, tmp_path):
+        project, version = 'datadog-postgres', '14.0.0'
+        repo, _ = self._build_repo(tmp_path, monkeypatch, project, version)
+
+        with serve_flaky_directory(repo, fail_path='/metadata/timestamp.json', fail_count=10) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            with pytest.raises(DownloadError):
+                downloader.get_pointer(project, version=version)
 
 
 class TestInstantiateV2Downloader:

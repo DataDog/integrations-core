@@ -17,8 +17,11 @@ import urllib.request
 from collections.abc import Mapping
 from pathlib import Path
 
-from tuf.ngclient import Updater
+import requests
+from requests.adapters import HTTPAdapter
+from tuf.ngclient import RequestsFetcher, Updater
 from tuf.ngclient.config import UpdaterConfig
+from urllib3.util.retry import Retry
 
 from .exceptions import (
     DigestMismatch,
@@ -40,6 +43,17 @@ V2_POINTER_TARGET_DELEGATION = 'wheelsmith'
 V2_POINTER_TARGET_SCHEMA_VERSION = 'v1'
 V2_POINTER_TARGET_PREFIX = f'{V2_POINTER_TARGET_DELEGATION}/{V2_POINTER_TARGET_SCHEMA_VERSION}'
 SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
+
+
+class _RetryingRequestsFetcher(RequestsFetcher):
+    """RequestsFetcher that retries transient 5xx/network errors on TUF metadata GETs."""
+
+    def _get_session(self, url: str) -> requests.Session:
+        session = super()._get_session(url)
+        adapter = HTTPAdapter(max_retries=Retry(total=3, backoff_factor=1, status_forcelist={500, 502, 503, 504}))
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
 
 
 class TUFPointerDownloader:
@@ -64,6 +78,7 @@ class TUFPointerDownloader:
             target_base_url=f'{self._repository_url}/targets/',
             target_dir=str(target_dir),
             config=UpdaterConfig(prefix_targets_with_hash=True),
+            fetcher=_RetryingRequestsFetcher(),
         )
 
     @staticmethod
