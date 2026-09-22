@@ -670,7 +670,7 @@ def _run_streamed_query(
     request: rq_contract.RemoteQueryRequest,
     clickhouse_client: ClickhouseClient,
     creds: rq_upload.UploadCredentials,
-    client: rq_upload.UploadClient,
+    upload_client: rq_upload.UploadClient,
     agent_hostname: str,
     guard: Callable[[], None],
     stats: rq_contract.RemoteQueryRunStats,
@@ -714,7 +714,9 @@ def _run_streamed_query(
             # stamps the envelope with the agent node identity Fleet reports, never
             # socket.gethostname().
             descriptor = build_upload_descriptor(request, columns, agent_hostname)
-            writer = rq_pages.SourcePageWriter(delivery, creds, client, descriptor, guard, stats, timings, tracing)
+            writer = rq_pages.SourcePageWriter(
+                delivery, creds, upload_client, descriptor, guard, stats, timings, tracing
+            )
         try:
             guard()
             with timings.phase('encode_and_page_build'), tracing.phase('encode_and_page_build'):
@@ -832,7 +834,7 @@ class ClickhouseRemoteQueryHandler:
         """
         timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
         stats = None
-        client = None
+        upload_client = None
         creds = None
         tracing = rq_tracing.NULL_PRODUCER_TRACING
         try:
@@ -859,7 +861,7 @@ class ClickhouseRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
                     )
-                client = (
+                upload_client = (
                     http_client
                     if http_client is not None
                     else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
@@ -869,7 +871,7 @@ class ClickhouseRemoteQueryHandler:
                 receipt = self._produce_remote_query(
                     parsed,
                     creds,
-                    client,
+                    upload_client,
                     timings.started_at,
                     stats,
                     clickhouse_client_factory=clickhouse_client_factory,
@@ -877,9 +879,9 @@ class ClickhouseRemoteQueryHandler:
                     tracing=tracing,
                 )
             except BaseException as error:
-                if client is not None:
+                if upload_client is not None:
                     with tracing.abort_span():
-                        rq_upload.safe_abort(client, creds)
+                        rq_upload.safe_abort(upload_client, creds)
                 # The root span's counters mirror the stats the failure event carries; the
                 # failure classification rides the same closed event error-code vocabulary, and
                 # an admission failure before the run's stats exist carries all-zero counters.
@@ -908,7 +910,7 @@ class ClickhouseRemoteQueryHandler:
         self,
         request: rq_contract.RemoteQueryRequest,
         creds: rq_upload.UploadCredentials,
-        client: rq_upload.UploadClient,
+        upload_client: rq_upload.UploadClient,
         started_at: float,
         stats: rq_contract.RemoteQueryRunStats,
         clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
@@ -965,7 +967,7 @@ class ClickhouseRemoteQueryHandler:
                     request,
                     clickhouse_client,
                     creds,
-                    client,
+                    upload_client,
                     self._check.hostname,
                     guard,
                     stats,
@@ -1008,8 +1010,9 @@ class ClickhouseRemoteQueryHandler:
                 raise rq_contract.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
             return receipt
         finally:
-            # The streamed response is owned and closed by _run_streamed_query; the client owns
-            # no pool of its own, so closing it is a no-op for the shared connection pool.
+            # The streamed response is owned and closed by _run_streamed_query. The dedicated
+            # database client shares the check's existing HTTP connection pool — it does not
+            # create another independent pool — so closing it is a no-op for the shared pool.
             if clickhouse_client is not None:
                 try:
                     clickhouse_client.close()
