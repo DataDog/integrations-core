@@ -82,7 +82,7 @@ sub-reason, failure category and result reported by the appliance, and the alert
 the event's syslog severity: Emergency through Error become errors, Warning becomes a warning, and
 Notice and Info become informational.
 
-Events are tagged with severity, device family, event name, device name, site and SSID. Per-client
+Events are tagged with severity, device family, event name, device name, site, and SSID. Per-client
 identifiers appear in the event body rather than as tags.
 
 ### Service checks
