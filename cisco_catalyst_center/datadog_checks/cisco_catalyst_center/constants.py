@@ -17,11 +17,12 @@ SITE_HEALTH_SUMMARIES_ENDPOINT: Final = '/dna/data/api/v1/siteHealthSummaries'
 ASSURANCE_EVENTS_ENDPOINT: Final = '/dna/data/api/v1/assuranceEvents'
 ASSURANCE_ISSUES_ENDPOINT: Final = '/dna/data/api/v1/assuranceIssues'
 
-# Intent API: used only where the data API has no equivalent.
+# Assurance data API, for the optional domains.
 NETWORK_APPLICATIONS_ENDPOINT: Final = '/dna/data/api/v1/networkApplications'
 FABRIC_SITE_HEALTH_ENDPOINT: Final = '/dna/data/api/v1/fabricSiteHealthSummaries'
 VIRTUAL_NETWORK_HEALTH_ENDPOINT: Final = '/dna/data/api/v1/virtualNetworkHealthSummaries'
 
+# Intent API: used only where the data API has no equivalent.
 PHYSICAL_TOPOLOGY_ENDPOINT: Final = '/dna/intent/api/v1/topology/physical-topology'
 SITE_TOPOLOGY_ENDPOINT: Final = '/dna/intent/api/v1/topology/site-topology'
 L3_TOPOLOGY_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/topology/l3/{topology_type}'

@@ -12,7 +12,7 @@ your Cisco campus network from within Datadog.
 The integration provides:
 
 - **Device and interface inventory**: Reachability, hardware, and interface details for switches, routers, wireless controllers, and access points, with optional Network Device Monitoring metadata for pairing with the SNMP integration.
-- **Assurance health**: Site, network, and client health scores, plus per-application traffic and performance.
+- **Assurance health**: Site, network, and client health scores, plus traffic and performance for the busiest applications at each site.
 - **Assurance issues and events**: Counts of open issues and, optionally, individual assurance events as Datadog events.
 - **Topology**: Physical (CDP/LLDP), site, and layer 3 topology sizing.
 - **SD-Access and security**: Fabric and virtual network health, plus rogue access point and aWIPS wireless intrusion counts.

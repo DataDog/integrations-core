@@ -90,14 +90,18 @@ DEFAULT_NAMESPACE = 'default'
 
 
 def device_identity_tags(namespace: str, management_ip: Any, device_uuid: Any) -> list[str | None]:
-    """The two identity tags every device-scoped metric carries.
+    """The identity tags every device-scoped metric carries.
 
-    `device_id` is the `{namespace}:{ip}` form the Agent's SNMP check also uses; `device_uuid` is
-    Catalyst Center's own `instanceUuid`, which keys the NDM device record. Neither is derivable
-    from the other: the UUID is stable and always present, the IP form is what correlates with
-    SNMP.
+    `device_namespace`, `device_ip` and `device_id` are the NDM device record's `id_tags`, which
+    NDM uses to correlate metrics with the device. `device_id` is the `{namespace}:{ip}` form the
+    Agent's SNMP check also uses;
+    `device_uuid` is Catalyst Center's own `instanceUuid`, which keys the NDM device record.
+    Neither is derivable from the other: the UUID is stable and always present, the IP form is
+    what correlates with SNMP.
     """
     return [
+        tag('device_namespace', namespace),
+        tag('device_ip', management_ip),
         tag('device_id', f'{namespace}:{management_ip}' if management_ip else None),
         tag('device_uuid', device_uuid),
     ]
@@ -109,7 +113,6 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
         [
             *device_identity_tags(namespace, record.get('managementIpAddress'), record.get('id')),
             tag('device_name', record.get('name')),
-            tag('device_ip', record.get('managementIpAddress')),
             tag('device_family', record.get('deviceFamily')),
             tag('device_series', record.get('deviceSeries')),
             tag('device_role', record.get('deviceRole')),
@@ -230,7 +233,6 @@ def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -
     return compact(
         [
             *device_identity_tags(namespace, record.get('networkDeviceIpAddress'), record.get('networkDeviceId')),
-            tag('device_ip', record.get('networkDeviceIpAddress')),
             tag('interface', record.get('name')),
             tag('interface_type', record.get('interfaceType')),
             tag('admin_status', record.get('adminStatus')),
@@ -250,7 +252,8 @@ def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[s
 
     A view replaces the field set rather than extending it, so the only way to see an
     interface's configuration and its throughput together is to ask twice and join. The join key
-    is `id`; every view returns it.
+    is `id`; every view returns it. The views overlap only on identity fields, which they report
+    identically, so the order they are merged in does not change the result.
     """
     merged: dict[str, dict[str, Any]] = {}
     for view in views:
@@ -304,8 +307,7 @@ def collect_interfaces(
     Args:
         check: The check instance.
         client: An authenticated client.
-        views: Which interface views to request, in merge order. `configuration` should come
-            first so that later views cannot overwrite the descriptive fields.
+        views: Which interface views to request and join on the interface id.
         base_tags: Tags applied to every metric.
     """
     base_tags = base_tags or []
@@ -399,9 +401,7 @@ def _emit_device_rollups(
     for device_ip, bucket in totals.items():
         if not bucket.seen:
             continue
-        tags = base_tags + compact(
-            [*device_identity_tags(namespace, device_ip, bucket.device_uuid), tag('device_ip', device_ip)]
-        )
+        tags = base_tags + compact(device_identity_tags(namespace, device_ip, bucket.device_uuid))
         check.gauge('device.throughput.rx', bucket.rx, tags=tags)
         check.gauge('device.throughput.tx', bucket.tx, tags=tags)
 
@@ -812,25 +812,33 @@ def _issue_payload(record: dict[str, Any], base_tags: list[str]) -> dict[str, An
     return payload
 
 
+def _is_new_occurrence(reported: dict[str, int | None], issue_id: str, occurred: int | None) -> bool:
+    """Whether an issue has not been reported yet, or has recurred since it was."""
+    if issue_id not in reported:
+        return True
+    previous = reported[issue_id]
+    return occurred is not None and previous is not None and occurred > previous
+
+
 def collect_assurance_issues(
     check: AgentCheck,
     client: CatalystCenterClient,
     base_tags: list[str] | None = None,
-    reported_through: int | None = None,
-) -> int | None:
+    reported: dict[str, int | None] | None = None,
+) -> dict[str, int | None]:
     """Collect open issues as counts, and newly-occurring ones as Datadog events.
 
-    Returns the newest `mostRecentOccurredTime` seen, which the caller stores and hands back on
-    the next cycle.
+    Returns each current issue's `mostRecentOccurredTime` keyed by `issueId`, which the caller
+    stores and hands back as `reported` on the next cycle. On the first cycle `reported` is None
+    and every current issue is reported.
 
     Counts and events are deliberately asymmetric. Every open issue is counted on every cycle,
     because counts describe current state. An issue stays open until it clears, so one event per
-    cycle would turn a single unresolved problem into an unbounded stream; `reported_through` is
-    the watermark that holds each occurrence to one event.
-
-    An issue with no `mostRecentOccurredTime` cannot be placed against that watermark: it repeats
-    every cycle while the watermark is unset, then stops being reported at all once any other
-    issue establishes one.
+    cycle would turn a single unresolved problem into an unbounded stream. An issue is therefore
+    reported when its id is new, or when it recurs with a later `mostRecentOccurredTime`. Keying
+    on the id rather than on the newest time seen means an issue that surfaces after a newer one
+    is still reported, and one with no timestamp is reported once. The state is rebuilt from the
+    current list, so it never outgrows the open issues.
 
     `suggestedActions` arrives in this same response, so no separate `issue-enrichment-details`
     call is needed. It is free text, so the event body is where it lands.
@@ -845,17 +853,19 @@ def collect_assurance_issues(
     for field, tag_key in ISSUE_TAG_FIELDS:
         _count_by(check, 'issue.count', issues, field, tag_key, tags)
 
-    watermark = reported_through
+    current: dict[str, int | None] = {}
     for record in issues:
+        if record.get('issueId') is None:
+            # Nothing to recognise it by on the next cycle, so it is counted but not reported.
+            continue
+        issue_id = str(record['issueId'])
         occurred = record.get('mostRecentOccurredTime')
         occurred = occurred if isinstance(occurred, int) else None
-        if reported_through is not None and (occurred is None or occurred <= reported_through):
-            continue
-        check.event(_issue_payload(record, tags))
-        if occurred is not None and (watermark is None or occurred > watermark):
-            watermark = occurred
+        current[issue_id] = occurred
+        if reported is None or _is_new_occurrence(reported, issue_id, occurred):
+            check.event(_issue_payload(record, tags))
 
-    return watermark
+    return current
 
 
 # -- assurance events -----------------------------------------------------------------
@@ -1001,7 +1011,7 @@ def collect_events(
 def collect_application_health(
     check: AgentCheck, client: CatalystCenterClient, sites: list[dict[str, Any]], base_tags: list[str] | None = None
 ) -> None:
-    """Collect per-application health and traffic, one call per site.
+    """Collect health and traffic for the busiest applications at each site, one call per site.
 
     `siteId` is mandatory here -- omitting it returns `errorCode 14029`, whose message reads
     `siteIds` while the accepted parameter is singular. So this is a genuine per-site fan-out
@@ -1018,11 +1028,12 @@ def collect_application_health(
 
         site_tags = tags + compact([tag('site_id', site_id), tag('site_hierarchy', site.get('siteHierarchy'))])
         try:
-            # There is no top-N endpoint. Sorting descending by usage is the only way to get the
-            # busiest applications first.
-            applications = client.get_list(
+            # There is no top-N endpoint. Sorting descending by usage and reading one page is how
+            # to get the busiest applications, and keeps the series bounded however many a site
+            # runs. `order` accepts only `asc` or `desc`.
+            applications = client.get_first_page(
                 NETWORK_APPLICATIONS_ENDPOINT,
-                params={'siteId': site_id, 'sortBy': 'usage', 'order': 'des'},
+                params={'siteId': site_id, 'sortBy': 'usage', 'order': 'desc'},
             )
         except CatalystApiError:
             check.log.warning('Could not read application health for site %s', site_id, exc_info=True)

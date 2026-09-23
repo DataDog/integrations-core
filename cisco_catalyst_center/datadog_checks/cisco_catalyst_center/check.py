@@ -54,7 +54,8 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # check object outlives a single cycle, which is what lets each window start where the
         # previous one ended.
         self._events_polled_through: int | None = None
-        self._issues_reported_through: int | None = None
+        # Each open issue's last reported occurrence, by issueId. None until the first cycle.
+        self._reported_issues: dict[str, int | None] | None = None
 
     @property
     def client(self) -> CatalystCenterClient:
@@ -66,8 +67,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
     def _interface_views(self) -> tuple[str, ...]:
         """Which interface views to request.
 
-        `configuration` comes first so that later views cannot overwrite the descriptive
-        fields. A view replaces the field set rather than extending it, so each one costs its own
+        A view replaces the field set rather than extending it, so each one costs its own
         paginated call -- which is why statistics and PoE are separately switchable.
         """
         views = ['configuration']
@@ -246,12 +246,12 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self.config.collect_assurance_issues:
 
             def _issues() -> None:
-                # Only advanced on success, so a failed cycle re-reports rather than skipping.
-                self._issues_reported_through = collect_assurance_issues(
+                # Only replaced on success, so a failed cycle re-reports rather than skipping.
+                self._reported_issues = collect_assurance_issues(
                     self,
                     self.client,
                     base_tags=base_tags,
-                    reported_through=self._issues_reported_through,
+                    reported=self._reported_issues,
                 )
 
             healthy &= self._run('assurance issues', _issues)
