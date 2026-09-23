@@ -22,13 +22,12 @@ if Platform.is_windows():
     embedded_lib = os.path.dirname(os.path.abspath(os.__file__))
     os.add_dll_directory(os.path.join(embedded_lib, 'site-packages', 'clidriver', 'bin'))
 
-import ibm_db
-
 from .__about__ import __version__
 from .config import build_config
+from .connection import Db2Connection
 from .custom_metrics import CustomMetricsCollector
 from .metrics import MetricsCollector
-from .utils import get_version, scrub_connection_string
+from .utils import get_version
 
 
 class IbmDb2Check(DatabaseCheck):
@@ -51,9 +50,9 @@ class IbmDb2Check(DatabaseCheck):
         self.tag_manager.set_tag('db', self._config.db)
 
         # We'll connect on the first check run
-        self._conn = None
-        metrics = MetricsCollector(self)
-        custom_metrics = CustomMetricsCollector(self, self._config.custom_queries)
+        self._connection = Db2Connection(self, self._config)
+        metrics = MetricsCollector(self, self._connection)
+        custom_metrics = CustomMetricsCollector(self, self._connection, self._config.custom_queries)
         self._query_methods = (
             metrics.query_instance,
             metrics.query_database,
@@ -64,10 +63,10 @@ class IbmDb2Check(DatabaseCheck):
         )
 
     def check(self, instance):
-        if self._conn is None:
-            self._conn = self.get_connection()
+        if self._connection.conn is None:
+            self._connection.connect()
         self.emit_connection_service_checks()
-        if self._conn is None:
+        if self._connection.conn is None:
             return
 
         self.collect_metadata()
@@ -84,7 +83,7 @@ class IbmDb2Check(DatabaseCheck):
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
         try:
-            raw_version = get_version(self._conn)
+            raw_version = get_version(self._connection.conn)
         except Exception as e:
             self.log.error("Error getting version: %s", e)
             return
@@ -159,34 +158,8 @@ class IbmDb2Check(DatabaseCheck):
             'fix': str(int(fix)),
         }
 
-    def get_connection(self):
-        target, username, password = self.get_connection_data(
-            self._config.db,
-            self._config.username,
-            self._config.password,
-            self._config.host,
-            self._config.port,
-            self._config.security,
-            self._config.tls_cert,
-            self._config.connection_timeout,
-        )
-
-        # Get column names in lower case
-        connection_options = {ibm_db.ATTR_CASE: ibm_db.CASE_LOWER}
-
-        try:
-            self.log.debug("Attempting to connect to Db2 with `%s`...", scrub_connection_string(target))
-            connection = ibm_db.connect(target, username, password, connection_options)
-        except Exception as e:
-            if self._config.host:
-                self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
-            else:  # no cov
-                self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
-            connection = None
-        return connection
-
     def emit_connection_service_checks(self):
-        if self._conn is None:
+        if self._connection.conn is None:
             self.service_check(
                 self.SERVICE_CHECK_CONNECT,
                 self.CRITICAL,
@@ -195,48 +168,6 @@ class IbmDb2Check(DatabaseCheck):
             )
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
-
-    @classmethod
-    def get_connection_data(cls, db, username, password, host, port, security, tls_cert, connection_timeout):
-        if host:
-            target = 'database={};hostname={};port={};protocol=tcpip;uid={};pwd={}'.format(
-                db, host, port, username, password
-            )
-            username = ''
-            password = ''
-            if security == 'ssl':
-                target = '{};security=ssl;'.format(target)
-            if tls_cert:
-                target = '{};security=ssl;sslservercertificate={}'.format(target, tls_cert)
-            if connection_timeout:
-                target = '{};connecttimeout={}'.format(target, connection_timeout)
-        else:  # no cov
-            target = db
-
-        return target, username, password
-
-    def iter_rows(self, query, method):
-        # https://github.com/ibmdb/python-ibmdb/wiki/APIs
-        try:
-            cursor = ibm_db.exec_immediate(self._conn, query)
-        except Exception as e:
-            error = str(e)
-            self.log.error("Error executing query: %s.\nAttempting to reconnect", error)
-            # ToDo: Probably the best strategy here would be to just set self._conn = None, abort the current check run
-            # and retry on the next check run.
-            self._conn = self.get_connection()
-            self.emit_connection_service_checks()
-            if self._conn is None:
-                raise ConnectionError("Unable to create new connection")
-
-            cursor = ibm_db.exec_immediate(self._conn, query)
-
-        row = method(cursor)
-        while row is not False:
-            yield row
-
-            # Get next row, if any
-            row = method(cursor)
 
     @classmethod
     def m(cls, metric):

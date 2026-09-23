@@ -12,23 +12,25 @@ from . import queries
 from .utils import status_to_service_check
 
 if TYPE_CHECKING:
+    from .connection import Db2Connection
     from .ibm_db2 import IbmDb2Check
 
 
 class MetricsCollector:
-    def __init__(self, check: IbmDb2Check):
+    def __init__(self, check: IbmDb2Check, connection: Db2Connection):
         self._check = check
+        self._connection = connection
         self._table_space_states = {}
 
     def query_instance(self):
         # Only 1 instance
-        for inst in self._check.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
+        for inst in self._connection.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0060773.html
             self._check.gauge(self._check.m('connection.active'), inst['total_connections'], tags=self._check.tags)
 
     def query_database(self):
         # Only 1 database
-        for db in self._check.iter_rows(queries.DATABASE_TABLE, ibm_db.fetch_assoc):
+        for db in self._connection.iter_rows(queries.DATABASE_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001156.html
             self._check.service_check(
                 self._check.SERVICE_CHECK_STATUS, status_to_service_check(db['db_status']), tags=self._check.tags
@@ -90,7 +92,7 @@ class MetricsCollector:
     def query_buffer_pool(self):
         # Hit ratio formulas:
         # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0056871.html
-        for bp in self._check.iter_rows(queries.BUFFER_POOL_TABLE, ibm_db.fetch_assoc):
+        for bp in self._connection.iter_rows(queries.BUFFER_POOL_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002256.html
             bp_tags = ['bufferpool:{}'.format(bp['bp_name'])]
             bp_tags.extend(self._check.tags)
@@ -301,7 +303,7 @@ class MetricsCollector:
     def query_table_space(self):
         # Utilization formulas:
         # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0056516.html
-        for ts in self._check.iter_rows(queries.TABLE_SPACE_TABLE, ibm_db.fetch_assoc):
+        for ts in self._connection.iter_rows(queries.TABLE_SPACE_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001295.html
             table_space_name = ts['tbsp_name']
             ts_tags = ['tablespace:{}'.format(table_space_name)]
@@ -335,7 +337,7 @@ class MetricsCollector:
 
     def query_transaction_log(self):
         # Only 1 transaction log
-        for tlog in self._check.iter_rows(queries.TRANSACTION_LOG_TABLE, ibm_db.fetch_assoc):
+        for tlog in self._connection.iter_rows(queries.TRANSACTION_LOG_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0/com.ibm.db2.luw.admin.config.doc/doc/r0000239.html
             block_size = 4096
 

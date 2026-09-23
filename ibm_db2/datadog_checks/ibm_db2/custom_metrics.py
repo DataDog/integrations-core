@@ -10,12 +10,14 @@ import ibm_db
 
 if TYPE_CHECKING:
     from .config_models.instance import CustomQuery
+    from .connection import Db2Connection
     from .ibm_db2 import IbmDb2Check
 
 
 class CustomMetricsCollector:
-    def __init__(self, check: IbmDb2Check, custom_queries: tuple[CustomQuery, ...]):
+    def __init__(self, check: IbmDb2Check, connection: Db2Connection, custom_queries: tuple[CustomQuery, ...]):
         self._check = check
+        self._connection = connection
         self._custom_queries = custom_queries
 
     def query_custom(self):
@@ -36,7 +38,7 @@ class CustomMetricsCollector:
                 self._check.log.error('Custom query field `columns` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
-            rows = self._check.iter_rows(query, ibm_db.fetch_tuple)
+            rows = self._connection.iter_rows(query, ibm_db.fetch_tuple)
             self._check.log.debug('Running query for metric_prefix `%s`: `%s`', metric_prefix, query)
 
             # Trigger query execution

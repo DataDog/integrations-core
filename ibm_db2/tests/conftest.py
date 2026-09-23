@@ -7,14 +7,14 @@ import ibm_db
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
-from datadog_checks.ibm_db2 import IbmDb2Check
+from datadog_checks.ibm_db2.connection import get_connection_data
 
 from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
 
 class DbManager(object):
     def __init__(self, config):
-        self.target, self.username, self.password = IbmDb2Check.get_connection_data(
+        self.target, self.username, self.password = get_connection_data(
             config['db'],
             config['username'],
             config['password'],
