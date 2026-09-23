@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import httpx
 
+from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     render_comment,
@@ -99,6 +100,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._lock = asyncio.Lock()
         self._logger = monitor.logger
         self.monitor = monitor
+        self._metrics = MetricsHelper(monitor.metrics)
 
     @property
     def latest_body(self) -> str | None:
@@ -141,8 +143,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 published = True
             else:
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, message.progress, revision=message.revision, now=now)
+                try:
+                    published = await self._write(pr_number, body, message.progress, revision=message.revision, now=now)
+                except Exception:
+                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    raise
                 self._pr_comment_failed = not published
+                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
 
             if message.progress.done and published:
                 self._final_report_published = True
@@ -172,8 +179,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return
 
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                try:
+                    published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                except Exception:
+                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    raise
                 self._pr_comment_failed = not published
+                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
                 if published:
                     self._logger.info("Run reported as %s", request.kind.value, published=True)
 
