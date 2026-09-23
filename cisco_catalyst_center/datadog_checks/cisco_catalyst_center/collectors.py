@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Collectors.
 
-One module while there are two of them. It splits when the third arrives.
-
 The device collector is the load-bearing one: a single `data/networkDevices` call returns
 switches, routers, access points and controllers together, each carrying its own health scores,
-its AP configuration and per-radio KPIs, and its fabric role. What the product brief describes as
-four separate per-device fan-outs is one paginated request.
+its AP configuration and per-radio KPIs, and its fabric role. One paginated request therefore
+covers what would otherwise be four separate per-device fan-outs.
 """
 
 from __future__ import annotations
@@ -92,16 +90,18 @@ DEFAULT_NAMESPACE = 'default'
 
 
 def device_identity_tags(namespace: str, management_ip: Any, device_uuid: Any) -> list[str | None]:
-    """The two identity tags every device-scoped metric carries.
+    """The identity tags every device-scoped metric carries.
 
-    `device_id` is the `{namespace}:{ip}` form the Agent's SNMP check also uses, so one tag
-    key means one thing across both halves of the pairing. `device_uuid` carries Catalyst
-    Center's own `instanceUuid`, which is what the NDM device record is keyed on.
-
-    Both are emitted because they answer different questions and neither is derivable from the
-    other: the UUID is stable and always present, the IP form is what correlates with SNMP.
+    `device_namespace`, `device_ip` and `device_id` are the NDM device record's `id_tags`, which
+    NDM uses to correlate metrics with the device. `device_id` is the `{namespace}:{ip}` form the
+    Agent's SNMP check also uses;
+    `device_uuid` is Catalyst Center's own `instanceUuid`, which keys the NDM device record.
+    Neither is derivable from the other: the UUID is stable and always present, the IP form is
+    what correlates with SNMP.
     """
     return [
+        tag('device_namespace', namespace),
+        tag('device_ip', management_ip),
         tag('device_id', f'{namespace}:{management_ip}' if management_ip else None),
         tag('device_uuid', device_uuid),
     ]
@@ -113,7 +113,6 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
         [
             *device_identity_tags(namespace, record.get('managementIpAddress'), record.get('id')),
             tag('device_name', record.get('name')),
-            tag('device_ip', record.get('managementIpAddress')),
             tag('device_family', record.get('deviceFamily')),
             tag('device_series', record.get('deviceSeries')),
             tag('device_role', record.get('deviceRole')),
@@ -181,8 +180,8 @@ def collect_devices(
     for record in records:
         tags = base_tags + device_tags(record, namespace)
 
-        # "Is this device up" is the first question an operator asks. It was previously only in
-        # the NDM payload, which is inventory rather than something you can alert on.
+        # Reachability as a metric, not only as NDM inventory: a monitor cannot alert on
+        # inventory, and "is this device up" is the first question an operator asks.
         reachability = record.get('reachabilityHealthStatus')
         if reachability is not None:
             check.gauge('device.reachable', int(reachability in REACHABLE_VALUES), tags=tags)
@@ -234,7 +233,6 @@ def interface_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -
     return compact(
         [
             *device_identity_tags(namespace, record.get('networkDeviceIpAddress'), record.get('networkDeviceId')),
-            tag('device_ip', record.get('networkDeviceIpAddress')),
             tag('interface', record.get('name')),
             tag('interface_type', record.get('interfaceType')),
             tag('admin_status', record.get('adminStatus')),
@@ -254,7 +252,8 @@ def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[s
 
     A view replaces the field set rather than extending it, so the only way to see an
     interface's configuration and its throughput together is to ask twice and join. The join key
-    is `id`; every view returns it.
+    is `id`; every view returns it. The views overlap only on identity fields, which they report
+    identically, so the order they are merged in does not change the result.
     """
     merged: dict[str, dict[str, Any]] = {}
     for view in views:
@@ -269,14 +268,12 @@ def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[s
 def _enrich_metadata(client: CatalystCenterClient, merged: dict[str, dict[str, Any]]) -> None:
     """Fill the interface metadata fields the data API leaves null, from the intent API.
 
-    The product brief sources every NDM interface field from the intent API, but the data API is
-    the only place interface throughput, errors and PoE exist, so the collector reads both and
-    joins them. That join is free: both APIs identify an interface by the same UUID.
+    Throughput, errors and PoE exist only on the data API; `macAddress` and `description` only on
+    the intent API. The join is free: both identify an interface by the same UUID.
 
-    Only `INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record
-    actually carries a value -- see the constant for why a wholesale merge is wrong. Interfaces
-    the intent inventory omits, such as stack sub-interfaces, keep their data API record
-    unchanged rather than being dropped.
+    Only `INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record carries a
+    value -- see the constant for why a wholesale merge is wrong. Interfaces the intent inventory
+    omits, such as stack sub-interfaces, keep their data API record unchanged.
     """
     for record in client.get_list(INTENT_INTERFACES_ENDPOINT):
         interface_id = record.get('id')
@@ -303,17 +300,14 @@ def collect_interfaces(
     The records are returned rather than counted so that NDM metadata can be built from the same
     fetch instead of asking for every interface a second time.
 
-    The intent API sweep is unconditional. It is the only source of `description`, which is in
-    turn the only uplink signal on hardware that leaves `isWan` null, so gating it behind
-    `send_ndm_metadata` -- a flag about NDM payloads -- left three uplink metrics and the
-    `uplink` tag unreachable for anyone who had not enabled NDM. It costs one more paginated
-    pass, the same order as one additional view.
+    The intent API sweep is unconditional: it is the only source of `description`, which is the
+    only uplink signal on hardware that leaves `isWan` null. Gating it on NDM would leave the
+    uplink metrics and the `uplink` tag unreachable. It costs one more paginated pass.
 
     Args:
         check: The check instance.
         client: An authenticated client.
-        views: Which interface views to request, in merge order. `configuration` should come
-            first so that later views cannot overwrite the descriptive fields.
+        views: Which interface views to request and join on the interface id.
         base_tags: Tags applied to every metric.
     """
     base_tags = base_tags or []
@@ -370,8 +364,8 @@ def _emit_device_rollups(
 ) -> None:
     """Roll per-interface rates up to per-device and per-uplink totals.
 
-    The brief asks for device-level throughput and for aggregate uplink throughput. Both are sums
-    over interfaces, and doing them here means a dashboard does not have to.
+    Device-level and uplink-level throughput are both sums over interfaces, and rolling them up
+    here means a dashboard does not have to.
 
     Which interfaces count as uplinks is `is_uplink()`'s decision, so this aggregate,
     the `uplink` tag and the NDM port role cannot drift apart. `portMode` is deliberately not
@@ -388,25 +382,26 @@ def _emit_device_rollups(
         if not bucket.device_uuid:
             bucket.device_uuid = record.get('networkDeviceId') or None
 
-        rx, tx = record.get('rxRate'), record.get('txRate')
+        # to_number, not float(): the statistics view is absent for some interfaces and the
+        # appliance spells absence several ways. A bare float() turns `{}` or `''` into a 0 that
+        # emit_gauge suppressed at the per-interface level, and raises on any other non-numeric.
+        rx, tx = to_number(record.get('rxRate')), to_number(record.get('txRate'))
         if rx is None and tx is None:
-            # No statistics view for this interface; it contributes nothing to a throughput sum.
+            # No statistics for this interface; it contributes nothing to a throughput sum.
             continue
         bucket.seen = True
-        bucket.rx += float(rx or 0)
-        bucket.tx += float(tx or 0)
+        bucket.rx += rx or 0.0
+        bucket.tx += tx or 0.0
 
         if is_uplink(record):
             bucket.uplinks += 1
-            bucket.uplink_rx += float(rx or 0)
-            bucket.uplink_tx += float(tx or 0)
+            bucket.uplink_rx += rx or 0.0
+            bucket.uplink_tx += tx or 0.0
 
     for device_ip, bucket in totals.items():
         if not bucket.seen:
             continue
-        tags = base_tags + compact(
-            [*device_identity_tags(namespace, device_ip, bucket.device_uuid), tag('device_ip', device_ip)]
-        )
+        tags = base_tags + compact(device_identity_tags(namespace, device_ip, bucket.device_uuid))
         check.gauge('device.throughput.rx', bucket.rx, tags=tags)
         check.gauge('device.throughput.tx', bucket.tx, tags=tags)
 
@@ -439,6 +434,15 @@ def site_tags(record: dict[str, Any]) -> list[str]:
     )
 
 
+def list_sites(client: CatalystCenterClient) -> list[dict[str, Any]]:
+    """List the site hierarchy.
+
+    Separate from `collect_site_health` because application health needs a site on every request
+    but the user may have site metrics switched off.
+    """
+    return client.get_list(SITE_HEALTH_SUMMARIES_ENDPOINT)
+
+
 def collect_site_health(
     check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None
 ) -> list[dict[str, Any]]:
@@ -448,7 +452,7 @@ def collect_site_health(
     is the only call that enumerates them.
     """
     base_tags = base_tags or []
-    records = client.get_list(SITE_HEALTH_SUMMARIES_ENDPOINT)
+    records = list_sites(client)
 
     for record in records:
         tags = base_tags + site_tags(record)
@@ -524,12 +528,13 @@ def collect_stacks(
 ) -> None:
     """Collect stack membership.
 
-    This is the only per-device fan-out in the P0 set, so it is bounded to stackable families
-    rather than issued for every managed device. Stack membership changes on human timescales,
-    which is why the caller is expected to run it on a longer interval than the health cycle.
+    The only per-device fan-out in the check, so it is bounded to stackable families and off by
+    default. Stack membership changes on human timescales, so a large fleet should run this on a
+    second instance with a long `min_collection_interval`. Caching instead would be wrong:
+    `member.state` and `port.status` are fault signals, and re-emitting a stale `1` reports a
+    healthy stack that is not.
 
-    A device that fails is logged and skipped: one unreachable switch must not cost the whole
-    cycle.
+    A device that fails is logged and skipped: one unreachable switch must not cost the cycle.
     """
     base_tags = base_tags or []
 
@@ -684,9 +689,8 @@ def collect_topology(check: AgentCheck, client: CatalystCenterClient, base_tags:
 def collect_site_topology(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the size of the site hierarchy.
 
-    The brief asks for site topology as hierarchy plus device-to-site mapping. The mapping already
-    rides on every device record as `siteId` and `siteHierarchy`, so this contributes only the
-    hierarchy size.
+    Device-to-site mapping already rides on every device record as `siteId` and `siteHierarchy`,
+    so the only thing left to report here is the size of the hierarchy itself.
     """
     tags = base_tags or []
     topology = client.get_object(SITE_TOPOLOGY_ENDPOINT)
@@ -698,8 +702,8 @@ def collect_l3_topology(
 ) -> None:
     """Collect the L3 routing graph size for one topology type.
 
-    The brief names OSPF, IS-IS and static. Only counts are emitted here; the graph itself is not
-    submitted anywhere by this integration.
+    Only counts are emitted; the graph itself is not submitted anywhere by this integration.
+    `L3_TOPOLOGY_TYPES` lists the types the endpoint serves.
     """
     tags = (base_tags or []) + [f'topology_type:{topology_type}']
     topology = client.get_object(L3_TOPOLOGY_ENDPOINT_TEMPLATE.format(topology_type=topology_type))
@@ -715,8 +719,8 @@ def collect_sda_fabric(
 ) -> None:
     """Collect fabric health and node roles.
 
-    The brief routes node status through `sda/edge-device` and `sda/border-device`, which
-    answer 400 with no list mode. `fabricDetails` on the bulk device record carries the same
+    `sda/edge-device` and `sda/border-device` answer 400 with no list mode, so node roles cannot
+    be read from them in bulk. `fabricDetails` on the bulk device record carries the same
     information at no extra cost, so roles are counted from records already in hand.
     """
     tags = base_tags or []
@@ -778,10 +782,8 @@ def _issue_alert_type(record: dict[str, Any]) -> str:
 def _issue_body(record: dict[str, Any]) -> str:
     """Assemble the diagnosis text, skipping fields the appliance left empty.
 
-    No assurance issue has ever been observed on the sandbox, so the *rendering* of
-    `suggestedActions` is the least certain part of this: the published schema names the field
-    but not its type. If it turns out to be structured rather than free text, this is the line to
-    revisit, and a real payload should be captured as a fixture at the same time.
+    Every field is rendered as free text. The published schema names `suggestedActions` without
+    giving its type, so a structured value would need handling here.
     """
     return '\n'.join(f'{label}: {record[field]}' for field, label in ISSUE_DETAIL_FIELDS if record.get(field))
 
@@ -810,31 +812,36 @@ def _issue_payload(record: dict[str, Any], base_tags: list[str]) -> dict[str, An
     return payload
 
 
+def _is_new_occurrence(reported: dict[str, int | None], issue_id: str, occurred: int | None) -> bool:
+    """Whether an issue has not been reported yet, or has recurred since it was."""
+    if issue_id not in reported:
+        return True
+    previous = reported[issue_id]
+    return occurred is not None and previous is not None and occurred > previous
+
+
 def collect_assurance_issues(
     check: AgentCheck,
     client: CatalystCenterClient,
     base_tags: list[str] | None = None,
-    reported_through: int | None = None,
-) -> int | None:
+    reported: dict[str, int | None] | None = None,
+) -> dict[str, int | None]:
     """Collect open issues as counts, and newly-occurring ones as Datadog events.
 
-    Returns the newest `mostRecentOccurredTime` seen, which the caller stores and hands back on
-    the next cycle.
+    Returns each current issue's `mostRecentOccurredTime` keyed by `issueId`, which the caller
+    stores and hands back as `reported` on the next cycle. On the first cycle `reported` is None
+    and every current issue is reported.
 
-    The counts and the events are deliberately not symmetrical. Counts describe current state, so
-    every open issue is counted on every cycle. Events describe something happening, and an issue
-    stays open and is returned again until it clears -- so submitting one per cycle would turn a
-    single unresolved problem into an unbounded stream. `reported_through` is the watermark that
-    holds each occurrence to one event.
+    Counts and events are deliberately asymmetric. Every open issue is counted on every cycle,
+    because counts describe current state. An issue stays open until it clears, so one event per
+    cycle would turn a single unresolved problem into an unbounded stream. An issue is therefore
+    reported when its id is new, or when it recurs with a later `mostRecentOccurredTime`. Keying
+    on the id rather than on the newest time seen means an issue that surfaces after a newer one
+    is still reported, and one with no timestamp is reported once. The state is rebuilt from the
+    current list, so it never outgrows the open issues.
 
-    An issue the appliance gives no `mostRecentOccurredTime` for cannot be placed against that
-    watermark. With nothing to compare against, it is resubmitted on every cycle for as long as
-    the watermark stays unset -- not just once at startup -- and then, once any other issue
-    establishes a watermark, it stops being reported at all, timestamped or not.
-
-    `suggestedActions` arrives in this same response, so the brief's separate
-    `issue-enrichment-details` call is unnecessary. It is free text, which no metric tag can
-    carry, so the event body is where it lands.
+    `suggestedActions` arrives in this same response, so no separate `issue-enrichment-details`
+    call is needed. It is free text, so the event body is where it lands.
     """
     tags = base_tags or []
     issues = client.get_list(ASSURANCE_ISSUES_ENDPOINT)
@@ -846,17 +853,19 @@ def collect_assurance_issues(
     for field, tag_key in ISSUE_TAG_FIELDS:
         _count_by(check, 'issue.count', issues, field, tag_key, tags)
 
-    watermark = reported_through
+    current: dict[str, int | None] = {}
     for record in issues:
+        if record.get('issueId') is None:
+            # Nothing to recognise it by on the next cycle, so it is counted but not reported.
+            continue
+        issue_id = str(record['issueId'])
         occurred = record.get('mostRecentOccurredTime')
         occurred = occurred if isinstance(occurred, int) else None
-        if reported_through is not None and (occurred is None or occurred <= reported_through):
-            continue
-        check.event(_issue_payload(record, tags))
-        if occurred is not None and (watermark is None or occurred > watermark):
-            watermark = occurred
+        current[issue_id] = occurred
+        if reported is None or _is_new_occurrence(reported, issue_id, occurred):
+            check.event(_issue_payload(record, tags))
 
-    return watermark
+    return current
 
 
 # -- assurance events -----------------------------------------------------------------
@@ -922,34 +931,28 @@ def collect_events(
 ) -> None:
     """Collect assurance events in one time window, as Datadog events plus aggregate counts.
 
-    Each record becomes a Datadog event carrying the diagnosis, and the same records are counted by
-    severity, family, type and device. Both are submitted because they answer different questions:
-    the counts are what a monitor alerts on and what a graph shows, the events are what someone
-    reads afterwards to find out why.
+    Each record becomes a Datadog event carrying the diagnosis, and the same records are counted
+    by severity, family, type and device. Both are submitted because they answer different
+    questions: the counts are what a monitor alerts on, the events are what someone reads
+    afterwards to find out why.
 
-    This is the fallback ingestion path. Where outbound webhooks are permitted, an Event Management
-    subscription posts the same events straight to the Datadog intake and this collector should stay
-    disabled -- the two paths are alternatives, and running both submits every event twice.
+    This is the fallback ingestion path. Where outbound webhooks are permitted, an Event
+    Management subscription posts the same events straight to the Datadog intake and this
+    collector should stay disabled; running both submits every event twice.
 
-    The window is supplied rather than derived here so that the caller owns the cursor: consecutive
-    windows must not overlap, or every event is counted more than once. Both bounds are epoch
-    milliseconds.
+    The window is supplied rather than derived here so the caller owns the cursor -- consecutive
+    windows must not overlap. Both bounds are epoch milliseconds.
 
-    Four requests is the floor. `deviceFamily` is mandatory, and its values fall into four groups
-    the endpoint refuses to mix, so each group is its own sweep -- see
-    `EVENT_DEVICE_FAMILY_GROUPS`.
+    Four requests is the floor: `deviceFamily` is mandatory and its values fall into four groups
+    the endpoint refuses to mix, so each group is its own sweep (`EVENT_DEVICE_FAMILY_GROUPS`).
+    A failing group is logged and skipped, costing one window of its events; failing the whole
+    collection instead would have the caller retry and double-count the groups that succeeded.
+    If *every* group fails there is nothing to double-count, so that case raises and the window is
+    retried next cycle.
 
-    A group that fails is logged and skipped rather than aborting the sweep. That costs one window
-    of that group's events, which is the lesser of two evils: the alternative is to fail the whole
-    collection so the caller retries the window, which would double-count everything the groups
-    before it already submitted. That trade only makes sense when some group got through, though:
-    if every group fails, nothing was submitted for the window at all, so there is nothing left to
-    double-count by retrying -- that case raises instead, so the caller does not advance its
-    watermark and the window is retried next cycle rather than silently dropped.
-
-    `event.total.count` comes from the total the appliance reports, not from the records that
-    arrived, so it stays correct when a sweep is cut short by the page budget. The breakdown cannot
-    be -- it is derived from records -- so a truncated sweep is warned about loudly.
+    `event.total.count` comes from the total the appliance reports rather than from the records
+    that arrived, so it survives a sweep cut short by the page budget. The breakdown cannot, so a
+    truncated sweep is warned about loudly.
     """
     tags = base_tags or []
     window = {'startTime': start_time, 'endTime': end_time}
@@ -1008,7 +1011,7 @@ def collect_events(
 def collect_application_health(
     check: AgentCheck, client: CatalystCenterClient, sites: list[dict[str, Any]], base_tags: list[str] | None = None
 ) -> None:
-    """Collect per-application health and traffic, one call per site.
+    """Collect health and traffic for the busiest applications at each site, one call per site.
 
     `siteId` is mandatory here -- omitting it returns `errorCode 14029`, whose message reads
     `siteIds` while the accepted parameter is singular. So this is a genuine per-site fan-out
@@ -1025,11 +1028,12 @@ def collect_application_health(
 
         site_tags = tags + compact([tag('site_id', site_id), tag('site_hierarchy', site.get('siteHierarchy'))])
         try:
-            # Sorting descending by usage is what makes this the brief's "top applications by
-            # usage" -- there is no separate top-N endpoint, only this ordering.
-            applications = client.get_list(
+            # There is no top-N endpoint. Sorting descending by usage and reading one page is how
+            # to get the busiest applications, and keeps the series bounded however many a site
+            # runs. `order` accepts only `asc` or `desc`.
+            applications = client.get_first_page(
                 NETWORK_APPLICATIONS_ENDPOINT,
-                params={'siteId': site_id, 'sortBy': 'usage', 'order': 'des'},
+                params={'siteId': site_id, 'sortBy': 'usage', 'order': 'desc'},
             )
         except CatalystApiError:
             check.log.warning('Could not read application health for site %s', site_id, exc_info=True)

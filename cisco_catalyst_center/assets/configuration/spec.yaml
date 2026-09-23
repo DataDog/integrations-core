@@ -102,12 +102,16 @@ files:
     - name: collect_stacks
       fleet_configurable: true
       description: |
-        Set to `false` to skip switch stack membership and member health. This is the only
-        per-device request the check makes, issued once per stackable switch.
+        Set to `true` to collect switch stack membership and member health. Off by default
+        because it is the only per-device request the check makes: one call per stackable
+        switch on every cycle, so its cost grows with the size of the fleet. To collect it on
+        a large fleet without paying that on every health cycle, enable it on a second
+        instance that has every other collector disabled and a long `min_collection_interval`,
+        and give that instance its own `tags` entry so the two stay distinguishable.
       value:
         type: boolean
-        example: true
-        default: true
+        example: false
+        default: false
 
     - name: collect_site_health
       fleet_configurable: true
@@ -173,8 +177,8 @@ files:
       fleet_configurable: true
       description: |
         Set to `true` to collect counts of open assurance issues by severity, priority, category
-        and status. Each issue not seen on a prior cycle is also submitted as a Datadog event,
-        with an alert type derived from the issue's priority.
+        and status. Each issue is also submitted as a Datadog event the first time it is seen and
+        again whenever it recurs, with an alert type derived from the issue's priority.
       value:
         type: boolean
         example: false
@@ -221,9 +225,9 @@ files:
     - name: collect_application_health
       fleet_configurable: true
       description: |
-        Set to `true` to collect per-application health and traffic. This endpoint requires a site
-        to be named on every request, so it costs one request per site and its cost grows with the
-        size of the hierarchy.
+        Set to `true` to collect health and traffic for the 100 busiest applications at each site,
+        ranked by usage. This endpoint requires a site to be named on every request, so it costs
+        one request per site and its cost grows with the size of the hierarchy.
       value:
         type: boolean
         example: false

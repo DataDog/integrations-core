@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """HTTP client for the Catalyst Center REST API.
 
-The client owns three things collectors should never see: the token lifecycle, pagination
-arithmetic, and the response envelope.
+The client owns four things collectors should never see: the token lifecycle, pagination
+arithmetic, the response envelope, and transport failures, which it reports as `CatalystApiError`
+like any other failure.
 
 The envelope is the reason this layer exists. Catalyst Center returns errors in the same
 `response` slot it uses for real data, in at least six shapes, and one of them is an object
@@ -19,6 +20,8 @@ import logging
 import random
 import time
 from typing import Any, Callable, TypeGuard
+
+import requests
 
 from .constants import (
     AUTH_ENDPOINT,
@@ -106,8 +109,12 @@ class CatalystCenterClient:
         `_ensure_token()` calls this method whenever there is no token yet, so routing this retry
         through either one would recurse before the first token exists.
         """
+
+        def send() -> Any:
+            return self.http.post(f'{self.base_url}{AUTH_ENDPOINT}', auth=(self._username, self._password))
+
         for attempt in range(MAX_THROTTLE_RETRIES):
-            response = self.http.post(f'{self.base_url}{AUTH_ENDPOINT}', auth=(self._username, self._password))
+            response = self._send(AUTH_ENDPOINT, send)
             if response.status_code != 429 or attempt == MAX_THROTTLE_RETRIES - 1:
                 break
             delay = self._throttle_delay(response, attempt)
@@ -125,7 +132,7 @@ class CatalystCenterClient:
                 error_code=response.status_code,
                 correlation_id=self._correlation_id(response),
             )
-        token = response.json().get('Token')
+        token = self._json(response, AUTH_ENDPOINT).get('Token')
         if not token:
             raise CatalystApiError('Catalyst Center authentication returned no Token field')
 
@@ -140,6 +147,29 @@ class CatalystCenterClient:
     # -- request plumbing -------------------------------------------------------------
 
     @staticmethod
+    def _send(path: str, send: Callable[[], Any]) -> Any:
+        """Issue one request, reporting a transport failure as a `CatalystApiError`.
+
+        Collectors skip a failed device family group, device or site only on a `CatalystApiError`.
+        A raw `requests` exception would bypass that and fail the whole collector.
+        """
+        try:
+            return send()
+        except requests.RequestException as exc:
+            raise CatalystApiError(f'Catalyst Center request to {path} failed: {exc}') from exc
+
+    @staticmethod
+    def _json(response: Any, path: str) -> Any:
+        """Parse a response body, reporting one that is not JSON as a `CatalystApiError`.
+
+        A proxy or login page in front of the appliance can answer with HTML instead.
+        """
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise CatalystApiError(f'Catalyst Center returned a body that is not JSON for {path}') from exc
+
+    @staticmethod
     def _correlation_id(response: Any) -> str | None:
         return getattr(response, 'headers', {}).get('x-correlation-id')
 
@@ -150,13 +180,14 @@ class CatalystCenterClient:
         """How long to wait after a 429.
 
         Cisco's own `Retry-After` is preferred when present, since it reflects the appliance's
-        actual budget window; otherwise back off exponentially with jitter so that several
-        collectors throttled at once do not retry in lockstep.
+        actual budget window, but only up to `THROTTLE_MAX_DELAY_SECONDS`: an uncapped header would
+        hold the Agent's check runner for as long as it asks. Otherwise back off exponentially with
+        jitter so that several collectors throttled at once do not retry in lockstep.
         """
         retry_after = getattr(response, 'headers', {}).get('Retry-After')
         if retry_after:
             try:
-                return float(retry_after)
+                return min(max(float(retry_after), 0.0), THROTTLE_MAX_DELAY_SECONDS)
             except ValueError:
                 self.log.debug('Could not parse Retry-After value %r; falling back to backoff', retry_after)
 
@@ -172,7 +203,7 @@ class CatalystCenterClient:
         """
         for attempt in range(MAX_THROTTLE_RETRIES):
             self._ensure_token()
-            response = send()
+            response = self._send(path, send)
             if response.status_code != 429:
                 return response
             if attempt == MAX_THROTTLE_RETRIES - 1:
@@ -206,7 +237,7 @@ class CatalystCenterClient:
             return response
 
         self._authenticate()
-        response = send()
+        response = self._send(path, send)
         if response.status_code == 401:
             raise CatalystApiError(
                 f'Catalyst Center rejected authentication twice for {path}',
@@ -316,7 +347,7 @@ class CatalystCenterClient:
         that answer with a bare JSON array. Extracting `response` from it is the caller's job,
         because some endpoints put their payload beside that key rather than inside it.
         """
-        body = response.json()
+        body = self._json(response, path)
 
         # A bare array has no envelope to inspect.
         if isinstance(body, list):
@@ -410,6 +441,25 @@ class CatalystCenterClient:
         """Page through a list endpoint and return every record."""
         return self.get_list_with_total(path, params)[0]
 
+    def get_first_page(self, path: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+        """Fetch only the first page of a list endpoint.
+
+        For a caller that sorts on the appliance and wants the top of the list, where stopping
+        after one page is the intent rather than a truncation worth warning about.
+        """
+        limit = ENDPOINT_PAGE_LIMITS.get(path, DEFAULT_PAGE_LIMIT)
+        return self._get_page(path, params, limit, FIRST_OFFSET)[0]
+
+    def _get_page(
+        self, path: str, params: dict[str, Any] | None, limit: int, offset: int
+    ) -> tuple[list[dict[str, Any]], Any]:
+        """Fetch one page of a list endpoint, returning its records and the body they arrived in."""
+        body = self._get_body(path, {**(params or {}), 'limit': limit, 'offset': offset})
+        page = self._payload_of(body, path)
+        if not isinstance(page, list):
+            raise CatalystApiError(f'Expected a list from {path}, got {type(page).__name__}')
+        return page, body
+
     def get_list_with_total(
         self, path: str, params: dict[str, Any] | None = None, max_pages: int | None = None
     ) -> tuple[list[dict[str, Any]], int | None]:
@@ -435,12 +485,7 @@ class CatalystCenterClient:
         total: int | None = None
 
         for _ in range(page_budget):
-            page_params = {**(params or {}), 'limit': limit, 'offset': offset}
-            body = self._get_body(path, page_params)
-            page = self._payload_of(body, path)
-            if not isinstance(page, list):
-                raise CatalystApiError(f'Expected a list from {path}, got {type(page).__name__}')
-
+            page, body = self._get_page(path, params, limit, offset)
             if total is None:
                 total = self._collection_total(body)
             records.extend(page)

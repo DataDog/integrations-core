@@ -174,10 +174,8 @@ SCORE_FIELDS: Final[frozenset[str]] = frozenset(
     }
 )
 
-# FabricSiteSummary and VirtualNetworkSummary. Both schemas are large (82 and 59 fields) and
-# almost entirely `<kpi><Good|Fair|Poor>HealthDeviceCount` variations, so only the top-level
-# rollups are mapped; the per-KPI breakdowns can be added once a real fabric is available to
-# confirm which of them populate.
+# FabricSiteSummary and VirtualNetworkSummary. Both schemas are large and almost entirely
+# `<kpi><Good|Fair|Poor>HealthDeviceCount` variations, so only the top-level rollups are mapped.
 FABRIC_SITE_METRICS: Final[dict[str, str]] = {
     'goodHealthPercentage': 'fabric.site.health',
     'totalDeviceCount': 'fabric.site.device.count',
@@ -216,14 +214,13 @@ APPLICATION_METRICS: Final[dict[str, str]] = {
     'applicationServerLatency': 'application.latency.server_app',
 }
 
-# Client experience, via POST clients/summaryAnalytics. Each entry is
-# (field, aggregate function, metric name), and the *request* is built from this same tuple -- so
-# what is asked for and what is parsed cannot drift apart.
+# Client experience, via POST clients/summaryAnalytics. Each entry is (field, aggregate function,
+# metric name), and the request is built from this same tuple, so what is asked for and what is
+# parsed cannot drift apart.
 #
-# Aggregating on the appliance is deliberate. The brief asks for RSSI and SNR "per client", but a
-# series per client would put client MAC in the tag set: tens of thousands of series at the scale
-# of the named accounts, for a question nobody asks one client at a time. Grouping by SSID and
-# band answers "which SSID is bad on which band" at a cardinality that stays bounded.
+# Aggregating on the appliance is deliberate: a per-client series would put client MAC in the tag
+# set, tens of thousands of series for a question nobody asks one client at a time. Grouping by
+# SSID and band stays bounded.
 CLIENT_AGGREGATES: Final[tuple[tuple[str, str, str], ...]] = (
     ('rssi', 'avg', 'client.rssi.avg'),
     ('snr', 'avg', 'client.snr.avg'),
@@ -245,11 +242,10 @@ CLIENT_GROUP_BY_DEFAULT: Final[tuple[str, ...]] = ('ssid', 'band')
 
 # Dimensions the assurance-event breakdown is grouped on, as (record field, tag key).
 #
-# Every one is bounded: `severity` is an integer 0-6, `deviceFamily` is the seven-value enum the
-# endpoint accepts, `name` is drawn from the appliance's event catalog, and device names are
-# bounded by the inventory. The same 69-field record also carries clientMac, ipv4, ipv6, username
-# and bssid, which are per-client and per-session -- they are deliberately absent here, because a
-# tag on any of them turns one event into one series that is never queried again.
+# Every one is bounded: `severity` is an integer 0-6, `deviceFamily` the seven-value enum the
+# endpoint accepts, `name` comes from the appliance's event catalog, and device names are bounded
+# by the inventory. clientMac, ipv4, ipv6, username and bssid are excluded: per-client and
+# per-session values turn one event into one series that is never queried again.
 EVENT_BREAKDOWNS: Final[tuple[tuple[str, str], ...]] = (
     ('severity', 'severity'),
     ('deviceFamily', 'device_family'),

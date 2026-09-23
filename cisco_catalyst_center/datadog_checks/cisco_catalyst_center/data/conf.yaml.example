@@ -69,11 +69,15 @@ instances:
     #
     # collect_interface_poe: false
 
-    ## @param collect_stacks - boolean - optional - default: true
-    ## Set to `false` to skip switch stack membership and member health. This is the only
-    ## per-device request the check makes, issued once per stackable switch.
+    ## @param collect_stacks - boolean - optional - default: false
+    ## Set to `true` to collect switch stack membership and member health. Off by default
+    ## because it is the only per-device request the check makes: one call per stackable
+    ## switch on every cycle, so its cost grows with the size of the fleet. To collect it on
+    ## a large fleet without paying that on every health cycle, enable it on a second
+    ## instance that has every other collector disabled and a long `min_collection_interval`,
+    ## and give that instance its own `tags` entry so the two stay distinguishable.
     #
-    # collect_stacks: true
+    # collect_stacks: false
 
     ## @param collect_site_health - boolean - optional - default: true
     ## Set to `false` to skip per-site rollups. This endpoint returns at most 20 sites per page,
@@ -110,8 +114,8 @@ instances:
 
     ## @param collect_assurance_issues - boolean - optional - default: false
     ## Set to `true` to collect counts of open assurance issues by severity, priority, category
-    ## and status. Each issue not seen on a prior cycle is also submitted as a Datadog event,
-    ## with an alert type derived from the issue's priority.
+    ## and status. Each issue is also submitted as a Datadog event the first time it is seen and
+    ## again whenever it recurs, with an alert type derived from the issue's priority.
     #
     # collect_assurance_issues: false
 
@@ -145,9 +149,9 @@ instances:
     # events_initial_lookback_minutes: 15
 
     ## @param collect_application_health - boolean - optional - default: false
-    ## Set to `true` to collect per-application health and traffic. This endpoint requires a site
-    ## to be named on every request, so it costs one request per site and its cost grows with the
-    ## size of the hierarchy.
+    ## Set to `true` to collect health and traffic for the 100 busiest applications at each site,
+    ## ranked by usage. This endpoint requires a site to be named on every request, so it costs
+    ## one request per site and its cost grows with the size of the hierarchy.
     #
     # collect_application_health: false
 

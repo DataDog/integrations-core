@@ -119,16 +119,15 @@ def _int_or_none(value: Any) -> int | None:
 def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMetadata:
     """Build the NDM device payload from one `data/networkDevices` record.
 
-    Field names differ from those the product brief lists, because the brief maps against the
-    legacy inventory endpoint: the data API has `name` rather than `hostname`, `osType`
-    rather than `softwareType`, and `reachabilityHealthStatus` rather than
-    `reachabilityStatus`.
+    The data API names these fields differently from the legacy inventory endpoint: `name` rather
+    than `hostname`, `osType` rather than `softwareType`, and `reachabilityHealthStatus` rather
+    than `reachabilityStatus`.
     """
     management_ip = record.get('managementIpAddress') or ''
     hierarchy = record.get('siteHierarchy')
 
-    # The record identity is Catalyst Center's own instanceUuid, per the product brief. It is
-    # present on every record, whereas managementIpAddress is not -- an access point reporting
+    # The record identity is Catalyst Center's own instanceUuid. It is present on every
+    # record, whereas managementIpAddress is not -- an access point reporting
     # through a controller may have none, and an IP-derived id would collapse every such device
     # onto a single record.
     device_uuid = record.get('id') or ''
@@ -174,10 +173,8 @@ def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMeta
 def _port_role(record: dict[str, Any]) -> str | None:
     """Classify a port as uplink, access or trunk.
 
-    The brief derives this from `interfaceType`, `portMode` and the description. The uplink
-    decision itself belongs to `is_uplink()`, so that the port role, the `uplink`
-    tag and the device rollup always agree; anything it does not claim falls back to the
-    reported port mode.
+    The uplink decision belongs to `is_uplink()`, so that the port role, the `uplink` tag and the
+    device rollup always agree; anything it does not claim falls back to the reported port mode.
     """
     if is_uplink(record):
         return 'uplink'

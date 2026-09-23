@@ -11,11 +11,11 @@ your Cisco campus network from within Datadog.
 
 The integration provides:
 
-- **Device and interface inventory**: reachability, hardware, and interface details for switches, routers, wireless controllers, and access points, with optional Network Device Monitoring metadata for pairing with the SNMP integration.
-- **Assurance health**: site, network, and client health scores, plus per-application traffic and performance.
-- **Assurance issues and events**: counts of open issues and, optionally, individual assurance events as Datadog events.
-- **Topology**: physical (CDP/LLDP), site, and layer 3 topology sizing.
-- **SD-Access and security**: fabric and virtual network health, plus rogue access point and aWIPS wireless intrusion counts.
+- **Device and interface inventory**: Reachability, hardware, and interface details for switches, routers, wireless controllers, and access points, with optional Network Device Monitoring metadata for pairing with the SNMP integration.
+- **Assurance health**: Site, network, and client health scores, plus traffic and performance for the busiest applications at each site.
+- **Assurance issues and events**: Counts of open issues and, optionally, individual assurance events as Datadog events.
+- **Topology**: Physical (CDP/LLDP), site, and layer 3 topology sizing.
+- **SD-Access and security**: Fabric and virtual network health, plus rogue access point and aWIPS wireless intrusion counts.
 
 ## Setup
 
@@ -40,12 +40,12 @@ per continuous Agent run.
 
 The resume point is kept in memory, not on disk: restarting the Agent forgets it, and the next cycle
 falls back to polling `events_initial_lookback_minutes` again. Events already reported before the
-restart that still fall inside that window are submitted a second time. The `cisco_catalyst_center.event.count`
-and `.event.total.count` metrics have no protection against this and double-count that window.
+restart that still fall inside that window are submitted a second time. The metrics `cisco_catalyst_center.event.count`
+and `cisco_catalyst_center.event.total.count` have no protection against this and double-count that window.
 
-Events can also be lost rather than duplicated: if one device family's request fails, or a sweep is
-cut short by the per-cycle page budget, the window still advances and is not retried on the next
-cycle, so those events are gone rather than double-counted.
+Events can also be lost rather than duplicated. If one device family's request fails, or a sweep is
+cut short by the per-cycle page budget, the window still advances without a retry. Those events are
+gone rather than double-counted.
 
 Polling costs four requests per cycle at minimum, delays each event by up to one collection
 interval, and submits at most 800 events per cycle. Events that occur while the Agent is stopped for
@@ -77,12 +77,16 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 ### Events
 
 When `collect_events` is enabled, the Cisco Catalyst Center integration submits each Catalyst Center
-assurance event as a Datadog event. The title is the event name, the body carries the reason,
-sub-reason, failure category and result reported by the appliance, and the alert type is derived from
-the event's syslog severity: Emergency through Error become errors, Warning becomes a warning, and
-Notice and Info become informational.
+assurance event as a Datadog event. The title is the event name, and the body carries the reason,
+sub-reason, failure category, and result reported by the appliance.
 
-Events are tagged with severity, device family, event name, device name, site and SSID. Per-client
+The alert type is derived from the event's syslog severity:
+
+- Emergency through Error become errors
+- Warning becomes a warning
+- Notice and Info become informational
+
+Events are tagged with severity, device family, event name, device name, site, and SSID. Per-client
 identifiers appear in the event body rather than as tags.
 
 ### Service checks

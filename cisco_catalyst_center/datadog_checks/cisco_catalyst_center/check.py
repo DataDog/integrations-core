@@ -28,6 +28,7 @@ from .collectors import (
     collect_site_topology,
     collect_stacks,
     collect_topology,
+    list_sites,
 )
 from .config_models import ConfigMixin
 from .constants import EVENT_DEFAULT_LOOKBACK_MINUTES, EVENT_WINDOW_MAX_SECONDS, L3_TOPOLOGY_TYPES
@@ -50,9 +51,11 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         super().__init__(name, init_config, instances)
         self._client: CatalystCenterClient | None = None
         # End of the last assurance-event window that was collected, in epoch milliseconds. The
-        # check object outlives a single cycle, which is what lets consecutive windows abut.
+        # check object outlives a single cycle, which is what lets each window start where the
+        # previous one ended.
         self._events_polled_through: int | None = None
-        self._issues_reported_through: int | None = None
+        # Each open issue's last reported occurrence, by issueId. None until the first cycle.
+        self._reported_issues: dict[str, int | None] | None = None
 
     @property
     def client(self) -> CatalystCenterClient:
@@ -64,27 +67,24 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
     def _interface_views(self) -> tuple[str, ...]:
         """Which interface views to request.
 
-        `configuration` comes first so that later views cannot overwrite the descriptive
-        fields. A view replaces the field set rather than extending it, so each one costs its own
+        A view replaces the field set rather than extending it, so each one costs its own
         paginated call -- which is why statistics and PoE are separately switchable.
         """
         views = ['configuration']
         if self.config.collect_interface_statistics:
             views.append('statistics')
         if self.config.collect_interface_poe:
+            # `poE` is the appliance's own spelling of the view name, not a typo.
             views.append('poE')
         return tuple(views)
 
     def _event_window(self) -> tuple[int, int] | None:
         """The window to poll assurance events for, in epoch milliseconds, or None to skip.
 
-        Windows are consecutive and never overlap: each one begins where the previous one ended, so
-        an event is counted exactly once whatever the collection interval is. Polling a fixed
-        lookback instead would recount every event on every cycle.
-
-        The first cycle has no predecessor and reaches back `events_initial_lookback_minutes`.
-        After that the start is clamped to the widest window the endpoint accepts, which is what an
-        Agent restarted after a long outage runs into.
+        Each window begins where the previous one ended, so an event is counted exactly once
+        whatever the collection interval is. The first cycle has no predecessor and reaches back
+        `events_initial_lookback_minutes`; after a long outage the start is clamped to the widest
+        window the endpoint accepts.
         """
         now = int(time.time() * 1000)
         if self._events_polled_through is None:
@@ -159,12 +159,8 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # The instance's `tags` option is a convention every integration honours, so it is
         # folded in ahead of anything this check derives itself.
         base_tags = list(self.instance.get('tags') or [])
-        # The tag must echo back what the user configured, not the client's normalized base URL:
-        # `spec.yaml` tells users not to include a scheme, so the normalized, https-prefixed URL
-        # can never equal the configured value. `self.config` carries the configured string
-        # unchanged -- normalization is the client's job, not the config model's -- and by this
-        # point in the lifecycle it is already validated, so there is no reason to read the raw
-        # instance dict instead.
+        # The host as the user wrote it in conf.yaml, not the client's base URL: users are told
+        # to omit the scheme, so the client's https:// prefix would otherwise leak into the tag.
         base_tags.append(f'catalyst_center_host:{self.config.catalyst_center_host}')
         namespace = self.config.namespace or 'default'
 
@@ -227,7 +223,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 lambda: collect_client_experience(self, self.client, base_tags=base_tags),
             )
 
-        # -- P1 domains, all gated off by default -------------------------------------
+        # -- Optional domains, all gated off by default -------------------------------
         if self.config.collect_topology:
             healthy &= self._run('topology', lambda: collect_topology(self, self.client, base_tags=base_tags))
             healthy &= self._run('site topology', lambda: collect_site_topology(self, self.client, base_tags=base_tags))
@@ -250,12 +246,12 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self.config.collect_assurance_issues:
 
             def _issues() -> None:
-                # Only advanced on success, so a failed cycle re-reports rather than skipping.
-                self._issues_reported_through = collect_assurance_issues(
+                # Only replaced on success, so a failed cycle re-reports rather than skipping.
+                self._reported_issues = collect_assurance_issues(
                     self,
                     self.client,
                     base_tags=base_tags,
-                    reported_through=self._issues_reported_through,
+                    reported=self._reported_issues,
                 )
 
             healthy &= self._run('assurance issues', _issues)
@@ -270,20 +266,30 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 )
                 healthy &= polled
                 if polled:
-                    # Advance only on success, so a cycle that failed outright retries its window
-                    # rather than leaving a hole. A sweep that lost one device-family group still
-                    # counts as success -- collect_events contains that failure itself -- because
+                    # Advance only on success, so a failed cycle retries its window rather than
+                    # leaving a hole. Losing one device-family group still counts as success:
                     # retrying would double-count the groups that did submit.
                     self._events_polled_through = end_time
 
         if self.config.collect_application_health:
             if not sites:
-                self.log.warning(
-                    'collect_application_health needs the site list, which comes from '
-                    'collect_site_health; enable it or no application metrics will be collected'
-                )
-            # Costs one request per site, so it reuses the sites already collected rather than
-            # re-listing the hierarchy.
+                # networkApplications requires a siteId, and site health is otherwise the only
+                # call that lists sites. Without this, switching site health off would collect no
+                # application metrics while still reporting success.
+                self.log.debug('No sites collected yet; enumerating the site hierarchy for application health')
+
+                def _list_sites() -> None:
+                    nonlocal sites
+                    sites = list_sites(self.client)
+
+                healthy &= self._run('site list', _list_sites)
+
+            # Logged because a count of zero is the only visible symptom of a site list that came
+            # back empty: the collector below would then submit nothing while the cycle still
+            # reports success.
+            self.log.debug('Collecting application health for %s sites', len(sites))
+
+            # One request per site on top of that, so the cost scales with the hierarchy.
             healthy &= self._run(
                 'application health',
                 lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
@@ -295,8 +301,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self.config.send_ndm_metadata:
             healthy &= self._run('NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace))
 
-        # A metric rather than a service check: new integrations in this repository do not ship
-        # their own service checks. It has to be emitted on failure too, which is the whole point
-        # -- a monitor on missing data cannot tell an unreachable appliance from a check that is
-        # not running, but a 0 on a series that is still arriving says exactly which it is.
+        # A metric rather than a service check: new integrations here do not ship service checks.
+        # Emitted on failure too -- a monitor on missing data cannot tell an unreachable appliance
+        # from a check that is not running, but a 0 on a series still arriving can.
         self.gauge('collection.success', int(healthy), tags=base_tags)
