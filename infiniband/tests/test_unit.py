@@ -4,6 +4,8 @@
 import mock
 import pytest
 
+from datadog_checks.base.errors import SkipInstanceError
+from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.infiniband import InfinibandCheck
 
 from .common import (
@@ -263,3 +265,12 @@ def test_configured_counters_absent_from_sysfs_are_logged(aggregator, instance, 
 
     assert "configured but not found" in caplog.text
     assert "symbol_error" in caplog.text
+
+
+def test_check_skipped_when_gpu_monitoring_disabled(instance, mock_fs):
+    # The check ships as part of the GPU monitoring SKU. With gpu.enabled off the instance
+    # must be skipped outright rather than collecting a partial set of metrics.
+    # mock_fs makes the sysfs path resolve so that the gate is the only reason to raise.
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
+        with pytest.raises(SkipInstanceError):
+            InfinibandCheck('infiniband', {}, [instance])
