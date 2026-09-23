@@ -44,9 +44,10 @@ def get_connection_data(
 
 
 class Db2Connection:
-    def __init__(self, check: IbmDb2Check, config: InstanceConfig):
+    def __init__(self, check: IbmDb2Check, config: InstanceConfig, on_reconnect: Callable[[], None] | None = None):
         self._check = check
         self._config = config
+        self._on_reconnect = on_reconnect
         self.conn = None
 
     def connect(self) -> None:
@@ -79,7 +80,7 @@ class Db2Connection:
         """
         Execute `query` and yield rows fetched with `method` (an `ibm_db` fetch function).
 
-        If execution fails, reconnects once and retries, emitting the connection service check. Raises
+        If execution fails, reconnects once, calls `on_reconnect`, and retries. Raises
         `requests.ConnectionError` if the reconnect fails.
         """
         # https://github.com/ibmdb/python-ibmdb/wiki/APIs
@@ -91,7 +92,8 @@ class Db2Connection:
             # ToDo: Probably the best strategy here would be to just set self.conn = None, abort the current check run
             # and retry on the next check run.
             self.connect()
-            self._check.emit_connection_service_checks()
+            if self._on_reconnect is not None:
+                self._on_reconnect()
             if self.conn is None:
                 raise ConnectionError("Unable to create new connection")
 
@@ -103,3 +105,12 @@ class Db2Connection:
 
             # Get next row, if any
             row = method(cursor)
+
+    def close(self) -> None:
+        if self.conn is None:
+            return
+        try:
+            ibm_db.close(self.conn)
+        except Exception as e:
+            self._check.log.debug("Error closing Db2 connection: %s", e)
+        self.conn = None

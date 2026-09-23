@@ -50,17 +50,16 @@ class IbmDb2Check(DatabaseCheck):
         self.tag_manager.set_tag('db', self._config.db)
 
         # We'll connect on the first check run
-        self._connection = Db2Connection(self, self._config)
+        self._connection = Db2Connection(self, self._config, on_reconnect=self.emit_connection_service_checks)
         self._metrics = MetricsCollector(self, self._connection)
-        self._custom_metrics = CustomMetricsCollector(self, self._connection, self._config.custom_queries)
         self._query_methods = (
             self._metrics.query_instance,
             self._metrics.query_database,
             self._metrics.query_buffer_pool,
             self._metrics.query_table_space,
             self._metrics.query_transaction_log,
-            self._custom_metrics.query_custom,
         )
+        self._custom_metrics = self.register_async_job(CustomMetricsCollector(self, self._config))
 
     def check(self, instance):
         if self._connection.conn is None:
@@ -79,6 +78,11 @@ class IbmDb2Check(DatabaseCheck):
             except Exception as e:
                 self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
                 continue
+
+        self.run_async_jobs(self.tags)
+
+    def shutdown(self) -> None:
+        self._connection.close()
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):

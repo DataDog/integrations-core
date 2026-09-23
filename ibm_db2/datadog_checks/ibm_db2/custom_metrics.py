@@ -8,17 +8,40 @@ from typing import TYPE_CHECKING
 
 import ibm_db
 
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
+
+from .connection import Db2Connection
+
 if TYPE_CHECKING:
-    from .config_models.instance import CustomQuery
-    from .connection import Db2Connection
+    from .config_models import InstanceConfig
     from .ibm_db2 import IbmDb2Check
 
 
-class CustomMetricsCollector:
-    def __init__(self, check: IbmDb2Check, connection: Db2Connection, custom_queries: tuple[CustomQuery, ...]):
+class CustomMetricsCollector(DBMAsyncJob):
+    def __init__(self, check: IbmDb2Check, config: InstanceConfig):
+        super().__init__(
+            check,
+            config_host=config.host,
+            min_collection_interval=config.min_collection_interval,
+            rate_limit=1 / float(config.min_collection_interval),
+            dbms=check.dbms,
+            enabled=bool(config.custom_queries),
+            job_name='custom-queries',
+        )
         self._check = check
-        self._connection = connection
-        self._custom_queries = custom_queries
+        self._custom_queries = config.custom_queries
+        # The job runs on its own thread, so it can't share the check's connection.
+        self._connection = Db2Connection(check, config)
+
+    def run_job(self):
+        if self._connection.conn is None:
+            self._connection.connect()
+            if self._connection.conn is None:
+                return
+        self.query_custom()
+
+    def shutdown(self) -> None:
+        self._connection.close()
 
     def query_custom(self):
         for custom_query in self._custom_queries:
@@ -65,7 +88,7 @@ class CustomMetricsCollector:
                     continue
 
                 metric_info = []
-                query_tags = list(self._check.tags)
+                query_tags = list(self._tags)
                 query_tags.extend(custom_query.tags or ())
 
                 for column, value in zip(columns, row):
