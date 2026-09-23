@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
-from .config_models import InstanceConfig
+from .config_models import InstanceConfig, dict_defaults
 
 CONFIG_MODELS_PACKAGE = 'datadog_checks.ibm_db2.config_models'
 
@@ -38,6 +38,11 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
     # The model defaults `connection_timeout` to 10, but an unset timeout has always meant "use the driver
     # default", so mark it as configured to keep the model from filling it in.
     args.setdefault('connection_timeout', None)
+
+    args['collect_schemas'] = {
+        **dict_defaults.instance_collect_schemas().model_dump(),
+        **(instance.get('collect_schemas') or {}),
+    }
 
     return check.load_configuration_model(
         CONFIG_MODELS_PACKAGE, 'InstanceConfig', args, check._get_config_model_context(args)

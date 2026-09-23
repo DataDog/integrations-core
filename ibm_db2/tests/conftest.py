@@ -12,6 +12,17 @@ from datadog_checks.ibm_db2.connection import get_connection_data
 
 from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
+SCHEMA_OBJECTS = (
+    "CREATE TABLE TEST_SCHEMA.PARENT (ID INT NOT NULL PRIMARY KEY, NAME VARCHAR(50) NOT NULL DEFAULT 'x', "
+    "PRICE DECIMAL(10,2))",
+    "CREATE TABLE TEST_SCHEMA.CHILD (ID INT NOT NULL PRIMARY KEY, PARENT_ID INT, "
+    "CONSTRAINT FK_PARENT FOREIGN KEY (PARENT_ID) REFERENCES TEST_SCHEMA.PARENT (ID) ON DELETE CASCADE)",
+    "CREATE INDEX TEST_SCHEMA.IDX_CHILD_PARENT ON TEST_SCHEMA.CHILD (PARENT_ID DESC)",
+    "CREATE TABLE TEST_SCHEMA.EVENTS (ID INT NOT NULL, TS DATE NOT NULL) "
+    "PARTITION BY RANGE (TS) (STARTING '2026-01-01' ENDING '2026-12-31' EVERY 6 MONTHS)",
+    "CREATE SCHEMA EMPTY_SCHEMA",
+)
+
 
 class DbManager(object):
     def __init__(self, config):
@@ -62,6 +73,14 @@ class DbManager(object):
     def connect(self):
         ibm_db.close(ibm_db.connect(self.target, self.username, self.password))
 
+    def create_schema_objects(self):
+        conn = ibm_db.connect(self.target, self.username, self.password)
+        try:
+            for statement in SCHEMA_OBJECTS:
+                ibm_db.exec_immediate(conn, statement)
+        finally:
+            ibm_db.close(conn)
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -69,7 +88,11 @@ def dd_environment():
 
     # The official image creates the Db2 instance at container start, which takes a few minutes.
     setup_complete = CheckDockerLogs(COMPOSE_FILE, 'Setup has completed', attempts=60, wait=10)
-    with docker_run(COMPOSE_FILE, conditions=[setup_complete, db.initialize, WaitFor(db.connect)], attempts=2):
+    with docker_run(
+        COMPOSE_FILE,
+        conditions=[setup_complete, db.initialize, WaitFor(db.connect), db.create_schema_objects],
+        attempts=2,
+    ):
         yield CONFIG, E2E_METADATA
 
 

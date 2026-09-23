@@ -27,6 +27,7 @@ from .config import build_config
 from .connection import Db2Connection
 from .custom_metrics import CustomMetricsCollector
 from .metrics import MetricsCollector
+from .schemas import Db2SchemaCollectionJob
 from .utils import get_version
 
 
@@ -60,6 +61,8 @@ class IbmDb2Check(DatabaseCheck):
             self._metrics.query_transaction_log,
         )
         self._custom_metrics = self.register_async_job(CustomMetricsCollector(self, self._config))
+        if self._config.dbm:
+            self._schema_collection = self.register_async_job(Db2SchemaCollectionJob(self, self._config))
 
     def check(self, instance):
         if self._connection.conn is None:
