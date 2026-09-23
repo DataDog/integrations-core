@@ -352,7 +352,7 @@ The available options are:
 | `genresources_max_resources_per_cycle`                 | `10000`  | Maximum number of items collected per resource type per cycle. Anything beyond the cap is dropped and a warning is logged.                                                                  |
 | `collect_openmetrics`                                  | `true`   | Scrapes the Prometheus endpoints. Set it to `false` to run entity collection without metric collection, in which case the `*_endpoint` options are not required. At least one of `collect_openmetrics` and `collect_genresources` must be enabled. |
 
-Keep the following in mind:
+Note the following:
 
 - Enable entity collection on one Argo CD instance only. Several Agents polling the same Argo CD API submit the same resources under the same key, which adds API load without adding data.
 - The key prefix comes from the Agent's own cluster name and `env` tag, not from this configuration. Set `DD_CLUSTER_NAME` and `DD_ENV` explicitly when the Agent cannot detect them, such as when it runs outside the cluster it monitors, and use the same values in the notifications ConfigMap below.
