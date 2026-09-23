@@ -46,7 +46,7 @@ def test_table_space_tags(aggregator, instance, dd_run_check):
 @pytest.mark.usefixtures('dd_environment')
 def test_table_space_state_change(aggregator, instance, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check._table_space_states['USERSPACE1'] = 'test'
+    check._metrics._table_space_states['USERSPACE1'] = 'test'
     dd_run_check(check)
 
     aggregator.assert_event('State of `USERSPACE1` changed from `test` to `NORMAL`.')
