@@ -339,15 +339,12 @@ def test_remote_query_evaluates_the_query_values_exactly_once(integration_check,
     # pg_sleep returns void: an empty quoted field next to each row's value.
     assert page == b'"","1"\n' + b'"","2"\n' + b'"","3"\n'
     assert final['upload_receipt']['totalRows'] == 3
-    producer = final['executionDiagnostics']['producer']
     # The three rows sleep a fixed 1.2 s in the database, and exactly one evaluation
-    # produced them: the database walls carry the sleep exactly once — some server
-    # versions deliver it in the COPY dispatch (setup) and others in the reads (fetch), so
-    # the bound covers both — while a second evaluation (a cursor fetch or a double COPY)
-    # would carry it twice, and the whole run stays below a second evaluation's wall.
-    database_ms = producer['databaseSetupMs'] + producer['databaseFetchMs']
-    assert 1200 <= database_ms < 2400, producer
-    assert producer['totalMs'] < 4000, producer
+    # produced them: the run's whole measured wall carries the sleep exactly once, while
+    # a second evaluation (a cursor fetch or a double COPY) would carry it twice and
+    # exceed the bound — the upload and finalize work is in-process and negligible.
+    elapsed_ms = final['stats']['elapsedMs']
+    assert 1200 <= elapsed_ms < 2400, elapsed_ms
 
 
 @pytest.mark.integration

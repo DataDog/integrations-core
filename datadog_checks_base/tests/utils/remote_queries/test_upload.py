@@ -12,7 +12,6 @@ from types import SimpleNamespace
 import pytest
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
-from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
@@ -121,7 +120,7 @@ def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, cr
         return SimpleNamespace(status_code=200, content=json.dumps({'upload_id': creds.upload_id}).encode())
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     assert rq_upload.RequestsUploadClient().register_descriptor(creds, body) == {'upload_id': 'upload-1'}
     assert calls[0] == calls[1]
     method, url, headers, sent = calls[0]
@@ -150,7 +149,7 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
         return SimpleNamespace(status_code=202, content=json.dumps(acceptance_receipt(2, 7, 1)).encode())
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     client = rq_upload.RequestsUploadClient()
     with io.BytesIO(payload) as body:
         receipt = client.put_source_page(creds, page, body)
@@ -276,10 +275,10 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
         return SimpleNamespace(status_code=202, content=json.dumps(acceptance_receipt(0, 0, 1)).encode())
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     # The wall is 100 s away, but the per-attempt bound is 55 s: the first attempt's body read
     # happens past it and is killed mid-body; the second, rewound attempt succeeds.
-    monkeypatch.setattr(rq_timing.time, 'monotonic', lambda: clock['now'])
+    monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
     wall_creds = rq_upload.UploadCredentials(
         creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=100.0
     )
@@ -304,12 +303,12 @@ def test_http_page_attempt_bound_never_exceeds_the_run_wall(monkeypatch, creds):
         return SimpleNamespace(status_code=200, content=b'{}')
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     # The wall is 50 s away, inside the 55 s attempt bound, so the attempt's own deadline is
     # the wall: a partially consumed budget bounds the page attempt, the killed attempt is not
     # retried past the wall, and the run surfaces the retryable wall timeout.
     clock = iter([0.0, 0.0, 51.0, 51.5] + [51.5] * 10)
-    monkeypatch.setattr(rq_timing.time, 'monotonic', lambda: next(clock))
+    monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: next(clock))
     wall_creds = rq_upload.UploadCredentials(
         creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=50.0
     )
@@ -332,11 +331,11 @@ def test_http_retry_sequence_never_extends_the_run_wall(monkeypatch, creds):
         return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     # A transient rejection followed by an expired wall: the sequence refuses to start another
     # attempt and surfaces the retryable wall timeout instead of uploading past the wall.
     clock = iter([0.0, 0.0, 51.5] + [51.5] * 10)
-    monkeypatch.setattr(rq_timing.time, 'monotonic', lambda: next(clock))
+    monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: next(clock))
     wall_creds = rq_upload.UploadCredentials(
         creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=50.0
     )
@@ -378,14 +377,14 @@ def test_http_finalize_polls_pending_until_the_authoritative_receipt(monkeypatch
         return SimpleNamespace(status_code=200, content=json.dumps(finalize_receipt(3, 5, 99)).encode())
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', sleeps.append)
+    monkeypatch.setattr(rq_upload.time, 'sleep', sleeps.append)
     scoped = rq_upload.UploadCredentials(
         creds.base_url,
         creds.upload_id,
         creds.api_key,
         creds.app_key,
         None,
-        wall_deadline=rq_timing.time.monotonic() + 60,
+        wall_deadline=rq_upload.time.monotonic() + 60,
     )
     assert rq_upload.RequestsUploadClient().finalize_run(scoped, 3) == finalize_receipt(3, 5, 99)
     # Every poll replays the identical finalize body under the same wall.
@@ -421,14 +420,14 @@ def test_http_finalize_pending_receipt_is_strictly_verified(monkeypatch, creds, 
         return SimpleNamespace(status_code=202, content=body.encode())
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     scoped = rq_upload.UploadCredentials(
         creds.base_url,
         creds.upload_id,
         creds.api_key,
         creds.app_key,
         None,
-        wall_deadline=rq_timing.time.monotonic() + 60,
+        wall_deadline=rq_upload.time.monotonic() + 60,
     )
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         rq_upload.RequestsUploadClient().finalize_run(scoped, 3)
@@ -453,8 +452,8 @@ def test_http_finalize_pending_backoff_is_bounded_under_the_run_wall(monkeypatch
         clock['now'] += seconds
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', sleep)
-    monkeypatch.setattr(rq_timing.time, 'monotonic', lambda: clock['now'])
+    monkeypatch.setattr(rq_upload.time, 'sleep', sleep)
+    monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
     scoped = rq_upload.UploadCredentials(
         creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=25.0
     )
@@ -478,14 +477,14 @@ def test_http_finalize_pending_then_terminal_rejection_fails_closed(monkeypatch,
         return SimpleNamespace(status_code=409, content=b'{"error":{"code":"already_exists"}}')
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     scoped = rq_upload.UploadCredentials(
         creds.base_url,
         creds.upload_id,
         creds.api_key,
         creds.app_key,
         None,
-        wall_deadline=rq_timing.time.monotonic() + 60,
+        wall_deadline=rq_upload.time.monotonic() + 60,
     )
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         rq_upload.RequestsUploadClient().finalize_run(scoped, 1)
@@ -511,7 +510,7 @@ def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_chang
         return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     client = rq_upload.RequestsUploadClient()
 
     def drive(trace_context):
@@ -567,11 +566,10 @@ def test_page_upload_attempts_span_each_http_attempt_with_retry_and_outcome(monk
         return SimpleNamespace(status_code=202, content=page_receipt)
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     tracing, tracer = make_tracing()
     tracing.open_root(delivery)
-    timings = rq_timing.RemoteQueryProducerTimings(0.0)
-    client = rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
+    client = rq_upload.RequestsUploadClient(tracing=tracing)
 
     with io.BytesIO(b'x') as body:
         page_receipt = client.put_source_page(creds, page, body)
@@ -591,14 +589,11 @@ def test_page_upload_attempts_span_each_http_attempt_with_retry_and_outcome(monk
     assert second.error == 0
     assert second.metrics[rq_tracing.REMOTE_QUERY_SPAN_HTTP_STATUS_METRIC] == 202
     assert [span.child_of for span in (first, second)] == [tracer.spans[0], tracer.spans[0]]
-    # The root's attempt counters agree with the accumulator's upload accounting for the
-    # same retries.
+    # The root's attempt counters count each HTTP page upload attempt exactly once, a
+    # retry being any attempt beyond a page's first.
     root = tracer.spans[0]
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_ATTEMPT_COUNT_METRIC] == 2
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_RETRY_COUNT_METRIC] == 1
-    accumulator = timings.metadata()['producer']
-    assert accumulator['uploadAttemptCount'] == 2
-    assert accumulator['uploadRetryCount'] == 1
 
 
 def test_active_spans_replace_the_manual_trace_headers_only_on_spanned_requests(monkeypatch, delivery, creds):
@@ -742,7 +737,7 @@ def test_retry_exhausted_upload_failure_reports_only_safe_diagnostics(monkeypatc
         return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         rq_upload.RequestsUploadClient().register_descriptor(creds, b'{}')
     assert failure.value.code == 'upload_failed'
@@ -767,7 +762,7 @@ def test_abort_failures_log_fixed_text_only(monkeypatch, creds, caplog):
         raise requests.exceptions.ConnectionError('SECRET_DO_NOT_LOG while aborting')
 
     monkeypatch.setattr(requests, 'request', request)
-    monkeypatch.setattr(rq_timing.time, 'sleep', lambda _: None)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     rq_upload.RequestsUploadClient().abort(creds)  # best-effort: never raises
 
     class ExplodingClient:

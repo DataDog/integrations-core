@@ -1658,35 +1658,23 @@ class AgentCheck(object):
             REMOTE_QUERY_OPERATIONS,
         )
 
-        request, timings, failure = parse_agent_rpc_request(request_json)
+        request, started_at, failure = parse_agent_rpc_request(request_json)
         if failure is not None:
             emit_event(emit, failure)
             return
         assert request is not None
         operation = request.get('operation')
         if not isinstance(operation, str) or operation not in REMOTE_QUERY_OPERATIONS:
-            emit_event(
-                emit,
-                failed_event(
-                    'invalid_request', 'Unknown remote query operation.', execution_diagnostics=timings.metadata()
-                ),
-            )
+            emit_event(emit, failed_event('invalid_request', 'Unknown remote query operation.'))
             return
         handler = self.get_remote_query_handler()
         if handler is None:
-            emit_event(
-                emit,
-                failed_event(
-                    'unsupported_operation',
-                    'Check does not support remote queries.',
-                    execution_diagnostics=timings.metadata(),
-                ),
-            )
+            emit_event(emit, failed_event('unsupported_operation', 'Check does not support remote queries.'))
             return
         events = (
             handler.resolve(request)
             if operation == REMOTE_QUERY_OPERATION_RESOLVE_TARGET
-            else handler.execute(request, timings)
+            else handler.execute(request, started_at)
         )
         emit_agent_rpc_events(emit, events)
 

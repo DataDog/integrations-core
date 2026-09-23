@@ -688,10 +688,10 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The leading zeros cover every earlier clock read (started_at, the client factory's and
-    # settings' remaining-time derivations, both stream-read phase brackets, and the
+    # settings' remaining-time derivations, the chunk guard, the setup guard, and the
     # per-row guards) so the wall still expires at the page-close guard, after rows were
     # produced.
-    values = iter([0.0] * 18 + [10.0] * 50)
+    values = iter([0.0] * 8 + [10.0] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
 
     events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
@@ -867,7 +867,7 @@ def recording_tracing_factory(tracing):
     return factory
 
 
-def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
+def test_producer_opens_spans_at_each_phase_boundary(monkeypatch):
     patch_upload_credentials(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request(maxFileBytes=prefix_len + row_object_bound(BOUND_ROW) + len(rq_pages.PAGE_SUFFIX))
@@ -879,7 +879,7 @@ def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
     events = collect_events(request, make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
 
     assert_success(events)
-    # The native spans open at exactly the accumulator's phase boundaries: the root
+    # The native spans open at exactly the producer's phase boundaries: the root
     # before the run, both setup segments (client creation and stream open through
     # descriptor registration) with the header read's fetch boundary inside, encode around
     # the row loop with one fetch boundary per raw stream read — the second read is the

@@ -45,7 +45,7 @@ REMOTE_QUERY_PRODUCER_SPAN_SERVICE = INTEGRATION_TRACING_SERVICE_NAME
 
 # The producer span operation vocabulary, pinned by the producer timing retirement plan:
 # one root span carrying run identity and the bounded counters, and phase spans at the
-# timing accumulator's own phase boundaries.
+# producer's own phase boundaries.
 REMOTE_QUERY_PRODUCER_ROOT_SPAN_OPERATION = 'remote_queries.producer'
 REMOTE_QUERY_DATABASE_SETUP_SPAN_OPERATION = 'remote_queries.database_setup'
 REMOTE_QUERY_DATABASE_FETCH_SPAN_OPERATION = 'remote_queries.database_fetch'
@@ -117,8 +117,8 @@ def _inject_span_context(propagator: Any, span: Any, headers: Mapping[str, str])
 class RemoteQueryProducerTracing:
     """Native, fail-open ddtrace producer spans for one remote query run.
 
-    Real spans parented on the request's existing trace context, additive to the timing
-    accumulator and the event contract — both stay byte-identical, and tracing failure of
+    Real spans parented on the request's existing trace context, additive to the event
+    contract — which stays byte-identical, and tracing failure of
     any kind never alters pages, receipts, retries, results, or errors.
 
     The tracer is the supported global ``ddtrace.trace.tracer`` singleton (importing
@@ -147,7 +147,7 @@ class RemoteQueryProducerTracing:
         self._root: Any = None
         self._root_finished = False
         # The monotonic root start for time_to_first_page_ms, which counts to the first
-        # acknowledged page exactly like the accumulator's field.
+        # acknowledged page.
         self._root_started_at: float | None = None
         # The open phase spans, outermost first; the root itself is never on the stack.
         self._spans: list[Any] = []
@@ -256,7 +256,7 @@ class RemoteQueryProducerTracing:
 
     @contextmanager
     def phase(self, name: str) -> Iterator[None]:
-        """One phase span scope, opened at the same boundary as the accumulator's phase."""
+        """One phase span scope at a producer phase boundary."""
         token = self.enter_phase(name)
         try:
             yield
@@ -266,7 +266,7 @@ class RemoteQueryProducerTracing:
     def enter_phase(self, name: str) -> Any:
         """Start one phase span; the exit token for ``exit_phase``, or None when inert.
 
-        ``name`` is the timing accumulator's phase vocabulary; an unmapped name starts no
+        ``name`` is the producer phase vocabulary; an unmapped name starts no
         span, so a vocabulary drift degrades to a missing span instead of poisoning the
         run's tracing.
         """
@@ -284,8 +284,8 @@ class RemoteQueryProducerTracing:
     def exit_phase(self, phase: Any) -> None:
         """Close one entered phase span; a no-op unless it is still the innermost open span.
 
-        Idempotent like the accumulator's ``exit_phase``, so a phase spanning nested
-        ``with`` blocks can be exited inline and then again from its spanning ``finally``.
+        Idempotent, so a phase spanning nested ``with`` blocks can be exited inline and
+        then again from its spanning ``finally``.
         """
         if self._failed or phase is None or not self._spans or self._spans[-1] is not phase:
             return
@@ -323,8 +323,7 @@ class RemoteQueryProducerTracing:
     def begin_page_upload_attempt(self, *, retry: bool) -> Any:
         """Start one page-upload attempt span and answer its handle, or None when inert.
 
-        The attempt and retry counters feed the root span's metrics exactly like the
-        accumulator's uploadAttemptCount/uploadRetryCount: one count per HTTP page
+        The attempt and retry counters feed the root span's metrics: one count per HTTP page
         upload attempt, a retry being any attempt beyond a page's first.
         """
         if self._failed or self._root is None:
@@ -395,9 +394,8 @@ class RemoteQueryProducerTracing:
     def note_page_acknowledged(self) -> None:
         """Record the first acknowledged page's wall from the root span's start, once.
 
-        The accumulator's ``timeToFirstPageMs`` counts to the first receipt-verified,
-        counted page; the root span's metric counts the same boundary so span and
-        retired-contract comparisons stay aligned.
+        The root span's metric counts to the first receipt-verified, counted page —
+        the same boundary an operator would time by hand.
         """
         if self._first_page_ms is not None or self._root_started_at is None:
             return

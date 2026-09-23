@@ -43,8 +43,8 @@ def test_root_span_carries_run_identity_and_the_success_terminal(delivery):
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_BYTE_COUNT_METRIC] == 7
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_ATTEMPT_COUNT_METRIC] == 0
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_RETRY_COUNT_METRIC] == 0
-    # The first acknowledged page's wall from the root start — the same boundary the
-    # accumulator's timeToFirstPageMs counts.
+    # The first acknowledged page's wall from the root start — the first receipt-verified,
+    # counted page.
     assert isinstance(root.metrics[rq_tracing.REMOTE_QUERY_SPAN_TIME_TO_FIRST_PAGE_METRIC], int)
     assert root.error == 0
     assert root.finished
@@ -71,8 +71,8 @@ def test_root_span_records_the_failure_code_and_partial_counters(delivery):
     # operation name.
     assert root.resource is None
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_PAGE_COUNT_METRIC] == 1
-    # The attempt counters count each HTTP page upload attempt exactly like the
-    # accumulator's uploadAttemptCount/uploadRetryCount.
+    # The attempt counters count each HTTP page upload attempt exactly once, a retry
+    # being any attempt beyond a page's first.
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_ATTEMPT_COUNT_METRIC] == 2
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_RETRY_COUNT_METRIC] == 1
 
@@ -105,7 +105,7 @@ def test_phase_spans_follow_real_execution_order_and_close_before_the_root(deliv
     ]
     root, _setup, header_fetch, encode, _fetch, upload, _tail_fetch, finalize = tracer.spans
     # Phase spans are the root's children; fetch regions and the upload attempt are
-    # children of the phase they run inside — the accumulator's own nesting.
+    # children of the phase they run inside — the producer's own nesting.
     assert header_fetch.child_of.name == 'remote_queries.database_setup'
     assert encode.child_of is root
     assert upload.child_of is encode

@@ -10,21 +10,22 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
-from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
 
 
 class QueryHandler:
     """A remote-query capability handler used to exercise the base dispatch."""
 
     execution_closed = False
+    started_at: float | None = None
 
     def resolve(self, request: Mapping[str, Any]) -> Iterator[RemoteQueryEvent]:
         yield RemoteQueryEvent('final', {'status': 'MATCHED', 'target': request['target']})
 
-    def execute(self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings) -> Iterator[RemoteQueryEvent]:
+    def execute(self, request: Mapping[str, Any], started_at: float) -> Iterator[RemoteQueryEvent]:
+        self.started_at = started_at
         try:
             yield RemoteQueryEvent('metadata', {'status': 'STARTED', 'query': request['query']})
-            yield RemoteQueryEvent('final', {'status': 'SUCCEEDED', 'executionDiagnostics': timings.metadata()})
+            yield RemoteQueryEvent('final', {'status': 'SUCCEEDED'})
         finally:
             self.execution_closed = True
 
@@ -72,7 +73,10 @@ def test_dispatches_to_the_handler(operation: str):
     else:
         assert [event[0] for event in events] == ['metadata', 'final']
         assert json.loads(events[0][1])['query'] == request['query']
-        assert 'executionDiagnostics' in json.loads(events[-1][1])
+        assert json.loads(events[-1][1])['status'] == 'SUCCEEDED'
+        # The execution receives the monotonic run start captured at the request-parse
+        # boundary: a usable timestamp, not later than this check.
+        assert isinstance(check.handler.started_at, float)
         assert check.handler.execution_closed
 
 

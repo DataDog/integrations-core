@@ -396,10 +396,9 @@ def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypa
     # expire at the delivered wall, which is exactly the case the old replacement semantics
     # silently allowed to run past its parent budget. The leading constant values cover every
     # clock read before the page-close guard (started_at, statement-timeout resolution, the
-    # setup/encode phase brackets, the copy-read brackets, and the per-block and per-record
-    # guards) so the wall still expires at the page-close guard, after the record was
-    # produced and the page assembled.
-    clock = iter([100.0] * 13 + [101.5] * 50)
+    # pre-copy guard, and the per-block and per-record guards) so the wall still expires at
+    # the page-close guard, after the record was produced and the page assembled.
+    clock = iter([100.0] * 5 + [101.5] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(clock))
 
     events = collect_events(request, check, client=fake)
@@ -753,10 +752,10 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     request = valid_request()
     request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The leading zeros cover every clock read before the page-close guard (started_at,
-    # statement-timeout resolution, the setup/encode phase brackets, the copy-read brackets,
-    # and the per-block and per-record guards) so the wall still expires at the page-close
-    # guard, after the record was produced and the page assembled.
-    values = iter([0.0] * 13 + [10.0] * 50)
+    # statement-timeout resolution, the pre-copy guard, and the per-block and per-record
+    # guards) so the wall still expires at the page-close guard, after the record was
+    # produced and the page assembled.
+    values = iter([0.0] * 5 + [10.0] * 50)
     monkeypatch.setattr(remote_query.time, 'monotonic', lambda: next(values))
 
     events = collect_events(request, make_check(pool=pool), client=FakeUploadClient())
@@ -910,7 +909,7 @@ def recording_tracing_factory(tracing):
     return factory
 
 
-def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
+def test_producer_opens_spans_at_each_phase_boundary(monkeypatch):
     request = two_row_boundary_request(monkeypatch)
     pool = wide_row_pool()
     fake = FakeUploadClient()
@@ -920,7 +919,7 @@ def test_producer_opens_spans_at_each_timing_phase_boundary(monkeypatch):
     events = collect_events(request, make_check(pool=pool), client=fake)
 
     assert_success(events)
-    # The native spans open at exactly the accumulator's phase boundaries: the root before
+    # The native spans open at exactly the producer's phase boundaries: the root before
     # the run, setup through the COPY dispatch, encode around the read loop with one fetch
     # boundary per copy.read, a page acknowledgment per accepted page, and the finalize
     # span around run finalization — closed by the terminal success and the single close.

@@ -175,24 +175,6 @@ def bounded_delivery(delivery, **limits):
     return rq_contract.RemoteQueryResultDelivery.model_validate(value)
 
 
-class AdvancingUploads(Uploads):
-    """Uploads fake whose calls advance a mutable clock, each by a fixed wall."""
-
-    def __init__(self, clock, put_source_page_seconds, finalize_seconds):
-        super().__init__()
-        self._clock = clock
-        self._put_source_page_seconds = put_source_page_seconds
-        self._finalize_seconds = finalize_seconds
-
-    def put_source_page(self, creds, page, body):
-        self._clock['now'] += self._put_source_page_seconds
-        return super().put_source_page(creds, page, body)
-
-    def finalize_run(self, creds, expected_page_count):
-        self._clock['now'] += self._finalize_seconds
-        return super().finalize_run(creds, expected_page_count)
-
-
 def make_writer(delivery, creds, uploads, source_descriptor=None, include_schema=False):
     return rq_pages.SourcePageWriter(
         delivery,

@@ -26,7 +26,6 @@ from pydantic import ValidationError
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
-from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
@@ -364,10 +363,9 @@ class CopyPageWriter:
         descriptor: rq_contract.RemoteQueryUploadDescriptor,
         guard: Callable[[], None],
         stats: rq_contract.RemoteQueryRunStats,
-        timings: rq_timing.RemoteQueryProducerTimings,
         tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
     ):
-        self._uploader = rq_pages.PageUploader(delivery, creds, client, descriptor, guard, stats, timings, tracing)
+        self._uploader = rq_pages.PageUploader(delivery, creds, client, descriptor, guard, stats, tracing)
         self._guard = guard
         self._max_row_bytes = delivery.limits.max_row_bytes
         self._target = delivery.limits.max_file_bytes * 4 // 5
@@ -510,21 +508,25 @@ class PostgresRemoteQueryHandler:
     def execute(
         self,
         request: Any,
-        timings: rq_timing.RemoteQueryProducerTimings | None = None,
+        started_at: float | None = None,
         *,
         http_client: rq_upload.UploadClient | None = None,
     ) -> Iterator[rq_contract.RemoteQueryEvent]:
         """Execute on the composed check; emit only status and the intake receipt.
 
-        The produce hook is `_produce_remote_query` itself, its adapter-owned phase boundaries
-        opening the native producer spans. Once the request is admitted through validation,
-        the run opens its native producer spans fail-open through
+        `started_at` is the monotonic run start captured at the request-parse boundary: the
+        origin of the run-wide wall, the per-attempt deadlines, and the ordinary elapsed
+        stats. When absent — a directly driven test — the boundary is this admission.
+
+        The produce hook is `_produce_remote_query` itself, its adapter-owned phase
+        boundaries opening the native producer spans. Once the request is admitted through
+        validation, the run opens its native producer spans fail-open through
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
         event, a receipt, a retry, or an error.
         """
-        timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
+        started_at = started_at if started_at is not None else time.monotonic()
         stats = None
         client = None
         creds = None
@@ -533,8 +535,8 @@ class PostgresRemoteQueryHandler:
             try:
                 parsed = rq_events.validate_request(request)
                 # Native producer spans cover every admitted run — the admission failures below
-                # included — as a root span on the request's trace context, additive to the
-                # timing accumulator and the event contract, fail-open through every boundary.
+                # included — as a root span on the request's trace context, fail-open through
+                # every boundary.
                 tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'postgres')
                 tracing.open_root(parsed.result_delivery)
                 if self._match_check_for_target(parsed.target) is None:
@@ -546,9 +548,7 @@ class PostgresRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
                     )
-                creds = rq_upload.resolve_upload_credentials(
-                    parsed.result_delivery, timings.started_at, parsed.trace_context
-                )
+                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
                 if not creds.api_key or not creds.app_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
@@ -563,16 +563,12 @@ class PostgresRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched Postgres check connection pool is closed.'
                     )
-                client = (
-                    http_client
-                    if http_client is not None
-                    else rq_upload.RequestsUploadClient(timings=timings, tracing=tracing)
-                )
+                client = http_client if http_client is not None else rq_upload.RequestsUploadClient(tracing=tracing)
                 stats = rq_contract.RemoteQueryRunStats()
                 yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
                 try:
                     receipt = self._produce_remote_query(
-                        parsed, creds, client, execution_dbname, timings.started_at, stats, timings, tracing
+                        parsed, creds, client, execution_dbname, started_at, stats, tracing=tracing
                     )
                 except psycopg_errors.QueryCanceled:
                     raise rq_contract.RemoteQueryFailure(
@@ -599,12 +595,10 @@ class PostgresRemoteQueryHandler:
                 tracing.fail(
                     error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
                 )
-                yield rq_events.query_failure_event(error, timings, stats)
+                yield rq_events.query_failure_event(error, started_at, stats)
                 return
             tracing.succeed(stats)
-            yield rq_contract.RemoteQueryEvent(
-                'final', rq_events.succeeded_metadata(receipt, stats, timings.started_at, timings)
-            )
+            yield rq_contract.RemoteQueryEvent('final', rq_events.succeeded_metadata(receipt, stats, started_at))
         finally:
             # The run's only flush, best-effort: the root span finishes here at the latest and
             # the singleton is never shut down.
@@ -618,7 +612,6 @@ class PostgresRemoteQueryHandler:
         execution_dbname: str,
         started_at: float,
         stats: rq_contract.RemoteQueryRunStats,
-        timings: rq_timing.RemoteQueryProducerTimings | None = None,
         tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
     ) -> dict[str, Any]:
         """Execute the validated query once, natively, and return the compact run receipt.
@@ -634,14 +627,13 @@ class PostgresRemoteQueryHandler:
         precede the first record, and CopyPageWriter frames the native blocks,
         buffers one bounded source page, and uploads it without re-querying.
 
-        Producer phases: connection acquisition through descriptor registration and the COPY
-        dispatch is database setup, each `copy.read` call is a database fetch, record
-        framing and page buffering are encode and page build (with any upload triggers nested
-        inside it), and page uploads and finalize are accounted by the shared source-page
-        writer. Everything else — timeout resolution, the pre-read guards, transaction
-        teardown — lands in `otherMs`. The native producer spans open at exactly these phase
-        boundaries — `tracing` is fail-open and additive to the timing accumulator, and
-        every span boundary here is the accumulator's own.
+        Producer span boundaries: connection acquisition through descriptor registration and
+        the COPY dispatch is one database-setup span, each result-stream read window opens a
+        database-fetch region span (one per page window, bounded by maxPages), record framing
+        and page buffering run inside the encode-and-page-build span with upload-triggered
+        page uploads nested inside it, and the shared source-page writer opens the
+        page-upload attempt and finalize spans. `tracing` is fail-open: every span failure
+        is swallowed without changing an event, a receipt, a retry, or an error.
         """
         delivery = request.result_delivery
         limits = delivery.limits
@@ -650,7 +642,6 @@ class PostgresRemoteQueryHandler:
         # replace or lengthen the wall.
         deadline = started_at + limits.timeout_ms / 1000
         statement_timeout_ms = self._resolve_statement_timeout_ms(deadline)
-        timings = timings or rq_timing.RemoteQueryProducerTimings(time.monotonic())
         tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
 
         def guard() -> None:
@@ -658,13 +649,11 @@ class PostgresRemoteQueryHandler:
             rq_events.raise_if_cancelled(self._check)
 
         cursor_name = 'remote_query_{}'.format(uuid.uuid4().hex)
-        # The setup phase spans pool connection acquisition through descriptor registration and
+        # The setup span covers pool connection acquisition through descriptor registration and
         # the COPY dispatch, and ends before the first data read; the connection and cursor
-        # contexts outlive the phase, so it is entered and exited explicitly. The inline exit
+        # contexts outlive the span, so it is entered and exited explicitly. The inline exit
         # marks the boundary before the record loop; the spanning `finally` re-exits it
-        # (idempotently) so a setup interrupted mid-flight still reports its partial wall. The
-        # setup span enters and exits at the same boundaries.
-        setup_phase = timings.enter_phase('database_setup')
+        # (idempotently) so a setup interrupted mid-flight still closes its span.
         setup_span = tracing.enter_phase('database_setup')
         try:
             with self._check.db_pool.get_connection(execution_dbname) as conn:
@@ -693,32 +682,19 @@ class PostgresRemoteQueryHandler:
                             # The executing check's Agent-reported hostname: the descriptor carries it
                             # so intake stamps the envelope with the agent node identity Fleet reports,
                             # never socket.gethostname().
-                            writer = CopyPageWriter(delivery, creds, client, descriptor, guard, stats, timings, tracing)
+                            writer = CopyPageWriter(delivery, creds, client, descriptor, guard, stats, tracing)
                             guard()
                             with conn.cursor() as stream_cursor:
                                 with stream_cursor.copy(native_copy_sql(request.query)) as copy:
-                                    # Setup ends here: the first copy.read below is its own phase.
-                                    timings.exit_phase(setup_phase)
+                                    # Setup ends here: the first copy.read below is its own span.
                                     tracing.exit_phase(setup_span)
                                     try:
-                                        with (
-                                            timings.phase('encode_and_page_build'),
-                                            tracing.phase('encode_and_page_build'),
-                                        ):
+                                        with tracing.phase('encode_and_page_build'):
                                             while True:
-                                                # One fetch phase per read, entered and exited
-                                                # explicitly like the setup phase above: the
-                                                # per-record loop is the hot path, and a phase
-                                                # context manager per read costs more than the
-                                                # read itself.
-                                                fetch_phase = timings.enter_phase('database_fetch')
-                                                # The fetch region span opens lazily: one span per
-                                                # page's worth of reads, bounded by maxPages.
+                                                # The fetch region span opens lazily: one span
+                                                # per page's worth of reads, bounded by maxPages.
                                                 tracing.enter_fetch()
-                                                try:
-                                                    block = copy.read()
-                                                finally:
-                                                    timings.exit_phase(fetch_phase)
+                                                block = copy.read()
                                                 if not block:
                                                     break
                                                 guard()
@@ -740,7 +716,6 @@ class PostgresRemoteQueryHandler:
                                 # or identifiers embedded in its message.
                                 LOGGER.debug('Unable to roll back remote query read-only transaction')
         finally:
-            timings.exit_phase(setup_phase)
             tracing.exit_phase(setup_span)
 
     def _resolve_statement_timeout_ms(self, deadline: float) -> int:

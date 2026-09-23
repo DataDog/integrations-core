@@ -11,7 +11,6 @@ from collections.abc import Iterator, Mapping
 from typing import Any, Protocol
 
 from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
-from datadog_checks.base.utils.remote_queries.timing import RemoteQueryProducerTimings
 
 # The closed operation vocabulary the bridge routes: resolving a target without executing
 # customer SQL, and executing one query into JSON result pages.
@@ -36,6 +35,11 @@ class RemoteQueryHandler(Protocol):
         """Yield the per-check target verdict without executing customer SQL or uploading data."""
         ...
 
-    def execute(self, request: Mapping[str, Any], timings: RemoteQueryProducerTimings) -> Iterator[RemoteQueryEvent]:
-        """Yield STARTED then a final receipt or error; upload result bytes outside the bridge."""
+    def execute(self, request: Mapping[str, Any], started_at: float) -> Iterator[RemoteQueryEvent]:
+        """Yield STARTED then a final receipt or error; upload result bytes outside the bridge.
+
+        `started_at` is the monotonic run start captured at the request-parse boundary: the
+        origin of the run-wide wall (`limits.timeout_ms`), the per-attempt deadlines, and
+        the ordinary elapsed stats.
+        """
         ...

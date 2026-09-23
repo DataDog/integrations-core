@@ -23,7 +23,6 @@ from .contract import (
     RemoteQueryRunStats,
     validation_message,
 )
-from .timing import RemoteQueryProducerTimings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,20 +58,12 @@ def started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
     }
 
 
-def succeeded_metadata(
-    receipt: Mapping[str, Any],
-    stats: RemoteQueryRunStats,
-    started_at: float,
-    timings: RemoteQueryProducerTimings | None = None,
-) -> dict[str, Any]:
-    metadata = {
+def succeeded_metadata(receipt: Mapping[str, Any], stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
+    return {
         'status': 'SUCCEEDED',
         'upload_receipt': dict(receipt),
         'stats': stats_metadata(stats, started_at),
     }
-    if timings is not None:
-        metadata['executionDiagnostics'] = timings.metadata(stats)
-    return metadata
 
 
 def stats_metadata(stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
@@ -90,7 +81,6 @@ def failed_event(
     retryable: bool = False,
     stats: Mapping[str, Any] | None = None,
     elapsed_ms: int | None = None,
-    execution_diagnostics: Mapping[str, Any] | None = None,
 ) -> RemoteQueryEvent:
     metadata: dict[str, Any] = {
         'status': 'FAILED',
@@ -100,8 +90,6 @@ def failed_event(
         metadata['stats'] = dict(stats)
     elif elapsed_ms is not None:
         metadata['stats'] = {'elapsedMs': elapsed_ms}
-    if execution_diagnostics is not None:
-        metadata['executionDiagnostics'] = dict(execution_diagnostics)
     return RemoteQueryEvent('error', metadata)
 
 
@@ -136,39 +124,31 @@ def elapsed_ms(started_at: float) -> int:
 
 def parse_agent_rpc_request(
     request_json: str | bytes | bytearray,
-) -> tuple[Mapping[str, Any] | None, RemoteQueryProducerTimings, RemoteQueryEvent | None]:
-    """Parse the bridge's request JSON with the run clock already running.
+) -> tuple[Mapping[str, Any] | None, float, RemoteQueryEvent | None]:
+    """Parse the bridge's request JSON, starting the run clock at the same boundary.
 
-    Returns the parsed request object, the run's timing accumulator, and a failure event
-    when the request is not a usable JSON object — malformed JSON or a non-object value:
-    exactly one of the request and the failure event is set. Diagnostics collection
-    starts before the parse so even a malformed request reports its measured wall.
+    Returns the parsed request object, the monotonic run start captured before the parse,
+    and a failure event when the request is not a usable JSON object — malformed JSON or
+    a non-object value: exactly one of the request and the failure event is set. The run
+    start is captured before the parse so the budgets and ordinary elapsed stats of even a
+    malformed request begin at the same request boundary.
     """
     started_at = time.monotonic()
-    timings = RemoteQueryProducerTimings(started_at)
     try:
         request = json.loads(request_json)
     except (TypeError, ValueError):
         return (
             None,
-            timings,
-            failed_event(
-                'invalid_request',
-                'Invalid remote query request: request_json must be a valid JSON object.',
-                execution_diagnostics=timings.metadata(),
-            ),
+            started_at,
+            failed_event('invalid_request', 'Invalid remote query request: request_json must be a valid JSON object.'),
         )
     if not isinstance(request, Mapping):
         return (
             None,
-            timings,
-            failed_event(
-                'invalid_request',
-                'Invalid remote query request: request_json must be a JSON object.',
-                execution_diagnostics=timings.metadata(),
-            ),
+            started_at,
+            failed_event('invalid_request', 'Invalid remote query request: request_json must be a JSON object.'),
         )
-    return request, timings, None
+    return request, started_at, None
 
 
 def emit_agent_rpc_events(emit: RemoteQueryEmit, events: Iterator[RemoteQueryEvent]) -> None:
@@ -192,9 +172,7 @@ def validate_request(request: Any) -> RemoteQueryRequest:
         raise RemoteQueryFailure('invalid_request', validation_message(error)) from None
 
 
-def query_failure_event(
-    error: Exception, timings: RemoteQueryProducerTimings, stats: RemoteQueryRunStats | None
-) -> RemoteQueryEvent:
+def query_failure_event(error: Exception, started_at: float, stats: RemoteQueryRunStats | None) -> RemoteQueryEvent:
     if not isinstance(error, RemoteQueryFailure):
         # Driver/transport exceptions can contain credentials, SQL or result values.
         LOGGER.error('Remote query execution failed')
@@ -203,7 +181,6 @@ def query_failure_event(
         error.code,
         error.message,
         error.retryable,
-        stats=stats_metadata(stats, timings.started_at) if stats is not None else None,
-        elapsed_ms=elapsed_ms(timings.started_at),
-        execution_diagnostics=timings.metadata(stats),
+        stats=stats_metadata(stats, started_at) if stats is not None else None,
+        elapsed_ms=elapsed_ms(started_at),
     )

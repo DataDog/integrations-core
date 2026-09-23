@@ -10,7 +10,6 @@ import pytest
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import events as rq_events
-from datadog_checks.base.utils.remote_queries import timing as rq_timing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 
@@ -29,7 +28,7 @@ def test_agent_config_read_failure_logs_fixed_text_only(monkeypatch, caplog):
 
 @pytest.mark.parametrize('request_json', ['{"password": "SECRET_DO_NOT_LOG"', b'\xff'])
 def test_parse_agent_rpc_request_rejects_malformed_json(request_json):
-    request, timings, failure = rq_events.parse_agent_rpc_request(request_json)
+    request, started_at, failure = rq_events.parse_agent_rpc_request(request_json)
 
     assert request is None
     assert failure is not None
@@ -42,11 +41,11 @@ def test_parse_agent_rpc_request_rejects_malformed_json(request_json):
         'retryable': False,
     }
     assert 'SECRET_DO_NOT_LOG' not in str(metadata)
-    # Even a malformed request reports its measured wall: the diagnostics object holds
-    # exactly the un-instrumented remainder.
-    assert metadata['executionDiagnostics']['contractVersion'] == 1
-    assert set(metadata['executionDiagnostics']['producer']) == {'totalMs', 'otherMs'}
-    assert isinstance(timings, rq_timing.RemoteQueryProducerTimings)
+    # The failure event carries only the status and the safe error fields.
+    assert set(metadata) == {'status', 'error'}
+    # The run clock started at the request boundary even for a malformed request: the
+    # answered start is a usable monotonic timestamp.
+    assert isinstance(started_at, float)
 
 
 @pytest.mark.parametrize('request_json', ['[]', 'null', '"SECRET_DO_NOT_LOG"', '1'])
@@ -57,6 +56,7 @@ def test_parse_agent_rpc_request_rejects_non_object_json(request_json):
     assert failure is not None
     assert failure.metadata['error']['code'] == 'invalid_request'
     assert failure.metadata['error']['message'] == 'Invalid remote query request: request_json must be a JSON object.'
+    assert set(failure.metadata) == {'status', 'error'}
     assert 'SECRET_DO_NOT_LOG' not in str(failure.metadata)
 
 

@@ -8,14 +8,13 @@ Each benchmark drives the normal ``PostgresRemoteQueryHandler.execute`` path —
 DECLARE descriptor, the single ``COPY ... TO STDOUT``, record framing, page buffering, and
 page uploads — with a discard upload client: every page body is read and dropped, a
 structurally valid receipt is returned, and no HTTP request is made, so the measured wall is
-exactly the producer's own phases (COPY generation and fetch, CSV framing, source-page
+exactly the producer's own work (COPY generation and fetch, CSV framing, source-page
 buffering), never network or intake work.
 
 Two scales run per invocation: a fast multi-page development case and a 256 MiB comparison
-case. The producer phase diagnostics (``databaseSetupMs``, ``databaseFetchMs``,
-``encodeAndPageBuildMs``, ``pageUploadMs``, …) and derived throughput are recorded in each
-benchmark's ``extra_info`` so before/after comparisons can target the phase under change.
-
+case. The run's ordinary elapsed stats (``stats.elapsedMs``) and derived throughput are
+recorded in each benchmark's ``extra_info`` so before/after comparisons can target the
+run as a whole; phase-level attribution belongs to the native producer spans.
 """
 
 import hashlib
@@ -43,8 +42,8 @@ READ_CHUNK_BYTES = 64 * 1024
 class DiscardUploadClient:
     """Intake-side fake: reads each page body, drops it, and answers a valid receipt.
 
-    Pages are never retained and no HTTP is made, so the producer's pageUploadMs stays near
-    zero and the benchmark measures its own phases only.
+    Pages are never retained and no HTTP is made, so the in-process upload work stays
+    negligible and the benchmark measures the producer's own pipeline only.
     """
 
     def __init__(self):
@@ -149,18 +148,11 @@ def bench_request(pg_instance, rows, max_file_bytes, timeout_ms):
 
 
 def record_benchmark_info(benchmark, client, final):
-    """Record the producer's own phase diagnostics and derived throughput for the run."""
-    producer = final['executionDiagnostics']['producer']
-    total_seconds = producer['totalMs'] / 1000
+    """Record the run's ordinary elapsed stats and derived throughput for the run."""
+    total_seconds = final['stats']['elapsedMs'] / 1000
     benchmark.extra_info.update(
         {
-            'databaseSetupMs': producer.get('databaseSetupMs'),
-            'databaseFetchMs': producer.get('databaseFetchMs'),
-            'encodeAndPageBuildMs': producer.get('encodeAndPageBuildMs'),
-            'pageUploadMs': producer.get('pageUploadMs'),
-            'finalizeMs': producer.get('finalizeMs'),
-            'otherMs': producer.get('otherMs'),
-            'totalMs': producer.get('totalMs'),
+            'elapsedMs': final['stats']['elapsedMs'],
             'pageCount': client.page_count(),
             'rowCount': client.rows,
             'sourceBytes': client.source_bytes,

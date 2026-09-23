@@ -27,7 +27,6 @@ from .contract import (
     canonical_json_bytes,
 )
 from .events import raise_if_timed_out
-from .timing import RemoteQueryProducerTimings
 from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 
 LOGGER = logging.getLogger(__name__)
@@ -155,11 +154,9 @@ class RequestsUploadClient:
     def __init__(
         self,
         timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
-        timings: RemoteQueryProducerTimings | None = None,
         tracing: RemoteQueryProducerTracing | None = None,
     ) -> None:
         self._timeout = timeout
-        self._timings = timings or RemoteQueryProducerTimings(time.monotonic())
         self._tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
 
     def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
@@ -219,7 +216,6 @@ class RequestsUploadClient:
                 REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE
             },
             deadline=creds.wall_deadline,
-            timings=self._timings,
             tracing=self._tracing,
             attempt_spans=True,
         )
@@ -443,15 +439,10 @@ def upload_with_retry(
     timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
     mapped_error_codes: Mapping[str, str] | None = None,
     deadline: float | None = None,
-    timings: RemoteQueryProducerTimings | None = None,
     tracing: RemoteQueryProducerTracing | None = None,
     attempt_spans: bool = False,
 ) -> tuple[int, bytes]:
     """Send one intake request with bounded retries; `deadline` is the run-wide wall.
-
-    `timings`, when given, counts each HTTP attempt (and each retry beyond a page's
-    first attempt) on the producer accumulator; only `put_source_page` passes one, so
-    descriptor, finalize, and abort attempts are not page upload attempts.
 
     `tracing`, when given, carries the active producer span's context into the request
     headers in place of the manual trace-context trio: with `attempt_spans` (page
@@ -463,7 +454,6 @@ def upload_with_retry(
     """
     import requests  # lazy: only the POC upload path needs it
 
-    timings = timings or RemoteQueryProducerTimings(time.monotonic())
     tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
     # The default is an empty mapping, normalized once here: descriptor, finalize, and abort
     # map no intake error codes, so their terminal rejections fail closed as upload_failed.
@@ -487,7 +477,6 @@ def upload_with_retry(
         if deadline is not None and not isinstance(body, bytes):
             attempt_deadline = min(deadline, time.monotonic() + REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS)
             request_body = DeadlinedPageBody(body, attempt_deadline)
-        timings.note_upload_attempt(retry=attempt > 0)
         # One span per page upload attempt, retry-tagged; the attempt's injected context
         # replaces the manual trace headers on exactly this attempt's request.
         page_attempt = tracing.begin_page_upload_attempt(retry=attempt > 0) if attempt_spans else None
