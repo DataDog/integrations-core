@@ -240,12 +240,14 @@ CLIENT_AGGREGATES: Final[tuple[tuple[str, str, str], ...]] = (
 # this way.
 CLIENT_GROUP_BY_DEFAULT: Final[tuple[str, ...]] = ('ssid', 'band')
 
-# Dimensions the assurance-event breakdown is grouped on, as (record field, tag key).
+# Tags on `event.count`, as (record field, tag key). Each event is counted once carrying all of
+# them, so the series sum to the event total however they are grouped.
 #
 # Every one is bounded: `severity` is an integer 0-6, `deviceFamily` the seven-value enum the
 # endpoint accepts, `name` comes from the appliance's event catalog, and device names are bounded
-# by the inventory. clientMac, ipv4, ipv6, username and bssid are excluded: per-client and
-# per-session values turn one event into one series that is never queried again.
+# by the inventory. Their combinations are bounded too, by the events read in a cycle. clientMac,
+# ipv4, ipv6, username and bssid are excluded: per-client and per-session values turn one event
+# into one series that is never queried again.
 EVENT_BREAKDOWNS: Final[tuple[tuple[str, str], ...]] = (
     ('severity', 'severity'),
     ('deviceFamily', 'device_family'),

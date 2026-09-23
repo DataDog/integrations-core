@@ -12,7 +12,7 @@ covers what would otherwise be four separate per-device fan-outs.
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -748,23 +748,30 @@ def collect_sda_fabric(
 # -- assurance issues -----------------------------------------------------------------
 
 
-def _group_counts(records: list[dict[str, Any]], field: str) -> dict[str, int]:
-    """Count `records` by the value of one field, in sorted key order.
+def _group_counts(records: list[dict[str, Any]], fields: Sequence[tuple[str, str]]) -> dict[tuple[str, ...], int]:
+    """Count `records` by the tags they carry across `fields`, one entry per distinct tag set.
 
-    Records whose value is absent are skipped rather than grouped under a placeholder. Both of
-    Catalyst Center's absent-data conventions for a string count as absent, matching
-    `tag()`: an empty tag value is never a useful dimension to query on.
+    Each record is counted once, carrying all of its breakdown tags at the same time, so the counts
+    sum to the number of records however they are grouped or filtered. A breakdown per field under
+    one metric name would count every record once per field instead. A value the record does not
+    carry is left out of its tag set rather than filled with a placeholder, matching `tag()`.
     """
-    counts = Counter(str(value) for record in records if (value := record.get(field)) not in (None, ''))
+    counts = Counter(
+        tuple(compact([tag(tag_key, record.get(field)) for field, tag_key in fields])) for record in records
+    )
     return dict(sorted(counts.items()))
 
 
 def _count_by(
-    check: AgentCheck, metric_name: str, records: list[dict[str, Any]], field: str, tag_key: str, tags: list[str]
+    submit: Callable[..., None],
+    metric_name: str,
+    records: list[dict[str, Any]],
+    fields: Sequence[tuple[str, str]],
+    tags: list[str],
 ) -> None:
-    """Emit a per-value breakdown of `records` grouped on one field."""
-    for value, count in _group_counts(records, field).items():
-        check.gauge(metric_name, count, tags=tags + [f'{tag_key}:{value}'])
+    """Submit a breakdown of `records` across `fields`, one series per distinct tag set."""
+    for breakdown_tags, count in _group_counts(records, fields).items():
+        submit(metric_name, count, tags=tags + list(breakdown_tags))
 
 
 def _issue_alert_type(record: dict[str, Any]) -> str:
@@ -850,8 +857,7 @@ def collect_assurance_issues(
     # emitted rather than left as a gap in the graph.
     check.gauge('issue.total.count', len(issues), tags=tags)
 
-    for field, tag_key in ISSUE_TAG_FIELDS:
-        _count_by(check, 'issue.count', issues, field, tag_key, tags)
+    _count_by(check.gauge, 'issue.count', issues, ISSUE_TAG_FIELDS, tags)
 
     current: dict[str, int | None] = {}
     for record in issues:
@@ -932,7 +938,7 @@ def collect_events(
     """Collect assurance events in one time window, as Datadog events plus aggregate counts.
 
     Each record becomes a Datadog event carrying the diagnosis, and the same records are counted
-    by severity, family, type and device. Both are submitted because they answer different
+    with their severity, family, type and device as tags. Both are submitted because they answer different
     questions: the counts are what a monitor alerts on, the events are what someone reads
     afterwards to find out why.
 
@@ -989,9 +995,7 @@ def collect_events(
                 len(records),
             )
 
-        for field, tag_key in EVENT_BREAKDOWNS:
-            for value, count in _group_counts(records, field).items():
-                check.count('event.count', count, tags=tags + [f'{tag_key}:{value}'])
+        _count_by(check.count, 'event.count', records, EVENT_BREAKDOWNS, tags)
 
         # A record with no timestamp falls back to the end of the window it was found in, which is
         # the latest moment it could have happened.
@@ -1064,8 +1068,8 @@ def collect_security(check: AgentCheck, client: CatalystCenterClient, base_tags:
 
     rogues = client.get_list(SECURITY_ROGUE_ENDPOINT)
     check.gauge('security.rogue.total.count', len(rogues), tags=tags)
-    _count_by(check, 'security.rogue.count', rogues, 'threatLevel', 'threat_level', tags)
+    _count_by(check.gauge, 'security.rogue.count', rogues, [('threatLevel', 'threat_level')], tags)
 
     threats = client.get_list(SECURITY_THREATS_ENDPOINT)
     check.gauge('security.threat.total.count', len(threats), tags=tags)
-    _count_by(check, 'security.threat.count', threats, 'threatType', 'threat_type', tags)
+    _count_by(check.gauge, 'security.threat.count', threats, [('threatType', 'threat_type')], tags)
