@@ -108,6 +108,14 @@ class IbmDb2Check(DatabaseCheck):
         return self._resolved_hostname
 
     @property
+    def database_identifier_params(self) -> dict:
+        return {
+            'resolved_hostname': self.reported_hostname,
+            'host': str(self._config.host),
+            'port': str(self._config.port),
+        }
+
+    @property
     def dbms_version(self) -> str | None:
         return self._version
 
