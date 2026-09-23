@@ -12,7 +12,7 @@
 
 * [Cisco ACI] Add new endpoint to process APIC interfaces to enable topology ([#24193](https://github.com/DataDog/integrations-core/pull/24193))
 
-## 5.1.0 / 2026-08-24
+## 5.1.0 / 2026-08-24 / Agent 7.83.0
 
 ***Security***:
 

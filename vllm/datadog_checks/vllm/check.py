@@ -5,6 +5,7 @@ try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
+from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative
 
@@ -29,10 +30,14 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
         endpoint = self.instance["openmetrics_endpoint"].replace("/metrics", "/version")
-        response = self.http.get(endpoint)
-        response.raise_for_status()
+        try:
+            response = self.http.get(endpoint)
+            response.raise_for_status()
+            data = response.json()
+        except (RequestException, ValueError) as e:
+            self.log.debug("Could not retrieve vLLM version metadata: %s", e)
+            return
 
-        data = response.json()
         version = data.get("version", "")
         version_split = version.split(".")
         if len(version_split) >= 3:

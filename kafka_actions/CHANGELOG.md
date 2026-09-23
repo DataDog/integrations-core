@@ -12,7 +12,7 @@
 
 * Fix unintended config resets by switching from deprecated alter_configs (PUT semantics) to incremental_alter_configs (PATCH semantics) in update_topic_config and delete_topic_config. ([#24967](https://github.com/DataDog/integrations-core/pull/24967))
 
-## 2.9.0 / 2026-08-05
+## 2.9.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:
 

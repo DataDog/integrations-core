@@ -287,10 +287,16 @@ def job_progress(
     *attempts: JobAttemptProgress,
     target: str = "redis",
     environment: str = "py3.12",
+    platform: PlatformName = PlatformName.LINUX,
     minimum_base_package: bool = False,
 ) -> JobProgress:
     return JobProgress(
-        job=batch_job(target=target, environment=environment, minimum_base_package=minimum_base_package),
+        job=batch_job(
+            target=target,
+            environment=environment,
+            platform=platform,
+            minimum_base_package=minimum_base_package,
+        ),
         attempts=attempts,
     )
 
