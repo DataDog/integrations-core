@@ -1,0 +1,10 @@
+{
+  "response": [
+    {
+      "detail": null,
+      "errorCode": 2511,
+      "message": "Offset can't be less than 1"
+    }
+  ],
+  "version": "1.0"
+}
