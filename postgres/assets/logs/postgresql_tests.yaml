@@ -8,6 +8,8 @@ tests:
         date: 1510075839000
         severity: "LOG"
       error_severity: "LOG"
+      postgres:
+        severity_category: "info"
       timestamp: "2017-11-07 17:30:39 UTC"
     message: "incomplete startup packet"
     status: "info"
@@ -30,12 +32,13 @@ tests:
       error_severity: "LOG"
       network:
         client:
-          ip: "[local]"
+          hostname: "[local]"
       pid: 5237
       postgres:
         appname: "psql"
         proc_id: "5237"
         session_id: "5a0348cd.1475"
+        severity_category: "info"
       remote_host: "[local]"
       session_id: "5a0348cd.1475"
       timestamp: "2017-11-08 18:11:35.727 UTC"
@@ -69,6 +72,7 @@ tests:
         appname: "datadog-agent"
         proc_id: "114"
         session_id: "5defc7c5.72"
+        severity_category: "info"
       remote_host: "172.28.0.1"
       session_id: "5defc7c5.72"
       timestamp: "2019-12-10 18:27:45.389 UTC"
@@ -100,6 +104,7 @@ tests:
       postgres:
         proc_id: "20337"
         session_id: "68c862e1.4f71"
+        severity_category: "info"
         vxid: "384/39221"
         xid: "0"
       remote_host: "10.0.216.218"
@@ -141,6 +146,7 @@ tests:
         appname: "pgbench"
         proc_id: "87"
         session_id: "68c9abb6.57"
+        severity_category: "info"
         vxid: "5/2050"
         xid: "2823"
       remote_host: "192.168.65.1"
@@ -182,6 +188,7 @@ tests:
         appname: "PostgreSQL JDBC Driver"
         proc_id: "194370"
         session_id: "691e0ab7.2f742"
+        severity_category: "info"
         vxid: "15/174689"
         xid: "276953619"
       remote_host: "10.198.137.95"
@@ -213,6 +220,7 @@ tests:
       postgres:
         proc_id: "1670514"
         session_id: "6930969e.197d72"
+        severity_category: "info"
         vxid: "20/120887"
         xid: "0"
       session_id: "6930969e.197d72"
@@ -237,6 +245,7 @@ tests:
       pid: 63
       postgres:
         proc_id: "63"
+        severity_category: "info"
       timestamp: "2026-08-17 20:46:39.837 UTC"
     message: "checkpoint starting: shutdown immediate"
     status: "info"
@@ -266,6 +275,7 @@ tests:
         appname: pgbench
         proc_id: '87'
         session_id: 68c9abb6.57
+        severity_category: error
         vxid: 5/2050
         xid: '2823'
       remote_host: 192.168.65.1

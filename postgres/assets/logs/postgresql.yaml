@@ -14,6 +14,11 @@ facets:
     source: log
   - groups:
       - Database
+    name: Statement
+    path: db.statement
+    source: log
+  - groups:
+      - Database
     name: User
     path: db.user
     source: log
@@ -27,6 +32,11 @@ facets:
     unit:
       family: time
       name: nanosecond
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
   - groups:
       - Database
     name: Session ID
@@ -96,9 +106,15 @@ pipeline:
           pg_date_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
 
           pg_date %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
+
+          pg_date_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):db.date}\s*
+
+          pg_date_notz %{date("yyyy-MM-dd HH:mm:ss"):db.date}\s*
       samples:
         - 2026-08-17 20:45:57.031 UTC
         - 2026-08-17 20:45:45 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
     - type: grok-parser
       name: Extract query details from `message`
       enabled: true
@@ -119,16 +135,61 @@ pipeline:
         - "statement: SELECT 'duration: 99 ms'"
         - 'checkpoint starting: shutdown immediate'
         - "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
-    - type: attribute-remapper
-      name: Map `remote_host` to `network.client.ip`
+    - type: grok-parser
+      name: Classify `remote_host`
+      enabled: true
+      source: remote_host
+      grok:
+        supportRules: |
+        matchRules: |
+          # Keep first because the hostname fallback also accepts dotted numeric values.
+          pg_client_ip %{ip:network.client.ip}
+
+          pg_client_local %{regex("\\[local\\]"):network.client.hostname}
+
+          pg_client_hostname %{regex("[A-Za-z0-9][A-Za-z0-9_.-]*"):network.client.hostname}
+      samples:
+        - 172.17.0.1
+        - fd42::3
+        - '[local]'
+        - db-client.internal
+        - 123host
+        - db.123host
+    - type: category-processor
+      name: Normalize PostgreSQL severity
+      enabled: true
+      target: postgres.severity_category
+      categories:
+        - filter:
+            query: '@error_severity:PANIC'
+          name: emergency
+        - filter:
+            query: '@error_severity:FATAL'
+          name: critical
+        - filter:
+            query: '@error_severity:ERROR'
+          name: error
+        - filter:
+            query: '@error_severity:WARNING'
+          name: warning
+        - filter:
+            query: '@error_severity:NOTICE'
+          name: notice
+        - filter:
+            query: '@error_severity:DEBUG1 OR @error_severity:DEBUG2 OR @error_severity:DEBUG3 OR @error_severity:DEBUG4 OR @error_severity:DEBUG5'
+          name: debug
+        - filter:
+            query: '@error_severity:INFO OR @error_severity:LOG OR @error_severity:DETAIL OR @error_severity:HINT OR @error_severity:QUERY OR @error_severity:STATEMENT OR @error_severity:CONTEXT OR @error_severity:LOCATION'
+          name: info
+        - filter:
+            query: '*'
+          name: info_default
+    # Status remappers are first-write-wins.
+    - type: status-remapper
+      name: Define `postgres.severity_category` as the official status of the log
       enabled: true
       sources:
-        - remote_host
-      target: network.client.ip
-      targetType: attribute
-      preserveSource: true
-      overrideOnConflict: false
-      sourceType: attribute
+        - postgres.severity_category
     - type: date-remapper
       name: Define `db.date` as the official date of the log
       enabled: true
@@ -190,9 +251,15 @@ pipeline:
           pg_backend_start_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.backend_start}
 
           pg_backend_start %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
+
+          pg_backend_start_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):db.backend_start}\s*
+
+          pg_backend_start_notz %{date("yyyy-MM-dd HH:mm:ss"):db.backend_start}\s*
       samples:
         - 2025-09-15 19:02:57 UTC
         - 2026-08-17 20:45:57.031 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
     - type: status-remapper
       name: Define `db.severity` as the official status of the log
       enabled: true
