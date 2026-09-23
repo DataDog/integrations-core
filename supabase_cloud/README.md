@@ -31,7 +31,7 @@ If your Postgres log volume exceeds 200 messages per second, Datadog recommends 
     |--------------------|--------------------|
     |Account name|Used to identify this account in Datadog.|
     |Project ID|Supabase project ID, found in the URL of your Supabase project. For example: `https://app.supabase.com/project/<project_id>`.|
-    |Collect Logs|Enable this option to collect logs from your Supabase project instead of using a [Datadog Log Drain][3]. Uses the Management API, limited by its rate limits; if you generate more than ~200 log events per second, use Supabase's log drain feature instead.|
+    |Collect Logs|Enable this option to collect logs from your Supabase project using the Management API instead of a [Datadog Log Drain][3].|
     |Enable Database Monitoring|Enable this option to get query performance insights for your Supabase databases.|
 
 3. Click **Connect via OAuth**. You're redirected to Supabase to log in (if you aren't already) and select the
