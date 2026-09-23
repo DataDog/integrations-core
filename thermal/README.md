@@ -47,7 +47,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 On Windows, each metric is tagged with `thermal_zone:<instance>`, where `<instance>` identifies the thermal zone reported by Windows.
 
-On macOS, hardware temperature metrics have the `macos` and `smc` tags and a tag identifying the sensor type: `cpu`, `gpu`, `ssd`, or `battery`. The `system.thermal.pressure_level` metric has the `macos` tag and a `pressure_level:<name>` tag. The possible pressure levels are:
+On macOS, the `system.thermal.pressure_level` metric has a `pressure_level:<name>` tag. The possible pressure levels are:
 
 | Value | Tag | Description |
 | --- | --- | --- |
