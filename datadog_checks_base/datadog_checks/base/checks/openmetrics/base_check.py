@@ -6,7 +6,6 @@ from copy import deepcopy
 import requests
 
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -159,12 +158,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     def cancel(self) -> None:
         try:
             tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
-            instance = self.instance or {}
-            init_config = self.init_config or {}
-            process_isolation = is_affirmative(
-                instance.get('process_isolation', init_config.get('process_isolation', False))
-            )
-            if process_isolation and not tracked_issues_drained:
+            if endpoint_unreachable_issue.uses_process_isolation(self) and not tracked_issues_drained:
                 for config in tuple(self.config_map.values()):
                     endpoint_unreachable_issue.resolve(
                         self,

@@ -15,7 +15,6 @@ from requests.exceptions import RequestException
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.openmetrics import endpoint_unreachable_issue
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -120,7 +119,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     def cancel(self) -> None:
         try:
             tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
-            if self._uses_process_isolation() and not tracked_issues_drained:
+            if endpoint_unreachable_issue.uses_process_isolation(self) and not tracked_issues_drained:
                 # The isolated child owns runtime reporter state. The parent can only reconstruct endpoints present
                 # directly in configuration; endpoints discovered or transformed at runtime remain best-effort.
                 defaults = None
@@ -153,11 +152,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
         finally:
             super().cancel()
-
-    def _uses_process_isolation(self) -> bool:
-        instance = self.instance or {}
-        init_config = self.init_config or {}
-        return is_affirmative(instance.get('process_isolation', init_config.get('process_isolation', False)))
 
     def configure_scrapers(self):
         """

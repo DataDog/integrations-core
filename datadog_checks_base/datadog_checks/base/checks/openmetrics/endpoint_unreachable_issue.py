@@ -18,6 +18,8 @@ from urllib.parse import urlsplit, urlunsplit
 from requests.exceptions import ProxyError as RequestsProxyError
 from urllib3.exceptions import ProxyError as Urllib3ProxyError
 
+from datadog_checks.base.config import is_affirmative
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -189,6 +191,12 @@ def cancel(check: AgentCheck) -> bool:
     except Exception:
         _debug(check, 'Failed to cancel OpenMetrics endpoint-unreachable issue reporting', exc_info=True)
         return False
+
+
+def uses_process_isolation(check: AgentCheck) -> bool:
+    instance = check.instance or {}
+    init_config = check.init_config or {}
+    return is_affirmative(instance.get('process_isolation', init_config.get('process_isolation', False)))
 
 
 def _endpoint_details(endpoint: str | None) -> EndpointDetails | None:
