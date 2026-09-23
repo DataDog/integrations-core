@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 19.1.0 / 2026-09-18
+
+***Added***:
+
+* Open a datadog-agent PR pinning `INTEGRATIONS_CORE_VERSION` to the tagged commit when tagging an Agent release branch. The PR targets the Agent `main` for the first RC of a milestone and the matching Agent release branch for every other tag, and is opened before the tag is pushed: PR creation retries on transient HTTP errors and, if it keeps failing, the command aborts without pushing the tag, printing the `gh pr create` command to open it manually; pass `--skip-pr-creation` to create and push the tag without the PR. ([#25116](https://github.com/DataDog/integrations-core/pull/25116))
+
+***Fixed***:
+
+* Include actionable QA label guidance in failed validation reports. ([#25262](https://github.com/DataDog/integrations-core/pull/25262))
+
 ## 19.0.0 / 2026-09-17
 
 ***Removed***:

@@ -14,8 +14,8 @@ from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     render_comment,
     render_compact_comment,
-    render_minimal_comment,
     render_shutdown_notice,
+    render_truncated_comment,
     summary_line,
 )
 from ddev.event_bus.orchestrator import AsyncProcessor
@@ -43,9 +43,11 @@ class CommentRenderer(Protocol):
     def __call__(self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str: ...
 
 
-# Smaller renderings to fall back on, largest first, when a body is refused for being too long.
-# Whether one differs from the tier above it depends on the snapshot, so each is compared once rendered.
-FALLBACK_TIERS: tuple[CommentRenderer, ...] = (render_compact_comment, render_minimal_comment)
+# Smaller renderings to fall back on when a body is refused for being too long. `render_comment`
+# already returns the largest tier that fits our own measurement, so these are for the case where
+# GitHub's accounting disagreed with it; how many of them differ from what was sent depends on the
+# snapshot, so each is rendered and compared by size rather than assumed to be smaller.
+FALLBACK_TIERS: tuple[CommentRenderer, ...] = (render_compact_comment, render_truncated_comment)
 
 
 @dataclass(frozen=True)
@@ -181,7 +183,9 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
             try:
                 await self._submit(pr_number, rendered)
             except GitHubBodyTooLongError as error:
-                smaller = next((candidate for candidate in tiers if candidate != rendered), None)
+                # Only a genuinely smaller body is worth another round trip: a tier can render larger
+                # than what was just refused, because the refused body may already be a lower tier.
+                smaller = next((candidate for candidate in tiers if len(candidate) < len(rendered)), None)
                 if smaller is None:
                     self._logger.error("PR comment too long at every tier: %s", error)
                     return False

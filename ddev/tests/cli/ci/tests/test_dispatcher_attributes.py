@@ -93,7 +93,6 @@ MAPPING_FIELDS = {
                 'git.branch': 'feature',
                 'dispatcher.base_branch': 'master',
                 'dispatcher.context': 'pr',
-                'dispatcher.pr.number': '42',
                 'team': 'agent-integrations',
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.job.status': 'success',
@@ -129,10 +128,7 @@ def test_log_attributes_keep_native_json_values_while_tag_transports_stringify()
         'dispatcher.pr.number': '42',
         'dispatcher.run.is_fork': 'false',
     }
-    assert metric_tag_mapping(fields) == {
-        'dispatcher.pr.number': '42',
-        'dispatcher.run.is_fork': 'false',
-    }
+    assert metric_tag_mapping(fields) == {'dispatcher.run.is_fork': 'false'}
 
 
 def test_batch_fields_include_batch_metadata():

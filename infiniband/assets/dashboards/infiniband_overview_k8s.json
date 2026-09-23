@@ -1236,55 +1236,6 @@
                         }
                     },
                     {
-                        "id": 5000000000000032,
-                        "definition": {
-                            "title": "Discarded Received Packets",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Received Discards"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "order_by": "values",
-                                        "palette": "warm",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 8,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 5000000000000033,
                         "definition": {
                             "title": "Outbound Packets Discarded",
@@ -1400,23 +1351,14 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Port Received Data (64-bit)",
-                                            "formula": "monotonic_diff(query1)"
-                                        },
-                                        {
                                             "alias": "Port Received Data",
-                                            "formula": "monotonic_diff(query2)"
+                                            "formula": "monotonic_diff(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
                                             "query": "sum:infiniband.port_rcv_data{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
@@ -1458,23 +1400,14 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Port Transmit Data (64-bit)",
-                                            "formula": "monotonic_diff(query1)"
-                                        },
-                                        {
                                             "alias": "Port Transmit Data",
-                                            "formula": "monotonic_diff(query2)"
+                                            "formula": "monotonic_diff(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_xmit_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
                                             "query": "sum:infiniband.port_xmit_data{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
@@ -1516,23 +1449,14 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Port Received Packets (64-bit)",
-                                            "formula": "monotonic_diff(query1)"
-                                        },
-                                        {
                                             "alias": "Port Received Packets",
-                                            "formula": "monotonic_diff(query2)"
+                                            "formula": "monotonic_diff(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_packets_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
                                             "query": "sum:infiniband.port_rcv_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
@@ -2406,54 +2330,6 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 14,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 5000000000000057,
-                        "definition": {
-                            "title": "Work Queue Entry Errors",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "monotonic_diff(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:infiniband.rdma.rx_wqe_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "order_by": "values",
-                                        "palette": "warm",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
                             "y": 14,
                             "width": 4,
                             "height": 3

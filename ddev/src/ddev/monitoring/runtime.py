@@ -7,16 +7,18 @@ from __future__ import annotations
 
 import itertools
 import logging
-from collections.abc import Collection, Iterator
-from contextlib import contextmanager
+import threading
+from collections.abc import Collection, Iterator, Mapping
+from contextlib import contextmanager, suppress
 from typing import Any
 
 import structlog
 from structlog.stdlib import BoundLogger
 
 from ddev.monitoring.context import MonitorContext
+from ddev.monitoring.diagnostics import DiagnosticCategory
 from ddev.monitoring.logger import logger_processors
-from ddev.monitoring.metrics import Metrics, MetricsSink
+from ddev.monitoring.metrics import Metrics, MetricsSink, TagProjector
 
 _runtime_names = itertools.count()
 
@@ -56,12 +58,14 @@ class MonitoringRuntime:
         *,
         console_handler: logging.Handler | None = None,
         metrics_sink: MetricsSink | None = None,
+        metrics_tag_projector: TagProjector | None = None,
         protected_fields: Collection[str] = (),
     ) -> None:
         self._closed = False
+        self._metrics_closed = False
+        self._close_lock = threading.Lock()
         self._context = MonitorContext(protected_fields)
-        # An unregistered logger isolates handlers from other command invocations, and the
-        # NullHandler keeps stdlib from writing to `lastResort` when no console handler was supplied.
+        self._metrics_sink = metrics_sink
         self._stdlib_logger = logging.Logger(f'ddev.monitoring.{next(_runtime_names)}', level=logging.DEBUG)
         self._stdlib_logger.propagate = False
         self._stdlib_logger.addHandler(logging.NullHandler())
@@ -73,7 +77,23 @@ class MonitoringRuntime:
             wrapper_class=structlog.stdlib.BoundLogger,
             context_class=dict,
         ).bind()
-        self._metrics = Metrics(self._context, sink=metrics_sink, is_closed=lambda: self._closed)
+        self._metrics = Metrics(
+            self._context,
+            sink=metrics_sink,
+            tag_projector=metrics_tag_projector,
+            is_closed=lambda: self._metrics_closed,
+        )
+        if metrics_sink is not None:
+            diagnostic_logger = self.component('datadog-metrics').logger
+
+            def report_metric_diagnostic(
+                category: DiagnosticCategory,
+                message: str,
+                fields: Mapping[str, object],
+            ) -> None:
+                diagnostic_logger.warning(message, category=category.value, **fields)
+
+            metrics_sink.diagnostics = report_metric_diagnostic
 
     @property
     def context(self) -> MonitorContext:
@@ -94,7 +114,14 @@ class MonitoringRuntime:
         )
 
     def close(self) -> None:
-        """Stop all emissions, detach attached handlers, and leave caller-owned streams open."""
-        self._closed = True
-        for handler in list(self._stdlib_logger.handlers):
-            self._stdlib_logger.removeHandler(handler)
+        """Drain the owned metrics sink, then stop logging and detach caller-owned handlers."""
+        with self._close_lock:
+            if self._closed:
+                return
+            self._metrics_closed = True
+            if self._metrics_sink is not None:
+                with suppress(Exception):
+                    self._metrics_sink.close()
+            self._closed = True
+            for handler in list(self._stdlib_logger.handlers):
+                self._stdlib_logger.removeHandler(handler)

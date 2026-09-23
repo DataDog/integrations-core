@@ -50,8 +50,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
     def _parse_config(self):
         url = self.config.prefect_url.rstrip('/')
 
-        self.http.options['headers'].update(self.config.custom_headers or {})
-
         self.client = PrefectClient(url, self.http, self.log)
 
         self.base_tags = list(self.config.tags or [])
