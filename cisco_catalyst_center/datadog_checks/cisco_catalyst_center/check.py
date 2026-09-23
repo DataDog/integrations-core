@@ -276,11 +276,18 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 # networkApplications requires a siteId, and site health is otherwise the only
                 # call that lists sites. Without this, switching site health off would collect no
                 # application metrics while still reporting success.
+                self.log.debug('No sites collected yet; enumerating the site hierarchy for application health')
+
                 def _list_sites() -> None:
                     nonlocal sites
                     sites = list_sites(self.client)
 
                 healthy &= self._run('site list', _list_sites)
+
+            # Logged because a count of zero is the only visible symptom of a site list that came
+            # back empty: the collector below would then submit nothing while the cycle still
+            # reports success.
+            self.log.debug('Collecting application health for %s sites', len(sites))
 
             # One request per site on top of that, so the cost scales with the hierarchy.
             healthy &= self._run(
