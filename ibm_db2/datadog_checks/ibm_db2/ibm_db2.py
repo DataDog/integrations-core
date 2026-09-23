@@ -8,9 +8,8 @@ from time import time as timestamp
 
 from requests import ConnectionError
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
-from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.platform import Platform
@@ -28,6 +27,7 @@ import ibm_db
 
 from . import queries
 from .__about__ import __version__
+from .config import build_config
 from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
@@ -41,40 +41,20 @@ class IbmDb2Check(DatabaseCheck):
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
-        self._db = self.instance.get('db', '')
-        self._username = self.instance.get('username', '')
-        self._password = self.instance.get('password', '')
-        self._host = self.instance.get('host', '')
-        self._port = self.instance.get('port', 50000)
-        self.tag_manager.set_tags_from_list(self.instance.get('tags', []), replace=True)
-        self._security = self.instance.get('security', 'none')
-        self._tls_cert = self.instance.get('tls_cert')
-        self._connection_timeout = self.instance.get('connection_timeout')
-        self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
+        self._config = build_config(self)
+        self.tag_manager.set_tags_from_list(self._config.tags or (), replace=True)
         self._resolved_hostname = None
         self._version = None
         self._database_instance_last_emitted = None
 
         # Add global database tag
-        self.tag_manager.set_tag('db', self._db)
+        self.tag_manager.set_tag('db', self._config.db)
 
         # Track table space state changes
         self._table_space_states = {}
 
         # We'll connect on the first check run
         self._conn = None
-
-        custom_queries = self.instance.get('custom_queries', [])
-        use_global_custom_queries = self.instance.get('use_global_custom_queries', True)
-
-        # Handle overrides
-        if use_global_custom_queries == 'extend':
-            custom_queries.extend(self.init_config.get('global_custom_queries', []))
-        elif 'global_custom_queries' in self.init_config and is_affirmative(use_global_custom_queries):
-            custom_queries = self.init_config.get('global_custom_queries', [])
-
-        # Deduplicate
-        self._custom_queries = list(iter_unique(custom_queries))
         self._query_methods = (
             self.query_instance,
             self.query_database,
@@ -122,7 +102,7 @@ class IbmDb2Check(DatabaseCheck):
     @property
     def reported_hostname(self) -> str:
         if self._resolved_hostname is None:
-            self._resolved_hostname = agent_host_resolver(self._host)
+            self._resolved_hostname = agent_host_resolver(self._config.host)
         return self._resolved_hostname
 
     @property
@@ -141,7 +121,7 @@ class IbmDb2Check(DatabaseCheck):
         ):
             event = {
                 "host": self.reported_hostname,
-                "port": self._port,
+                "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.reported_hostname,
                 "agent_version": self.agent_version,
@@ -155,8 +135,8 @@ class IbmDb2Check(DatabaseCheck):
                 "timestamp": now * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
-                    "dbm": self._dbm_enabled,
-                    "connection_host": self._host,
+                    "dbm": self._config.dbm,
+                    "connection_host": self._config.host,
                 },
             }
             self._database_instance_last_emitted = now
@@ -497,19 +477,19 @@ class IbmDb2Check(DatabaseCheck):
             self.monotonic_count(self.m('log.writes'), tlog['log_writes'], tags=self.tags)
 
     def query_custom(self):
-        for custom_query in self._custom_queries:
-            metric_prefix = custom_query.get('metric_prefix')
+        for custom_query in self._config.custom_queries:
+            metric_prefix = custom_query.metric_prefix
             if not metric_prefix:  # no cov
                 self.log.error('Custom query field `metric_prefix` is required')
                 continue
             metric_prefix = metric_prefix.rstrip('.')
 
-            query = custom_query.get('query')
+            query = custom_query.query
             if not query:  # no cov
                 self.log.error('Custom query field `query` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
-            columns = custom_query.get('columns')
+            columns = custom_query.columns
             if not columns:  # no cov
                 self.log.error('Custom query field `columns` is required for metric_prefix `%s`', metric_prefix)
                 continue
@@ -540,7 +520,7 @@ class IbmDb2Check(DatabaseCheck):
 
                 metric_info = []
                 query_tags = list(self.tags)
-                query_tags.extend(custom_query.get('tags', []))
+                query_tags.extend(custom_query.tags or ())
 
                 for column, value in zip(columns, row):
                     # Columns can be ignored via configuration.
@@ -609,14 +589,14 @@ class IbmDb2Check(DatabaseCheck):
 
     def get_connection(self):
         target, username, password = self.get_connection_data(
-            self._db,
-            self._username,
-            self._password,
-            self._host,
-            self._port,
-            self._security,
-            self._tls_cert,
-            self._connection_timeout,
+            self._config.db,
+            self._config.username,
+            self._config.password,
+            self._config.host,
+            self._config.port,
+            self._config.security,
+            self._config.tls_cert,
+            self._config.connection_timeout,
         )
 
         # Get column names in lower case
@@ -626,7 +606,7 @@ class IbmDb2Check(DatabaseCheck):
             self.log.debug("Attempting to connect to Db2 with `%s`...", scrub_connection_string(target))
             connection = ibm_db.connect(target, username, password, connection_options)
         except Exception as e:
-            if self._host:
+            if self._config.host:
                 self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
@@ -639,7 +619,7 @@ class IbmDb2Check(DatabaseCheck):
                 self.SERVICE_CHECK_CONNECT,
                 self.CRITICAL,
                 tags=self.tags,
-                message="Unable to create new connection to database: {}".format(self._db),
+                message="Unable to create new connection to database: {}".format(self._config.db),
             )
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
