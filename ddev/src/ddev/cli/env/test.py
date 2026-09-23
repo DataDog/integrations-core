@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     help='Environment variables to pass to the Agent e.g. -e DD_URL=app.datadoghq.com -e DD_API_KEY=foobar',
 )
 @click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')
+@click.option('--ignore-teardown-errors', is_flag=True, help='Warn if automatic cleanup after testing fails')
 @click.option('--junit', is_flag=True, hidden=True)
 @click.option('--python-filter', envvar='PYTHON_FILTER', hidden=True)
 @click.option('--new-env', is_flag=True, hidden=True)
@@ -55,6 +56,7 @@ def test_command(
     agent_build: str | None,
     extra_env_vars: tuple[str, ...],
     recreate: bool,
+    ignore_teardown_errors: bool,
     junit: bool,
     python_filter: str | None,
     new_env: bool,
@@ -121,7 +123,7 @@ def test_command(
     app.display_header(integration.display_name)
 
     active = set(active_envs)
-    for env_name in env_names:
+    for env_index, env_name in enumerate(env_names):
         env_active = env_name in active
 
         # If recreating and environment is already active, stop it first to get a fresh environment
@@ -161,7 +163,16 @@ def test_command(
                     ddtrace=ddtrace,
                 )
         finally:
-            ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)
+            try:
+                ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)
+            except Exception as error:
+                if not ignore_teardown_errors:
+                    raise
+                # Opting in also accepts bugs in `stop` so cleanup cannot mask test results.
+                warning = f'Automatic teardown failed for `{intg_name}:{env_name}` ({error!r}).'
+                if env_index < len(env_names) - 1:
+                    warning += ' The next environment may fail to start if cleanup was incomplete.'
+                app.display_warning(warning)
 
 
 def is_e2e_environment(environment: Environment) -> bool:
