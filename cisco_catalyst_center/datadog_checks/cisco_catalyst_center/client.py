@@ -21,6 +21,8 @@ import random
 import time
 from typing import Any, Callable, TypeGuard
 
+import requests
+
 from .constants import (
     AUTH_ENDPOINT,
     DEFAULT_PAGE_LIMIT,
@@ -148,15 +150,12 @@ class CatalystCenterClient:
     def _send(path: str, send: Callable[[], Any]) -> Any:
         """Issue one request, reporting a transport failure as a `CatalystApiError`.
 
-        Collectors skip a failed device family group, device or site only on a `CatalystApiError`,
-        so a transport failure that escaped would fail the whole collector instead. The exceptions
-        `self.http` raises for a failed request all derive from `OSError`, as do the socket and TLS
-        errors beneath them, so catching it covers every transport failure without the client
-        importing the HTTP library the wrapper is built on.
+        Collectors skip a failed device family group, device or site only on a `CatalystApiError`.
+        A raw `requests` exception would bypass that and fail the whole collector.
         """
         try:
             return send()
-        except OSError as exc:
+        except requests.RequestException as exc:
             raise CatalystApiError(f'Catalyst Center request to {path} failed: {exc}') from exc
 
     @staticmethod
