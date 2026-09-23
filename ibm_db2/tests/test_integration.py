@@ -54,7 +54,9 @@ def test_table_space_state_change(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, instance, dd_run_check):
+def test_custom_queries(aggregator, instance, dd_run_check, monkeypatch):
+    # Run the custom queries job inline so its metrics are submitted before the assertions.
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     instance['custom_queries'] = [
         {
             'metric_prefix': 'ibm_db2',
@@ -83,7 +85,9 @@ def test_custom_queries(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries_init_config(aggregator, instance, dd_run_check):
+def test_custom_queries_init_config(aggregator, instance, dd_run_check, monkeypatch):
+    # Run the custom queries job inline so its metrics are submitted before the assertions.
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     init_config = {
         'global_custom_queries': [
             {
