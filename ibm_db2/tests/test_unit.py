@@ -146,3 +146,17 @@ def test_get_connection_data():
 
     expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;connecttimeout=1'
     assert (expected, '', '') == get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, 1)
+
+
+def test_cancel_closes_check_and_custom_query_connections(instance):
+    instance['custom_queries'] = [{'metric_prefix': 'ibm_db2', 'query': 'SELECT 1', 'columns': [{}]}]
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check_conn = mock.MagicMock()
+    job_conn = mock.MagicMock()
+    check._connection.conn = check_conn
+    check._custom_metrics._connection.conn = job_conn
+
+    with mock.patch('ibm_db.close') as close:
+        check.cancel()
+
+    close.assert_has_calls([mock.call(job_conn), mock.call(check_conn)], any_order=True)
