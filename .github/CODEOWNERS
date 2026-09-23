@@ -181,6 +181,9 @@ datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring
 /clickhouse/                                        @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /clickhouse/*.md                                    @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /clickhouse/manifest.json                           @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/ibm_db2/                                           @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/ibm_db2/*.md                                       @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/ibm_db2/manifest.json                              @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Data Observability
 /do_query_actions/                                  @DataDog/data-observability @DataDog/agent-integrations
