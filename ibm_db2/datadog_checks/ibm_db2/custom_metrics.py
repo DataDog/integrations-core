@@ -90,7 +90,7 @@ class CustomMetricsCollector:
                     if column_type == 'tag':
                         query_tags.append('{}:{}'.format(name, value))
                     else:
-                        if not hasattr(self, column_type):
+                        if not hasattr(self._check, column_type):
                             self._check.log.error(
                                 'Invalid submission method `%s` for metric column `%s` of metric_prefix `%s`',
                                 column_type,
@@ -113,4 +113,4 @@ class CustomMetricsCollector:
                 else:
                     for info in metric_info:
                         metric, value, method = info
-                        getattr(self, method)(metric, value, tags=query_tags)
+                        getattr(self._check, method)(metric, value, tags=query_tags)
