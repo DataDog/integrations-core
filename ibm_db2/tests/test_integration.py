@@ -121,7 +121,7 @@ def test_metadata(instance, datadog_agent, dd_run_check):
     dd_run_check(check)
 
     # only major and minor are consistent values
-    major, minor = DB2_VERSION.split('.')
+    major, minor = DB2_VERSION.split('.')[:2]
 
     version_metadata = {
         'version.scheme': 'ibm_db2',
