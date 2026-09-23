@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
+from datetime import datetime, timezone
 
 import httpx
 import pytest
@@ -68,12 +70,14 @@ def _reporter(
     *,
     pr_number: int | None = PR_NUMBER,
     handler: logging.Handler | None = None,
+    clock: Callable[[], datetime] | None = None,
 ) -> TaskRunReporter:
     return TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number),
         monitor=make_monitor('run-reporter', handler=handler),
+        clock=clock,
     )
 
 
@@ -728,10 +732,12 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
     body the renderer can produce for this snapshot.
     """
     message = _tiered_update(1, done=True)
+    # One render instant shared with the reporter, so the bodies below and the ones it sends match.
+    now = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
     rendered = [
-        pr_comment.render_comment(message.progress),
-        pr_comment.render_compact_comment(message.progress),
-        pr_comment.render_truncated_comment(message.progress),
+        pr_comment.render_comment(message.progress, now=now),
+        pr_comment.render_compact_comment(message.progress, now=now),
+        pr_comment.render_truncated_comment(message.progress, now=now),
     ]
     # A tier that renders the same bytes as the one above it is never sent twice, and one that
     # renders larger is not worth a round trip, so neither appears in what the reporter attempts.
@@ -757,7 +763,7 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
         return await original(owner, repo, issue_number, body, timeout)
 
     monkeypatch.setattr(client, "create_issue_comment", stricter_github)
-    reporter = _reporter(client)
+    reporter = _reporter(client, clock=lambda: now)
 
     asyncio.run(reporter.process_message(message))
 

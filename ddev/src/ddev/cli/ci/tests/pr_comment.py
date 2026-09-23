@@ -11,7 +11,7 @@ failed. So every affected target keeps a line of its own with its own link, and 
 not change with the number of targets or integrations — only `DetailLevel` changes it, and only
 because the body would otherwise not fit.
 
-The footer adds the commit and workflow URL from the environment.
+The footer adds the commit, workflow URL, and run logs link from the environment.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.dispatcher_logging import get_dispatcher_logs_url
 from ddev.cli.ci.tests.progress import ExecutionState, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
@@ -30,6 +31,7 @@ from ddev.utils.github_async import COMMENT_BODY_LIMIT
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from datetime import datetime
 
     from ddev.cli.ci.tests.progress import (
         BatchProgress,
@@ -164,30 +166,37 @@ def _code(text: str) -> str:
     return f"{fence}{padding}{text}{padding}{fence}"
 
 
-def render_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def render_comment(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+) -> str:
     """The report, at the most detail that fits GitHub's limit.
 
     The tiers are walked here rather than only on a rejection, so local measurement and a refusal
     from GitHub degrade through the same structure instead of through two. The message's `revision`
-    is deliberately not rendered: internal ordering metadata, already logged.
+    is deliberately not rendered: internal ordering metadata, already logged. `now` fixes the
+    footer's log-link window, so tiers from one snapshot render identically.
     """
-    body = _render(progress, DetailLevel.FULL, shutdown=shutdown)
+    body = _render(progress, DetailLevel.FULL, shutdown=shutdown, now=now)
     for level in (DetailLevel.COMPACT, DetailLevel.TRUNCATED):
         if _size(body) <= COMMENT_BODY_LIMIT:
             return body
-        body = _render(progress, level, shutdown=shutdown)
+        body = _render(progress, level, shutdown=shutdown, now=now)
     # The last tier packs its rows against the real budget, so it fits by construction.
     return body
 
 
-def render_compact_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def render_compact_comment(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+) -> str:
     """Every target keeps its row and its link, and no failure is named. For the rejection path."""
-    return _render(progress, DetailLevel.COMPACT, shutdown=shutdown)
+    return _render(progress, DetailLevel.COMPACT, shutdown=shutdown, now=now)
 
 
-def render_truncated_comment(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def render_truncated_comment(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+) -> str:
     """As many linked target rows as the budget holds, and a notice counting the rest."""
-    return _render(progress, DetailLevel.TRUNCATED, shutdown=shutdown)
+    return _render(progress, DetailLevel.TRUNCATED, shutdown=shutdown, now=now)
 
 
 def _render(
@@ -195,6 +204,7 @@ def _render(
     level: DetailLevel,
     *,
     shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
 ) -> str:
     """Assemble one report: the header, the affected integrations, then the footer.
 
@@ -202,7 +212,7 @@ def _render(
     so a queued run and a failed one differ in what they say rather than in where they say it.
     """
     header = _header(progress, shutdown=shutdown)
-    footer = _footer(progress, shutdown=shutdown)
+    footer = _footer(progress, shutdown=shutdown, now=now)
 
     # The header and footer always survive; only the affected integrations are budgeted, and only the
     # last tier spends that budget. Two newlines join every block, so each costs its own separator.
@@ -213,10 +223,10 @@ def _render(
     return "\n\n".join(blocks)
 
 
-def render_shutdown_notice(request: ShutdownRequest) -> str:
+def render_shutdown_notice(request: ShutdownRequest, *, now: datetime | None = None) -> str:
     """Render a terminal notice when no progress snapshot exists."""
     blocks = [COMMENT_MARKER, SHUTDOWN_HEADINGS[request.kind], SHADOW_NOTICE, _shutdown_alert(request)]
-    blocks.append(_footer(None, shutdown=request))
+    blocks.append(_footer(None, shutdown=request, now=now))
     return "\n\n".join(blocks)
 
 
@@ -780,7 +790,12 @@ def _shutdown_reason(request: ShutdownRequest) -> str:
     return _code(reason)
 
 
-def _footer(progress: DispatcherProgress | None, *, shutdown: ShutdownRequest | None = None) -> str:
+def _footer(
+    progress: DispatcherProgress | None,
+    *,
+    shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
+) -> str:
     """Whether this is the last word, and where the run that produced it lives.
 
     No status emoji on a finished run: the outcome is the heading's job, and a ✅ here read as "all
@@ -795,8 +810,16 @@ def _footer(progress: DispatcherProgress | None, *, shutdown: ShutdownRequest | 
         note = "Dispatcher finished"
     if sha := get_commit_sha():
         note += f" on {_code(sha)}"
+    # Links to where the run can be inspected, each omitted when the environment cannot identify it.
+    links = []
     if run_url := get_workflow_run_url():
-        note += f" — [GitHub Run]({run_url})"
+        links.append(f"[GitHub Run]({run_url})")
+    if logs_url := get_dispatcher_logs_url(
+        terminal=shutdown is not None or (progress is not None and progress.done), now=now
+    ):
+        links.append(f"[Dispatcher Logs]({logs_url})")
+    if links:
+        note += f" — {' · '.join(links)}"
     return f"<sub>{note}.</sub>"
 
 
