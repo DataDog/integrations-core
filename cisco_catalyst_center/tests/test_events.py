@@ -142,12 +142,22 @@ def test_collect_events_given_three_records_breaks_them_down_and_emits_one_event
     # across the timeframe a dashboard is showing.
     collect_events(check, _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
 
-    assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1') == [2]
-    assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'event_name:AP Coverage Hole') == [1]
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1')) == 2
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.event.count', 'event_name:AP Coverage Hole')) == 1
     aggregator.assert_metric('cisco_catalyst_center.event.total.count', metric_type=aggregator.COUNT)
     aggregator.assert_metric('cisco_catalyst_center.event.count', metric_type=aggregator.COUNT)
     assert len(aggregator.events) == len(EVENTS)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+def test_collect_events_given_three_records_breakdown_sums_to_the_number_of_events(
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
+):
+    # Each event is counted once, carrying all four dimensions as tags, so an ungrouped sum over
+    # event.count matches event.total.count rather than being that number once per dimension.
+    collect_events(check, _client(instance, [_page(EVENTS, 3)]), WINDOW_START, WINDOW_END)
+
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.event.count')) == 3
 
 
 def test_collect_events_given_a_truncated_sweep_reports_the_appliance_total(
@@ -171,7 +181,7 @@ def test_collect_events_given_one_failing_group_still_collects_the_others(
 
     collect_events(check, client, WINDOW_START, WINDOW_END)
 
-    assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1') == [2]
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:1')) == 2
 
 
 def test_collect_events_given_every_group_failing_raises_instead_of_reporting_success(

@@ -107,21 +107,33 @@ def test_collect_assurance_issues_given_none_open_emits_a_total_of_zero(aggregat
     assert metric_values(aggregator, 'cisco_catalyst_center.issue.total.count') == [0]
 
 
+#: Three open issues spread across two severities, three priorities and two categories.
+SEVERAL_ISSUES = [
+    {'issueId': 'i1', 'severity': 'High', 'priority': 'P1', 'category': 'Connectivity', 'status': 'active'},
+    {'issueId': 'i2', 'severity': 'High', 'priority': 'P2', 'category': 'Connectivity', 'status': 'active'},
+    {'issueId': 'i3', 'severity': 'Low', 'priority': 'P4', 'category': 'Device', 'status': 'active'},
+]
+
+
 def test_collect_assurance_issues_counts_by_severity_and_category(aggregator, instance, check):
-    payload = with_value(
-        load_captured('data_assurance_issues'),
-        'response',
-        [
-            {'issueId': 'i1', 'severity': 'High', 'priority': 'P1', 'category': 'Connectivity', 'status': 'active'},
-            {'issueId': 'i2', 'severity': 'High', 'priority': 'P2', 'category': 'Connectivity', 'status': 'active'},
-            {'issueId': 'i3', 'severity': 'Low', 'priority': 'P4', 'category': 'Device', 'status': 'active'},
-        ],
-    )
+    payload = with_value(load_captured('data_assurance_issues'), 'response', SEVERAL_ISSUES)
 
     collect_assurance_issues(check, _client(instance, [payload]))
 
-    assert metric_values(aggregator, 'cisco_catalyst_center.issue.count', 'severity:High') == [2]
-    assert metric_values(aggregator, 'cisco_catalyst_center.issue.count', 'category:Device') == [1]
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.issue.count', 'severity:High')) == 2
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.issue.count', 'category:Device')) == 1
+
+
+def test_collect_assurance_issues_given_several_issues_breakdown_sums_to_the_number_of_issues(
+    aggregator, instance, check
+):
+    # Each issue is counted once, carrying all four dimensions as tags, so an ungrouped sum over
+    # issue.count is the number of issues rather than that number once per dimension.
+    payload = with_value(load_captured('data_assurance_issues'), 'response', SEVERAL_ISSUES)
+
+    collect_assurance_issues(check, _client(instance, [payload]))
+
+    assert sum(metric_values(aggregator, 'cisco_catalyst_center.issue.count')) == 3
 
 
 # Issues are stateful in a way assurance events are not: an open issue comes back on every cycle
