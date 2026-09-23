@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Add OAuth support for connecting Supabase Cloud projects to Datadog. Personal Access Token setup is now deprecated for new accounts.
+* Add OAuth support for connecting Supabase Cloud projects to Datadog. Personal Access Token setup is deprecated for new accounts.
 
 ## 1.0.0 / 2026-01-26
 

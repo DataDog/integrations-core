@@ -15,7 +15,7 @@ With this integration, you can, per Supabase project:
 
 Connect your Supabase Cloud project to Datadog using OAuth. OAuth is the only way to connect a new project;
 Personal Access Token (PAT) setup is **deprecated** and no longer available for new accounts. Existing PAT-based
-accounts continue to collect data, but can no longer be edited from the Datadog integration tile — re-authenticate
+accounts continue to collect data, but can no longer be edited from the Datadog integration tile. Re-authenticate
 with OAuth as described below to make changes.
 
 If your Postgres log volume exceeds 200 messages per second, Datadog recommends using the
