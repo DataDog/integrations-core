@@ -25,7 +25,6 @@ if TYPE_CHECKING:
 # `start_commands` to exhaust the job timeout. Point apt at the generic archive instead.
 APT_MIRRORLIST_FILE = '/etc/apt/mirrorlist.main'
 APT_MIRROR = 'http://archive.ubuntu.com/ubuntu'
-DEFAULT_CMD_PORT = '5001'
 
 
 @contextmanager
@@ -181,13 +180,9 @@ class DockerAgent(AgentInterface):
         if self._is_windows_container and docker_network:
             raise ValueError('Custom Docker networks are not supported for Windows Agent containers')
 
-        # The Agent's command API normally listens on port 5001.
-        # With --network host, another process on the host might already use that
-        # port, so choose a currently free one instead.
-        # On an isolated network, each container has its own ports, so every Agent
-        # can use 5001 without conflicting with the host or other containers.
         uses_host_network = not docker_network or docker_network == 'host'
-        env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port()) if uses_host_network else DEFAULT_CMD_PORT
+        if uses_host_network:
+            env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
         # Disable trace Agent by default (can be overridden by user-provided env_vars)
         env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')

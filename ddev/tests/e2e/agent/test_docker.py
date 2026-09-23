@@ -6,7 +6,7 @@ import subprocess
 
 import pytest
 
-from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, DEFAULT_CMD_PORT, DockerAgent
+from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, DockerAgent
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path
@@ -242,6 +242,13 @@ class TestStart:
             ),
         ]
 
+    @pytest.mark.parametrize(
+        'env_vars, cmd_port_args',
+        [
+            pytest.param({}, [], id='agent-default'),
+            pytest.param({'DD_CMD_PORT': '12345'}, ['-e', 'DD_CMD_PORT=12345'], id='custom-port'),
+        ],
+    )
     def test_docker_network(
         self,
         app,
@@ -250,6 +257,8 @@ class TestStart:
         get_integration,
         docker_path,
         mocker,
+        env_vars: dict[str, str],
+        cmd_port_args: list[str],
     ):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
         find_free_port = mocker.patch('ddev.e2e.agent.docker._find_free_port')
@@ -263,7 +272,7 @@ class TestStart:
         metadata = {'docker_network': 'kind'}
 
         agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
-        agent.start(agent_build='', local_packages={}, env_vars={})
+        agent.start(agent_build='', local_packages={}, env_vars=env_vars)
 
         find_free_port.assert_not_called()
         assert run.call_args_list == [
@@ -287,8 +296,7 @@ class TestStart:
                     'DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                     '-e',
                     'DD_APM_ENABLED=false',
-                    '-e',
-                    f'DD_CMD_PORT={DEFAULT_CMD_PORT}',
+                    *cmd_port_args,
                     '-e',
                     'DD_EXPVAR_PORT=5000',
                     '-e',
@@ -325,7 +333,6 @@ class TestStart:
         command = run.call_args_list[1].args[0]
         assert command[command.index('--network') + 1] == 'host'
         assert f'DD_CMD_PORT={free_port}' in command
-        assert f'DD_CMD_PORT={DEFAULT_CMD_PORT}' not in command
 
     def test_docker_network_rejects_shared_container_namespace(
         self,
