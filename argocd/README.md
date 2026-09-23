@@ -458,7 +458,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Argo CD integration submits Application sync and health status events to Datadog when the Argo CD [notifications controller][20] is configured to forward them through the webhook described in [Entity collection](#entity-collection).
+The Argo CD integration submits Application sync and health status events to Datadog when the Argo CD [notifications controller][20] is configured to forward them through the webhook described in the [Entity collection](#entity-collection) section.
 
 ### Service Checks
 
