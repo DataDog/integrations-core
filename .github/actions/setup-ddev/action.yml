@@ -20,6 +20,13 @@ inputs:
     description: Optional PyPI ddev version specifier, for example ==16.0.0.
     required: false
     default: ""
+  editable:
+    description: >-
+      Whether local installs are editable. Set to false when the checkout will be
+      replaced after installing, so ddev keeps running the installed sources. Ignored
+      when install-mode is pypi.
+    required: false
+    default: "true"
 
 runs:
   using: composite
@@ -171,7 +178,14 @@ runs:
     - name: Install ddev from local folder
       if: ${{ inputs.install-mode == 'local' }}
       shell: bash
-      run: uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+      env:
+        EDITABLE: ${{ inputs.editable }}
+      run: |-
+        if [ "$EDITABLE" = "false" ]; then
+          uv pip install --system ./datadog_checks_dev[cli] ./ddev
+        else
+          uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+        fi
 
     - name: Install ddev from PyPI
       if: ${{ inputs.install-mode == 'pypi' }}
