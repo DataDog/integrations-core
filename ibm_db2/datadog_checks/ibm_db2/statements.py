@@ -11,7 +11,7 @@ import ibm_db
 
 from datadog_checks.base.utils.db.query_metrics import ObfuscationLookup, QueryStats, TextKind, resolve_obfuscations
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.format import json
 
 from . import queries
 
@@ -64,7 +64,7 @@ class Db2StatementMetrics(DBMAsyncJob):
         )
         self._obfuscation_lookup: ObfuscationLookup[StatementKey] = ObfuscationLookup(
             maxsize=OBFUSCATION_CACHE_SIZE,
-            obfuscate_options=json.dumps({'return_json_metadata': True}),
+            obfuscate_options=json.encode({'return_json_metadata': True}),
         )
 
     def _close_connection(self) -> None:
@@ -179,7 +179,7 @@ class Db2StatementMetrics(DBMAsyncJob):
         queue = [rows]
         while queue:
             batch = queue.pop()
-            payload = json.dumps({**wrapper, 'ibm_db2_rows': batch}, default=default_json_event_encoding)
+            payload = json.encode({**wrapper, 'ibm_db2_rows': batch}, default=default_json_event_encoding)
             if len(payload.encode('utf-8')) <= MAX_PAYLOAD_SIZE:
                 # Empty successful collections keep idle instances visible to DBM metering.
                 self._check.database_monitoring_query_metrics(payload)
