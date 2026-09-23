@@ -1198,6 +1198,37 @@ def test_normalize_queries(dbm_instance):
 
 
 @pytest.mark.unit
+def test_normalize_queries_with_embedded_null_character(dbm_instance):
+    """
+    Rows unioned in from `performance_schema.prepared_statements_instances` carry raw `sql_text`,
+    which may contain an embedded null character. Such a row must still be collected, with the
+    null character removed from the reported query text.
+
+    Regression test for the crash loop in SDBM-2979, where obfuscation raised on the null
+    character and the row was dropped. Note that the `obfuscate_sql` test stub cannot raise the
+    way the Go implementation does, so this asserts the resulting text rather than the crash.
+    """
+    check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    normalized_rows = check.statement_metrics._normalize_queries(
+        [
+            {
+                'schema': 'network',
+                'digest': None,
+                'digest_text': "SELECT * from table where name = 'abc\x00def'",
+                'count': 41,
+                'time': 66721400,
+                'lock_time': 18298000,
+            }
+        ]
+    )
+
+    assert len(normalized_rows) == 1
+    assert normalized_rows[0]['digest_text'] == "SELECT * from table where name = 'abcdef'"
+    assert normalized_rows[0]['query_signature'] == compute_sql_signature("SELECT * from table where name = 'abcdef'")
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "timer_end,now,uptime,expected_timestamp",
     [
