@@ -181,9 +181,11 @@ class DockerAgent(AgentInterface):
         if self._is_windows_container and docker_network:
             raise ValueError('Custom Docker networks are not supported for Windows Agent containers')
 
-        # Host-networked containers need a unique API port because they share the host's network
-        # namespace. Containers attached to an isolated Docker network can use the Agent's standard
-        # command port without racing host processes for an ephemeral port.
+        # The Agent's command API normally listens on port 5001.
+        # With --network host, another process on the host might already use that
+        # port, so choose a currently free one instead.
+        # On an isolated network, each container has its own ports, so every Agent
+        # can use 5001 without conflicting with the host or other containers.
         uses_host_network = not docker_network or docker_network == 'host'
         env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port()) if uses_host_network else DEFAULT_CMD_PORT
 
