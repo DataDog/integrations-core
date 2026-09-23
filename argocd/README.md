@@ -430,7 +430,7 @@ The Argo CD notifications controller renders a template and posts it to a webhoo
 
    A default subscription tracks every Application on the cluster. On large clusters, start with per-Application annotations, or add a `selector` to the default subscription, to keep event volume under control.
 
-**Note**: Argo CD records the notifications it has already sent in each Application's `notified.notifications.argoproj.io` annotation and never removes entries. An Application therefore stops notifying once it has sent one notification for every combination its `oncePer` expression can produce, and the controller logs `already sent` in place of `TRIGGERED`. This deduplication is what keeps the webhook from firing on every reconcile, and the Agent collector's periodic scrape keeps the resource current regardless.
+**Note**: Argo CD records the notifications it has already sent in each Application's `notified.notifications.argoproj.io` annotation and never removes entries. An Application therefore stops notifying after it has sent one notification for every combination its `oncePer` expression can produce, and the controller logs `already sent` in place of `TRIGGERED`. This deduplication is what keeps the webhook from firing on every reconcile, and the Agent collector's periodic scrape keeps the resource current regardless.
 
 #### Validate entity collection
 
