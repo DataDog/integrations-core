@@ -80,9 +80,8 @@ def is_uplink(record: dict[str, Any]) -> bool:
     """Whether one merged interface record describes an uplink.
 
     `isWan` is the appliance's own judgement about which link leaves the site, so it stays
-    primary: where it is set, its value decides and the description is never consulted. It is
-    null on every interface the DevNet sandbox exposes, and the product brief names the port
-    description as the fallback for exactly that case.
+    primary: where it is set, its value decides and the description is never consulted. Much
+    hardware leaves it null, and the port description is the fallback for that case.
 
     The match is deliberately narrow -- the substring `uplink`, case-insensitively, and nothing
     else. `core`, `dist` and `trunk` are not uplink markers, and `portMode` is not

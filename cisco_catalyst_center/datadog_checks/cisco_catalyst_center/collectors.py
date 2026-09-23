@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Collectors.
 
-One module while there are two of them. It splits when the third arrives.
-
 The device collector is the load-bearing one: a single `data/networkDevices` call returns
 switches, routers, access points and controllers together, each carrying its own health scores,
-its AP configuration and per-radio KPIs, and its fabric role. What the product brief describes as
-four separate per-device fan-outs is one paginated request.
+its AP configuration and per-radio KPIs, and its fabric role. One paginated request therefore
+covers what would otherwise be four separate per-device fan-outs.
 """
 
 from __future__ import annotations
@@ -181,8 +179,8 @@ def collect_devices(
     for record in records:
         tags = base_tags + device_tags(record, namespace)
 
-        # "Is this device up" is the first question an operator asks. It was previously only in
-        # the NDM payload, which is inventory rather than something you can alert on.
+        # Reachability as a metric, not only as NDM inventory: a monitor cannot alert on
+        # inventory, and "is this device up" is the first question an operator asks.
         reachability = record.get('reachabilityHealthStatus')
         if reachability is not None:
             check.gauge('device.reachable', int(reachability in REACHABLE_VALUES), tags=tags)
@@ -269,9 +267,9 @@ def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[s
 def _enrich_metadata(client: CatalystCenterClient, merged: dict[str, dict[str, Any]]) -> None:
     """Fill the interface metadata fields the data API leaves null, from the intent API.
 
-    The product brief sources every NDM interface field from the intent API, but the data API is
-    the only place interface throughput, errors and PoE exist, so the collector reads both and
-    joins them. That join is free: both APIs identify an interface by the same UUID.
+    Interface throughput, errors and PoE exist only on the data API, while `macAddress` and
+    `description` are populated only on the intent API, so both are read and joined. The join is
+    free: both APIs identify an interface by the same UUID.
 
     Only `INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record
     actually carries a value -- see the constant for why a wholesale merge is wrong. Interfaces
@@ -304,10 +302,9 @@ def collect_interfaces(
     fetch instead of asking for every interface a second time.
 
     The intent API sweep is unconditional. It is the only source of `description`, which is in
-    turn the only uplink signal on hardware that leaves `isWan` null, so gating it behind
-    `send_ndm_metadata` -- a flag about NDM payloads -- left three uplink metrics and the
-    `uplink` tag unreachable for anyone who had not enabled NDM. It costs one more paginated
-    pass, the same order as one additional view.
+    turn the only uplink signal on hardware that leaves `isWan` null, so the three uplink metrics
+    and the `uplink` tag depend on it whether or not NDM payloads are enabled. It costs one more
+    paginated pass, the same order as one additional view.
 
     Args:
         check: The check instance.
@@ -370,8 +367,8 @@ def _emit_device_rollups(
 ) -> None:
     """Roll per-interface rates up to per-device and per-uplink totals.
 
-    The brief asks for device-level throughput and for aggregate uplink throughput. Both are sums
-    over interfaces, and doing them here means a dashboard does not have to.
+    Device-level and uplink-level throughput are both sums over interfaces, and rolling them up
+    here means a dashboard does not have to.
 
     Which interfaces count as uplinks is `is_uplink()`'s decision, so this aggregate,
     the `uplink` tag and the NDM port role cannot drift apart. `portMode` is deliberately not
@@ -536,7 +533,7 @@ def collect_stacks(
 ) -> None:
     """Collect stack membership.
 
-    This is the only per-device fan-out in the P0 set, so it is bounded to stackable families
+    This is the only per-device fan-out in the check, so it is bounded to stackable families
     rather than issued for every managed device -- and it is off by default for the same reason
     every other fan-out is. Stack membership changes on human timescales, so a large fleet should
     run this on a second instance with a long `min_collection_interval` rather than on the health
@@ -699,9 +696,8 @@ def collect_topology(check: AgentCheck, client: CatalystCenterClient, base_tags:
 def collect_site_topology(check: AgentCheck, client: CatalystCenterClient, base_tags: list[str] | None = None) -> None:
     """Collect the size of the site hierarchy.
 
-    The brief asks for site topology as hierarchy plus device-to-site mapping. The mapping already
-    rides on every device record as `siteId` and `siteHierarchy`, so this contributes only the
-    hierarchy size.
+    Device-to-site mapping already rides on every device record as `siteId` and `siteHierarchy`,
+    so the only thing left to report here is the size of the hierarchy itself.
     """
     tags = base_tags or []
     topology = client.get_object(SITE_TOPOLOGY_ENDPOINT)
@@ -713,8 +709,8 @@ def collect_l3_topology(
 ) -> None:
     """Collect the L3 routing graph size for one topology type.
 
-    The brief names OSPF, IS-IS and static. Only counts are emitted here; the graph itself is not
-    submitted anywhere by this integration.
+    Only counts are emitted; the graph itself is not submitted anywhere by this integration.
+    `L3_TOPOLOGY_TYPES` lists the types the endpoint serves.
     """
     tags = (base_tags or []) + [f'topology_type:{topology_type}']
     topology = client.get_object(L3_TOPOLOGY_ENDPOINT_TEMPLATE.format(topology_type=topology_type))
@@ -730,8 +726,8 @@ def collect_sda_fabric(
 ) -> None:
     """Collect fabric health and node roles.
 
-    The brief routes node status through `sda/edge-device` and `sda/border-device`, which
-    answer 400 with no list mode. `fabricDetails` on the bulk device record carries the same
+    `sda/edge-device` and `sda/border-device` answer 400 with no list mode, so node roles cannot
+    be read from them in bulk. `fabricDetails` on the bulk device record carries the same
     information at no extra cost, so roles are counted from records already in hand.
     """
     tags = base_tags or []
@@ -793,10 +789,8 @@ def _issue_alert_type(record: dict[str, Any]) -> str:
 def _issue_body(record: dict[str, Any]) -> str:
     """Assemble the diagnosis text, skipping fields the appliance left empty.
 
-    No assurance issue has ever been observed on the sandbox, so the *rendering* of
-    `suggestedActions` is the least certain part of this: the published schema names the field
-    but not its type. If it turns out to be structured rather than free text, this is the line to
-    revisit, and a real payload should be captured as a fixture at the same time.
+    Every field is rendered as free text. The published schema names `suggestedActions` without
+    giving its type, so a structured value would need handling here.
     """
     return '\n'.join(f'{label}: {record[field]}' for field, label in ISSUE_DETAIL_FIELDS if record.get(field))
 
@@ -847,9 +841,9 @@ def collect_assurance_issues(
     the watermark stays unset -- not just once at startup -- and then, once any other issue
     establishes a watermark, it stops being reported at all, timestamped or not.
 
-    `suggestedActions` arrives in this same response, so the brief's separate
-    `issue-enrichment-details` call is unnecessary. It is free text, which no metric tag can
-    carry, so the event body is where it lands.
+    `suggestedActions` arrives in this same response, so no separate `issue-enrichment-details`
+    call is needed. It is free text, which no metric tag can carry, so the event body is where it
+    lands.
     """
     tags = base_tags or []
     issues = client.get_list(ASSURANCE_ISSUES_ENDPOINT)
@@ -954,13 +948,13 @@ def collect_events(
     the endpoint refuses to mix, so each group is its own sweep -- see
     `EVENT_DEVICE_FAMILY_GROUPS`.
 
-    A group that fails is logged and skipped rather than aborting the sweep. That costs one window
-    of that group's events, which is the lesser of two evils: the alternative is to fail the whole
-    collection so the caller retries the window, which would double-count everything the groups
-    before it already submitted. That trade only makes sense when some group got through, though:
-    if every group fails, nothing was submitted for the window at all, so there is nothing left to
-    double-count by retrying -- that case raises instead, so the caller does not advance its
-    watermark and the window is retried next cycle rather than silently dropped.
+    A group that fails is logged and skipped rather than aborting the sweep, at the cost of one
+    window of that group's events. Failing the whole collection instead would have the caller
+    retry the window and double-count everything the earlier groups already submitted.
+
+    If every group fails, nothing was submitted for the window, so there is nothing to
+    double-count: that case raises, leaving the caller's watermark where it is so the window is
+    retried next cycle rather than silently dropped.
 
     `event.total.count` comes from the total the appliance reports, not from the records that
     arrived, so it stays correct when a sweep is cut short by the page budget. The breakdown cannot
@@ -1040,8 +1034,8 @@ def collect_application_health(
 
         site_tags = tags + compact([tag('site_id', site_id), tag('site_hierarchy', site.get('siteHierarchy'))])
         try:
-            # Sorting descending by usage is what makes this the brief's "top applications by
-            # usage" -- there is no separate top-N endpoint, only this ordering.
+            # There is no top-N endpoint. Sorting descending by usage is the only way to get the
+            # busiest applications first.
             applications = client.get_list(
                 NETWORK_APPLICATIONS_ENDPOINT,
                 params={'siteId': site_id, 'sortBy': 'usage', 'order': 'des'},

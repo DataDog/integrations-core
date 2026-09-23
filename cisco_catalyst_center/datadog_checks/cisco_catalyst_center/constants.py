@@ -55,8 +55,7 @@ ENDPOINT_PAGE_LIMITS: Final[dict[str, int]] = {
 }
 
 # Interface metadata fields the data API's `configuration` view returns null on every interface
-# but the intent API populates. The product brief names the intent API as the source for all
-# interface metadata; these are the two of its fields the data API cannot supply.
+# but the intent API populates.
 #
 # An allow-list rather than a wholesale merge, because the intent record also carries `name`
 # (always empty -- it uses `portName`, so copying it would blank the interface tag) and a
@@ -67,7 +66,7 @@ INTENT_INTERFACE_METADATA_FIELDS: Final = ('macAddress', 'description')
 FIRST_OFFSET: Final = 1
 
 # Device families that can be part of a switch stack. Used to bound the per-device stack
-# fan-out, which is the only fan-out in the P0 set.
+# fan-out, which is the only per-device fan-out in the check.
 STACKABLE_DEVICE_FAMILIES: Final[frozenset[str]] = frozenset({'Switches and Hubs'})
 
 # `state` values reported for a stack member and a stack port respectively.
@@ -79,7 +78,7 @@ STACK_PORT_OK_VALUES: Final[frozenset[str]] = frozenset({'Yes', 'yes', 'true', '
 # in upper case, so both are accepted.
 REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', 'reachable'})
 
-# L3 topology types the brief names.
+# L3 topology types the endpoint serves.
 L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')
 
 # Values Catalyst Center uses for a device, interface, or topology link that is up, shared by
@@ -104,8 +103,8 @@ ISSUE_PRIORITY_ALERT_TYPES: Final[dict[str, str]] = {
 ISSUE_DEFAULT_ALERT_TYPE: Final = 'info'
 
 # Fields carrying the diagnosis, in the order they read best in an issue body. `suggestedActions`
-# is the remediation hint the brief asks for through a separate `issue-enrichment-details` call;
-# it arrives in the issue record itself, so that call is unnecessary.
+# is the remediation hint; it arrives in the issue record itself, so no separate
+# `issue-enrichment-details` call is needed.
 ISSUE_DETAIL_FIELDS: Final[tuple[tuple[str, str], ...]] = (
     ('summary', 'Summary'),
     ('description', 'Description'),

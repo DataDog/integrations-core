@@ -51,7 +51,8 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         super().__init__(name, init_config, instances)
         self._client: CatalystCenterClient | None = None
         # End of the last assurance-event window that was collected, in epoch milliseconds. The
-        # check object outlives a single cycle, which is what lets consecutive windows abut.
+        # check object outlives a single cycle, which is what lets each window start where the
+        # previous one ended.
         self._events_polled_through: int | None = None
         self._issues_reported_through: int | None = None
 
@@ -73,6 +74,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self.config.collect_interface_statistics:
             views.append('statistics')
         if self.config.collect_interface_poe:
+            # `poE` is the appliance's own spelling of the view name, not a typo.
             views.append('poE')
         return tuple(views)
 
@@ -160,12 +162,9 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # The instance's `tags` option is a convention every integration honours, so it is
         # folded in ahead of anything this check derives itself.
         base_tags = list(self.instance.get('tags') or [])
-        # The tag must echo back what the user configured, not the client's normalized base URL:
-        # `spec.yaml` tells users not to include a scheme, so the normalized, https-prefixed URL
-        # can never equal the configured value. `self.config` carries the configured string
-        # unchanged -- normalization is the client's job, not the config model's -- and by this
-        # point in the lifecycle it is already validated, so there is no reason to read the raw
-        # instance dict instead.
+        # The tag carries the host exactly as configured, not the client's normalized base URL.
+        # Users are told to omit the scheme, so the https-prefixed URL would never match what they
+        # wrote in conf.yaml. `self.config` holds that validated, unnormalized string.
         base_tags.append(f'catalyst_center_host:{self.config.catalyst_center_host}')
         namespace = self.config.namespace or 'default'
 
@@ -228,7 +227,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 lambda: collect_client_experience(self, self.client, base_tags=base_tags),
             )
 
-        # -- P1 domains, all gated off by default -------------------------------------
+        # -- Optional domains, all gated off by default -------------------------------
         if self.config.collect_topology:
             healthy &= self._run('topology', lambda: collect_topology(self, self.client, base_tags=base_tags))
             healthy &= self._run('site topology', lambda: collect_site_topology(self, self.client, base_tags=base_tags))
