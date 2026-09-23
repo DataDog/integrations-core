@@ -28,6 +28,8 @@ SYSTEM_SCHEMAS_FILTER = "s.SCHEMANAME NOT LIKE 'SYS%' AND s.SCHEMANAME NOT IN ('
 # Every JSON_ARRAY fullselect starts from `SYSIBM.SYSDUMMY1 LEFT JOIN` so that it always returns at
 # least one row: Db2 11.5 fails with SQL0901N ("Unexpected aggregation mode") when the fullselect is
 # empty. The placeholder row yields a NULL element, which JSON_ARRAY drops (ABSENT ON NULL).
+#
+# Referential rule codes: https://www.ibm.com/docs/en/db2/11.5?topic=views-syscatreferences
 SCHEMA_TABLES_QUERY = """
 WITH schemas AS (
     SELECT s.SCHEMANAME AS schema_name, s.OWNER AS schema_owner
@@ -110,7 +112,6 @@ SELECT schema_tables.schema_name, schema_tables.schema_owner,
                                 AND k.TABNAME = r.REFTABNAME
                           ORDER BY k.COLSEQ
                       )) FORMAT JSON,
-                      -- https://www.ibm.com/docs/en/db2/11.5?topic=views-syscatreferences
                       KEY 'delete_rule' VALUE CASE r.DELETERULE
                           WHEN 'A' THEN 'NO ACTION' WHEN 'C' THEN 'CASCADE'
                           WHEN 'N' THEN 'SET NULL' WHEN 'R' THEN 'RESTRICT'
@@ -177,6 +178,8 @@ def build_schema_tables_query(config: Db2SchemaCollectorConfig) -> tuple[str, li
         max_tables=config.max_tables,
         max_columns=config.max_columns,
     )
+    # Collapse whitespace so the statement sent to Db2 (and seen in its monitoring views) stays compact.
+    query = ' '.join(query.split())
     params = [*config.exclude_schemas, *config.include_schemas, *config.exclude_tables, *config.include_tables]
     return query, params
 
