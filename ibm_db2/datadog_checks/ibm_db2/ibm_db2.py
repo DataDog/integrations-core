@@ -51,15 +51,15 @@ class IbmDb2Check(DatabaseCheck):
 
         # We'll connect on the first check run
         self._connection = Db2Connection(self, self._config)
-        metrics = MetricsCollector(self, self._connection)
-        custom_metrics = CustomMetricsCollector(self, self._connection, self._config.custom_queries)
+        self._metrics = MetricsCollector(self, self._connection)
+        self._custom_metrics = CustomMetricsCollector(self, self._connection, self._config.custom_queries)
         self._query_methods = (
-            metrics.query_instance,
-            metrics.query_database,
-            metrics.query_buffer_pool,
-            metrics.query_table_space,
-            metrics.query_transaction_log,
-            custom_metrics.query_custom,
+            self._metrics.query_instance,
+            self._metrics.query_database,
+            self._metrics.query_buffer_pool,
+            self._metrics.query_table_space,
+            self._metrics.query_transaction_log,
+            self._custom_metrics.query_custom,
         )
 
     def check(self, instance):
