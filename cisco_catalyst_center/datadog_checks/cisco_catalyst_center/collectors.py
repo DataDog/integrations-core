@@ -92,12 +92,10 @@ DEFAULT_NAMESPACE = 'default'
 def device_identity_tags(namespace: str, management_ip: Any, device_uuid: Any) -> list[str | None]:
     """The two identity tags every device-scoped metric carries.
 
-    `device_id` is the `{namespace}:{ip}` form the Agent's SNMP check also uses, so one tag
-    key means one thing across both halves of the pairing. `device_uuid` carries Catalyst
-    Center's own `instanceUuid`, which is what the NDM device record is keyed on.
-
-    Both are emitted because they answer different questions and neither is derivable from the
-    other: the UUID is stable and always present, the IP form is what correlates with SNMP.
+    `device_id` is the `{namespace}:{ip}` form the Agent's SNMP check also uses; `device_uuid` is
+    Catalyst Center's own `instanceUuid`, which keys the NDM device record. Neither is derivable
+    from the other: the UUID is stable and always present, the IP form is what correlates with
+    SNMP.
     """
     return [
         tag('device_id', f'{namespace}:{management_ip}' if management_ip else None),
@@ -267,14 +265,12 @@ def _merge_views(client: CatalystCenterClient, views: tuple[str, ...]) -> dict[s
 def _enrich_metadata(client: CatalystCenterClient, merged: dict[str, dict[str, Any]]) -> None:
     """Fill the interface metadata fields the data API leaves null, from the intent API.
 
-    Interface throughput, errors and PoE exist only on the data API, while `macAddress` and
-    `description` are populated only on the intent API, so both are read and joined. The join is
-    free: both APIs identify an interface by the same UUID.
+    Throughput, errors and PoE exist only on the data API; `macAddress` and `description` only on
+    the intent API. The join is free: both identify an interface by the same UUID.
 
-    Only `INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record
-    actually carries a value -- see the constant for why a wholesale merge is wrong. Interfaces
-    the intent inventory omits, such as stack sub-interfaces, keep their data API record
-    unchanged rather than being dropped.
+    Only `INTENT_INTERFACE_METADATA_FIELDS` is copied, and only where the intent record carries a
+    value -- see the constant for why a wholesale merge is wrong. Interfaces the intent inventory
+    omits, such as stack sub-interfaces, keep their data API record unchanged.
     """
     for record in client.get_list(INTENT_INTERFACES_ENDPOINT):
         interface_id = record.get('id')
@@ -301,10 +297,9 @@ def collect_interfaces(
     The records are returned rather than counted so that NDM metadata can be built from the same
     fetch instead of asking for every interface a second time.
 
-    The intent API sweep is unconditional. It is the only source of `description`, which is in
-    turn the only uplink signal on hardware that leaves `isWan` null, so the three uplink metrics
-    and the `uplink` tag depend on it whether or not NDM payloads are enabled. It costs one more
-    paginated pass, the same order as one additional view.
+    The intent API sweep is unconditional: it is the only source of `description`, which is the
+    only uplink signal on hardware that leaves `isWan` null. Gating it on NDM would leave the
+    uplink metrics and the `uplink` tag unreachable. It costs one more paginated pass.
 
     Args:
         check: The check instance.
@@ -533,15 +528,13 @@ def collect_stacks(
 ) -> None:
     """Collect stack membership.
 
-    This is the only per-device fan-out in the check, so it is bounded to stackable families
-    rather than issued for every managed device -- and it is off by default for the same reason
-    every other fan-out is. Stack membership changes on human timescales, so a large fleet should
-    run this on a second instance with a long `min_collection_interval` rather than on the health
-    cycle. Caching it here instead would be wrong: `member.state` and `port.status` are fault
-    signals, and re-emitting a stale `1` for either reports a healthy stack that is not.
+    The only per-device fan-out in the check, so it is bounded to stackable families and off by
+    default. Stack membership changes on human timescales, so a large fleet should run this on a
+    second instance with a long `min_collection_interval`. Caching instead would be wrong:
+    `member.state` and `port.status` are fault signals, and re-emitting a stale `1` reports a
+    healthy stack that is not.
 
-    A device that fails is logged and skipped: one unreachable switch must not cost the whole
-    cycle.
+    A device that fails is logged and skipped: one unreachable switch must not cost the cycle.
     """
     base_tags = base_tags or []
 
@@ -830,20 +823,17 @@ def collect_assurance_issues(
     Returns the newest `mostRecentOccurredTime` seen, which the caller stores and hands back on
     the next cycle.
 
-    The counts and the events are deliberately not symmetrical. Counts describe current state, so
-    every open issue is counted on every cycle. Events describe something happening, and an issue
-    stays open and is returned again until it clears -- so submitting one per cycle would turn a
-    single unresolved problem into an unbounded stream. `reported_through` is the watermark that
-    holds each occurrence to one event.
+    Counts and events are deliberately asymmetric. Every open issue is counted on every cycle,
+    because counts describe current state. An issue stays open until it clears, so one event per
+    cycle would turn a single unresolved problem into an unbounded stream; `reported_through` is
+    the watermark that holds each occurrence to one event.
 
-    An issue the appliance gives no `mostRecentOccurredTime` for cannot be placed against that
-    watermark. With nothing to compare against, it is resubmitted on every cycle for as long as
-    the watermark stays unset -- not just once at startup -- and then, once any other issue
-    establishes a watermark, it stops being reported at all, timestamped or not.
+    An issue with no `mostRecentOccurredTime` cannot be placed against that watermark: it repeats
+    every cycle while the watermark is unset, then stops being reported at all once any other
+    issue establishes one.
 
     `suggestedActions` arrives in this same response, so no separate `issue-enrichment-details`
-    call is needed. It is free text, which no metric tag can carry, so the event body is where it
-    lands.
+    call is needed. It is free text, so the event body is where it lands.
     """
     tags = base_tags or []
     issues = client.get_list(ASSURANCE_ISSUES_ENDPOINT)
@@ -931,34 +921,28 @@ def collect_events(
 ) -> None:
     """Collect assurance events in one time window, as Datadog events plus aggregate counts.
 
-    Each record becomes a Datadog event carrying the diagnosis, and the same records are counted by
-    severity, family, type and device. Both are submitted because they answer different questions:
-    the counts are what a monitor alerts on and what a graph shows, the events are what someone
-    reads afterwards to find out why.
+    Each record becomes a Datadog event carrying the diagnosis, and the same records are counted
+    by severity, family, type and device. Both are submitted because they answer different
+    questions: the counts are what a monitor alerts on, the events are what someone reads
+    afterwards to find out why.
 
-    This is the fallback ingestion path. Where outbound webhooks are permitted, an Event Management
-    subscription posts the same events straight to the Datadog intake and this collector should stay
-    disabled -- the two paths are alternatives, and running both submits every event twice.
+    This is the fallback ingestion path. Where outbound webhooks are permitted, an Event
+    Management subscription posts the same events straight to the Datadog intake and this
+    collector should stay disabled; running both submits every event twice.
 
-    The window is supplied rather than derived here so that the caller owns the cursor: consecutive
-    windows must not overlap, or every event is counted more than once. Both bounds are epoch
-    milliseconds.
+    The window is supplied rather than derived here so the caller owns the cursor -- consecutive
+    windows must not overlap. Both bounds are epoch milliseconds.
 
-    Four requests is the floor. `deviceFamily` is mandatory, and its values fall into four groups
-    the endpoint refuses to mix, so each group is its own sweep -- see
-    `EVENT_DEVICE_FAMILY_GROUPS`.
+    Four requests is the floor: `deviceFamily` is mandatory and its values fall into four groups
+    the endpoint refuses to mix, so each group is its own sweep (`EVENT_DEVICE_FAMILY_GROUPS`).
+    A failing group is logged and skipped, costing one window of its events; failing the whole
+    collection instead would have the caller retry and double-count the groups that succeeded.
+    If *every* group fails there is nothing to double-count, so that case raises and the window is
+    retried next cycle.
 
-    A group that fails is logged and skipped rather than aborting the sweep, at the cost of one
-    window of that group's events. Failing the whole collection instead would have the caller
-    retry the window and double-count everything the earlier groups already submitted.
-
-    If every group fails, nothing was submitted for the window, so there is nothing to
-    double-count: that case raises, leaving the caller's watermark where it is so the window is
-    retried next cycle rather than silently dropped.
-
-    `event.total.count` comes from the total the appliance reports, not from the records that
-    arrived, so it stays correct when a sweep is cut short by the page budget. The breakdown cannot
-    be -- it is derived from records -- so a truncated sweep is warned about loudly.
+    `event.total.count` comes from the total the appliance reports rather than from the records
+    that arrived, so it survives a sweep cut short by the page budget. The breakdown cannot, so a
+    truncated sweep is warned about loudly.
     """
     tags = base_tags or []
     window = {'startTime': start_time, 'endTime': end_time}

@@ -81,13 +81,10 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
     def _event_window(self) -> tuple[int, int] | None:
         """The window to poll assurance events for, in epoch milliseconds, or None to skip.
 
-        Windows are consecutive and never overlap: each one begins where the previous one ended, so
-        an event is counted exactly once whatever the collection interval is. Polling a fixed
-        lookback instead would recount every event on every cycle.
-
-        The first cycle has no predecessor and reaches back `events_initial_lookback_minutes`.
-        After that the start is clamped to the widest window the endpoint accepts, which is what an
-        Agent restarted after a long outage runs into.
+        Each window begins where the previous one ended, so an event is counted exactly once
+        whatever the collection interval is. The first cycle has no predecessor and reaches back
+        `events_initial_lookback_minutes`; after a long outage the start is clamped to the widest
+        window the endpoint accepts.
         """
         now = int(time.time() * 1000)
         if self._events_polled_through is None:
@@ -162,9 +159,8 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # The instance's `tags` option is a convention every integration honours, so it is
         # folded in ahead of anything this check derives itself.
         base_tags = list(self.instance.get('tags') or [])
-        # The tag carries the host exactly as configured, not the client's normalized base URL.
-        # Users are told to omit the scheme, so the https-prefixed URL would never match what they
-        # wrote in conf.yaml. `self.config` holds that validated, unnormalized string.
+        # The host as the user wrote it in conf.yaml, not the client's base URL: users are told
+        # to omit the scheme, so the client's https:// prefix would otherwise leak into the tag.
         base_tags.append(f'catalyst_center_host:{self.config.catalyst_center_host}')
         namespace = self.config.namespace or 'default'
 
@@ -270,19 +266,16 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 )
                 healthy &= polled
                 if polled:
-                    # Advance only on success, so a cycle that failed outright retries its window
-                    # rather than leaving a hole. A sweep that lost one device-family group still
-                    # counts as success -- collect_events contains that failure itself -- because
+                    # Advance only on success, so a failed cycle retries its window rather than
+                    # leaving a hole. Losing one device-family group still counts as success:
                     # retrying would double-count the groups that did submit.
                     self._events_polled_through = end_time
 
         if self.config.collect_application_health:
             if not sites:
-                # networkApplications rejects a request without a site, so with no site list there
-                # is nothing to ask for -- and the cycle would report success having collected no
-                # application metrics at all. Enumerate the hierarchy here instead; that happens
-                # when site health is switched off, since it is otherwise the only call that
-                # lists sites.
+                # networkApplications requires a siteId, and site health is otherwise the only
+                # call that lists sites. Without this, switching site health off would collect no
+                # application metrics while still reporting success.
                 def _list_sites() -> None:
                     nonlocal sites
                     sites = list_sites(self.client)
@@ -301,8 +294,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         if self.config.send_ndm_metadata:
             healthy &= self._run('NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace))
 
-        # A metric rather than a service check: new integrations in this repository do not ship
-        # their own service checks. It has to be emitted on failure too, which is the whole point
-        # -- a monitor on missing data cannot tell an unreachable appliance from a check that is
-        # not running, but a 0 on a series that is still arriving says exactly which it is.
+        # A metric rather than a service check: new integrations here do not ship service checks.
+        # Emitted on failure too -- a monitor on missing data cannot tell an unreachable appliance
+        # from a check that is not running, but a 0 on a series still arriving can.
         self.gauge('collection.success', int(healthy), tags=base_tags)

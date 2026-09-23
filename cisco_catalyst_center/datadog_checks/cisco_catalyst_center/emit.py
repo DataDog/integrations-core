@@ -83,13 +83,12 @@ def is_uplink(record: dict[str, Any]) -> bool:
     primary: where it is set, its value decides and the description is never consulted. Much
     hardware leaves it null, and the port description is the fallback for that case.
 
-    The match is deliberately narrow -- the substring `uplink`, case-insensitively, and nothing
-    else. `core`, `dist` and `trunk` are not uplink markers, and `portMode` is not
-    consulted at all: either would relabel ordinary trunk ports on an access switch and silently
-    inflate the uplink throughput aggregate. A wrong aggregate is worse than a dark metric.
+    The match is deliberately narrow: the substring `uplink`, case-insensitively, and nothing
+    else. Treating `core`, `dist`, `trunk` or `portMode` as markers would relabel ordinary trunk
+    ports on an access switch and silently inflate the uplink throughput aggregate.
 
     One rule with three callers -- the `uplink` tag, the device rollup and the NDM port role --
-    so that they cannot drift apart.
+    so they cannot drift apart.
     """
     is_wan = record.get('isWan')
     if is_wan is not None:
