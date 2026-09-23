@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import contextlib
-from typing import TYPE_CHECKING, Any, Iterator
+from typing import TYPE_CHECKING, Any
 
 import ibm_db
 
 from datadog_checks.base.utils.db.schemas import DatabaseInfo, SchemaCollector, SchemaCollectorConfig
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.serialization import json
 
 from .connection import Db2Connection
 
@@ -18,15 +19,17 @@ if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .ibm_db2 import IbmDb2Check
 
-TableKey = tuple[str, str]
-
 # Db2 reserves schema names starting with SYS for the catalog; NULLID and SQLJ hold driver packages.
 SYSTEM_SCHEMAS_FILTER = "s.SCHEMANAME NOT LIKE 'SYS%' AND s.SCHEMANAME NOT IN ('NULLID', 'SQLJ')"
 
-# Schemas left-joined to their tables so that empty schemas are still reported, capped at
-# `max_tables` rows. Every query below starts from this CTE so they all see the same objects.
-LIMITED_OBJECTS_CTE = """
-schemas AS (
+# One row per table (or per schema without tables), with its columns, indexes, foreign keys and
+# partition key aggregated into JSON arrays so rows can be streamed from the cursor one at a time.
+#
+# Every JSON_ARRAY fullselect starts from `SYSIBM.SYSDUMMY1 LEFT JOIN` so that it always returns at
+# least one row: Db2 11.5 fails with SQL0901N ("Unexpected aggregation mode") when the fullselect is
+# empty. The placeholder row yields a NULL element, which JSON_ARRAY drops (ABSENT ON NULL).
+SCHEMA_TABLES_QUERY = """
+WITH schemas AS (
     SELECT s.SCHEMANAME AS schema_name, s.OWNER AS schema_owner
     FROM SYSCAT.SCHEMATA s
     WHERE {system_schemas_filter}{schema_filters}
@@ -36,7 +39,7 @@ tables AS (
     FROM SYSCAT.TABLES t
     WHERE t.TYPE IN ('T', 'N'){table_filters}
 ),
-limited_objects AS (
+schema_tables AS (
     SELECT schemas.schema_name, schemas.schema_owner,
            tables.TABNAME AS table_name, tables.OWNER AS table_owner,
            tables.TYPE AS table_type, tables.CARD AS row_count
@@ -45,70 +48,95 @@ limited_objects AS (
     ORDER BY schemas.schema_name, tables.TABNAME
     FETCH FIRST {max_tables} ROWS ONLY
 )
-"""
-
-OBJECTS_QUERY = """
-WITH {limited_objects_cte},
-limited_columns AS (
-    SELECT c.TABSCHEMA, c.TABNAME, c.COLNAME, c.TYPENAME, c.LENGTH, c.SCALE, c.NULLS, c.DEFAULT, c.COLNO,
-           ROW_NUMBER() OVER (PARTITION BY c.TABSCHEMA, c.TABNAME ORDER BY c.COLNO) AS rn
-    FROM SYSCAT.COLUMNS c
-    JOIN limited_objects lo ON lo.schema_name = c.TABSCHEMA AND lo.table_name = c.TABNAME
-)
-SELECT lo.schema_name, lo.schema_owner, lo.table_name, lo.table_owner, lo.table_type, lo.row_count,
+SELECT schema_tables.schema_name, schema_tables.schema_owner,
+       schema_tables.table_name, schema_tables.table_owner, schema_tables.table_type, schema_tables.row_count,
+       JSON_ARRAY((
+           SELECT CASE WHEN c.COLNAME IS NOT NULL THEN JSON_OBJECT(
+                      KEY 'name' VALUE c.COLNAME,
+                      KEY 'data_type' VALUE c.TYPENAME,
+                      KEY 'length' VALUE c.LENGTH,
+                      KEY 'scale' VALUE c.SCALE,
+                      KEY 'nullable' VALUE CASE WHEN c.NULLS = 'Y' THEN 'true' ELSE 'false' END FORMAT JSON,
+                      KEY 'default' VALUE c.DEFAULT
+                  ) END
+           FROM SYSIBM.SYSDUMMY1
+           LEFT JOIN SYSCAT.COLUMNS c
+                  ON c.TABSCHEMA = schema_tables.schema_name AND c.TABNAME = schema_tables.table_name
+           ORDER BY c.COLNO
+           FETCH FIRST {max_columns} ROWS ONLY
+       ) FORMAT JSON RETURNING CLOB(100M)) AS columns,
+       JSON_ARRAY((
+           SELECT CASE WHEN i.INDNAME IS NOT NULL THEN JSON_OBJECT(
+                      KEY 'schema' VALUE RTRIM(i.INDSCHEMA),
+                      KEY 'name' VALUE i.INDNAME,
+                      KEY 'is_unique' VALUE CASE WHEN i.UNIQUERULE IN ('P', 'U') THEN 'true' ELSE 'false' END
+                          FORMAT JSON,
+                      KEY 'is_primary' VALUE CASE WHEN i.UNIQUERULE = 'P' THEN 'true' ELSE 'false' END FORMAT JSON,
+                      KEY 'index_type' VALUE RTRIM(i.INDEXTYPE),
+                      KEY 'columns' VALUE JSON_ARRAY((
+                          SELECT CASE WHEN ic.COLNAME IS NOT NULL THEN JSON_OBJECT(
+                                     KEY 'name' VALUE ic.COLNAME,
+                                     KEY 'order' VALUE CASE ic.COLORDER
+                                         WHEN 'A' THEN 'ASC' WHEN 'D' THEN 'DESC' WHEN 'I' THEN 'INCLUDE'
+                                     END
+                                 ) END
+                          FROM SYSIBM.SYSDUMMY1
+                          LEFT JOIN SYSCAT.INDEXCOLUSE ic ON ic.INDSCHEMA = i.INDSCHEMA AND ic.INDNAME = i.INDNAME
+                          ORDER BY ic.COLSEQ
+                      ) FORMAT JSON) FORMAT JSON
+                  ) END
+           FROM SYSIBM.SYSDUMMY1
+           LEFT JOIN SYSCAT.INDEXES i
+                  ON i.TABSCHEMA = schema_tables.schema_name AND i.TABNAME = schema_tables.table_name
+           ORDER BY i.INDSCHEMA, i.INDNAME
+       ) FORMAT JSON RETURNING CLOB(100M)) AS indexes,
+       JSON_ARRAY((
+           SELECT CASE WHEN r.CONSTNAME IS NOT NULL THEN JSON_OBJECT(
+                      KEY 'name' VALUE r.CONSTNAME,
+                      KEY 'columns' VALUE JSON_ARRAY((
+                          SELECT k.COLNAME
+                          FROM SYSIBM.SYSDUMMY1
+                          LEFT JOIN SYSCAT.KEYCOLUSE k
+                                 ON k.CONSTNAME = r.CONSTNAME AND k.TABSCHEMA = r.TABSCHEMA AND k.TABNAME = r.TABNAME
+                          ORDER BY k.COLSEQ
+                      )) FORMAT JSON,
+                      KEY 'referenced_schema' VALUE RTRIM(r.REFTABSCHEMA),
+                      KEY 'referenced_table' VALUE r.REFTABNAME,
+                      KEY 'referenced_columns' VALUE JSON_ARRAY((
+                          SELECT k.COLNAME
+                          FROM SYSIBM.SYSDUMMY1
+                          LEFT JOIN SYSCAT.KEYCOLUSE k
+                                 ON k.CONSTNAME = r.REFKEYNAME AND k.TABSCHEMA = r.REFTABSCHEMA
+                                AND k.TABNAME = r.REFTABNAME
+                          ORDER BY k.COLSEQ
+                      )) FORMAT JSON,
+                      -- https://www.ibm.com/docs/en/db2/11.5?topic=views-syscatreferences
+                      KEY 'delete_rule' VALUE CASE r.DELETERULE
+                          WHEN 'A' THEN 'NO ACTION' WHEN 'C' THEN 'CASCADE'
+                          WHEN 'N' THEN 'SET NULL' WHEN 'R' THEN 'RESTRICT'
+                      END,
+                      KEY 'update_rule' VALUE CASE r.UPDATERULE WHEN 'A' THEN 'NO ACTION' WHEN 'R' THEN 'RESTRICT' END
+                  ) END
+           FROM SYSIBM.SYSDUMMY1
+           LEFT JOIN SYSCAT.REFERENCES r
+                  ON r.TABSCHEMA = schema_tables.schema_name AND r.TABNAME = schema_tables.table_name
+           ORDER BY r.CONSTNAME
+       ) FORMAT JSON RETURNING CLOB(100M)) AS foreign_keys,
+       JSON_ARRAY((
+           SELECT CAST(e.DATAPARTITIONEXPRESSION AS VARCHAR(1024))
+           FROM SYSIBM.SYSDUMMY1
+           LEFT JOIN SYSCAT.DATAPARTITIONEXPRESSION e
+                  ON e.TABSCHEMA = schema_tables.schema_name AND e.TABNAME = schema_tables.table_name
+           ORDER BY e.DATAPARTITIONKEYSEQ
+       ) RETURNING CLOB(100M)) AS partition_key,
        (SELECT COUNT(*)
         FROM SYSCAT.DATAPARTITIONS p
-        WHERE p.TABSCHEMA = lo.schema_name AND p.TABNAME = lo.table_name) AS num_partitions,
-       lc.COLNAME AS column_name, lc.TYPENAME AS data_type, lc.LENGTH AS length, lc.SCALE AS scale,
-       lc.NULLS AS nulls, lc.DEFAULT AS column_default
-FROM limited_objects lo
-LEFT JOIN limited_columns lc
-       ON lc.TABSCHEMA = lo.schema_name AND lc.TABNAME = lo.table_name AND lc.rn <= {max_columns}
-ORDER BY lo.schema_name, lo.table_name, lc.COLNO
-"""
-
-INDEX_COLUMNS_QUERY = """
-WITH {limited_objects_cte}
-SELECT i.TABSCHEMA AS schema_name, i.TABNAME AS table_name, i.INDSCHEMA AS index_schema, i.INDNAME AS name,
-       i.UNIQUERULE AS unique_rule, i.INDEXTYPE AS index_type,
-       ic.COLNAME AS column_name, ic.COLORDER AS column_order
-FROM SYSCAT.INDEXES i
-JOIN limited_objects lo ON lo.schema_name = i.TABSCHEMA AND lo.table_name = i.TABNAME
-JOIN SYSCAT.INDEXCOLUSE ic ON ic.INDSCHEMA = i.INDSCHEMA AND ic.INDNAME = i.INDNAME
-ORDER BY i.TABSCHEMA, i.TABNAME, i.INDSCHEMA, i.INDNAME, ic.COLSEQ
-"""
-
-FOREIGN_KEY_COLUMNS_QUERY = """
-WITH {limited_objects_cte}
-SELECT r.TABSCHEMA AS schema_name, r.TABNAME AS table_name, r.CONSTNAME AS name,
-       r.REFTABSCHEMA AS referenced_schema, r.REFTABNAME AS referenced_table,
-       r.DELETERULE AS delete_rule, r.UPDATERULE AS update_rule,
-       k.COLNAME AS column_name, rk.COLNAME AS referenced_column_name
-FROM SYSCAT.REFERENCES r
-JOIN limited_objects lo ON lo.schema_name = r.TABSCHEMA AND lo.table_name = r.TABNAME
-JOIN SYSCAT.KEYCOLUSE k ON k.CONSTNAME = r.CONSTNAME AND k.TABSCHEMA = r.TABSCHEMA AND k.TABNAME = r.TABNAME
-LEFT JOIN SYSCAT.KEYCOLUSE rk
-       ON rk.CONSTNAME = r.REFKEYNAME AND rk.TABSCHEMA = r.REFTABSCHEMA AND rk.TABNAME = r.REFTABNAME
-      AND rk.COLSEQ = k.COLSEQ
-ORDER BY r.TABSCHEMA, r.TABNAME, r.CONSTNAME, k.COLSEQ
-"""
-
-PARTITION_KEY_QUERY = """
-WITH {limited_objects_cte}
-SELECT e.TABSCHEMA AS schema_name, e.TABNAME AS table_name,
-       CAST(e.DATAPARTITIONEXPRESSION AS VARCHAR(1024)) AS expression
-FROM SYSCAT.DATAPARTITIONEXPRESSION e
-JOIN limited_objects lo ON lo.schema_name = e.TABSCHEMA AND lo.table_name = e.TABNAME
-ORDER BY e.TABSCHEMA, e.TABNAME, e.DATAPARTITIONKEYSEQ
+        WHERE p.TABSCHEMA = schema_tables.schema_name AND p.TABNAME = schema_tables.table_name) AS num_partitions
+FROM schema_tables
+ORDER BY schema_tables.schema_name, schema_tables.table_name
 """
 
 TABLE_TYPES = {'T': 'TABLE', 'N': 'NICKNAME'}
-
-# https://www.ibm.com/docs/en/db2/11.5?topic=views-syscatindexcoluse
-INDEX_COLUMN_ORDERS = {'A': 'ASC', 'D': 'DESC', 'I': 'INCLUDE'}
-
-# https://www.ibm.com/docs/en/db2/11.5?topic=views-syscatreferences
-REFERENTIAL_RULES = {'A': 'NO ACTION', 'C': 'CASCADE', 'N': 'SET NULL', 'R': 'RESTRICT'}
 
 
 def regex_exclude_clauses(column: str, patterns: tuple[str, ...]) -> str:
@@ -135,30 +163,22 @@ class Db2SchemaCollectorConfig(SchemaCollectorConfig):
         self.exclude_tables = config.exclude_tables
 
 
-class Db2SchemaQueryBuilder:
-    def __init__(self, config: Db2SchemaCollectorConfig):
-        self._config = config
-
-    def _limited_objects_cte(self) -> tuple[str, list[str]]:
-        config = self._config
-        schema_filters = regex_exclude_clauses('s.SCHEMANAME', config.exclude_schemas) + regex_include_clause(
-            's.SCHEMANAME', config.include_schemas
-        )
-        table_filters = regex_exclude_clauses('t.TABNAME', config.exclude_tables) + regex_include_clause(
-            't.TABNAME', config.include_tables
-        )
-        cte = LIMITED_OBJECTS_CTE.format(
-            system_schemas_filter=SYSTEM_SCHEMAS_FILTER,
-            schema_filters=schema_filters,
-            table_filters=table_filters,
-            max_tables=config.max_tables,
-        ).strip()
-        params = [*config.exclude_schemas, *config.include_schemas, *config.exclude_tables, *config.include_tables]
-        return cte, params
-
-    def build(self, query: str, **kwargs: Any) -> tuple[str, list[str]]:
-        cte, params = self._limited_objects_cte()
-        return query.format(limited_objects_cte=cte, **kwargs), params
+def build_schema_tables_query(config: Db2SchemaCollectorConfig) -> tuple[str, list[str]]:
+    schema_filters = regex_exclude_clauses('s.SCHEMANAME', config.exclude_schemas) + regex_include_clause(
+        's.SCHEMANAME', config.include_schemas
+    )
+    table_filters = regex_exclude_clauses('t.TABNAME', config.exclude_tables) + regex_include_clause(
+        't.TABNAME', config.include_tables
+    )
+    query = SCHEMA_TABLES_QUERY.format(
+        system_schemas_filter=SYSTEM_SCHEMAS_FILTER,
+        schema_filters=schema_filters,
+        table_filters=table_filters,
+        max_tables=config.max_tables,
+        max_columns=config.max_columns,
+    )
+    params = [*config.exclude_schemas, *config.include_schemas, *config.exclude_tables, *config.include_tables]
+    return query, params
 
 
 class Db2SchemaCollector(SchemaCollector):
@@ -169,7 +189,6 @@ class Db2SchemaCollector(SchemaCollector):
         super().__init__(check, config)
         self._db_name = db_name
         self._connection = connection
-        self._query_builder = Db2SchemaQueryBuilder(config)
 
     @property
     def kind(self) -> str:
@@ -178,136 +197,37 @@ class Db2SchemaCollector(SchemaCollector):
     def _get_databases(self) -> list[DatabaseInfo]:
         return [{'name': self._db_name}]
 
-    def _execute(self, query: str, params: list[str]) -> Any:
+    @contextlib.contextmanager
+    def _get_cursor(self, _database_name):
+        query, params = build_schema_tables_query(self._config)
         stmt = ibm_db.prepare(
             self._connection.conn, query, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: self._config.max_query_duration}
         )
-        ibm_db.execute(stmt, tuple(params))
-        return stmt
-
-    def _fetch_rows_by_table(self, query: str) -> dict[TableKey, list[dict]]:
-        stmt = self._execute(*self._query_builder.build(query))
         try:
-            rows_by_table: dict[TableKey, list[dict]] = {}
-            row = ibm_db.fetch_assoc(stmt)
-            while row is not False:
-                rows_by_table.setdefault((row['schema_name'], row['table_name']), []).append(row)
-                row = ibm_db.fetch_assoc(stmt)
-            return rows_by_table
+            ibm_db.execute(stmt, tuple(params))
+            yield stmt
         finally:
             ibm_db.free_stmt(stmt)
 
-    def _fetch_indexes(self) -> dict[TableKey, list[dict]]:
-        indexes_by_table = {}
-        for key, rows in self._fetch_rows_by_table(INDEX_COLUMNS_QUERY).items():
-            indexes: dict[tuple[str, str], dict] = {}
-            for row in rows:
-                index = indexes.setdefault(
-                    (row['index_schema'], row['name']),
-                    {
-                        'schema': row['index_schema'].strip(),
-                        'name': row['name'],
-                        'is_unique': row['unique_rule'] in ('P', 'U'),
-                        'is_primary': row['unique_rule'] == 'P',
-                        'index_type': row['index_type'].strip(),
-                        'columns': [],
-                    },
-                )
-                index['columns'].append(
-                    {'name': row['column_name'], 'order': INDEX_COLUMN_ORDERS.get(row['column_order'])}
-                )
-            indexes_by_table[key] = list(indexes.values())
-        return indexes_by_table
+    def _get_next(self, cursor: Any) -> dict | None:
+        return ibm_db.fetch_assoc(cursor) or None
 
-    def _fetch_foreign_keys(self) -> dict[TableKey, list[dict]]:
-        foreign_keys_by_table = {}
-        for key, rows in self._fetch_rows_by_table(FOREIGN_KEY_COLUMNS_QUERY).items():
-            foreign_keys: dict[str, dict] = {}
-            for row in rows:
-                foreign_key = foreign_keys.setdefault(
-                    row['name'],
-                    {
-                        'name': row['name'],
-                        'columns': [],
-                        'referenced_schema': row['referenced_schema'].strip(),
-                        'referenced_table': row['referenced_table'],
-                        'referenced_columns': [],
-                        'delete_rule': REFERENTIAL_RULES.get(row['delete_rule']),
-                        'update_rule': REFERENTIAL_RULES.get(row['update_rule']),
-                    },
-                )
-                foreign_key['columns'].append(row['column_name'])
-                foreign_key['referenced_columns'].append(row['referenced_column_name'])
-            foreign_keys_by_table[key] = list(foreign_keys.values())
-        return foreign_keys_by_table
-
-    def _fetch_partition_keys(self) -> dict[TableKey, list[str]]:
-        return {
-            key: [row['expression'] for row in rows]
-            for key, rows in self._fetch_rows_by_table(PARTITION_KEY_QUERY).items()
-        }
-
-    @contextlib.contextmanager
-    def _get_cursor(self, _database_name):
-        indexes = self._fetch_indexes()
-        foreign_keys = self._fetch_foreign_keys()
-        partition_keys = self._fetch_partition_keys()
-        stmt = self._execute(*self._query_builder.build(OBJECTS_QUERY, max_columns=self._config.max_columns))
-        try:
-            yield self._iter_objects(stmt, indexes, foreign_keys, partition_keys)
-        finally:
-            ibm_db.free_stmt(stmt)
-
-    def _iter_objects(
-        self,
-        stmt: Any,
-        indexes: dict[TableKey, list[dict]],
-        foreign_keys: dict[TableKey, list[dict]],
-        partition_keys: dict[TableKey, list[str]],
-    ) -> Iterator[dict]:
-        """
-        Group the ordered (schema, table, column) rows into one object per table, or per empty schema.
-        """
-        row = ibm_db.fetch_assoc(stmt)
-        while row is not False:
-            key = (row['schema_name'], row['table_name'])
-            obj = {**row, 'columns': []}
-            while row is not False and (row['schema_name'], row['table_name']) == key:
-                if row['column_name'] is not None:
-                    obj['columns'].append(
-                        {
-                            'name': row['column_name'],
-                            'data_type': row['data_type'],
-                            'length': row['length'],
-                            'scale': row['scale'],
-                            'nullable': row['nulls'] == 'Y',
-                            'default': row['column_default'],
-                        }
-                    )
-                row = ibm_db.fetch_assoc(stmt)
-            obj['indexes'] = indexes.get(key, [])
-            obj['foreign_keys'] = foreign_keys.get(key, [])
-            obj['partition_key'] = partition_keys.get(key)
-            yield obj
-
-    def _get_next(self, cursor):
-        return next(cursor, None)
-
-    def _map_row(self, database: DatabaseInfo, obj: dict) -> dict:
-        schema = {'name': obj['schema_name'], 'owner': obj['schema_owner'].strip(), 'tables': []}
-        if obj['table_name'] is not None:
+    def _map_row(self, database: DatabaseInfo, row: dict) -> dict:
+        schema = {'name': row['schema_name'], 'owner': row['schema_owner'].strip(), 'tables': []}
+        if row['table_name'] is not None:
             table = {
-                'name': obj['table_name'],
-                'owner': obj['table_owner'].strip(),
-                'type': TABLE_TYPES.get(obj['table_type'], obj['table_type']),
-                'row_count': obj['row_count'] if obj['row_count'] >= 0 else None,
-                'columns': obj['columns'],
-                'indexes': obj['indexes'],
-                'foreign_keys': obj['foreign_keys'],
+                'name': row['table_name'],
+                'owner': row['table_owner'].strip(),
+                'type': TABLE_TYPES.get(row['table_type'], row['table_type']),
+                'row_count': row['row_count'] if row['row_count'] >= 0 else None,
+                'columns': json.loads(row['columns']),
+                'indexes': json.loads(row['indexes']),
+                'foreign_keys': json.loads(row['foreign_keys']),
             }
-            if obj['partition_key']:
-                table['partition_key'] = obj['partition_key']
-                table['num_partitions'] = obj['num_partitions']
+            partition_key = json.loads(row['partition_key'])
+            if partition_key:
+                table['partition_key'] = partition_key
+                table['num_partitions'] = row['num_partitions']
             schema['tables'].append(table)
         return {**database, 'schemas': [schema]}
 
