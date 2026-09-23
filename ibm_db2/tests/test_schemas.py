@@ -9,12 +9,13 @@ from datadog_checks.ibm_db2 import IbmDb2Check
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def collect_schemas(aggregator, instance, dd_run_check, monkeypatch, collect_schemas_config):
-    # Run the schema job inline so its payloads are submitted before the assertions.
-    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+def collect_schemas(aggregator, instance, dd_run_check, collect_schemas_config):
     instance['dbm'] = True
     instance['collect_schemas'] = collect_schemas_config
-    dd_run_check(IbmDb2Check('ibm_db2', {}, [instance]))
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    # Run the schema job inline so its payloads are submitted before the assertions.
+    check._schema_collection._run_sync = True
+    dd_run_check(check)
 
     schemas = []
     for event in aggregator.get_event_platform_events('dbm-metadata'):
@@ -25,10 +26,8 @@ def collect_schemas(aggregator, instance, dd_run_check, monkeypatch, collect_sch
     return schemas
 
 
-def test_schema_collection_payload(aggregator, instance, dd_run_check, monkeypatch):
-    schemas = collect_schemas(
-        aggregator, instance, dd_run_check, monkeypatch, {'include_schemas': ['TEST_SCHEMA', 'EMPTY_SCHEMA']}
-    )
+def test_schema_collection_payload(aggregator, instance, dd_run_check):
+    schemas = collect_schemas(aggregator, instance, dd_run_check, {'include_schemas': ['TEST_SCHEMA', 'EMPTY_SCHEMA']})
 
     assert {'name': 'EMPTY_SCHEMA', 'owner': 'DB2INST1', 'tables': []} in schemas
     tables = {
@@ -83,21 +82,18 @@ def test_schema_collection_payload(aggregator, instance, dd_run_check, monkeypat
         pytest.param({'enabled': False}, set(), id='disabled'),
     ],
 )
-def test_schema_collection_filters(
-    aggregator, instance, dd_run_check, monkeypatch, collect_schemas_config, expected_tables
-):
+def test_schema_collection_filters(aggregator, instance, dd_run_check, collect_schemas_config, expected_tables):
     collect_schemas_config = {'include_schemas': ['TEST_SCHEMA'], **collect_schemas_config}
-    schemas = collect_schemas(aggregator, instance, dd_run_check, monkeypatch, collect_schemas_config)
+    schemas = collect_schemas(aggregator, instance, dd_run_check, collect_schemas_config)
 
     assert {table['name'] for schema in schemas for table in schema['tables']} == expected_tables
 
 
-def test_schema_collection_max_columns(aggregator, instance, dd_run_check, monkeypatch):
+def test_schema_collection_max_columns(aggregator, instance, dd_run_check):
     schemas = collect_schemas(
         aggregator,
         instance,
         dd_run_check,
-        monkeypatch,
         {'include_schemas': ['TEST_SCHEMA'], 'include_tables': ['PARENT'], 'max_columns': 2},
     )
 

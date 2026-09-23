@@ -54,9 +54,7 @@ def test_table_space_state_change(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, instance, dd_run_check, monkeypatch):
-    # Run the custom queries job inline so its metrics are submitted before the assertions.
-    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+def test_custom_queries(aggregator, instance, dd_run_check):
     instance['custom_queries'] = [
         {
             'metric_prefix': 'ibm_db2',
@@ -70,6 +68,8 @@ def test_custom_queries(aggregator, instance, dd_run_check, monkeypatch):
     ]
 
     check = IbmDb2Check('ibm_db2', {}, [instance])
+    # Run the custom queries job inline so its metrics are submitted before the assertions.
+    check._custom_metrics._run_sync = True
     dd_run_check(check)
 
     # There is also `SYSTOOLSPACE` but it seems that takes some time to come up
@@ -85,9 +85,7 @@ def test_custom_queries(aggregator, instance, dd_run_check, monkeypatch):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries_init_config(aggregator, instance, dd_run_check, monkeypatch):
-    # Run the custom queries job inline so its metrics are submitted before the assertions.
-    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+def test_custom_queries_init_config(aggregator, instance, dd_run_check):
     init_config = {
         'global_custom_queries': [
             {
@@ -103,6 +101,8 @@ def test_custom_queries_init_config(aggregator, instance, dd_run_check, monkeypa
     }
 
     check = IbmDb2Check('ibm_db2', init_config, [instance])
+    # Run the custom queries job inline so its metrics are submitted before the assertions.
+    check._custom_metrics._run_sync = True
     dd_run_check(check)
 
     # There is also `SYSTOOLSPACE` but it seems that takes some time to come up
