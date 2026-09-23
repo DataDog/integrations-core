@@ -40,9 +40,6 @@ jobs:
         with:
           policy: integrations-core-api-key
 
-      # Install ddev from master so the measurement doesn't depend on changes the commit
-      # makes to ddev itself. The install must not be editable, because the checkout below
-      # replaces the sources it would point to.
       - name: Install ddev
         uses: ./.github/actions/setup-ddev
         with:
