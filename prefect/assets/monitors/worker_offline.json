@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-09-23",
+  "definition": {
+    "message": "{{#is_alert}}\nWorker {{worker_name.name}} in pool {{work_pool_name.name}} has not sent a heartbeat for at least 15 minutes (currently {{value}} seconds since the last heartbeat). It is not picking up flow runs. Check the worker process and its connection to the Prefect API.\n{{/is_alert}}\n\n{{#is_recovery}}\nWorker {{worker_name.name}} in pool {{work_pool_name.name}} is sending heartbeats again and can pick up flow runs.\n{{/is_recovery}}",
+    "name": "[Prefect] Worker {{worker_name.name}} in pool {{work_pool_name.name}} has stopped heartbeating",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 90,
+        "critical_recovery": 45
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "min(last_15m):max:prefect.server.work_pool.worker.heartbeat_age_seconds{*} by {work_pool_name,worker_name} > 90",
+    "tags": [
+      "integration:prefect"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the time since each worker last sent a heartbeat to the Prefect server. A worker that stops heartbeating is offline and no longer picks up flow runs from its work pool.",
+  "last_updated_at": "2026-09-23",
+  "tags": [
+    "integration:prefect"
+  ],
+  "title": "Worker has stopped sending heartbeats",
+  "version": 2
+}

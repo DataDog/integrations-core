@@ -1,0 +1,310 @@
+id: "prefect"
+tests:
+ -
+  sample: |-
+    16:12:06.026 | ERROR   | Task run 'fail-974' - Task run failed with exception: RuntimeError('Intentional fail for testing')
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1013, in run_context
+        yield self
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1672, in run_task_sync
+        engine.call_task_fn(txn)
+        ~~~~~~~~~~~~~~~~~~~^^^^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1030, in call_task_fn
+        result = call_with_parameters(self.task.fn, parameters)
+      File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+        return fn(*args, **kwargs)
+      File "/app/scripts/failing_flow.py", line 7, in fail
+        raise RuntimeError("Intentional fail for testing")
+    RuntimeError: Intentional fail for testing
+  result:
+    custom:
+      error:
+        kind: "RuntimeError"
+        message: "Intentional fail for testing"
+        stack: |2-
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1013, in run_context
+              yield self
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1672, in run_task_sync
+              engine.call_task_fn(txn)
+              ~~~~~~~~~~~~~~~~~~~^^^^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1030, in call_task_fn
+              result = call_with_parameters(self.task.fn, parameters)
+            File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+              return fn(*args, **kwargs)
+            File "/app/scripts/failing_flow.py", line 7, in fail
+              raise RuntimeError("Intentional fail for testing")
+          RuntimeError: Intentional fail for testing
+      level: "ERROR"
+      prefect:
+        task_run_name: "fail-974"
+      timestamp: 31507926026
+    message: "Task run failed with exception: RuntimeError('Intentional fail for testing')"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507926026
+ -
+  sample: |-
+    16:12:06.041 | ERROR   | Flow run 'nondescript-swift' - Encountered exception during execution: RuntimeError('Intentional fail for testing')
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 989, in run_context
+        yield self
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1634, in run_flow_sync
+        engine.call_flow_fn()
+        ~~~~~~~~~~~~~~~~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1009, in call_flow_fn
+        result = call_with_parameters(self.flow.fn, self.parameters)
+      File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+        return fn(*args, **kwargs)
+      File "/app/scripts/failing_flow.py", line 19, in failing_flow
+        fail()
+        ~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/tasks.py", line 1209, in __call__
+        return run_task(
+            task=self,
+        ...<2 lines>...
+            return_type=return_type,
+        )
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1899, in run_task
+        return run_task_sync(**kwargs)
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1674, in run_task_sync
+        return engine.state if return_type == "state" else engine.result()
+                                                           ~~~~~~~~~~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 610, in result
+        raise self._raised
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1013, in run_context
+        yield self
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1672, in run_task_sync
+        engine.call_task_fn(txn)
+        ~~~~~~~~~~~~~~~~~~~^^^^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1030, in call_task_fn
+        result = call_with_parameters(self.task.fn, parameters)
+      File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+        return fn(*args, **kwargs)
+      File "/app/scripts/failing_flow.py", line 7, in fail
+        raise RuntimeError("Intentional fail for testing")
+    RuntimeError: Intentional fail for testing
+  result:
+    custom:
+      error:
+        kind: "RuntimeError"
+        message: "Intentional fail for testing"
+        stack: |2-
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 989, in run_context
+              yield self
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1634, in run_flow_sync
+              engine.call_flow_fn()
+              ~~~~~~~~~~~~~~~~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1009, in call_flow_fn
+              result = call_with_parameters(self.flow.fn, self.parameters)
+            File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+              return fn(*args, **kwargs)
+            File "/app/scripts/failing_flow.py", line 19, in failing_flow
+              fail()
+              ~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/tasks.py", line 1209, in __call__
+              return run_task(
+                  task=self,
+              ...<2 lines>...
+                  return_type=return_type,
+              )
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1899, in run_task
+              return run_task_sync(**kwargs)
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1674, in run_task_sync
+              return engine.state if return_type == "state" else engine.result()
+                                                                 ~~~~~~~~~~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 610, in result
+              raise self._raised
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1013, in run_context
+              yield self
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1672, in run_task_sync
+              engine.call_task_fn(txn)
+              ~~~~~~~~~~~~~~~~~~~^^^^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1030, in call_task_fn
+              result = call_with_parameters(self.task.fn, parameters)
+            File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+              return fn(*args, **kwargs)
+            File "/app/scripts/failing_flow.py", line 7, in fail
+              raise RuntimeError("Intentional fail for testing")
+          RuntimeError: Intentional fail for testing
+      level: "ERROR"
+      prefect:
+        flow_run_name: "nondescript-swift"
+      timestamp: 31507926041
+    message: "Encountered exception during execution: RuntimeError('Intentional fail for testing')"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507926041
+ -
+  sample: |-
+    16:12:07.663 | ERROR   | prefect.engine - Execution of flow run '533085fe-a0fa-446b-b5b1-ed276ce3a3b9' exited with unexpected exception
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.13/site-packages/prefect/engine.py", line 57, in handle_engine_signals
+        yield
+      File "/usr/local/lib/python3.13/site-packages/prefect/engine.py", line 124, in <module>
+        run_flow(flow, flow_run=flow_run, error_logger=run_logger)
+        ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1791, in run_flow
+        ret_val = run_flow_sync(**kwargs)
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1636, in run_flow_sync
+        return engine.state if return_type == "state" else engine.result()
+                                                           ~~~~~~~~~~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 539, in result
+        raise self._raised
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 989, in run_context
+        yield self
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1634, in run_flow_sync
+        engine.call_flow_fn()
+        ~~~~~~~~~~~~~~~~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1009, in call_flow_fn
+        result = call_with_parameters(self.flow.fn, self.parameters)
+      File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+        return fn(*args, **kwargs)
+      File "/app/scripts/failing_flow.py", line 19, in failing_flow
+        fail()
+        ~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/tasks.py", line 1209, in __call__
+        return run_task(
+            task=self,
+        ...<2 lines>...
+            return_type=return_type,
+        )
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1899, in run_task
+        return run_task_sync(**kwargs)
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1674, in run_task_sync
+        return engine.state if return_type == "state" else engine.result()
+                                                           ~~~~~~~~~~~~~^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 610, in result
+        raise self._raised
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1013, in run_context
+        yield self
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1672, in run_task_sync
+        engine.call_task_fn(txn)
+        ~~~~~~~~~~~~~~~~~~~^^^^^
+      File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1030, in call_task_fn
+        result = call_with_parameters(self.task.fn, parameters)
+      File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+        return fn(*args, **kwargs)
+      File "/app/scripts/failing_flow.py", line 7, in fail
+        raise RuntimeError("Intentional fail for testing")
+    RuntimeError: Intentional fail for testing
+  result:
+    custom:
+      error:
+        kind: "RuntimeError"
+        message: "Intentional fail for testing"
+        stack: |2-
+            File "/usr/local/lib/python3.13/site-packages/prefect/engine.py", line 57, in handle_engine_signals
+              yield
+            File "/usr/local/lib/python3.13/site-packages/prefect/engine.py", line 124, in <module>
+              run_flow(flow, flow_run=flow_run, error_logger=run_logger)
+              ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1791, in run_flow
+              ret_val = run_flow_sync(**kwargs)
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1636, in run_flow_sync
+              return engine.state if return_type == "state" else engine.result()
+                                                                 ~~~~~~~~~~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 539, in result
+              raise self._raised
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 989, in run_context
+              yield self
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1634, in run_flow_sync
+              engine.call_flow_fn()
+              ~~~~~~~~~~~~~~~~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/flow_engine.py", line 1009, in call_flow_fn
+              result = call_with_parameters(self.flow.fn, self.parameters)
+            File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+              return fn(*args, **kwargs)
+            File "/app/scripts/failing_flow.py", line 19, in failing_flow
+              fail()
+              ~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/tasks.py", line 1209, in __call__
+              return run_task(
+                  task=self,
+              ...<2 lines>...
+                  return_type=return_type,
+              )
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1899, in run_task
+              return run_task_sync(**kwargs)
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1674, in run_task_sync
+              return engine.state if return_type == "state" else engine.result()
+                                                                 ~~~~~~~~~~~~~^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 610, in result
+              raise self._raised
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1013, in run_context
+              yield self
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1672, in run_task_sync
+              engine.call_task_fn(txn)
+              ~~~~~~~~~~~~~~~~~~~^^^^^
+            File "/usr/local/lib/python3.13/site-packages/prefect/task_engine.py", line 1030, in call_task_fn
+              result = call_with_parameters(self.task.fn, parameters)
+            File "/usr/local/lib/python3.13/site-packages/prefect/utilities/callables.py", line 210, in call_with_parameters
+              return fn(*args, **kwargs)
+            File "/app/scripts/failing_flow.py", line 7, in fail
+              raise RuntimeError("Intentional fail for testing")
+          RuntimeError: Intentional fail for testing
+      level: "ERROR"
+      prefect:
+        logger:
+          name: "prefect.engine"
+      timestamp: 31507927663
+    message: "Execution of flow run '533085fe-a0fa-446b-b5b1-ed276ce3a3b9' exited with unexpected exception"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507927663
+ -
+  sample: "16:12:06.040 | ERROR   | Task run 'fail-974' - Finished in state Failed('Task run encountered an exception RuntimeError: Intentional fail for testing')"
+  result:
+    custom:
+      level: "ERROR"
+      prefect:
+        task_run_name: "fail-974"
+      timestamp: 31507926040
+    message: "Finished in state Failed('Task run encountered an exception RuntimeError: Intentional fail for testing')"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507926040
+ -
+  sample: "16:12:05.896 | INFO    | Flow run 'nondescript-swift' - Beginning flow run 'nondescript-swift' for flow 'failing-flow'"
+  result:
+    custom:
+      level: "INFO"
+      prefect:
+        flow_run_name: "nondescript-swift"
+      timestamp: 31507925896
+    message: "Beginning flow run 'nondescript-swift' for flow 'failing-flow'"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507925896
+ -
+  sample: "16:12:01.962 | INFO    | prefect.flow_runs.worker - Worker 'ProcessWorker cc4641e5-f890-492e-9498-1b9c4308a1b3' submitting flow run '533085fe-a0fa-446b-b5b1-ed276ce3a3b9'"
+  result:
+    custom:
+      level: "INFO"
+      prefect:
+        logger:
+          name: "prefect.flow_runs.worker"
+      timestamp: 31507921962
+    message: "Worker 'ProcessWorker cc4641e5-f890-492e-9498-1b9c4308a1b3' submitting flow run '533085fe-a0fa-446b-b5b1-ed276ce3a3b9'"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507921962
+ -
+  sample: "16:11:49.747 | WARNING | EventsWorker - Still processing items: 1 items remaining..."
+  result:
+    custom:
+      level: "WARNING"
+      prefect:
+        logger:
+          name: "EventsWorker"
+      timestamp: 31507909747
+    message: "Still processing items: 1 items remaining..."
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31507909747

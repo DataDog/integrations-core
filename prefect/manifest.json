@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "dcba1320-9d38-4fb4-bd9e-56177f8a01b0",
+  "app_id": "prefect",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Prefect Server orchestration components.",
+    "title": "Prefect",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Category::Orchestration",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 90093423,
+      "source_type_name": "Prefect",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "prefect.",
+        "check": "prefect.server.deployment.is_ready",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+      "Prefect Overview": "assets/dashboards/prefect_overview.json"
+    },
+    "monitors": {
+      "Work queue backlog is abnormally high": "assets/monitors/high_backlog_per_queue_pool.json",
+      "Work queue has not been polled by any worker": "assets/monitors/queue_not_polling.json",
+      "Worker has stopped sending heartbeats": "assets/monitors/worker_offline.json",
+      "Flow run p95 execution time is abnormally high": "assets/monitors/latency_breach.json",
+      "Flow run failure rate is high": "assets/monitors/error_rate_spike.json"
+    },
+    "logs": {
+      "source": "prefect"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

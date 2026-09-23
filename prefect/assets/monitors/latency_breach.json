@@ -1,0 +1,40 @@
+{
+  "created_at": "2026-09-23",
+  "definition": {
+    "message": "{{#is_alert}}\nThe p95 execution time of flow runs for deployment {{deployment_name.name}} is above its expected range (currently {{value}} seconds, `prefect.server.flow_runs.execution_duration.95percentile`). Look at recent runs for slow tasks, retries, upstream latency, or resource contention on this deployment's infrastructure.\n{{/is_alert}}\n\n{{#is_recovery}}\nThe p95 execution time of flow runs for deployment {{deployment_name.name}} is back within its expected range.\n{{/is_recovery}}",
+    "name": "[Prefect] P95 flow run duration is abnormally high for deployment {{deployment_name.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_1h",
+        "trigger_window": "last_1h"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_4h):anomalies(max:prefect.server.flow_runs.execution_duration.95percentile{*} by {deployment_name}, 'basic', 2, direction='above', alert_window='last_1h', interval=60, count_default_zero='false') >= 1",
+    "tags": [
+      "integration:prefect"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the 95th percentile execution time of flow runs for each deployment and alerts when it rises well above that deployment's usual range. Slower runs can push work past its deadline and hold worker capacity longer than planned.",
+  "last_updated_at": "2026-09-23",
+  "tags": [
+    "integration:prefect"
+  ],
+  "title": "Flow run p95 execution time is abnormally high",
+  "version": 2
+}

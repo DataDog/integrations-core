@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-09-23",
+  "definition": {
+    "message": "{{#is_alert}}\nA share of {{value}} of the flow runs that finished on the Prefect server in the last hour ended in a Failed state (`prefect.server.flow_runs.failed.count`). Review recent failed runs for a common error, such as an infrastructure, credential, or upstream dependency problem.\n{{/is_alert}}\n\n{{#is_recovery}}\nThe share of flow runs ending in a Failed state on the Prefect server has dropped back below the alert threshold.\n{{/is_recovery}}",
+    "name": "[Prefect] Flow run failure rate is high",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0.1,
+        "critical_recovery": 0.05
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "sum(last_1h):sum:prefect.server.flow_runs.failed.count{*}.as_count() / (sum:prefect.server.flow_runs.completed.count{*}.as_count() + sum:prefect.server.flow_runs.failed.count{*}.as_count() + sum:prefect.server.flow_runs.crashed.count{*}.as_count() + sum:prefect.server.flow_runs.cancelled.count{*}.as_count()) > 0.1",
+    "tags": [
+      "integration:prefect"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the share of flow runs that ended in a Failed state, out of all runs that reached a final state, over the last hour. A high failure rate across the Prefect server usually points to a shared cause such as broken infrastructure, bad credentials, or an unavailable dependency.",
+  "last_updated_at": "2026-09-23",
+  "tags": [
+    "integration:prefect"
+  ],
+  "title": "Flow run failure rate is high",
+  "version": 2
+}
