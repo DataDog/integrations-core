@@ -248,7 +248,7 @@ def _make_schema_registry_check(check, instance_overrides=None):
     """Return a check instance wired with a mock Kafka client and persistent cache mocks."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'schema_registry_url': 'http://localhost:8081',
         'monitor_unlisted_consumer_groups': True,
     }
@@ -277,10 +277,10 @@ def _wire_cache(kafka_consumer_check, seed=None):
 
 @pytest.fixture
 def cluster_config():
-    """Base configuration for cluster monitoring tests."""
+    """Base configuration for Kafka Console tests."""
     return {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
     }
 
 
@@ -292,10 +292,10 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     - Verifies schema registry event structure and content
     - Tests throughput calculation with persistent cache
     """
-    # Create instance config with cluster monitoring enabled
+    # Create instance config with Kafka Console enabled
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'schema_registry_url': 'http://localhost:8081',
         'monitor_unlisted_consumer_groups': True,
         'tags': ['test_tag:test_value'],
@@ -643,7 +643,7 @@ def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
     """Test that negative throughput is not reported when offsets decrease (data loss scenario)."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'tags': ['test_tag:test_value'],
     }
 
@@ -695,7 +695,7 @@ def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
     """Test that throughput calculation skips unavailable partitions (-1 offset)."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'tags': ['test_tag:test_value'],
     }
 
@@ -752,7 +752,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
     This validates the fix for the bug where cache TTL was being reset on every check run,
     preventing events from ever being sent again unless content changed.
     """
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
@@ -915,7 +915,7 @@ def test_schema_registry_two_tier_ttl(check):
     """Test that schema version checks reuse CONFIGS_REFRESH_INTERVAL and event re-emission uses EVENT_CACHE_TTL."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'schema_registry_url': 'http://localhost:8081',
     }
 
@@ -1128,7 +1128,7 @@ def test_kafka_configs_refresh_interval(check, interval, expected_interval, expe
     """Test that kafka_configs_refresh_interval drives broker/topic TTLs and jitter."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
     }
     if interval is not None:
         instance['kafka_configs_refresh_interval'] = interval
@@ -1144,7 +1144,7 @@ def test_fetch_earliest_offsets_cached_across_calls(check):
     """fetch_earliest_offsets should hit the broker once, then serve later calls from cache."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
     }
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
@@ -1169,7 +1169,7 @@ def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
     """A fresh cache that doesn't cover every requested partition triggers a full refetch, keeping the same TTL."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
     }
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
@@ -1196,7 +1196,7 @@ def test_fetch_earliest_offsets_drops_negative_offsets(check, caplog):
     caplog.set_level(logging.WARNING)
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
     }
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
@@ -1228,7 +1228,7 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     """Test that OIDC OAuth token is fetched and passed as Bearer header for Schema Registry."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'schema_registry_url': 'http://localhost:8081',
         'schema_registry_oauth_token_provider': {
             'url': 'https://idp.example.com/oauth/token',
@@ -1288,7 +1288,7 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     """Test that expired OIDC token is refreshed on next check run."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'schema_registry_url': 'http://localhost:8081',
         'schema_registry_oauth_token_provider': {
             'url': 'https://idp.example.com/oauth/token',
@@ -1341,7 +1341,7 @@ def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
     """Test that a valid (non-expired) token is not re-fetched."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'schema_registry_url': 'http://localhost:8081',
         'schema_registry_oauth_token_provider': {
             'url': 'https://idp.example.com/oauth/token',
@@ -1404,7 +1404,7 @@ def test_cluster_metadata_with_cluster_id_override(check, dd_run_check, aggregat
     """When kafka_cluster_id_override is set, metadata metrics and events use the override."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'monitor_unlisted_consumer_groups': True,
         'kafka_cluster_id_override': 'my-override-id',
         'tags': ['test_tag:test_value'],
@@ -1496,7 +1496,7 @@ def test_partition_out_of_sync_broker_id_tag(
     """Under-replicated partitions expose an ``out_of_sync_broker_id`` tag per replica missing from the ISR."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'tags': ['test_tag:test_value'],
     }
 
@@ -1538,7 +1538,7 @@ def test_partition_out_of_sync_broker_id_tag(
 
 def test_heartbeat_brokers_populated(check):
     """Heartbeat payload includes the broker list when metadata is available."""
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
     kafka_consumer_check.client = mock_kafka_client
@@ -1558,7 +1558,7 @@ def test_heartbeat_brokers_populated(check):
 
 def test_heartbeat_brokers_empty_when_no_metadata(check):
     """Heartbeat payload has an empty broker list when _cluster_metadata is None."""
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
     mock_kafka_client._cluster_metadata = None
@@ -1742,7 +1742,7 @@ def _collect_groups(check, describe_result, group_id='test-group'):
     Reuses the shared seed_mock_kafka_client wiring and only swaps in the
     consumer-group futures, so the admin-client mock setup is not duplicated.
     """
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
 
     mock_client = seed_mock_kafka_client()
@@ -1755,7 +1755,7 @@ def _collect_groups(check, describe_result, group_id='test-group'):
 
 def _collect_groups_with_cache(check, describe_result, seed=None, group_id='test-group'):
     """Like _collect_groups but wires the persistent cache so membership-change logic is exercised."""
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
 
     mock_client = seed_mock_kafka_client()
@@ -2013,7 +2013,7 @@ def test_heartbeat_connect_api_status_present_when_urls_configured(check):
     """connect_api_status appears in heartbeat payload when Connect URLs are configured."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'kafka_connect_url': 'http://connect:8083',
     }
     kafka_consumer_check = check(instance)
@@ -2040,7 +2040,7 @@ def test_heartbeat_connect_api_status_present_when_urls_configured(check):
 
 def test_heartbeat_connect_api_status_absent_when_no_urls(check):
     """connect_api_status is absent from heartbeat payload when no Connect URLs are configured."""
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
     kafka_consumer_check.event_platform_event = mock.Mock()
 
@@ -2055,7 +2055,7 @@ def test_heartbeat_connect_api_status_absent_when_no_urls(check):
 
 def test_collect_connect_status_returns_none_when_unconfigured(check):
     """_collect_connect_status returns None when no Connect URLs are configured."""
-    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
     kafka_consumer_check = check(instance)
 
     result = kafka_consumer_check._collect_connect_status('test-cluster')
@@ -2066,7 +2066,7 @@ def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
     """_collect_connect_status returns {} when the collector raises, instead of propagating."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
+        'enable_kafka_console': True,
         'kafka_connect_url': 'http://connect:8083',
     }
     kafka_consumer_check = check(instance)
@@ -2079,3 +2079,62 @@ def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
         result = kafka_consumer_check._collect_connect_status('test-cluster')
 
     assert result == {}
+
+
+def test_truncate_config_preserves_retention_keys_for_topic(check):
+    """_truncate_config_for_event must keep retention.ms and retention.bytes even when
+    a topic has 30+ configs (e.g. tiered-storage topics).
+
+    Without the important_topic_configs set, retention.ms and retention.bytes sort
+    late alphabetically and get cut by the max_configs=30 cap.
+    """
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_kafka_console': True}
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    # Simulate 32 topic configs (as returned by describe_configs for a tiered-storage topic)
+    topic_configs = {
+        'cleanup.policy': 'delete',
+        'compression.gzip.level': '-1',
+        'compression.lz4.level': '9',
+        'compression.type': 'producer',
+        'compression.zstd.level': '3',
+        'delete.retention.ms': '86400000',
+        'file.delete.delay.ms': '60000',
+        'flush.messages': '9223372036854775807',
+        'flush.ms': '9223372036854775807',
+        'follower.replication.throttled.replicas': '',
+        'index.interval.bytes': '4096',
+        'leader.replication.throttled.replicas': '',
+        'local.retention.bytes': '-2',
+        'local.retention.ms': '3600000',
+        'max.compaction.lag.ms': '9223372036854775807',
+        'max.message.bytes': '20971520',
+        'message.downconversion.enable': 'true',
+        'message.format.version': '3.0-IV1',
+        'message.timestamp.after.max.ms': '9223372036854775807',
+        'message.timestamp.before.max.ms': '9223372036854775807',
+        'message.timestamp.difference.max.ms': '9223372036854775807',
+        'message.timestamp.type': 'LogAppendTime',
+        'min.cleanable.dirty.ratio': '0.5',
+        'min.compaction.lag.ms': '0',
+        'min.insync.replicas': '1',
+        'preallocate': 'false',
+        'remote.log.copy.disable': 'false',
+        'remote.log.delete.on.disable': 'false',
+        'remote.storage.enable': 'true',
+        'retention.bytes': '-1',
+        'retention.ms': '14400000',
+        'unclean.leader.election.enable': 'false',
+    }
+
+    result = collector._truncate_config_for_event(topic_configs, max_configs=30)
+
+    assert 'retention.ms' in result, 'retention.ms must not be truncated'
+    assert 'retention.bytes' in result, 'retention.bytes must not be truncated'
+    assert 'local.retention.ms' in result, 'local.retention.ms must not be truncated'
+    assert 'local.retention.bytes' in result, 'local.retention.bytes must not be truncated'
+    assert 'cleanup.policy' in result, 'cleanup.policy must not be truncated'
+    assert 'max.message.bytes' in result, 'max.message.bytes must not be truncated'
+    assert 'remote.storage.enable' in result, 'remote.storage.enable must not be truncated'
+    assert len(result) == 30, 'should respect max_configs=30'

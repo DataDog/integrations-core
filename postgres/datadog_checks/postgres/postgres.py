@@ -5,6 +5,7 @@ import contextlib
 import copy
 import functools
 import os
+from collections import defaultdict
 from time import time
 
 import psycopg
@@ -692,11 +693,11 @@ class PostgreSql(DatabaseCheck):
                         # if this is a relation-specific query, we need to list all relations last
                         if is_relations:
                             schema_field = get_schema_field(descriptors)
-                            formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                            cursor.execute(formatted_query)
+                            query = self._relations_manager.filter_relation_query(query, schema_field)
                         else:
-                            self.log.debug("Running query: %s", str(query))
-                            cursor.execute(query.replace(r'%', r'%%'))
+                            query = query.replace(r'%', r'%%')
+                        self.log.debug("Running query: %s", query)
+                        cursor.execute(query)
 
                         results = cursor.fetchall()
                         if not results:
@@ -832,19 +833,38 @@ class PostgreSql(DatabaseCheck):
 
         self.metrics_cache.table_activity_metrics[db][tablename][metric_name] = value
 
-    def _collect_metric_autodiscovery(self, instance_tags, scopes, scope_type):
+    def _collect_metric_autodiscovery(self, instance_tags, scope_groups: list[tuple[str, list[dict]]]):
+        """
+        Collect metrics for every autodiscovered database, visiting each database once so its
+        connection pool stays warm across all of its queries.
+
+        Each `scope_groups` entry pairs a telemetry scope type with its scopes; time is reported per
+        group. A group that raises for one database does not skip that database's remaining groups.
+        """
         if not self.autodiscovery:
             return
 
-        start_time = time()
+        groups = [(scope_type, scopes) for scope_type, scopes in scope_groups if scopes]
+        if not groups:
+            return
+
+        elapsed_ms_by_scope_type = defaultdict(float)
         databases = self.autodiscovery.get_items()
         for db in databases:
-            try:
-                for scope in scopes:
-                    self._query_scope(scope, instance_tags, False, dbname=db)
-            except Exception as e:
-                self.log.error("Error collecting metrics for database %s %s", db, str(e))
-        elapsed_ms = (time() - start_time) * 1000
+            for scope_type, scopes in groups:
+                start_time = time()
+                try:
+                    for scope in scopes:
+                        self._query_scope(scope, instance_tags, False, dbname=db)
+                except Exception as e:
+                    self.log.error("Error collecting metrics for database %s %s", db, str(e))
+                finally:
+                    elapsed_ms_by_scope_type[scope_type] += (time() - start_time) * 1000
+
+        for scope_type, _ in groups:
+            self._report_autodiscovery_timing(scope_type, elapsed_ms_by_scope_type[scope_type])
+
+    def _report_autodiscovery_timing(self, scope_type: str, elapsed_ms: float) -> None:
         self.histogram(
             f"dd.postgres.{scope_type}.time",
             elapsed_ms,
@@ -914,22 +934,18 @@ class PostgreSql(DatabaseCheck):
             metric_scope.append(SLRU_METRICS)
 
         # Do we need relation-specific metrics?
+        relations_scopes = []
         if self._config.relations:
             relations_scopes = list(RELATION_METRICS)
 
             if self._config.collect_bloat_metrics:
                 relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
 
-            # If autodiscovery is enabled, get relation metrics from all databases found
-            if self.autodiscovery:
-                self._collect_metric_autodiscovery(
-                    instance_tags,
-                    scopes=relations_scopes,
-                    scope_type='_collect_relations_autodiscovery',
-                )
-            # otherwise, continue just with dbname
-            else:
+            # If autodiscovery is enabled, relation metrics are collected from all databases found
+            # in the single autodiscovery pass below. Otherwise, continue just with dbname.
+            if not self.autodiscovery:
                 metric_scope.extend(relations_scopes)
+                relations_scopes = []
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -965,17 +981,18 @@ class PostgreSql(DatabaseCheck):
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(activity_metrics, instance_tags, False)
 
-        if per_database_metric_scope:
-            # if autodiscovery is enabled, get per-database metrics from all databases found
-            if self.autodiscovery:
-                self._collect_metric_autodiscovery(
-                    instance_tags,
-                    scopes=per_database_metric_scope,
-                    scope_type='_collect_stat_autodiscovery',
-                )
-            else:
-                # otherwise, continue just with dbname
-                metric_scope.extend(per_database_metric_scope)
+        # With autodiscovery, every per-database scope is collected in a single pass over the
+        # database list so that each database is visited once. Without it, continue just with dbname.
+        if self.autodiscovery:
+            self._collect_metric_autodiscovery(
+                instance_tags,
+                scope_groups=[
+                    ('_collect_relations_autodiscovery', relations_scopes),
+                    ('_collect_stat_autodiscovery', per_database_metric_scope),
+                ],
+            )
+        elif per_database_metric_scope:
+            metric_scope.extend(per_database_metric_scope)
 
         for scope in list(metric_scope):
             self._query_scope(scope, instance_tags, False)
@@ -1123,7 +1140,7 @@ class PostgreSql(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",

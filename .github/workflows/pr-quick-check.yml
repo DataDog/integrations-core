@@ -59,12 +59,14 @@ jobs:
         curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
 
     - name: Check changelog
+      env:
+        REPO: ${{ inputs.repo }}
       run: >-
         python ${{ env.CHECK_SCRIPT }} changelog
         --diff-file /tmp/diff
         --pr-file "$GITHUB_EVENT_PATH"
         ${{ github.event.pull_request.base.repo.private && '--private' || '' }}
-        --repo "${{ inputs.repo }}"
+        --repo "$REPO"
 
     - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
       # Make sure to update the list of allowed actions in the repo's settings when you bump the hash.

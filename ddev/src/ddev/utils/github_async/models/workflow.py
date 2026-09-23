@@ -46,12 +46,12 @@ class WorkflowJobConclusion(StrEnum):
 
 
 class JobStepStatus(StrEnum):
-    """The status of a single step within a workflow job.
+    """The status of a step within a workflow job.
 
-    The `job` schema's `steps` items declare `status` as
-    `enum: [queued, in_progress, completed]` (a narrower set than the job's own
-    status). Their `conclusion` is a nullable string with no `enum`, so it stays
-    a plain `str`.
+    The API returns `pending` for post-job steps, although its published schema omits it.
+    Observed response:
+    https://github.com/DataDog/integrations-core/actions/runs/34215910364/job/102398685006
+
     Reference:
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
     """
@@ -59,6 +59,7 @@ class JobStepStatus(StrEnum):
     QUEUED = auto()
     IN_PROGRESS = auto()
     COMPLETED = auto()
+    PENDING = auto()
 
 
 class WorkflowRun(BaseModel):
@@ -66,7 +67,9 @@ class WorkflowRun(BaseModel):
 
     The `workflow-run` schema declares `status` and `conclusion` as plain
     nullable strings with no `enum`, so they are intentionally kept as free-form
-    strings rather than modeled as a StrEnum.
+    strings rather than modeled as a StrEnum. `status` is also in the schema's
+    `required` list, so it is typed `str | None` with no default: the key is
+    always present and only its value may be null.
     Reference:
     https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run
     """
@@ -75,7 +78,7 @@ class WorkflowRun(BaseModel):
 
     id: int
     name: str | None = None
-    status: str
+    status: str | None
     conclusion: str | None = None
     html_url: str
     created_at: str | None = None

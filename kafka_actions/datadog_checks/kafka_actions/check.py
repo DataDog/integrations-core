@@ -689,6 +689,37 @@ class KafkaActionsCheck(AgentCheck):
             if not success:
                 raise Exception(f"Failed to delete configs for topic '{topic}'")
 
+        # Emit the updated topic config so the UI reflects changes immediately,
+        # without waiting for the kafka_consumer check's cache to expire.
+        self._emit_topic_config(topic)
+
+    def _emit_topic_config(self, topic: str):
+        """Fetch and emit the current topic config to the data-streams-message track.
+
+        Called after a successful update_topic_config or delete_topic_config action
+        so the backend UI reflects the change immediately, without waiting for
+        the kafka_consumer check's config cache (default 180s) to expire.
+        """
+        try:
+            topic_config = self.kafka_client.describe_topic_config(topic)
+            if not topic_config:
+                self.log.debug("No config returned for topic '%s', skipping emit", topic)
+                return
+
+            self.log.debug("Emitting updated config for topic '%s' after config change", topic)
+
+            payload = {
+                'collection_timestamp': int(time.time() * 1000),
+                'kafka_cluster_id': self.cluster,
+                'topic': topic,
+                'config_type': 'topic',
+                'config': topic_config,
+            }
+
+            self.event_platform_event(json.dumps(payload), "data-streams-message")
+        except Exception as e:
+            self.log.warning("Failed to emit topic config for '%s': %s", topic, e)
+
     def _action_delete_topic(self):
         """Delete a Kafka topic (RFC Action #4).
 

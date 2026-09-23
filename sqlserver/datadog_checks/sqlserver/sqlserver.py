@@ -63,6 +63,7 @@ from datadog_checks.sqlserver.utils import (
     construct_use_statement,
     parse_sqlserver_major_version,
     parse_sqlserver_year,
+    serialize_database_names,
 )
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
@@ -177,15 +178,16 @@ class SQLServer(DatabaseCheck):
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
 
         # DBM
-        self.statement_metrics = SqlserverStatementMetrics(self, self._config)
-        self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
-        self.sql_metadata = SqlserverMetadata(self, self._config)
-        self.activity = SqlserverActivity(self, self._config)
-        self.agent_history = SqlserverAgentHistory(self, self._config)
-        self.deadlocks = Deadlocks(self, self._config)
-        self.data_observability = SqlServerDataObservability(self, self._config)
+        self.statement_metrics = None
+        self.procedure_metrics = None
+        self.sql_metadata = None
+        self.activity = None
+        self.agent_history = None
+        self.deadlocks = None
+        self.data_observability = None
+        self._register_async_jobs()
 
-        # XE Session Handlers
+        # XE Session Handlers, registered by initialize_xe_session_handlers()
         self.xe_session_handlers = []
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -209,28 +211,35 @@ class SQLServer(DatabaseCheck):
 
         self._submit_initialization_health_event()
 
+    def _register_async_jobs(self):
+        """Build and register the async jobs enabled by this check's configuration."""
+        if self._config.dbm_enabled:
+            self.statement_metrics = self.register_async_job(SqlserverStatementMetrics(self, self._config))
+            self.procedure_metrics = self.register_async_job(SqlserverProcedureMetrics(self, self._config))
+            self.sql_metadata = self.register_async_job(SqlserverMetadata(self, self._config))
+            self.activity = self.register_async_job(SqlserverActivity(self, self._config))
+            self.agent_history = self.register_async_job(SqlserverAgentHistory(self, self._config))
+            self.deadlocks = self.register_async_job(Deadlocks(self, self._config))
+        if self._config.data_observability.enabled:
+            self.data_observability = self.register_async_job(SqlServerDataObservability(self, self._config))
+
     def initialize_xe_session_handlers(self):
-        """Initialize the XE session handlers without starting them"""
-        # Initialize XE session handlers if not already initialized
-        if not self.xe_session_handlers:
+        """Build and register the XE session handlers without starting them"""
+        if not self.xe_session_handlers and self._config.dbm_enabled:
             self.xe_session_handlers = get_xe_session_handlers(self, self._config)
+            for handler in self.xe_session_handlers:
+                self.register_async_job(handler)
             self.log.debug("Initialized %d XE session handlers", len(self.xe_session_handlers))
 
-    def cancel(self):
-        self.statement_metrics.cancel()
-        self.procedure_metrics.cancel()
-        self.activity.cancel()
-        self.sql_metadata.cancel()
-        self.deadlocks.cancel()
-        self.agent_history.cancel()
-        self.data_observability.cancel()
-
-        # Cancel all XE session handlers
-        for handler in self.xe_session_handlers:
-            try:
-                handler.cancel()
-            except Exception as e:
-                self.log.error("Error canceling XE session handler for %s: %s", handler.session_name, e)
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime."""
+        self._query_manager = None
+        self._database_metrics = None
+        self.health = None
+        self._connection = None
+        self.tag_manager = None
+        self.proc_type_mapping = {}
+        self.instance_metrics = []
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -261,8 +270,21 @@ class SQLServer(DatabaseCheck):
         except Exception as e:
             self.log.error("Error submitting health event for initialization: %s", e)
 
-    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
+    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False, operation_tags=None):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
+        if track_operation_time and operation_tags:
+            operations = {query['query']: query['name'] for query in queries}
+            execute_query = executor
+
+            def execute_tracked_query(query: str, params: tuple | None = None) -> list[tuple]:
+                with tracked_query(self, operation=operations[query], tags=operation_tags):
+                    if params is not None:
+                        return execute_query(query, params=params)
+                    return execute_query(query)
+
+            executor = execute_tracked_query
+            track_operation_time = False
+
         return QueryExecutor(
             executor,
             self,
@@ -586,14 +608,15 @@ class SQLServer(DatabaseCheck):
 
             self.log.debug("Resulting filtered databases: %s", filtered_dbs)
             self._ad_last_check = now
-            if filtered_dbs != self.databases:
+            databases_changed = filtered_dbs != self.databases
+            if databases_changed:
                 self.log.debug("Databases updated from previous autodiscovery check.")
                 if self._ad_initial_discovery_done and self._database_metrics is not None:
                     self.log.info("Invalidating database metrics cache due to database list change.")
                     self._database_metrics = None
-                self._ad_initial_discovery_done = True
                 self.databases = filtered_dbs
-                return True
+            self._ad_initial_discovery_done = True
+            return databases_changed
         return False
 
     def _get_autodiscovery_query_cached(self, cursor):
@@ -625,7 +648,7 @@ class SQLServer(DatabaseCheck):
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
-        if is_affirmative(self.instance.get("include_instance_metrics", True)):
+        if is_affirmative(self._config.database_metrics_config['instance_metrics']['enabled']):
             common_metrics = list(INSTANCE_METRICS)
             if year and year >= 2016:
                 common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
@@ -844,27 +867,24 @@ class SQLServer(DatabaseCheck):
     def _check_connections_by_use_db(self):
         with self.connection.open_managed_default_connection(KEY_PREFIX):
             with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-                for db in self.databases:
-                    check_err_message = "Database {} connection service check failed: {}"
-                    try:
-                        switch_db_statement = construct_use_statement(db.name)
-                        cursor.execute(switch_db_statement)
-                        cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
-                        cursor.fetchall()
-                        self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
-                    except Exception as e:
-                        self.log.warning(check_err_message.format(db.name, str(e)))
-                        self.handle_service_check(
-                            AgentCheck.CRITICAL,
-                            self.connection.get_host_with_port(),
-                            db.name,
-                            check_err_message.format(db.name, str(e)),
-                            False,
-                        )
+                database_names = [db.name for db in self.databases]
+                if not database_names:
+                    return
+
+                cursor.execute(DATABASE_SERVICE_CHECK_QUERY, (serialize_database_names(database_names),))
+                database_access = dict(cursor.fetchall())
+
+                connection_host = self.connection.get_host_with_port()
+                for database_name in database_names:
+                    if database_access.get(database_name) == 1:
+                        self.handle_service_check(AgentCheck.OK, connection_host, database_name, False)
                         continue
-                # Switch DB back to MASTER
-                switch_db_statement = construct_use_statement(self.connection.DEFAULT_DATABASE)
-                cursor.execute(switch_db_statement)
+
+                    message = "Database {} connection service check failed: database is not accessible".format(
+                        database_name
+                    )
+                    self.log.warning(message)
+                    self.handle_service_check(AgentCheck.CRITICAL, connection_host, database_name, message, False)
 
     def get_databases(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
@@ -905,23 +925,8 @@ class SQLServer(DatabaseCheck):
 
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
-            if self._config.dbm_enabled:
-                self.agent_history.run_job_loop(self.tag_manager.get_tags())
-                self.statement_metrics.run_job_loop(self.tag_manager.get_tags())
-                self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
-                self.activity.run_job_loop(self.tag_manager.get_tags())
-                self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
-                self.deadlocks.run_job_loop(self.tag_manager.get_tags())
 
-                # Run XE session handlers
-                for handler in self.xe_session_handlers:
-                    try:
-                        handler.run_job_loop(self.tag_manager.get_tags())
-                    except Exception as e:
-                        self.log.error("Error running XE session handler for %s: %s", handler.session_name, e)
-
-            if self._config.data_observability.enabled:
-                self.data_observability.run_job_loop(self.tag_manager.get_tags())
+            self.run_async_jobs(self.tag_manager.get_tags())
 
         else:
             self.log.debug("Skipping check")
@@ -932,6 +937,7 @@ class SQLServer(DatabaseCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
+            track_operation_time=True,
             databases=db_names,
         )
 
@@ -978,11 +984,21 @@ class SQLServer(DatabaseCheck):
 
         self._database_metrics = []
         # list of database names to collect metrics for
-        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        autodiscovered_db_names = [d.name for d in self.databases]
+        db_names = autodiscovered_db_names or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
 
         # instance level metrics
         for database_metric_class in self._instance_level_database_metrics:
-            self._database_metrics.append(self._new_database_metric_executor(database_metric_class))
+            filter_databases = self._config.autodiscovery and database_metric_class in (
+                SqlserverFileStatsMetrics,
+                SqlserverDatabaseStatsMetrics,
+                SqlserverDatabaseBackupMetrics,
+            )
+            self._database_metrics.append(
+                self._new_database_metric_executor(
+                    database_metric_class, autodiscovered_db_names if filter_databases else None
+                )
+            )
 
         # database level metrics
         for database_metric_class in self._database_level_database_metrics:
@@ -1095,7 +1111,7 @@ class SQLServer(DatabaseCheck):
                 with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
-    def execute_query_raw(self, query, db=None, params=None):
+    def execute_query_raw(self, query, db=None, params=None, fetch_multiple_results=False):
         with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             if db:
                 ctx = construct_use_statement(db)
@@ -1105,7 +1121,15 @@ class SQLServer(DatabaseCheck):
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
-            return cursor.fetchall()
+            if not fetch_multiple_results:
+                return cursor.fetchall()
+
+            rows = []
+            while True:
+                if cursor.description is not None:
+                    rows.extend(cursor.fetchall())
+                if not cursor.nextset():
+                    return rows
 
     def do_stored_procedure_check(self):
         """
@@ -1175,7 +1199,7 @@ class SQLServer(DatabaseCheck):
                 "host": self.reported_hostname,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",

@@ -10,11 +10,6 @@ if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
     from datadog_checks.clickhouse.config_models.instance import CollectAsyncInserts
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -399,7 +394,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         payload = {
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'ddsource': 'clickhouse',
             'dbm_type': 'query_completion',
             'collection_interval': self._collection_interval,
@@ -545,7 +540,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         return {
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'ddsource': 'clickhouse',
             'dbm_type': DBM_TYPE_FLUSH,
             'collection_interval': self._flush_collection_interval,

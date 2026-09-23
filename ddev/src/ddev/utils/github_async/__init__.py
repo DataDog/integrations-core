@@ -27,10 +27,17 @@ if TYPE_CHECKING:
     from .client import COMMENT_BODY_LIMIT as COMMENT_BODY_LIMIT
     from .client import DEFAULT_BASE_URL as DEFAULT_BASE_URL
     from .client import GITHUB_API_VERSION as GITHUB_API_VERSION
+    from .client import MAX_PER_PAGE as MAX_PER_PAGE
     from .client import AsyncGitHubClient as AsyncGitHubClient
     from .client import GitHubResponse as GitHubResponse
     from .client import PaginationData as PaginationData
     from .client import async_github_client as async_github_client
+    from .retry import DEFAULT_RETRY_POLICIES as DEFAULT_RETRY_POLICIES
+    from .retry import MUTATION_RETRY as MUTATION_RETRY
+    from .retry import NO_RETRY as NO_RETRY
+    from .retry import SAFE_RETRY as SAFE_RETRY
+    from .retry import RetryPolicies as RetryPolicies
+    from .retry import RetryPolicy as RetryPolicy
 
 # Map of exported name -> submodule (relative to this package) that defines it.
 MODULE_BY_NAME: dict[str, str] = {
@@ -39,8 +46,15 @@ MODULE_BY_NAME: dict[str, str] = {
     'GITHUB_API_VERSION': 'client',
     'DEFAULT_BASE_URL': 'client',
     'COMMENT_BODY_LIMIT': 'client',
+    'MAX_PER_PAGE': 'client',
     'GitHubResponse': 'client',
     'PaginationData': 'client',
+    'RetryPolicy': 'retry',
+    'RetryPolicies': 'retry',
+    'NO_RETRY': 'retry',
+    'SAFE_RETRY': 'retry',
+    'MUTATION_RETRY': 'retry',
+    'DEFAULT_RETRY_POLICIES': 'retry',
 }
 
 

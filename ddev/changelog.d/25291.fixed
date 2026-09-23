@@ -1,0 +1,1 @@
+Fix breaking-change notices for integration major-version changes, including downgrades and transitions across digit boundaries.

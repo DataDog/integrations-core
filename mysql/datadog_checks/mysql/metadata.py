@@ -7,16 +7,6 @@ from operator import attrgetter
 
 import pymysql
 
-from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
-
-from .util import ManagedAuthConnectionMixin, connect_with_session_variables
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -24,6 +14,10 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mysql.cursor import CommenterDictCursor
+from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
+
+from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -184,7 +178,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
+            "agent_version": self._check.agent_version,
             "dbms": self._check.dbms,
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,

@@ -92,6 +92,33 @@ services:
         echo "expired_keys=$$($$R INFO stats | grep expired_keys || true)"
         echo "seed-done"
 
+  # Continuous workload so rate/counter metrics keep moving across scrapes
+  # (keyspace, commands, eviction, expiry, net bytes, blocked clients, forks/RDB,
+  # slowlog, client-side caching), not just the one-shot seed. Writes straight to
+  # the master; scrapers read the same data through the proxy. See ../activity-gen.sh.
+  activity-gen:
+    # Same image as the other services (no extra pull); used only for its
+    # redis-cli client to drive the workload against the master.
+    image: "redis:${REDIS_VERSION:-7.4}"
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - network1
+    restart: unless-stopped
+    environment:
+      DB_HOST: redis-master
+      REDIS_PASSWORD: devops-best-friend
+      ACTIVITY_DB: "14"
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent redis-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    command: ["sh", "/opt/activity-gen.sh"]
+
   info-proxy:
     build:
       context: ../proxy
@@ -111,6 +138,8 @@ services:
         condition: service_healthy
       seed:
         condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
     environment:
       LISTEN_ADDR: ":6379"
       BACKEND_ADDR: "redis-master:6379"

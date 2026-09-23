@@ -90,28 +90,33 @@ jobs:
           ORACLE_DOCKER_PASSWORD: ${{ secrets.ORACLE_DOCKER_PASSWORD }}
           DD_GITHUB_USER: ${{ github.actor }}
           DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ddev ci setup ${{ inputs.target || 'tls' }}
+          TARGET: ${{ inputs.target || 'tls' }}
+        run: ddev ci setup "$TARGET"
 
       - name: Run E2E tests with FIPS disabled
         env:
           DDEV_E2E_AGENT: "${{ inputs.agent-image || 'registry.datadoghq.com/agent-dev:master-py3' }}"
           DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
+          TARGET: ${{ inputs.target || 'tls' }}
         run: |
-          ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
+          ddev env test --base --new-env --junit "$TARGET" -- all -m "fips_off"
 
       - name: Run E2E tests with FIPS enabled
         env:
           DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'registry.datadoghq.com/agent-dev:master-fips' }}"
           DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
+          TARGET: ${{ inputs.target || 'tls' }}
         run: |
-          ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
+          ddev env test --base --new-env --junit "$TARGET" -- all -k "fips_on"
 
       - name: Finalize test results
         if: always()
+        env:
+          TARGET: ${{ inputs.target || 'tls' }}
         run: |-
           mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-          if [[ -d ${{ inputs.target || 'tls' }}/junit ]]; then
-            mv ${{ inputs.target || 'tls' }}/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+          if [[ -d "$TARGET/junit" ]]; then
+            mv "$TARGET"/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
           fi
 
       - name: Upload test results

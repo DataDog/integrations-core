@@ -9,6 +9,7 @@ import pytest
 
 from ddev.cli.ci.tests.batching.targets import (
     UNTESTABLE_TARGETS,
+    AllTargetsRule,
     DirectTargetRule,
     RegistryRepositoryFacts,
     RepositoryWideRule,
@@ -174,6 +175,50 @@ def test_repository_wide_rule_does_not_fire_outside_core():
     assert list(rule(changed, facts("postgres", "datadog_checks_base"))) == []
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        # Without the ignore, `tests/.+` would select postgres and `ddev/src/ddev/cli/ci/tests/.+`
+        # would expand to every eligible target.
+        pytest.param("postgres/tests/AGENTS.md", id="direct-target-trigger"),
+        pytest.param("ddev/src/ddev/cli/ci/tests/batching/CLAUDE.md", id="repository-wide-trigger"),
+    ],
+)
+def test_instruction_files_select_no_targets(path):
+    # Repository instruction files only document conventions, so editing one must not run tests.
+    changed = [modified(path)]
+
+    assert find_affected_targets(changed, facts("postgres", "mysql", "ddev"), rules=CORE_RULES) == []
+
+
+@pytest.mark.parametrize(
+    "source, destination, expected",
+    [
+        # The ignored source contributes nothing, so the relevant destination selects only its
+        # direct target instead of the repository-wide expansion the source would trigger.
+        pytest.param(
+            "ddev/src/ddev/cli/ci/tests/batching/AGENTS.md",
+            "postgres/tests/test_a.py",
+            ["postgres"],
+            id="ignored-source-relevant-destination",
+        ),
+        # The ignored destination must not drag the whole change with it: filtering is per path,
+        # so the repository-wide source still expands to the full eligible set (`ddev` also
+        # arrives via the direct rule, as for any ddev Python file).
+        pytest.param(
+            "ddev/src/ddev/cli/ci/tests/batching/units.py",
+            "postgres/AGENTS.md",
+            ["ddev", "mysql", "postgres"],
+            id="relevant-source-ignored-destination",
+        ),
+    ],
+)
+def test_rename_with_an_ignored_end_still_evaluates_the_other(source, destination, expected):
+    changed = [renamed(source, destination)]
+
+    assert find_affected_targets(changed, facts("postgres", "mysql", "ddev"), rules=CORE_RULES) == expected
+
+
 def test_repository_wide_rule_ignores_irrelevant_paths():
     rule = RepositoryWideRule(is_core=True)
     changed = [modified("postgres/tests/test_a.py")]
@@ -264,3 +309,8 @@ def test_registry_repository_facts_eligible_targets_excludes_untestable_and_poli
     )
 
     assert RegistryRepositoryFacts(registry).eligible_targets() == ["postgres"]
+
+
+def test_all_targets_rule_selects_every_eligible_target_without_a_change():
+    """`--all` must not depend on the change set: a run that tests everything has nothing to diff."""
+    assert list(AllTargetsRule()([], facts("postgres", "mysql", "mesos_slave"))) == ["mysql", "postgres"]

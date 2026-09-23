@@ -48,6 +48,8 @@ hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
+dynamo = "Dynamo"
+intersystems_iris = "InterSystems IRIS"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -59,6 +61,8 @@ control_m = "control_m."
 nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
+dynamo = "dynamo."
+intersystems_iris = "intersystems_iris."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -217,7 +221,6 @@ exclude = [
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'pymysql',      # Pinned to below 1.2.0 as requested by DBM while they work on supporting 1.2+
     'foundationdb', # 7+ has a breaking changes
-    'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
     'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
                     # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
 
@@ -262,7 +265,7 @@ __pycache__ = false
   "datadog-prefect",
 ]
 
-# Explicitely add the platforms supported by an integration for those where the manifest has been
+# Explicitly add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.
@@ -278,4 +281,6 @@ control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
+dynamo = ["linux", "windows", "mac_os"]
+intersystems_iris = ["linux", "windows", "mac_os"]
 

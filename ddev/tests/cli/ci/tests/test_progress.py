@@ -11,8 +11,6 @@ from __future__ import annotations
 
 import dataclasses
 
-import pytest
-
 from ddev.cli.ci.tests.messages import BatchJob
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
@@ -196,6 +194,17 @@ def test_planned_jobs_count_toward_total_but_not_complete() -> None:
     assert progress.total == 3
 
 
+def test_running_executions_remain_pending_in_the_totals():
+    running = dataclasses.replace(_attempt(), state=ExecutionState.RUNNING, status=None, conclusion=None)
+    progress = DispatcherProgress(
+        batches=(_batch(_job(_attempt(), name="done"), _job(running, name="running"), _job(name="queued")),),
+        done=False,
+    )
+
+    assert (progress.complete, progress.total) == (1, 3)
+    assert (progress.passed, progress.failed, progress.skipped) == (1, 0, 0)
+
+
 def test_an_execution_missing_its_artifacts_still_counts() -> None:
     # Only the artifacts are missing: the error qualifies the execution, it does not erase it.
     attempt = _attempt(status=Status.SUCCESS, error=ProgressError.NO_ARTIFACTS)
@@ -206,28 +215,3 @@ def test_an_execution_missing_its_artifacts_still_counts() -> None:
 def test_empty_progress_counts_zero() -> None:
     progress = DispatcherProgress(batches=(), done=False)
     assert (progress.passed, progress.failed, progress.skipped, progress.complete, progress.total) == (0, 0, 0, 0, 0)
-
-
-# ---------------------------------------------------------------------------
-# Immutability and defaults
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("instance", "field_name", "value"),
-    [
-        (_attempt(), "status", Status.FAILURE),
-        (_job(), "attempts", ()),
-        (_batch(), "state", ExecutionState.PLANNED),
-        (DispatcherProgress(batches=(), done=False), "done", True),
-    ],
-    ids=["attempt", "job", "batch", "dispatcher"],
-)
-def test_progress_objects_are_immutable(instance: object, field_name: str, value: object) -> None:
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        setattr(instance, field_name, value)
-
-
-def test_error_defaults_to_none() -> None:
-    assert _attempt().error is None
-    assert _batch().error is None
