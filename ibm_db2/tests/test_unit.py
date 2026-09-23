@@ -160,3 +160,10 @@ def test_cancel_closes_check_and_custom_query_connections(instance):
         check.cancel()
 
     close.assert_has_calls([mock.call(job_conn), mock.call(check_conn)], any_order=True)
+
+
+def test_database_identifier_defaults_to_resolved_hostname(instance):
+    instance['host'] = 'db2.example.com'
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+
+    assert check.database_identifier == 'db2.example.com'
