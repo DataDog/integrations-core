@@ -120,38 +120,37 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         try:
             tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
             if endpoint_unreachable_issue.uses_process_isolation(self) and not tracked_issues_drained:
-                # The isolated child owns runtime reporter state. The parent can only reconstruct endpoints present
-                # directly in configuration; endpoints discovered or transformed at runtime remain best-effort.
-                defaults = None
-                endpoint_namespaces = set()
-                configs = [*self.scraper_configs, self.instance]
-                for config in configs:
-                    if not config:
-                        continue
-                    if self.__NAMESPACE__:
-                        namespace = self.__NAMESPACE__
-                    elif 'namespace' in config:
-                        namespace = config.get('namespace')
-                    else:
-                        if defaults is None:
-                            defaults = self.get_default_config()
-                        namespace = defaults.get('namespace', '')
-
-                    for key, endpoint in config.items():
-                        if (
-                            isinstance(key, str)
-                            and key.endswith('_endpoint')
-                            and isinstance(endpoint, str)
-                            and endpoint
-                        ):
-                            endpoint_namespaces.add((endpoint, str(namespace)))
-
-                for endpoint, namespace in endpoint_namespaces:
+                for endpoint, namespace in self._process_isolation_fallback_endpoints():
                     endpoint_unreachable_issue.resolve(self, endpoint, namespace)
         except Exception:
             self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
         finally:
             super().cancel()
+
+    def _process_isolation_fallback_endpoints(self) -> set[tuple[str, str]]:
+        # The isolated child owns runtime reporter state. The parent can only reconstruct endpoints present
+        # directly in configuration; endpoints discovered or transformed at runtime remain best-effort.
+        # Any *_endpoint key is a candidate because integrations that build scraper configs at runtime may only
+        # expose the scraped URL under their own option name, such as agent_endpoint. A key that was never
+        # reported only costs an extra resolve call.
+        defaults = None
+        endpoint_namespaces = set()
+        for config in [*self.scraper_configs, self.instance]:
+            if not config:
+                continue
+            if self.__NAMESPACE__:
+                namespace = self.__NAMESPACE__
+            elif 'namespace' in config:
+                namespace = config.get('namespace')
+            else:
+                if defaults is None:
+                    defaults = self.get_default_config()
+                namespace = defaults.get('namespace', '')
+
+            for key, endpoint in config.items():
+                if isinstance(key, str) and key.endswith('_endpoint') and isinstance(endpoint, str) and endpoint:
+                    endpoint_namespaces.add((endpoint, str(namespace)))
+        return endpoint_namespaces
 
     def configure_scrapers(self):
         """
