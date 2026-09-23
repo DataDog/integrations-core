@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.monitoring import ComponentMonitor, MonitoringRuntime
     from ddev.monitoring.datadog import DatadogLogHandler
+    from ddev.monitoring.datadog_metrics import DatadogMetricsSink
     from ddev.utils.git import ChangedFile
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
@@ -181,6 +182,7 @@ def dispatch_tests(
     from ddev.cli.ci.tests.dispatcher import DispatcherContext, build_dispatcher
     from ddev.cli.ci.tests.dispatcher_attributes import (
         PROTECTED_RUN_FIELDS,
+        metric_tag_mapping,
         repository_fields,
         run_fields,
         tag_fields,
@@ -196,7 +198,14 @@ def dispatch_tests(
     console_handler = AppLoggingHandler(app)
     console_handler.setLevel(output_level)
     console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags))))
-    monitoring = MonitoringRuntime(console_handler=console_handler, protected_fields=PROTECTED_RUN_FIELDS)
+    # `--dry-run` and `--resolve-only` dispatch nothing, so they report no metrics either.
+    metrics_sink = None if (dry_run or resolve_only) else build_datadog_metrics_sink(app)
+    monitoring = MonitoringRuntime(
+        console_handler=console_handler,
+        metrics_sink=metrics_sink,
+        metrics_tag_projector=metric_tag_mapping,
+        protected_fields=PROTECTED_RUN_FIELDS,
+    )
     monitoring.set_run_fields(**{**tag_fields(caller_tags), **repository_fields(owner, repo)})
     datadog_handler = attach_datadog_log_handler(app, monitoring, level=output_level)
     started = time.monotonic()
@@ -325,6 +334,25 @@ def dispatch_tests(
         if datadog_handler is not None:
             # Close the runtime first so no event arrives while delivery drains.
             datadog_handler.close(EXPORT_DRAIN_TIMEOUT)
+
+
+def build_datadog_metrics_sink(app: Application) -> DatadogMetricsSink | None:
+    """Build metric delivery when the organization has an API key."""
+    from ddev.monitoring.datadog_metrics import DatadogMetricsSink
+
+    api_key = app.config.org.config.get('api_key')
+    if not api_key:
+        return None
+    try:
+        return DatadogMetricsSink(
+            api_key=api_key,
+            site=app.config.org.config.get('site', 'datadoghq.com'),
+            namespace='agent_integrations.test_dispatcher',
+            diagnostics=app.display_warning,
+        )
+    except Exception as error:
+        app.display_warning(f'Datadog metric delivery is unavailable: {type(error).__name__}: {error}')
+        return None
 
 
 def attach_datadog_log_handler(

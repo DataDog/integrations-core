@@ -93,7 +93,6 @@ MAPPING_FIELDS = {
                 'git.branch': 'feature',
                 'dispatcher.base_branch': 'master',
                 'dispatcher.context': 'pr',
-                'dispatcher.pr.number': '42',
                 'team': 'agent-integrations',
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.job.status': 'success',

@@ -1375,7 +1375,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     assert completed[0] == 0
     assert "in progress" in bodies[0]
     assert "**12/12 jobs**" in bodies[-1]
-    assert "## ✅ Dispatcher tests · passed" in bodies[-1]
+    assert "## ✅ Dispatcher tests: passed" in bodies[-1]
     assert "Dispatcher finished" in bodies[-1]
 
 
