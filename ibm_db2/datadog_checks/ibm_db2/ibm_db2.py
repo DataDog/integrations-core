@@ -9,8 +9,12 @@ from time import time as timestamp
 from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.serialization import json
 
 if Platform.is_windows():
     # After installing ibm_db, dll path of dependent library of clidriver must be set before importing the module
@@ -23,14 +27,17 @@ if Platform.is_windows():
 import ibm_db
 
 from . import queries
+from .__about__ import __version__
 from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
-class IbmDb2Check(AgentCheck):
+class IbmDb2Check(DatabaseCheck):
+    DBMS = 'ibm_db2'
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
     EVENT_TABLE_SPACE_STATE = '{}.tablespace_state_change'.format(METRIC_PREFIX)
+    DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
@@ -39,13 +46,17 @@ class IbmDb2Check(AgentCheck):
         self._password = self.instance.get('password', '')
         self._host = self.instance.get('host', '')
         self._port = self.instance.get('port', 50000)
-        self._tags = self.instance.get('tags', [])
+        self.tag_manager.set_tags_from_list(self.instance.get('tags', []), replace=True)
         self._security = self.instance.get('security', 'none')
         self._tls_cert = self.instance.get('tls_cert')
         self._connection_timeout = self.instance.get('connection_timeout')
+        self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
+        self._resolved_hostname = None
+        self._version = None
+        self._database_instance_last_emitted = None
 
         # Add global database tag
-        self._tags.append('db:{}'.format(self._db))
+        self.tag_manager.set_tag('db', self._db)
 
         # Track table space state changes
         self._table_space_states = {}
@@ -81,6 +92,7 @@ class IbmDb2Check(AgentCheck):
             return
 
         self.collect_metadata()
+        self._send_database_instance_metadata()
         for query_method in self._query_methods:
             try:
                 query_method()
@@ -99,12 +111,56 @@ class IbmDb2Check(AgentCheck):
             return
 
         if raw_version:
+            self._version = raw_version
             version_parts = self.parse_version(raw_version)
             self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
 
             self.log.debug('Found ibm_db2 version: %s', raw_version)
         else:
             self.log.warning('Could not retrieve ibm_db2 version info: %s', raw_version)
+
+    @property
+    def reported_hostname(self) -> str:
+        if self._resolved_hostname is None:
+            self._resolved_hostname = agent_host_resolver(self._host)
+        return self._resolved_hostname
+
+    @property
+    def dbms_version(self) -> str | None:
+        return self._version
+
+    @property
+    def cloud_metadata(self) -> dict:
+        return {}
+
+    def _send_database_instance_metadata(self):
+        now = timestamp()
+        if (
+            self._database_instance_last_emitted is None
+            or now - self._database_instance_last_emitted >= self.DATABASE_INSTANCE_COLLECTION_INTERVAL
+        ):
+            event = {
+                "host": self.reported_hostname,
+                "port": self._port,
+                "database_instance": self.database_identifier,
+                "database_hostname": self.reported_hostname,
+                "agent_version": self.agent_version,
+                "ddagenthostname": self.agent_hostname,
+                "dbms": self.dbms,
+                "kind": "database_instance",
+                "collection_interval": self.DATABASE_INSTANCE_COLLECTION_INTERVAL,
+                "dbms_version": self.dbms_version,
+                "integration_version": __version__,
+                "tags": self.tag_manager.get_tags(include_internal=False),
+                "timestamp": now * 1000,
+                "cloud_metadata": self.cloud_metadata,
+                "metadata": {
+                    "dbm": self._dbm_enabled,
+                    "connection_host": self._host,
+                },
+            }
+            self._database_instance_last_emitted = now
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def parse_version(self, version):
         """
@@ -128,37 +184,37 @@ class IbmDb2Check(AgentCheck):
         # Only 1 instance
         for inst in self.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0060773.html
-            self.gauge(self.m('connection.active'), inst['total_connections'], tags=self._tags)
+            self.gauge(self.m('connection.active'), inst['total_connections'], tags=self.tags)
 
     def query_database(self):
         # Only 1 database
         for db in self.iter_rows(queries.DATABASE_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001156.html
-            self.service_check(self.SERVICE_CHECK_STATUS, status_to_service_check(db['db_status']), tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_STATUS, status_to_service_check(db['db_status']), tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001201.html
-            self.gauge(self.m('application.active'), db['appls_cur_cons'], tags=self._tags)
+            self.gauge(self.m('application.active'), db['appls_cur_cons'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001202.html
-            self.gauge(self.m('application.executing'), db['appls_in_db2'], tags=self._tags)
+            self.gauge(self.m('application.executing'), db['appls_in_db2'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002225.html
-            self.gauge(self.m('connection.max'), db['connections_top'], tags=self._tags)
+            self.gauge(self.m('connection.max'), db['connections_top'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001200.html
-            self.monotonic_count(self.m('connection.total'), db['total_cons'], tags=self._tags)
+            self.monotonic_count(self.m('connection.total'), db['total_cons'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001283.html
-            self.monotonic_count(self.m('lock.dead'), db['deadlocks'], tags=self._tags)
+            self.monotonic_count(self.m('lock.dead'), db['deadlocks'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001290.html
-            self.monotonic_count(self.m('lock.timeouts'), db['lock_timeouts'], tags=self._tags)
+            self.monotonic_count(self.m('lock.timeouts'), db['lock_timeouts'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001281.html
-            self.gauge(self.m('lock.active'), db['num_locks_held'], tags=self._tags)
+            self.gauge(self.m('lock.active'), db['num_locks_held'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001296.html
-            self.gauge(self.m('lock.waiting'), db['num_locks_waiting'], tags=self._tags)
+            self.gauge(self.m('lock.waiting'), db['num_locks_waiting'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001294.html
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001293.html
@@ -166,11 +222,11 @@ class IbmDb2Check(AgentCheck):
                 average_lock_wait = db['lock_wait_time'] / db['lock_waits']
             else:
                 average_lock_wait = 0
-            self.gauge(self.m('lock.wait'), average_lock_wait, tags=self._tags)
+            self.gauge(self.m('lock.wait'), average_lock_wait, tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001282.html
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0/com.ibm.db2.luw.admin.config.doc/doc/r0000267.html
-            self.gauge(self.m('lock.pages'), db['lock_list_in_use'] / 4096, tags=self._tags)
+            self.gauge(self.m('lock.pages'), db['lock_list_in_use'] / 4096, tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001160.html
             last_backup = db['last_backup']
@@ -178,16 +234,16 @@ class IbmDb2Check(AgentCheck):
                 seconds_since_last_backup = (db['current_time'] - last_backup).total_seconds()
             else:
                 seconds_since_last_backup = -1
-            self.gauge(self.m('backup.latest'), seconds_since_last_backup, tags=self._tags)
+            self.gauge(self.m('backup.latest'), seconds_since_last_backup, tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0051568.html
-            self.monotonic_count(self.m('row.modified.total'), db['rows_modified'], tags=self._tags)
+            self.monotonic_count(self.m('row.modified.total'), db['rows_modified'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001317.html
-            self.monotonic_count(self.m('row.reads.total'), db['rows_read'], tags=self._tags)
+            self.monotonic_count(self.m('row.reads.total'), db['rows_read'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0051569.html
-            self.monotonic_count(self.m('row.returned.total'), db['rows_returned'], tags=self._tags)
+            self.monotonic_count(self.m('row.returned.total'), db['rows_returned'], tags=self.tags)
 
     def query_buffer_pool(self):
         # Hit ratio formulas:
@@ -195,7 +251,7 @@ class IbmDb2Check(AgentCheck):
         for bp in self.iter_rows(queries.BUFFER_POOL_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002256.html
             bp_tags = ['bufferpool:{}'.format(bp['bp_name'])]
-            bp_tags.extend(self._tags)
+            bp_tags.extend(self.tags)
 
             # Column-organized pages
 
@@ -383,7 +439,7 @@ class IbmDb2Check(AgentCheck):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001295.html
             table_space_name = ts['tbsp_name']
             ts_tags = ['tablespace:{}'.format(table_space_name)]
-            ts_tags.extend(self._tags)
+            ts_tags.extend(self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0007534.html
             page_size = ts['tbsp_page_size']
@@ -419,7 +475,7 @@ class IbmDb2Check(AgentCheck):
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002530.html
             used = tlog['total_log_used']
-            self.gauge(self.m('log.used'), used / block_size, tags=self._tags)
+            self.gauge(self.m('log.used'), used / block_size, tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002531.html
             available = tlog['total_log_available']
@@ -431,14 +487,14 @@ class IbmDb2Check(AgentCheck):
                 utilized = used / available * 100
                 available /= block_size
 
-            self.gauge(self.m('log.available'), available, tags=self._tags)
-            self.gauge(self.m('log.utilized'), utilized, tags=self._tags)
+            self.gauge(self.m('log.available'), available, tags=self.tags)
+            self.gauge(self.m('log.utilized'), utilized, tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001278.html
-            self.monotonic_count(self.m('log.reads'), tlog['log_reads'], tags=self._tags)
+            self.monotonic_count(self.m('log.reads'), tlog['log_reads'], tags=self.tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001279.html
-            self.monotonic_count(self.m('log.writes'), tlog['log_writes'], tags=self._tags)
+            self.monotonic_count(self.m('log.writes'), tlog['log_writes'], tags=self.tags)
 
     def query_custom(self):
         for custom_query in self._custom_queries:
@@ -483,7 +539,7 @@ class IbmDb2Check(AgentCheck):
                     continue
 
                 metric_info = []
-                query_tags = list(self._tags)
+                query_tags = list(self.tags)
                 query_tags.extend(custom_query.get('tags', []))
 
                 for column, value in zip(columns, row):
@@ -582,11 +638,11 @@ class IbmDb2Check(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_CONNECT,
                 self.CRITICAL,
-                tags=self._tags,
+                tags=self.tags,
                 message="Unable to create new connection to database: {}".format(self._db),
             )
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
 
     @classmethod
     def get_connection_data(cls, db, username, password, host, port, security, tls_cert, connection_timeout):
