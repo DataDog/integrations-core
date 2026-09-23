@@ -141,14 +141,30 @@ def test_check_given_two_cycles_polls_consecutive_windows(
     assert first_cycle_ends == second_cycle_starts, 'second cycle must resume exactly where the first one ended'
 
 
-def test_check_given_two_cycles_reports_a_still_open_issue_once(
-    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
-) -> None:
-    # `_issues_reported_through` is meant to carry the watermark `collect_assurance_issues` returns
-    # from one cycle into the next, so an issue that stays open is reported as an event once, not
-    # on every cycle it remains open. Nothing exercises that hand-off through two real
-    # `dd_run_check` cycles -- the collector-level watermark logic itself is already covered
-    # directly in test_p1_collectors.py.
+#: Issue records as the second cycle sees them relative to the first. Only the two fields the
+#: reporting decision reads are present.
+STILL_OPEN = {'issueId': 'issue-1', 'mostRecentOccurredTime': 1_700_000_000_000}
+RECURRED = dict(STILL_OPEN, mostRecentOccurredTime=1_700_000_600_000)
+SURFACED_LATE = {'issueId': 'issue-2', 'mostRecentOccurredTime': 1_699_999_000_000}
+NO_TIMESTAMP = {'issueId': 'issue-3'}
+
+
+@pytest.mark.parametrize(
+    'first_cycle, second_cycle, expected_events',
+    [
+        pytest.param([STILL_OPEN], [STILL_OPEN], 1, id='still-open-issue-is-reported-once'),
+        pytest.param([STILL_OPEN], [RECURRED], 2, id='recurrence-is-reported-again'),
+        # Detection can lag occurrence by a different amount for each issue type, so an issue can
+        # first appear after a newer one was already reported.
+        pytest.param([STILL_OPEN], [STILL_OPEN, SURFACED_LATE], 2, id='issue-surfacing-after-a-newer-one'),
+        pytest.param([NO_TIMESTAMP], [NO_TIMESTAMP], 1, id='issue-without-a-timestamp-is-reported-once'),
+    ],
+)
+def test_check_given_two_cycles_reports_each_issue_occurrence_once(
+    dd_run_check, aggregator, instance, first_cycle, second_cycle, expected_events
+):
+    # The check carries what it reported from one cycle into the next, so an issue that stays open
+    # is one event rather than one per cycle, while a new occurrence still gets its own.
     instance.update(
         collect_stacks=False,
         collect_interfaces=False,
@@ -158,13 +174,14 @@ def test_check_given_two_cycles_reports_a_still_open_issue_once(
     )
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
     empty_list = {'response': [], 'version': '1.0'}
-    issue = {'issueId': 'issue-1', 'mostRecentOccurredTime': 1_700_000_000_000}
-    issues_page = {'response': [issue], 'version': '1.0'}
-    # Per cycle: devices, network health, client health, then assurance issues.
-    one_cycle = [empty_list, empty_list, empty_list, issues_page]
-    check.client.http = ScriptedHttp([*one_cycle, *one_cycle])
+
+    def one_cycle(issues):
+        # Per cycle: devices, network health, client health, then assurance issues.
+        return [empty_list, empty_list, empty_list, {'response': issues, 'version': '1.0'}]
+
+    check.client.http = ScriptedHttp([*one_cycle(first_cycle), *one_cycle(second_cycle)])
 
     dd_run_check(check)
     dd_run_check(check)
 
-    assert len(aggregator.events) == 1, 'an issue that is still open on the second cycle must not get a second event'
+    assert len(aggregator.events) == expected_events

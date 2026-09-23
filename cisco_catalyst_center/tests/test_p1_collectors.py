@@ -125,8 +125,8 @@ def test_collect_assurance_issues_counts_by_severity_and_category(aggregator, in
 
 
 # Issues are stateful in a way assurance events are not: an open issue comes back on every cycle
-# until it clears. `mostRecentOccurredTime` is the watermark that stops one open issue becoming
-# one Datadog event per cycle for as long as it stays open.
+# until it clears. What was reported last cycle, by `issueId`, is what stops one open issue
+# becoming one Datadog event per cycle for as long as it stays open.
 OPEN_ISSUE = {
     'issueId': 'i1',
     'name': 'Switch unreachable',
@@ -159,26 +159,16 @@ def test_collect_assurance_issues_submits_an_event_carrying_the_diagnosis(aggreg
 def test_collect_assurance_issues_given_an_issue_already_reported_counts_it_without_a_new_event(
     aggregator, instance, check
 ):
-    # Without the watermark, an issue that stays open produces one event every cycle, forever.
-    # The counts are current state though, so it keeps counting on the cycles it is not re-reported.
+    # Without that record, an issue that stays open produces one event every cycle, forever. The
+    # counts are current state though, so it keeps counting on the cycles it is not re-reported.
     collect_assurance_issues(
         check,
         _client(instance, [_issues(OPEN_ISSUE)]),
-        reported_through=OPEN_ISSUE['mostRecentOccurredTime'],
+        reported={OPEN_ISSUE['issueId']: OPEN_ISSUE['mostRecentOccurredTime']},
     )
 
     assert not aggregator.events
     assert metric_values(aggregator, 'cisco_catalyst_center.issue.total.count') == [1]
-
-
-def test_collect_assurance_issues_returns_the_latest_occurrence_as_the_new_watermark(instance, check):
-    # The caller stores this and hands it back next cycle. If it does not advance past the newest
-    # issue, every issue is reported again on the following cycle.
-    older = dict(OPEN_ISSUE, issueId='i0', mostRecentOccurredTime=1_755_001_000_000)
-
-    watermark = collect_assurance_issues(check, _client(instance, [_issues(older, OPEN_ISSUE)]))
-
-    assert watermark == 1_755_002_000_000
 
 
 # -- application visibility -------------------------------------------------------
@@ -189,13 +179,14 @@ SITES = [{'id': 'site-a', 'siteHierarchy': 'Global/A'}]
 def test_collect_application_health_asks_each_site_for_its_top_applications_by_usage(aggregator, instance, check):
     # networkApplications rejects a call without siteId (errorCode 14029). Note the API's own
     # message says "siteIds", but the accepted parameter is singular. "Top applications by usage
-    # per site" is a sort on that same call rather than a separate endpoint.
+    # per site" is a sort on that same call rather than a separate endpoint, and `order` accepts
+    # only `asc` or `desc`.
     client = _client(instance, [load_captured('data_network_applications')])
 
     collect_application_health(check, client, sites=SITES)
 
     params = client.http.requests[0]['params']
-    assert (params['siteId'], params['sortBy'], params['order']) == ('site-a', 'usage', 'des')
+    assert (params['siteId'], params['sortBy'], params['order']) == ('site-a', 'usage', 'desc')
     # The captured page is empty, and an empty page is not a zero.
     aggregator.assert_metric('cisco_catalyst_center.application.health', count=0)
 
@@ -211,6 +202,22 @@ def test_collect_application_health_emits_per_application_metrics(aggregator, in
 
     assert metric_values(aggregator, 'cisco_catalyst_center.application.health', 'application:webex') == [8]
     assert metric_values(aggregator, 'cisco_catalyst_center.application.usage', 'application:webex') == [4096]
+
+
+def test_collect_application_health_given_more_applications_than_a_page_collects_only_the_busiest(
+    aggregator, instance, check
+):
+    # Top-N by usage: the appliance sorts busiest first and only the first page is read, so the
+    # application series stay bounded at one page per site however many applications a site runs.
+    busiest = [{'name': f'app-{rank}', 'healthScore': 9} for rank in range(100)]  # a full page
+    first_page = with_value(load_captured('data_network_applications'), 'response', busiest)
+    second_page = with_value(
+        load_captured('data_network_applications'), 'response', [{'name': 'app-quiet', 'healthScore': 9}]
+    )
+
+    collect_application_health(check, _client(instance, [first_page, second_page]), sites=SITES)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.application.health', 'application:app-quiet') == []
 
 
 def test_collect_application_health_given_no_sites_makes_no_calls(instance, check):

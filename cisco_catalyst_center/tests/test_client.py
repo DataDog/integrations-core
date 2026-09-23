@@ -12,6 +12,7 @@ it without raising and records nothing. That failure is silent and survives code
 from __future__ import annotations
 
 import pytest
+import requests
 
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
@@ -139,6 +140,28 @@ def test_get_list_given_http_500_without_a_body_still_raises(client, respond_seq
         client.get_list('/dna/data/api/v1/networkDevices')
 
 
+@pytest.mark.parametrize(
+    'failure',
+    [
+        pytest.param(requests.exceptions.ReadTimeout('Read timed out. (read timeout=10)'), id='read-timeout'),
+        pytest.param(requests.exceptions.ConnectionError('Connection reset by peer'), id='connection-reset'),
+        pytest.param(
+            {'status_code': 200, 'json': requests.exceptions.JSONDecodeError('Expecting value', '<html>', 0)},
+            id='body-that-is-not-json',
+        ),
+    ],
+)
+def test_get_list_given_a_transport_failure_raises_catalyst_api_error(client, respond_sequence, failure):
+    # Collectors skip a failed device family group, device or site only when the failure is a
+    # `CatalystApiError`. A raw `requests` exception would bypass that and fail the whole collector;
+    # for assurance events that leaves the window unadvanced, so the next cycle re-submits every
+    # group that had already succeeded.
+    respond_sequence([failure])
+
+    with pytest.raises(CatalystApiError, match='networkDevices'):
+        client.get_list('/dna/data/api/v1/networkDevices')
+
+
 def test_get_list_given_429_waits_for_the_retry_after_header_then_succeeds(client, respond_sequence, sleeps):
     # The documented limit varies 20-500 requests per minute per endpoint, so 429 is expected
     # traffic rather than an exceptional condition.
@@ -164,6 +187,27 @@ def test_get_list_given_persistent_429_backs_off_then_gives_up(client, respond_s
     assert len(requests) == 3, 'bounded attempts; a throttled appliance must not be retried forever'
     assert len(sleeps) == 2, 'no point waiting after the final attempt, only between them'
     assert sleeps[1] > sleeps[0], 'each successive wait should be longer'
+
+
+@pytest.mark.parametrize(
+    'retry_after, expected_wait',
+    [
+        pytest.param('600', 30.0, id='longer-than-the-cap'),
+        pytest.param('-5', 0.0, id='negative'),
+    ],
+)
+def test_get_list_given_an_out_of_range_retry_after_clamps_the_wait(
+    client, respond_sequence, sleeps, retry_after, expected_wait
+):
+    # Retry-After is the one wait the check does not choose. Honouring 600 would hold an Agent
+    # check runner for ten minutes per throttled request, and a negative value makes `time.sleep`
+    # raise.
+    throttled = {'status_code': 429, 'json': {}, 'headers': {'Retry-After': retry_after}}
+    respond_sequence([throttled, load_captured('data_network_devices')])
+
+    client.get_list('/dna/data/api/v1/networkDevices')
+
+    assert sleeps == [expected_wait]
 
 
 def test_authenticate_given_429_waits_then_succeeds(instance, sleeps):

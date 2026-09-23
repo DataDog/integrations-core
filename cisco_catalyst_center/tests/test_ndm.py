@@ -213,7 +213,8 @@ def test_check_given_ndm_disabled_sends_no_metadata_event(dd_run_check, aggregat
     assert aggregator.get_event_platform_events('network-devices-metadata', parse_json=False) == []
 
 
-def test_check_given_ndm_enabled_sends_devices_in_the_metadata_event(dd_run_check, aggregator, instance):
+def _ndm_enabled_check(instance):
+    """A check with NDM metadata switched on, serving the captured devices and interfaces."""
     instance['send_ndm_metadata'] = True
     instance['collect_stacks'] = False
     instance['collect_site_health'] = False
@@ -228,12 +229,29 @@ def test_check_given_ndm_enabled_sends_devices_in_the_metadata_event(dd_run_chec
         # viewless request would be served the device payload above.
         by_path={'/dna/intent/api/v1/interface': {'response': []}},
     )
+    return check
 
-    dd_run_check(check)
 
+def _ndm_devices(aggregator):
     payloads = [
         json.loads(p) for p in aggregator.get_event_platform_events('network-devices-metadata', parse_json=False)
     ]
-    devices = [d for payload in payloads for d in payload.get('devices', [])]
+    return [d for payload in payloads for d in payload.get('devices', [])]
+
+
+def test_check_given_ndm_enabled_sends_devices_in_the_metadata_event(dd_run_check, aggregator, instance):
+    dd_run_check(_ndm_enabled_check(instance))
+
     expected = {record['id'] for record in load_captured('data_network_devices')['response']}
-    assert {d['id'] for d in devices} == expected
+    assert {d['id'] for d in _ndm_devices(aggregator)} == expected
+
+
+def test_check_given_ndm_enabled_tags_each_device_metric_with_its_id_tags(dd_run_check, aggregator, instance):
+    # NDM attaches metrics to a device through the device's `id_tags`, so an id tag that no metric
+    # carries leaves the device's NDM record without its telemetry.
+    dd_run_check(_ndm_enabled_check(instance))
+
+    for device in _ndm_devices(aggregator):
+        series = [m.tags for m in aggregator.metrics('cisco_catalyst_center.device.reachable')]
+        [tags] = [t for t in series if f"device_uuid:{device['id']}" in t]
+        assert set(device['id_tags']) <= set(tags), device['id']

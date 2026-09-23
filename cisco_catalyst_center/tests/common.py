@@ -93,6 +93,8 @@ class _Response:
         self.headers: dict[str, str] = {'x-correlation-id': 'test-correlation-id', **(headers or {})}
 
     def json(self) -> Any:
+        if isinstance(self._payload, BaseException):
+            raise self._payload
         return self._payload
 
 
@@ -100,8 +102,12 @@ def _to_response(item: Any) -> _Response:
     """Build a response from a script entry.
 
     A plain value becomes a 200 with that value as the body. The `{'status_code': ...,
-    'json': ...}` shape overrides both, so a script can also inject a failure.
+    'json': ...}` shape overrides both, so a script can also inject a failure. An exception is
+    raised the way the transport would raise it, and an exception given as `json` is raised when
+    the body is parsed.
     """
+    if isinstance(item, BaseException):
+        raise item
     if isinstance(item, dict) and 'status_code' in item and 'json' in item:
         return _Response(item['json'], item['status_code'], item.get('headers'))
     return _Response(item)
