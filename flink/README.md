@@ -60,6 +60,8 @@ No additional installation is needed on your server.
 
 3. Restart Flink and the Agent.
 
+##### Collect custom metrics
+
 Flink jobs can register their own [custom metrics][16] (for example, an
 operator-scoped counter your operator code emits). By default, this
 integration collects only the metrics documented in [metadata.csv][11], so
@@ -80,6 +82,8 @@ You can also match multiple metrics at once with a regular expression, for
 example, to collect everything under a given Flink scope:
 
 ```yaml
+instances:
+  - openmetrics_endpoint: http://<FLINK_HOST>:9249/metrics
     extra_metrics:
       - ^flink_taskmanager_job_task_operator_.+
 ```
@@ -93,6 +97,8 @@ If a custom metric's exposed type is wrong (for example, Flink reports one of
 your operator's counters as a `gauge`), force the correct type the same way:
 
 ```yaml
+instances:
+  - openmetrics_endpoint: http://<FLINK_HOST>:9249/metrics
     extra_metrics:
       - flink_taskmanager_job_task_operator_customEventsTotal:
           name: operator.customEventsTotal
