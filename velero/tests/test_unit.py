@@ -13,16 +13,22 @@ from datadog_checks.velero import VeleroCheck
 
 from .common import OPTIONAL_METRICS, TEST_METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit():
+    assert VeleroCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('velero_payload.txt'))
+    mock_http_response(file_path=get_fixture_path("velero_payload.txt"))
 
-    check = VeleroCheck('velero', {}, [instance])
+    check = VeleroCheck("velero", {}, [instance])
     dd_run_check(check)
 
     for metric, metric_type in (TEST_METRICS | OPTIONAL_METRICS).items():
         aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
-        aggregator.assert_metric_has_tag(metric, 'test:tag')
+        aggregator.assert_metric_has_tag(metric, "test:tag")
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -31,17 +37,17 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
+        match="InstanceConfig`:\nopenmetrics_endpoint\n  Field required",
     ):
-        check = VeleroCheck('velero', {}, [{}])
+        check = VeleroCheck("velero", {}, [{}])
         dd_run_check(check)
 
 
 def test_incorrect_openmetrics_endpoint(dd_run_check):
-    endpoint = 'velero:2112/metrics'
+    endpoint = "velero:2112/metrics"
     with pytest.raises(
         Exception,
-        match='openmetrics_endpoint: {} is incorrectly configured'.format(endpoint),
+        match="openmetrics_endpoint: {} is incorrectly configured".format(endpoint),
     ):
-        check = VeleroCheck('velero', {}, [{'openmetrics_endpoint': endpoint}])
+        check = VeleroCheck("velero", {}, [{"openmetrics_endpoint": endpoint}])
         dd_run_check(check)
