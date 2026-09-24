@@ -1,0 +1,24 @@
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 4102444800
+# HELP zero_bucket_seconds Histogram whose smallest bucket threshold is zero.
+# TYPE zero_bucket_seconds histogram
+zero_bucket_seconds_bucket{le="0.0"} 7
+zero_bucket_seconds_bucket{le="5.0"} 10
+zero_bucket_seconds_bucket{le="+Inf"} 10
+zero_bucket_seconds_sum 6
+zero_bucket_seconds_count 10
+# HELP zero_bucket_large_seconds Histogram with more zero observations than fit in a single sketch bin.
+# TYPE zero_bucket_large_seconds histogram
+zero_bucket_large_seconds_bucket{le="0.0"} 65600
+zero_bucket_large_seconds_bucket{le="+Inf"} 65600
+zero_bucket_large_seconds_sum 0
+zero_bucket_large_seconds_count 65600
+# HELP negative_bucket_seconds Histogram with explicit negative thresholds.
+# TYPE negative_bucket_seconds histogram
+negative_bucket_seconds_bucket{le="-5.0"} 1
+negative_bucket_seconds_bucket{le="0.0"} 3
+negative_bucket_seconds_bucket{le="5.0"} 6
+negative_bucket_seconds_bucket{le="+Inf"} 6
+negative_bucket_seconds_sum 1
+negative_bucket_seconds_count 6

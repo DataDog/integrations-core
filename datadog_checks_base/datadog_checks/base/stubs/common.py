@@ -20,6 +20,10 @@ HistogramBucketStubBase = namedtuple(
 )
 
 
+# Summary of a distribution sketch produced by the Agent, replayed from `agent check` output in E2E tests
+SketchStub = namedtuple('SketchStub', 'name count min max sum avg tags hostname')
+
+
 class HistogramBucketStub(HistogramBucketStubBase):
     def __new__(cls, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=None):
         return HistogramBucketStubBase.__new__(

@@ -145,6 +145,26 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                     data.get('device'),
                 )
 
+        # Older aggregator stubs cannot record sketches
+        if hasattr(stub_aggregator, 'submit_sketch_e2e'):
+            # The Agent serializes sketches as {"sketches": [...]}
+            sketches = aggregator.get('sketches') or {}
+            for data in sketches.get('sketches') or []:
+                for point in data.get('points') or []:
+                    summary = point['sketch']['summary']
+                    stub_aggregator.submit_sketch_e2e(
+                        check_name,
+                        check_id,
+                        data['metric'],
+                        summary['Cnt'],
+                        summary['Min'],
+                        summary['Max'],
+                        summary['Sum'],
+                        summary['Avg'],
+                        data.get('tags') or [],
+                        data.get('host'),
+                    )
+
         for ep_event_type in EVENT_PLATFORM_EVENT_TYPES:
             ep_events = aggregator.get(ep_event_type) or []
             for event in ep_events:

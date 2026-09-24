@@ -20,3 +20,6 @@ INSTANCE = {
         'go_memstats_alloc_bytes',  # gauge
     ],
 }
+
+# Static payload with zero-bound histogram buckets, served by the `zero-buckets` compose service
+ZERO_BUCKETS_URL = 'http://{}:8999/metrics'.format(HOST)

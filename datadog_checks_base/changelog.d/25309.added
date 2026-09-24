@@ -1,0 +1,1 @@
+Add distribution sketch summaries to the aggregator stub so E2E tests can assert on sketches produced by the Agent

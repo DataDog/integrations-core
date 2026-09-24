@@ -11,7 +11,7 @@ from collections import OrderedDict, defaultdict
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 
-from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
+from .common import HistogramBucketStub, MetricStub, ServiceCheckStub, SketchStub
 from .similar import build_similar_elements_msg
 
 METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
@@ -146,6 +146,35 @@ class AggregatorStub(object):
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value)
         )
+
+    def submit_sketch_e2e(self, check, check_id, name, count, min, max, sum, avg, tags, hostname):
+        # Sketches are only available in E2E tests, replayed from the Agent's `agent check` output
+        self._sketches[name].append(SketchStub(name, count, min, max, sum, avg, tags, hostname))
+
+    def sketches(self, name):
+        """
+        Return the distribution sketch summaries received under the given name (E2E tests only)
+        """
+        return [
+            SketchStub(
+                ensure_unicode(stub.name),
+                stub.count,
+                stub.min,
+                stub.max,
+                stub.sum,
+                stub.avg,
+                normalize_tags(stub.tags),
+                ensure_unicode(stub.hostname),
+            )
+            for stub in self._sketches.get(to_native_string(name), [])
+        ]
+
+    @property
+    def sketch_names(self):
+        """
+        Return all distribution sketch names received (E2E tests only)
+        """
+        return [ensure_unicode(name) for name in self._sketches]
 
     def metrics(self, name):
         """
@@ -609,6 +638,7 @@ class AggregatorStub(object):
         # dict[event_type, [events]]
         self._event_platform_events = defaultdict(list)
         self._histogram_buckets = defaultdict(list)
+        self._sketches = defaultdict(list)
 
     def all_metrics_asserted(self):
         assert self.metrics_asserted_pct >= 100.0
