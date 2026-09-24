@@ -14,6 +14,8 @@ def describe_agent_error(error: BaseException) -> str:
     """
     if isinstance(error, asyncio.CancelledError) and str(error):
         return f"Timed out: {error}"
+    if isinstance(error, FlowStopRequested):
+        return str(error)
     return f"{type(error).__name__}: {error}"
 
 

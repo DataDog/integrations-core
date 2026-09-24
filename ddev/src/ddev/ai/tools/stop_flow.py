@@ -24,12 +24,14 @@ class StopFlowInput(BaseToolInput):
 
 
 class StopFlowTool(BaseTool[StopFlowInput]):
-    """Stop the entire run immediately because the task cannot be completed as specified.
+    """Stop immediately because the task cannot be completed as specified.
 
     Use this only when the described goal is actually unreachable — e.g. the instructions require
     something that does not exist or contradicts itself — not for an obstacle you can work around
-    or retry. This ends the whole run, not just the current phase or subagent, so a human can fix
-    the instructions and run again. Explain precisely what is blocking completion."""
+    or retry. If called by the top-level agent, this ends the whole run, so a human can fix the
+    instructions and run again. If called by a subagent, it only ends that subagent's run; the
+    parent receives the reason as the subagent's outcome and decides whether to stop itself.
+    Explain precisely what is blocking completion."""
 
     @property
     def name(self) -> str:

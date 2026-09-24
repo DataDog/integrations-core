@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -210,7 +210,7 @@ class AgenticPhase(Phase):
         try:
             result = await process.start(prompt)
         except FlowStopRequested as e:
-            self.__raise_with_tokens(e)
+            self._raise_with_tokens(e)
         self._add_tokens(result.total_input_tokens, result.total_output_tokens)
         return result
 
@@ -238,9 +238,9 @@ class AgenticPhase(Phase):
             )
         except GoalValidationError as e:
             self._record_goal_attempt(task, e.attempts, final_valid=False)
-            self.__raise_with_tokens(e)
+            self._raise_with_tokens(e)
         except FlowStopRequested as e:
-            self.__raise_with_tokens(e)
+            self._raise_with_tokens(e)
 
         self._record_goal_attempt(task, outcome.attempts, final_valid=True)
         self._add_tokens(outcome.total_input_tokens, outcome.total_output_tokens)
@@ -269,7 +269,7 @@ class AgenticPhase(Phase):
         self._total_input_tokens += input_tokens
         self._total_output_tokens += output_tokens
 
-    def __raise_with_tokens(self, e: GoalValidationError | FlowStopRequested):
+    def _raise_with_tokens(self, e: GoalValidationError | FlowStopRequested) -> NoReturn:
         self._add_tokens(e.input_tokens, e.output_tokens)
         raise e
 

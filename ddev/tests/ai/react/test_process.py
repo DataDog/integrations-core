@@ -354,33 +354,36 @@ async def test_partial_batch_failure_only_affects_raising_tool(fake_tool: FakeTo
 # ---------------------------------------------------------------------------
 
 
-async def test_stop_reason_result_raises_flow_stop_requested(fake_tool: FakeToolFactory) -> None:
+@pytest.mark.parametrize(
+    "tool_calls",
+    [
+        pytest.param([make_tool_call("tc_01", "stop_flow")], id="solo"),
+        pytest.param(
+            [make_tool_call("tc_01", "read_file"), make_tool_call("tc_02", "stop_flow")], id="parallel_with_others"
+        ),
+    ],
+)
+async def test_stop_reason_result_raises_flow_stop_requested(
+    fake_tool: FakeToolFactory, tool_calls: list[ToolCall]
+) -> None:
     """A tool result carrying stop_reason must end the run instead of being sent back to the agent,
-    so an unreachable goal stops the whole flow rather than looping forever."""
-    tc = make_tool_call("tc_01", "stop_flow")
-    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=[tc]), make_response(StopReason.END_TURN)])
-    stop_flow = fake_tool("stop_flow", result=ToolResult(success=True, stop_reason="the PRD endpoint doesn't exist"))
-
-    with pytest.raises(FlowStopRequested, match="the PRD endpoint doesn't exist"):
-        await make_process(agent, registry=ToolRegistry([stop_flow])).start("Build the check")
-
-    # The tool call is still reported before the loop ends, but no further turn is sent.
-    assert len(agent.send_calls) == 1
-
-
-async def test_stop_reason_takes_priority_over_other_parallel_results(fake_tool: FakeToolFactory) -> None:
-    """A stop request dispatched alongside ordinary tool calls in the same turn still ends the run."""
-    tool_calls = [make_tool_call("tc_01", "read_file"), make_tool_call("tc_02", "stop_flow")]
-    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=tool_calls)])
+    so an unreachable goal stops the whole flow rather than looping forever — even when it's
+    dispatched alongside ordinary tool calls in the same turn."""
+    # A second queued response would answer a follow-up send if one were mistakenly made;
+    # its presence is what makes the send_calls == 1 assertion below meaningful.
+    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=tool_calls), make_response(StopReason.END_TURN)])
     registry = ToolRegistry(
         [
             fake_tool("read_file"),
-            fake_tool("stop_flow", result=ToolResult(success=True, stop_reason="blocked")),
+            fake_tool("stop_flow", result=ToolResult(success=True, stop_reason="the PRD endpoint doesn't exist")),
         ]
     )
 
-    with pytest.raises(FlowStopRequested, match="blocked"):
+    with pytest.raises(FlowStopRequested, match="the PRD endpoint doesn't exist"):
         await make_process(agent, registry=registry).start("Build the check")
+
+    # The tool call is still reported before the loop ends, but no further turn is sent.
+    assert len(agent.send_calls) == 1
 
 
 async def test_stop_reason_exception_carries_tokens_spent_before_the_stop(fake_tool: FakeToolFactory):

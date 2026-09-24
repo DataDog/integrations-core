@@ -18,7 +18,6 @@ from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
@@ -648,30 +647,47 @@ async def test_flow_stop_requested_checkpoint_includes_tokens_spent_before_the_s
     assert cp.error == "blocked"
 
 
-async def test_run_goal_validation_adds_tokens_from_flow_stop_requested(flow_dir, monkeypatch, message_queue):
+async def test_flow_stop_requested_during_goal_validation_checkpoint_includes_tokens(
+    flow_dir, monkeypatch, message_queue
+):
     """A stop requested during goal validation (by the worker's repair turn or the reviewer) must
-    still count toward the phase's token total, same as a stop from a goal-less task."""
-    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
+    land in the persisted FailedCheckpoint together with the worker's tokens, not just in some
+    private counter that a broken wiring change could leave stranded."""
+    from ddev.event_bus.exceptions import MessageProcessingError
 
-    async def raise_stop(**kwargs):
-        raise FlowStopRequested("blocked", input_tokens=90, output_tokens=45)
+    worker = MockAgent([make_response("worker attempt 1", 10, 5)])
 
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.run_goal_loop", raise_stop)
-    result = ReActResult(
-        final_response=make_response("done"),
-        iterations=1,
-        total_input_tokens=0,
-        total_output_tokens=0,
-        context_usage=None,
+    def goal_builder(owner_id: str) -> AgentRuntime:
+        reviewer_agent = MockAgent([])
+
+        async def raising_send(content, allowed_tools=None):
+            reviewer_agent.send_calls.append(content)
+            raise FlowStopRequested("blocked", input_tokens=90, output_tokens=45)
+
+        monkeypatch.setattr(reviewer_agent, "send", raising_send)
+        return AgentRuntime(agent=reviewer_agent, tool_registry=ToolRegistry([]))
+
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        worker,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="g", max_goal_attempts=2)],
+        goal_runtime_builder=goal_builder,
+    )
+    trigger = PhaseTrigger(id="start", phase_id=None)
+
+    with pytest.raises(FlowStopRequested) as exc_info:
+        await phase.process_message(trigger)
+
+    await phase.on_error(
+        MessageProcessingError(processor_name="p1", message=trigger, original_exception=exc_info.value)
     )
 
-    with pytest.raises(FlowStopRequested):
-        await phase._run_goal_validation(
-            process=None, task=TaskConfig(name="t1", prompt="x", goal="g"), context={}, prompt="TASK", result=result
-        )
-
-    assert phase._total_input_tokens == 90
-    assert phase._total_output_tokens == 45
+    cp = mgr.read()["p1"]
+    assert isinstance(cp, FailedCheckpoint)
+    assert cp.tokens == CheckpointTokenInfo(total_input=10 + 90, total_output=5 + 45)
+    assert cp.error == "blocked"
 
 
 # ---------------------------------------------------------------------------
