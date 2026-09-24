@@ -77,7 +77,7 @@ instances:
 <div class="alert alert-info">These custom Flink metrics are considered standard metrics in Datadog.</div>
 
 You can also match multiple metrics at once with a regular expression, for
-example to collect everything under a given Flink scope:
+example, to collect everything under a given Flink scope:
 
 ```yaml
     extra_metrics:
