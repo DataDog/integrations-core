@@ -429,6 +429,10 @@ integration/datadog_csi_driver:
 - changed-files:
   - any-glob-to-any-file:
     - datadog_csi_driver/**/*
+integration/datadog_dogstatsd:
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_dogstatsd/**/*
 integration/datadog_operator:
 - changed-files:
   - any-glob-to-any-file:
