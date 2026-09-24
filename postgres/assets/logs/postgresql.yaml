@@ -316,11 +316,6 @@ pipeline:
         - 2026-08-17 20:45:57.031 UTC
         - '2026-08-28 12:19:21.018 '
         - '2026-08-28 12:19:21 '
-    - type: status-remapper
-      name: Define `db.severity` as the official status of the log
-      enabled: true
-      sources:
-        - db.severity
     - type: string-builder-processor
       name: Map `pid` to `postgres.proc_id`
       enabled: true
