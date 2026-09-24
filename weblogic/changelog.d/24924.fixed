@@ -1,0 +1,1 @@
+Fix ``com.bea`` JMX metrics not being collected because ``bean_regex`` patterns in the default ``metrics.yaml`` assumed a key-property order that does not match WebLogic's actual (alphabetically sorted) ``ObjectName`` format.

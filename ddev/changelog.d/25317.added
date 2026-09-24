@@ -1,0 +1,1 @@
+Emit Dispatcher execution and component-operation metrics, including workflow and artifact-download durations, launched-job totals, and incomplete results.
