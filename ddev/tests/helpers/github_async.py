@@ -177,6 +177,8 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 status='completed',
                 conclusion='success',
                 html_url='https://github.com/o/r/actions/runs/123',
+                run_started_at='2026-01-01T10:00:00Z',
+                updated_at='2026-01-01T10:01:30Z',
             ),
             headers={},
         ),

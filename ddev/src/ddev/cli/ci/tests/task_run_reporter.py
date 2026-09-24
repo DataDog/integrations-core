@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import httpx
 
+from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     render_comment,
@@ -99,6 +100,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._lock = asyncio.Lock()
         self._logger = monitor.logger
         self.monitor = monitor
+        self._metrics = MetricsHelper(monitor.metrics)
 
     @property
     def latest_body(self) -> str | None:
@@ -123,7 +125,11 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         # Serialize revision checks and writes so older updates cannot overwrite newer ones.
         async with self._lock:
             if message.revision <= self._latest_revision:
-                self._logger.info("Stale UpdatePRComment ignored (latest rendered is %s)", self._latest_revision)
+                self._logger.info(
+                    "Stale PR comment revision %s ignored (latest rendered is %s)",
+                    message.revision,
+                    self._latest_revision,
+                )
                 return
 
             # Retain the report before any write that could fail or be interrupted.
@@ -137,8 +143,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 published = True
             else:
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, message.progress, now=now)
+                try:
+                    published = await self._write(pr_number, body, message.progress, revision=message.revision, now=now)
+                except Exception:
+                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    raise
                 self._pr_comment_failed = not published
+                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
 
             if message.progress.done and published:
                 self._final_report_published = True
@@ -168,8 +179,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return
 
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                try:
+                    published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                except Exception:
+                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    raise
                 self._pr_comment_failed = not published
+                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
                 if published:
                     self._logger.info("Run reported as %s", request.kind.value, published=True)
 
@@ -179,12 +195,14 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         body: str,
         progress: DispatcherProgress | None,
         *,
+        revision: int | None = None,
         shutdown: ShutdownRequest | None = None,
         now: datetime | None = None,
     ) -> bool:
         """Return whether publication succeeded, using smaller bodies or a replacement comment.
 
-        The GitHub client handles transient retries.
+        The GitHub client handles transient retries. `revision` is the progress revision the body
+        renders, or `None` for the terminal report a shutdown publishes.
         """
         rendered = body
         # Render fallback tiers only when needed, skipping duplicate bodies.
@@ -216,12 +234,28 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 self._logger.error("PR comment write failed: %s", error)
                 return False
             else:
-                self._logger.info(
-                    "PR comment written",
-                    comment_id=self._comment_id,
-                    bytes=len(rendered),
-                    published=True,
-                )
+                if shutdown is not None:
+                    self._logger.info(
+                        "PR comment written for shutdown: %s",
+                        shutdown.kind.value,
+                        comment_id=self._comment_id,
+                        bytes=len(rendered),
+                        published=True,
+                    )
+                else:
+                    # A non-shutdown write always renders a progress snapshot; assert rather than
+                    # render meaningless counts if that contract is broken.
+                    assert progress is not None and revision is not None
+                    self._logger.info(
+                        "PR comment written for revision %s (finished=%s, failed=%s, pending=%s)",
+                        revision,
+                        progress.complete,
+                        progress.failed,
+                        progress.total - progress.complete,
+                        comment_id=self._comment_id,
+                        bytes=len(rendered),
+                        published=True,
+                    )
                 return True
 
         self._logger.error("PR comment write found no comment it may edit")

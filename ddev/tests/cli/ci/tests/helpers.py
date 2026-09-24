@@ -12,6 +12,7 @@ from collections.abc import Iterable, Sequence
 from pydantic import ValidationError
 
 from ddev.cli.ci.tests.batching.units import ResolvedEnvironment, TestUnit
+from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.messages import BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import (
     BatchProgress,
@@ -23,12 +24,14 @@ from ddev.cli.ci.tests.progress import (
 )
 from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.orchestrator import BaseMessage
+from ddev.monitoring import MonitoringRuntime
 from ddev.utils.git import ChangedFile, ChangeType
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
 from ddev.utils.platform import PlatformName
+from tests.helpers.monitoring import RecordingSink
 
 DEFAULT_PYTHON_VERSION = "3.13"
 DEFAULT_RUNNER_LABELS = ("ubuntu-22.04",)
@@ -108,6 +111,13 @@ def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
         jobs_count=len(job_list),
         integrations=sorted({job.target for job in job_list}),
     )
+
+
+def recording_runtime() -> tuple[MonitoringRuntime, RecordingSink]:
+    """A monitoring runtime delivering every component's metrics into one recording sink."""
+    sink = RecordingSink()
+    monitoring = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=metric_tag_mapping)
+    return monitoring, sink
 
 
 def invalid_response_error() -> ValidationError:
@@ -263,13 +273,14 @@ def failing_report(*test_names: str) -> JUnitReport:
 
 
 def attempt(
-    status: Status = Status.SUCCESS,
+    status: Status | None = Status.SUCCESS,
     *,
     number: int = 1,
     failed_steps: tuple[str, ...] = (),
-    reports: tuple[JUnitReport, ...] = (),
+    reports: tuple[JUnitReport, ...] | None = (),
     job_url: str | None = JOB_URL,
     error: ProgressError | None = None,
+    state: ExecutionState = ExecutionState.FINISHED,
 ) -> JobAttemptProgress:
     return JobAttemptProgress(
         attempt=number,
@@ -280,6 +291,7 @@ def attempt(
         job_url=job_url,
         reports=reports,
         error=error,
+        state=state,
     )
 
 
