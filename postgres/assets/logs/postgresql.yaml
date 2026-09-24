@@ -66,21 +66,37 @@ pipeline:
         - 'custom-prefix|host=db1|LOG:  statement: SELECT 99;'
       grok:
         supportRules: |
+          # %p — process ID
           _pg_pid %{integer:pid}
+          # %l — log line number within the session
           _pg_line_num %{integer:line_num}
+          # %x — transaction ID
           _pg_txid %{integer:txid}
+          # %c — session ID
           _pg_session_id %{regex("[0-9a-f]+\\.[0-9a-f]+"):session_id}
+          # %v — virtual transaction ID
           _pg_vxid (?:%{regex("[0-9]+/[0-9]+"):vxid})?
+          # %e — SQLSTATE
           _pg_state_code %{regex("[A-Z0-9]{5}"):state_code:nullIf("00000")}
+          # %m / %t — log timestamp with / without milliseconds
           _pg_timestamp %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)? (?:[0-9A-Za-z+-]+)?"):timestamp}
+          # %s — process start timestamp
           _pg_session_start %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)? (?:[0-9A-Za-z+-]+)?"):session_start}
+          # %r — client host and optional port
           _pg_remote (?:(?:%{ipOrHost:remote_host}\(%{integer:remote_port}\))|%{regex("\\[local\\]"):remote_host}|%{ipOrHost:remote_host})?
+          # %u — user name
           _pg_user %{regex("\\S*"):user:nullIf("[unknown]")}
+          # %d — database name
           _pg_dbname %{regex("\\S*"):dbname:nullIf("[unknown]")}
+          # %a — application name
           _pg_app_name %{data:application_name:nullIf("[unknown]")}
+          # %h — client host only
           _pg_remote_host %{regex("\\S*"):remote_host}
+          # %b — backend type
           _pg_backend_type %{data:backend_type}
+          # %i — command tag
           _pg_ps %{data:ps}
+          # Both body helpers parse the severity, optional SQLSTATE and message after the configured prefix.
           # Text cannot distinguish cursorpos from internalpos, so consume but do not publish it.
           _pg_body %{word:error_severity}:  (?:%{regex("[A-Z0-9]{5}"):state_code:nullIf("00000")}: )?%{data:message}(?: at character \d+)?
           # When %e already captures SQLSTATE, consume its verbose-body copy without creating an array.
