@@ -51,7 +51,7 @@ deps = [
     "requests==2.34.2",
     "simplejson==4.1.2",
     "urllib3==2.8.0",
-    "wrapt==2.4.1",
+    "wrapt==2.3.0",
 ]
 http = [
     "aws-requests-auth==0.4.3",
