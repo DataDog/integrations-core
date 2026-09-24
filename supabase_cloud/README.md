@@ -13,7 +13,7 @@ With this integration, you can, per Supabase project:
 
 ## Setup
 
-The Supabase Cloud integration requires the `service_role` API key to retrieve metrics from the hosted project's
+The Supabase Cloud integration requires an API key to retrieve metrics from the hosted project's
 [metrics endpoint][4]. If you want to collect logs, you also need a [Personal Access Token][7] to access the Supabase [Management API][6]. 
 
 If your Postgres log volume exceeds 200 messages per second, Datadog recommends using the
@@ -21,11 +21,13 @@ If your Postgres log volume exceeds 200 messages per second, Datadog recommends 
 
 **Important**: If you have a Datadog Log Drain configured for your Supabase project, disable it before enabling log collection via this integration to avoid duplicate logs.
 
-### Retrieve the service_role API key
+### Retrieve the API Key
 
 1. Log in to [Supabase][2] as an administrator.
 2. Navigate to **Project Settings** > **API Keys**.
-3. On the **Legacy API Keys** tab, retrieve the `service_role` API key.
+3. On the **Publishable and secret API keys** tab:
+
+   1. Under **Secret keys**, either retrieve the `default` API key or create a new secret key using the **+ New secret key** button.
 
 ### Generate a Personal Access Token
 A Personal Access Token (PAT) is required to access the Supabase Management API and collect logs.
@@ -45,11 +47,11 @@ A Personal Access Token (PAT) is required to access the Supabase Management API 
 
 ### Connect your Supabase Cloud project to Datadog
 
-1. In the Datadog app, navigate to the [Supabase Cloud integration tile][8] and add your Supabase hosted project ID and `service_role` API key:
+1. In the Datadog app, navigate to the [Supabase Cloud integration tile][8] and add your Supabase hosted project ID and Secret API key:
     |Parameter|Description|
     |--------------------|--------------------|
     |Project ID|Supabase project ID. For example: `https://supabase.com/dashboard/project/<project_id>/settings/general`.|
-    |`service_role` API key|API key needed for communication with the Metrics endpoint.|
+    |Secret API key|Secret API key needed for communication with the Metrics endpoint.|
     |Collect Logs|Enable this option to collect logs from your Supabase project instead of using a [Datadog Log Drain][3].|
     |Personal Access Token|Token needed for communication with the Management API. Required only if **Collect Logs** is enabled.|
 
