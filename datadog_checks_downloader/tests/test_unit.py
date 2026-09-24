@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import urllib.error
-
 import pytest
+import requests
 from tuf.api.exceptions import DownloadError
 
 from datadog_checks.downloader.cli import _v2_failure_category
@@ -15,7 +14,7 @@ from datadog_checks.downloader.exceptions import TargetNotFoundError
     'exc,expected',
     [
         pytest.param(TargetNotFoundError('missing'), 'target version not found', id='target-not-found'),
-        pytest.param(urllib.error.URLError('timeout'), 'network error', id='network-urlerror'),
+        pytest.param(requests.exceptions.ConnectionError('timeout'), 'network error', id='network-connectionerror'),
         pytest.param(DownloadError('boom'), 'network error', id='network-downloaderror'),
         pytest.param(TimeoutError('slow'), 'network error', id='network-timeout'),
         pytest.param(ValueError('bad pointer'), 'other', id='other'),

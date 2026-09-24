@@ -6,12 +6,12 @@
 
 import hashlib
 import json
-import urllib.error
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from tuf.api.exceptions import DownloadError
+import requests
+from tuf.api.exceptions import DownloadError, DownloadHTTPError
 
 from datadog_checks.downloader import cli
 from datadog_checks.downloader.download_v2 import (
@@ -69,15 +69,21 @@ def _mock_tuf_updater_with_pointer_bytes(pointer_bytes: bytes) -> MagicMock:
 
 def _mock_response(content: bytes) -> MagicMock:
     response = MagicMock()
-    response.__enter__ = lambda s: s
-    response.__exit__ = MagicMock(return_value=False)
-    response.read.return_value = content
+    response.content = content
+    response.raise_for_status = MagicMock()
+    return response
+
+
+def _mock_error_response(status_code: int) -> MagicMock:
+    response = MagicMock()
+    response.status_code = status_code
+    response.raise_for_status.side_effect = requests.exceptions.HTTPError(response=response)
     return response
 
 
 @pytest.fixture
-def mock_urlopen():
-    with patch('datadog_checks.downloader.download_v2.urllib.request.urlopen') as mock:
+def mock_get():
+    with patch('datadog_checks.downloader.download_v2.requests.Session.get') as mock:
         mock.return_value = _mock_response(WHEEL_CONTENT)
         yield mock
 
@@ -97,7 +103,7 @@ class TestTargetResolution:
             pytest.param(None, f'wheelsmith/v1/{PROJECT}/latest.json', id='missing-version'),
         ],
     )
-    def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
+    def test_get_pointer_requests_expected_target(self, mock_get, mock_updater_cls, version, expected_target):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.get_pointer(PROJECT, version=version)
 
@@ -106,7 +112,7 @@ class TestTargetResolution:
 
 
 class TestHappyPath:
-    def test_download_returns_wheel_path(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_download_returns_wheel_path(self, mock_get, mock_updater_cls, tmp_path):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
@@ -114,21 +120,21 @@ class TestHappyPath:
         assert wheel_path.read_bytes() == WHEEL_CONTENT
         assert wheel_path.name == WHEEL_NAME
 
-    def test_repository_flag_overrides_pointer_repository(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_repository_flag_overrides_pointer_repository(self, mock_get, mock_updater_cls, tmp_path):
         prod_pointer = {**POINTER, 'repository': 'https://agent-integration-wheels-prod.s3.amazonaws.com'}
         mock_updater_cls.return_value = _mock_tuf_updater(prod_pointer)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
-        mock_urlopen.assert_called_once_with(
+        mock_get.assert_called_once_with(
             f'{REPO_URL}/wheels/{PROJECT}/{WHEEL_NAME}',
             timeout=60,
         )
 
 
 class TestTargetNotFound:
-    def test_raises_when_tuf_target_absent(self, mock_urlopen, mock_updater_cls):
+    def test_raises_when_tuf_target_absent(self, mock_get, mock_updater_cls):
         mock_updater = MagicMock()
         mock_updater.get_targetinfo.return_value = None
         mock_updater_cls.return_value = mock_updater
@@ -139,9 +145,9 @@ class TestTargetNotFound:
 
 
 class TestDigestMismatch:
-    def test_raises_on_corrupted_wheel(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_raises_on_corrupted_wheel(self, mock_get, mock_updater_cls, tmp_path):
         tampered = b'tampered bytes that match the pointer length'[:WHEEL_LENGTH]
-        mock_urlopen.return_value = _mock_response(tampered)
+        mock_get.return_value = _mock_response(tampered)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(DigestMismatch, match=PROJECT):
@@ -150,7 +156,7 @@ class TestDigestMismatch:
 
 
 class TestLengthMismatch:
-    def test_raises_when_pointer_length_does_not_match_wheel(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_raises_when_pointer_length_does_not_match_wheel(self, mock_get, mock_updater_cls, tmp_path):
         bad_pointer = {**POINTER, 'length': WHEEL_LENGTH + 1}
         mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
 
@@ -164,7 +170,7 @@ class TestLengthMismatch:
 
 class TestMalformedPointer:
     @pytest.mark.parametrize('missing_key', ['digest', 'length', 'wheel_path'])
-    def test_raises_when_required_key_missing(self, mock_urlopen, mock_updater_cls, tmp_path, missing_key):
+    def test_raises_when_required_key_missing(self, mock_get, mock_updater_cls, tmp_path, missing_key):
         broken_pointer = {k: v for k, v in POINTER.items() if k != missing_key}
         mock_updater_cls.return_value = _mock_tuf_updater(broken_pointer)
 
@@ -172,14 +178,14 @@ class TestMalformedPointer:
         with pytest.raises(MalformedPointerError, match=missing_key):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
-    def test_raises_when_wheel_path_missing_leading_slash(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_raises_when_wheel_path_missing_leading_slash(self, mock_get, mock_updater_cls, tmp_path):
         no_slash_pointer = {**POINTER, 'wheel_path': f'wheels/{PROJECT}/{WHEEL_NAME}'}
         mock_updater_cls.return_value = _mock_tuf_updater(no_slash_pointer)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match='wheel_path'):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-        mock_urlopen.assert_not_called()
+        mock_get.assert_not_called()
 
     @pytest.mark.parametrize(
         'pointer_bytes',
@@ -188,13 +194,13 @@ class TestMalformedPointer:
             pytest.param(b'"not an object"', id='string'),
         ],
     )
-    def test_raises_when_pointer_payload_is_not_object(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_bytes):
+    def test_raises_when_pointer_payload_is_not_object(self, mock_get, mock_updater_cls, tmp_path, pointer_bytes):
         mock_updater_cls.return_value = _mock_tuf_updater_with_pointer_bytes(pointer_bytes)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match='pointer'):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-        mock_urlopen.assert_not_called()
+        mock_get.assert_not_called()
 
     @pytest.mark.parametrize(
         'wheel_path',
@@ -206,7 +212,7 @@ class TestMalformedPointer:
         ],
     )
     def test_rejects_path_traversal_or_scheme_bypass_in_wheel_path(
-        self, mock_urlopen, mock_updater_cls, tmp_path, wheel_path
+        self, mock_get, mock_updater_cls, tmp_path, wheel_path
     ):
         bad_pointer = {**POINTER, 'wheel_path': wheel_path}
         mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
@@ -214,7 +220,7 @@ class TestMalformedPointer:
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match='wheel_path'):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-        mock_urlopen.assert_not_called()
+        mock_get.assert_not_called()
 
     @pytest.mark.parametrize(
         'pointer_digest',
@@ -226,14 +232,14 @@ class TestMalformedPointer:
             pytest.param(WHEEL_DIGEST.upper(), id='uppercase'),
         ],
     )
-    def test_rejects_invalid_digest(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_digest):
+    def test_rejects_invalid_digest(self, mock_get, mock_updater_cls, tmp_path, pointer_digest):
         bad_pointer = {**POINTER, 'digest': pointer_digest}
         mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match='digest'):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-        mock_urlopen.assert_not_called()
+        mock_get.assert_not_called()
 
     @pytest.mark.parametrize(
         'pointer_length',
@@ -244,16 +250,16 @@ class TestMalformedPointer:
             pytest.param(None, id='none'),
         ],
     )
-    def test_rejects_invalid_length(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_length):
+    def test_rejects_invalid_length(self, mock_get, mock_updater_cls, tmp_path, pointer_length):
         bad_pointer = {**POINTER, 'length': pointer_length}
         mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match='length'):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
-        mock_urlopen.assert_not_called()
+        mock_get.assert_not_called()
 
-    def test_extra_unknown_keys_are_forward_compatible(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_extra_unknown_keys_are_forward_compatible(self, mock_get, mock_updater_cls, tmp_path):
         forward_compat = {**POINTER, 'future_feature': {'enabled': True}, 'signing_metadata_url': '/x'}
         mock_updater_cls.return_value = _mock_tuf_updater(forward_compat)
 
@@ -261,11 +267,11 @@ class TestMalformedPointer:
         wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
         assert wheel_path.read_bytes() == WHEEL_CONTENT
 
-    def test_zero_length_wheel_is_allowed(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_zero_length_wheel_is_allowed(self, mock_get, mock_updater_cls, tmp_path):
         empty_digest = hashlib.sha256(b'').hexdigest()
         empty_pointer = {**POINTER, 'digest': empty_digest, 'length': 0}
         mock_updater_cls.return_value = _mock_tuf_updater(empty_pointer)
-        mock_urlopen.return_value = _mock_response(b'')
+        mock_get.return_value = _mock_response(b'')
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
@@ -273,32 +279,69 @@ class TestMalformedPointer:
 
 
 class TestNetworkErrorMidDownload:
-    def test_http_error_propagates(self, mock_urlopen, mock_updater_cls, tmp_path):
-        mock_urlopen.side_effect = urllib.error.HTTPError(
-            url='http://example/x.whl', code=500, msg='boom', hdrs=None, fp=None
-        )
+    def test_http_error_propagates(self, mock_get, mock_updater_cls, tmp_path):
+        mock_get.return_value = _mock_error_response(404)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
-        with pytest.raises(urllib.error.HTTPError):
+        with pytest.raises(requests.exceptions.HTTPError):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
-    def test_url_error_propagates(self, mock_urlopen, mock_updater_cls, tmp_path):
-        mock_urlopen.side_effect = urllib.error.URLError('unreachable')
+    def test_connection_error_propagates(self, mock_get, mock_updater_cls, tmp_path):
+        mock_get.side_effect = requests.exceptions.ConnectionError('unreachable')
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
-        with pytest.raises(urllib.error.URLError):
+        with pytest.raises(requests.exceptions.ConnectionError):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+
+class TestWheelFetchRetry:
+    """The v2 downloader retries transient 5xx errors on the wheel GET too, not just metadata.
+
+    Exercised against a real local server, not a mock: retries happen inside requests/urllib3's
+    own HTTPAdapter, invisible to anything that mocks Session.get itself.
+    """
+
+    def _repo_with_wheel(self, tmp_path: Path) -> Path:
+        wheel_dir = tmp_path / 'repo' / 'wheels' / PROJECT
+        wheel_dir.mkdir(parents=True)
+        (wheel_dir / WHEEL_NAME).write_bytes(WHEEL_CONTENT)
+        return tmp_path / 'repo'
+
+    def test_survives_transient_5xx_then_succeeds(self, mock_updater_cls, tmp_path):
+        repo = self._repo_with_wheel(tmp_path)
+        mock_updater_cls.return_value = _mock_tuf_updater(POINTER)
+
+        with serve_flaky_directory(
+            repo, fail_path=f'/wheels/{PROJECT}/{WHEEL_NAME}', fail_count=2, fail_status=504
+        ) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+        assert wheel_path.read_bytes() == WHEEL_CONTENT
+
+    def test_raises_with_original_status_once_retries_are_exhausted(self, mock_updater_cls, tmp_path):
+        repo = self._repo_with_wheel(tmp_path)
+        mock_updater_cls.return_value = _mock_tuf_updater(POINTER)
+
+        with serve_flaky_directory(
+            repo, fail_path=f'/wheels/{PROJECT}/{WHEEL_NAME}', fail_count=10, fail_status=504
+        ) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+                downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+        assert exc_info.value.response.status_code == 504
 
 
 class TestDisableVerification:
-    def test_directly_downloads_wheel_without_tuf_or_digest_checks(self, mock_urlopen, mock_updater_cls, tmp_path):
+    def test_directly_downloads_wheel_without_tuf_or_digest_checks(self, mock_get, mock_updater_cls, tmp_path):
         content = b'bytes not matching any signed pointer'
-        mock_urlopen.return_value = _mock_response(content)
+        mock_get.return_value = _mock_response(content)
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
         wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
 
-        mock_urlopen.assert_called_once_with(
+        mock_get.assert_called_once_with(
             f'{REPO_URL}/wheels/{PROJECT}/{WHEEL_NAME}',
             timeout=60,
         )
@@ -315,7 +358,7 @@ class TestDisableVerification:
 class TestUpdaterContract:
     """Lock in the v2 target-path storage contract."""
 
-    def test_get_targetinfo_called_with_prefixed_path_only(self, mock_urlopen, mock_updater_cls):
+    def test_get_targetinfo_called_with_prefixed_path_only(self, mock_get, mock_updater_cls):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.get_pointer(PROJECT, version=VERSION)
 
@@ -324,7 +367,7 @@ class TestUpdaterContract:
         assert call.args == (f'wheelsmith/v1/{PROJECT}/{VERSION}.json',)
         assert call.kwargs == {}
 
-    def test_target_path_uses_stable_wheelsmith_namespace(self, mock_urlopen, mock_updater_cls):
+    def test_target_path_uses_stable_wheelsmith_namespace(self, mock_get, mock_updater_cls):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.get_pointer(PROJECT, version=VERSION)
 
@@ -430,11 +473,14 @@ class TestTransientMetadataError:
         _patch_bootstrap_to_use(repo, monkeypatch)
         return repo, pointer
 
-    def test_get_pointer_survives_transient_5xx_on_metadata_fetch(self, monkeypatch, tmp_path):
+    @pytest.mark.parametrize('fail_status', [504, 524], ids=['gateway-timeout', 'cloudflare-origin-timeout'])
+    def test_get_pointer_survives_transient_5xx_on_metadata_fetch(self, monkeypatch, tmp_path, fail_status):
         project, version = 'datadog-postgres', '14.0.0'
         repo, pointer = self._build_repo(tmp_path, monkeypatch, project, version)
 
-        with serve_flaky_directory(repo, fail_path='/metadata/timestamp.json', fail_count=2) as url:
+        with serve_flaky_directory(
+            repo, fail_path='/metadata/timestamp.json', fail_count=2, fail_status=fail_status
+        ) as url:
             downloader = TUFPointerDownloader(repository_url=url)
             assert downloader.get_pointer(project, version=version) == pointer
 
@@ -442,10 +488,11 @@ class TestTransientMetadataError:
         project, version = 'datadog-postgres', '14.0.0'
         repo, _ = self._build_repo(tmp_path, monkeypatch, project, version)
 
-        with serve_flaky_directory(repo, fail_path='/metadata/timestamp.json', fail_count=10) as url:
+        with serve_flaky_directory(repo, fail_path='/metadata/timestamp.json', fail_count=10, fail_status=504) as url:
             downloader = TUFPointerDownloader(repository_url=url)
-            with pytest.raises(DownloadError):
+            with pytest.raises(DownloadHTTPError) as exc_info:
                 downloader.get_pointer(project, version=version)
+        assert exc_info.value.status_code == 504
 
 
 class TestInstantiateV2Downloader:
@@ -501,7 +548,7 @@ class TestCliDownloadFallback:
             pytest.param(TargetNotFoundError('missing'), id='target-not-found'),
             pytest.param(DownloadError('unreachable'), id='download-error'),
             pytest.param(TimeoutError('slow'), id='timeout-error'),
-            pytest.param(urllib.error.URLError('unreachable'), id='url-error'),
+            pytest.param(requests.exceptions.ConnectionError('unreachable'), id='connection-error'),
         ],
     )
     def test_default_falls_back_to_v1_on_expected_v2_failures(self, monkeypatch, fallback_exc):

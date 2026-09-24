@@ -162,15 +162,15 @@ def serve_directory(directory: Path) -> Iterator[str]:
 
 
 @contextmanager
-def serve_flaky_directory(directory: Path, fail_path: str, fail_count: int) -> Iterator[str]:
-    """Like ``serve_directory``, but respond 504 to the first *fail_count* requests for *fail_path*."""
+def serve_flaky_directory(directory: Path, fail_path: str, fail_count: int, fail_status: int) -> Iterator[str]:
+    """Like ``serve_directory``, but respond *fail_status* to the first *fail_count* requests for *fail_path*."""
     remaining = [fail_count]
 
     class _FlakyHandler(SimpleHTTPRequestHandler):
         def do_GET(self):
             if self.path == fail_path and remaining[0] > 0:
                 remaining[0] -= 1
-                self.send_response(504)
+                self.send_response(fail_status)
                 self.end_headers()
                 return
             super().do_GET()
