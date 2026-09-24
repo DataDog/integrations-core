@@ -425,38 +425,22 @@ class AggregatorStub(object):
             msg += '\nFound metrics that are not asserted:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
-    def assert_metrics_using_metadata(
+    def calculate_metric_metadata_coverage(
         self,
         metadata_metrics,
         check_metric_type=True,
         check_submission_type=False,
         exclude=None,
-        check_symmetric_inclusion=False,
     ):
-        """
-        Assert metrics using metadata.csv. The assertion fails if there are metrics emitted that are
-        not in metadata.csv. Metrics passed in the `exclude` parameter are ignored.
-
-        Pass `check_symmetric_inclusion=True` to assert that both set of metrics, those submitted and
-        those in metadata.csv, are the same.
-
-        Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
-        asserting this type make sense for e2e (metrics collected from agent).
-        For integrations tests, we can check the submission type with `check_submission_type=True`, or
-        use `check_metric_type=False` not to check types.
-
-        Usage:
-
-            from datadog_checks.dev.utils import get_metadata_metrics
-            aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-        """
-
+        """Calculate metric coverage against metadata.csv without changing assertion behavior."""
         exclude = exclude or []
+        excluded_metrics = set(exclude)
         errors = set()
         submitted_metrics = set()
+        type_mismatches = []
+
         for metric_name, metric_stubs in self._metrics.items():
-            if metric_name in exclude:
+            if metric_name in excluded_metrics:
                 continue
             for metric_stub in metric_stubs:
                 metric_stub_name = backend_normalize_metric_name(metric_stub.name)
@@ -485,15 +469,133 @@ class AggregatorStub(object):
 
                 if check_metric_type:
                     if expected_metric_type != actual_metric_type:
+                        type_mismatches.append(
+                            {
+                                'metric_name': metric_stub_name,
+                                'expected_type': expected_metric_type,
+                                'actual_type': actual_metric_type,
+                            }
+                        )
                         errors.add(
                             "Expect `{}` to have type `{}` but got `{}`.".format(
                                 metric_stub_name, expected_metric_type, actual_metric_type
                             )
                         )
 
+        metadata_metric_names = set(metadata_metrics)
+        covered_metrics = submitted_metrics & metadata_metric_names
+        missing_from_metadata = submitted_metrics - metadata_metric_names
+        missing_from_submissions = metadata_metric_names - submitted_metrics
+        metadata_count = len(metadata_metric_names)
+        coverage_percent = len(covered_metrics) / metadata_count * 100 if metadata_count else 100
+
+        return {
+            'submitted_metrics': submitted_metrics,
+            'metadata_metrics': metadata_metric_names,
+            'covered_metrics': covered_metrics,
+            'missing_from_metadata': missing_from_metadata,
+            'missing_from_submissions': missing_from_submissions,
+            'type_mismatches': type_mismatches,
+            'excluded_metrics': excluded_metrics,
+            'submitted_count': len(submitted_metrics),
+            'metadata_count': metadata_count,
+            'covered_count': len(covered_metrics),
+            'missing_from_metadata_count': len(missing_from_metadata),
+            'missing_from_submissions_count': len(missing_from_submissions),
+            'type_mismatch_count': len(type_mismatches),
+            'excluded_count': len(excluded_metrics),
+            'coverage_percent': coverage_percent,
+            'errors': errors,
+        }
+
+    def _report_metric_metadata_coverage(self, coverage):
+        coverage_enabled = os.environ.get('DD_INTEGRATION_METRIC_COVERAGE')
+        # Temporary CI experiment: if test-target CI exposes TEST_RESULTS_DIR, emit reports even
+        # when an individual ddev/hatch process does not inherit the explicit opt-in flag.
+        ci_results_dir = os.environ.get('TEST_RESULTS_DIR') if os.environ.get('GITHUB_ACTIONS') else ''
+        if not coverage_enabled and not ci_results_dir:
+            return
+
+        payload = self._format_metric_metadata_coverage_report(coverage)
+        coverage_file = os.environ.get('DD_INTEGRATION_METRIC_COVERAGE_FILE')
+        if not coverage_file and ci_results_dir:
+            coverage_file = os.path.join(ci_results_dir, 'metric-metadata-coverage.jsonl')
+
+        if coverage_file:
+            coverage_dir = os.path.dirname(coverage_file)
+            if coverage_dir:
+                os.makedirs(coverage_dir, exist_ok=True)
+            with open(coverage_file, 'a') as f:
+                f.write(json.dumps(payload, sort_keys=True) + '\n')
+
+        print('DD_INTEGRATION_METRIC_COVERAGE ' + json.dumps(payload, sort_keys=True))
+
+    @staticmethod
+    def _format_metric_metadata_coverage_report(coverage):
+        pytest_current_test = os.environ.get('PYTEST_CURRENT_TEST', '')
+        pytest_nodeid = pytest_current_test.rsplit(' ', 1)[0] if pytest_current_test else ''
+        payload = {
+            'event': 'integration_metric_metadata_coverage',
+            'integration': os.environ.get('INPUT_TARGET') or os.environ.get('DD_INTEGRATION') or '',
+            'check_name': os.environ.get('DD_CHECK_NAME') or os.environ.get('INPUT_TARGET') or '',
+            'pytest_nodeid': pytest_nodeid,
+            'pytest_current_test': pytest_current_test,
+            'submitted_count': coverage['submitted_count'],
+            'metadata_count': coverage['metadata_count'],
+            'covered_count': coverage['covered_count'],
+            'missing_from_metadata_count': coverage['missing_from_metadata_count'],
+            'missing_from_submissions_count': coverage['missing_from_submissions_count'],
+            'type_mismatch_count': coverage['type_mismatch_count'],
+            'excluded_count': coverage['excluded_count'],
+            'coverage_percent': round(coverage['coverage_percent'], 2),
+            'missing_metric_names': sorted(coverage['missing_from_submissions']),
+            'emitted_not_in_metadata': sorted(coverage['missing_from_metadata']),
+            'type_mismatches': sorted(coverage['type_mismatches'], key=lambda item: item['metric_name']),
+            'excluded_metrics': sorted(coverage['excluded_metrics']),
+        }
+        return payload
+
+    def assert_metrics_using_metadata(
+        self,
+        metadata_metrics,
+        check_metric_type=True,
+        check_submission_type=False,
+        exclude=None,
+        check_symmetric_inclusion=False,
+    ):
+        """
+        Assert metrics using metadata.csv. The assertion fails if there are metrics emitted that are
+        not in metadata.csv. Metrics passed in the `exclude` parameter are ignored.
+
+        Pass `check_symmetric_inclusion=True` to assert that both set of metrics, those submitted and
+        those in metadata.csv, are the same.
+
+        Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
+        asserting this type make sense for e2e (metrics collected from agent).
+        For integrations tests, we can check the submission type with `check_submission_type=True`, or
+        use `check_metric_type=False` not to check types.
+
+        Usage:
+
+            from datadog_checks.dev.utils import get_metadata_metrics
+            aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+        """
+
+        coverage = self.calculate_metric_metadata_coverage(
+            metadata_metrics,
+            check_metric_type=check_metric_type,
+            check_submission_type=check_submission_type,
+            exclude=exclude,
+        )
+        errors = coverage['errors']
+        submitted_metrics = coverage['submitted_metrics']
+
         if check_symmetric_inclusion:
             missing_metrics = metadata_metrics.keys() - submitted_metrics
             errors.update(f"Expect `{m}` from metadata.csv but not submitted." for m in missing_metrics)
+
+        self._report_metric_metadata_coverage(coverage)
 
         assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 
