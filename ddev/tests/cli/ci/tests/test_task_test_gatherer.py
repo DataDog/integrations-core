@@ -36,10 +36,17 @@ from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.cli.ci.tests.task_test_gatherer import INITIAL_UPDATE_MESSAGE_ID, TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
+from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async.models import JobStep, WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
 from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
-from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, jobs_reported, make_job
+from tests.cli.ci.tests.helpers import (
+    RecordingBus,
+    drain_queue,
+    jobs_reported,
+    make_job,
+    recording_runtime,
+)
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
@@ -145,6 +152,7 @@ def _make_gatherer(
     plan: dict[str, list[BatchJob]] | None = None,
     *,
     handler: logging.Handler | None = None,
+    monitor: ComponentMonitor | None = None,
 ) -> TaskTestGatherer:
     """Gatherer primed with the complete plan, given as ``{batch_id: planned jobs}``."""
     if plan is None:
@@ -153,7 +161,7 @@ def _make_gatherer(
         "gatherer",
         output_base_path=tmp_path / "out",
         batches=[_test_batch(batch_id, jobs) for batch_id, jobs in plan.items()],
-        monitor=make_monitor('test-gatherer', handler=handler),
+        monitor=monitor or make_monitor('test-gatherer', handler=handler),
     )
     gatherer.bus = RecordingBus()  # type: ignore[assignment]
     return gatherer
@@ -250,16 +258,16 @@ def test_job_completion_is_logged_once_when_an_observation_transitions_to_comple
     gatherer.process_message(
         _progress_update(WorkflowJob(id=1, run_id=100, name="j1", status="in_progress"), sequence=1)
     )
-    assert [event for event in handler.events if event["event"] == "Job completed"] == []
+    assert [event for event in handler.events if event["event"] == "Job j1 completed: success"] == []
 
     completed = _progress_update(_workflow_job("j1", "success"), sequence=2)
     gatherer.process_message(completed)
-    [event] = [event for event in handler.events if event["event"] == "Job completed"]
+    [event] = [event for event in handler.events if event["event"] == "Job j1 completed: success"]
     assert event["job"] == "j1"
     assert event["job_status"] == "success"
 
     gatherer.process_message(dataclasses.replace(completed, id="progress-3", sequence=3))
-    assert len([event for event in handler.events if event["event"] == "Job completed"]) == 1
+    assert len([event for event in handler.events if event["event"] == "Job j1 completed: success"]) == 1
 
 
 def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_path: Path):
@@ -382,7 +390,8 @@ def test_a_shutting_down_bus_abandons_gathering_without_registering_the_batch(
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
 
-    gatherer = _make_gatherer(tmp_path)
+    monitoring, sink = recording_runtime()
+    gatherer = _make_gatherer(tmp_path, monitor=monitoring.component("test-gatherer"))
     bus = RecordingBus()
     gatherer.bus = bus  # type: ignore[assignment]
     start_stopping(gatherer, bus)
@@ -397,6 +406,9 @@ def test_a_shutting_down_bus_abandons_gathering_without_registering_the_batch(
     assert _registry(gatherer) == []
     # Still planned, so nothing downstream can read the batch as one that finished.
     assert gatherer._progress_by_batch["batch-1"].state is ExecutionState.PLANNED
+    assert sink.records_named("jobs.failed") == []
+    assert sink.records_named("batches.failed") == []
+    assert sink.records_named("operations.count") == []
 
 
 def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
@@ -427,6 +439,95 @@ def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
     assert (tmp_path / "out" / "coverage" / "ntp_py3.13_linux.xml").is_file()
     assert (tmp_path / "out" / "test_results" / "ntp_py3.13_linux-test-unit-py3.13.xml").is_file()
     assert (tmp_path / "out" / "test_results" / "ntp_py3.13_linux-test-e2e-py3.13.xml").is_file()
+
+
+def test_an_accepted_final_result_reports_the_batches_outcomes(tmp_path: Path):
+    """An accepted commit reports its batch's outcome and a zero-filled flag per collected job."""
+    monitoring, sink = recording_runtime()
+    j1 = _batch_job("j1")
+    j2 = _batch_job("j2", target="kafka")
+    j3 = _batch_job("j3", target="redis")
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2, j3]}, monitor=monitoring.component("test-gatherer"))
+
+    artifacts = tmp_path / "artifacts" / "100"
+    j1_dir = _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING, e2e=False)
+    j2_dir = _make_job_tree(artifacts, "j2", e2e=False)
+    j3_dir = _make_job_tree(artifacts, "j3", e2e=False)
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status="failure",
+            batch_jobs=[
+                _batch_job_result(j1, _workflow_job("j1", "failure"), j1_dir),
+                _batch_job_result(j2, _workflow_job("j2", "skipped"), j2_dir),
+                _batch_job_result(j3, _workflow_job("j3", "success"), j3_dir),
+            ],
+        )
+    )
+
+    drain_queue(gatherer.bus.queue)
+    assert [record.value for record in sink.records_named("batches.failed")] == [1]
+    failed = [
+        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.failed")
+    ]
+    assert failed == [(1, "ntp"), (0, "kafka"), (0, "redis")]
+    skipped = [
+        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.skipped")
+    ]
+    assert skipped == [(0, "ntp"), (1, "kafka"), (0, "redis")]
+    assert {record.tags["dispatcher.component"] for record in sink.records_named("jobs.failed")} == {"test-gatherer"}
+    assert sink.records_named("jobs.incomplete") == []
+    gathered_operations = [
+        record
+        for record in sink.records_named("operations.count")
+        if record.tags["dispatcher.operation"] == "gather_batch_results"
+    ]
+    assert [record.value for record in gathered_operations] == [1]
+    assert {record.value for record in sink.records_named("operations.failed")} == {0}
+
+
+def test_an_observed_attempt_the_commit_never_collected_reports_no_outcome(tmp_path: Path):
+    """An observed job is not a collected result, so the commit reports no outcome for it."""
+    monitoring, sink = recording_runtime()
+    j1 = _batch_job("j1")
+    j2 = _batch_job("j2", target="kafka")
+    gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]}, monitor=monitoring.component("test-gatherer"))
+
+    gatherer.process_message(_progress_update(WorkflowJob(id=2, run_id=100, name="j2", status="in_progress")))
+    drain_queue(gatherer.bus.queue)
+    artifacts = tmp_path / "artifacts" / "100"
+    j1_dir = _make_job_tree(artifacts, "j1", e2e=False)
+    gatherer.process_message(
+        _batch_finished(artifacts, batch_jobs=[_batch_job_result(j1, _workflow_job("j1", "success"), j1_dir)])
+    )
+    drain_queue(gatherer.bus.queue)
+
+    reported = [record.tags["dispatcher.batch.job.integration"] for record in sink.records_named("jobs.failed")]
+    assert reported == ["ntp"]
+    assert [record.value for record in sink.records_named("jobs.failed")] == [0]
+    assert [
+        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.skipped")
+    ] == [(0, "ntp")]
+
+
+def test_a_duplicate_final_message_does_not_report_the_batch_twice(tmp_path: Path):
+    monitoring, sink = recording_runtime()
+    job = _batch_job("j1")
+    gatherer = _make_gatherer(tmp_path, monitor=monitoring.component("test-gatherer"))
+
+    artifacts = tmp_path / "artifacts" / "100"
+    job_dir = _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING, e2e=False)
+    batch = _batch_finished(
+        artifacts,
+        status="failure",
+        batch_jobs=[_batch_job_result(job, _workflow_job("j1", "failure"), job_dir)],
+    )
+    gatherer.process_message(batch)
+    gatherer.process_message(dataclasses.replace(batch, id="replay"))
+
+    assert [record.value for record in sink.records_named("jobs.failed")] == [1]
+    assert [record.value for record in sink.records_named("batches.failed")] == [1]
+    assert [record.value for record in sink.records_named("operations.count")] == [1]
 
 
 def test_failure_path_records_failed_steps_and_reports(tmp_path: Path):
@@ -730,12 +831,15 @@ def test_missing_workflow_job_raises(tmp_path: Path):
     # Correlation is the runner's job; a job without a workflow job on a non-timed-out batch is a bug.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
+    monitoring, sink = recording_runtime()
+    gatherer = _make_gatherer(tmp_path, monitor=monitoring.component("test-gatherer"))
 
-    gatherer = _make_gatherer(tmp_path)
     with pytest.raises(ValueError, match="No workflow job correlated"):
         gatherer.process_message(
             _batch_finished(artifacts, batch_jobs=[_batch_job_result(make_job("j1"), None, job_dir)])
         )
+
+    assert [record.value for record in sink.records_named("operations.failed")] == [1]
 
 
 def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
@@ -1061,8 +1165,9 @@ def test_timed_out_batch_is_recorded_on_the_batch(tmp_path: Path) -> None:
 
 def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
     # Concurrent batches land on different threads: one revision each, no loss, no repeat.
+    monitoring, sink = recording_runtime()
     plan = {f"b{index}": [_scenario_batch_job(f"int{index}")] for index in range(1, 6)}
-    gatherer = _make_gatherer(tmp_path, plan)
+    gatherer = _make_gatherer(tmp_path, plan, monitor=monitoring.component("test-gatherer"))
 
     messages = []
     for index in range(1, 6):
@@ -1087,6 +1192,8 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
     final = max(updates, key=lambda update: update.revision)
     assert {batch.state for batch in final.progress.batches} == {ExecutionState.FINISHED}
     assert (final.progress.passed, final.progress.complete, final.progress.total) == (5, 5, 5)
+    # Five concurrent commits, each accepted once: no batch is reported twice.
+    assert [record.value for record in sink.records_named("batches.failed")] == [0] * 5
 
 
 def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) -> None:

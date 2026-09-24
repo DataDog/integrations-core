@@ -55,9 +55,9 @@ def test_component_binding_and_shared_scopes_enrich_logs_and_metrics(
     runtime = MonitoringRuntime(
         metrics_sink=sink,
         metrics_tag_projector=projector_for('repo', 'component', 'operation', 'batch_id'),
+        base_fields={'repo': 'DataDog/integrations-core'},
     )
     runtime.add_log_handler(handler)
-    runtime.set_run_fields(repo='DataDog/integrations-core')
     monitor = runtime.component('planner').bind(operation='dispatch')
 
     with runtime.component('dispatcher').scope(batch_id='batch-01'):
@@ -80,7 +80,7 @@ def test_component_binding_and_shared_scopes_enrich_logs_and_metrics(
 
 
 def test_resolving_run_fields_affects_future_events_not_emitted_ones(handler: RecordingJsonHandler):
-    runtime = MonitoringRuntime()
+    runtime = MonitoringRuntime(base_fields={'commit': 'unresolved'})
     runtime.add_log_handler(handler)
     monitor = runtime.component('resolution')
     monitor.logger.info('Resolving run')
@@ -88,7 +88,7 @@ def test_resolving_run_fields_affects_future_events_not_emitted_ones(handler: Re
     runtime.set_run_fields(commit='head-sha')
     monitor.logger.info('Resolved run')
 
-    assert [event.get('commit') for event in handler.events] == [None, 'head-sha']
+    assert [event['commit'] for event in handler.events] == ['unresolved', 'head-sha']
 
 
 @pytest.mark.parametrize('error', [ValueError('boom'), asyncio.CancelledError()])
