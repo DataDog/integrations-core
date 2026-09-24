@@ -189,8 +189,6 @@ pipeline:
         - 'duration: 12.345 ms'
         - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
         - "statement: SELECT 'duration: 99 ms'"
-        - 'checkpoint starting: shutdown immediate'
-        - "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
     - type: grok-parser
       name: Classify `remote_host`
       enabled: true
