@@ -238,12 +238,6 @@ def test_traversal_does_not_bypass(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_deny_patterns_property_preserves_input(tmp_path) -> None:
-    patterns = ("*.pem", "~/.ssh/*", ".env")
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=patterns)
-    assert policy._deny_patterns == patterns
-
-
 def test_basename_patterns_filters_to_basename_only(tmp_path) -> None:
     policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=("*.pem", "~/.ssh/*", ".env"))
     assert set(policy.basename_patterns) == {"*.pem", ".env"}
@@ -278,33 +272,8 @@ def test_read_denied_by_default_path_pattern(tmp_path, root) -> None:
 )
 def test_integration_root_normalizes_like_ddev_create(tmp_path, integration_name, expected_name) -> None:
     policy = FileAccessPolicy(write_root=tmp_path, integration_name=integration_name)
-    assert policy._integration_root == tmp_path / expected_name
-
-
-def test_integration_root_is_none_without_integration_name(tmp_path) -> None:
-    assert FileAccessPolicy(write_root=tmp_path)._integration_root is None
-
-
-@pytest.mark.parametrize("value", ["", "   ", "---", None, 123])
-def test_integration_root_is_none_for_invalid_value(tmp_path, value) -> None:
-    assert FileAccessPolicy(write_root=tmp_path, integration_name=value)._integration_root is None
-
-
-@pytest.mark.parametrize("value", ["ddev/src", "../escape", "/etc", "a/b/c"])
-def test_integration_root_rejects_path_separators(tmp_path, value) -> None:
-    """normalize_package_name only touches `-_. `, so a slash would otherwise survive
-    normalization and let integration_name name an arbitrary directory outside the
-    intended integration root."""
-    assert FileAccessPolicy(write_root=tmp_path, integration_name=value)._integration_root is None
-
-
-@pytest.mark.parametrize("value", ["datadog_operator", "Datadog Checks", "DATADOG-anything"])
-def test_integration_root_rejects_reserved_datadog_prefix(tmp_path, value) -> None:
-    """`ddev create` itself rejects any name starting with `datadog`
-    (`ddev/cli/create/_common.py:_validate_integration_name`); a value like
-    "datadog_operator" would otherwise normalize to an existing, unrelated repository
-    directory and grant delete_file access to it."""
-    assert FileAccessPolicy(write_root=tmp_path, integration_name=value)._integration_root is None
+    target = tmp_path / expected_name / "check.py"
+    assert policy.assert_deletable(str(target)) == target
 
 
 # ---------------------------------------------------------------------------
@@ -314,6 +283,27 @@ def test_integration_root_rejects_reserved_datadog_prefix(tmp_path, value) -> No
 
 def test_assert_deletable_fails_closed_without_integration_name(tmp_path) -> None:
     policy = FileAccessPolicy(write_root=tmp_path)
+    with pytest.raises(FileAccessError, match="no resolved integration directory"):
+        policy.assert_deletable(str(tmp_path / "file.txt"))
+
+
+@pytest.mark.parametrize("value", ["", "   ", "---", None, 123])
+def test_assert_deletable_fails_closed_for_invalid_integration_name(tmp_path, value) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name=value)
+    with pytest.raises(FileAccessError, match="no resolved integration directory"):
+        policy.assert_deletable(str(tmp_path / "file.txt"))
+
+
+@pytest.mark.parametrize("value", ["ddev/src", "../escape", "/etc", "a/b/c"])
+def test_assert_deletable_fails_closed_for_path_separators(tmp_path, value) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name=value)
+    with pytest.raises(FileAccessError, match="no resolved integration directory"):
+        policy.assert_deletable(str(tmp_path / "file.txt"))
+
+
+@pytest.mark.parametrize("value", ["datadog_operator", "Datadog Checks", "DATADOG-anything"])
+def test_assert_deletable_fails_closed_for_reserved_datadog_prefix(tmp_path, value) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name=value)
     with pytest.raises(FileAccessError, match="no resolved integration directory"):
         policy.assert_deletable(str(tmp_path / "file.txt"))
 
