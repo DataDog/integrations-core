@@ -79,7 +79,7 @@ def discover_instances(config, interval, check_ref):
                 del check
 
             check = check_ref()
-            if check is None:
+            if check is None or not check._running:
                 return
             # Write again at the end of the loop, in case some host have been removed since last
             write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
