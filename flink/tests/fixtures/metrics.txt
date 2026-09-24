@@ -31,6 +31,9 @@ flink_jobmanager_job_numberOfCompletedCheckpoints{host="jobmanager-0",job_name="
 # HELP flink_jobmanager_job_numberOfFailedCheckpoints numberOfFailedCheckpoints (scope: jobmanager_job)
 # TYPE flink_jobmanager_job_numberOfFailedCheckpoints gauge
 flink_jobmanager_job_numberOfFailedCheckpoints{host="jobmanager-0",job_name="wordcount",} 0.0
+# HELP flink_jobmanager_job_totalNumberOfCheckpoints totalNumberOfCheckpoints (scope: jobmanager_job)
+# TYPE flink_jobmanager_job_totalNumberOfCheckpoints gauge
+flink_jobmanager_job_totalNumberOfCheckpoints{host="jobmanager-0",job_name="wordcount",} 42.0
 # HELP flink_jobmanager_job_lastCheckpointDuration lastCheckpointDuration (scope: jobmanager_job)
 # TYPE flink_jobmanager_job_lastCheckpointDuration gauge
 flink_jobmanager_job_lastCheckpointDuration{host="jobmanager-0",job_name="wordcount",} 256.0

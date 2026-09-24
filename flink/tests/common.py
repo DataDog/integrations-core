@@ -28,12 +28,6 @@ METRICS = [
         "tags": TAGS,
     },
     {
-        "name": "jobmanager.job.numberOfCompletedCheckpoints",
-        "value": 42,
-        "type": AggregatorStub.GAUGE,
-        "tags": TAGS + ["job_name:wordcount"],
-    },
-    {
         "name": "taskmanager.Status.JVM.Memory.Heap.Used",
         "value": 87654321.0,
         "type": AggregatorStub.GAUGE,
@@ -58,6 +52,7 @@ METRICS = [
 
 _TASK_TAGS = TAGS + ["tm_id:tm-1", "job_name:wordcount", "task_name:Source: KafkaSource", "subtask_index:0"]
 _OPERATOR_TAGS = TAGS + ["tm_id:tm-1", "job_name:wordcount", "operator_name:Source", "subtask_index:0"]
+_JOB_TAGS = TAGS + ["job_name:wordcount"]
 
 # Flink Counters (see metrics.py's COUNTER_METRICS). Flink's Prometheus reporter
 # always describes these as `# TYPE ... gauge` in the raw scrape (see
@@ -80,4 +75,7 @@ COUNTER_METRICS = [
     {"name": "operator.numSplitsProcessed", "value": 7.0, "tags": _OPERATOR_TAGS},
     {"name": "operator.commitsSucceeded", "value": 15.0, "tags": _OPERATOR_TAGS},
     {"name": "operator.commitsFailed", "value": 0.0, "tags": _OPERATOR_TAGS},
+    {"name": "jobmanager.job.numberOfCompletedCheckpoints", "value": 42.0, "tags": _JOB_TAGS},
+    {"name": "jobmanager.job.numberOfFailedCheckpoints", "value": 0.0, "tags": _JOB_TAGS},
+    {"name": "jobmanager.job.totalNumberOfCheckpoints", "value": 42.0, "tags": _JOB_TAGS},
 ]
