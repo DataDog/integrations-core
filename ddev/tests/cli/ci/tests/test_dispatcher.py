@@ -22,8 +22,20 @@ import pytest
 
 from ddev.cli.ci.tests import dispatcher as dispatcher_module
 from ddev.cli.ci.tests import rate_limiting
-from ddev.cli.ci.tests.dispatcher import CANCELLED_RATE_LIMITS, Dispatcher, DispatcherContext, build_dispatcher
-from ddev.cli.ci.tests.dispatcher_attributes import PROTECTED_RUN_FIELDS, log_tag_mapping, message_fields, run_fields
+from ddev.cli.ci.tests.dispatcher import (
+    CANCELLED_RATE_LIMITS,
+    Dispatcher,
+    DispatcherContext,
+    build_dispatcher,
+    message_scope,
+)
+from ddev.cli.ci.tests.dispatcher_attributes import (
+    PROTECTED_RUN_FIELDS,
+    console_hidden_fields,
+    log_tag_mapping,
+    message_fields,
+    run_fields,
+)
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
@@ -45,8 +57,10 @@ from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunRepor
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.orchestrator import BaseMessage
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import MonitoringRuntime, console_formatter
+from ddev.monitoring.context import MonitorContext
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
@@ -747,7 +761,7 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
     sink = RecordingSink()
     stream = StringIO()
     console_handler = logging.StreamHandler(stream)
-    console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS))
+    console_handler.setFormatter(console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS))
     monitoring = MonitoringRuntime(
         console_handler=console_handler,
         metrics_sink=sink,
@@ -810,24 +824,26 @@ def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client,
     assert progress["run_id"] == 123
 
     by_event = {event["event"]: event for event in handler.events}
-    dispatched = by_event["Dispatched batch"]
+    dispatched = by_event["Batch batch-01 dispatched as workflow run 123"]
     assert dispatched["batch_id"] == "batch-01"
     assert dispatched["run_id"] == 123
     assert dispatched["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
+    assert dispatched["batch_integrations"] == ["ntp"]
 
-    completed = by_event["Workflow completed"]
+    completed = by_event["Workflow run 123 completed: success"]
     assert completed["batch_id"] == "batch-01"
     assert completed["run_id"] == 123
     assert completed["workflow_status"] == "completed"
     assert completed["workflow_conclusion"] == "success"
 
     # The gatherer runs in a worker thread: its logs still carry the batch the message described.
-    gathered = by_event["Gathering batch results"]
+    gathered = by_event["Gathering results for batch batch-01 (jobs=1)"]
     assert gathered["batch_id"] == "batch-01"
     assert gathered["run_id"] == 123
     assert gathered["batch_job_count"] == 1
+    assert gathered["batch_integrations"] == ["ntp"]
 
-    comment = by_event["PR comment written"]
+    comment = [event for event in handler.events if event["event"].startswith("PR comment written for revision")][-1]
     assert comment["message_type"] == "UpdatePRComment"
     assert comment["message_id"]
     assert comment["revision"] > 0
@@ -835,3 +851,62 @@ def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client,
     assert comment["comment_id"] == DEFAULT_COMMENT_ID
     assert comment["published"] is True
     assert "batch_id" not in comment
+    assert "batch_integrations" not in comment
+
+
+@pytest.mark.parametrize(
+    ("message", "expected_integrations"),
+    [
+        pytest.param(make_batch(make_job(target="redis"), batch_id="batch-02"), ["redis"], id="batch"),
+        pytest.param(
+            BatchProgressUpdate(
+                id="progress",
+                batch_id="batch-02",
+                run_id=123,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                state=ExecutionState.RUNNING,
+                sequence=1,
+            ),
+            ["redis"],
+            id="progress",
+        ),
+        pytest.param(
+            BatchProgressUpdate(
+                id="unplanned-progress",
+                batch_id="unplanned-batch",
+                run_id=456,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                state=ExecutionState.RUNNING,
+                sequence=1,
+            ),
+            None,
+            id="unplanned-batch",
+        ),
+        pytest.param(
+            BatchFinished(
+                id="finished",
+                batch_id="batch-02",
+                run_id=123,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                status=Status.SUCCESS,
+                artifacts_path="artifacts",
+            ),
+            ["redis"],
+            id="finished",
+        ),
+        pytest.param(
+            UpdatePRComment(id="report", revision=1, progress=DispatcherProgress(batches=(), done=True)),
+            None,
+            id="report",
+        ),
+    ],
+)
+def test_message_scope_resolves_integrations_from_the_planned_batch(
+    message: BaseMessage, expected_integrations: list[str] | None
+):
+    context = MonitorContext()
+    batches = [make_batch(), make_batch(make_job(target="redis"), batch_id="batch-02")]
+    scope = message_scope(context, batches)
+
+    with scope(message):
+        assert context.fields.get("batch_integrations") == expected_integrations

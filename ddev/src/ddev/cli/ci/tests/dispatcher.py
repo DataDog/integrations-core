@@ -28,6 +28,7 @@ from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 from ddev.utils.rate_limiting import RelaxedRateLimits
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
@@ -90,15 +91,21 @@ class DispatcherOutcome:
         )
 
 
-def message_scope(context: MonitorContext) -> MessageScope:
+def message_scope(context: MonitorContext, batches: Sequence[TestBatch]) -> MessageScope:
+    """Scope each message against the plan, so batch-scoped events resolve one canonical batch by id."""
+    planned = {batch.batch_id: batch for batch in batches}
+
     def scope(message: BaseMessage) -> AbstractContextManager[None]:
         fields = {
             'message_type': type(message).__name__,
             'message_id': message.id,
             **message_fields(message),
         }
-        if isinstance(message, TestBatch):
-            fields.update(batch_fields(message))
+        if isinstance(message, TestBatch | BatchProgressUpdate | BatchFinished):
+            # Progress and results correlate on the stable batch id, so they see the same
+            # canonical batch fields the dispatch did, resolved from the original plan.
+            if (batch := planned.get(message.batch_id)) is not None:
+                fields.update(batch_fields(batch))
         elif isinstance(message, UpdatePRComment):
             fields.update(revision=message.revision, done=message.progress.done)
         return context.scope(fields)
@@ -271,5 +278,5 @@ def build_dispatcher(
         max_timeout=config.global_timeout_seconds,
         grace_period=config.grace_period_seconds,
         monitor=monitoring.component('dispatcher'),
-        message_scope=message_scope(monitoring.context),
+        message_scope=message_scope(monitoring.context, batches),
     )

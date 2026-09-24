@@ -289,6 +289,24 @@ def test_concurrent_revisions_are_serialized():
     assert reported[-1] == 3
 
 
+async def test_pr_comment_log_messages_name_their_revision():
+    client = FakeAsyncGitHubClient()
+    handler = RecordingJsonHandler()
+    reporter = _reporter(client, handler=handler)
+
+    await reporter.process_message(_update(1))
+    await reporter.process_message(_update(2, done=True))
+    # A delivery of a superseded revision, as concurrent batches can produce.
+    await reporter.process_message(_update(1))
+    await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
+
+    messages = [event["event"] for event in handler.events]
+    assert "PR comment written for revision 1 (finished=1, failed=0, pending=9)" in messages
+    assert "PR comment written for revision 2 (finished=10, failed=0, pending=0)" in messages
+    assert "Stale PR comment revision 1 ignored (latest rendered is 2)" in messages
+    assert "PR comment written for shutdown: cancelled" in messages
+
+
 # ---------------------------------------------------------------------------
 # No pull request to comment on
 # ---------------------------------------------------------------------------

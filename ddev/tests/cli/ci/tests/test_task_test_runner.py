@@ -524,6 +524,25 @@ async def test_downloads_all_batch_artifacts(tmp_path: Path):
     )
 
 
+async def test_lifecycle_log_messages_identify_their_batch_run_and_artifacts(tmp_path: Path):
+    fake = FakeAsyncGitHubClient()
+    mock_artifacts(fake, [make_artifact(1)])
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+
+    await runner.process_message(make_batch("batch-1"))
+
+    messages = [event["event"] for event in handler.events]
+    assert "Dispatching batch batch-1 (integrations=1, jobs=1)" in messages
+    assert "Batch batch-1 dispatched as workflow run 123" in messages
+    assert "Batch batch-1 state changed to artifact_download" in messages
+    assert "Workflow run 123 completed: success" in messages
+    assert "Collecting artifacts for workflow run 123" in messages
+    assert "Downloaded artifact artifact-1" in messages
+    assert "Artifacts downloaded for workflow run 123 (count=1)" in messages
+    assert "Batch batch-1 workflow results ready: success" in messages
+
+
 @pytest.mark.asyncio
 async def test_emits_batch_finished_with_run_metadata(tmp_path: Path):
     _, finished = await run_happy_path(tmp_path)
@@ -1017,7 +1036,6 @@ async def test_a_batch_that_failed_mid_poll_stays_cancellable(tmp_path: Path):
 
 
 async def test_cancellation_reporting_identifies_the_batch_and_run_it_stops(tmp_path: Path):
-    """Cancellation logs identify the batch and workflow run being stopped."""
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("queued"), once=True)
     fake.mock_response("get_workflow_run", RuntimeError("boom-mid-poll"), once=True)
@@ -1029,7 +1047,9 @@ async def test_cancellation_reporting_identifies_the_batch_and_run_it_stops(tmp_
 
     await runner.cancel_dispatched_runs()
 
-    cancelled = [event for event in handler.events if event["event"] == "Dispatched run cancelled"]
+    cancelled = [
+        event for event in handler.events if event["event"] == "Workflow run 123 for batch batch-err cancelled"
+    ]
     assert [(event["batch_id"], event["run_id"]) for event in cancelled] == [("batch-err", 123)]
 
 

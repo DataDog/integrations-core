@@ -250,16 +250,16 @@ def test_job_completion_is_logged_once_when_an_observation_transitions_to_comple
     gatherer.process_message(
         _progress_update(WorkflowJob(id=1, run_id=100, name="j1", status="in_progress"), sequence=1)
     )
-    assert [event for event in handler.events if event["event"] == "Job completed"] == []
+    assert [event for event in handler.events if event["event"] == "Job j1 completed: success"] == []
 
     completed = _progress_update(_workflow_job("j1", "success"), sequence=2)
     gatherer.process_message(completed)
-    [event] = [event for event in handler.events if event["event"] == "Job completed"]
+    [event] = [event for event in handler.events if event["event"] == "Job j1 completed: success"]
     assert event["job"] == "j1"
     assert event["job_status"] == "success"
 
     gatherer.process_message(dataclasses.replace(completed, id="progress-3", sequence=3))
-    assert len([event for event in handler.events if event["event"] == "Job completed"]) == 1
+    assert len([event for event in handler.events if event["event"] == "Job j1 completed: success"]) == 1
 
 
 def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_path: Path):

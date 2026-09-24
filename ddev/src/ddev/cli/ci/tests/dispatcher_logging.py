@@ -14,7 +14,7 @@ from urllib.parse import quote, urlencode
 import structlog
 from structlog.typing import EventDict
 
-from ddev.cli.ci.tests.dispatcher_attributes import ATTRIBUTE_SPECS, log_tag_mapping, stringify
+from ddev.cli.ci.tests.dispatcher_attributes import ATTRIBUTE_SPECS, log_tag_mapping, native_value, stringify
 from ddev.monitoring.logger import REDACTED, is_secret_field, redact_value
 
 SERVICE = 'ddev'
@@ -94,7 +94,7 @@ def get_dispatcher_logs_url(*, terminal: bool = False, now: datetime | None = No
     return f'{LOGS_URL}?{urlencode(params, quote_via=quote)}'
 
 
-def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None) -> dict[str, str]:
+def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None) -> dict[str, Any]:
     """Project a canonical Dispatcher event onto Datadog log attributes."""
     attributes = {
         'message': _stringify(event.get('event', '')),
@@ -113,7 +113,7 @@ def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None)
     for key, value in fields.items():
         if key not in ATTRIBUTE_SPECS:
             target = f'dispatcher.{key}'
-            attributes[target] = REDACTED if is_secret_field(target) else stringify(value)
+            attributes[target] = REDACTED if is_secret_field(target) else native_value(value)
     attributes.update(ci or {})
     return attributes
 
