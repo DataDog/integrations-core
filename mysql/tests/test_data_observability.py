@@ -253,7 +253,7 @@ def test_closed_connection_propagates_and_cron_query_is_retried(instance_basic, 
     check.data_observability._db = recovered_conn
     check.data_observability.run_job()
 
-    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 2
     assert [call.args[0] for call in recovered_cursor.execute.call_args_list] == [
         'USE `test_db`',
         CRON_QUERY['query'],
@@ -729,3 +729,67 @@ def test_cancelled_job_aborts_query_before_execution(instance_basic):
         job._execute_single_query(conn, job._scheduled_queries[0].query)
 
     cursor.execute.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'code,kind', [(3024, 'statement_timeout'), (1969, 'statement_timeout'), (1205, 'lock_timeout'), (1146, 'sql_error')]
+)
+def test_query_errors_include_targets_and_classification(instance_basic, aggregator, code, kind):
+    queries = deepcopy(MULTI_QUERIES)
+    targets = [{'metric_config_id': 42, 'entity_id': 'a'}, {'metric_config_id': 43, 'entity_id': 'b'}]
+    queries[0]['metric_targets'] = targets
+    conn, cursor = _make_mock_conn()
+    cursor.execute.side_effect = [None, pymysql.err.OperationalError(code, 'query failed'), None]
+    with patch.object(MySql, 'event_platform_event') as events:
+        _setup_and_run(instance_basic, queries=queries, mock_conn=conn)
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert len(payloads) == 2
+    assert payloads[0]['error_kind'] == kind
+    assert payloads[0]['error_code'] == code
+    assert payloads[0]['error_phase'] == 'execute'
+    assert payloads[0]['timeout_ms'] == 30000
+    assert payloads[0]['metric_targets'] == targets
+    assert payloads[0]['columns'] == []
+    assert payloads[0]['query'] == queries[0]['query']
+    assert payloads[1]['status'] == 'success'
+    assert f'error_kind:{kind}' in aggregator.metrics('dd.mysql.data_observability.query_errors')[0].tags
+
+
+def test_connection_failure_reports_blocked_queries_with_cooldown(instance_basic, aggregator, monkeypatch):
+    current_time = [1000.0]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    check.data_observability._get_db_connection = MagicMock(side_effect=pymysql.err.OperationalError(2003, 'refused'))
+    with patch.object(MySql, 'event_platform_event') as events:
+        for elapsed in (0, 10, 60):
+            current_time[0] = 1000.0 + elapsed
+            with pytest.raises(pymysql.err.OperationalError):
+                check.data_observability.run_job()
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert len(payloads) == 4
+    assert {p['query'] for p in payloads} == {q['query'] for q in MULTI_QUERIES}
+    assert all(p['error_kind'] == 'connection_error' and p['error_phase'] == 'connect' for p in payloads)
+    assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_errors')) == 6
+
+
+def test_lost_connection_reports_failed_and_unstarted_queries(instance_basic, aggregator):
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    conn, cursor = _make_mock_conn(open=False)
+    cursor.execute.side_effect = [None, pymysql.err.OperationalError(2013, 'lost connection')]
+    check.data_observability._db = conn
+    with patch.object(MySql, 'event_platform_event') as events:
+        with pytest.raises(pymysql.err.OperationalError):
+            check.data_observability.run_job()
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert [p['error_phase'] for p in payloads] == ['execute', 'blocked']
+    assert all(p['error_kind'] == 'connection_error' for p in payloads)
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
+    recovered, recovered_cursor = _make_mock_conn()
+    check.data_observability._db = recovered
+    check.data_observability.run_job()
+    assert [c.args[0] for c in recovered_cursor.execute.call_args_list] == [
+        'USE `test_db`',
+        MULTI_QUERIES[0]['query'],
+        MULTI_QUERIES[1]['query'],
+    ]

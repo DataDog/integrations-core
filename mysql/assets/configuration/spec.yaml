@@ -197,6 +197,21 @@ files:
                             type: integer
                           - name: entity_id
                             type: string
+                      - name: metric_targets
+                        description: |
+                          Metric configuration and entity IDs affected by this query.
+                          Used to report collection errors even when no result columns are returned.
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - metric_config_id
+                            - entity_id
+                          properties:
+                            - name: metric_config_id
+                              type: integer
+                            - name: entity_id
+                              type: string
                 fleet_configurable: false
           - name: propagate_agent_tags
             display_priority: 0

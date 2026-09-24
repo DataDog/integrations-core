@@ -103,6 +103,15 @@ class Entity(BaseModel):
     table: str
 
 
+class MetricTarget(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    entity_id: str
+    metric_config_id: int
+
+
 class Query(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -114,6 +123,10 @@ class Query(BaseModel):
     interval_seconds: Optional[int] = Field(
         None,
         description='How often (in seconds) to run this query. Ignored when schedule is set\n(see schedule for the precedence rule).\n',
+    )
+    metric_targets: Optional[tuple[MetricTarget, ...]] = Field(
+        None,
+        description='Metric configuration and entity IDs affected by this query.\nUsed to report collection errors even when no result columns are returned.\n',
     )
     monitor_id: int
     query: str
