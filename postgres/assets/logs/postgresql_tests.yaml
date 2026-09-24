@@ -1,5 +1,23 @@
+# bypass-global-date-remapper-parse-failure-checks
+# pgprefix_kv_client and pgprefix_unparsed intentionally have no timestamp to remap.
+# Allow the harness sentinel for those cases; exact date expectations remain asserted below.
+# Full-pipeline expectations; these are separate from each Grok processor's UI samples.
+# Each case names its parsing rule and the behavior it protects. Assertions include absent fields.
+# Failure triage: compare the reported actual output with the expected fields below.
+# The test harness starts at timestamp 1; cases without a parsed date retain that sentinel.
+# - Wrong/missing raw prefix fields: named pgprefix_* rule and its _pg_* helpers.
+# - Wrong message/state_code: _pg_body[_with_prefix_state], then the message remapper.
+# - Correct raw timestamp/session_start but wrong db.date/db.backend_start: date Grok rules.
+# - Correct db.date but wrong official timestamp: date remapper.
+# - Wrong db.statement/db.operation: pg_statement. Wrong duration: pg_duration/pg_statement,
+#   then Convert duration from ms to ns (the expected output here is always nanoseconds).
+# - Correct remote_host but wrong network.client.ip/hostname: Classify `remote_host`.
+# - Correct error_severity but wrong category/status: Normalize PostgreSQL severity/status remapper.
+# - Correct raw field but wrong compatibility alias or db tag: the corresponding Map processor.
+# These cases cover representative branches, not every regex input or Agent collection behavior.
 id: "postgresql"
 tests:
+ # pgprefix_timestamp_only: preserve an ordinary body; no query details or duration.
  -
   sample: "2017-11-07 17:30:39 UTC LOG:  incomplete startup packet"
   result:
@@ -16,6 +34,7 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1510075839000
+ # pgprefix_dd_docs: pg_statement without duration; local host; numeric PID and string alias.
  -
   sample: "2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;"
   result:
@@ -49,6 +68,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:postgres"
     timestamp: 1510164695727
+ # pgprefix_dd_docs: pg_statement with duration; pg_client_ip precedes hostname; ms -> ns.
  -
   sample: "2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
   result:
@@ -83,6 +103,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:datadog_test"
     timestamp: 1576002465389
+ # pgprefix_rds_enhanced: nullIf on application/SQLSTATE; LOCATION -> info; metadata aliases.
  -
   sample: "2025-09-15 19:05:58.892 UTC:10.0.216.218(36378):shopper_1@dbmorders_1:[20337]:395:00000:2025-09-15 19:02:57 UTC:384/39221:0:68c862e1.4f71:[unknown]:LOCATION:  exec_simple_query, postgres.c:1075"
   result:
@@ -122,6 +143,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:dbmorders_1"
     timestamp: 1757963158892
+ # pgprefix_rds_enhanced: pg_duration accepts execute, but does not invent db.statement.
  -
   sample: "2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:00000:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
   result:
@@ -164,6 +186,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:postgres"
     timestamp: 1758047205429
+ # pgprefix_rds_enhanced: _pg_app_name retains spaces; pg_duration leaves plan content opaque.
  -
   sample: "2025-11-19 18:27:10.640 UTC:10.198.137.95(54414):service_catalog_rw@service_catalog:[194370]:4:00000:2025-11-19 18:21:43 UTC:15/174689:276953619:691e0ab7.2f742:PostgreSQL JDBC Driver:LOG:  duration: 1626.107 ms  plan: {}"
   result:
@@ -206,6 +229,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:service_catalog"
     timestamp: 1763576830640
+ # pgprefix_rds_enhanced: %q omits application; empty connection fields; retain txid = 0.
  -
   sample: "2025-12-03 19:59:40.415 UTC::@:[1670514]:1:00000:2025-12-03 19:59:26 UTC:20/120887:0:6930969e.197d72:LOG:  automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
   result:
@@ -234,6 +258,7 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1764791980415
+ # default_format: minimal timestamp/PID prefix; preserve checkpoint body.
  -
   sample: "2026-08-17 20:46:39.837 UTC [63] LOG:  checkpoint starting: shutdown immediate"
   result:
@@ -252,6 +277,7 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1786999599837
+ # pgprefix_azure: hyphens delimit timestamp/session ID; no invented PID.
  -
   sample: "2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -272,6 +298,7 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1786999545000
+ # pgprefix_bracket: closing bracket separates _pg_ps from _pg_body; split host/port.
  -
   sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -308,6 +335,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999622000
+ # pgprefix_heroku: quoted fields retain numeric/string types; suppress SQLSTATE 00000.
  -
   sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -351,6 +379,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999633749
+ # pgprefix_rds: colons and user@database delimit fields; split host/port.
  -
   sample: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -382,6 +411,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999512000
+ # pgprefix_verbose_user_backend: _pg_backend_type retains spaces; [10-1] captures line_num = 10.
  -
   sample: "2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -410,6 +440,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999589997
+ # pgprefix_verbose_user_host: _pg_remote_host -> pg_client_hostname; digit-leading DNS label.
  -
   sample: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=db.123host LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -441,6 +472,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999579015
+ # pgprefix_verbose_user: absent backend/host fields do not shift database/user boundaries.
  -
   sample: "2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -468,6 +500,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999568111
+ # pgprefix_atdb: user@database without pganalyze labels.
  -
   sample: "2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -493,6 +526,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999601019
+ # pgprefix_pganalyze: labeled user/database/application produce the shared vocabulary.
  -
   sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
   result:
@@ -520,6 +554,7 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:pgllp_db"
     timestamp: 1786999534801
+ # pgprefix_heroku / _pg_body_with_prefix_state: repeated SQLSTATE remains a scalar; ERROR -> error.
  -
   sample: " sql_error_code = 42601 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" ERROR:  42601: syntax error at or near \"SELEC\""
   result:
@@ -563,6 +598,7 @@ tests:
     - source:LOGS_SOURCE
     - db:pgllp_db
     timestamp: 1786999633749
+ # pgprefix_rds_enhanced / _pg_body_with_prefix_state: repeated SQLSTATE remains a scalar.
  -
   sample: "2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:42601:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:ERROR:  42601: syntax error at or near \"SELEC\""
   result:
@@ -606,6 +642,7 @@ tests:
     - source:LOGS_SOURCE
     - db:postgres
     timestamp: 1758047205429
+ # pgprefix_pganalyze precedes pgprefix_atdb: preserve @ inside user.
  - result:
      custom:
        application_name: pgllp_app
@@ -633,6 +670,7 @@ tests:
      timestamp: 1786999534801
    sample: '2026-08-17 20:45:34.801 UTC [105] [user=edge@user,db=pgllp_db,app=pgllp_app]
      LOG:  statement: SELECT 2 AS c02;'
+ # pgprefix_pganalyze precedes pgprefix_atdb: preserve @ inside database.
  - result:
      custom:
        application_name: pgllp_app
@@ -660,6 +698,7 @@ tests:
      timestamp: 1786999534801
    sample: '2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=edge@db,app=pgllp_app]
      LOG:  statement: SELECT 2 AS c02;'
+ # pgprefix_pganalyze precedes pgprefix_atdb: preserve @ inside application.
  - result:
      custom:
        application_name: edge@app
@@ -687,22 +726,7 @@ tests:
      timestamp: 1786999534801
    sample: '2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=edge@app]
      LOG:  statement: SELECT 2 AS c02;'
- -
-  sample: "2017-11-07 17:30:39 UTC LOG:  checkpoint starting: shutdown immediate"
-  result:
-    custom:
-      db:
-        date: 1510075839000
-        severity: "LOG"
-      error_severity: "LOG"
-      postgres:
-        severity_category: "info"
-      timestamp: "2017-11-07 17:30:39 UTC"
-    message: "checkpoint starting: shutdown immediate"
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1510075839000
+ # pg_statement: anchored matching ignores statement: inside an execute SQL literal.
  -
   sample: "2017-11-07 17:30:39 UTC LOG:  execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
   result:
@@ -719,3 +743,193 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1510075839000
+ # pgprefix_kv_client: IPv6 host without a port; pg_duration alone; no prefix timestamp.
+ - sample: 'pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=fd42::3 LOG:  duration: 12.345 ms'
+   result:
+     custom:
+       pid: 107
+       user: pgllp_user
+       dbname: pgllp_db
+       application_name: pgllp_app
+       remote_host: fd42::3
+       duration: 12345000.0
+       error_severity: LOG
+       db:
+         instance: pgllp_db
+         user: pgllp_user
+         severity: LOG
+       postgres:
+         proc_id: '107'
+         appname: pgllp_app
+         severity_category: info
+       network:
+         client:
+           ip: fd42::3
+     message: 'duration: 12.345 ms'
+     status: info
+     tags:
+     - source:LOGS_SOURCE
+     - db:pgllp_db
+     timestamp: 1
+ # pgprefix_unparsed: preserve the entire unknown prefix; missing severity -> info_default.
+ - sample: 'custom-prefix|host=db1|LOG:  statement: SELECT 99;'
+   result:
+     custom:
+       postgres:
+         severity_category: info_default
+     message: 'custom-prefix|host=db1|LOG:  statement: SELECT 99;'
+     status: info
+     tags:
+     - source:LOGS_SOURCE
+     timestamp: 1
+ # pgprefix_rds / _pg_remote: IPv6 + port after EST; _pg_body captures SQLSTATE and strips position; FATAL -> critical.
+ - sample: '2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database "missing" does not exist at
+     character 12'
+   result:
+     custom:
+       pid: 87
+       remote_host: fd42::3
+       remote_port: 5432
+       user: postgres
+       dbname: postgres
+       state_code: 3D000
+       sql_state: 3D000
+       timestamp: 2026-01-15 12:00:00 EST
+       error_severity: FATAL
+       db:
+         instance: postgres
+         user: postgres
+         date: 1768496400000
+         severity: FATAL
+       postgres:
+         proc_id: '87'
+         severity_category: critical
+       network:
+         client:
+           ip: fd42::3
+           port: 5432
+     message: database "missing" does not exist
+     status: critical
+     tags:
+     - source:LOGS_SOURCE
+     - db:postgres
+     timestamp: 1768496400000
+ # pgprefix_heroku: %q background + empty _pg_vxid; pg_date_ms_notz/pg_backend_start_notz assume UTC; PANIC -> emergency.
+ - sample: ' sql_error_code = 00000 time_ms = "2026-08-28 12:19:21.018 " pid="108" proc_start_time="2026-08-28 12:19:20 " session_id="6a837351.6c"
+     vtid="" tid="0" log_line="1" PANIC:  could not write to log file'
+   result:
+     custom:
+       pid: 108
+       session_start: '2026-08-28 12:19:20 '
+       session_id: 6a837351.6c
+       txid: 0
+       line_num: 1
+       session_lineno: 1
+       timestamp: '2026-08-28 12:19:21.018 '
+       error_severity: PANIC
+       db:
+         backend_start: 1787919560000
+         date: 1787919561018
+         severity: PANIC
+       postgres:
+         proc_id: '108'
+         session_id: 6a837351.6c
+         xid: '0'
+         severity_category: emergency
+     message: could not write to log file
+     status: emergency
+     tags:
+     - source:LOGS_SOURCE
+     timestamp: 1787919561018
+ # pgprefix_rds_enhanced: pg_date_notz/pg_backend_start_ms_notz; unknown user/database/application suppressed; bare remote host; WARNING -> warning.
+ - sample: '2026-08-28 12:19:21 :db.internal:[unknown]@[unknown]:[87]:1:00000:2026-08-28 12:19:20.018 :5/2050:0:68c9abb6.57:[unknown]:WARNING:  connection
+     warning'
+   result:
+     custom:
+       pid: 87
+       remote_host: db.internal
+       session_start: '2026-08-28 12:19:20.018 '
+       session_id: 68c9abb6.57
+       txid: 0
+       vxid: 5/2050
+       line_num: 1
+       session_lineno: 1
+       timestamp: '2026-08-28 12:19:21 '
+       error_severity: WARNING
+       db:
+         backend_start: 1787919560018
+         date: 1787919561000
+         severity: WARNING
+       postgres:
+         proc_id: '87'
+         session_id: 68c9abb6.57
+         xid: '0'
+         vxid: 5/2050
+         severity_category: warning
+       network:
+         client:
+           hostname: db.internal
+     message: connection warning
+     status: warn
+     tags:
+     - source:LOGS_SOURCE
+     timestamp: 1787919561000
+ # pgprefix_heroku / _pg_remote: local socket; pg_backend_start_ms preserves milliseconds; DEBUG5 -> debug.
+ - sample: ' sql_error_code = 00000 time_ms = "2026-08-17 20:47:13.749 UTC" pid="108" proc_start_time="2026-08-17 20:47:13.031
+     UTC" session_id="6a837351.6c" vtid="4/5" tid="0" log_line="10" database="pgllp_db" connection_source="[local]" user="pgllp_user"
+     application_name="pgllp_app" DEBUG5:  backend initialized'
+   result:
+     custom:
+       pid: 108
+       session_start: 2026-08-17 20:47:13.031 UTC
+       session_id: 6a837351.6c
+       txid: 0
+       vxid: 4/5
+       line_num: 10
+       session_lineno: 10
+       dbname: pgllp_db
+       user: pgllp_user
+       application_name: pgllp_app
+       remote_host: '[local]'
+       timestamp: 2026-08-17 20:47:13.749 UTC
+       error_severity: DEBUG5
+       db:
+         backend_start: 1786999633031
+         instance: pgllp_db
+         user: pgllp_user
+         date: 1786999633749
+         severity: DEBUG5
+       postgres:
+         proc_id: '108'
+         session_id: 6a837351.6c
+         xid: '0'
+         vxid: 4/5
+         appname: pgllp_app
+         severity_category: debug
+       network:
+         client:
+           hostname: '[local]'
+     message: backend initialized
+     status: debug
+     tags:
+     - source:LOGS_SOURCE
+     - db:pgllp_db
+     timestamp: 1786999633749
+ # default_format / Normalize PostgreSQL severity: NOTICE remains notice, not generic info.
+ - sample: '2026-08-17 20:46:39.837 UTC [63] NOTICE:  table "missing" does not exist, skipping'
+   result:
+     custom:
+       pid: 63
+       timestamp: 2026-08-17 20:46:39.837 UTC
+       error_severity: NOTICE
+       db:
+         date: 1786999599837
+         severity: NOTICE
+       postgres:
+         proc_id: '63'
+         severity_category: notice
+     message: table "missing" does not exist, skipping
+     status: notice
+     tags:
+     - source:LOGS_SOURCE
+     timestamp: 1786999599837
