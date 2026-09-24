@@ -63,8 +63,9 @@ junit/
 # Sphinx documentation
 docs/_build/
 
-# MkDocs documentation
+# Generated documentation
 site/
+docs/developer-build/
 
 # PyBuilder
 target/
