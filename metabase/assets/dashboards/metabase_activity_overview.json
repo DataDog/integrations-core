@@ -41,7 +41,7 @@
                             "hide_zero_counts": true,
                             "show_status": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:(integration:metabase) service:activity-events",
+                            "query": "tag:(integration:metabase) (service:activity-events OR tag:(vendor.endpoint:activity-events))",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -117,7 +117,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -183,7 +183,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -232,7 +232,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -316,7 +316,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(alert-create OR alert-update OR alert-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(alert-create OR alert-update OR alert-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -374,7 +374,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:alert-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:alert-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -432,7 +432,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:alert-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:alert-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -490,7 +490,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:alert-send $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:alert-send $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -555,7 +555,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(alert-create OR alert-update OR alert-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(alert-create OR alert-update OR alert-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -604,7 +604,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(alert-create OR alert-update OR alert-send) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(alert-create OR alert-update OR alert-send) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -667,7 +667,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(subscription-create OR subscription-update OR subscription-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(subscription-create OR subscription-update OR subscription-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -725,7 +725,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:subscription-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:subscription-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -783,7 +783,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:subscription-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:subscription-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -841,7 +841,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:subscription-send $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:subscription-send $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -906,7 +906,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(subscription-create OR subscription-update OR subscription-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(subscription-create OR subscription-update OR subscription-send) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -955,7 +955,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(subscription-create OR subscription-update OR subscription-send) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(subscription-create OR subscription-update OR subscription-send) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1036,7 +1036,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(segment-create OR segment-update OR segment-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(segment-create OR segment-update OR segment-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1094,7 +1094,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:segment-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:segment-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1152,7 +1152,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:segment-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:segment-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1210,7 +1210,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:segment-delete $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:segment-delete $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1275,7 +1275,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(segment-create OR segment-update OR segment-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(segment-create OR segment-update OR segment-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1324,7 +1324,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(segment-create OR segment-update OR segment-delete) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(segment-create OR segment-update OR segment-delete) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1405,7 +1405,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(metric-create OR metric-update OR metric-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(metric-create OR metric-update OR metric-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1463,7 +1463,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:metric-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:metric-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1521,7 +1521,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:metric-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:metric-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1579,7 +1579,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:metric-delete $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:metric-delete $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1644,7 +1644,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(metric-create OR metric-update OR metric-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(metric-create OR metric-update OR metric-delete) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1693,7 +1693,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(metric-create OR metric-update OR metric-delete) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(metric-create OR metric-update OR metric-delete) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1774,7 +1774,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(card-create OR card-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(card-create OR card-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1832,7 +1832,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:card-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:card-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1890,7 +1890,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:card-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:card-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -1955,7 +1955,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(card-create OR card-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(card-create OR card-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2004,7 +2004,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(card-create OR card-update) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(card-create OR card-update) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2085,7 +2085,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(dashboard-create OR dashboard-add-cards OR dashboard-remove-cards) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(dashboard-create OR dashboard-add-cards OR dashboard-remove-cards) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2143,7 +2143,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:dashboard-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:dashboard-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2201,7 +2201,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:dashboard-add-cards $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:dashboard-add-cards $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2259,7 +2259,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:dashboard-remove-cards $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:dashboard-remove-cards $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2324,7 +2324,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(dashboard-create OR dashboard-add-cards OR dashboard-remove-cards) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(dashboard-create OR dashboard-add-cards OR dashboard-remove-cards) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2373,7 +2373,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(dashboard-create OR dashboard-add-cards OR dashboard-remove-cards) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(dashboard-create OR dashboard-add-cards OR dashboard-remove-cards) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2454,7 +2454,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(database-create OR database-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(database-create OR database-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2512,7 +2512,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:database-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:database-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2570,7 +2570,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:database-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:database-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2636,7 +2636,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:database-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:database-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2703,7 +2703,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(database-create OR database-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(database-create OR database-update) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2752,7 +2752,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(database-create OR database-update) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(database-create OR database-update) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2833,7 +2833,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(api-key-create OR api-key-update OR api-key-delete OR api-key-regenerate) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(api-key-create OR api-key-update OR api-key-delete OR api-key-regenerate) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2891,7 +2891,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:api-key-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:api-key-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -2949,7 +2949,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:api-key-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:api-key-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3007,7 +3007,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:api-key-delete $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:api-key-delete $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3065,7 +3065,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:api-key-regenerate $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:api-key-regenerate $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3130,7 +3130,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(api-key-create OR api-key-update OR api-key-delete OR api-key-regenerate) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(api-key-create OR api-key-update OR api-key-delete OR api-key-regenerate) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3198,7 +3198,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:api-key-create $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:api-key-create $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3247,7 +3247,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(api-key-create OR api-key-update OR api-key-delete OR api-key-regenerate) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(api-key-create OR api-key-update OR api-key-delete OR api-key-regenerate) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3328,7 +3328,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(user-invited OR user-update OR user-joined OR user-deactivated OR user-reactivated) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(user-invited OR user-update OR user-joined OR user-deactivated OR user-reactivated) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3386,7 +3386,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:user-invited $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:user-invited $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3444,7 +3444,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:user-joined $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:user-joined $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3502,7 +3502,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:user-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:user-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3560,7 +3560,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:user-deactivated $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:user-deactivated $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3618,7 +3618,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:user-reactivated $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:user-reactivated $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3683,7 +3683,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:(user-invited OR user-update OR user-joined OR user-deactivated OR user-reactivated) $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(user-invited OR user-update OR user-joined OR user-deactivated OR user-reactivated) $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3732,7 +3732,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:(user-invited OR user-update OR user-joined OR user-deactivated OR user-reactivated) $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:(user-invited OR user-update OR user-joined OR user-deactivated OR user-reactivated) $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3813,7 +3813,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:setting-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:setting-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3879,7 +3879,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:metabase service:activity-events @evt.name:setting-update $User_ID $Entity_ID $Entity_Type $Event_Name"
+                                                "query": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:setting-update $User_ID $Entity_ID $Entity_Type $Event_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -3928,7 +3928,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:metabase service:activity-events @evt.name:setting-update $User_ID $Entity_ID $Entity_Type $Event_Name",
+                                        "query_string": "source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:setting-update $User_ID $Entity_ID $Entity_Type $Event_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
