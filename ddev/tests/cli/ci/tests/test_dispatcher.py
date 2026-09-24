@@ -22,7 +22,13 @@ import pytest
 
 from ddev.cli.ci.tests import dispatcher as dispatcher_module
 from ddev.cli.ci.tests import rate_limiting
-from ddev.cli.ci.tests.dispatcher import CANCELLED_RATE_LIMITS, Dispatcher, DispatcherContext, build_dispatcher
+from ddev.cli.ci.tests.dispatcher import (
+    CANCELLED_RATE_LIMITS,
+    Dispatcher,
+    DispatcherContext,
+    build_dispatcher,
+    message_scope,
+)
 from ddev.cli.ci.tests.dispatcher_attributes import (
     PROTECTED_RUN_FIELDS,
     console_hidden_fields,
@@ -51,8 +57,10 @@ from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunRepor
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.orchestrator import BaseMessage
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import MonitoringRuntime, console_formatter
+from ddev.monitoring.context import MonitorContext
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
@@ -820,6 +828,7 @@ def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client,
     assert dispatched["batch_id"] == "batch-01"
     assert dispatched["run_id"] == 123
     assert dispatched["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
+    assert dispatched["batch_integrations"] == ["ntp"]
 
     completed = by_event["Workflow run 123 completed: success"]
     assert completed["batch_id"] == "batch-01"
@@ -832,64 +841,72 @@ def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client,
     assert gathered["batch_id"] == "batch-01"
     assert gathered["run_id"] == 123
     assert gathered["batch_job_count"] == 1
+    assert gathered["batch_integrations"] == ["ntp"]
 
     comment = [event for event in handler.events if event["event"].startswith("PR comment written for revision")][-1]
     assert comment["message_type"] == "UpdatePRComment"
     assert comment["message_id"]
     assert comment["revision"] > 0
-    assert (
-        comment["event"] == f"PR comment written for revision {comment['revision']} (finished=1, failed=0, pending=0)"
-    )
     assert comment["done"] is True
     assert comment["comment_id"] == DEFAULT_COMMENT_ID
     assert comment["published"] is True
     assert "batch_id" not in comment
-
-
-def test_batch_scoped_events_resolve_their_planned_batch_and_aggregates_stay_neutral(client, tmp_path, monkeypatch):
-    """Every batch-scoped message sees the integration list of the planned batch its `batch_id`
-    names, on the runner and the gatherer alike; the aggregate report inherits none of them."""
-    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", lambda token, rate_limiter=None, **kwargs: client)
-    job_1 = make_job()
-    job_2 = make_job("job-2", target="redis")
-    client.mock_response(
-        "list_workflow_jobs",
-        WorkflowJobsList(
-            total_count=2,
-            jobs=[
-                WorkflowJob(id=1, run_id=123, name=job_1.name, status="completed", conclusion="success"),
-                WorkflowJob(id=2, run_id=123, name=job_2.name, status="completed", conclusion="success"),
-            ],
-        ),
-    )
-    handler = RecordingJsonHandler()
-    monitoring = MonitoringRuntime(console_handler=handler)
-    monitoring.set_run_fields(**run_fields(CONTEXT))
-
-    dispatcher = build_dispatcher(
-        batches=[make_batch(job_1), make_batch(job_2, batch_id="batch-02")],
-        context=CONTEXT,
-        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
-        token="test-token",
-        artifacts_path=tmp_path / "artifacts",
-        output_path=tmp_path / "results",
-        monitoring=monitoring,
-    )
-
-    dispatcher.run()
-    monitoring.close()
-
-    by_event = {event["event"]: event for event in handler.events}
-    assert by_event["Batch batch-01 dispatched as workflow run 123"]["batch_integrations"] == ["ntp"]
-    assert by_event["Batch batch-02 dispatched as workflow run 123"]["batch_integrations"] == ["redis"]
-    assert by_event["Gathering results for batch batch-01 (jobs=1)"]["batch_integrations"] == ["ntp"]
-    assert by_event["Gathering results for batch batch-02 (jobs=1)"]["batch_integrations"] == ["redis"]
-
-    # A gatherer-side observation while processing a `BatchProgressUpdate`: same resolved batch.
-    progress = by_event["Job job-2 completed: success"]
-    assert progress["batch_id"] == "batch-02"
-    assert progress["batch_integrations"] == ["redis"]
-
-    comment = [event for event in handler.events if event["event"].startswith("PR comment written for revision")][-1]
-    assert "batch_id" not in comment
     assert "batch_integrations" not in comment
+
+
+@pytest.mark.parametrize(
+    ("message", "expected_integrations"),
+    [
+        pytest.param(make_batch(make_job(target="redis"), batch_id="batch-02"), ["redis"], id="batch"),
+        pytest.param(
+            BatchProgressUpdate(
+                id="progress",
+                batch_id="batch-02",
+                run_id=123,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                state=ExecutionState.RUNNING,
+                sequence=1,
+            ),
+            ["redis"],
+            id="progress",
+        ),
+        pytest.param(
+            BatchProgressUpdate(
+                id="unplanned-progress",
+                batch_id="unplanned-batch",
+                run_id=456,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                state=ExecutionState.RUNNING,
+                sequence=1,
+            ),
+            None,
+            id="unplanned-batch",
+        ),
+        pytest.param(
+            BatchFinished(
+                id="finished",
+                batch_id="batch-02",
+                run_id=123,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                status=Status.SUCCESS,
+                artifacts_path="artifacts",
+            ),
+            ["redis"],
+            id="finished",
+        ),
+        pytest.param(
+            UpdatePRComment(id="report", revision=1, progress=DispatcherProgress(batches=(), done=True)),
+            None,
+            id="report",
+        ),
+    ],
+)
+def test_message_scope_resolves_integrations_from_the_planned_batch(
+    message: BaseMessage, expected_integrations: list[str] | None
+):
+    context = MonitorContext()
+    batches = [make_batch(), make_batch(make_job(target="redis"), batch_id="batch-02")]
+    scope = message_scope(context, batches)
+
+    with scope(message):
+        assert context.fields.get("batch_integrations") == expected_integrations

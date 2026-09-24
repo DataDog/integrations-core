@@ -240,7 +240,7 @@ def test_native_json_attribute_values_are_delivered_with_their_types():
     )
     handler.close()
 
-    log = submitter.assert_log_matches(
+    submitter.assert_log_matches(
         {
             'message': 'Batch dispatched',
             'attempt': 3,
@@ -249,7 +249,6 @@ def test_native_json_attribute_values_are_delivered_with_their_types():
             'nested': {'k': 1},
         }
     )
-    assert isinstance(log['integrations'], list)
     assert not diagnostics
 
 

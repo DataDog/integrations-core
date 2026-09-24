@@ -191,7 +191,7 @@ def test_batch_integrations_arrive_at_intake_as_a_native_array():
     runtime.close()
     datadog.close()
 
-    log = submitter.assert_log_matches(
+    submitter.assert_log_matches(
         {
             'message': 'Dispatching batch',
             'dispatcher.batch.id': 'batch-01',
@@ -200,5 +200,3 @@ def test_batch_integrations_arrive_at_intake_as_a_native_array():
             'dispatcher.batch.job_count': 2,
         }
     )
-    assert isinstance(log['dispatcher.batch.integrations'], list)
-    assert all(isinstance(integration, str) for integration in log['dispatcher.batch.integrations'])

@@ -118,7 +118,6 @@ def test_log_attributes_keep_native_json_values_while_tag_transports_stringify()
 
     logs = log_tag_mapping(fields)
     assert logs['dispatcher.batch.integrations'] == ['ntp', 'redis']
-    assert isinstance(logs['dispatcher.batch.integrations'], list)
     assert logs['dispatcher.pr.number'] == 42
     assert logs['dispatcher.run.is_fork'] is False
 
