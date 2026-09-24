@@ -13,7 +13,6 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.checks.openmetrics import endpoint_unreachable_issue
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
@@ -89,10 +88,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         We take care of instance-level customization at initialization time.
         """
         self.refresh_scrapers()
-        endpoint_unreachable_issue.resolve_stale(
-            self,
-            ((scraper.endpoint, scraper.namespace) for scraper in self.scrapers.values()),
-        )
 
         for endpoint, scraper in self.scrapers.items():
             self.log.debug('Scraping OpenMetrics endpoint: %s', endpoint)
@@ -115,42 +110,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             observed_count,
             limit,
         )
-
-    def cancel(self) -> None:
-        try:
-            tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
-            if endpoint_unreachable_issue.uses_process_isolation(self) and not tracked_issues_drained:
-                for endpoint, namespace in self._process_isolation_fallback_endpoints():
-                    endpoint_unreachable_issue.resolve(self, endpoint, namespace)
-        except Exception:
-            self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
-        finally:
-            super().cancel()
-
-    def _process_isolation_fallback_endpoints(self) -> set[tuple[str, str]]:
-        # The isolated child owns runtime reporter state. The parent can only reconstruct endpoints present
-        # directly in configuration; endpoints discovered or transformed at runtime remain best-effort.
-        # Any *_endpoint key is a candidate because integrations that build scraper configs at runtime may only
-        # expose the scraped URL under their own option name, such as agent_endpoint. A key that was never
-        # reported only costs an extra resolve call.
-        defaults = None
-        endpoint_namespaces = set()
-        for config in [*self.scraper_configs, self.instance]:
-            if not config:
-                continue
-            if self.__NAMESPACE__:
-                namespace = self.__NAMESPACE__
-            elif 'namespace' in config:
-                namespace = config.get('namespace')
-            else:
-                if defaults is None:
-                    defaults = self.get_default_config()
-                namespace = defaults.get('namespace', '')
-
-            for key, endpoint in config.items():
-                if isinstance(key, str) and key.endswith('_endpoint') and isinstance(endpoint, str) and endpoint:
-                    endpoint_namespaces.add((endpoint, str(namespace)))
-        return endpoint_namespaces
 
     def configure_scrapers(self):
         """

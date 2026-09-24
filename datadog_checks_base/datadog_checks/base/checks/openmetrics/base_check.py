@@ -9,7 +9,6 @@ from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.tracing import traced_class
 
-from . import endpoint_unreachable_issue
 from .metric_limit_issue import MetricLimitIssueReporter
 from .mixins import OpenMetricsScraperMixin
 
@@ -154,21 +153,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             observed_count,
             limit,
         )
-
-    def cancel(self) -> None:
-        try:
-            tracked_issues_drained = endpoint_unreachable_issue.cancel(self)
-            if endpoint_unreachable_issue.uses_process_isolation(self) and not tracked_issues_drained:
-                for config in tuple(self.config_map.values()):
-                    endpoint_unreachable_issue.resolve(
-                        self,
-                        config.get('prometheus_url'),
-                        config.get('namespace', ''),
-                    )
-        except Exception:
-            self.log.debug('Failed to clean up OpenMetrics endpoint-unreachable issues', exc_info=True)
-        finally:
-            super().cancel()
 
     def get_scraper_config(self, instance):
         """

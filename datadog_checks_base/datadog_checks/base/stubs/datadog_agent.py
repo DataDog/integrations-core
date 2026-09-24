@@ -92,37 +92,17 @@ class DatadogAgentStub(object):
             metric_value, check_name, metric_name, metric_type, values
         )
 
-    def assert_reported_issue(self, check_name, issue_id, issue=None):
-        reported = self._sent_reported_issues.get(check_name, [])
+    def assert_reported_issue(self, check_name, issue_id, issue):
+        reported = self._sent_reported_issues[check_name]
         matching = [reported_issue for reported_issue in reported if reported_issue['id'] == issue_id]
         assert matching, 'No reported issue with id {} for check {}. Found: {}'.format(issue_id, check_name, reported)
-        if issue is not None:
-            assert matching[0] == issue, 'Expected reported issue {} for check {}, found {}.'.format(
-                issue, check_name, matching[0]
-            )
-        return matching[0]
-
-    def assert_no_reported_issues(self):
-        reported = {check_name: issues for check_name, issues in self._sent_reported_issues.items() if issues}
-        assert not reported, 'Expected no reported issues. Found: {}'.format(reported)
-
-    def assert_reported_issue_count(self, check_name, count):
-        reported = self._sent_reported_issues.get(check_name, [])
-        assert len(reported) == count, (
-            'Expected {} reported issues for check {}, found {}. Submitted issues: {}'.format(
-                count, check_name, len(reported), reported
-            )
+        assert matching[0] == issue, 'Expected reported issue {} for check {}, found {}.'.format(
+            issue, check_name, matching[0]
         )
 
     def assert_resolved_issue(self, issue_id):
         assert issue_id in self._sent_resolved_issues, 'Expected resolved issue {}. Found: {}'.format(
             issue_id, self._sent_resolved_issues
-        )
-
-    def assert_resolved_issue_count(self, count):
-        resolved_count = len(self._sent_resolved_issues)
-        assert resolved_count == count, 'Expected {} resolved issues, found {}. Submitted issues: {}'.format(
-            count, resolved_count, self._sent_resolved_issues
         )
 
     def get_hostname(self):

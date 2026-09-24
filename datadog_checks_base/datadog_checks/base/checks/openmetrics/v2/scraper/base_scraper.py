@@ -442,9 +442,7 @@ class OpenMetricsScraper:
         try:
             response = self.send_request()
         except Exception as e:
-            if self.ignore_connection_errors:
-                endpoint_unreachable_issue.resolve(self.check, self.endpoint, self.namespace)
-            else:
+            if not self.ignore_connection_errors:
                 endpoint_unreachable_issue.report(self.check, self.endpoint, e, self.namespace)
             self.submit_health_check(ServiceCheck.CRITICAL, message=str(e))
             raise
