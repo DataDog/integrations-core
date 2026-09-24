@@ -435,16 +435,14 @@ def test_namespace_is_normalized_for_identity_and_emitted_context():
 
 def test_report_and_resolve_bridge_failures_are_best_effort():
     check = create_check()
-    check.report_issue.side_effect = RuntimeError('report bridge failure')
+    check.report_issue.side_effect = [RuntimeError('report bridge failure'), None]
     check.resolve_issue.side_effect = RuntimeError('resolve bridge failure')
 
     endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
     endpoint_unreachable_issue.resolve(check, RAW_ENDPOINT, namespace='demo')
+    endpoint_unreachable_issue.report(check, RAW_ENDPOINT, unreachable_connection_error(), namespace='demo')
 
-    assert check.log.debug.call_args_list == [
-        mock.call('Failed to report the OpenMetrics endpoint-unreachable issue', exc_info=True),
-        mock.call('Failed to resolve the OpenMetrics endpoint-unreachable issue', exc_info=True),
-    ]
+    assert [call.kwargs['id'] for call in check.report_issue.call_args_list] == [ISSUE_ID, ISSUE_ID]
 
 
 @pytest.mark.parametrize(
