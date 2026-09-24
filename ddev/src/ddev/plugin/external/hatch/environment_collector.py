@@ -189,17 +189,23 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         )
 
     def inject_ddtrace_dependency(self, env_config):
+        if requirement := self.agent_requirement('ddtrace'):
+            env_config.setdefault('dependencies', []).append(requirement)
+
+    def agent_requirement(self, name: str) -> str | None:
+        """Return the pinned requirement for `name` from the core repo's `agent_requirements.in`, if any."""
         if not self.in_core_repo:
-            return
+            return None
 
         agent_requirements = self.root.parent / 'agent_requirements.in'
         if not agent_requirements.exists():
-            return
+            return None
 
         for line in agent_requirements.read_text().splitlines():
-            if line.startswith('ddtrace=='):
-                env_config.setdefault('dependencies', []).append(line.strip())
-                return
+            if line.startswith(f'{name}=='):
+                return line.strip()
+
+        return None
 
     def ruff_settings_dir(self):
         # If the local pyproject.toml exists and has ruff configuration, use it
@@ -245,8 +251,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
                 'ruff==0.11.10',
-                # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==2.13.4',
+                # Follows the Agent's pin so mypy's pydantic plugin matches runtime. The fallback only
+                # applies outside the core repo, where `agent_requirements.in` does not exist.
+                self.agent_requirement('pydantic') or 'pydantic==2.13.4',
                 # uv-managed venvs do not seed pip, but mypy's --install-types
                 # shells out to `python -m pip install` for missing type stubs.
                 'pip',

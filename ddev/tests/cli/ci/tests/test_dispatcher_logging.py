@@ -6,18 +6,45 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
 from ddev.cli.ci.tests.dispatcher_logging import (
     ci_attributes,
     dispatcher_datadog_formatter,
+    get_dispatcher_logs_url,
     project_event,
 )
 from ddev.monitoring import MonitoringRuntime
 from ddev.monitoring.datadog import DatadogLogHandler
 from tests.helpers.datadog import FakeLogSubmitter
 from tests.helpers.monitoring import RecordingJsonHandler
+
+
+@pytest.mark.parametrize(
+    ('terminal', 'from_ts', 'to_ts', 'live'),
+    [
+        (False, 'now-4h', 'now', 'true'),
+        (True, '1767308645000', '1767323345000', 'false'),
+    ],
+)
+def test_logs_url_selects_the_current_run_for_rolling_and_terminal_reports(
+    monkeypatch, terminal: bool, from_ts: str, to_ts: str, live: str
+):
+    monkeypatch.setenv('GITHUB_RUN_ID', '987654')
+    now = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
+
+    url = get_dispatcher_logs_url(terminal=terminal, now=now)
+
+    parts = urlsplit(url)
+    assert f'{parts.scheme}://{parts.netloc}{parts.path}' == 'https://app.datadoghq.com/logs'
+    params = parse_qs(parts.query)
+    assert params['query'] == ['service:ddev source:dispatcher @ci.pipeline.id:987654']
+    assert params['from_ts'] == [from_ts]
+    assert params['to_ts'] == [to_ts]
+    assert params['live'] == [live]
 
 
 def test_projection_maps_event_fields_to_datadog_attributes():

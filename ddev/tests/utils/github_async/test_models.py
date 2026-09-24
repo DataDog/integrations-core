@@ -15,12 +15,14 @@ from ddev.utils.github_async.models import (
     PullRequest,
     PullRequestRef,
     PullRequestState,
+    WorkflowRun,
 )
 from tests.utils.github_async.payloads import (
     file_commit_payload,
     file_content_payload,
     full_pull_request_payload,
     git_ref_payload,
+    workflow_run_payload,
 )
 
 
@@ -75,6 +77,14 @@ def test_file_commit_parses_with_null_content() -> None:
     """`file-commit.content` is nullable; the commit is what callers need and must still parse."""
     commit = FileCommit.model_validate(file_commit_payload(commit_sha="e" * 40))
     assert commit.commit.sha == "e" * 40
+
+
+def test_workflow_run_parses_null_status():
+    """The `workflow-run` schema declares `status` nullable, so a null value must parse."""
+    run = WorkflowRun.model_validate(workflow_run_payload(status=None))
+
+    assert run.status is None
+    assert run.is_completed is False
 
 
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:

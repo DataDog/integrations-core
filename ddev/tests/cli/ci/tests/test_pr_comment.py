@@ -15,6 +15,7 @@ from __future__ import annotations
 import dataclasses
 import re
 from collections.abc import Callable
+from datetime import datetime, timezone
 
 import pytest
 from markdown_it import MarkdownIt
@@ -59,6 +60,12 @@ GITHUB_COMMENT_HARD_LIMIT = 65_536
 
 # What the autouse `github_actions_env` fixture makes the footer link to.
 DISPATCH_RUN_URL = "https://github.com/DataDog/integrations-core/actions/runs/12345"
+DISPATCH_LOGS_QUERY = (
+    "https://app.datadoghq.com/logs?query=service%3Addev%20source%3Adispatcher%20%40ci.pipeline.id%3A12345"
+)
+LOG_SNAPSHOT = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
+DISPATCH_LOGS_RUNNING_URL = f"{DISPATCH_LOGS_QUERY}&from_ts=now-4h&to_ts=now&live=true"
+DISPATCH_LOGS_FINISHED_URL = f"{DISPATCH_LOGS_QUERY}&from_ts=1767308645000&to_ts=1767323345000&live=false"
 # `batch_progress`'s default, which the batch strip links each batch to.
 BATCH_RUN_URL = "https://github.com/o/r/actions/runs/121"
 # `attempt`'s default, which each affected target's row links to.
@@ -144,7 +151,7 @@ def test_a_queued_run_renders_the_plan_and_nothing_else():
         done=False,
     )
 
-    assert render_comment(progress) == (
+    assert render_comment(progress, now=LOG_SNAPSHOT) == (
         f"""{COMMENT_MARKER}
 
 ## 🔄 Dispatcher tests: in progress
@@ -162,7 +169,7 @@ This comment updates automatically.
 
 Batches · ⏳ `batch-01` 0/3 · ⏳ `batch-02` 0/2 — *links available after dispatch*
 
-<sub>⏳ Dispatcher running — [GitHub Run]({DISPATCH_RUN_URL}).</sub>"""
+<sub>⏳ Dispatcher running — [GitHub Run]({DISPATCH_RUN_URL}) · [Dispatcher Logs]({DISPATCH_LOGS_RUNNING_URL}).</sub>"""
     )
 
 
@@ -193,7 +200,7 @@ def test_a_running_run_reports_the_failures_it_already_has():
         done=False,
     )
 
-    assert render_comment(progress) == (
+    assert render_comment(progress, now=LOG_SNAPSHOT) == (
         f"""{COMMENT_MARKER}
 
 ## 🔄 Dispatcher tests: in progress
@@ -231,7 +238,7 @@ Tests failed in every target:
 
 </details>
 
-<sub>⏳ Dispatcher running — [GitHub Run]({DISPATCH_RUN_URL}).</sub>"""
+<sub>⏳ Dispatcher running — [GitHub Run]({DISPATCH_RUN_URL}) · [Dispatcher Logs]({DISPATCH_LOGS_RUNNING_URL}).</sub>"""
     )
 
 
@@ -265,7 +272,7 @@ def test_a_failed_run_groups_every_kind_of_bad_news_by_integration(on_a_commit):
         done=True,
     )
 
-    assert render_comment(progress) == (
+    assert render_comment(progress, now=LOG_SNAPSHOT) == (
         f"""{COMMENT_MARKER}
 
 ## ❌ Dispatcher tests: failed
@@ -326,7 +333,8 @@ step `Run ./.github/actions/setup-ddev` · artifacts could not be downloaded
 
 </details>
 
-<sub>Dispatcher finished on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}).</sub>"""
+<sub>Dispatcher finished on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}) · \
+[Dispatcher Logs]({DISPATCH_LOGS_FINISHED_URL}).</sub>"""
     )
 
 
@@ -349,7 +357,7 @@ def test_a_clean_run_collapses_to_the_batch_strip(on_a_commit):
         done=True,
     )
 
-    assert render_comment(progress) == (
+    assert render_comment(progress, now=LOG_SNAPSHOT) == (
         f"""{COMMENT_MARKER}
 
 ## ✅ Dispatcher tests: passed
@@ -363,7 +371,8 @@ def test_a_clean_run_collapses_to_the_batch_strip(on_a_commit):
 
 Batches · ✅ [batch-01]({BATCH_RUN_URL}) 3/3 · ✅ [batch-02]({BATCH_RUN_URL}) 2/2
 
-<sub>Dispatcher finished on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}).</sub>"""
+<sub>Dispatcher finished on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}) · \
+[Dispatcher Logs]({DISPATCH_LOGS_FINISHED_URL}).</sub>"""
     )
 
 
@@ -1668,14 +1677,17 @@ def test_the_footer_of_a_finished_run_points_at_the_dispatcher_run(on_a_commit):
     """The commit tested and where Dispatcher ran are not available anywhere else in the comment."""
     body = render_comment(uniform_progress(done=True))
 
-    assert body.endswith(f"<sub>Dispatcher finished on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}).</sub>")
+    assert f"<sub>Dispatcher finished on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}) · " in body
+    assert f"[Dispatcher Logs]({DISPATCH_LOGS_QUERY}" in body
+    assert body.endswith("&live=false).</sub>")
 
 
 def test_the_footer_of_a_running_run_names_the_commit_too(on_a_commit):
     """Which commit is being tested is not knowable from anywhere else, finished or not."""
     body = render_comment(uniform_progress(complete=4))
 
-    assert body.endswith(f"<sub>⏳ Dispatcher running on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}).</sub>")
+    assert f"<sub>⏳ Dispatcher running on `ff9caa5` — [GitHub Run]({DISPATCH_RUN_URL}) · " in body
+    assert body.endswith(f"[Dispatcher Logs]({DISPATCH_LOGS_RUNNING_URL}).</sub>")
 
 
 def test_the_footer_says_what_it_can_outside_github_actions(monkeypatch):
@@ -1683,7 +1695,10 @@ def test_the_footer_says_what_it_can_outside_github_actions(monkeypatch):
     for variable in ("GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_SERVER_URL", "GITHUB_REPOSITORY"):
         monkeypatch.delenv(variable, raising=False)
 
-    assert render_comment(uniform_progress(done=True)).endswith("<sub>Dispatcher finished.</sub>")
+    body = render_comment(uniform_progress(done=True))
+
+    assert body.endswith("<sub>Dispatcher finished.</sub>")
+    assert "[Dispatcher Logs]" not in body
 
 
 @pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
@@ -1691,6 +1706,8 @@ def test_the_footer_of_a_stopped_run_names_the_terminal_state(kind: ShutdownKind
     body = render_comment(uniform_progress(complete=4), shutdown=shutdown_request(kind))
 
     assert f"<sub>Dispatcher {kind.value} on `ff9caa5`" in body
+    assert f"[Dispatcher Logs]({DISPATCH_LOGS_QUERY}" in body
+    assert body.endswith("&live=false).</sub>")
 
 
 def test_summary_line_reports_state_and_counts():
@@ -1802,6 +1819,7 @@ def test_a_stopped_run_with_nothing_collected_still_says_it_ran(kind: ShutdownKi
     assert SHUTDOWN_HEADINGS[kind] in body
     assert "Batches · " not in body
     assert "<details>" not in body
+    assert body.endswith("&live=false).</sub>")
 
 
 def test_the_cancellation_alert_survives_every_tier():
