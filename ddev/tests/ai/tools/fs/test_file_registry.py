@@ -12,7 +12,7 @@ OWNER_B = "agent-b"
 
 @pytest.fixture
 def registry(tmp_path) -> FileRegistry:
-    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration"))
 
 
 # ---------------------------------------------------------------------------

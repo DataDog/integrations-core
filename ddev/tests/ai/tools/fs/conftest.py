@@ -26,7 +26,7 @@ def owner_id() -> str:
 
 @pytest.fixture
 def permissive_policy(tmp_path) -> FileAccessPolicy:
-    return FileAccessPolicy(write_root=tmp_path, deny_patterns=())
+    return FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=())
 
 
 @pytest.fixture

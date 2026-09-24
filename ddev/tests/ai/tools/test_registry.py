@@ -171,7 +171,7 @@ def from_names(tool_names: list[str], tmp_path, *, scope: AgentScope = SCOPE) ->
     return ToolRegistry.from_names(
         tool_names,
         scope=scope,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")),
         agent_config=AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=tool_names),
         process_factory=PROCESS_FACTORY,
     )
@@ -254,15 +254,6 @@ async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
     inside_result = await registry.run("delete_file", {"path": str(inside)})
     assert inside_result.success is True
     assert not inside.exists()
-
-
-async def test_from_names_defaults_integration_root_to_none(tmp_path):
-    registry = from_names(["delete_file"], tmp_path)
-
-    result = await registry.run("delete_file", {"path": str(tmp_path / "anything.txt")})
-
-    assert result.success is False
-    assert "no resolved integration directory" in result.error
 
 
 # ---------------------------------------------------------------------------
@@ -350,7 +341,7 @@ def test_filter_read_only_unknown_still_raises():
 
 def test_from_names_reuses_supplied_file_registry(tmp_path):
     """Multiple ToolRegistries can share one FileRegistry; tools carry their own owner_id."""
-    shared = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+    shared = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration"))
     reg_a = ToolRegistry.from_names(
         ["read_file", "create_file"],
         scope=AgentScope(owner_id="a", role=AgentRole.PHASE, phase_id="a"),

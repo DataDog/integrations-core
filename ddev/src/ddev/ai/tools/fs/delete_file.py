@@ -17,10 +17,8 @@ class DeleteFileInput(BaseToolInput):
 
 
 class DeleteFileTool(FileRegistryTool[DeleteFileInput]):
-    """Permanently deletes a single file inside the current integration's directory.
-    Use this to remove a file you created or read earlier in this session that turned out
-    to be wrong or unwanted. You must have already read or created the file in this session;
-    read it first if you haven't.
+    """Permanently deletes a single file. Deletion is regulated by the file access policy.
+    You must have already read or created the file in this session.
 
     This cannot be undone, so only delete files you are sure about."""
 

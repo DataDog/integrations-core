@@ -215,6 +215,10 @@ class ExecutionScreen(TogoScreen):
 
         runtime_variables = self.runtime_variables or {}
         integration = runtime_variables.get("integration")
+        if not isinstance(integration, str):
+            raise ValueError(
+                f"Flow {self.flow.name!r} must declare a required 'integration' input; got {integration!r}"
+            )
 
         return PhaseOrchestrator(
             resolved_flow=self.flow,
@@ -222,10 +226,7 @@ class ExecutionScreen(TogoScreen):
             checkpoint_path=run_dir / "checkpoints.yaml",
             runtime_variables=runtime_variables,
             provider_registry=self.togo_app.provider_registry,
-            file_access_policy=FileAccessPolicy(
-                write_root=write_root,
-                integration_name=integration if isinstance(integration, str) else None,
-            ),
+            file_access_policy=FileAccessPolicy(write_root=write_root, integration_name=integration),
             callbacks=callbacks,
             resume=self.resume,
         )

@@ -16,7 +16,16 @@ from textual.widget import Widget
 from textual.widgets import Input
 
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.config.models import AgentConfig, FlowConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
+from ddev.ai.config.models import (
+    AgentConfig,
+    FlowConfig,
+    FlowEntry,
+    FlowInput,
+    InputType,
+    PhaseConfig,
+    ResolvedFlow,
+    TaskConfig,
+)
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
@@ -53,7 +62,18 @@ def _make_flow(
     return ResolvedFlow(
         name=name,
         description="A test flow",
-        inputs=FlowConfig(name="test", flow=[]).inputs,
+        inputs=FlowConfig(
+            name="test",
+            flow=[],
+            inputs=[
+                FlowInput(
+                    name="integration",
+                    label="Integration name",
+                    input_type=InputType.STRING,
+                    default="My Integration",
+                )
+            ],
+        ).inputs,
         agents=agents,
         phases=phase_configs,
         flow=flow_entries,
@@ -1912,7 +1932,7 @@ async def test_default_builder_constructs_real_phase_orchestrator(tmp_path: Path
         togo_app = _app_with_repo(flow, fake_ddev_app)
         async with togo_app.run_test() as pilot:
             await pilot.pause()
-            screen = ExecutionScreen(flow)
+            screen = ExecutionScreen(flow, runtime_variables={"integration": "My Integration"})
             await togo_app.push_screen(screen)
             await pilot.pause(0.3)
 
@@ -1943,7 +1963,7 @@ async def test_default_builder_resume_flag_forwarded(tmp_path: Path) -> None:
         togo_app = _app_with_repo(flow, fake_ddev_app)
         async with togo_app.run_test() as pilot:
             await pilot.pause()
-            screen = ExecutionScreen(flow, resume=True)
+            screen = ExecutionScreen(flow, resume=True, runtime_variables={"integration": "My Integration"})
             await togo_app.push_screen(screen)
             await pilot.pause(0.3)
 
@@ -1965,12 +1985,12 @@ async def test_default_builder_forwards_runtime_variables(tmp_path: Path) -> Non
         togo_app = _app_with_repo(flow, fake_ddev_app)
         async with togo_app.run_test() as pilot:
             await pilot.pause()
-            screen = ExecutionScreen(flow, runtime_variables={"max_timeout": "120"})
+            screen = ExecutionScreen(flow, runtime_variables={"max_timeout": "120", "integration": "My Integration"})
             await togo_app.push_screen(screen)
             await pilot.pause(0.3)
 
     call_kwargs = MockOrch.call_args.kwargs
-    assert call_kwargs["runtime_variables"] == {"max_timeout": "120"}
+    assert call_kwargs["runtime_variables"] == {"max_timeout": "120", "integration": "My Integration"}
 
 
 async def test_fresh_real_run_clears_only_computed_flow_directory(tmp_path: Path) -> None:

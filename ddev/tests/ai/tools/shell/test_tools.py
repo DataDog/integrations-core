@@ -15,7 +15,7 @@ from ddev.ai.tools.shell.list_files import ListFilesInput, ListFilesTool
 
 
 def test_grep_tool_meta(tmp_path) -> None:
-    tool = GrepTool(FileAccessPolicy(write_root=tmp_path))
+    tool = GrepTool(FileAccessPolicy(write_root=tmp_path, integration_name="my_integration"))
     assert tool.name == "grep"
     assert GrepTool.timeout == 30
 
@@ -33,7 +33,7 @@ def test_list_files_tool_meta() -> None:
 
 @pytest.fixture
 def grep_tool(tmp_path) -> GrepTool:
-    return GrepTool(FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
+    return GrepTool(FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=()))
 
 
 def test_grep_cmd_full_command(grep_tool: GrepTool):
@@ -73,7 +73,9 @@ def test_grep_cmd_pattern_and_path_placement(grep_tool: GrepTool):
 
 def test_grep_cmd_recursive_outside_write_root_adds_basename_excludes(tmp_path) -> None:
     """--exclude= flags are added only for basename patterns when search is outside write_root."""
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(".env", "*.pem", f"{tmp_path}/secrets/*"))
+    policy = FileAccessPolicy(
+        write_root=tmp_path, integration_name="my_integration", deny_patterns=(".env", "*.pem", f"{tmp_path}/secrets/*")
+    )
     tool = GrepTool(policy)
     # /project is outside tmp_path (write_root)
     cmd = tool.cmd(GrepInput(pattern="SECRET", path="/project", recursive=True))
@@ -89,7 +91,7 @@ def test_grep_cmd_recursive_outside_write_root_adds_basename_excludes(tmp_path) 
 
 def test_grep_cmd_recursive_inside_write_root_no_excludes(tmp_path) -> None:
     """No --exclude= flags when search path is inside write_root."""
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(".env", "*.pem"))
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=(".env", "*.pem"))
     tool = GrepTool(policy)
     # Search inside write_root — deny patterns are bypassed, so no excludes.
     cmd = tool.cmd(GrepInput(pattern="SECRET", path=str(tmp_path / "project"), recursive=True))
@@ -99,7 +101,7 @@ def test_grep_cmd_recursive_inside_write_root_no_excludes(tmp_path) -> None:
 def test_grep_cmd_recursive_spanning_write_root_no_excludes(tmp_path) -> None:
     """No --exclude= flags when write_root is inside the search path (mixed zone)."""
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env", "*.pem"))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(".env", "*.pem"))
     tool = GrepTool(policy)
     # Search starts at tmp_path which is a parent of write_root — spanning case.
     cmd = tool.cmd(GrepInput(pattern="SECRET", path=str(tmp_path), recursive=True))
@@ -107,7 +109,9 @@ def test_grep_cmd_recursive_spanning_write_root_no_excludes(tmp_path) -> None:
 
 
 def test_grep_cmd_non_recursive_no_exclude_flags(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(".env", "*.pem", f"{tmp_path}/secrets/*"))
+    policy = FileAccessPolicy(
+        write_root=tmp_path, integration_name="my_integration", deny_patterns=(".env", "*.pem", f"{tmp_path}/secrets/*")
+    )
     tool = GrepTool(policy)
     cmd = tool.cmd(GrepInput(pattern="SECRET", path="/project/file.txt", recursive=False))
     assert not any(arg.startswith("--exclude") for arg in cmd)
@@ -121,7 +125,7 @@ def test_grep_cmd_non_recursive_no_exclude_flags(tmp_path) -> None:
 def test_filter_stdout_keeps_allowed_lines(tmp_path) -> None:
     f = tmp_path / "ok.txt"
     f.write_text("x")
-    tool = GrepTool(FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
+    tool = GrepTool(FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=()))
     raw = f"{f}\x0042:hello\n{f}\x0043:world\n"
     out = tool._filter_stdout(raw)
     assert out == f"{f}:42:hello\n{f}:43:world"
@@ -137,7 +141,7 @@ def test_filter_stdout_filters_denied_path_lines(tmp_path) -> None:
     public.write_text("x")
 
     # write_root is a subdirectory; secrets/ and ok.txt are outside it, so deny patterns apply.
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{secrets}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{secrets}/*",))
     tool = GrepTool(policy)
     raw = f"{leak}\x001:hit\n{public}\x002:hit\n"
     out = tool._filter_stdout(raw)
@@ -147,14 +151,14 @@ def test_filter_stdout_filters_denied_path_lines(tmp_path) -> None:
 
 def test_filter_stdout_drops_lines_without_nul(tmp_path) -> None:
     """Defensive: stderr noise / malformed output is dropped, not passed through."""
-    tool = GrepTool(FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
+    tool = GrepTool(FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=()))
     assert tool._filter_stdout("grep: something: Permission denied\n") == ""
 
 
 def test_filter_stdout_caches_per_filename(tmp_path, monkeypatch) -> None:
     f = tmp_path / "ok.txt"
     f.write_text("x")
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=())
     calls = {"n": 0}
     real = policy.assert_readable
 
@@ -179,7 +183,7 @@ def test_filter_stdout_resolves_symlink_to_denied(tmp_path) -> None:
     link.symlink_to(target)
 
     # secrets/ is outside write_root, so its deny pattern applies.
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{secrets}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{secrets}/*",))
     tool = GrepTool(policy)
     raw = f"{link}\x001:hit\n"
     out = tool._filter_stdout(raw)

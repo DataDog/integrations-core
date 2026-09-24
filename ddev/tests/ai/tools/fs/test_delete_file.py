@@ -39,20 +39,6 @@ async def test_delete_file_success(
     assert registry.is_known(owner_id, str(known_file_in_root)) is False
 
 
-async def test_delete_file_fails_closed_without_integration_root(
-    owner_id: str, tmp_path: Path, known_file_in_root: Path
-):
-    # No integration_name, so the policy's integration_root is None.
-    registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    tool = DeleteFileTool(registry, owner_id)
-
-    result = await tool.run({"path": str(known_file_in_root)})
-
-    assert result.success is False
-    assert "no resolved integration directory" in result.error
-    assert known_file_in_root.exists()
-
-
 @pytest.mark.parametrize("use_dotdot_escape", [False, True])
 async def test_delete_file_refuses_outside_integration_root(
     delete_tool: DeleteFileTool,

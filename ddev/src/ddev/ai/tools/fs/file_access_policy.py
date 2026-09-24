@@ -108,16 +108,13 @@ class FileAccessPolicy:
 
     Paths checked at runtime go through ``canonicalize_path`` before
     matching, so symlinks and ``..`` cannot bypass the checks.
-
-    Optionally also holds the deletion policy for the current run's integration, via
-    ``integration_name``.
     """
 
     def __init__(
         self,
         write_root: Path | str,
+        integration_name: str,
         deny_patterns: Iterable[str] = DEFAULT_DENY_PATTERNS,
-        integration_name: str | None = None,
     ) -> None:
         self._write_root = canonicalize_path(write_root)
         patterns = tuple(deny_patterns)
@@ -131,28 +128,24 @@ class FileAccessPolicy:
         self._path_patterns: tuple[str, ...] = tuple(_canonicalize_pattern(p) for p in path)
         self._integration_root = self._resolve_integration_root(integration_name)
 
-    def _resolve_integration_root(self, integration_name: str | None) -> Path | None:
+    def _resolve_integration_root(self, integration_name: str) -> Path:
         """Resolve the directory `ddev create check` would use for `integration_name`.
 
-        Returns None when there is no usable name, so `assert_deletable` fails closed
-        instead of widening the deletion boundary to `write_root`.
+        Raises ValueError if `integration_name` is not a name `ddev create` would accept.
         """
-        if not isinstance(integration_name, str) or not integration_name.strip():
-            return None
-
         # Imported lazily: `ddev.cli` eagerly imports `ddev.cli.meta.ai`, which imports back
         # into `ddev.ai`, so importing it at module load time here would risk a circular import.
         from ddev.cli.create._naming import is_creatable_integration_name, normalize_package_name
 
-        if not is_creatable_integration_name(integration_name):
-            return None
+        if not isinstance(integration_name, str) or not is_creatable_integration_name(integration_name):
+            raise ValueError(f"Invalid integration name: {integration_name!r}")
 
         # normalize_package_name only touches "-_. ", so a value containing "/" would
         # otherwise survive normalization and let integration_name name an arbitrary
         # directory outside the intended integration root.
         normalized = normalize_package_name(integration_name).strip("_")
         if not normalized or len(Path(normalized).parts) != 1:
-            return None
+            raise ValueError(f"Invalid integration name: {integration_name!r}")
         return self._write_root / normalized
 
     @property
@@ -191,9 +184,6 @@ class FileAccessPolicy:
         patterns are enforced even inside it — unlike ordinary writes, where both are
         allowed inside `write_root` — because deletion is irreversible.
         """
-        if self._integration_root is None:
-            raise FileAccessError("delete_file is unavailable: this run has no resolved integration directory.")
-
         # canonicalize_path (below) fully resolves symlinks, including a symlink leaf
         # itself, so it can never be used to detect that the leaf is a symlink. Check
         # that on the pre-resolution path instead, before it's resolved away.

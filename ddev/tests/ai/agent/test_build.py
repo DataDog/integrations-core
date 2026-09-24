@@ -18,7 +18,7 @@ from tests.ai.config.utils import make_agent_config
 
 @pytest.fixture
 def policy(tmp_path) -> FileAccessPolicy:
-    return FileAccessPolicy(write_root=tmp_path)
+    return FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")
 
 
 @pytest.fixture
