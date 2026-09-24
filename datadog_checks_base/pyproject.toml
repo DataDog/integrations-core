@@ -41,7 +41,7 @@ deps = [
     "jellyfish==1.2.1",
     "lazy-loader==0.5",
     "prometheus-client==0.26.0",
-    "protobuf==7.36.2",
+    "protobuf==7.35.1",
     "pydantic==2.13.5",
     "python-dateutil==2.9.0.post0",
     "pywin32==312; sys_platform == 'win32'",

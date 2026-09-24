@@ -30,9 +30,9 @@ orjson==3.12.0
 packaging==26.3
 paramiko==5.0.0
 prometheus-client==0.26.0
-protobuf==7.36.2
+protobuf==7.35.1
 psutil==6.0.0
-psycopg[c,pool]==3.3.6
+psycopg[c,pool]==3.3.4
 pyasn1==0.6.4
 pydantic==2.13.5
 pyjwt==2.14.0
