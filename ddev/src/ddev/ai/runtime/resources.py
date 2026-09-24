@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from functools import cached_property
-from pathlib import Path
 
 from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
 from ddev.ai.agent.registry import AgentProviderRegistry
@@ -24,13 +23,11 @@ class RunResources:
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
         callbacks: Callbacks,
-        integration_root: Path | None = None,
     ) -> None:
         self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
         self._agents = agents
         self._callbacks = callbacks
-        self._integration_root = integration_root
 
     @cached_property
     def file_registry(self) -> FileRegistry:
@@ -50,7 +47,6 @@ class RunResources:
         return AgentRuntimeFactory(
             provider_registry=self._provider_registry,
             file_registry=self.file_registry,
-            integration_root=self._integration_root,
         )
 
     @cached_property

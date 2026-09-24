@@ -227,16 +227,16 @@ def test_from_names_fs_tools_share_file_registry(tmp_path):
 
 
 async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
-    integration_root = tmp_path / "my_integration"
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="My Integration")
+    integration_root = policy._integration_root
     integration_root.mkdir()
-    file_registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+    file_registry = FileRegistry(policy=policy)
     registry = ToolRegistry.from_names(
         ["delete_file"],
         scope=SCOPE,
         file_registry=file_registry,
         agent_config=make_agent_config(tools=["delete_file"]),
         process_factory=PROCESS_FACTORY,
-        integration_root=integration_root,
     )
 
     inside = integration_root / "inside.txt"

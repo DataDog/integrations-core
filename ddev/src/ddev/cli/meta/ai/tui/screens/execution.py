@@ -213,13 +213,19 @@ class ExecutionScreen(TogoScreen):
                 shutil.rmtree(run_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
 
+        runtime_variables = self.runtime_variables or {}
+        integration = runtime_variables.get("integration")
+
         return PhaseOrchestrator(
             resolved_flow=self.flow,
             phase_registry=self.togo_app.phase_registry,
             checkpoint_path=run_dir / "checkpoints.yaml",
-            runtime_variables=self.runtime_variables or {},
+            runtime_variables=runtime_variables,
             provider_registry=self.togo_app.provider_registry,
-            file_access_policy=FileAccessPolicy(write_root=write_root),
+            file_access_policy=FileAccessPolicy(
+                write_root=write_root,
+                integration_name=integration if isinstance(integration, str) else None,
+            ),
             callbacks=callbacks,
             resume=self.resume,
         )

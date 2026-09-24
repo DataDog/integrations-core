@@ -65,6 +65,23 @@ DEFAULT_DENY_PATTERNS: tuple[str, ...] = (
     "~/.docker/*",
 )
 
+# Relative to the integration root.
+PROTECTED_STRUCTURAL_PATTERNS: tuple[str, ...] = (
+    "manifest.json",
+    "pyproject.toml",
+    "hatch.toml",
+    "metadata.csv",
+    "README.md",
+    "assets/configuration/spec.yaml",
+    "datadog_checks/*/config_models/**",
+    "datadog_checks/*/data/conf.yaml.example",
+)
+
+
+def _is_protected_structural_path(relative: Path) -> bool:
+    rel = relative.as_posix()
+    return any(fnmatch(rel, pattern) for pattern in PROTECTED_STRUCTURAL_PATTERNS)
+
 
 class FileAccessError(Exception):
     """Raised when a file access violates the configured policy."""
@@ -91,12 +108,16 @@ class FileAccessPolicy:
 
     Paths checked at runtime go through ``canonicalize_path`` before
     matching, so symlinks and ``..`` cannot bypass the checks.
+
+    Optionally also holds the deletion policy for the current run's integration, via
+    ``integration_name``.
     """
 
     def __init__(
         self,
         write_root: Path | str,
         deny_patterns: Iterable[str] = DEFAULT_DENY_PATTERNS,
+        integration_name: str | None = None,
     ) -> None:
         self._write_root = canonicalize_path(write_root)
         patterns = tuple(deny_patterns)
@@ -108,14 +129,35 @@ class FileAccessPolicy:
             (path if "/" in p else basename).append(p)
         self._basename_patterns: tuple[str, ...] = tuple(basename)
         self._path_patterns: tuple[str, ...] = tuple(_canonicalize_pattern(p) for p in path)
+        self._integration_root = self._resolve_integration_root(integration_name)
+
+    def _resolve_integration_root(self, integration_name: str | None) -> Path | None:
+        """Resolve the directory `ddev create check` would use for `integration_name`.
+
+        Returns None when there is no usable name, so `assert_deletable` fails closed
+        instead of widening the deletion boundary to `write_root`.
+        """
+        if not isinstance(integration_name, str) or not integration_name.strip():
+            return None
+
+        # Imported lazily: `ddev.cli` eagerly imports `ddev.cli.meta.ai`, which imports back
+        # into `ddev.ai`, so importing it at module load time here would risk a circular import.
+        from ddev.cli.create._naming import is_creatable_integration_name, normalize_package_name
+
+        if not is_creatable_integration_name(integration_name):
+            return None
+
+        # normalize_package_name only touches "-_. ", so a value containing "/" would
+        # otherwise survive normalization and let integration_name name an arbitrary
+        # directory outside the intended integration root.
+        normalized = normalize_package_name(integration_name).strip("_")
+        if not normalized or len(Path(normalized).parts) != 1:
+            return None
+        return self._write_root / normalized
 
     @property
     def write_root(self) -> Path:
         return self._write_root
-
-    @property
-    def deny_patterns(self) -> tuple[str, ...]:
-        return self._deny_patterns
 
     @property
     def basename_patterns(self) -> tuple[str, ...]:
@@ -141,12 +183,38 @@ class FileAccessPolicy:
             raise FileAccessError(f"Write denied: {resolved} is outside write root {self._write_root}")
         return resolved
 
-    def matches_deny_pattern(self, path: str | Path) -> bool:
-        """Whether path matches a configured deny pattern, regardless of write_root.
+    def assert_deletable(self, path: str | Path) -> Path:
+        """Resolve `path` and verify it may be deleted under the deletion policy.
 
-        ``assert_writable`` does not check deny patterns — inside write_root, writes to
-        e.g. ``.env`` are intentionally allowed. Callers that must enforce deny patterns
-        even inside write_root (e.g. ``delete_file``, since deletion is irreversible) use
-        this directly instead.
+        Distinct from `assert_writable`: deletion is scoped to `integration_root`, a
+        boundary narrower than `write_root`, and protected structural files plus deny
+        patterns are enforced even inside it — unlike ordinary writes, where both are
+        allowed inside `write_root` — because deletion is irreversible.
         """
-        return self._is_denied(canonicalize_path(path))
+        if self._integration_root is None:
+            raise FileAccessError("delete_file is unavailable: this run has no resolved integration directory.")
+
+        # canonicalize_path (below) fully resolves symlinks, including a symlink leaf
+        # itself, so it can never be used to detect that the leaf is a symlink. Check
+        # that on the pre-resolution path instead, before it's resolved away.
+        is_symlink_leaf = Path(path).expanduser().is_symlink()
+        resolved = canonicalize_path(path)
+
+        if not resolved.is_relative_to(self._integration_root):
+            raise FileAccessError(
+                f"Delete denied: {resolved} is outside the integration directory {self._integration_root}"
+            )
+
+        if is_symlink_leaf:
+            raise FileAccessError(f"Delete denied: {resolved} is a symlink")
+
+        if resolved.is_dir():
+            raise FileAccessError(f"Delete denied: {resolved} is a directory")
+
+        if _is_protected_structural_path(resolved.relative_to(self._integration_root)):
+            raise FileAccessError(f"Delete denied: {resolved} is a protected structural file")
+
+        if self._is_denied(resolved):
+            raise FileAccessError(f"Delete denied by policy: {resolved}")
+
+        return resolved

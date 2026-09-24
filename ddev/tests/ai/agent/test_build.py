@@ -105,20 +105,19 @@ def test_build_runtime_propagates_context_to_tool_registry(file_registry, mocker
         file_registry=file_registry,
         agent_config=config,
         process_factory=sentinel_process_factory,
-        integration_root=None,
     )
 
 
-async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(file_registry, tmp_path):
-    integration_root = tmp_path / "my_integration"
+async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(tmp_path):
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="My Integration")
+    integration_root = policy._integration_root
     integration_root.mkdir()
+    file_registry = FileRegistry(policy=policy)
     provider = MagicMock()
     provider.build_agent.return_value = MagicMock()
     provider_registry = AgentProviderRegistry()
     provider_registry.register("test", provider)
-    factory = AgentRuntimeFactory(
-        provider_registry=provider_registry, file_registry=file_registry, integration_root=integration_root
-    )
+    factory = AgentRuntimeFactory(provider_registry=provider_registry, file_registry=file_registry)
     config = make_agent_config(provider="test", tools=["delete_file"])
     scope = AgentScope("p1", AgentRole.PHASE, "p1")
 

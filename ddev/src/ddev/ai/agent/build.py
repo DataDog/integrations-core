@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 from ddev.ai.agent.base import BaseAgent
@@ -59,11 +58,9 @@ class AgentRuntimeFactory:
         *,
         provider_registry: AgentProviderRegistry,
         file_registry: FileRegistry,
-        integration_root: Path | None = None,
     ) -> None:
         self._provider_registry = provider_registry
         self._file_registry = file_registry
-        self._integration_root = integration_root
 
     def build_runtime(
         self,
@@ -81,7 +78,6 @@ class AgentRuntimeFactory:
             agent_config=agent_config,
             # forwarded untouched to tools that spawn child agents
             process_factory=process_factory,
-            integration_root=self._integration_root,
         )
         agent = self._provider_registry.build_agent(
             agent_config,

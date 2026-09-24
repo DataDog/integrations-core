@@ -241,7 +241,7 @@ def test_traversal_does_not_bypass(tmp_path) -> None:
 def test_deny_patterns_property_preserves_input(tmp_path) -> None:
     patterns = ("*.pem", "~/.ssh/*", ".env")
     policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=patterns)
-    assert policy.deny_patterns == patterns
+    assert policy._deny_patterns == patterns
 
 
 def test_basename_patterns_filters_to_basename_only(tmp_path) -> None:
@@ -261,3 +261,126 @@ def test_read_denied_by_default_path_pattern(tmp_path, root) -> None:
     resolved_root = canonicalize_path(root)
     with pytest.raises(FileAccessError, match="Read denied"):
         policy.assert_readable(str(resolved_root / "config"))
+
+
+# ---------------------------------------------------------------------------
+# integration_root resolution
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "integration_name,expected_name",
+    [
+        ("HPE Aruba Edge", "hpe_aruba_edge"),
+        ("my-cool.Check", "my_cool_check"),
+        ("simple", "simple"),
+    ],
+)
+def test_integration_root_normalizes_like_ddev_create(tmp_path, integration_name, expected_name) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name=integration_name)
+    assert policy._integration_root == tmp_path / expected_name
+
+
+def test_integration_root_is_none_without_integration_name(tmp_path) -> None:
+    assert FileAccessPolicy(write_root=tmp_path)._integration_root is None
+
+
+@pytest.mark.parametrize("value", ["", "   ", "---", None, 123])
+def test_integration_root_is_none_for_invalid_value(tmp_path, value) -> None:
+    assert FileAccessPolicy(write_root=tmp_path, integration_name=value)._integration_root is None
+
+
+@pytest.mark.parametrize("value", ["ddev/src", "../escape", "/etc", "a/b/c"])
+def test_integration_root_rejects_path_separators(tmp_path, value) -> None:
+    """normalize_package_name only touches `-_. `, so a slash would otherwise survive
+    normalization and let integration_name name an arbitrary directory outside the
+    intended integration root."""
+    assert FileAccessPolicy(write_root=tmp_path, integration_name=value)._integration_root is None
+
+
+@pytest.mark.parametrize("value", ["datadog_operator", "Datadog Checks", "DATADOG-anything"])
+def test_integration_root_rejects_reserved_datadog_prefix(tmp_path, value) -> None:
+    """`ddev create` itself rejects any name starting with `datadog`
+    (`ddev/cli/create/_common.py:_validate_integration_name`); a value like
+    "datadog_operator" would otherwise normalize to an existing, unrelated repository
+    directory and grant delete_file access to it."""
+    assert FileAccessPolicy(write_root=tmp_path, integration_name=value)._integration_root is None
+
+
+# ---------------------------------------------------------------------------
+# assert_deletable
+# ---------------------------------------------------------------------------
+
+
+def test_assert_deletable_fails_closed_without_integration_name(tmp_path) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path)
+    with pytest.raises(FileAccessError, match="no resolved integration directory"):
+        policy.assert_deletable(str(tmp_path / "file.txt"))
+
+
+def test_assert_deletable_returns_canonical_path_inside_integration_root(tmp_path) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(), integration_name="My Integration")
+    target = policy._integration_root / "check.py"
+    assert policy.assert_deletable(str(target)) == target
+
+
+def test_assert_deletable_denies_outside_integration_root(tmp_path) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(), integration_name="My Integration")
+    with pytest.raises(FileAccessError, match="outside the integration directory"):
+        policy.assert_deletable(str(tmp_path / "outside.txt"))
+
+
+def test_assert_deletable_denies_symlink_leaf(tmp_path) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(), integration_name="My Integration")
+    integration_root = policy._integration_root
+    integration_root.mkdir()
+    target = integration_root / "real.txt"
+    target.write_text("x")
+    link = integration_root / "link.txt"
+    link.symlink_to(target)
+
+    with pytest.raises(FileAccessError, match="is a symlink"):
+        policy.assert_deletable(str(link))
+
+
+def test_assert_deletable_denies_directory(tmp_path) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(), integration_name="My Integration")
+    integration_root = policy._integration_root
+    subdir = integration_root / "subdir"
+    subdir.mkdir(parents=True)
+
+    with pytest.raises(FileAccessError, match="is a directory"):
+        policy.assert_deletable(str(subdir))
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "manifest.json",
+        "pyproject.toml",
+        "hatch.toml",
+        "metadata.csv",
+        "README.md",
+        "assets/configuration/spec.yaml",
+        "datadog_checks/mycheck/config_models/defaults.py",
+        "datadog_checks/mycheck/data/conf.yaml.example",
+    ],
+)
+def test_assert_deletable_denies_protected_structural_paths(tmp_path, relative) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(), integration_name="My Integration")
+    target = policy._integration_root / relative
+
+    with pytest.raises(FileAccessError, match="protected structural file"):
+        policy.assert_deletable(str(target))
+
+
+@pytest.mark.parametrize("filename", [".env", "secret.pem", "private.key"])
+def test_assert_deletable_denies_deny_pattern_files_inside_integration_root(tmp_path, filename) -> None:
+    # Default deny patterns (not disabled), unlike the other assert_deletable tests above,
+    # since this is specifically testing that deny patterns are enforced even inside the
+    # deletion boundary — unlike ordinary writes, where they're bypassed inside write_root.
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="My Integration")
+    target = policy._integration_root / filename
+
+    with pytest.raises(FileAccessError, match="Delete denied by policy"):
+        policy.assert_deletable(str(target))

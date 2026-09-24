@@ -13,14 +13,20 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 
 
 @pytest.fixture
+def permissive_policy(tmp_path) -> FileAccessPolicy:
+    """Overrides the base fixture with an integration_name, so integration_root resolves."""
+    return FileAccessPolicy(write_root=tmp_path, deny_patterns=(), integration_name="My Integration")
+
+
+@pytest.fixture
 async def known_file_in_root(create_tool: CreateFileTool, integration_root: Path) -> Path:
     f = integration_root / "check.py"
     await create_tool.run({"path": str(f), "content": "print('hi')\n"})
     return f
 
 
-def test_tool_name(registry: FileRegistry, owner_id: str, integration_root: Path):
-    assert DeleteFileTool(registry, owner_id, integration_root).name == "delete_file"
+def test_tool_name(registry: FileRegistry, owner_id: str):
+    assert DeleteFileTool(registry, owner_id).name == "delete_file"
 
 
 async def test_delete_file_success(
@@ -34,9 +40,11 @@ async def test_delete_file_success(
 
 
 async def test_delete_file_fails_closed_without_integration_root(
-    registry: FileRegistry, owner_id: str, known_file_in_root: Path
+    owner_id: str, tmp_path: Path, known_file_in_root: Path
 ):
-    tool = DeleteFileTool(registry, owner_id, None)
+    # No integration_name, so the policy's integration_root is None.
+    registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+    tool = DeleteFileTool(registry, owner_id)
 
     result = await tool.run({"path": str(known_file_in_root)})
 
@@ -126,14 +134,13 @@ async def test_delete_file_refuses_unknown_file(delete_tool: DeleteFileTool, int
 
 
 async def test_delete_file_refuses_file_only_another_owner_read(
-    registry: FileRegistry, owner_id: str, integration_root: Path
+    delete_tool: DeleteFileTool, registry: FileRegistry, integration_root: Path
 ):
     f = integration_root / "shared.py"
     f.write_text("x", encoding="utf-8")
     registry.record("other-agent", str(f), "x")
 
-    tool = DeleteFileTool(registry, owner_id, integration_root)
-    result = await tool.run({"path": str(f)})
+    result = await delete_tool.run({"path": str(f)})
 
     assert result.success is False
     assert "Not authorized" in result.error
@@ -185,10 +192,10 @@ async def test_delete_file_refuses_deny_pattern_files(owner_id: str, tmp_path: P
     # Deny patterns must be enforced even inside write_root/integration_root, unlike
     # ordinary writes, so this uses the default deny patterns rather than the
     # `permissive_policy` fixture (which disables them for the other tests in this module).
-    integration_root = tmp_path / "my_integration"
+    registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="My Integration"))
+    integration_root = registry.policy._integration_root
     integration_root.mkdir()
-    registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    tool = DeleteFileTool(registry, owner_id, integration_root)
+    tool = DeleteFileTool(registry, owner_id)
 
     f = integration_root / filename
     f.write_text("secret", encoding="utf-8")
