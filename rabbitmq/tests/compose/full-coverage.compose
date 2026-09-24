@@ -15,6 +15,8 @@
 #                connections, publish/deliver/ack counters, and queue depth.
 #   - activity-gen  periodic queue declare/delete churn for the
 #                   rabbitmq.queues.created/declared/deleted.count counters.
+#   - unroutable  producer-only publisher to an unbound routing key, for the
+#                 unroutable-dropped counters.
 #   - rabbitmq-full  fixture entrypoint: forwards the broker's ports and gates on
 #                    the workload, so depending on it brings up everything.
 services:
@@ -45,6 +47,8 @@ services:
   # connection, or delivery counters; a real AMQP client is required, and
   # perf-test is the canonical one. Publishers + acking consumers keep the
   # publish/deliver/ack counters and queue-depth gauges moving across scrapes.
+  # Publishing faster than consumers ack builds a backlog; --qos keeps most of it
+  # ready rather than unacked, and x-max-length caps it so it cannot grow unbounded.
   load:
     image: pivotalrabbitmq/perf-test:latest
     depends_on:
@@ -73,6 +77,33 @@ services:
       - --confirm
       - "10"
       - --multi-ack-every
+      - "5"
+      - --qos
+      - "50"
+      - --queue-args
+      - x-max-length=2000
+
+  # Producer-only publisher to a routing key nothing is bound to, so the
+  # unroutable-dropped counters advance. Long-lived AMQP, since the per-channel
+  # counter disappears with the channel.
+  unroutable:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    command:
+      - --uri
+      - amqp://guest:guest@rabbitmq-broker:5672
+      - --producers
+      - "1"
+      - --consumers
+      - "0"
+      - --exchange
+      - amq.direct
+      - --routing-key
+      - unroutable
+      - --rate
       - "5"
 
   activity-gen:
@@ -105,6 +136,8 @@ services:
       load:
         condition: service_started
       activity-gen:
+        condition: service_started
+      unroutable:
         condition: service_started
     entrypoint: ["sh", "-c"]
     command:

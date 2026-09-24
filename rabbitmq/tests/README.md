@@ -18,7 +18,7 @@ fixture in `evalya.yaml`.
 referenced by the OOTB dashboards (`assets/dashboards/`) and the recommended monitors
 (`assets/monitors/`). That union is 61 metrics, of which 58 belong to this check;
 `data_streams.latency`, `data_streams.payload_size`, and `system.mem.total` come from other
-sources and are out of scope. Five services:
+sources and are out of scope. Six services:
 
 - **rabbitmq-broker** — a `-management` broker. This image exposes both the management API
   (15672) and the Prometheus/OpenMetrics plugin (15692) on one broker.
@@ -27,15 +27,19 @@ sources and are out of scope. Five services:
 - **load** — `pivotalrabbitmq/perf-test`, a continuous AMQP workload. A real AMQP client
   is required: `rabbitmqadmin` (HTTP) cannot populate channel, connection, or delivery
   counters. perf-test's publishers and acking consumers keep those counters and the
-  queue-depth gauges moving across scrapes.
+  queue-depth gauges moving across scrapes. Publishers outpace consumers, and `--qos 50`
+  keeps that backlog ready rather than unacked, so both `messages_ready` and
+  `messages_unacknowledged` are non-zero; `x-max-length=2000` bounds it.
 - **activity-gen** — periodic queue declare/delete churn (`activity-gen.sh`) so the
   node-wide `rabbitmq.queues.created/declared/deleted.count` counters keep advancing;
   perf-test's long-lived queues do not produce churn. Set `ACTIVITY_GEN=0` (host env) to
   idle it.
+- **unroutable** — a producer-only perf-test publishing to a routing key nothing is bound
+  to, so the unroutable-dropped counters advance.
 - **rabbitmq-full** — the entrypoint the evalya task targets: a `socat` forwarder for 5672,
-  15672, and 15692, gated on the broker being healthy, `seed` completing, and `load`
-  and `activity-gen` starting. evalya only starts a task's target and its `depends_on`
-  chain, so targeting the broker directly would run it with no workload.
+  15672, and 15692, gated on the broker being healthy, `seed` completing, and `load`,
+  `activity-gen`, and `unroutable` starting. evalya only starts a task's target and its
+  `depends_on` chain, so targeting the broker directly would run it with no workload.
 
 No ports are published to the host, so the fixture cannot clash with a local broker or a
 concurrent run. To inspect it by hand, add a Compose override publishing the ports on
