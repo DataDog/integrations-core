@@ -687,3 +687,35 @@ tests:
      timestamp: 1786999534801
    sample: '2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=edge@app]
      LOG:  statement: SELECT 2 AS c02;'
+ -
+  sample: "2017-11-07 17:30:39 UTC LOG:  checkpoint starting: shutdown immediate"
+  result:
+    custom:
+      db:
+        date: 1510075839000
+        severity: "LOG"
+      error_severity: "LOG"
+      postgres:
+        severity_category: "info"
+      timestamp: "2017-11-07 17:30:39 UTC"
+    message: "checkpoint starting: shutdown immediate"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1510075839000
+ -
+  sample: "2017-11-07 17:30:39 UTC LOG:  execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
+  result:
+    custom:
+      db:
+        date: 1510075839000
+        severity: "LOG"
+      error_severity: "LOG"
+      postgres:
+        severity_category: "info"
+      timestamp: "2017-11-07 17:30:39 UTC"
+    message: "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1510075839000
