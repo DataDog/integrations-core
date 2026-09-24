@@ -136,6 +136,19 @@ class ResolvedRun(BaseModel):
     base_sha: str | None = None
     is_fork: bool = False
 
+    @property
+    def owner(self) -> str:
+        return self.repository.partition('/')[0]
+
+    @property
+    def repo(self) -> str:
+        return self.repository.partition('/')[2]
+
+    @property
+    def concurrency_key(self) -> str:
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
+        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
+
 
 def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
     """Write the resolved run's manifest as machine-readable JSON under its output directory.

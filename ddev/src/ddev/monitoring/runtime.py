@@ -15,7 +15,7 @@ from typing import Any
 import structlog
 from structlog.stdlib import BoundLogger
 
-from ddev.monitoring.context import MonitorContext
+from ddev.monitoring.context import EMPTY_FIELDS, MonitorContext
 from ddev.monitoring.diagnostics import DiagnosticCategory
 from ddev.monitoring.logger import logger_processors
 from ddev.monitoring.metrics import Metrics, MetricsSink, TagProjector
@@ -60,11 +60,13 @@ class MonitoringRuntime:
         metrics_sink: MetricsSink | None = None,
         metrics_tag_projector: TagProjector | None = None,
         protected_fields: Collection[str] = (),
+        base_fields: Mapping[str, Any] = EMPTY_FIELDS,
     ) -> None:
         self._closed = False
         self._metrics_closed = False
         self._close_lock = threading.Lock()
         self._context = MonitorContext(protected_fields)
+        self._context.set_fields(**base_fields)
         self._metrics_sink = metrics_sink
         self._stdlib_logger = logging.Logger(f'ddev.monitoring.{next(_runtime_names)}', level=logging.DEBUG)
         self._stdlib_logger.propagate = False

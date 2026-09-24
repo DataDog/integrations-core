@@ -83,6 +83,8 @@ class WorkflowRun(BaseModel):
     html_url: str
     created_at: str | None = None
     updated_at: str | None = None
+    # Start of the latest attempt, reset on rerun (see the workflow-run schema linked above).
+    run_started_at: str | None = None
 
     @property
     def is_completed(self) -> bool:
