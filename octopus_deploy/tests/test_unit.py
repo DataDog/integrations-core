@@ -1651,6 +1651,7 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
+                    '/api/Spaces-1/releases': MockResponse(status_code=500),
                     '/api/Spaces-1/releases/Releases-3': MockResponse(status_code=500),
                 }
             },
@@ -1879,6 +1880,7 @@ def test_deployment_metrics_releases_http_failure(
         pytest.param(
             {
                 'http_error': {
+                    '/api/Spaces-1/deployments': MockResponse(status_code=500),
                     '/api/Spaces-1/deployments/Deployments-18': MockResponse(status_code=500),
                 }
             },
@@ -2155,17 +2157,23 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, 
     dd_run_check(check)
 
     args_list = []
+    bulk_ids = {'deployments': [], 'releases': []}
     for call in mock_http_get.call_args_list:
-        args, _ = call
+        args, kwargs = call
         args_list += list(args)
+        for resource, ids in bulk_ids.items():
+            if args[0] == f'http://localhost:80/api/Spaces-1/{resource}':
+                ids.append(kwargs.get('params', {}).get('ids'))
 
-    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-1') == 1
-    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-2') == 1
-    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-3') == 1
+    # Every deployment and release is looked up in bulk, and only on the run that first sees it.
+    assert bulk_ids['deployments'] == [['Deployments-18', 'Deployments-19'], ['Deployments-16', 'Deployments-17']]
+    assert bulk_ids['releases'] == [['Releases-1', 'Releases-3'], ['Releases-2']]
 
-    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-17') == 1
-    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-18') == 1
-    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-19') == 1
+    # Individual lookups are the fallback for a cache miss, and must not run when the bulk lookup succeeded.
+    for deployment_id in ['Deployments-16', 'Deployments-17', 'Deployments-18', 'Deployments-19']:
+        assert args_list.count(f'http://localhost:80/api/Spaces-1/deployments/{deployment_id}') == 0
+    for release_id in ['Releases-1', 'Releases-2', 'Releases-3']:
+        assert args_list.count(f'http://localhost:80/api/Spaces-1/releases/{release_id}') == 0
 
     assert args_list.count('http://localhost:80/api/Spaces-1/environments') == 5
 
@@ -2385,15 +2393,15 @@ def test_paginated_limit_project_groups(
         pytest.param(
             30,
             [
-                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 0, 30),
+                (['http://localhost:80/api/Spaces-1/projects'], 0, 30),
             ],
             id='high limit',
         ),
         pytest.param(
             2,
             [
-                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 0, 2),
-                (['http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects'], 2, 2),
+                (['http://localhost:80/api/Spaces-1/projects'], 0, 2),
+                (['http://localhost:80/api/Spaces-1/projects'], 2, 2),
             ],
             id='low limit',
         ),
@@ -2401,7 +2409,7 @@ def test_paginated_limit_project_groups(
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_paginated_limit_projects_projectgroups1(
+def test_paginated_limit_projects(
     get_current_datetime, dd_run_check, paginated_limit, mock_http_get, expected_skip_take_args, instance
 ):
     instance = copy.deepcopy(instance)
@@ -2417,7 +2425,7 @@ def test_paginated_limit_projects_projectgroups1(
         args, kwargs = call
         take = kwargs.get('params', {}).get('take')
         skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/projectgroups/ProjectGroups-1/projects' == args[0]:
+        if 'http://localhost:80/api/Spaces-1/projects' == args[0]:
             skip_take_args += [(list(args), skip, take)]
 
     assert skip_take_args == expected_skip_take_args
@@ -2462,8 +2470,7 @@ def test_paginated_limit_tasks(
         args, kwargs = call
         take = kwargs.get('params', {}).get('take')
         skip = kwargs.get('params', {}).get('skip')
-        project = kwargs.get('params', {}).get('project')
-        if 'http://localhost:80/api/Spaces-1/tasks' == args[0] and project == 'Projects-1':
+        if 'http://localhost:80/api/Spaces-1/tasks' == args[0]:
             skip_take_args += [(list(args), skip, take)]
 
     assert skip_take_args == expected_skip_take_args
@@ -2796,3 +2803,68 @@ def test_unified_service_tagging(
         for metric in ALL_METRICS:
             aggregator.assert_metric_has_tag(metric, 'service:my-project', count=0)
             aggregator.assert_metric_has_tag(metric, 'env:staging', count=0)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_collection_does_not_scale_with_project_count(get_current_datetime, dd_run_check, mock_http_get, instance):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    urls = [call[0][0] for call in mock_http_get.call_args_list]
+
+    # The space holds four projects across three project groups, but each collection is listed once for the space.
+    assert urls.count('http://localhost:80/api/Spaces-1/projects') == 1
+    assert urls.count('http://localhost:80/api/Spaces-1/projectgroups') == 1
+    # One call for queued/executing tasks and one for the tasks completed during the interval.
+    assert urls.count('http://localhost:80/api/Spaces-1/tasks') == 2
+    # Deployments and their releases are resolved with one bulk lookup each, not one per task.
+    assert urls.count('http://localhost:80/api/Spaces-1/deployments') == 1
+    assert urls.count('http://localhost:80/api/Spaces-1/releases') == 1
+
+
+@pytest.mark.parametrize(
+    ('retry_after', 'expected_wait'),
+    [
+        pytest.param({'Retry-After': '7'}, 7.0, id='retry-after seconds'),
+        pytest.param({'Retry-After': '900'}, 10.0, id='retry-after above the cap'),
+        pytest.param({'Retry-After': 'Wed, 21 Oct 2015 07:28:00 GMT'}, 1.0, id='retry-after http date'),
+        pytest.param({}, 1.0, id='no retry-after header'),
+    ],
+)
+def test_throttled_request_waits_then_succeeds(instance, retry_after, expected_wait):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    check.load_configuration_models()
+    responses = [
+        MockResponse(status_code=429, headers=retry_after),
+        MockResponse(json_data={'Items': ['a space']}, status_code=200),
+    ]
+
+    with (
+        mock.patch('requests.Session.get', side_effect=responses) as http_get,
+        mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep,
+    ):
+        assert check._process_endpoint('api/spaces') == {'Items': ['a space']}
+
+    assert http_get.call_count == 2
+    sleep.assert_called_once_with(expected_wait)
+
+
+def test_throttled_request_gives_up_after_bounded_retries(instance, caplog):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    check.load_configuration_models()
+    caplog.set_level(logging.WARNING)
+
+    with (
+        mock.patch(
+            'requests.Session.get', return_value=MockResponse(status_code=429, headers={'Retry-After': '1'})
+        ) as http_get,
+        mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep,
+    ):
+        assert check._process_endpoint('api/spaces') == {}
+
+    # Three retries after the initial attempt, then the throttled response is surfaced instead of retrying forever.
+    assert http_get.call_count == 4
+    assert sleep.call_count == 3
+    assert 'Failed to access endpoint: api/spaces' in caplog.text
