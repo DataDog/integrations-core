@@ -16,7 +16,7 @@ import pytest
 from pydantic import ValidationError
 
 from ddev.cli.ci.dispatch_run import ResolvedRun
-from ddev.cli.ci.tests import messages
+from ddev.cli.ci.tests import messages, task_test_runner
 from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
@@ -232,6 +232,40 @@ async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
     }
     assert {record.tags['dispatcher.component'] for record in sink.records_named('operations.count')} == {'test-runner'}
     assert [record.kind.value for record in sink.records_named('artifacts.download.duration')] == ['distribution']
+
+
+async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """A batch's first poll has no predecessor, even when an earlier batch was polled by the same runner.
+
+    The samples are the runner's own, so they carry the run's metric dimensions and its component.
+    """
+    fake = FakeAsyncGitHubClient()
+    mock_artifacts(fake, [])
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    ticks = iter(range(0, 1000, 10))
+    monkeypatch.setattr(task_test_runner, "monotonic", lambda: float(next(ticks)))
+    monitoring, sink = recording_runtime()
+    monitoring.set_run_fields(ci_pipeline_id="12345", context="pr", team="agent-integrations")
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    for batch_id, polls in (("batch-1", 3), ("batch-2", 2)):
+        for _ in range(polls - 1):
+            fake.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
+        await runner.process_message(make_batch(batch_id))
+
+    intervals = sink.records_named("requests.polling_interval")
+    assert [record.value for record in intervals] == [10.0, 10.0, 10.0]
+    assert {tuple(sorted(record.tags.items())) for record in intervals} == {
+        (
+            ("ci.pipeline.id", "12345"),
+            ("dispatcher.component", "test-runner"),
+            ("dispatcher.context", "pr"),
+            ("team", "agent-integrations"),
+        )
+    }
+    assert {record.kind for record in intervals} == {MetricKind.DISTRIBUTION}
 
 
 @pytest.mark.asyncio

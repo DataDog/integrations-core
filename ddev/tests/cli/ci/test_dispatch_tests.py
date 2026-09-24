@@ -13,6 +13,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any
 from unittest.mock import ANY
 
+import httpx
 import pytest
 
 from ddev.cli.application import Application
@@ -26,9 +27,12 @@ from ddev.monitoring import MonitoringRuntime
 from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.monitoring.datadog_metrics import DatadogMetricsSink
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
+from ddev.utils.github_async import async_github_client
 from ddev.utils.github_async.models import PullRequest, WorkflowRun
+from ddev.utils.rate_limiting import BudgetGovernor
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, decode_job_list, listed_pull_request, mock_job_result, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.datadog import FakeLogSubmitter, FakeMetricsSubmitter
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
@@ -615,6 +619,77 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(
     }
 
 
+@pytest.mark.parametrize(
+    ('environ', 'pipeline_id'),
+    [
+        ({'GITHUB_RUN_ID': '111', 'GITHUB_RUN_ATTEMPT': '1'}, '111'),
+        ({'GITHUB_RUN_ID': '111', 'GITHUB_RUN_ATTEMPT': '2'}, '111'),
+        ({'GITHUB_RUN_ID': '222', 'GITHUB_RUN_ATTEMPT': '1'}, '222'),
+        ({}, None),
+    ],
+    ids=['first-attempt', 'rerun', 'another-workflow', 'outside-github-actions'],
+)
+def test_metrics_are_tagged_with_the_workflow_running_the_dispatcher(
+    ddev, fake_async_github, resolved_changes, mocker, monkeypatch, environ: dict[str, str], pipeline_id: str | None
+):
+    """A rerun reports as the same emitter, since it cannot run concurrently with the attempt it replaces."""
+    for variable in ('GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT'):
+        monkeypatch.delenv(variable, raising=False)
+    for variable, value in environ.items():
+        monkeypatch.setenv(variable, value)
+    sink = recording_runtime(mocker)
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.metrics.count('plan')
+        return []
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--tags', 'ci_pipeline_id:forged')
+
+    assert result.exit_code == 0, result.output
+    assert sink.records_named('plan')
+    assert {record.tags.get('ci.pipeline.id') for record in sink.records} == {pipeline_id}
+
+
+def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, resolved_changes, mocker, monkeypatch):
+    """Resolution builds its own client before the Dispatcher's exists, so its waits need their own wiring."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    monkeypatch.setattr('ddev.utils.rate_limiting.monotonic', clock)
+    monkeypatch.setattr('ddev.utils.github_async.defaults.BudgetGovernor', partial(BudgetGovernor, now=clock))
+    responses = [
+        httpx.Response(429, headers={'retry-after': '30'}),
+        httpx.Response(200, json=pull_request().model_dump(mode='json')),
+    ]
+    transport = httpx.MockTransport(lambda request: responses.pop(0))
+    mocker.patch('ddev.utils.github_async.async_github_client', partial(async_github_client, transport=transport))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': 'ghp_test'})
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=[])
+    monkeypatch.setenv('GITHUB_RUN_ID', '12345')
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+
+    assert result.exit_code == 0, result.output
+    # The 30 seconds GitHub asked for, plus the governor's one-second buffer.
+    assert [(record.value, dict(record.tags)) for record in sink.records_named('throttle.wait.duration')] == [
+        (31, {'ci.pipeline.id': '12345', 'dispatcher.reason': 'secondary_limit'})
+    ]
+    # Resolution's own requests are observed too, under the same pipeline ID.
+    assert [
+        (record.value, record.tags.get('ci.pipeline.id')) for record in sink.records_named('requests.throttled')
+    ] == [
+        (1, '12345'),
+        (0, '12345'),
+    ]
+    assert [event['event'] for event in handler.events if event['level'] == 'warning'] == [
+        'GitHub secondary rate limit hit: asked to retry after 30s, pausing all requests for 31s',
+        'rate limit secondary pause: waiting 31.0s before the next request',
+    ]
+
+
 @pytest.mark.usefixtures('resolved_changes')
 @pytest.mark.parametrize(
     ('level_options', 'visible', 'hidden'),
@@ -1082,9 +1157,11 @@ def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
     ddev: CliRunner,
     fake_async_github: FakeAsyncGitHubClient,
     mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     from_manifest: bool,
 ):
+    monkeypatch.setenv('GITHUB_RUN_ID', '12345')
     mocker.patch('ddev.cli.ci.dispatch_run.MERGE_COMMIT_REFRESH_SECONDS', 0.0)
     fake_async_github.mock_response('get_pull_request', pull_request(merge_commit_sha=None))
     handler = RecordingJsonHandler()
@@ -1115,6 +1192,7 @@ def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
         'git.branch': 'unresolved',
         'dispatcher.base_branch': 'unresolved',
         'dispatcher.run.is_fork': 'unresolved',
+        'ci.pipeline.id': '12345',
         'dispatcher.component': 'dispatcher',
     }
     [started] = [event for event in handler.events if event['event'] == 'Dispatcher invocation started']

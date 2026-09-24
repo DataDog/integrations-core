@@ -25,12 +25,11 @@ from ddev.utils.rate_limiting import (
     PacingReason,
     RateLimitEvent,
     SecondaryLimitEvent,
+    WaitEvent,
 )
 
-logger = logging.getLogger(__name__)
 
-
-def log_rate_limit_events(logger: logging.Logger = logger) -> Callable[[RateLimitEvent], None]:
+def log_rate_limit_events(logger: logging.Logger) -> Callable[[RateLimitEvent], None]:
     """Return an on_event callback that logs rate-limit events for operators.
 
     Stateless: a low budget logs at DEBUG on every observe, so it can be chatty. An edge-detecting
@@ -72,6 +71,8 @@ def log_rate_limit_events(logger: logging.Logger = logger) -> Callable[[RateLimi
                 logger.debug("%s rate limiter throttling request", event.name)
             case BucketEvent():
                 pass  # Bucket had capacity: nothing worth an operator's attention.
+            case WaitEvent():
+                pass  # The PacingEvent and BucketEvent above already announced this wait.
             case _:
                 # New event types must not break logging.
                 logger.debug("unhandled rate limit event: %r", event)
@@ -91,14 +92,15 @@ def default_github_rate_limiter(
     shared budget and secondary limits reported in response headers. With a healthy budget and no
     secondary limits the governor adds zero wait, so this default is invisible to well-behaved
     callers and engages only once GitHub has already signaled backpressure.
+
+    Without `on_event` the limiter reports nothing.
     """
-    handler = on_event or log_rate_limit_events()
-    governor = budget_governor or BudgetGovernor(on_event=handler)
+    governor = budget_governor or BudgetGovernor(on_event=on_event)
     # The governor and the InstrumentedAsyncLimiter each carry their own on_event slot; wiring only
     # one silently drops half the events (bucket-throttle vs budget/pacing), so wire both.
     return InstrumentedAsyncLimiter(
         AsyncLimiter(max_rate=5000, time_period=RATE_LIMIT_TIME_PERIOD),
-        on_event=handler,
+        on_event=on_event,
         budget_governor=governor,
         name=name,
     )

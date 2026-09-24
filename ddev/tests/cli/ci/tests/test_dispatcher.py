@@ -11,6 +11,7 @@ import os
 import signal
 import sys
 import time
+from collections import Counter
 from collections.abc import AsyncIterator
 from io import StringIO
 from pathlib import Path
@@ -67,6 +68,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
+from ddev.utils.github_async.observer import RequestObserver
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
 from tests.cli.ci.helpers import mock_job_result
 from tests.cli.ci.tests.helpers import (
@@ -208,12 +210,14 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
 ):
     events: list[RateLimitEvent] = []
     requests: dict[str, str] = {}
+    requests_sent: Counter[str] = Counter()
     job = make_job()
     run_url = "https://github.com/DataDog/integrations-core/actions/runs/123"
 
     def handle(request: httpx.Request) -> httpx.Response:
         bucket = next(event for event in reversed(events) if isinstance(event, BucketEvent))
         requests[request.url.path] = bucket.name
+        requests_sent[request.url.path] += 1
         if request.url.path.endswith("/dispatches"):
             return httpx.Response(200, json={"workflow_run_id": 123, "run_url": str(request.url), "html_url": run_url})
         if request.url.path.endswith("/artifacts"):
@@ -234,13 +238,20 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
         )
 
     def make_client(
-        token: str, *, rate_limiter: InstrumentedAsyncLimiter, logger: logging.Logger | None = None
+        token: str,
+        *,
+        rate_limiter: InstrumentedAsyncLimiter,
+        logger: logging.Logger | None = None,
+        observer: RequestObserver | None = None,
     ) -> AsyncGitHubClient:
-        return AsyncGitHubClient(token, rate_limiter=rate_limiter, logger=logger, transport=httpx.MockTransport(handle))
+        return AsyncGitHubClient(
+            token, rate_limiter=rate_limiter, logger=logger, observer=observer, transport=httpx.MockTransport(handle)
+        )
 
     monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
     monkeypatch.setattr(rate_limiting, "event_logger", lambda _: events.append)
-    monitoring = MonitoringRuntime()
+    sink = RecordingSink()
+    monitoring = MonitoringRuntime(metrics_sink=sink)
     dispatcher = build_dispatcher(
         batches=[make_batch(job)],
         run=CONTEXT.model_copy(update={"pr_number": None}),
@@ -258,6 +269,8 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
     assert requests[f"{prefix}/artifacts"] == "artifacts"
     assert requests[f"{prefix}/jobs"] == "default"
     assert requests[prefix] == "default"
+    # Both tiers report through the Dispatcher: one attempt per request the transport answered.
+    assert len(sink.records_named("requests.count")) == sum(requests_sent.values())
 
 
 def test_progress_reaches_the_comment_before_artifact_collection_finishes(
