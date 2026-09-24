@@ -299,7 +299,6 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             'query': query_spec.query,
             'entity': entity,
             'custom_sql_select_fields': custom_fields,
-            'metric_targets': [target.model_dump() for target in query_spec.metric_targets or ()],
             'timeout_ms': query_spec.query_timeout,
             **result,
         }

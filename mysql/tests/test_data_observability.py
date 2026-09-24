@@ -734,10 +734,9 @@ def test_cancelled_job_aborts_query_before_execution(instance_basic):
 @pytest.mark.parametrize(
     'code,kind', [(3024, 'statement_timeout'), (1969, 'statement_timeout'), (1205, 'lock_timeout'), (1146, 'sql_error')]
 )
-def test_query_errors_include_targets_and_classification(instance_basic, aggregator, code, kind):
+def test_query_errors_include_sql_and_classification(instance_basic, aggregator, code, kind):
     queries = deepcopy(MULTI_QUERIES)
-    targets = [{'metric_config_id': 42, 'entity_id': 'a'}, {'metric_config_id': 43, 'entity_id': 'b'}]
-    queries[0]['metric_targets'] = targets
+    queries[0]['query'] = 'SELECT COUNT(*) AS dd_abc_42, SUM(n) AS dd_def_43 FROM orders'
     conn, cursor = _make_mock_conn()
     cursor.execute.side_effect = [None, pymysql.err.OperationalError(code, 'query failed'), None]
     with patch.object(MySql, 'event_platform_event') as events:
@@ -748,7 +747,6 @@ def test_query_errors_include_targets_and_classification(instance_basic, aggrega
     assert payloads[0]['error_code'] == code
     assert payloads[0]['error_phase'] == 'execute'
     assert payloads[0]['timeout_ms'] == 30000
-    assert payloads[0]['metric_targets'] == targets
     assert payloads[0]['columns'] == []
     assert payloads[0]['query'] == queries[0]['query']
     assert payloads[1]['status'] == 'success'
