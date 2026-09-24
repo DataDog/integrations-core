@@ -41,6 +41,7 @@ from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import RecordingBus, drain_queue, jobs_reported, make_job
 from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -139,7 +140,12 @@ def _test_batch(batch_id: str, jobs: list[BatchJob]) -> TestBatch:
     )
 
 
-def _make_gatherer(tmp_path: Path, plan: dict[str, list[BatchJob]] | None = None) -> TaskTestGatherer:
+def _make_gatherer(
+    tmp_path: Path,
+    plan: dict[str, list[BatchJob]] | None = None,
+    *,
+    handler: logging.Handler | None = None,
+) -> TaskTestGatherer:
     """Gatherer primed with the complete plan, given as ``{batch_id: planned jobs}``."""
     if plan is None:
         plan = {"batch-1": [_batch_job("j1")]}
@@ -147,6 +153,7 @@ def _make_gatherer(tmp_path: Path, plan: dict[str, list[BatchJob]] | None = None
         "gatherer",
         output_base_path=tmp_path / "out",
         batches=[_test_batch(batch_id, jobs) for batch_id, jobs in plan.items()],
+        monitor=make_monitor('test-gatherer', handler=handler),
     )
     gatherer.bus = RecordingBus()  # type: ignore[assignment]
     return gatherer
@@ -236,6 +243,25 @@ def test_progress_observations_update_planned_jobs_and_suppress_equal_snapshots(
     assert drain_queue(gatherer.bus.queue) == []
 
 
+def test_job_completion_is_logged_once_when_an_observation_transitions_to_completed(tmp_path: Path):
+    handler = RecordingJsonHandler()
+    gatherer = _make_gatherer(tmp_path, handler=handler)
+
+    gatherer.process_message(
+        _progress_update(WorkflowJob(id=1, run_id=100, name="j1", status="in_progress"), sequence=1)
+    )
+    assert [event for event in handler.events if event["event"] == "Job completed"] == []
+
+    completed = _progress_update(_workflow_job("j1", "success"), sequence=2)
+    gatherer.process_message(completed)
+    [event] = [event for event in handler.events if event["event"] == "Job completed"]
+    assert event["job"] == "j1"
+    assert event["job_status"] == "success"
+
+    gatherer.process_message(dataclasses.replace(completed, id="progress-3", sequence=3))
+    assert len([event for event in handler.events if event["event"] == "Job completed"]) == 1
+
+
 def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_path: Path):
     job = _batch_job("j1")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [job]})
@@ -266,6 +292,41 @@ def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_pat
     gatherer.process_message(dataclasses.replace(update, sequence=10))
     assert gatherer.progress == finished.progress
     assert drain_queue(gatherer.bus.queue) == []
+
+
+@pytest.mark.parametrize(
+    "job_statuses, expected_state",
+    [
+        pytest.param((WorkflowJobStatus.IN_PROGRESS,), ExecutionState.RUNNING, id="running-job"),
+        pytest.param(
+            (WorkflowJobStatus.COMPLETED, WorkflowJobStatus.QUEUED),
+            ExecutionState.RUNNING,
+            id="completed-job",
+        ),
+        pytest.param((WorkflowJobStatus.QUEUED,), ExecutionState.QUEUED, id="waiting-job"),
+    ],
+)
+def test_queued_batch_state_reflects_observed_jobs(
+    tmp_path: Path,
+    job_statuses: tuple[WorkflowJobStatus, ...],
+    expected_state: ExecutionState,
+):
+    gatherer = _make_gatherer(
+        tmp_path, {"batch-1": [_batch_job(f"j{index}") for index in range(1, len(job_statuses) + 1)]}
+    )
+    jobs = tuple(
+        WorkflowJob(
+            id=index,
+            run_id=100,
+            name=f"j{index}",
+            status=status,
+            conclusion=WorkflowJobConclusion.SUCCESS if status is WorkflowJobStatus.COMPLETED else None,
+        )
+        for index, status in enumerate(job_statuses, start=1)
+    )
+    gatherer.process_message(_progress_update(*jobs, state=ExecutionState.QUEUED))
+    [update] = drain_queue(gatherer.bus.queue)
+    assert _batch_progress(update, "batch-1").state is expected_state
 
 
 def test_progress_does_not_regress_execution_or_collection(tmp_path: Path):
@@ -1273,12 +1334,18 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     initial plan, then edited once per finished batch, never regressing.
     """
     plan = _scenario_plan()
-    gatherer = TaskTestGatherer("gatherer", output_base_path=tmp_path / "out", batches=_scenario_batches(plan))
+    gatherer = TaskTestGatherer(
+        "gatherer",
+        output_base_path=tmp_path / "out",
+        batches=_scenario_batches(plan),
+        monitor=make_monitor('test-gatherer'),
+    )
     client = FakeAsyncGitHubClient()
     reporter = TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner="DataDog", repo="integrations-core", pr_number=42),
+        monitor=make_monitor('run-reporter'),
     )
 
     bus = _DispatcherBus(logging.getLogger("test-bus"), max_timeout=30, grace_period=0.2)
@@ -1308,7 +1375,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     assert completed[0] == 0
     assert "in progress" in bodies[0]
     assert "**12/12 jobs**" in bodies[-1]
-    assert "## ✅ Dispatcher tests · passed" in bodies[-1]
+    assert "## ✅ Dispatcher tests: passed" in bodies[-1]
     assert "Dispatcher finished" in bodies[-1]
 
 

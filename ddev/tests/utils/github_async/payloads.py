@@ -20,7 +20,7 @@ def artifact(idx: int, expired: bool = False, **extra: Any) -> dict[str, Any]:
 def workflow_run_payload(
     id: int = 42,
     name: str = "CI",
-    status: str = "completed",
+    status: str | None = "completed",
     conclusion: str | None = "success",
     html_url: str = "https://github.com/owner/repo/actions/runs/42",
     created_at: str = "2024-01-01T00:00:00Z",
@@ -226,5 +226,56 @@ def check_run_payload(
         "head_sha": head_sha,
         "conclusion": conclusion,
         "html_url": html_url,
+        **extra,
+    }
+
+
+def git_ref_payload(
+    ref: str = "refs/heads/main",
+    sha: str = "a" * 40,
+    object_type: str = "commit",
+    node_id: str = "REF_kwDOABCD",
+    **extra: Any,
+) -> dict[str, Any]:
+    return {
+        "ref": ref,
+        "node_id": node_id,
+        "url": f"https://api.github.com/repos/owner/repo/git/{ref}",
+        "object": {
+            "type": object_type,
+            "sha": sha,
+            "url": f"https://api.github.com/repos/owner/repo/git/commits/{sha}",
+        },
+        **extra,
+    }
+
+
+def file_content_payload(
+    path: str = "release.json",
+    content: str = "e30K",
+    sha: str = "b" * 40,
+    encoding: str = "base64",
+    size: int = 3,
+    **extra: Any,
+) -> dict[str, Any]:
+    return {
+        "type": "file",
+        "encoding": encoding,
+        "size": size,
+        "name": path.rsplit("/", 1)[-1],
+        "path": path,
+        "content": content,
+        "sha": sha,
+        **extra,
+    }
+
+
+def file_commit_payload(commit_sha: str = "c" * 40, **extra: Any) -> dict[str, Any]:
+    return {
+        "content": None,
+        "commit": {
+            "sha": commit_sha,
+            "html_url": f"https://github.com/owner/repo/commit/{commit_sha}",
+        },
         **extra,
     }
