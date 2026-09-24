@@ -178,11 +178,11 @@ pipeline:
       grok:
         supportRules: |
         matchRules: |
-          pg_duration_statement duration:\s+%{number:duration}\s+ms\s+statement:\s+(?=%{word:db.operation}(?:\s|$))%{data:db.statement}
+          # Statement, optionally preceded by duration; capture its leading operation.
+          pg_statement (?:duration:\s+%{number:duration}\s+ms\s+)?statement:\s+(?=%{word:db.operation}(?:\s|$))%{data:db.statement}
 
+          # Other duration records (execute, plan, or duration alone); this rule must follow the statement rule.
           pg_duration duration:\s+%{number:duration}\s+ms%{data}
-
-          pg_statement statement:\s+(?=%{word:db.operation}(?:\s|$))%{data:db.statement}
       samples:
         - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
         - 'duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
