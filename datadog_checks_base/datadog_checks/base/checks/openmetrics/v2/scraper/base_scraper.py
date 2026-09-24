@@ -442,7 +442,7 @@ class OpenMetricsScraper:
         try:
             response = self.send_request()
         except Exception as e:
-            if vars(self).get('ignore_connection_errors', False):
+            if self.ignore_connection_errors:
                 endpoint_unreachable_issue.resolve(self.check, self.endpoint, self.namespace)
             else:
                 endpoint_unreachable_issue.report(self.check, self.endpoint, e, self.namespace)
