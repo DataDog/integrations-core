@@ -14,10 +14,18 @@ from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchProgressUpd
 from ddev.event_bus.orchestrator import BaseMessage
 
 if TYPE_CHECKING:
-    from ddev.cli.ci.tests.dispatcher import DispatcherContext
+    from ddev.cli.ci.dispatch_run import ResolvedRun
 
 
 DEFAULT_TEAM = 'agent-integrations'
+BASE_FIELDS = {'team': DEFAULT_TEAM}
+# Keep pre-resolution failures in the same metric grouping dimensions as resolved runs.
+UNRESOLVED_RUN_FIELDS = {
+    'context': 'unresolved',
+    'head_branch': 'unresolved',
+    'base_branch': 'unresolved',
+    'is_fork': 'unresolved',
+}
 
 
 @dataclass(frozen=True)
@@ -50,10 +58,6 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
     ),
     'head_branch': AttributeSpec(
         'git.branch',
-        metric_tag=True,
-    ),
-    'is_default_branch': AttributeSpec(
-        'git.is_default_branch',
         metric_tag=True,
     ),
     'checkout_sha': AttributeSpec(
@@ -154,7 +158,6 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
     'done': AttributeSpec(
         'dispatcher.report.done',
         console_tag=True,
-        metric_tag=True,
     ),
     'comment_id': AttributeSpec(
         'dispatcher.report.comment_id',
@@ -316,11 +319,11 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
 
 PROTECTED_RUN_FIELDS = frozenset(
     {
+        'team',
         'repo',
         'repository_url',
         'head_branch',
         'head_sha',
-        'is_default_branch',
         'checkout_sha',
         'context',
         'pr_number',
@@ -425,27 +428,27 @@ def repository_fields(owner: str, repo: str) -> dict[str, str]:
     }
 
 
-def run_fields(context: DispatcherContext) -> dict[str, Any]:
-    """Resolve run identity while retaining an explicit non-PR caller context."""
-    fields: dict[str, Any] = {'team': DEFAULT_TEAM, **tag_fields(context.tags)}
+def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
+    """Project run identity, retaining caller context only for non-PR runs."""
+    fields: dict[str, Any] = tag_fields(tags)
     for name in PROTECTED_RUN_FIELDS:
         if name != 'context':
             fields.pop(name, None)
 
     fields.update(
         {
-            **repository_fields(context.owner, context.repo),
-            'head_sha': context.head_sha,
-            'head_branch': context.head_branch,
-            'is_default_branch': context.pr_number is None and context.head_branch == 'master',
-            'checkout_sha': context.checkout_sha,
-            'pr_number': context.pr_number,
-            'base_branch': context.base_branch,
-            'base_sha': context.base_sha,
-            'is_fork': context.is_fork,
+            **BASE_FIELDS,
+            **repository_fields(run.owner, run.repo),
+            'head_sha': run.head_sha,
+            'head_branch': run.head_branch,
+            'checkout_sha': run.checkout_sha,
+            'pr_number': run.pr_number,
+            'base_branch': run.base_branch,
+            'base_sha': run.base_sha,
+            'is_fork': run.is_fork,
         }
     )
-    if context.pr_number is not None:
+    if run.pr_number is not None:
         fields['context'] = 'pr'
     elif 'context' not in fields:
         fields['context'] = 'master'
