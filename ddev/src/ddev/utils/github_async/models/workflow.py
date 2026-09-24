@@ -5,9 +5,25 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from enum import StrEnum, auto
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+def _elapsed_seconds(start: str | None, end: str | None) -> float | None:
+    """Seconds between two API timestamps, or `None` when they are unusable.
+
+    Zero is valid; a negative result means the timestamps cannot be trusted. Mixed
+    naive/aware or unparseable values degrade to `None` rather than failing the caller.
+    """
+    if start is None or end is None:
+        return None
+    try:
+        duration = (datetime.fromisoformat(end) - datetime.fromisoformat(start)).total_seconds()
+    except (ValueError, TypeError):
+        return None
+    return duration if duration >= 0 else None
 
 
 class WorkflowJobStatus(StrEnum):
@@ -91,6 +107,19 @@ class WorkflowRun(BaseModel):
         """Whether the run has finished (``status == "completed"``)."""
         return self.status == "completed"
 
+    @property
+    def duration_seconds(self) -> float | None:
+        """The run's duration, or `None` while it is unfinished or its timing is unusable.
+
+        gh's completed-run timing convention is `updated_at - run_started_at`
+        (https://github.com/cli/cli/blob/trunk/pkg/cmd/run/shared/shared.go):
+        `updated_at` is only the end time once the run completed, so an
+        in-progress run has no duration.
+        """
+        if not self.is_completed:
+            return None
+        return _elapsed_seconds(self.run_started_at, self.updated_at)
+
 
 class WorkflowDispatchResult(BaseModel):
     """Run metadata returned by `POST /actions/workflows/{id}/dispatches` when `return_run_details=True`."""
@@ -142,8 +171,13 @@ class JobStep(BaseModel):
 class WorkflowJob(BaseModel):
     """A single job within a GitHub Actions workflow run.
 
-    Field reference:
+    The `job` schema lists both `started_at` and `completed_at` as required, and
+    only `completed_at` is nullable. Both are therefore required keys with no
+    default, `started_at` as `str` and `completed_at` as `str | None`, the same
+    pattern as `WorkflowRun.status`.
+    Field reference and pinned schema (`components.schemas.job`):
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
+    https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.2022-11-28.json
     """
 
     model_config = ConfigDict(extra="ignore")
@@ -154,7 +188,14 @@ class WorkflowJob(BaseModel):
     status: WorkflowJobStatus
     conclusion: WorkflowJobConclusion | None = None
     html_url: str | None = None
+    started_at: str
+    completed_at: str | None
     steps: list[JobStep] = Field(default_factory=list)
+
+    @property
+    def duration_seconds(self) -> float | None:
+        """The job's own execution time, or `None` if its timing is unusable. Queue time is excluded."""
+        return _elapsed_seconds(self.started_at, self.completed_at)
 
 
 class WorkflowJobsList(BaseModel):

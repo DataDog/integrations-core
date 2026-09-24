@@ -52,6 +52,16 @@ def mock_job_result(fake: FakeAsyncGitHubClient, job: BatchJob, conclusion: str)
         "list_workflow_jobs",
         WorkflowJobsList(
             total_count=1,
-            jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status="completed", conclusion=conclusion)],
+            jobs=[
+                WorkflowJob(
+                    id=1,
+                    run_id=123,
+                    name=job.name,
+                    status="completed",
+                    conclusion=conclusion,
+                    started_at="2026-01-01T10:00:00Z",
+                    completed_at="2026-01-01T10:01:30Z",
+                )
+            ],
         ),
     )

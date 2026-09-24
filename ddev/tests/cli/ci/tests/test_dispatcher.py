@@ -228,7 +228,15 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
                 json={
                     "total_count": 1,
                     "jobs": [
-                        {"id": 1, "run_id": 123, "name": job.name, "status": "completed", "conclusion": "success"}
+                        {
+                            "id": 1,
+                            "run_id": 123,
+                            "name": job.name,
+                            "status": "completed",
+                            "conclusion": "success",
+                            "started_at": "2026-01-01T10:00:00Z",
+                            "completed_at": "2026-01-01T10:01:30Z",
+                        }
                     ],
                 },
             )
@@ -336,7 +344,16 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
         "list_workflow_jobs",
         WorkflowJobsList(
             total_count=1,
-            jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status=WorkflowJobStatus.IN_PROGRESS)],
+            jobs=[
+                WorkflowJob(
+                    id=1,
+                    run_id=123,
+                    name=job.name,
+                    status=WorkflowJobStatus.IN_PROGRESS,
+                    started_at="2026-01-01T10:00:00Z",
+                    completed_at=None,
+                )
+            ],
         ),
         once=True,
     )
