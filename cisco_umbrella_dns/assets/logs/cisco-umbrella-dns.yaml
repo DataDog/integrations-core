@@ -890,7 +890,7 @@ pipeline:
               target: ocsf.src_endpoint.uid
               targetFormat: string
               preserveSource: true
-              overrideOnConflict: false
+              overrideOnConflict: true
               type: schema-remapper
             - name: Map `externalip` to `ocsf.proxy_endpoint.ip`
               sources:
