@@ -5,7 +5,7 @@
 # Each case names its parsing rule and the behavior it protects. Assertions include absent fields.
 # Failure triage: compare the reported actual output with the expected fields below.
 # The test harness starts at timestamp 1; cases without a parsed date retain that sentinel.
-# - Wrong/missing raw prefix fields: named pgprefix_* rule and its _pg_* helpers.
+# - Wrong/missing raw prefix fields: named prefix rule and its _pg_* helpers.
 # - Wrong message/state_code: _pg_body[_with_prefix_state], then the message remapper.
 # - Correct raw timestamp/session_start but wrong db.date/db.backend_start: date Grok rules.
 # - Correct db.date but wrong official timestamp: date remapper.
@@ -782,7 +782,8 @@ tests:
      tags:
      - source:LOGS_SOURCE
      timestamp: 1
- # pgprefix_rds / _pg_remote: IPv6 + port after EST; _pg_body captures SQLSTATE and strips position; FATAL -> critical.
+ # pgprefix_rds / _pg_remote: IPv6 + port after EST; _pg_body captures SQLSTATE and strips position; FATAL
+ # -> critical.
  - sample: '2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database "missing" does not exist at
      character 12'
    result:
@@ -814,7 +815,8 @@ tests:
      - source:LOGS_SOURCE
      - db:postgres
      timestamp: 1768496400000
- # pgprefix_heroku: %q background + empty _pg_vxid; pg_date_ms_notz/pg_backend_start_notz assume UTC; PANIC -> emergency.
+ # pgprefix_heroku: %q background + empty _pg_vxid; pg_date_ms_notz/pg_backend_start_notz assume UTC; PANIC
+ # -> emergency.
  - sample: ' sql_error_code = 00000 time_ms = "2026-08-28 12:19:21.018 " pid="108" proc_start_time="2026-08-28 12:19:20 " session_id="6a837351.6c"
      vtid="" tid="0" log_line="1" PANIC:  could not write to log file'
    result:
@@ -841,7 +843,8 @@ tests:
      tags:
      - source:LOGS_SOURCE
      timestamp: 1787919561018
- # pgprefix_rds_enhanced: pg_date_notz/pg_backend_start_ms_notz; unknown user/database/application suppressed; bare remote host; WARNING -> warning.
+ # pgprefix_rds_enhanced: pg_date_notz/pg_backend_start_ms_notz; unknown user/database/application
+ # suppressed; bare remote host; WARNING -> warning category / warn status.
  - sample: '2026-08-28 12:19:21 :db.internal:[unknown]@[unknown]:[87]:1:00000:2026-08-28 12:19:20.018 :5/2050:0:68c9abb6.57:[unknown]:WARNING:  connection
      warning'
    result:
