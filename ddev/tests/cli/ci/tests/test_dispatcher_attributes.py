@@ -27,6 +27,7 @@ MAPPING_FIELDS = {
     'pr_number': 42,
     'team': 'agent-integrations',
     'component': 'test-runner',
+    'done': False,
     'batch_id': 'batch-01',
     'job_status': 'success',
     'integration': 'postgres',
@@ -41,6 +42,7 @@ MAPPING_FIELDS = {
         (
             attribute_mapping,
             {
+                'dispatcher.report.done': 'false',
                 'git.repository.id_v2': 'github.com/datadog/integrations-core',
                 'git.repository_url': 'https://github.com/DataDog/Integrations-Core',
                 'git.commit.sha': 'head-sha',
@@ -59,6 +61,7 @@ MAPPING_FIELDS = {
         (
             log_tag_mapping,
             {
+                'dispatcher.report.done': False,
                 'git.repository.id_v2': 'github.com/datadog/integrations-core',
                 'git.repository_url': 'https://github.com/DataDog/Integrations-Core',
                 'git.commit.sha': 'head-sha',
