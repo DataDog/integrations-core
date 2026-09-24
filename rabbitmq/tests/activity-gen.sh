@@ -6,7 +6,7 @@
 # which perf-test's long-lived queues do not.
 set -eu
 
-HOST="${RABBITMQ_HOST:-rabbitmq}"
+HOST="${RABBITMQ_HOST:-rabbitmq-broker}"
 A="rabbitmqadmin --non-interactive -H ${HOST} -u guest -p guest"
 
 log() { echo "activity-gen: $*"; }

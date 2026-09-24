@@ -18,9 +18,9 @@ fixture in `evalya.yaml`.
 referenced by the OOTB dashboards (`assets/dashboards/`) and the recommended monitors
 (`assets/monitors/`). That union is 61 metrics, of which 58 belong to this check;
 `data_streams.latency`, `data_streams.payload_size`, and `system.mem.total` come from other
-sources and are out of scope. Four services:
+sources and are out of scope. Five services:
 
-- **rabbitmq** — a `-management` broker. This image exposes both the management API
+- **rabbitmq-broker** — a `-management` broker. This image exposes both the management API
   (15672) and the Prometheus/OpenMetrics plugin (15692) on one broker.
 - **seed** — one-shot: declares the static queues, exchanges, and bindings so per-object
   metrics have subjects before the first scrape (`seed.sh`).
@@ -32,6 +32,14 @@ sources and are out of scope. Four services:
   node-wide `rabbitmq.queues.created/declared/deleted.count` counters keep advancing;
   perf-test's long-lived queues do not produce churn. Set `ACTIVITY_GEN=0` (host env) to
   idle it.
+- **rabbitmq-full** — the entrypoint the evalya task targets: a `socat` forwarder for 5672,
+  15672, and 15692, gated on the broker being healthy, `seed` completing, and `load`
+  and `activity-gen` starting. evalya only starts a task's target and its `depends_on`
+  chain, so targeting the broker directly would run it with no workload.
+
+No ports are published to the host, so the fixture cannot clash with a local broker or a
+concurrent run. To inspect it by hand, add a Compose override publishing the ports on
+`rabbitmq-broker`.
 
 ### Two check instances are required
 

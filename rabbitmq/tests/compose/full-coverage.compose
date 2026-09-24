@@ -8,20 +8,20 @@
 # Prometheus), so a single broker feeds both. A consumer of this fixture must run
 # two check instances against it, one per backend; see ../README.md.
 #
-# Three services:
-#   - rabbitmq   the broker (both endpoints).
+# Services:
+#   - rabbitmq-broker  the broker (both endpoints).
 #   - seed       one-shot: vhosts, static queues/exchanges/bindings, cluster name.
 #   - load       continuous AMQP workload (perf-test): drives channels,
 #                connections, publish/deliver/ack counters, and queue depth.
 #   - activity-gen  periodic queue declare/delete churn for the
 #                   rabbitmq.queues.created/declared/deleted.count counters.
+#   - rabbitmq-full  fixture entrypoint: forwards the broker's ports and gates on
+#                    the workload, so depending on it brings up everything.
 services:
-  rabbitmq:
+  # Not named `rabbitmq`: consumers commonly alias this fixture under that task
+  # id, and evalya then gives the entrypoint that hostname, shadowing the broker.
+  rabbitmq-broker:
     image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
-    ports:
-      - 5672:5672
-      - 15672:15672
-      - 15692:15692
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
       interval: 10s
@@ -32,13 +32,13 @@ services:
   seed:
     image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
     depends_on:
-      rabbitmq:
+      rabbitmq-broker:
         condition: service_healthy
     restart: "no"
     volumes:
       - ../seed.sh:/opt/seed.sh:ro
     environment:
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: rabbitmq-broker
     command: ["sh", "/opt/seed.sh"]
 
   # Continuous AMQP traffic. rabbitmqadmin (HTTP) cannot populate channel,
@@ -53,7 +53,7 @@ services:
     restart: unless-stopped
     command:
       - --uri
-      - amqp://guest:guest@rabbitmq:5672
+      - amqp://guest:guest@rabbitmq-broker:5672
       - --producers
       - "4"
       - --consumers
@@ -84,8 +84,32 @@ services:
     volumes:
       - ../activity-gen.sh:/opt/activity-gen.sh:ro
     environment:
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: rabbitmq-broker
       # Set ACTIVITY_GEN=0 (host env) to idle: the container stays up but
       # generates no queue churn. Defaults to on.
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
     command: ["sh", "/opt/activity-gen.sh"]
+
+  # Fixture entrypoint (published as rabbitmq-full). evalya only starts the
+  # target service and its depends_on chain, and nothing depends on the workload
+  # services, so targeting the broker would run it idle. Gating the entrypoint on
+  # them pulls up the whole environment; socat keeps the broker reachable at the
+  # entrypoint's hostname, which is what the provides labels advertise.
+  rabbitmq-full:
+    image: alpine/socat:latest
+    depends_on:
+      rabbitmq-broker:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      load:
+        condition: service_started
+      activity-gen:
+        condition: service_started
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        for port in 5672 15672 15692; do
+          socat TCP-LISTEN:$$port,fork,reuseaddr TCP:rabbitmq-broker:$$port &
+        done
+        wait

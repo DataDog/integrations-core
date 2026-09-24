@@ -7,7 +7,7 @@
 # images ship the incompatible v1 tool, so this fixture pins a 4.x broker.
 set -eu
 
-HOST="${RABBITMQ_HOST:-rabbitmq}"
+HOST="${RABBITMQ_HOST:-rabbitmq-broker}"
 A="rabbitmqadmin --non-interactive -H ${HOST} -u guest -p guest"
 
 log() { echo "seed: $*"; }
