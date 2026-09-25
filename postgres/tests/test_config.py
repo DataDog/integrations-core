@@ -87,6 +87,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'query_samples': {'enabled': True},
             'collect_settings': {'enabled': True},
             'collect_schemas': {'enabled': True},
+            'collect_roles': {'enabled': True},
             'collect_column_statistics': {'enabled': True},
             'query_activity': {'enabled': True},
             'query_metrics': {'enabled': True},
@@ -102,6 +103,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.QUERY_SAMPLES,
         FeatureKey.COLLECT_SETTINGS,
         FeatureKey.COLLECT_SCHEMAS,
+        FeatureKey.COLLECT_ROLES,
         FeatureKey.COLLECT_COLUMN_STATISTICS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
@@ -120,6 +122,7 @@ def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     assert features[FeatureKey.QUERY_SAMPLES]['enabled'] is False
     assert features[FeatureKey.COLLECT_SETTINGS]['enabled'] is False
     assert features[FeatureKey.COLLECT_SCHEMAS]['enabled'] is False
+    assert features[FeatureKey.COLLECT_ROLES]['enabled'] is False
     assert features[FeatureKey.COLLECT_COLUMN_STATISTICS]['enabled'] is False
     assert features[FeatureKey.QUERY_ACTIVITY]['enabled'] is False
     assert features[FeatureKey.QUERY_METRICS]['enabled'] is False
@@ -131,6 +134,7 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     instance['query_samples'] = {'enabled': True}
     instance['collect_settings'] = {'enabled': True}
     instance['collect_schemas'] = {'enabled': True}
+    instance['collect_roles'] = {'enabled': True}
     instance['query_activity'] = {'enabled': True}
     instance['query_metrics'] = {'enabled': True}
     mock_check.instance = instance
@@ -143,6 +147,7 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     assert FeatureKey.QUERY_SAMPLES in feature_keys
     assert FeatureKey.COLLECT_SETTINGS in feature_keys
     assert FeatureKey.COLLECT_SCHEMAS in feature_keys
+    assert FeatureKey.COLLECT_ROLES in feature_keys
     assert FeatureKey.QUERY_ACTIVITY in feature_keys
     assert FeatureKey.QUERY_METRICS in feature_keys
 
@@ -309,6 +314,27 @@ def test_apply_validated_defaults(mock_check, minimal_instance, section, section
     config, result = build_config(check=mock_check)
     assert result.valid
     assert getattr(config, section).collection_interval == expected_collection_interval
+
+
+@pytest.mark.parametrize(
+    'field, value, expected',
+    [
+        ('collection_interval', 'not_a_number', dict_defaults.instance_collect_roles().collection_interval),
+        ('collection_interval', '0', dict_defaults.instance_collect_roles().collection_interval),
+        ('collection_interval', '1', 1),
+        ('max_query_duration', 'not_a_number', dict_defaults.instance_collect_roles().max_query_duration),
+        ('max_query_duration', '0', dict_defaults.instance_collect_roles().max_query_duration),
+        ('max_query_duration', '1', 1),
+    ],
+)
+def test_collect_roles_validated_defaults(mock_check, minimal_instance, field, value, expected):
+    instance = minimal_instance
+    instance['collect_roles'] = {field: value}
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert getattr(config.collect_roles, field) == expected
 
 
 def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
