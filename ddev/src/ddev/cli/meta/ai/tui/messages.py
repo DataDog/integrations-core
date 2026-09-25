@@ -13,6 +13,7 @@ from textual.message import Message
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
 from ddev.ai.react.types import ReActResult
+from ddev.ai.runtime.outcome import RunOutcome, RunOutcomeError
 from ddev.ai.tools.core.types import ToolResult
 
 
@@ -43,6 +44,31 @@ class PhaseErrored(Message):
 
 class RunErrored(Message):
     """Fired when orchestration stops because a phase failed."""
+
+
+class RunFinished(Message):
+    """Fired after a non-cancelled run has a deterministic outcome."""
+
+    def __init__(self, outcome: RunOutcome) -> None:
+        super().__init__()
+        self.outcome = outcome
+
+
+class RunOutcomeErrored(Message):
+    """Fired when the flow ended but its outcome could not be built or persisted."""
+
+    def __init__(self, error: RunOutcomeError, outcome: RunOutcome | None) -> None:
+        super().__init__()
+        self.error = error
+        self.outcome = outcome
+
+
+class OutcomeRecordingErrored(Message):
+    """Fired when a failed run's outcome could not be built or persisted after the phase failure."""
+
+    def __init__(self, error: RunOutcomeError) -> None:
+        super().__init__()
+        self.error = error
 
 
 class ExecutionFailed(Message):

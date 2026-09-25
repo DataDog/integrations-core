@@ -7,6 +7,7 @@ from typing import Any, Protocol
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolCall
 from ddev.ai.react.types import ReActResult
+from ddev.ai.runtime.outcome import RunOutcome
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -100,6 +101,12 @@ class OnRunErrorCallback(Protocol):
     async def __call__(self) -> None: ...
 
 
+class OnRunFinishedCallback(Protocol):
+    """Called once after a non-cancelled run ends with its deterministic outcome."""
+
+    async def __call__(self, outcome: RunOutcome) -> None: ...
+
+
 class OnBeforeGoalCheckCallback(Protocol):
     """Called immediately before each reviewer agent run for a task with a goal."""
 
@@ -147,6 +154,7 @@ class CallbackSet:
         self._on_phase_finish: list[OnPhaseFinishCallback] = []
         self._on_phase_error: list[OnPhaseErrorCallback] = []
         self._on_run_error: list[OnRunErrorCallback] = []
+        self._on_run_finished: list[OnRunFinishedCallback] = []
         self._on_before_goal_check: list[OnBeforeGoalCheckCallback] = []
         self._on_after_goal_check: list[OnAfterGoalCheckCallback] = []
 
@@ -248,6 +256,13 @@ class CallbackSet:
     async def fire_run_error(self) -> None:
         await self._fire(self._on_run_error)
 
+    def on_run_finished(self, func: OnRunFinishedCallback) -> OnRunFinishedCallback:
+        self._on_run_finished.append(func)
+        return func
+
+    async def fire_run_finished(self, outcome: RunOutcome) -> None:
+        await self._fire(self._on_run_finished, outcome)
+
     def on_before_goal_check(self, func: OnBeforeGoalCheckCallback) -> OnBeforeGoalCheckCallback:
         self._on_before_goal_check.append(func)
         return func
@@ -326,6 +341,10 @@ class Callbacks:
     async def fire_run_error(self) -> None:
         for s in self._sets:
             await s.fire_run_error()
+
+    async def fire_run_finished(self, outcome: RunOutcome) -> None:
+        for s in self._sets:
+            await s.fire_run_finished(outcome)
 
     async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:

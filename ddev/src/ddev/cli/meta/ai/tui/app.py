@@ -19,7 +19,7 @@ from textual.reactive import reactive
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.phases.registry import PhaseRegistry
-from ddev.cli.meta.ai.palette import STATUS_DONE, STATUS_FAILED, STATUS_PENDING, STATUS_RUNNING
+from ddev.cli.meta.ai.palette import STATUS_CANCELLED, STATUS_DONE, STATUS_FAILED, STATUS_PENDING, STATUS_RUNNING
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
     AfterGoalCheck,
@@ -36,12 +36,15 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseFinished,
     PhaseStarted,
     RunErrored,
+    RunFinished,
+    RunOutcomeErrored,
 )
 from ddev.cli.meta.ai.tui.status import ExecutionStatus
 from ddev.cli.meta.ai.tui.theme import togo_markdown_theme, togo_theme
 
 if TYPE_CHECKING:
     from ddev.ai.config.engine import ConfigurationEngine
+    from ddev.ai.runtime.outcome import RunOutcome, RunOutcomeError
     from ddev.cli.application import Application
 
 
@@ -50,6 +53,12 @@ class OrchestratorLike(Protocol):
 
     @property
     def failed_phase(self) -> str | None: ...
+
+    @property
+    def outcome(self) -> RunOutcome | None: ...
+
+    @property
+    def outcome_recording_error(self) -> RunOutcomeError | None: ...
 
     async def run_async(self) -> None: ...
 
@@ -102,6 +111,7 @@ class TogoApp(App):
             "status-pending": STATUS_PENDING,
             "status-done": STATUS_DONE,
             "status-failed": STATUS_FAILED,
+            "status-cancelled": STATUS_CANCELLED,
         }
 
     def on_mount(self) -> None:
@@ -159,6 +169,12 @@ class TogoApp(App):
         self._record(msg)
 
     async def on_run_errored(self, msg: RunErrored) -> None:
+        self._record(msg)
+
+    async def on_run_finished(self, msg: RunFinished) -> None:
+        self._record(msg)
+
+    async def on_run_outcome_errored(self, msg: RunOutcomeErrored) -> None:
         self._record(msg)
 
     async def on_agent_started(self, msg: AgentStarted) -> None:

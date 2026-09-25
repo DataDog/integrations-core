@@ -188,7 +188,9 @@ async def test_togo_header_idle_badge_is_empty(ddev_app: Any) -> None:
     [
         (ExecutionStatus.FINISHING, "◌ finishing"),
         (ExecutionStatus.COMPLETED, "✓ completed"),
+        (ExecutionStatus.INCOMPLETE, "◌ incomplete"),
         (ExecutionStatus.FAILED, "✕ failed"),
+        (ExecutionStatus.OUTCOME_ERROR, "! outcome unavailable"),
     ],
 )
 async def test_togo_header_stable_execution_badges(ddev_app: Any, status: ExecutionStatus, label: str) -> None:
