@@ -67,7 +67,15 @@ def test_correlate_matches_jobs_and_artifacts(tmp_path: Path):
     base = job.artifact_name()
     artifact_dir = tmp_path / base
     artifact_dir.mkdir()
-    workflow_job = WorkflowJob(id=1, run_id=123, name="j1", status="completed", conclusion="success")
+    workflow_job = WorkflowJob(
+        id=1,
+        run_id=123,
+        name="j1",
+        status="completed",
+        conclusion="success",
+        started_at="2026-09-24T15:39:24Z",
+        completed_at="2026-09-24T15:44:30Z",
+    )
 
     [result] = BatchJobResult.correlate([job], [workflow_job], {base: artifact_dir})
 

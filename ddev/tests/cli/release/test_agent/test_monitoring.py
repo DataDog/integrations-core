@@ -182,6 +182,8 @@ async def test_collect_monitor_state_fetches_workflow_jobs(fake_async_github: Fa
                     status='completed',
                     conclusion='failure',
                     html_url='https://github.com/DataDog/integrations-core/actions/runs/123/job/456',
+                    started_at='2026-01-01T10:00:00Z',
+                    completed_at='2026-01-01T10:01:30Z',
                 )
             ],
         ),
@@ -234,6 +236,8 @@ async def test_monitor_workflows_does_not_raise_on_job_failure(fake_async_github
                         status='completed',
                         conclusion='failure',
                         html_url='https://github.com/DataDog/integrations-core/actions/runs/123/job/456',
+                        started_at='2026-01-01T10:00:00Z',
+                        completed_at='2026-01-01T10:01:30Z',
                     )
                 ],
             ),

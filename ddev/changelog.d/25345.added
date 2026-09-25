@@ -1,0 +1,1 @@
+Report each Dispatcher test job's GitHub execution time through the `agent_integrations.test_dispatcher.job.duration` distribution.
