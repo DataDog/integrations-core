@@ -27,7 +27,7 @@
       "editable": true,
       "required": true,
       "text": {
-        "pattern": "^[a-zA-Z0-9]+\\.manage\\.trendmicro\\.[a-zA-Z0-9]+$"
+        "pattern": "^[a-zA-Z0-9]+(\\.[a-zA-Z0-9-]+)?\\.manage\\.trendmicro\\.[a-zA-Z0-9]+$"
       }
     },
     {
