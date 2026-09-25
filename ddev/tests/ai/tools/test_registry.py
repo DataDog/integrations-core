@@ -238,8 +238,9 @@ def test_from_names_fs_tools_share_file_registry(tmp_path):
         (["edit_file", "create_file"], []),
         ([], []),
         (["read_file", "list_files"], ["read_file", "list_files"]),
+        (["read_file", "stop_flow"], ["read_file"]),
     ],
-    ids=["mixed", "all_writes", "empty", "all_reads"],
+    ids=["mixed", "all_writes", "empty", "all_reads", "stop_flow_excluded"],
 )
 def test_filter_read_only(input_names, expected):
     assert filter_read_only(input_names) == expected

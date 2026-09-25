@@ -85,6 +85,7 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "list_files": ToolSpec("shell.list_files", "ListFilesTool", read_only=True),
     "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory, read_only=False),
     "http_get": ToolSpec("http.http_get", "HttpGetTool", read_only=True),
+    # read_only=False because a reviewer must never be able to end the run on its own.
     "stop_flow": ToolSpec("stop_flow", "StopFlowTool", read_only=False),
     "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool", read_only=False),
     "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool", read_only=True),

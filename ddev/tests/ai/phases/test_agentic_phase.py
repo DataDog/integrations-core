@@ -650,21 +650,24 @@ async def test_flow_stop_requested_checkpoint_includes_tokens_spent_before_the_s
 async def test_flow_stop_requested_during_goal_validation_checkpoint_includes_tokens(
     flow_dir, monkeypatch, message_queue
 ):
-    """A stop requested during goal validation (by the worker's repair turn or the reviewer) must
-    land in the persisted FailedCheckpoint together with the worker's tokens, not just in some
-    private counter that a broken wiring change could leave stranded."""
+    """A stop requested during the worker's goal-repair retry must land in the persisted
+    FailedCheckpoint together with the reviewer's tokens spent reaching that retry — not just in
+    some private counter that a broken wiring change could leave stranded."""
     from ddev.event_bus.exceptions import MessageProcessingError
 
-    worker = MockAgent([make_response("worker attempt 1", 10, 5)])
+    class WorkerAgent(MockAgent):
+        async def send(self, content, allowed_tools=None):
+            self.send_calls.append(content)
+            if len(self.send_calls) == 2:
+                raise FlowStopRequested("blocked", input_tokens=40, output_tokens=20)
+            response = self._responses[self._index]
+            self._index += 1
+            return response
+
+    worker = WorkerAgent([make_response("worker attempt 1", 10, 5)])
 
     def goal_builder(owner_id: str) -> AgentRuntime:
-        reviewer_agent = MockAgent([])
-
-        async def raising_send(content, allowed_tools=None):
-            reviewer_agent.send_calls.append(content)
-            raise FlowStopRequested("blocked", input_tokens=90, output_tokens=45)
-
-        monkeypatch.setattr(reviewer_agent, "send", raising_send)
+        reviewer_agent = MockAgent([make_response(make_goal_verdict(False, "missing X"), 5, 3)])
         return AgentRuntime(agent=reviewer_agent, tool_registry=ToolRegistry([]))
 
     phase, mgr = make_agent_phase(
@@ -686,7 +689,7 @@ async def test_flow_stop_requested_during_goal_validation_checkpoint_includes_to
 
     cp = mgr.read()["p1"]
     assert isinstance(cp, FailedCheckpoint)
-    assert cp.tokens == CheckpointTokenInfo(total_input=10 + 90, total_output=5 + 45)
+    assert cp.tokens == CheckpointTokenInfo(total_input=10 + 5 + 40, total_output=5 + 3 + 20)
     assert cp.error == "blocked"
 
 
