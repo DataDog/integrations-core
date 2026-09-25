@@ -130,6 +130,13 @@ def test_workflow_job_duration_comes_only_from_valid_ordered_timestamps(
     assert job.duration_seconds == expected
 
 
+def test_workflow_job_queue_duration_comes_only_from_created_at_to_started_at():
+    """A job's runner wait is `started_at - created_at`. The shared edge cases are the duration matrix."""
+    job = WorkflowJob.model_validate(workflow_job(created_at="2026-01-01T09:59:55Z", started_at="2026-01-01T10:00:00Z"))
+
+    assert job.queue_duration_seconds == 5.0
+
+
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:
     import ddev.utils.github_async.models as models
 

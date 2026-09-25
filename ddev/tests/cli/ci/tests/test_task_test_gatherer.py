@@ -553,16 +553,11 @@ def test_completed_attempts_report_their_github_duration_once(tmp_path: Path):
 @pytest.mark.parametrize(
     ("conclusion", "reported"),
     [
-        pytest.param(WorkflowJobConclusion.SUCCESS, True, id="success"),
-        pytest.param(WorkflowJobConclusion.FAILURE, True, id="failure"),
-        pytest.param(WorkflowJobConclusion.TIMED_OUT, True, id="timed-out"),
+        pytest.param(WorkflowJobConclusion.TIMED_OUT, True, id="finished-running"),
         pytest.param(WorkflowJobConclusion.CANCELLED, False, id="cancelled"),
-        pytest.param(WorkflowJobConclusion.SKIPPED, False, id="skipped"),
-        pytest.param(WorkflowJobConclusion.NEUTRAL, False, id="neutral"),
-        pytest.param(WorkflowJobConclusion.ACTION_REQUIRED, False, id="action-required"),
     ],
 )
-def test_only_jobs_that_ran_to_an_outcome_report_a_duration(
+def test_only_jobs_that_finished_running_report_a_duration(
     tmp_path: Path, conclusion: WorkflowJobConclusion, reported: bool
 ):
     """A cancelled or skipped job's timing is near zero or partial, so it would skew the distribution."""

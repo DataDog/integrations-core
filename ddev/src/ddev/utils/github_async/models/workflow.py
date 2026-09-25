@@ -171,9 +171,9 @@ class JobStep(BaseModel):
 class WorkflowJob(BaseModel):
     """A single job within a GitHub Actions workflow run.
 
-    The `job` schema lists both `started_at` and `completed_at` as required, and
-    only `completed_at` is nullable. Both are therefore required keys with no
-    default, `started_at` as `str` and `completed_at` as `str | None`, the same
+    The `job` schema lists `created_at`, `started_at` and `completed_at` in its `required`
+    list. Only `completed_at` is nullable, so all three are required keys with no default,
+    `created_at` and `started_at` as `str` and `completed_at` as `str | None`, the same
     pattern as `WorkflowRun.status`.
     Field reference and pinned schema (`components.schemas.job`):
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
@@ -188,6 +188,7 @@ class WorkflowJob(BaseModel):
     status: WorkflowJobStatus
     conclusion: WorkflowJobConclusion | None = None
     html_url: str | None = None
+    created_at: str
     started_at: str
     completed_at: str | None
     steps: list[JobStep] = Field(default_factory=list)
@@ -196,6 +197,11 @@ class WorkflowJob(BaseModel):
     def duration_seconds(self) -> float | None:
         """The job's own execution time, or `None` if its timing is unusable. Queue time is excluded."""
         return _elapsed_seconds(self.started_at, self.completed_at)
+
+    @property
+    def queue_duration_seconds(self) -> float | None:
+        """Seconds the job waited for a runner, or `None` if its timing is unusable."""
+        return _elapsed_seconds(self.created_at, self.started_at)
 
 
 class WorkflowJobsList(BaseModel):

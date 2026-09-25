@@ -46,6 +46,7 @@ def workflow_job(
     status: str = "completed",
     conclusion: str | None = "success",
     html_url: str | None = None,
+    created_at: str = "2024-01-01T00:00:00Z",
     steps: list[dict[str, Any]] | None = None,
     **extra: Any,
 ) -> dict[str, Any]:
@@ -56,7 +57,9 @@ def workflow_job(
         "status": status,
         "conclusion": conclusion,
         "html_url": html_url if html_url is not None else f"https://github.com/owner/repo/actions/runs/42/job/{idx}",
-        # Timestamps follow the `job` schema: both keys always present, `completed_at` null until the job finishes.
+        # Timestamps follow the `job` schema: all three keys always present, `completed_at` null until
+        # the job finishes.
+        "created_at": created_at,
         "started_at": "2024-01-01T00:00:00Z",
         "completed_at": "2024-01-01T00:01:00Z" if status == "completed" else None,
         "steps": steps

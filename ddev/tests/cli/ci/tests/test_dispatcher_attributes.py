@@ -98,6 +98,7 @@ MAPPING_FIELDS = {
                 'dispatcher.context': 'pr',
                 'team': 'agent-integrations',
                 'dispatcher.component': 'test-runner',
+                'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
                 'dispatcher.batch.job.integration': 'postgres',
             },
@@ -130,7 +131,7 @@ def test_log_attributes_keep_native_json_values_while_tag_transports_stringify()
         'dispatcher.pr.number': '42',
         'dispatcher.run.is_fork': 'false',
     }
-    assert metric_tag_mapping(fields) == {'dispatcher.run.is_fork': 'false'}
+    assert metric_tag_mapping(fields) == {'dispatcher.batch.id': 'batch-01', 'dispatcher.run.is_fork': 'false'}
 
 
 def test_batch_fields_include_batch_metadata():
