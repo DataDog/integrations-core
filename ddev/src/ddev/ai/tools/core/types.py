@@ -11,6 +11,8 @@ class ToolResult(BaseModel):
     success: bool
     data: str | None = None
     error: str | None = None
+    # Set (non-None) to ask ReActProcess to end the run instead of feeding this result back to the agent.
+    stop_reason: str | None = None
     truncated: bool = False
     total_size: int | None = None
     shown_size: int | None = None

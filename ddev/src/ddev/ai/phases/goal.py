@@ -8,6 +8,7 @@ import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
+from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig, TaskConfig
@@ -386,6 +387,10 @@ async def _drive_goal_loop(
         e.input_tokens += total_in
         e.output_tokens += total_out
         e.attempts = attempts
+        raise
+    except FlowStopRequested as e:
+        e.input_tokens += total_in
+        e.output_tokens += total_out
         raise
 
 
