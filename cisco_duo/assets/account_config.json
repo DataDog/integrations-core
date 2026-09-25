@@ -30,6 +30,10 @@
     }
   ],
   "dataflow_config": [
-    { "dataflow_id": "cisco-duo-logs" }
+    { "dataflow_id": "cisco-duo-authentication-logs" },
+    { "dataflow_id": "cisco-duo-activity-logs" },
+    { "dataflow_id": "cisco-duo-telephony-logs" },
+    { "dataflow_id": "cisco-duo-administrator-logs" },
+    { "dataflow_id": "cisco-duo-offline-enrollment-logs" }
   ]
 }
