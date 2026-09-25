@@ -21,7 +21,7 @@ from .common import (
     HERE,
     PORT,
     SNMP_CONTAINER_NAME,
-    SNMP_LISTENER_ENV,
+    SNMP_TEST_SUITE,
     generate_container_instance_config,
 )
 
@@ -60,7 +60,7 @@ def dd_environment():
                     output.write(response.content)
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
-            if SNMP_LISTENER_ENV == 'true':
+            if SNMP_TEST_SUITE == 'listener':
                 instance_config = None
                 new_e2e_metadata['docker_volumes'].append(
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir)),
