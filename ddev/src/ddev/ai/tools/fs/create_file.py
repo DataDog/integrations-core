@@ -15,13 +15,17 @@ from .file_access_policy import FileAccessError
 class CreateFileInput(BaseToolInput):
     path: Annotated[str, Field(description="Path of the file to create")]
     content: Annotated[str, Field(description="Content of the file to create")] = ""
+    replace_if_existing: Annotated[
+        bool,
+        Field(description="If the file already exists, overwrite its content instead of failing"),
+    ] = False
 
 
 class CreateFileTool(FileRegistryTool[CreateFileInput]):
     """Creates a new file and writes content into it (default: empty content).
     Parent directories are created automatically if they do not exist (no need to call mkdir first).
     Registers the file in the file registry.
-    Fails if the file already exists.
+    Fails if the file already exists, unless replace_if_existing is set.
     Use edit_file to modify existing files."""
 
     @property
@@ -42,6 +46,21 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
             return ToolResult(success=False, error=str(e))
 
         async with self._registry.lock_for(str(path)):
+            if tool_input.replace_if_existing:
+                already_existed = path.exists()
+                if already_existed:
+                    _, fail = self._read_verified(str(path))
+                    if fail:
+                        return fail
+                try:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text(tool_input.content, encoding="utf-8")
+                except OSError as e:
+                    return ToolResult(success=False, error=str(e))
+                self._register(str(path), tool_input.content)
+                verb = "replaced" if already_existed else "created"
+                return ToolResult(success=True, data=f"File {verb}: {path}")
+
             try:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 with open(path, "x", encoding="utf-8") as fh:
