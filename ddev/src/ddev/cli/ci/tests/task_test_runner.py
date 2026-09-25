@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from itertools import count
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
 from pydantic import ValidationError
@@ -280,7 +281,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         sequences = count(1)
         known_jobs: dict[str, WorkflowJob] = {}
         previous_state: ExecutionState | None = None
+        previous_poll: float | None = None
         while True:
+            poll_started = monotonic()
+            if previous_poll is not None:
+                self.monitor.metrics.distribution('requests.polling_interval', poll_started - previous_poll)
+            previous_poll = poll_started
             try:
                 run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
             except ValidationError as error:

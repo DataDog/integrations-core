@@ -15,6 +15,7 @@ from ddev.event_bus.orchestrator import BaseMessage
 
 if TYPE_CHECKING:
     from ddev.cli.ci.dispatch_run import ResolvedRun
+    from ddev.monitoring import Metrics
 
 
 DEFAULT_TEAM = 'agent-integrations'
@@ -46,6 +47,12 @@ class AttributeSpec:
 # Compact operational context helps read a line; payloads and run-wide identity do not, so they
 # stay console-hidden and remain available in the structured event.
 ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
+    # Logs take the pipeline ID from `ci_attributes`, with the rest of the workflow's identity.
+    'ci_pipeline_id': AttributeSpec(
+        'ci.pipeline.id',
+        log_tag=False,
+        metric_tag=True,
+    ),
     'repo': AttributeSpec(
         'git.repository.id_v2',
         metric_tag=True,
@@ -308,6 +315,12 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         console_tag=True,
         metric_tag=True,
     ),
+    'status_code': AttributeSpec(
+        'http.status_code',
+    ),
+    'rate_limit_resource': AttributeSpec(
+        'github.rate_limit.resource',
+    ),
     'error': AttributeSpec(
         'error.message',
         console_tag=True,
@@ -320,6 +333,7 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
 PROTECTED_RUN_FIELDS = frozenset(
     {
         'team',
+        'ci_pipeline_id',
         'repo',
         'repository_url',
         'head_branch',
@@ -409,6 +423,27 @@ def test_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:
 def metric_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:
     """Render bounded dimensions approved for future metric use."""
     return _policy_mapping(fields, lambda spec: spec.metric_tag, _stringify_value)
+
+
+# The GitHub request metrics are sampled per attempt, so every run, batch or job dimension the
+# context holds would multiply their series. They carry only these, whatever else is bound.
+GITHUB_METRIC_FIELDS = frozenset({'ci_pipeline_id', 'status_code', 'reason', 'rate_limit_resource'})
+
+
+def github_metric_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:
+    """Render the few dimensions the GitHub request and throttle metrics carry."""
+    return attribute_mapping({name: value for name, value in fields.items() if name in GITHUB_METRIC_FIELDS})
+
+
+def github_metrics(metrics: Metrics) -> Metrics:
+    """A view of *metrics* for the GitHub request and throttle family.
+
+    Only the pipeline ID may come from the context. Every other allowlisted dimension describes one
+    emission, so a caller's `--tags` or an enclosing scope must not supply it.
+    """
+    return metrics.with_tag_projector(github_metric_tag_mapping).bind(
+        **dict.fromkeys(GITHUB_METRIC_FIELDS - PROTECTED_RUN_FIELDS)
+    )
 
 
 def tag_fields(tags: Sequence[str]) -> dict[str, str]:
