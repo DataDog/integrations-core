@@ -640,9 +640,13 @@ plaid/assets/logs/                                                  @DataDog/saa
 /mac_audit_logs/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
 /mac_audit_logs/assets/logs/                                         @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/gpu/                                                                @DataDog/ebpf-platform
-/gpu/*.md                                                            @DataDog/ebpf-platform @DataDog/documentation
-/gpu/manifest.json                                                   @DataDog/ebpf-platform @DataDog/agent-integrations @DataDog/documentation
+/gpu/                                                                @DataDog/gpu-monitoring-agent
+/gpu/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
+/gpu/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+
+/infiniband/                                                         @DataDog/gpu-monitoring-agent
+/infiniband/*.md                                                     @DataDog/gpu-monitoring-agent @DataDog/documentation
+/infiniband/manifest.json                                            @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
 /kueue/                                                                @DataDog/gpu-monitoring-agent
 /kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
