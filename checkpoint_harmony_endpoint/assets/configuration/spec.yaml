@@ -3,9 +3,9 @@ fleet_configurable: true
 files:
 - name: checkpoint_harmony_endpoint.yaml
   options:
-  - template: init_config
-    options:
-    - template: init_config/default
-  - template: instances
-    options:
-    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/checkpoint.log
+      source: checkpoint_harmony_endpoint
+      service: <SERVICE_NAME>
