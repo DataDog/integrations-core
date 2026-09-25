@@ -1,0 +1,1 @@
+Add a new feature to filter Consul service tags being sent to Datadog using an allow list. It can be configured using the `allowed_service_tags` option.
