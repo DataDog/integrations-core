@@ -7,6 +7,8 @@ from ddev.ai.runtime.outcome import (
     PhaseReport,
     PhaseReportStatus,
     RunOutcome,
+    RunSummaryMetadata,
+    RunSummaryStatus,
     RunVerdict,
 )
 from ddev.cli.meta.ai.tui.status import ExecutionStatus, RunStatus
@@ -168,6 +170,85 @@ async def test_failed_ending_screen_renders_error_details(make_togo_app):
     assert "Flow failed in phase_1" in rendered
     assert "GoalAttemptsExhausted" in error
     assert "goal could not be satisfied" in error
+
+
+async def test_ending_screen_renders_successful_markdown_summary(make_togo_app, tmp_path):
+    from textual.widgets import Markdown
+
+    from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
+
+    (tmp_path / "summary.md").write_text("# Generated narrative\n\nImportant output.", encoding="utf-8")
+    outcome = make_outcome(RunVerdict.SUCCEEDED).model_copy(
+        update={
+            "run_dir": str(tmp_path),
+            "summary": RunSummaryMetadata(
+                status=RunSummaryStatus.SUCCEEDED,
+                markdown_path="summary.md",
+            ),
+        }
+    )
+    app = make_togo_app()
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = EndingScreen(outcome)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        summary = screen.query_one("#ending-summary", Markdown)
+        assert "Generated narrative" in summary.source
+
+
+async def test_ending_screen_rejects_summary_path_escape(make_togo_app, tmp_path):
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
+
+    outcome = make_outcome(RunVerdict.SUCCEEDED).model_copy(
+        update={
+            "run_dir": str(tmp_path),
+            "summary": RunSummaryMetadata(
+                status=RunSummaryStatus.SUCCEEDED,
+                markdown_path="../summary.md",
+            ),
+        }
+    )
+    app = make_togo_app()
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = EndingScreen(outcome)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        summary = screen.query_one("#ending-summary", Static)
+        assert "AI summary unavailable" in summary.render().plain
+
+
+async def test_ending_screen_renders_bracketed_summary_error_without_crashing(make_togo_app, tmp_path):
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.ending import EndingScreen
+
+    outcome = make_outcome(RunVerdict.SUCCEEDED).model_copy(
+        update={
+            "run_dir": str(tmp_path),
+            "summary": RunSummaryMetadata(
+                status=RunSummaryStatus.UNAVAILABLE,
+                error="ValueError: error at [/tmp/foo]",
+            ),
+        }
+    )
+    app = make_togo_app()
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = EndingScreen(outcome)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        summary = screen.query_one("#ending-summary", Static)
+        assert "error at [/tmp/foo]" in summary.render().plain
 
 
 async def test_execution_screen_offers_summary_without_opening_it_automatically(make_flow, make_togo_app):

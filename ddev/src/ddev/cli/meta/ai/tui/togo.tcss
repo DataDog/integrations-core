@@ -516,6 +516,19 @@ MarkdownH3 {
     padding: 0 1 1 1;
 }
 
+#execution-summary-status {
+    width: 1fr;
+    height: 3;
+    content-align: right middle;
+    padding: 1 2;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+}
+
+#execution-summary-status.outcome-warning {
+    color: $warning;
+}
+
 #pipeline-connectors {
     layer: connectors;
     color: $text-muted;
