@@ -12,6 +12,7 @@ import secrets
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 from pydantic import ValidationError
 
@@ -32,7 +33,7 @@ from ddev.cli.ci.tests.task_test_runner import (
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.monitoring import ComponentMonitor
 from ddev.monitoring.metrics import MetricKind
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
@@ -50,6 +51,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
     recording_runtime,
 )
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
@@ -406,6 +408,30 @@ def failed_by_operation(sink: RecordingSink) -> dict[str, float]:
     for record in sink.records_named('operations.failed'):
         totals[record.tags['dispatcher.operation']] = totals.get(record.tags['dispatcher.operation'], 0) + record.value
     return totals
+
+
+async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """GitHub answers 404 on a freshly dispatched run's jobs listing until that listing becomes visible."""
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(
+            200, json={"total_count": 1, "jobs": [{"id": 1, "run_id": 123, "name": "j1", "status": "queued"}]}
+        ),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        jobs = await runner._list_jobs(123, "batch-1", "listing workflow jobs")
+    finally:
+        await client.aclose()
+
+    assert [job.id for job in jobs] == [1]
+    assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
 async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):
