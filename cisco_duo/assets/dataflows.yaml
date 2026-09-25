@@ -1,5 +1,25 @@
 provides:
-  - id: cisco-duo-logs
+  - id: cisco-duo-authentication-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: cisco-duo-activity-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: cisco-duo-telephony-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: cisco-duo-administrator-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: cisco-duo-offline-enrollment-logs
     always_on: true
     granular: true
     data_type: logs
