@@ -216,12 +216,36 @@ def expand_template_items(
 
 
 def _get_instance_option_names(options: list) -> frozenset[str]:
-    """Return all option names from the instances section of a resolved options list."""
+    """Return all option names from the instances section of a resolved options list.
+
+    When `multiple_instances_defined` is set, each item under `instances` is a named
+    group of options (one per instance mode) rather than a leaf field, so those groups
+    are unwrapped by exactly one level to collect the actual field names. Deeper nesting
+    within a mode's own options is left alone, matching the normal (non-grouped) case.
+    """
     for section in options:
         if isinstance(section, dict) and section.get('name') == 'instances':
             section_opts = section.get('options', [])
-            if isinstance(section_opts, list):
-                return frozenset(opt['name'] for opt in section_opts if isinstance(opt, dict) and 'name' in opt)
+            if not isinstance(section_opts, list):
+                return frozenset()
+
+            if section.get('multiple_instances_defined'):
+                names = set()
+                for opt in section_opts:
+                    if not isinstance(opt, dict):
+                        continue
+                    mode_opts = opt.get('options')
+                    if isinstance(mode_opts, list):
+                        names.update(
+                            mode_opt['name']
+                            for mode_opt in mode_opts
+                            if isinstance(mode_opt, dict) and 'name' in mode_opt
+                        )
+                    elif 'name' in opt:
+                        names.add(opt['name'])
+                return frozenset(names)
+
+            return frozenset(opt['name'] for opt in section_opts if isinstance(opt, dict) and 'name' in opt)
     return frozenset()
 
 

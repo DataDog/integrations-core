@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from datadog_checks.dev import EnvVars, TempDir, docker_run, get_here
+from datadog_checks.dev import EnvVars, TempDir, docker_run, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.dev.http import MockResponse
@@ -76,7 +76,7 @@ def dd_environment():
                     MANAGEMENT_INSTANCE,
                 ],
             },
-            E2E_METADATA,
+            {**E2E_METADATA, **get_e2e_discovery_metadata()},
         )
 
 
