@@ -22,6 +22,7 @@ from packaging.version import parse as parse_version
 from securesystemslib import interface
 from tuf.ngclient import Updater
 
+from .download_v2 import RetryingRequestsFetcher
 from .exceptions import (
     DuplicatePackage,
     InconsistentSimpleIndex,
@@ -101,6 +102,7 @@ class TUFDownloader:
             metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
             target_base_url=f'{repository_url_prefix}/targets/',
             target_dir=self.__targets_dir,
+            fetcher=RetryingRequestsFetcher(),
         )
 
         # Increase requests timeout.
