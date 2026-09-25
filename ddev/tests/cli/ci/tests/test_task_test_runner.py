@@ -6,19 +6,18 @@
 from __future__ import annotations
 
 import asyncio
-import base64
-import gzip
 import json
 import logging
 import secrets
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 from pydantic import ValidationError
 
-from ddev.cli.ci.tests import messages
-from ddev.cli.ci.tests.dispatcher import DispatcherContext
+from ddev.cli.ci.dispatch_run import ResolvedRun
+from ddev.cli.ci.tests import messages, task_test_runner
 from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
@@ -29,9 +28,12 @@ from ddev.cli.ci.tests.task_test_runner import (
     JobListTooLargeError,
     TaskTestRunner,
     TestRunnerOptions,
+    workflow_duration_seconds,
 )
 from ddev.event_bus.exceptions import FatalProcessingError
-from ddev.utils.github_async import GitHubResponse
+from ddev.monitoring import ComponentMonitor
+from ddev.monitoring.metrics import MetricKind
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
@@ -41,14 +43,17 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
+from tests.cli.ci.helpers import decode_job_list
 from tests.cli.ci.tests.helpers import (
     RecordingBus,
     drain_queue,
     invalid_response_error,
     make_job,
+    recording_runtime,
 )
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
-from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -57,10 +62,6 @@ from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 def wrap(data: Any) -> GitHubResponse[Any]:
     return GitHubResponse(data=data, headers={})
-
-
-def decode_job_list(encoded: str) -> list[dict[str, Any]]:
-    return json.loads(gzip.decompress(base64.b64decode(encoded)).decode())
 
 
 DEFAULT_URL = object()
@@ -78,13 +79,20 @@ def make_artifact(idx: int, expired: bool = False, archive_download_url: Any = D
     )
 
 
-def make_workflow_run(status: str = "completed", conclusion: str | None = "success") -> WorkflowRun:
+def make_workflow_run(
+    status: str = "completed",
+    conclusion: str | None = "success",
+    run_started_at: str | None = None,
+    updated_at: str | None = None,
+) -> WorkflowRun:
     return WorkflowRun(
         id=123,
         name="test-batch",
         status=status,
         conclusion=conclusion if status == "completed" else None,
         html_url="https://github.com/o/r/actions/runs/123",
+        run_started_at=run_started_at,
+        updated_at=updated_at,
     )
 
 
@@ -119,28 +127,28 @@ def make_runner(
     origin_run_url: str | None = None,
     pr_number: int | None = None,
     handler: logging.Handler | None = None,
-    context: DispatcherContext | None = None,
+    run: ResolvedRun | None = None,
+    tags: tuple[str, ...] = (),
+    monitor: ComponentMonitor | None = None,
 ) -> TaskTestRunner:
-    context = context or DispatcherContext(
-        owner="DataDog",
-        repo="integrations-core",
-        workflow="test-batch.yaml",
-        workflow_ref="master",
+    run = run or ResolvedRun(
+        repository="DataDog/integrations-core",
         head_sha="head-sha-aaa",
         checkout_sha="merge-sha-bbb",
         head_branch="a-branch",
+        all_targets=False,
         base_branch="master",
         base_sha="base-sha-ccc",
         pr_number=123,
         is_fork=is_fork,
     )
     options = TestRunnerOptions(
-        owner=context.owner,
-        repo=context.repo,
-        workflow_id=context.workflow,
-        ref=context.workflow_ref,
-        run_fields=run_fields(context),
-        concurrency_key=context.concurrency_key,
+        owner=run.owner,
+        repo=run.repo,
+        workflow_id="test-batch.yaml",
+        ref="master",
+        run_fields=run_fields(run, tags=tags),
+        concurrency_key=run.concurrency_key,
         artifacts_base_path=tmp_path,
         poll_interval_seconds=0.0,
         pytest_args=pytest_args,
@@ -152,7 +160,7 @@ def make_runner(
         client=client,  # type: ignore[arg-type]
         options=options,
         artifact_client=artifact_client or client,  # type: ignore[arg-type]
-        monitor=make_monitor('test-runner', handler=handler),
+        monitor=monitor or make_monitor('test-runner', handler=handler),
     )
     runner.bus = RecordingBus()  # type: ignore[assignment]
     return runner
@@ -193,6 +201,160 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
     assert len(submitted) == 1
     finished = submitted[0]
     return fake, finished
+
+
+@pytest.mark.asyncio
+async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [make_artifact(1), make_artifact(2)])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(
+        TestBatch(
+            id="msg-1",
+            batch_id="batch-1",
+            job_list=[make_job("j1"), make_job("j2")],
+            jobs_count=2,
+            integrations=["ntp", "kafka"],
+        )
+    )
+
+    assert finished_messages(runner)
+    counted = {}
+    for record in sink.records_named('operations.count'):
+        counted[record.tags['dispatcher.operation']] = counted.get(record.tags['dispatcher.operation'], 0) + 1
+    assert counted == {"dispatch_batch": 1, "fetch_workflow": 1, "refresh_jobs": 2, "collect_artifacts": 1}
+    assert failed_by_operation(sink) == {
+        "dispatch_batch": 0,
+        "fetch_workflow": 0,
+        "refresh_jobs": 0,
+        "collect_artifacts": 0,
+    }
+    assert {record.tags['dispatcher.component'] for record in sink.records_named('operations.count')} == {'test-runner'}
+    assert [record.kind.value for record in sink.records_named('artifacts.download.duration')] == ['distribution']
+
+
+async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """A batch's first poll has no predecessor, even when an earlier batch was polled by the same runner.
+
+    The samples are the runner's own, so they carry the run's metric dimensions and its component.
+    """
+    fake = FakeAsyncGitHubClient()
+    mock_artifacts(fake, [])
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    ticks = iter(range(0, 1000, 10))
+    monkeypatch.setattr(task_test_runner, "monotonic", lambda: float(next(ticks)))
+    monitoring, sink = recording_runtime()
+    monitoring.set_run_fields(ci_pipeline_id="12345", context="pr", team="agent-integrations")
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    for batch_id, polls in (("batch-1", 3), ("batch-2", 2)):
+        for _ in range(polls - 1):
+            fake.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
+        await runner.process_message(make_batch(batch_id))
+
+    intervals = sink.records_named("requests.polling_interval")
+    assert [record.value for record in intervals] == [10.0, 10.0, 10.0]
+    assert {tuple(sorted(record.tags.items())) for record in intervals} == {
+        (
+            ("ci.pipeline.id", "12345"),
+            ("dispatcher.component", "test-runner"),
+            ("dispatcher.context", "pr"),
+            ("team", "agent-integrations"),
+        )
+    }
+    assert {record.kind for record in intervals} == {MetricKind.DISTRIBUTION}
+
+
+@pytest.mark.asyncio
+async def test_an_accepted_dispatch_counts_the_batch_and_its_jobs(tmp_path: Path):
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+    batch = TestBatch(
+        id="msg-1",
+        batch_id="batch-1",
+        job_list=[make_job("j1"), make_job("j2", target="kafka")],
+        jobs_count=2,
+        integrations=["ntp", "kafka"],
+    )
+
+    await runner.process_message(batch)
+
+    assert [record.value for record in sink.records_named('batches.count')] == [1]
+    assert [record.value for record in sink.records_named('batch.jobs.count')] == [2]
+    counted = sink.records_named('jobs.count')
+    assert [record.value for record in counted] == [1, 1]
+    assert [record.tags['dispatcher.batch.job.integration'] for record in counted] == ['ntp', 'kafka']
+    assert {record.tags['dispatcher.component'] for record in counted} == {'test-runner'}
+
+
+@pytest.mark.asyncio
+async def test_a_completed_workflow_reports_its_own_running_duration(tmp_path: Path):
+    """`batch.duration` is the workflow's running time, not the dispatcher's."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response(
+        "get_workflow_run",
+        make_workflow_run(
+            "completed", "success", run_started_at="2026-01-01T10:00:00Z", updated_at="2026-01-01T10:01:30Z"
+        ),
+    )
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(make_batch())
+
+    duration = sink.records_named("batch.duration")
+    assert [record.value for record in duration] == [90.0]
+    assert duration[0].kind is MetricKind.DISTRIBUTION
+
+
+@pytest.mark.asyncio
+async def test_a_completed_workflow_without_timing_reports_no_batch_duration(tmp_path: Path):
+    """A missing start is omitted, not approximated from another clock."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(make_batch())
+
+    assert sink.records_named("batch.duration") == []
+
+
+@pytest.mark.parametrize(
+    ("run_started_at", "updated_at", "expected"),
+    [
+        pytest.param("2026-01-01T10:00:00Z", "2026-01-01T10:01:30Z", 90.0, id="valid"),
+        pytest.param("2026-01-01T10:00:00Z", "2026-01-01T10:00:00Z", 0.0, id="genuine-zero"),
+        pytest.param("2026-01-01T10:00:00", "2026-01-01T10:01:30", 90.0, id="naive-but-consistent"),
+        pytest.param("2026-01-01T10:00:00Z", "2026-01-01T10:01:30", None, id="mixed-zones"),
+        pytest.param("2026-01-01T10:01:30Z", "2026-01-01T10:00:00Z", None, id="reversed"),
+        pytest.param("not-a-timestamp", "2026-01-01T10:00:00Z", None, id="invalid-start"),
+        pytest.param(None, "2026-01-01T10:00:00Z", None, id="missing-start"),
+        pytest.param("2026-01-01T10:00:00Z", None, None, id="missing-end"),
+    ],
+)
+def test_workflow_duration_comes_only_from_valid_ordered_timestamps(
+    run_started_at: str | None, updated_at: str | None, expected: float | None
+):
+    run = WorkflowRun(
+        id=123,
+        status="completed",
+        html_url="https://github.com/o/r/actions/runs/123",
+        run_started_at=run_started_at,
+        updated_at=updated_at,
+    )
+
+    assert workflow_duration_seconds(run) == expected
 
 
 # ---------------------------------------------------------------------------
@@ -241,6 +403,52 @@ async def test_dispatch_publishes_the_link_before_polling(tmp_path: Path):
     await runner.process_message(make_batch())
 
 
+def failed_by_operation(sink: RecordingSink) -> dict[str, float]:
+    totals: dict[str, float] = {}
+    for record in sink.records_named('operations.failed'):
+        totals[record.tags['dispatcher.operation']] = totals.get(record.tags['dispatcher.operation'], 0) + record.value
+    return totals
+
+
+async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """GitHub answers 404 on a freshly dispatched run's jobs listing until that listing becomes visible."""
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(
+            200, json={"total_count": 1, "jobs": [{"id": 1, "run_id": 123, "name": "j1", "status": "queued"}]}
+        ),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        jobs = await runner._list_jobs(123, "batch-1", "listing workflow jobs")
+    finally:
+        await client.aclose()
+
+    assert [job.id for job in jobs] == [1]
+    assert failed_by_operation(sink) == {"refresh_jobs": 0}
+
+
+async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_workflow_dispatch", RuntimeError("dispatch refused"))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))
+
+    with pytest.raises(RuntimeError, match="dispatch refused"):
+        await runner.process_message(make_batch())
+
+    assert sink.records_named("batches.count") == []
+    assert sink.records_named("jobs.count") == []
+    assert failed_by_operation(sink) == {"dispatch_batch": 1}
+    assert [record.value for record in sink.records_named("operations.count")] == [1]
+
+
 async def test_collection_publishes_outcomes_before_a_cancellable_artifact_request(tmp_path: Path):
     client, artifacts = FakeAsyncGitHubClient(), FakeAsyncGitHubClient()
     batch = make_batch()
@@ -254,7 +462,8 @@ async def test_collection_publishes_outcomes_before_a_cancellable_artifact_reque
         await asyncio.Future()
 
     artifacts.download_artifact = blocked_download  # type: ignore[method-assign]
-    runner = make_runner(client, tmp_path, artifact_client=artifacts)
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, artifact_client=artifacts, monitor=monitoring.component("test-runner"))
     task = asyncio.create_task(runner.process_message(batch))
     try:
         async with asyncio.timeout(5):
@@ -271,6 +480,16 @@ async def test_collection_publishes_outcomes_before_a_cancellable_artifact_reque
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
+
+    # A cancelled download never settled, so it counts as no operation outcome at all, but the
+    # time it took is still reported.
+    settled = [
+        record
+        for record in sink.records_named("operations.count")
+        if record.tags["dispatcher.operation"] == "collect_artifacts"
+    ]
+    assert settled == []
+    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
 
     await runner.cancel_dispatched_runs()
     assert client.calls_to("cancel_workflow_run") == []
@@ -344,35 +563,34 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
 
 
 @pytest.mark.parametrize(
-    ("context", "expected_context", "has_pr_tags"),
+    ("run", "tags", "expected_context", "concurrency_key", "has_pr_tags"),
     [
-        pytest.param(None, "pr", True, id="pull-request"),
+        pytest.param(None, (), "pr", "pr-123", True, id="pull-request"),
         pytest.param(
-            DispatcherContext(
-                owner="DataDog",
-                repo="integrations-core",
-                workflow="test-batch.yaml",
-                workflow_ref="master",
+            ResolvedRun(
+                repository="DataDog/integrations-core",
                 head_sha="master-sha",
                 checkout_sha="master-sha",
                 head_branch="master",
+                all_targets=False,
             ),
+            (),
             "master",
+            "master-sha",
             False,
             id="master",
         ),
         pytest.param(
-            DispatcherContext(
-                owner="DataDog",
-                repo="integrations-core",
-                workflow="test-batch.yaml",
-                workflow_ref="master",
+            ResolvedRun(
+                repository="DataDog/integrations-core",
                 head_sha="agent-sha",
                 checkout_sha="agent-sha",
                 head_branch="test-agent",
-                tags=("context:test-agent",),
+                all_targets=False,
             ),
+            ("context:test-agent",),
             "test-agent",
+            "agent-sha",
             False,
             id="custom-context",
         ),
@@ -380,38 +598,38 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
 )
 def test_run_identity_and_context_reach_workflow_and_job_tags(
     tmp_path: Path,
-    context: DispatcherContext | None,
+    run: ResolvedRun | None,
+    tags: tuple[str, ...],
     expected_context: str,
+    concurrency_key: str,
     has_pr_tags: bool,
 ):
-    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, context=context)
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run, tags=tags)
 
     inputs = runner._build_inputs(make_batch("batch-context"))
     [job] = decode_job_list(inputs["job_list"])
-    tags = job["additional_tags"].split(",")
+    job_tags = job["additional_tags"].split(",")
 
     assert inputs["context"] == expected_context
-    assert inputs["checkout_sha"] == (context.checkout_sha if context else "merge-sha-bbb")
-    assert inputs["head_sha"] == (context.head_sha if context else "head-sha-aaa")
-    assert inputs["head_branch"] == (context.head_branch if context else "a-branch")
-    assert f"dispatcher.context:{expected_context}" in tags
-    assert ("dispatcher.pr.number:123" in tags) is has_pr_tags
-    assert ("dispatcher.base_branch:master" in tags) is has_pr_tags
-    assert not any(tag.startswith(("git.", "dispatcher.head_sha", "dispatcher.head_branch")) for tag in tags)
+    assert inputs["concurrency_key"] == concurrency_key
+    assert inputs["checkout_sha"] == (run.checkout_sha if run else "merge-sha-bbb")
+    assert inputs["head_sha"] == (run.head_sha if run else "head-sha-aaa")
+    assert inputs["head_branch"] == (run.head_branch if run else "a-branch")
+    assert f"dispatcher.context:{expected_context}" in job_tags
+    assert ("dispatcher.pr.number:123" in job_tags) is has_pr_tags
+    assert ("dispatcher.base_branch:master" in job_tags) is has_pr_tags
+    assert not any(tag.startswith(("git.", "dispatcher.head_sha", "dispatcher.head_branch")) for tag in job_tags)
 
 
 def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
-    context = DispatcherContext(
-        owner="DataDog",
-        repo="integrations-core",
-        workflow="test-batch.yaml",
-        workflow_ref="master",
+    run = ResolvedRun(
+        repository="DataDog/integrations-core",
         head_sha="agent-sha",
         checkout_sha="agent-sha",
         head_branch="test-agent",
-        tags=("context:release,candidate\nunsafe\rvalue",),
+        all_targets=False,
     )
-    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, context=context)
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run, tags=("context:release,candidate\nunsafe\rvalue",))
 
     inputs = runner._build_inputs(make_batch("batch-context"))
     [job] = decode_job_list(inputs["job_list"])
@@ -683,7 +901,8 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     mock_artifacts(fake, [])
     fake.mock_response("list_workflow_jobs", RuntimeError("boom-list-jobs"))
-    runner = make_runner(fake, tmp_path)
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     # A failure listing jobs must not abort the batch: BatchFinished is still emitted, each
     # correlated job carrying no workflow job.
@@ -692,6 +911,11 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
     finished = finished_messages(runner)[0]
     assert finished.status == "success"
     assert all(result.workflow_job is None for result in finished.batch_jobs)
+    assert [
+        record.value
+        for record in sink.records_named("operations.failed")
+        if record.tags["dispatcher.operation"] == "refresh_jobs"
+    ] == [1, 1]
 
 
 @pytest.mark.parametrize(
@@ -796,28 +1020,30 @@ async def test_final_results_preserve_only_completed_observations(tmp_path: Path
     assert finished.batch_jobs[1].workflow_job is None
 
 
+@pytest.mark.parametrize(
+    "unavailable",
+    [
+        pytest.param(make_artifact(2, expired=True), id="expired"),
+        pytest.param(make_artifact(2, archive_download_url=None), id="missing-url"),
+    ],
+)
 @pytest.mark.asyncio
-async def test_process_message_skips_expired_artifacts(tmp_path: Path):
+async def test_unavailable_artifacts_degrade_collection(tmp_path: Path, unavailable: Artifact):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
-    mock_artifacts(
-        fake,
-        [
-            make_artifact(1),
-            make_artifact(2, expired=True),
-            make_artifact(3, archive_download_url=None),
-        ],
-    )
-    runner = make_runner(fake, tmp_path)
+    mock_artifacts(fake, [make_artifact(1), unavailable])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     await runner.process_message(
         TestBatch(id="batch-4", batch_id="batch-4", job_list=[make_job()], jobs_count=1, integrations=["ntp"])
     )
 
-    # Only the non-expired artifact with a download URL should be fetched.
     download_calls = fake.calls_to("download_artifact")
     assert len(download_calls) == 1
     assert download_calls[0].kwargs["archive_download_url"] == "https://api.github.com/artifact/1/zip"
+    assert failed_by_operation(sink)["collect_artifacts"] == 1
+    assert [finished.status for finished in finished_messages(runner)] == [Status.SUCCESS]
 
 
 @pytest.mark.asyncio
@@ -825,7 +1051,8 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
     fake.mock_response("list_workflow_run_artifacts", RuntimeError("boom-list-artifacts"))
-    runner = make_runner(fake, tmp_path)
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     # A failure listing artifacts must not abort the batch: exactly one BatchFinished is still
     # emitted, with the workflow's real conclusion.
@@ -835,6 +1062,13 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
     assert len(submitted) == 1
     finished = submitted[0]
     assert finished.status == "success"
+    assert failed_by_operation(sink) == {
+        "dispatch_batch": 0,
+        "fetch_workflow": 0,
+        "refresh_jobs": 0,
+        "collect_artifacts": 1,
+    }
+    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
 
 
 @pytest.mark.asyncio
@@ -847,7 +1081,8 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
         RuntimeError("download failure for artifact 2"),
         archive_download_url="https://api.github.com/artifact/2/zip",
     )
-    runner = make_runner(fake, tmp_path)
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     await runner.process_message(make_batch())
 
@@ -861,6 +1096,8 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     submitted = finished_messages(runner)
     assert len(submitted) == 1
     assert submitted[0].status == "success"
+    assert failed_by_operation(sink)["collect_artifacts"] == 1
+    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
 
 
 # ---------------------------------------------------------------------------
@@ -879,16 +1116,57 @@ def running_run() -> WorkflowRun:
 
 
 @pytest.mark.parametrize(
-    ("failure_point", "operation", "workflow_running", "cancelled_runs"),
+    ("failure_point", "operation", "workflow_running", "cancelled_runs", "operation_failures", "durations"),
     [
         # The dispatch response could not be parsed, so a dispatched run's ID is unknown and
         # nothing is tracked to cancel.
-        pytest.param("create_workflow_dispatch", "dispatching the batch", False, [], id="dispatch-response"),
-        pytest.param("get_workflow_run", "polling workflow status", True, [123], id="poll-response"),
+        pytest.param(
+            "create_workflow_dispatch",
+            "dispatching the batch",
+            False,
+            [],
+            {"dispatch_batch": 1},
+            [],
+            id="dispatch-response",
+        ),
+        pytest.param(
+            "get_workflow_run",
+            "polling workflow status",
+            True,
+            [123],
+            {"dispatch_batch": 0, "fetch_workflow": 1},
+            [],
+            id="poll-response",
+        ),
         # Jobs are refreshed on every poll, so the page can fail while the workflow is still going.
-        pytest.param("list_workflow_jobs", "listing workflow jobs", True, [123], id="jobs-page"),
+        pytest.param(
+            "list_workflow_jobs",
+            "listing workflow jobs",
+            True,
+            [123],
+            {"dispatch_batch": 0, "fetch_workflow": 0, "refresh_jobs": 1},
+            [],
+            id="jobs-page",
+        ),
+        pytest.param(
+            "list_workflow_jobs",
+            "listing workflow jobs",
+            False,
+            [],
+            {"dispatch_batch": 0, "fetch_workflow": 0, "refresh_jobs": 1},
+            [90.0],
+            id="completed-jobs-page",
+        ),
         # Artifacts are collected after completion, when the run is already released.
-        pytest.param("list_workflow_run_artifacts", "listing workflow artifacts", False, [], id="artifact-page"),
+        pytest.param(
+            "list_workflow_run_artifacts",
+            "listing workflow artifacts",
+            False,
+            [],
+            {"dispatch_batch": 0, "fetch_workflow": 0, "refresh_jobs": 0, "collect_artifacts": 1},
+            [90.0],
+            id="artifact-page",
+        ),
     ],
 )
 @pytest.mark.asyncio
@@ -898,13 +1176,16 @@ async def test_an_unparsable_response_stops_the_batch_and_keeps_its_run_cancella
     operation: str,
     workflow_running: bool,
     cancelled_runs: list[int],
+    operation_failures: dict[str, float],
+    durations: list[float],
 ):
     """An invalid response stops the batch without losing a known unfinished run."""
     fake = FakeAsyncGitHubClient()
     if workflow_running:
         fake.mock_response("get_workflow_run", running_run())
     fake.mock_response(failure_point, invalid_response_error())
-    runner = make_runner(fake, tmp_path)
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     # Bound the test if an invalid response is retried indefinitely.
     with pytest.raises(FatalProcessingError, match=f"Invalid GitHub response while {operation}"):
@@ -912,6 +1193,8 @@ async def test_an_unparsable_response_stops_the_batch_and_keeps_its_run_cancella
             await runner.process_message(make_batch())
 
     assert finished_messages(runner) == []
+    assert failed_by_operation(sink) == operation_failures
+    assert [record.value for record in sink.records_named('batch.duration')] == durations
 
     await runner.cancel_dispatched_runs()
     cancelled = [call.kwargs["run_id"] for call in fake.calls_to("cancel_workflow_run")]

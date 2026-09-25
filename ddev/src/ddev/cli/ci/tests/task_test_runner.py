@@ -10,13 +10,16 @@ import gzip
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import datetime
 from itertools import count
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
 from pydantic import ValidationError
 
 from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, test_tag_mapping
+from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import conclusion_to_status
@@ -26,6 +29,7 @@ from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
+from ddev.utils.github_async.retry import SAFE_RETRY, on_status
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
@@ -35,6 +39,10 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # GitHub rejects a workflow dispatch whose whole `inputs` object exceeds this.
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
+
+# Jobs are listed right after the run is dispatched, before GitHub makes the run's jobs listing
+# visible, and until then that endpoint answers 404.
+JOBS_LISTING_RETRY = SAFE_RETRY.also_on(on_status(404))
 
 
 class JobListTooLargeError(Exception):
@@ -59,6 +67,20 @@ def _serialize_test_tags(fields: Mapping[str, Any]) -> str:
 
 def _sanitize_test_tag_value(value: str) -> str:
     return value.replace(',', '_').replace('\n', '_').replace('\r', '_')
+
+
+def workflow_duration_seconds(run: WorkflowRun) -> float | None:
+    """Use gh's completed-run timing convention, omitting unavailable or invalid timestamps.
+
+    https://github.com/cli/cli/blob/trunk/pkg/cmd/run/shared/shared.go
+    """
+    if run.run_started_at is None or run.updated_at is None:
+        return None
+    try:
+        duration = (datetime.fromisoformat(run.updated_at) - datetime.fromisoformat(run.run_started_at)).total_seconds()
+    except (ValueError, TypeError):
+        return None
+    return duration if duration >= 0 else None
 
 
 def encode_job_list(jobs: list[dict[str, Any]]) -> str:
@@ -114,6 +136,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._runs_in_flight: dict[str, int] = {}
         self._logger = monitor.logger
         self.monitor = monitor
+        self._metrics = MetricsHelper(monitor.metrics)
 
     def _response_failure(
         self, operation: str, batch_id: str, run_id: int | None, error: ValidationError
@@ -167,9 +190,16 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 return_run_details=True,
             )
         except ValidationError as error:
+            self._metrics.record_operation(Operation.DISPATCH_BATCH, failed=True)
             raise self._response_failure("dispatching the batch", message.batch_id, None, error) from error
+        except Exception:
+            self._metrics.record_operation(Operation.DISPATCH_BATCH, failed=True)
+            raise
+        self._metrics.record_operation(Operation.DISPATCH_BATCH, failed=False)
         run_id = dispatch.data.workflow_run_id
         self._runs_in_flight[message.batch_id] = run_id
+        message.run_id = run_id
+        self._report_launch(message)
         self.submit_message(
             BatchProgressUpdate(
                 id=f"{message.id}-progress-0",
@@ -217,6 +247,15 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
         self._logger.info("Batch %s workflow results ready: %s", message.batch_id, status.value)
 
+    def _report_launch(self, batch: TestBatch) -> None:
+        """Count the batch and its jobs only after GitHub accepts its dispatch."""
+        metrics = self.monitor.metrics
+        metrics.count('batches.count', 1)
+        # One sample per launch supports batch-size averages without per-batch tags.
+        metrics.distribution('batch.jobs.count', batch.jobs_count)
+        for job in batch.job_list:
+            metrics.count('jobs.count', 1, **job_fields(job))
+
     async def cancel_dispatched_runs(self) -> None:
         """Concurrently cancel all tracked unfinished runs."""
         if not self._runs_in_flight:
@@ -247,15 +286,27 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         sequences = count(1)
         known_jobs: dict[str, WorkflowJob] = {}
         previous_state: ExecutionState | None = None
+        previous_poll: float | None = None
         while True:
+            poll_started = monotonic()
+            if previous_poll is not None:
+                self.monitor.metrics.distribution('requests.polling_interval', poll_started - previous_poll)
+            previous_poll = poll_started
             try:
                 run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
             except ValidationError as error:
+                self._metrics.record_operation(Operation.FETCH_WORKFLOW, failed=True)
                 raise self._response_failure("polling workflow status", message.batch_id, run_id, error) from error
+            except Exception:
+                self._metrics.record_operation(Operation.FETCH_WORKFLOW, failed=True)
+                raise
+            self._metrics.record_operation(Operation.FETCH_WORKFLOW, failed=False)
             completed = run.data.is_completed
             # Shutdown must not try to cancel a completed run while its artifacts are still being collected.
             if completed:
                 self._runs_in_flight.pop(message.batch_id, None)
+                if (duration := workflow_duration_seconds(run.data)) is not None:
+                    self.monitor.metrics.distribution('batch.duration', duration)
 
             # Report workflow progress first. The jobs request may be delayed by the API rate limit.
             progress = self._publish_workflow_progress(message, run_id, run.data, known_jobs, next(sequences))
@@ -354,13 +405,17 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         jobs: list[WorkflowJob] = []
         try:
             async for page in self._client.list_workflow_jobs(
-                self._options.owner, self._options.repo, run_id, per_page=100
+                self._options.owner, self._options.repo, run_id, per_page=100, retry=JOBS_LISTING_RETRY
             ):
                 jobs.extend(page.data.jobs)
         except ValidationError as error:
+            self._metrics.record_operation(Operation.REFRESH_JOBS, failed=True)
             raise self._response_failure(operation, batch_id, run_id, error) from error
         except Exception:
             self._logger.warning("Failed to list workflow jobs", exc_info=True)
+            self._metrics.record_operation(Operation.REFRESH_JOBS, failed=True)
+        else:
+            self._metrics.record_operation(Operation.REFRESH_JOBS, failed=False)
         return jobs
 
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
@@ -368,7 +423,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         inputs = {
             "batch_id": message.batch_id,
             "checkout_sha": str(run["checkout_sha"]),
-            # Keys the workflow's cancellation group; see `DispatcherContext.concurrency_key`.
+            # Keys the workflow's cancellation group; see `ResolvedRun.concurrency_key`.
             "concurrency_key": self._options.concurrency_key,
             # The batch is dispatched at the default branch, so its own context describes master.
             # These two say which commit the results belong to, for CI Visibility and the check run.
@@ -411,23 +466,31 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         """
         artifact_dirs: dict[str, Path] = {}
         failures: list[tuple[int, str]] = []
-        try:
-            async for page in self._artifact_client.list_workflow_run_artifacts(
-                self._options.owner, self._options.repo, run_id, per_page=100
-            ):
-                for artifact in page.data.artifacts:
-                    url = self._artifact_download_url(artifact)
-                    if url is None:
-                        continue
-                    target = await self._download_artifact(artifact, url)
-                    if target is None:
-                        failures.append((artifact.id, artifact.name))
-                    else:
-                        artifact_dirs[artifact.name] = target
-        except ValidationError as error:
-            raise self._response_failure("listing workflow artifacts", batch_id, run_id, error) from error
-        except Exception:
-            self._logger.warning("Failed to list workflow run artifacts", exc_info=True)
+        with self._metrics.time_operation(
+            Operation.COLLECT_ARTIFACTS, duration_metric='artifacts.download.duration'
+        ) as result:
+            degraded = False
+            try:
+                async for page in self._artifact_client.list_workflow_run_artifacts(
+                    self._options.owner, self._options.repo, run_id, per_page=100
+                ):
+                    for artifact in page.data.artifacts:
+                        url = self._artifact_download_url(artifact)
+                        if url is None:
+                            degraded = True
+                            continue
+                        target = await self._download_artifact(artifact, url)
+                        if target is None:
+                            failures.append((artifact.id, artifact.name))
+                        else:
+                            artifact_dirs[artifact.name] = target
+            except ValidationError as error:
+                raise self._response_failure("listing workflow artifacts", batch_id, run_id, error) from error
+            except Exception:
+                self._logger.warning("Failed to list workflow run artifacts", exc_info=True)
+                degraded = True
+            # An incomplete listing degrades the collection like a failed download does.
+            result.failed = degraded or bool(failures)
         if failures:
             self._logger.warning(
                 "Failed to download %s %s for workflow run %s",
