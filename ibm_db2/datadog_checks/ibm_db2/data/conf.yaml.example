@@ -42,6 +42,7 @@ instances:
 
     ## @param host - string - optional
     ## The hostname used to connect to a remote or uncataloged database.
+    ## Required when Database Monitoring is enabled.
     #
     # host: <HOSTNAME>
 
@@ -66,6 +67,27 @@ instances:
     ## Connection timeout in seconds
     #
     # connection_timeout: 10
+
+    ## @param dbm - boolean - optional - default: false
+    ## Enable Database Monitoring to collect query execution counts and execution times.
+    ## Requires an explicit `host` and collects the configured database on the connected Db2 member.
+    #
+    # dbm: false
+
+    ## Configure collection of query metrics.
+    #
+    # query_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## The query metric collection interval in seconds. Must be greater than zero.
+        ## Each collection queries `MON_GET_PKG_CACHE_STMT` on the connected Db2 member.
+        #
+        # collection_interval: 10
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

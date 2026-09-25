@@ -1,4 +1,6 @@
 [env.collectors.datadog-checks]
+# Exercise the Agent's orjson backend, including UTF-8 payload size checks.
+base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
