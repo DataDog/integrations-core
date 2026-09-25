@@ -69,6 +69,8 @@ if TYPE_CHECKING:
     from datadog_checks.base.utils.discovery import Service
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
+    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEmit
+    from datadog_checks.base.utils.remote_queries.handler import RemoteQueryHandler
 
 inspect: _module_inspect = lazy_loader.load('inspect')
 traceback: _module_traceback = lazy_loader.load('traceback')
@@ -1617,6 +1619,64 @@ class AgentCheck(object):
         tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', tag)
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
+
+    def get_remote_query_handler(self) -> RemoteQueryHandler | None:
+        """The check's composed remote-query capability, or None when it has none.
+
+        Integrations that support remote queries return one handler here, composed with
+        the check; the hook may use a function-local import so ordinary monitoring
+        startup never imports the optional remote-query runtime. A fresh, cheap handler
+        per bridge call is expected: handlers hold the check they serve, never shared
+        request state.
+        """
+        return None
+
+    def run_remote_query(self, request_json: str | bytes | bytearray, emit: RemoteQueryEmit) -> None:
+        """Agent bridge entry point for the optional remote-query capability.
+
+        The dispatcher validates the request's operation against the closed Remote Query
+        vocabulary, then acquires one optional handler through `get_remote_query_handler`
+        and dispatches directly through it: handler presence alone gates the capability,
+        because a handler implements the complete protocol — resolve and execute. Requests
+        are decoded JSON objects; the handler validates its operation's schema before
+        accessing database state. Only metadata events cross `emit`, never rows.
+
+        The Agent pins this loaded check for the call and prevents calls after shutdown.
+        This path is independent of scheduled `check()` runs: implementations must use
+        concurrency-safe database resources, honor the run deadline and `is_cancelled`,
+        and release resources when the event generator is closed (including emit failure).
+        """
+        # Keep the optional runtime out of ordinary monitoring check startup.
+        from datadog_checks.base.utils.remote_queries.events import (
+            emit_agent_rpc_events,
+            emit_event,
+            failed_event,
+            parse_agent_rpc_request,
+        )
+        from datadog_checks.base.utils.remote_queries.handler import (
+            REMOTE_QUERY_OPERATION_RESOLVE_TARGET,
+            REMOTE_QUERY_OPERATIONS,
+        )
+
+        request, started_at, failure = parse_agent_rpc_request(request_json)
+        if failure is not None:
+            emit_event(emit, failure)
+            return
+        assert request is not None
+        operation = request.get('operation')
+        if not isinstance(operation, str) or operation not in REMOTE_QUERY_OPERATIONS:
+            emit_event(emit, failed_event('invalid_request', 'Unknown remote query operation.'))
+            return
+        handler = self.get_remote_query_handler()
+        if handler is None:
+            emit_event(emit, failed_event('unsupported_operation', 'Check does not support remote queries.'))
+            return
+        events = (
+            handler.resolve(request)
+            if operation == REMOTE_QUERY_OPERATION_RESOLVE_TARGET
+            else handler.execute(request, started_at)
+        )
+        emit_agent_rpc_events(emit, events)
 
     def check(self, instance):
         # type: (InstanceType) -> None

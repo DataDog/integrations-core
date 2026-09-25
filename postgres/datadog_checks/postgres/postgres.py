@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import annotations
+
 import contextlib
 import copy
 import functools
 import os
 from collections import defaultdict
 from time import time
+from typing import TYPE_CHECKING
 
 import psycopg
 from cachetools import TTLCache
@@ -99,6 +102,9 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+if TYPE_CHECKING:
+    from .remote_query import PostgresRemoteQueryHandler
+
 MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
@@ -116,6 +122,17 @@ class PostgreSql(DatabaseCheck):
     METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
     HA_SUPPORTED = True
+
+    def get_remote_query_handler(self) -> 'PostgresRemoteQueryHandler':
+        """One remote-query capability handler composed with this check, created per bridge call.
+
+        The function-local import keeps the optional remote-query runtime out of ordinary
+        monitoring startup; the handler itself is cheap to construct and holds only this
+        check, never request state.
+        """
+        from .remote_query import PostgresRemoteQueryHandler
+
+        return PostgresRemoteQueryHandler(self)
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
