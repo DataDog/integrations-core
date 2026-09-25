@@ -1,0 +1,1 @@
+Fix MongoDB process CPU collection, which reported nothing on Windows and never submitted ``mongodb.system.cpu.percent`` on any platform.
