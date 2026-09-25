@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointManager,
     CheckpointTokenInfo,
     FailedCheckpoint,
@@ -615,6 +617,29 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert cp.error == "something went wrong"
 
 
+async def test_cancellation_writes_partial_tokens_and_goal_validations(flow_dir, monkeypatch, message_queue):
+    worker = MockAgent([make_response("done", 0, 0)])
+    phase, mgr = make_agent_phase(flow_dir, worker, monkeypatch, message_queue)
+
+    phase._total_input_tokens = 42
+    phase._total_output_tokens = 17
+    phase._goal_attempt_log = [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+
+    async def cancel(_context):
+        raise asyncio.CancelledError("maximum runtime reached")
+
+    monkeypatch.setattr(phase, "execute", cancel)
+
+    with pytest.raises(asyncio.CancelledError, match="maximum runtime reached"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, CancelledCheckpoint)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
+    assert checkpoint.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+    assert checkpoint.reason == "maximum runtime reached"
+
+
 # ---------------------------------------------------------------------------
 # process_message — per-task context management flags
 # ---------------------------------------------------------------------------
@@ -850,7 +875,35 @@ async def test_resume_frontier_phase_injects_notice_without_error(flow_dir, monk
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert "RESUMED RUN" in captured["system_prompt"]
-    assert "previous attempt recorded this error" not in captured["system_prompt"]
+    assert "previous attempt recorded this before stopping" not in captured["system_prompt"]
+
+
+async def test_resume_frontier_phase_injects_notice_with_cancellation_reason(flow_dir, monkeypatch, message_queue):
+    """A frontier phase with a prior cancelled checkpoint gets the resume notice plus the reason."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset({"p1"}),
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_phase_checkpoint(
+        "p1",
+        CancelledCheckpoint(
+            started_at="2026-01-01T00:00:00+00:00",
+            finished_at="2026-01-01T00:00:05+00:00",
+            reason="Orchestrator exceeded max_timeout of 0.05s",
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+        ),
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" in captured["system_prompt"]
+    assert "Orchestrator exceeded max_timeout of 0.05s" in captured["system_prompt"]
 
 
 async def test_non_frontier_phase_gets_no_resume_notice(flow_dir, monkeypatch, message_queue):

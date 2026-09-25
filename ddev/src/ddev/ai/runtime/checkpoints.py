@@ -24,6 +24,7 @@ class CheckpointReadError(Exception):
 class CheckpointStatus(StrEnum):
     SUCCESS = "success"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 class CheckpointTokenInfo(BaseModel):
@@ -60,7 +61,21 @@ class FailedCheckpoint(BaseModel):
     goal_validations: list[GoalValidationRecord] | None = None
 
 
-PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]
+class CancelledCheckpoint(BaseModel):
+    """Checkpoint written when a started phase is cancelled before completion."""
+
+    status: Literal[CheckpointStatus.CANCELLED] = CheckpointStatus.CANCELLED
+    started_at: str
+    finished_at: str
+    reason: str | None = None
+    tokens: CheckpointTokenInfo
+    goal_validations: list[GoalValidationRecord] | None = None
+
+
+PhaseCheckpoint = Annotated[
+    SuccessCheckpoint | FailedCheckpoint | CancelledCheckpoint,
+    Field(discriminator="status"),
+]
 
 # TypeAdapter provides model_validate() for annotated union types that aren't BaseModel subclasses.
 CheckpointAdapter: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)

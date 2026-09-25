@@ -5,6 +5,7 @@
 from typing import Any
 
 from ddev.ai.runtime.checkpoints import (
+    CancelledCheckpoint,
     CheckpointAdapter,
     CheckpointStatus,
     CheckpointTokenInfo,
@@ -38,3 +39,7 @@ def make_success_checkpoint(**kwargs: Any) -> SuccessCheckpoint:
 
 def make_failed_checkpoint(**kwargs: Any) -> FailedCheckpoint:
     return make_checkpoint(CheckpointStatus.FAILED, kwargs)
+
+
+def make_cancelled_checkpoint(**kwargs: Any) -> CancelledCheckpoint:
+    return make_checkpoint(CheckpointStatus.CANCELLED, kwargs)
