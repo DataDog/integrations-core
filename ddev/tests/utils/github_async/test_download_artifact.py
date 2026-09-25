@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import logging
 import traceback
+from pathlib import Path
 
 import httpx
 import pytest
 
 from ddev.utils.github_async import AsyncGitHubClient
+from ddev.utils.github_async.observer import RequestFault
 from ddev.utils.github_errors import GitHubAuthenticationError
-from tests.utils.github_async.helpers import TOKEN, make_client, make_zip, patch_signed_download
+from tests.utils.github_async.helpers import TOKEN, RecordingObserver, make_client, make_zip, patch_signed_download
 
 pytestmark = pytest.mark.usefixtures("instant_backoff")
 
@@ -35,13 +37,31 @@ async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch
     assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
 
 
-async def test_download_artifact_non_302_raises(tmp_path) -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=b"not a redirect")
-
-    client = make_client(httpx.MockTransport(handler))
-    with pytest.raises(httpx.HTTPError, match="Expected 302"):
+@pytest.mark.parametrize(
+    ('status_code', 'headers', 'message'),
+    [
+        pytest.param(200, {}, 'Expected 302', id='non-redirect'),
+        pytest.param(301, {'location': 'https://signed.example/zip'}, 'Expected 302', id='wrong-redirect'),
+        pytest.param(302, {}, 'Missing Location', id='missing-location'),
+        pytest.param(302, {'location': ''}, 'Missing Location', id='empty-location'),
+    ],
+)
+async def test_download_artifact_reports_invalid_redirect(
+    tmp_path: Path, status_code: int, headers: dict[str, str], message: str
+):
+    observer = RecordingObserver()
+    client = AsyncGitHubClient(
+        token=TOKEN,
+        transport=httpx.MockTransport(lambda request: httpx.Response(status_code, headers=headers)),
+        observer=observer,
+    )
+    with pytest.raises(httpx.HTTPError, match=message) as exc_info:
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    assert [(attempt.number, attempt.fault) for attempt in observer.attempts] == [
+        (1, RequestFault.UNEXPECTED_RESPONSE),
+    ]
+    assert observer.attempts[0].error is exc_info.value
 
 
 async def test_download_artifact_authentication_error_remains_actionable(tmp_path) -> None:
@@ -66,15 +86,6 @@ async def test_download_artifact_signed_url_error_propagates(
     patch_signed_download(monkeypatch, signed_handler)
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
-        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-
-async def test_download_artifact_missing_location_header_raises(tmp_path) -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(302)
-
-    client = make_client(httpx.MockTransport(handler))
-    with pytest.raises(httpx.HTTPError, match="Missing Location"):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
@@ -131,6 +142,36 @@ async def test_an_expired_signed_url_is_resolved_again_rather_than_refetched(mon
     assert len(github_calls) == 2
     assert signed_calls == ["https://signed.example/expired", "https://signed.example/fresh"]
     assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
+
+
+async def test_only_github_api_requests_are_reported_and_a_storage_retry_is_still_logged(
+    monkeypatch, tmp_path, caplog
+) -> None:
+    """The storage fetch is not a GitHub API request, so it must not count as one.
+
+    Its failure is not an attempt the observer was shown, so the retry it causes stays in the log.
+    """
+    github_handler, signed_handler, _ = _signed_download(
+        httpx.Response(403, content=b"<Error>AccessDenied</Error>"), fail_every_attempt=False
+    )
+    patch_signed_download(monkeypatch, signed_handler)
+    observer = RecordingObserver()
+    client = AsyncGitHubClient(
+        token=TOKEN,
+        transport=httpx.MockTransport(github_handler),
+        logger=logging.getLogger("test-client"),
+        observer=observer,
+    )
+
+    with caplog.at_level(logging.WARNING, logger="test-client"):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    assert [(attempt.number, attempt.fault) for attempt in observer.attempts] == [
+        (1, RequestFault.NONE),
+        (2, RequestFault.NONE),
+    ]
+    assert observer.failures == []
+    assert len([record for record in caplog.records if record.name == "test-client"]) == 1
 
 
 async def test_a_denial_from_github_itself_is_not_retried_as_an_expired_url(tmp_path) -> None:

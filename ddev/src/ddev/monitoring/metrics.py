@@ -87,6 +87,16 @@ class Metrics:
             is_closed=self._is_closed,
         )
 
+    def with_tag_projector(self, tag_projector: TagProjector) -> Metrics:
+        """The same view, rendering its tags with *tag_projector* instead of the runtime's."""
+        return Metrics(
+            self._context,
+            sink=self._sink,
+            tag_projector=tag_projector,
+            fields=self._fields,
+            is_closed=self._is_closed,
+        )
+
     def count(
         self,
         name: str,

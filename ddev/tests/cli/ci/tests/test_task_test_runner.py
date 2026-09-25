@@ -12,11 +12,12 @@ import secrets
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 from pydantic import ValidationError
 
 from ddev.cli.ci.dispatch_run import ResolvedRun
-from ddev.cli.ci.tests import messages
+from ddev.cli.ci.tests import messages, task_test_runner
 from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
@@ -32,7 +33,7 @@ from ddev.cli.ci.tests.task_test_runner import (
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.monitoring import ComponentMonitor
 from ddev.monitoring.metrics import MetricKind
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
@@ -50,6 +51,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
     recording_runtime,
 )
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
@@ -234,6 +236,40 @@ async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
     assert [record.kind.value for record in sink.records_named('artifacts.download.duration')] == ['distribution']
 
 
+async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """A batch's first poll has no predecessor, even when an earlier batch was polled by the same runner.
+
+    The samples are the runner's own, so they carry the run's metric dimensions and its component.
+    """
+    fake = FakeAsyncGitHubClient()
+    mock_artifacts(fake, [])
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    ticks = iter(range(0, 1000, 10))
+    monkeypatch.setattr(task_test_runner, "monotonic", lambda: float(next(ticks)))
+    monitoring, sink = recording_runtime()
+    monitoring.set_run_fields(ci_pipeline_id="12345", context="pr", team="agent-integrations")
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    for batch_id, polls in (("batch-1", 3), ("batch-2", 2)):
+        for _ in range(polls - 1):
+            fake.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
+        await runner.process_message(make_batch(batch_id))
+
+    intervals = sink.records_named("requests.polling_interval")
+    assert [record.value for record in intervals] == [10.0, 10.0, 10.0]
+    assert {tuple(sorted(record.tags.items())) for record in intervals} == {
+        (
+            ("ci.pipeline.id", "12345"),
+            ("dispatcher.component", "test-runner"),
+            ("dispatcher.context", "pr"),
+            ("team", "agent-integrations"),
+        )
+    }
+    assert {record.kind for record in intervals} == {MetricKind.DISTRIBUTION}
+
+
 @pytest.mark.asyncio
 async def test_an_accepted_dispatch_counts_the_batch_and_its_jobs(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
@@ -372,6 +408,30 @@ def failed_by_operation(sink: RecordingSink) -> dict[str, float]:
     for record in sink.records_named('operations.failed'):
         totals[record.tags['dispatcher.operation']] = totals.get(record.tags['dispatcher.operation'], 0) + record.value
     return totals
+
+
+async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """GitHub answers 404 on a freshly dispatched run's jobs listing until that listing becomes visible."""
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(
+            200, json={"total_count": 1, "jobs": [{"id": 1, "run_id": 123, "name": "j1", "status": "queued"}]}
+        ),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        jobs = await runner._list_jobs(123, "batch-1", "listing workflow jobs")
+    finally:
+        await client.aclose()
+
+    assert [job.id for job in jobs] == [1]
+    assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
 async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):

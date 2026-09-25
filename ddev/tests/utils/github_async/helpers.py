@@ -16,6 +16,7 @@ import httpx
 from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
+from ddev.utils.github_async.observer import RequestAttempt, RequestFailure
 from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, BudgetGovernor, InstrumentedAsyncLimiter
 from tests.helpers.clock import FakeClock
 from tests.utils.github_async.payloads import (
@@ -87,6 +88,7 @@ def governed_client(
     transport: httpx.MockTransport,
     on_event: Any = None,
     max_rate_limit_retries: int = 2,
+    observer: RecordingObserver | None = None,
 ) -> AsyncGitHubClient:
     """Client whose governor runs on *clock*, so retry waits are deterministic under a fake sleep."""
     governor = BudgetGovernor(now=clock, on_event=on_event)
@@ -97,8 +99,24 @@ def governed_client(
         name="github",
     )
     return AsyncGitHubClient(
-        token=TOKEN, rate_limiter=limiter, transport=transport, max_rate_limit_retries=max_rate_limit_retries
+        token=TOKEN,
+        rate_limiter=limiter,
+        transport=transport,
+        max_rate_limit_retries=max_rate_limit_retries,
+        observer=observer,
     )
+
+
+@dataclasses.dataclass
+class RecordingObserver:
+    attempts: list[RequestAttempt] = dataclasses.field(default_factory=list)
+    failures: list[RequestFailure] = dataclasses.field(default_factory=list)
+
+    def attempt_finished(self, attempt: RequestAttempt) -> None:
+        self.attempts.append(attempt)
+
+    def request_failed(self, failure: RequestFailure) -> None:
+        self.failures.append(failure)
 
 
 async def first_page(pages: AsyncIterator[GitHubResponse[Any]]) -> GitHubResponse[Any]:
