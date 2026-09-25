@@ -38,7 +38,7 @@ from ddev.cli.ci.tests.task_test_gatherer import INITIAL_UPDATE_MESSAGE_ID, Task
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.monitoring import ComponentMonitor
 from ddev.monitoring.metrics import MetricKind
-from ddev.utils.github_async.models import JobStep, WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
+from ddev.utils.github_async.models import WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
 from ddev.utils.junit import TestStatus
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import (
@@ -48,7 +48,12 @@ from tests.cli.ci.tests.helpers import (
     make_job,
     recording_runtime,
 )
-from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.github_async import (
+    DEFAULT_DURATION_SECONDS,
+    FakeAsyncGitHubClient,
+    make_job_step,
+    make_workflow_job,
+)
 from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 # ---------------------------------------------------------------------------
@@ -87,28 +92,6 @@ def _make_job_tree(
     if e2e:
         (job_dir / f"test-e2e-{environment}.xml").write_text(JUNIT_E2E, encoding="utf-8")
     return job_dir
-
-
-def _workflow_job(
-    name: str,
-    conclusion: str,
-    failed_step: str | None = None,
-    run_id: int = 100,
-    job_id: int = 1,
-    started_at: str = "2026-09-24T15:39:24Z",
-    completed_at: str = "2026-09-24T15:44:30Z",
-) -> WorkflowJob:
-    steps = [JobStep(name=failed_step, status="completed", conclusion="failure")] if failed_step else []
-    return WorkflowJob(
-        id=job_id,
-        run_id=run_id,
-        name=name,
-        status="completed",
-        conclusion=conclusion,
-        steps=steps,
-        started_at=started_at,
-        completed_at=completed_at,
-    )
 
 
 def _batch_job(
@@ -243,12 +226,10 @@ def _progress_update(
 def test_progress_observations_update_planned_jobs_and_suppress_equal_snapshots(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path, {"batch-1": [_batch_job(name) for name in ("j1", "j2", "j3", "j4")]})
     update = _progress_update(
-        _workflow_job("j1", "success"),
-        WorkflowJob(
-            id=2, run_id=100, name="j2", status="in_progress", started_at="2026-09-24T15:39:24Z", completed_at=None
-        ),
-        WorkflowJob(id=4, run_id=100, name="j4", status="queued", started_at="2026-09-24T15:39:24Z", completed_at=None),
-        _workflow_job("setup", "failure"),
+        make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS),
+        make_workflow_job(id=2, name="j2", status=WorkflowJobStatus.IN_PROGRESS),
+        make_workflow_job(id=4, name="j4", status=WorkflowJobStatus.QUEUED),
+        make_workflow_job(name="setup", conclusion=WorkflowJobConclusion.FAILURE),
     )
     gatherer.process_message(update)
     [published] = drain_queue(gatherer.bus.queue)
@@ -266,7 +247,9 @@ def test_progress_observations_update_planned_jobs_and_suppress_equal_snapshots(
     gatherer.process_message(_progress_update(sequence=4))
     assert drain_queue(gatherer.bus.queue) == []
 
-    gatherer.process_message(_progress_update(_workflow_job("j1", "failure"), sequence=2))
+    gatherer.process_message(
+        _progress_update(make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.FAILURE), sequence=2)
+    )
     assert gatherer.progress.passed == 1
     assert drain_queue(gatherer.bus.queue) == []
 
@@ -277,15 +260,13 @@ def test_job_completion_is_logged_once_when_an_observation_transitions_to_comple
 
     gatherer.process_message(
         _progress_update(
-            WorkflowJob(
-                id=1, run_id=100, name="j1", status="in_progress", started_at="2026-09-24T15:39:24Z", completed_at=None
-            ),
+            make_workflow_job(name="j1", status=WorkflowJobStatus.IN_PROGRESS),
             sequence=1,
         )
     )
     assert [event for event in handler.events if event["event"] == "Job j1 completed: success"] == []
 
-    completed = _progress_update(_workflow_job("j1", "success"), sequence=2)
+    completed = _progress_update(make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), sequence=2)
     gatherer.process_message(completed)
     [event] = [event for event in handler.events if event["event"] == "Job j1 completed: success"]
     assert event["job"] == "j1"
@@ -298,7 +279,11 @@ def test_job_completion_is_logged_once_when_an_observation_transitions_to_comple
 def test_final_gathering_enriches_the_observed_execution_without_a_retry(tmp_path: Path):
     job = _batch_job("j1")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [job]})
-    observed = _workflow_job("j1", "failure", failed_step="Run unit tests")
+    observed = make_workflow_job(
+        name="j1",
+        conclusion=WorkflowJobConclusion.FAILURE,
+        steps=(make_job_step(name="Run unit tests", conclusion="failure"),),
+    )
     update = _progress_update(observed, state=ExecutionState.ARTIFACT_DOWNLOAD, status=Status.FAILURE)
     gatherer.process_message(update)
     [collecting] = drain_queue(gatherer.bus.queue)
@@ -348,15 +333,7 @@ def test_queued_batch_state_reflects_observed_jobs(
         tmp_path, {"batch-1": [_batch_job(f"j{index}") for index in range(1, len(job_statuses) + 1)]}
     )
     jobs = tuple(
-        WorkflowJob(
-            id=index,
-            run_id=100,
-            name=f"j{index}",
-            status=status,
-            conclusion=WorkflowJobConclusion.SUCCESS if status is WorkflowJobStatus.COMPLETED else None,
-            started_at="2026-09-24T15:39:24Z",
-            completed_at="2026-09-24T15:44:30Z" if status is WorkflowJobStatus.COMPLETED else None,
-        )
+        make_workflow_job(id=index, name=f"j{index}", status=status)
         for index, status in enumerate(job_statuses, start=1)
     )
     gatherer.process_message(_progress_update(*jobs, state=ExecutionState.QUEUED))
@@ -366,13 +343,13 @@ def test_queued_batch_state_reflects_observed_jobs(
 
 def test_progress_does_not_regress_execution_or_collection(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
-    gatherer.process_message(_progress_update(_workflow_job("j1", "success"), sequence=2))
+    gatherer.process_message(
+        _progress_update(make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), sequence=2)
+    )
     drain_queue(gatherer.bus.queue)
     gatherer.process_message(
         _progress_update(
-            WorkflowJob(
-                id=1, run_id=100, name="j1", status="in_progress", started_at="2026-09-24T15:39:24Z", completed_at=None
-            ),
+            make_workflow_job(name="j1", status=WorkflowJobStatus.IN_PROGRESS),
             sequence=3,
         )
     )
@@ -430,7 +407,12 @@ def test_a_shutting_down_bus_abandons_gathering_without_registering_the_batch(
 
     gatherer.process_message(
         _batch_finished(
-            artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -450,7 +432,12 @@ def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(
         _batch_finished(
-            artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -490,9 +477,9 @@ def test_an_accepted_final_result_reports_the_batches_outcomes(tmp_path: Path):
             artifacts,
             status="failure",
             batch_jobs=[
-                _batch_job_result(j1, _workflow_job("j1", "failure"), j1_dir),
-                _batch_job_result(j2, _workflow_job("j2", "skipped"), j2_dir),
-                _batch_job_result(j3, _workflow_job("j3", "success"), j3_dir),
+                _batch_job_result(j1, make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.FAILURE), j1_dir),
+                _batch_job_result(j2, make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.SKIPPED), j2_dir),
+                _batch_job_result(j3, make_workflow_job(name="j3", conclusion=WorkflowJobConclusion.SUCCESS), j3_dir),
             ],
         )
     )
@@ -528,16 +515,18 @@ def test_completed_attempts_report_their_github_duration_once(tmp_path: Path):
     j1 = _batch_job("j1")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [j1]}, monitor=monitoring.component("test-gatherer"))
 
-    first_attempt = _workflow_job(
-        "j1", "success", started_at="2026-09-24T15:39:24Z", completed_at="2026-09-24T15:44:30Z"
-    )
+    first_attempt = make_workflow_job(name="j1")
     gatherer.process_message(_progress_update(first_attempt, sequence=1))
     drain_queue(gatherer.bus.queue)
     gatherer.process_message(_progress_update(first_attempt, sequence=2))
     drain_queue(gatherer.bus.queue)
 
-    rerun = _workflow_job(
-        "j1", "failure", job_id=7, started_at="2026-09-24T16:00:00Z", completed_at="2026-09-24T16:02:30Z"
+    rerun = make_workflow_job(
+        name="j1",
+        conclusion=WorkflowJobConclusion.FAILURE,
+        id=7,
+        started_at="2026-09-24T16:00:00Z",
+        completed_at="2026-09-24T16:02:30Z",
     )
     gatherer.process_message(_progress_update(rerun, sequence=3))
     drain_queue(gatherer.bus.queue)
@@ -553,7 +542,7 @@ def test_completed_attempts_report_their_github_duration_once(tmp_path: Path):
     drain_queue(gatherer.bus.queue)
 
     durations = sink.records_named("job.duration")
-    assert [record.value for record in durations] == [306.0, 150.0]
+    assert [record.value for record in durations] == [DEFAULT_DURATION_SECONDS, 150.0]
     assert all(record.kind is MetricKind.DISTRIBUTION for record in durations)
     assert [record.tags["dispatcher.batch.job.integration"] for record in durations] == ["ntp", "ntp"]
     assert [record.tags["dispatcher.batch.job.environment"] for record in durations] == ["py3.13", "py3.13"]
@@ -580,9 +569,11 @@ def test_only_jobs_that_ran_to_an_outcome_report_a_duration(
     monitoring, sink = recording_runtime()
     gatherer = _make_gatherer(tmp_path, monitor=monitoring.component("test-gatherer"))
 
-    gatherer.process_message(_progress_update(_workflow_job("j1", conclusion)))
+    gatherer.process_message(_progress_update(make_workflow_job(name="j1", conclusion=conclusion)))
 
-    assert [record.value for record in sink.records_named("job.duration")] == ([306.0] if reported else [])
+    assert [record.value for record in sink.records_named("job.duration")] == (
+        [DEFAULT_DURATION_SECONDS] if reported else []
+    )
 
 
 def test_a_duration_survives_a_collection_failure(tmp_path: Path):
@@ -598,13 +589,13 @@ def test_a_duration_survives_a_collection_failure(tmp_path: Path):
     job_dir = _make_job_tree(artifacts, "j1", e2e=False)
     # A regular file where the output tree belongs makes organizing artifacts fail.
     (tmp_path / "out").write_text("not a directory", encoding="utf-8")
-    completed = _workflow_job("j1", "success", started_at="2026-09-24T15:39:24Z", completed_at="2026-09-24T15:44:30Z")
+    completed = make_workflow_job(name="j1")
 
     with pytest.raises(OSError):
         gatherer.process_message(_batch_finished(artifacts, batch_jobs=[_batch_job_result(job, completed, job_dir)]))
 
     [duration] = sink.records_named("job.duration")
-    assert duration.value == 306.0
+    assert duration.value == DEFAULT_DURATION_SECONDS
     assert duration.tags["dispatcher.batch.job.status"] == "success"
     assert [record.value for record in sink.records_named("operations.failed")] == [1]
 
@@ -623,9 +614,7 @@ def test_a_final_result_reports_a_duration_progress_never_observed(tmp_path: Pat
             batch_jobs=[
                 _batch_job_result(
                     job,
-                    _workflow_job(
-                        "j1", "success", started_at="2026-09-24T15:39:24Z", completed_at="2026-09-24T15:44:30Z"
-                    ),
+                    make_workflow_job(name="j1"),
                     job_dir,
                 )
             ],
@@ -634,7 +623,7 @@ def test_a_final_result_reports_a_duration_progress_never_observed(tmp_path: Pat
     drain_queue(gatherer.bus.queue)
 
     [duration] = sink.records_named("job.duration")
-    assert duration.value == 306.0
+    assert duration.value == DEFAULT_DURATION_SECONDS
     assert duration.tags["dispatcher.batch.job.integration"] == "ntp"
     assert duration.tags["dispatcher.batch.job.status"] == "success"
 
@@ -646,7 +635,7 @@ def test_unusable_timing_reports_no_duration_and_does_not_block_a_valid_one(tmp_
     job = _batch_job("j1")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [job]}, monitor=monitoring.component("test-gatherer"))
 
-    unusable = _workflow_job("j1", "success", completed_at="not-a-timestamp")
+    unusable = make_workflow_job(name="j1", completed_at="not-a-timestamp")
     gatherer.process_message(_progress_update(unusable, sequence=1))
     drain_queue(gatherer.bus.queue)
     assert sink.records_named("job.duration") == []
@@ -660,9 +649,7 @@ def test_unusable_timing_reports_no_duration_and_does_not_block_a_valid_one(tmp_
             batch_jobs=[
                 _batch_job_result(
                     job,
-                    _workflow_job(
-                        "j1", "success", started_at="2026-09-24T15:39:24Z", completed_at="2026-09-24T15:44:30Z"
-                    ),
+                    make_workflow_job(name="j1"),
                     job_dir,
                 )
             ],
@@ -671,7 +658,7 @@ def test_unusable_timing_reports_no_duration_and_does_not_block_a_valid_one(tmp_
     drain_queue(gatherer.bus.queue)
 
     [duration] = sink.records_named("job.duration")
-    assert duration.value == 306.0
+    assert duration.value == DEFAULT_DURATION_SECONDS
 
 
 def test_an_observed_attempt_the_commit_never_collected_reports_no_outcome(tmp_path: Path):
@@ -681,18 +668,17 @@ def test_an_observed_attempt_the_commit_never_collected_reports_no_outcome(tmp_p
     j2 = _batch_job("j2", target="kafka")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]}, monitor=monitoring.component("test-gatherer"))
 
-    gatherer.process_message(
-        _progress_update(
-            WorkflowJob(
-                id=2, run_id=100, name="j2", status="in_progress", started_at="2026-09-24T15:39:24Z", completed_at=None
-            )
-        )
-    )
+    gatherer.process_message(_progress_update(make_workflow_job(name="j2", status=WorkflowJobStatus.IN_PROGRESS)))
     drain_queue(gatherer.bus.queue)
     artifacts = tmp_path / "artifacts" / "100"
     j1_dir = _make_job_tree(artifacts, "j1", e2e=False)
     gatherer.process_message(
-        _batch_finished(artifacts, batch_jobs=[_batch_job_result(j1, _workflow_job("j1", "success"), j1_dir)])
+        _batch_finished(
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(j1, make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), j1_dir)
+            ],
+        )
     )
     drain_queue(gatherer.bus.queue)
 
@@ -714,7 +700,9 @@ def test_a_duplicate_final_message_does_not_report_the_batch_twice(tmp_path: Pat
     batch = _batch_finished(
         artifacts,
         status="failure",
-        batch_jobs=[_batch_job_result(job, _workflow_job("j1", "failure"), job_dir)],
+        batch_jobs=[
+            _batch_job_result(job, make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.FAILURE), job_dir)
+        ],
     )
     gatherer.process_message(batch)
     gatherer.process_message(dataclasses.replace(batch, id="replay"))
@@ -734,7 +722,15 @@ def test_failure_path_records_failed_steps_and_reports(tmp_path: Path):
             artifacts,
             status="failure",
             batch_jobs=[
-                _batch_job_result(make_job("j1"), _workflow_job("j1", "failure", failed_step="Run unit tests"), job_dir)
+                _batch_job_result(
+                    make_job("j1"),
+                    make_workflow_job(
+                        name="j1",
+                        conclusion=WorkflowJobConclusion.FAILURE,
+                        steps=(make_job_step(name="Run unit tests", conclusion="failure"),),
+                    ),
+                    job_dir,
+                )
             ],
         )
     )
@@ -762,7 +758,11 @@ def test_full_report_keeps_passing_tests(tmp_path: Path):
         _batch_finished(
             artifacts,
             status="failure",
-            batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "failure"), job_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.FAILURE), job_dir
+                )
+            ],
         )
     )
 
@@ -797,8 +797,8 @@ def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path):
     j2 = _batch_job("j2", target="kafka", environment="py3.13")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]})
     batch_jobs = [
-        _batch_job_result(j1, _workflow_job("j1", "success"), j1_dir),
-        _batch_job_result(j2, _workflow_job("j2", "failure"), j2_dir),
+        _batch_job_result(j1, make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), j1_dir),
+        _batch_job_result(j2, make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.FAILURE), j2_dir),
     ]
     gatherer.process_message(_batch_finished(artifacts, status="failure", batch_jobs=batch_jobs))
 
@@ -819,8 +819,8 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path):
     j2 = _batch_job("j2", platform=PlatformName.WINDOWS, runner="windows-latest")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [j1, j2]})
     batch_jobs = [
-        _batch_job_result(j1, _workflow_job("j1", "success"), j1_dir),
-        _batch_job_result(j2, _workflow_job("j2", "success"), j2_dir),
+        _batch_job_result(j1, make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), j1_dir),
+        _batch_job_result(j2, make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.SUCCESS), j2_dir),
     ]
     gatherer.process_message(_batch_finished(artifacts, batch_jobs=batch_jobs))
 
@@ -848,8 +848,14 @@ def test_minimum_base_package_replica_organizes_beside_its_original(tmp_path: Pa
         _batch_finished(
             artifacts,
             batch_jobs=[
-                _batch_job_result(original, _workflow_job(original.name, "success"), original_dir),
-                _batch_job_result(replica, _workflow_job(replica.name, "success"), replica_dir),
+                _batch_job_result(
+                    original,
+                    make_workflow_job(name=original.name, conclusion=WorkflowJobConclusion.SUCCESS),
+                    original_dir,
+                ),
+                _batch_job_result(
+                    replica, make_workflow_job(name=replica.name, conclusion=WorkflowJobConclusion.SUCCESS), replica_dir
+                ),
             ],
         )
     )
@@ -884,7 +890,13 @@ def test_combined_job_unit_and_e2e_outputs_coexist(tmp_path: Path):
     gatherer.process_message(
         _batch_finished(
             artifacts,
-            batch_jobs=[_batch_job_result(combined_job, _workflow_job("postgres (py3.13)", "success"), job_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    combined_job,
+                    make_workflow_job(name="postgres (py3.13)", conclusion=WorkflowJobConclusion.SUCCESS),
+                    job_dir,
+                )
+            ],
         )
     )
 
@@ -905,7 +917,11 @@ def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
             artifacts1,
             id="b1",
             run_id=100,
-            batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), j1_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), j1_dir
+                )
+            ],
         )
     )
 
@@ -923,7 +939,7 @@ def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
             artifacts2,
             id="b2",
             run_id=200,
-            batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success", run_id=200), j1_dir2)],
+            batch_jobs=[_batch_job_result(make_job("j1"), make_workflow_job(name="j1", run_id=200), j1_dir2)],
         )
     )
 
@@ -940,18 +956,13 @@ def test_multiple_failing_steps_all_collected(tmp_path: Path):
     # A workflow can run on-failure steps, so more than one step may conclude in failure.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1", e2e=False)
-    workflow_job = WorkflowJob(
-        id=1,
-        run_id=100,
+    workflow_job = make_workflow_job(
         name="j1",
-        status="completed",
-        conclusion="failure",
-        started_at="2026-09-24T15:39:24Z",
-        completed_at="2026-09-24T15:44:30Z",
+        conclusion=WorkflowJobConclusion.FAILURE,
         steps=[
-            JobStep(name="Run unit tests", status="completed", conclusion="failure"),
-            JobStep(name="Upload logs on failure", status="completed", conclusion="failure"),
-            JobStep(name="Checkout", status="completed", conclusion="success"),
+            make_job_step(name="Run unit tests", conclusion="failure"),
+            make_job_step(name="Upload logs on failure", conclusion="failure"),
+            make_job_step(name="Checkout"),
         ],
     )
 
@@ -969,17 +980,12 @@ def test_multiple_failing_steps_all_collected(tmp_path: Path):
 def test_per_job_status_comes_from_correlated_job(tmp_path: Path):
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING, e2e=False)
-    workflow_job = WorkflowJob(
-        id=1,
-        run_id=100,
+    workflow_job = make_workflow_job(
         name="j1",
-        status="completed",
-        conclusion="failure",
-        started_at="2026-09-24T15:39:24Z",
-        completed_at="2026-09-24T15:44:30Z",
+        conclusion=WorkflowJobConclusion.FAILURE,
         steps=[
-            JobStep(name="Checkout", status="completed", conclusion="success"),
-            JobStep(name="Run unit tests", status="completed", conclusion="failure"),
+            make_job_step(name="Checkout"),
+            make_job_step(name="Run unit tests", conclusion="failure"),
         ],
     )
 
@@ -1000,7 +1006,14 @@ def test_missing_artifact_dir_is_skipped(tmp_path: Path):
 
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(
-        _batch_finished(artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), None)])
+        _batch_finished(
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), None
+                )
+            ],
+        )
     )
 
     result = gatherer._results_by_batch["batch-1"][0]
@@ -1016,7 +1029,12 @@ def test_malformed_junit_is_swallowed(tmp_path: Path):
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(
         _batch_finished(
-            artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+            artifacts,
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -1053,14 +1071,10 @@ def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
 def test_empty_batch_jobs_still_terminates_the_batch(tmp_path: Path, observed_status: WorkflowJobStatus | None):
     gatherer = _make_gatherer(tmp_path)
     if observed_status is not None:
-        observed = WorkflowJob(
-            id=1,
-            run_id=100,
+        observed = make_workflow_job(
             name="j1",
             status=observed_status,
             conclusion=WorkflowJobConclusion.FAILURE if observed_status is WorkflowJobStatus.COMPLETED else None,
-            started_at="2026-09-24T15:39:24Z",
-            completed_at="2026-09-24T15:44:30Z" if observed_status is WorkflowJobStatus.COMPLETED else None,
         )
         gatherer.process_message(_progress_update(observed))
         drain_queue(gatherer.bus.queue)
@@ -1090,7 +1104,7 @@ def test_empty_batch_does_not_block_completion(tmp_path: Path) -> None:
             artifacts,
             id="b2",
             run_id=200,
-            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success", run_id=200), job_dir)],
+            batch_jobs=[_batch_job_result(_batch_job("j1"), make_workflow_job(name="j1", run_id=200), job_dir)],
         )
     )
 
@@ -1109,7 +1123,11 @@ def test_unplanned_batch_is_ignored(tmp_path: Path) -> None:
         _batch_finished(
             artifacts,
             id="unknown",
-            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    _batch_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -1126,7 +1144,12 @@ def test_duplicate_batch_finished_is_ignored(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
     batch = _batch_finished(
-        artifacts, batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+        artifacts,
+        batch_jobs=[
+            _batch_job_result(
+                make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+            )
+        ],
     )
 
     gatherer = _make_gatherer(tmp_path)
@@ -1148,7 +1171,9 @@ def test_duplicate_is_detected_by_batch_id_not_message_id(tmp_path: Path) -> Non
     # A re-delivery carries the same batch under a new message id: still one batch.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
-    job = _batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)
+    job = _batch_job_result(
+        _batch_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+    )
 
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(_batch_finished(artifacts, id="msg-a", batch_id="batch-1", batch_jobs=[job]))
@@ -1173,7 +1198,11 @@ def test_correlates_on_batch_id_not_message_id(tmp_path: Path):
             id="msg-uuid-1",
             batch_id="batch-09",
             run_id=555,
-            batch_jobs=[_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -1189,7 +1218,11 @@ def test_duplicate_correlates_on_batch_id_across_reruns(tmp_path: Path):
     # be ignored because correlation is on batch_id, not run_id.
     artifacts = tmp_path / "artifacts" / "100"
     job_dir = _make_job_tree(artifacts, "j1")
-    jobs = [_batch_job_result(make_job("j1"), _workflow_job("j1", "success"), job_dir)]
+    jobs = [
+        _batch_job_result(
+            make_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+        )
+    ]
 
     gatherer = _make_gatherer(tmp_path, {"batch-09": [make_job("j1")]})
     gatherer.process_message(_batch_finished(artifacts, id="msg-a", batch_id="batch-09", run_id=100, batch_jobs=jobs))
@@ -1253,7 +1286,11 @@ def test_finished_batch_leaves_other_batches_planned(tmp_path: Path) -> None:
             artifacts,
             id="b1",
             run_id=100,
-            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    _batch_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -1277,9 +1314,15 @@ def test_progress_and_registry_agree(tmp_path: Path) -> None:
             artifacts,
             status="failure",
             batch_jobs=[
-                _batch_job_result(_batch_job("j1", environment="py3.12"), _workflow_job("j1", "success"), j1_dir),
                 _batch_job_result(
-                    _batch_job("j2", target="kafka", environment="py3.13"), _workflow_job("j2", "failure"), j2_dir
+                    _batch_job("j1", environment="py3.12"),
+                    make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS),
+                    j1_dir,
+                ),
+                _batch_job_result(
+                    _batch_job("j2", target="kafka", environment="py3.13"),
+                    make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.FAILURE),
+                    j2_dir,
                 ),
             ],
         )
@@ -1307,7 +1350,11 @@ def test_batch_status_comes_from_the_workflow_not_from_its_jobs(tmp_path: Path) 
         _batch_finished(
             artifacts,
             status="failure",
-            batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), job_dir)],
+            batch_jobs=[
+                _batch_job_result(
+                    _batch_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), job_dir
+                )
+            ],
         )
     )
 
@@ -1330,8 +1377,16 @@ def test_unplanned_job_is_warned_about_but_left_out_of_the_totals(tmp_path: Path
         _batch_finished(
             artifacts,
             batch_jobs=[
-                _batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), planned_dir),
-                _batch_job_result(_batch_job("j2", target="kafka"), _workflow_job("j2", "failure"), stray_dir),
+                _batch_job_result(
+                    _batch_job("j1"),
+                    make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS),
+                    planned_dir,
+                ),
+                _batch_job_result(
+                    _batch_job("j2", target="kafka"),
+                    make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.FAILURE),
+                    stray_dir,
+                ),
             ],
         )
     )
@@ -1372,7 +1427,7 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
     messages = []
     for index in range(1, 6):
         artifacts = tmp_path / "artifacts" / str(index)
-        jobs = [_scenario_job(artifacts, f"int{index}", "success", JUNIT_PASSING, run_id=index)]
+        jobs = [_scenario_job(artifacts, f"int{index}", "success", JUNIT_PASSING)]
         messages.append(_batch_finished(artifacts, id=f"b{index}", run_id=index, batch_jobs=jobs))
 
     barrier = threading.Barrier(len(messages))
@@ -1399,7 +1454,14 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
 def test_missing_artifact_dir_is_recorded_as_an_attempt_error(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path)
     gatherer.process_message(
-        _batch_finished("", batch_jobs=[_batch_job_result(_batch_job("j1"), _workflow_job("j1", "success"), None)])
+        _batch_finished(
+            "",
+            batch_jobs=[
+                _batch_job_result(
+                    _batch_job("j1"), make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), None
+                )
+            ],
+        )
     )
 
     attempt = _batch_progress(drain_queue(gatherer.bus.queue)[0], "batch-1").jobs_progress[0].latest
@@ -1422,8 +1484,8 @@ def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) 
             artifacts,
             status="failure",
             batch_jobs=[
-                _batch_job_result(j1, _workflow_job("j1", "success"), passing),
-                _batch_job_result(j2, _workflow_job("j2", "failure"), failing),
+                _batch_job_result(j1, make_workflow_job(name="j1", conclusion=WorkflowJobConclusion.SUCCESS), passing),
+                _batch_job_result(j2, make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.FAILURE), failing),
             ],
         )
     )
@@ -1435,7 +1497,9 @@ def test_second_run_appends_an_attempt_and_keeps_untouched_jobs(tmp_path: Path) 
         id="msg-2",
         batch_id="batch-1",
         run_id=101,
-        batch_jobs=[_batch_job_result(j2, _workflow_job("j2", "success"), rerun_dir)],
+        batch_jobs=[
+            _batch_job_result(j2, make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.SUCCESS), rerun_dir)
+        ],
     )
     gatherer._progress_by_batch["batch-1"] = gatherer._finished_batch_progress(
         gatherer._progress_by_batch["batch-1"], rerun, [gatherer._gather_job(rerun.batch_jobs[0], rerun)]
@@ -1471,14 +1535,17 @@ def _scenario_job(
     conclusion: str,
     junit: str | None,
     *,
-    run_id: int,
     platform: PlatformName = PlatformName.LINUX,
     runner_labels: tuple[str, ...] = ("ubuntu-latest",),
     failed_step: str | None = None,
 ) -> BatchJobResult:
     job = _scenario_batch_job(target, platform, runner_labels[0])
     job_dir = _make_job_tree(artifacts, target, environment="py3.12", junit=junit, e2e=False)
-    workflow_job = _workflow_job(target, conclusion, failed_step=failed_step, run_id=run_id)
+    workflow_job = make_workflow_job(
+        name=target,
+        conclusion=WorkflowJobConclusion(conclusion),
+        steps=(make_job_step(name=failed_step, conclusion="failure"),) if failed_step else (),
+    )
     return _batch_job_result(job, workflow_job, job_dir)
 
 
@@ -1502,18 +1569,17 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     # Batch-01 (steps 10-11): 4 jobs pass.
     a1 = tmp_path / "artifacts" / "1"
     batch_01 = [
-        _scenario_job(a1, "postgres", "success", JUNIT_PASSING, run_id=1),
-        _scenario_job(a1, "redis", "success", JUNIT_PASSING, run_id=1),
+        _scenario_job(a1, "postgres", "success", JUNIT_PASSING),
+        _scenario_job(a1, "redis", "success", JUNIT_PASSING),
         _scenario_job(
             a1,
             "ntp",
             "success",
             JUNIT_PASSING,
-            run_id=1,
             platform=PlatformName.WINDOWS,
             runner_labels=("windows-latest",),
         ),
-        _scenario_job(a1, "kafka", "success", JUNIT_PASSING, run_id=1),
+        _scenario_job(a1, "kafka", "success", JUNIT_PASSING),
     ]
     gatherer.process_message(_batch_finished(a1, id="b1", run_id=1, batch_jobs=batch_01))
     rev1 = drain_queue(gatherer.bus.queue)
@@ -1524,10 +1590,10 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     # Batch-02 (steps 13-14): 3 pass + 1 fail (mysql py3.12 linux).
     a2 = tmp_path / "artifacts" / "2"
     batch_02 = [
-        _scenario_job(a2, "disk", "success", JUNIT_PASSING, run_id=2),
-        _scenario_job(a2, "snmp", "success", JUNIT_PASSING, run_id=2),
-        _scenario_job(a2, "http_check", "success", JUNIT_PASSING, run_id=2),
-        _scenario_job(a2, "mysql", "failure", JUNIT_FAILING, run_id=2, failed_step="Run unit tests"),
+        _scenario_job(a2, "disk", "success", JUNIT_PASSING),
+        _scenario_job(a2, "snmp", "success", JUNIT_PASSING),
+        _scenario_job(a2, "http_check", "success", JUNIT_PASSING),
+        _scenario_job(a2, "mysql", "failure", JUNIT_FAILING, failed_step="Run unit tests"),
     ]
     gatherer.process_message(_batch_finished(a2, id="b2", status="failure", run_id=2, batch_jobs=batch_02))
     rev2 = drain_queue(gatherer.bus.queue)
@@ -1538,10 +1604,10 @@ def test_dispatcher_scenario_three_batches(tmp_path: Path) -> None:
     # Batch-03 (steps 15-16): 3 pass + 1 skip. Terminal — revision 3, done.
     a3 = tmp_path / "artifacts" / "3"
     batch_03 = [
-        _scenario_job(a3, "nginx", "success", JUNIT_PASSING, run_id=3),
-        _scenario_job(a3, "kubelet", "success", JUNIT_PASSING, run_id=3),
-        _scenario_job(a3, "vault", "success", JUNIT_PASSING, run_id=3),
-        _scenario_job(a3, "consul", "skipped", None, run_id=3),
+        _scenario_job(a3, "nginx", "success", JUNIT_PASSING),
+        _scenario_job(a3, "kubelet", "success", JUNIT_PASSING),
+        _scenario_job(a3, "vault", "success", JUNIT_PASSING),
+        _scenario_job(a3, "consul", "skipped", None),
     ]
     gatherer.process_message(_batch_finished(a3, id="b3", run_id=3, batch_jobs=batch_03))
     rev3 = drain_queue(gatherer.bus.queue)
@@ -1607,7 +1673,7 @@ def test_dispatcher_scenario_revisions_are_monotonic(tmp_path: Path):
     revisions: list[int] = []
     for index in (1, 2, 3):
         artifacts = tmp_path / "artifacts" / str(index)
-        jobs = [_scenario_job(artifacts, f"int{index}", "success", JUNIT_PASSING, run_id=index)]
+        jobs = [_scenario_job(artifacts, f"int{index}", "success", JUNIT_PASSING)]
         gatherer.process_message(_batch_finished(artifacts, id=f"b{index}", run_id=index, batch_jobs=jobs))
         emitted = drain_queue(gatherer.bus.queue)
         assert len(emitted) == 1
@@ -1662,7 +1728,7 @@ def test_gatherer_updates_the_pr_comment_through_the_event_bus(tmp_path: Path):
     bus.submit_message(gatherer.build_initial_update())
     for index, (batch_id, jobs) in enumerate(plan.items(), start=1):
         artifacts = tmp_path / "artifacts" / batch_id
-        results = [_scenario_job(artifacts, job.target, "success", JUNIT_PASSING, run_id=index) for job in jobs]
+        results = [_scenario_job(artifacts, job.target, "success", JUNIT_PASSING) for job in jobs]
         bus.submit_message(_batch_finished(artifacts, id=batch_id, run_id=index, batch_jobs=results))
 
     bus.run()

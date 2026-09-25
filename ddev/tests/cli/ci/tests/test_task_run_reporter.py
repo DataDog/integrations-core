@@ -42,7 +42,7 @@ from tests.cli.ci.tests.helpers import (
     recording_runtime,
     uniform_progress,
 )
-from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
+from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient, make_issue_comment
 from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 OWNER = "DataDog"
@@ -94,7 +94,7 @@ def _shutdown_request(kind: ShutdownKind) -> ShutdownRequest:
 
 
 def _marked_comment(comment_id: int = 77, note: str = "ours") -> IssueComment:
-    return IssueComment(id=comment_id, body=f"{COMMENT_MARKER}\n{note}")
+    return make_issue_comment(id=comment_id, body=f"{COMMENT_MARKER}\n{note}")
 
 
 def _http_error(status_code: int) -> httpx.HTTPStatusError:
@@ -163,11 +163,11 @@ def test_created_body_carries_the_marker():
 @pytest.mark.parametrize(
     ("comments", "expected_comment_id"),
     [
-        pytest.param((IssueComment(id=1, body="a human comment"), _marked_comment()), 77, id="marked-comment-reused"),
+        pytest.param((make_issue_comment(body="a human comment"), _marked_comment()), 77, id="marked-comment-reused"),
         pytest.param((_marked_comment(88, "previous"),), 88, id="marked-comment-on-a-later-page"),
-        pytest.param((IssueComment(id=1, body="Dispatcher tests: passed"),), None, id="unmarked-comment-ignored"),
+        pytest.param((make_issue_comment(body="Dispatcher tests: passed"),), None, id="unmarked-comment-ignored"),
         pytest.param(
-            (IssueComment(id=31, body=f"> {COMMENT_MARKER}\n> ## Dispatcher tests\n\nlooks wrong to me"),),
+            (make_issue_comment(id=31, body=f"> {COMMENT_MARKER}\n> ## Dispatcher tests\n\nlooks wrong to me"),),
             None,
             id="quote-copying-the-marker-ignored",
         ),

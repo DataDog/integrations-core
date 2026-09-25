@@ -1,36 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Test helpers for the async GitHub client.
+"""The fake async client, recording every call and serving canned responses.
 
-Provides a `FakeAsyncGitHubClient` that records every call and lets tests
-register canned responses with `mock_response`. The `fake_async_github`
-pytest fixture that wires this fake into `async_github_client` lives in
-the root `tests/conftest.py`.
-
-Quick reference:
-
-    def test_thing(fake_async_github):
-        # Sticky default for all matching calls
-        fake_async_github.mock_response(
-            'create_pull_request',
-            PullRequest(number=5, html_url='https://github.com/x/pr/5', changed_files=1),
-        )
-
-        # Partial match: only PR #5 gets the override
-        fake_async_github.mock_response(
-            'add_labels_to_issue',
-            httpx.HTTPStatusError(...),
-            issue_number=5,
-        )
-
-        # FIFO queue: first matching call raises, second succeeds
-        fake_async_github.mock_response('create_pull_request', err, once=True)
-        fake_async_github.mock_response('create_pull_request', pr_response, once=True)
-
-        do_thing_under_test()
-        fake_async_github.assert_called_with('create_pull_request', ...)
-        fake_async_github.assert_all_responses_consumed()
+The package docstring in `__init__.py` holds the quick reference for using it in a test.
 """
 
 from __future__ import annotations
@@ -49,23 +22,35 @@ from ddev.utils.github_async.models import (
     CheckRun,
     CheckRunConclusion,
     CheckRunStatus,
-    CommitInfo,
     FileCommit,
     FileContent,
-    GitObject,
     GitReference,
     IssueComment,
     Label,
     PullRequest,
     PullRequestFile,
     PullRequestReviewComment,
-    WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
 )
 from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
 from ddev.utils.rate_limiting import InstrumentedAsyncLimiter, RelaxedRateLimits
+
+from .factories import (
+    make_artifacts_list,
+    make_check_run,
+    make_file_commit,
+    make_file_content,
+    make_git_reference,
+    make_issue_comment,
+    make_pull_request,
+    make_pull_request_review_comment,
+    make_response,
+    make_workflow_dispatch_result,
+    make_workflow_jobs_list,
+    make_workflow_run,
+)
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
 # that assert on the URL can reference the helper rather than duplicating the literal.
@@ -121,32 +106,16 @@ class _MockEntry:
 def _default_response_factories() -> dict[str, Callable[[], Any]]:
     """Built-in default responses used when no `mock_response` matches a call."""
     return {
-        'create_pull_request': lambda: GitHubResponse(
-            data=PullRequest(number=1, html_url='https://github.com/test/repo/pull/1', changed_files=1),
-            headers={},
-        ),
-        'add_labels_to_issue': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'create_pull_request': lambda: make_response(make_pull_request(number=1)),
+        'add_labels_to_issue': lambda: make_response([]),
         # Cancelling returns nothing, and a run already terminal is the outcome asked for.
         'cancel_workflow_run': lambda: None,
         'enter_shutdown_mode': lambda: None,
-        'create_issue_comment': lambda: GitHubResponse(
-            data=IssueComment(
-                id=DEFAULT_COMMENT_ID,
-                body='',
-                html_url='https://github.com/test/repo/issues/1#issuecomment-1',
-            ),
-            headers={},
-        ),
-        'create_pr_review_comment': lambda: GitHubResponse(
-            data=PullRequestReviewComment(id=1, body='', path='file.py', commit_id='abc123'),
-            headers={},
-        ),
-        'update_issue_comment': lambda: GitHubResponse(
-            data=IssueComment(id=DEFAULT_COMMENT_ID, body=''),
-            headers={},
-        ),
+        'create_issue_comment': lambda: make_response(make_issue_comment(id=DEFAULT_COMMENT_ID)),
+        'create_pr_review_comment': lambda: make_response(make_pull_request_review_comment()),
+        'update_issue_comment': lambda: make_response(make_issue_comment(id=DEFAULT_COMMENT_ID)),
         # Default to a PR with no existing Dispatcher comment, so the run reporter creates one.
-        'list_issue_comments': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'list_issue_comments': lambda: make_response([]),
         # Default to "PR not found" so tests that don't care about PR lookup auto-fall-through
         # to commit resolution. Tests that need a specific PR register their own mock_response.
         'get_pull_request': lambda: httpx.HTTPStatusError(
@@ -156,101 +125,29 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         ),
         # Default to "no existing PRs" so the --from-pr idempotency check does not skip a base
         # unless a test explicitly registers an existing backport PR.
-        'list_pull_requests': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'list_pull_requests': lambda: make_response([]),
         # An empty page; tests that need changed files register their own list of PullRequestFile.
-        'list_pull_request_files': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
+        'list_pull_request_files': lambda: make_response([]),
         # Default to "this commit belongs to no open pull request", the same shape a closed one gives.
-        'list_commit_pulls': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
-        'create_workflow_dispatch': lambda: GitHubResponse(
-            data=WorkflowDispatchResult(
-                workflow_run_id=123,
-                run_url='https://api.github.com/repos/test/repo/actions/runs/123',
-                html_url=DEFAULT_DISPATCH_HTML_URL,
-            ),
-            headers={},
+        'list_commit_pulls': lambda: make_response([]),
+        'create_workflow_dispatch': lambda: make_response(
+            make_workflow_dispatch_result(workflow_run_id=123, html_url=DEFAULT_DISPATCH_HTML_URL)
         ),
         # Default to a completed/successful run so happy-path tests don't have to register one.
-        'get_workflow_run': lambda: GitHubResponse(
-            data=WorkflowRun(
-                id=123,
-                name='test-batch',
-                status='completed',
-                conclusion='success',
-                html_url='https://github.com/o/r/actions/runs/123',
-                run_started_at='2026-01-01T10:00:00Z',
-                updated_at='2026-01-01T10:01:30Z',
-            ),
-            headers={},
-        ),
-        'create_check_run': lambda: GitHubResponse(
-            data=CheckRun(
-                id=999,
-                name='check',
-                status='in_progress',
-                conclusion=None,
-                html_url=None,
-                head_sha='head-sha',
-            ),
-            headers={},
-        ),
-        'update_check_run': lambda: GitHubResponse(
-            data=CheckRun(
-                id=999,
-                name='check',
-                status='completed',
-                conclusion='success',
-                html_url=None,
-                head_sha='head-sha',
-            ),
-            headers={},
-        ),
+        'get_workflow_run': lambda: make_response(make_workflow_run()),
+        'create_check_run': lambda: make_response(make_check_run(status=CheckRunStatus.IN_PROGRESS)),
+        'update_check_run': lambda: make_response(make_check_run()),
         # An empty page; tests that need artifacts register their own ArtifactsList.
-        'list_workflow_run_artifacts': lambda: GitHubResponse(
-            data=ArtifactsList(total_count=0, artifacts=[]),
-            headers={},
-        ),
+        'list_workflow_run_artifacts': lambda: make_response(make_artifacts_list()),
         # An empty page; tests that need jobs register their own WorkflowJobsList.
-        'list_workflow_jobs': lambda: GitHubResponse(
-            data=WorkflowJobsList(total_count=0, jobs=[]),
-            headers={},
-        ),
+        'list_workflow_jobs': lambda: make_response(make_workflow_jobs_list()),
         # Download is a side-effecting no-op by default; per-URL failures are registered explicitly.
         'download_artifact': lambda: None,
         # Git data / contents defaults. Tests that care about specific values register their own.
-        'get_ref': lambda: GitHubResponse(
-            data=GitReference(
-                ref='refs/heads/main',
-                node_id='REF_kwDO',
-                url='https://api.github.com/repos/test/repo/git/refs/heads/main',
-                object=GitObject(type='commit', sha='a' * 40, url='https://api.github.com/x'),
-            ),
-            headers={},
-        ),
-        'create_ref': lambda: GitHubResponse(
-            data=GitReference(
-                ref='refs/heads/feature',
-                node_id='REF_kwDO',
-                url='https://api.github.com/repos/test/repo/git/refs/heads/feature',
-                object=GitObject(type='commit', sha='a' * 40, url='https://api.github.com/x'),
-            ),
-            headers={},
-        ),
-        'get_content': lambda: GitHubResponse(
-            data=FileContent(
-                type='file',
-                encoding='base64',
-                size=3,
-                name='release.json',
-                path='release.json',
-                content='e30K',
-                sha='b' * 40,
-            ),
-            headers={},
-        ),
-        'create_or_update_file_contents': lambda: GitHubResponse(
-            data=FileCommit(commit=CommitInfo(sha='c' * 40, html_url='https://github.com/x/commit/c')),
-            headers={},
-        ),
+        'get_ref': lambda: make_response(make_git_reference()),
+        'create_ref': lambda: make_response(make_git_reference(ref='refs/heads/feature')),
+        'get_content': lambda: make_response(make_file_content()),
+        'create_or_update_file_contents': lambda: make_response(make_file_commit()),
     }
 
 

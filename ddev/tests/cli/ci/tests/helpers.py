@@ -31,6 +31,7 @@ from ddev.utils.github_async.models import IssueComment
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
 from ddev.utils.platform import PlatformName
+from tests.helpers.github_async import make_response
 from tests.helpers.monitoring import RecordingSink
 
 DEFAULT_PYTHON_VERSION = "3.13"
@@ -408,4 +409,4 @@ def jobs_reported(body: str) -> int:
 
 def comment_page(*comments: IssueComment) -> GitHubResponse:
     """One page of issue comments, as the paginated client yields it."""
-    return GitHubResponse.model_validate({"data": list(comments), "headers": {}})
+    return make_response(list(comments))
