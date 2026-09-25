@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.5.2 / 2026-09-25
+
+***Fixed***:
+
+* Make logging when encountering binary calls issues less noisy ([#25154](https://github.com/DataDog/integrations-core/pull/25154))
+
 ## 2.5.1 / 2026-08-05 / Agent 7.83.0
 
 ***Fixed***:
