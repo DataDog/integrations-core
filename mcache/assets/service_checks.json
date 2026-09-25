@@ -5,6 +5,7 @@
         "check": "memcache.can_connect",
         "statuses": [
             "ok",
+            "warning",
             "critical"
         ],
         "groups": [
