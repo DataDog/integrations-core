@@ -125,10 +125,10 @@ class ExecutionScreen(TogoScreen):
         if self.resume:
             runs_dir = self._runs_dir or ai_runs_dir(self.togo_app.ddev_app.repo.path)
             for phase_id in flow_resume_state(self.flow, runs_dir).completed:
-                self._phase_statuses[phase_id] = RunStatus.DONE
+                self._phase_statuses[phase_id] = RunStatus.CHECKPOINTED
                 for task_phase, task_name in self._task_statuses:
                     if task_phase == phase_id:
-                        self._task_statuses[(task_phase, task_name)] = RunStatus.DONE
+                        self._task_statuses[(task_phase, task_name)] = RunStatus.CHECKPOINTED
         self._update_display()
         self.togo_app.execution_status = ExecutionStatus.RUNNING
         self._transition_to_finishing_if_phases_done()
@@ -340,8 +340,9 @@ class ExecutionScreen(TogoScreen):
         self._transition_to_finishing_if_phases_done()
 
     def _transition_to_finishing_if_phases_done(self) -> None:
+        """A resumed run settles once every phase is either done here or carried over from a checkpoint."""
         if self.togo_app.execution_status is ExecutionStatus.RUNNING and all(
-            status is RunStatus.DONE for status in self._phase_statuses.values()
+            status in (RunStatus.DONE, RunStatus.CHECKPOINTED) for status in self._phase_statuses.values()
         ):
             self.togo_app.execution_status = ExecutionStatus.FINISHING
 
