@@ -15,6 +15,7 @@ import click
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFileWithOverrides, RootConfig
+from ddev.repo.constants import DEFAULT_GITHUB_OWNER
 from ddev.repo.core import Repository
 from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property, running_in_ci
 from ddev.utils.fs import Path
@@ -105,7 +106,15 @@ class Application(Terminal):
     def github(self) -> GitHubManager:
         return self.__github
 
-    def set_repo(self, core: bool, extras: bool, marketplace: bool, agent: bool, here: bool):
+    def set_repo(
+        self,
+        core: bool,
+        extras: bool,
+        marketplace: bool,
+        agent: bool,
+        here: bool,
+        github_owner: str | None = None,
+    ) -> None:
         # Config looks like this:
         #
         # repo = "core"
@@ -129,8 +138,23 @@ class Application(Terminal):
         else:
             self.__repo = Repository(self.config.repo.name, self.config.repo.path)
 
+        # An explicit owner always wins. Otherwise, inside a GitHub Actions workflow, target the
+        # workflow's own repository when it names the active one, e.g. ddoghq/integrations-internal.
+        # The origin remote is deliberately not consulted: it may be a personal fork while GitHub
+        # operations still target the upstream repository.
+        owner = github_owner
+        if owner is None and (github_repository := os.environ.get('GITHUB_REPOSITORY', '')):
+            repository_owner, separator, name = github_repository.partition('/')
+            if repository_owner and separator and name and name.lower() == self.repo.full_name.lower():
+                owner = repository_owner
+
+        self.repo.owner = owner or DEFAULT_GITHUB_OWNER
+
         self.__github = GitHubManager(
-            self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
+            self.repo,
+            user=self.config.github.user,
+            token=self.config.github.token,
+            status=self.status,
         )
 
     def abort(self, text: str = '', code: int = 1, **kwargs: Any) -> NoReturn:
