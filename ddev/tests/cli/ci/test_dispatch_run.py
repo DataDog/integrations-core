@@ -9,8 +9,8 @@ import pytest
 
 from ddev.cli.ci.dispatch_run import PullRequestResolver, head_is_fork
 from ddev.cli.ci.tests.changes import ChangeResolutionError
-from ddev.utils.github_async.models import PullRequestRef
 from tests.cli.ci.helpers import HEAD_SHA, listed_pull_request, pulls_page
+from tests.helpers.github_async import make_pull_request_ref, make_pull_request_repo
 
 if TYPE_CHECKING:
     from tests.helpers.github_async import FakeAsyncGitHubClient
@@ -72,8 +72,10 @@ async def test_head_lookup_refuses_incomplete_results(fake_async_github: FakeAsy
 )
 def test_head_is_fork(head_repo: str | None, expected: bool):
     """A fork must not receive same-repository credentials."""
-    head = PullRequestRef(
-        ref='a-branch', sha=HEAD_SHA, repo={'full_name': head_repo} if head_repo is not None else None
+    head = make_pull_request_ref(
+        ref='a-branch',
+        sha=HEAD_SHA,
+        repo=None if head_repo is None else make_pull_request_repo(full_name=head_repo),
     )
 
     assert head_is_fork(head, owner='DataDog', repo='integrations-core') is expected

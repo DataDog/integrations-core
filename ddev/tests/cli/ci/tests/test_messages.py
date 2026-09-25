@@ -15,9 +15,9 @@ from ddev.cli.ci.tests.messages import (
     WorkflowStatus,
 )
 from ddev.cli.ci.tests.status import Status
-from ddev.utils.github_async.models import WorkflowJob
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import make_job
+from tests.helpers.github_async import make_workflow_job
 
 
 def test_artifact_name_built_from_target_env_platform():
@@ -67,15 +67,7 @@ def test_correlate_matches_jobs_and_artifacts(tmp_path: Path):
     base = job.artifact_name()
     artifact_dir = tmp_path / base
     artifact_dir.mkdir()
-    workflow_job = WorkflowJob(
-        id=1,
-        run_id=123,
-        name="j1",
-        status="completed",
-        conclusion="success",
-        started_at="2026-09-24T15:39:24Z",
-        completed_at="2026-09-24T15:44:30Z",
-    )
+    workflow_job = make_workflow_job(name="j1")
 
     [result] = BatchJobResult.correlate([job], [workflow_job], {base: artifact_dir})
 

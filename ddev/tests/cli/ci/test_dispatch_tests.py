@@ -28,12 +28,18 @@ from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.monitoring.datadog_metrics import DatadogMetricsSink
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
 from ddev.utils.github_async import async_github_client
-from ddev.utils.github_async.models import PullRequest, WorkflowRun
+from ddev.utils.github_async.models import PullRequest, PullRequestState
 from ddev.utils.rate_limiting import BudgetGovernor
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, decode_job_list, listed_pull_request, mock_job_result, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.datadog import FakeLogSubmitter, FakeMetricsSubmitter
+from tests.helpers.github_async import (
+    make_pull_request,
+    make_pull_request_ref,
+    make_pull_request_repo,
+    make_workflow_run,
+)
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 if TYPE_CHECKING:
@@ -66,7 +72,7 @@ PARENTS = {f'{MERGE_SHA}^1': 'current-master-sha-ccc', f'{MERGE_SHA}^2': HEAD_SH
 
 
 def pull_request(
-    state: str = 'open',
+    state: PullRequestState = PullRequestState.OPEN,
     number: int = PR_NUMBER,
     head_sha: str = HEAD_SHA,
     base_branch: str = 'a-target-branch',
@@ -74,17 +80,15 @@ def pull_request(
     head_repo: str | None = 'DataDog/integrations-core',
     merge_commit_sha: str | None = MERGE_SHA,
 ) -> PullRequest:
-    return PullRequest(
+    return make_pull_request(
         number=number,
-        html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
         state=state,
-        head={
-            'ref': 'hs/a-branch',
-            'sha': head_sha,
-            'repo': {'full_name': head_repo} if head_repo is not None else None,
-        },
-        base={'ref': base_branch, 'sha': base_sha},
-        changed_files=1,
+        head=make_pull_request_ref(
+            ref='hs/a-branch',
+            sha=head_sha,
+            repo=None if head_repo is None else make_pull_request_repo(full_name=head_repo),
+        ),
+        base=make_pull_request_ref(ref=base_branch, sha=base_sha, repo=None),
         merge_commit_sha=merge_commit_sha,
     )
 
@@ -330,7 +334,7 @@ def test_a_numbered_pull_request_must_match_its_base_constraint(ddev, github, pl
 
 def test_a_pull_request_that_is_no_longer_open_dispatches_nothing(ddev, github, planned):
     """Nothing to test at that point, and no open pull request to report to either."""
-    github.mock_response('get_pull_request', pull_request(state='closed'))
+    github.mock_response('get_pull_request', pull_request(state=PullRequestState.CLOSED))
 
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
 
@@ -1014,13 +1018,7 @@ def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
     mock_job_result(github, job, 'failure')
     github.mock_response(
         'get_workflow_run',
-        WorkflowRun(
-            id=123,
-            name='test-batch',
-            status='completed',
-            conclusion='failure',
-            html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
-        ),
+        make_workflow_run(name='test-batch', conclusion='failure'),
     )
     sink = recording_runtime(mocker)
     fast_dispatcher_config(mocker)
