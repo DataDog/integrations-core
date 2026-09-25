@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import fnmatch
 import inspect
+import json
 import re
 from collections.abc import Generator
 from copy import copy, deepcopy
@@ -11,8 +12,6 @@ from math import isinf, isnan
 from typing import List  # noqa: F401
 
 from prometheus_client import Metric
-from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
-from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
@@ -24,6 +23,60 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
+
+
+class _GoSample:
+    """Duck type for prometheus_client.metrics_core.Sample, populated from Go bridge JSON output."""
+
+    __slots__ = ('name', 'labels', 'value', 'timestamp')
+
+    def __init__(self, data):
+        labels = data['labels']
+        self.name = labels.pop('__name__', '')
+        self.labels = labels
+        self.value = data['value']
+        ts = data.get('timestamp')
+        self.timestamp = ts if ts else None
+
+
+class _GoMetric:
+    """Duck type for prometheus_client.Metric, populated from Go bridge JSON output."""
+
+    __slots__ = ('name', 'type', 'samples')
+
+    def __init__(self, data):
+        self.name = data['name']
+        # get_label_normalizer expects lowercase type strings ('histogram', 'summary', etc.)
+        self.type = data['type'].lower()
+        self.samples = [_GoSample(s) for s in data['samples']]
+
+
+class _ProcessedSample:
+    """Duck type for a processed sample from the Go bridge, with pre-built tags."""
+
+    __slots__ = ('name', 'value', 'labels', 'tags', 'hostname', '_go_label_keys')
+
+    def __init__(self, data):
+        self.name = data['sample_name']
+        self.value = data['value']
+        self.labels = data.get('labels', {})
+        self.labels.pop('__name__', None)
+        self.tags = data.get('tags', [])
+        self.hostname = data.get('hostname', '')
+        # Track original label keys so we can detect labels added by decorators/subclasses
+        self._go_label_keys = frozenset(self.labels)
+
+
+class _ProcessedMetric:
+    """Duck type for a processed metric family from the Go bridge, with pre-built sample data."""
+
+    __slots__ = ('name', 'type', 'samples', '_processed')
+
+    def __init__(self, data):
+        self.name = data['name']
+        self.type = data['type'].lower()
+        self.samples = [_ProcessedSample(s) for s in data['samples']]
+        self._processed = True
 
 
 class OpenMetricsScraper:
@@ -147,6 +200,7 @@ class OpenMetricsScraper:
             else:
                 exclude_metrics_patterns.append(entry)
 
+        self._exclude_metrics_patterns = exclude_metrics_patterns
         if exclude_metrics_patterns:
             self.exclude_metrics_pattern = re.compile('|'.join(exclude_metrics_patterns))
 
@@ -235,6 +289,53 @@ class OpenMetricsScraper:
         # Used for monotonic counts
         self.flush_first_value = None
 
+        # Build the Go processing config and probe availability.
+        self._process_config = self._build_process_config()
+        try:
+            probe = datadog_agent.process_prometheus_metrics('', json.dumps(self._process_config), '')
+            self._use_go_process = probe is not None
+        except Exception:
+            self._use_go_process = False
+
+    def _build_process_config(self):
+        """Build the ProcessConfig dict for the Go bridge."""
+        config = self.config
+
+        go_share_labels = {}
+        for metric, cfg in config.get('share_labels', {}).items():
+            if cfg is True:
+                go_share_labels[metric] = {'match': [], 'labels': [], 'values': []}
+            elif isinstance(cfg, dict):
+                go_share_labels[metric] = {
+                    'match': list(cfg.get('match', [])),
+                    'labels': list(cfg.get('labels', [])),
+                    'values': [float(v) for v in cfg.get('values', [])],
+                }
+
+        if self.target_info:
+            go_share_labels.setdefault('target_info', {'match': [], 'labels': [], 'values': []})
+
+        go_exclude_by_labels = {}
+        for label, values in config.get('exclude_metrics_by_labels', {}).items():
+            if values is True:
+                go_exclude_by_labels[label] = []
+            elif isinstance(values, list):
+                go_exclude_by_labels[label] = values
+
+        return {
+            'exclude_labels': list(self.exclude_labels),
+            'include_labels': list(self.include_labels),
+            'rename_labels': dict(self.rename_labels),
+            'exclude_metrics': list(self.exclude_metrics),
+            'exclude_metrics_patterns': self._exclude_metrics_patterns,
+            'exclude_metrics_by_labels': go_exclude_by_labels,
+            'raw_metric_prefix': self.raw_metric_prefix,
+            'hostname_label': self.hostname_label,
+            'hostname_format': config.get('hostname_format', ''),
+            'static_tags': [],
+            'share_labels': go_share_labels,
+        }
+
     def _scrape(self):
         """
         Execute a scrape, and for each metric collected, transform the metric.
@@ -278,16 +379,19 @@ class OpenMetricsScraper:
 
         if self.flush_first_value is None and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
-        if self.label_aggregator.configured:
-            metric_parser = self.label_aggregator(metric_parser)
+
+        # When Go handled processing, label aggregation and metric exclusion are already done.
+        if not self._use_go_process:
+            if self.label_aggregator.configured:
+                metric_parser = self.label_aggregator(metric_parser)
 
         for metric in metric_parser:
-            # Skip excluded metrics
-            if metric.name in self.exclude_metrics or (
-                self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
-            ):
-                self.submit_telemetry_number_of_ignored_metric_samples(metric)
-                continue
+            if not self._use_go_process:
+                if metric.name in self.exclude_metrics or (
+                    self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
+                ):
+                    self.submit_telemetry_number_of_ignored_metric_samples(metric)
+                    continue
 
             yield metric
 
@@ -301,20 +405,21 @@ class OpenMetricsScraper:
 
         if self.flush_first_value is None and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
-        if self.label_aggregator.configured:
-            metric_parser = self.label_aggregator(metric_parser)
+
+        if not self._use_go_process:
+            if self.label_aggregator.configured:
+                metric_parser = self.label_aggregator(metric_parser)
 
         for metric in metric_parser:
-            # Skip excluded metrics
-            if metric.name in self.exclude_metrics or (
-                self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
-            ):
-                self.submit_telemetry_number_of_ignored_metric_samples(metric)
-                continue
+            if not self._use_go_process:
+                if metric.name in self.exclude_metrics or (
+                    self.exclude_metrics_pattern is not None and self.exclude_metrics_pattern.search(metric.name)
+                ):
+                    self.submit_telemetry_number_of_ignored_metric_samples(metric)
+                    continue
 
-            # Process target_info metrics
-            if metric.name == 'target_info':
-                self.label_aggregator.process_target_info(metric)
+                if metric.name == 'target_info':
+                    self.label_aggregator.process_target_info(metric)
 
             yield metric
 
@@ -327,42 +432,57 @@ class OpenMetricsScraper:
         if self.raw_line_filter is not None:
             line_streamer = self.filter_connection_lines(line_streamer)
 
-        # Since we determine `self.parse_metric_families` dynamically from the response and that's done as a
-        # side effect inside the `line_streamer` generator, we need to consume the first line in order to
-        # trigger that side effect.
-        try:
-            line_streamer = chain([next(line_streamer)], line_streamer)
-        except StopIteration:
-            # If line_streamer is an empty iterator, next(line_streamer) fails.
+        raw_text = '\n'.join(line_streamer)
+        if not raw_text:
             return
 
-        for metric in self.parse_metric_families(line_streamer):
-            self.submit_telemetry_number_of_total_metric_samples(metric)
+        # When use_latest_spec is set, force OpenMetrics parsing regardless of
+        # the Content-Type header the server returned (mirrors the old
+        # parse_metric_families property behaviour).
+        content_type = self._content_type
+        if self._use_latest_spec:
+            content_type = 'application/openmetrics-text'
 
-            # It is critical that the prefix is removed immediately so that
-            # all other configuration may reference the trimmed metric name
-            if self.raw_metric_prefix and metric.name.startswith(self.raw_metric_prefix):
-                metric.name = metric.name[len(self.raw_metric_prefix) :]
+        if self._use_go_process:
+            # Optimized path: Go handles parsing, label processing, tag building,
+            # metric filtering, shared labels, and hostname extraction.
+            result = json.loads(datadog_agent.process_prometheus_metrics(
+                raw_text, json.dumps(self._process_config), content_type
+            ))
+            for family_data in result['families']:
+                metric = _ProcessedMetric(family_data)
+                self.submit_telemetry_number_of_total_metric_samples(metric)
+                yield metric
+        else:
+            # Fallback: Go parses, Python handles the rest.
+            for family_data in json.loads(datadog_agent.parse_prometheus_metrics(raw_text, content_type)):
+                metric = _GoMetric(family_data)
+                self.submit_telemetry_number_of_total_metric_samples(metric)
 
-            yield metric
+                if self.raw_metric_prefix and metric.name.startswith(self.raw_metric_prefix):
+                    metric.name = metric.name[len(self.raw_metric_prefix) :]
 
-    @property
-    def parse_metric_families(self):
-        media_type = self._content_type.split(';')[0]
-        # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
-        # the format will be chosen based on the media type specified in the response's content-header.
-        # The selection is based on what Prometheus does:
-        # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
-        return (
-            parse_openmetrics
-            if self._use_latest_spec or media_type == 'application/openmetrics-text'
-            else parse_prometheus
-        )
+                yield metric
 
     def generate_sample_data(self, metric):
         """
         Yield a sample of processed data.
         """
+        if getattr(metric, '_processed', False):
+            # Go already built tags, extracted hostname, filtered labels, and applied shared labels.
+            # Append self.tags (static + dynamic) since those are managed on the Python side.
+            # Also detect any labels added by decorators/subclasses after Go processing.
+            for sample in metric.samples:
+                tags = list(sample.tags)
+                if len(sample.labels) > len(sample._go_label_keys):
+                    for k, v in sample.labels.items():
+                        if k not in sample._go_label_keys:
+                            tags.append(f'{k}:{v}')
+                tags.extend(self.tags)
+                self.submit_telemetry_number_of_processed_metric_samples()
+                yield sample, tags, sample.hostname
+            return
+
         label_normalizer = get_label_normalizer(metric.type)
 
         for sample in metric.samples:

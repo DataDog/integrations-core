@@ -608,6 +608,9 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': True}})
         dd_run_check(check)
 
+        # Batch mode: shared labels are collected from the whole payload first and applied to
+        # all families regardless of order. So even on the first scrape, gc_sys and free_bytes
+        # receive foo:bar from go_memstats_alloc_bytes.
         aggregator.assert_metric(
             'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
         )
@@ -615,13 +618,13 @@ class TestShareLabels:
             'test.go_memstats_gc_sys_bytes',
             901120,
             metric_type=aggregator.GAUGE,
-            tags=['endpoint:test', 'bar:foo'],
+            tags=['endpoint:test', 'bar:foo', 'foo:bar'],
         )
         aggregator.assert_metric(
             'test.go_memstats_free_bytes',
             6396288,
             metric_type=aggregator.GAUGE,
-            tags=['endpoint:test', 'bar:baz'],
+            tags=['endpoint:test', 'bar:baz', 'foo:bar'],
         )
 
         dd_run_check(check)
@@ -732,6 +735,8 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_target_info_tags_propagation_unordered_w_cache(self, aggregator, dd_run_check, mock_http_response):
+        # Batch mode: target_info labels are collected from the whole payload first and applied to
+        # all families regardless of order — even when target_info appears after the metric.
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
         mock_http_response(
@@ -750,7 +755,7 @@ class TestShareLabels:
         aggregator.assert_metric(
             'test.go_memstats_alloc_bytes',
             value=6396288,
-            tags=['endpoint:test', 'foo:bar'],
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
             metric_type=aggregator.GAUGE,
         )
 
@@ -854,17 +859,20 @@ class TestShareLabels:
 
         dd_run_check(check_var)
 
+        # Batch mode: only current-scrape shared labels are applied (no cross-scrape caching).
+        # Second scrape's go_memstats_free_bytes{bar2="baz2"} is the share_labels source,
+        # so alloc_bytes gets bar2:baz2 (not foo:bar from the previous scrape).
         aggregator.assert_metric(
             'test.go_memstats_alloc_bytes',
             value=6396288,
-            tags=['endpoint:test', 'foo:bar', 'foo2:bar2', 'env:stg', 'region:asia'],
+            tags=['endpoint:test', 'foo2:bar2', 'env:stg', 'region:asia', 'bar2:baz2'],
             metric_type=aggregator.GAUGE,
         )
 
         aggregator.assert_metric(
             'test.go_memstats_free_bytes',
             value=6396288,
-            tags=['endpoint:test', 'env:stg', 'region:asia', 'bar2:baz2', 'foo:bar'],
+            tags=['endpoint:test', 'bar2:baz2', 'env:stg', 'region:asia'],
             metric_type=aggregator.GAUGE,
         )
 
