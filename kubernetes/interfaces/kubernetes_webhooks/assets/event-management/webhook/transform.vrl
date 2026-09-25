@@ -1,0 +1,24 @@
+# Normalises a Kubernetes Event object into a Feed V2 webhook event.
+#
+# The last expression is the output: this transform builds the result object rather than
+# mutating `.`, so the script is self-contained and means the same thing wherever it runs.
+severity = if .type == "Warning" { "warn" } else { "ok" }
+
+kind = string(.involvedObject.kind) ?? "Object"
+name = string(.involvedObject.name) ?? "unknown"
+
+{
+  "data": {
+    "type": "event",
+    "attributes": {
+      "title": kind + " " + name + ": " + (string(.reason) ?? "Event"),
+      "category": "alert",
+      "integration_id": "kubernetes",
+      "message": string(.message) ?? "",
+      "tags": ["namespace:" + (string(.involvedObject.namespace) ?? "default")],
+      "attributes": {
+        "status": severity
+      }
+    }
+  }
+}

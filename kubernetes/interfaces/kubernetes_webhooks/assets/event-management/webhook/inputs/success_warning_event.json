@@ -1,0 +1,10 @@
+{
+  "type": "Warning",
+  "reason": "BackOff",
+  "message": "Back-off restarting failed container",
+  "involvedObject": {
+    "kind": "Pod",
+    "name": "web-5f7c9d4b8-x2qlm",
+    "namespace": "production"
+  }
+}

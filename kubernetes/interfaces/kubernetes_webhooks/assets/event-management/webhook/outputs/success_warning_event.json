@@ -1,0 +1,15 @@
+{
+  "data": {
+    "type": "event",
+    "attributes": {
+      "title": "Pod web-5f7c9d4b8-x2qlm: BackOff",
+      "category": "alert",
+      "integration_id": "kubernetes",
+      "message": "Back-off restarting failed container",
+      "tags": ["namespace:production"],
+      "attributes": {
+        "status": "warn"
+      }
+    }
+  }
+}

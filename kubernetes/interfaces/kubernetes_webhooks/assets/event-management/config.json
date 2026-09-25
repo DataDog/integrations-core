@@ -1,0 +1,5 @@
+{
+  "interface_id": "kubernetes_webhooks",
+  "intake_channel": "webhook",
+  "audience": ["external"]
+}
