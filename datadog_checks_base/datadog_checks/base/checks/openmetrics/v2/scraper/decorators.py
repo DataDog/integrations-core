@@ -12,7 +12,7 @@ from .base_scraper import OpenMetricsScraper
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from prometheus_client.metrics_core import Metric
+    from datadog_checks.base.checks.openmetrics.v2.go_parser import Metric
 
 
 class WithHttpCodeClass(OpenMetricsScraper):

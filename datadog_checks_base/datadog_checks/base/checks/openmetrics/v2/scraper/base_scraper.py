@@ -10,14 +10,11 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
-from prometheus_client import Metric
-from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
-from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
-from datadog_checks.base.checks.openmetrics import parser_optimizations
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
+from datadog_checks.base.checks.openmetrics.v2.go_parser import Metric, parse_with_go_parser
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
 from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
 from datadog_checks.base.config import is_affirmative
@@ -25,6 +22,27 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
+
+# Lazy-loaded Python prometheus_client parsers, used as fallback when the Go parser is unavailable or broken.
+_parse_openmetrics = None
+_parse_prometheus = None
+
+
+def _get_python_parser(use_openmetrics: bool):
+    """Load the Python prometheus_client parser on demand."""
+    global _parse_openmetrics, _parse_prometheus
+    if use_openmetrics:
+        if _parse_openmetrics is None:
+            from prometheus_client.openmetrics.parser import text_fd_to_metric_families
+
+            _parse_openmetrics = text_fd_to_metric_families
+        return _parse_openmetrics
+    else:
+        if _parse_prometheus is None:
+            from prometheus_client.parser import text_fd_to_metric_families
+
+            _parse_prometheus = text_fd_to_metric_families
+        return _parse_prometheus
 
 
 class OpenMetricsScraper:
@@ -233,7 +251,7 @@ class OpenMetricsScraper:
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
-        parser_optimizations.init_from_agent_config()
+        self._use_go_parser = is_affirmative(config.get('use_go_parser', True))
 
         # Used for monotonic counts
         self.flush_first_value = None
@@ -351,16 +369,20 @@ class OpenMetricsScraper:
 
     @property
     def parse_metric_families(self):
-        media_type = self._content_type.split(';')[0]
-        # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
-        # the format will be chosen based on the media type specified in the response's content-header.
-        # The selection is based on what Prometheus does:
-        # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
-        return (
-            parse_openmetrics
-            if self._use_latest_spec or media_type == 'application/openmetrics-text'
-            else parse_prometheus
-        )
+        # When use_latest_spec is set, force OpenMetrics format regardless of the
+        # actual Content-Type header returned by the endpoint.
+        if self._use_latest_spec:
+            content_type = 'application/openmetrics-text'
+        else:
+            content_type = self._content_type
+
+        if self._use_go_parser:
+            return lambda lines: parse_with_go_parser(content_type, lines)
+
+        # Fallback to the Python prometheus_client parser.
+        media_type = content_type.split(';')[0]
+        use_openmetrics = media_type == 'application/openmetrics-text'
+        return _get_python_parser(use_openmetrics)
 
     def generate_sample_data(self, metric):
         """
