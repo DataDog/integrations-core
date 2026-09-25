@@ -12,6 +12,7 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+    ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS,
     ENGINE_EDITION_SQL_DATABASE,
     SQLSERVER_PARAMETER_LIMIT,
     STATIC_INFO_ENGINE_EDITION,
@@ -39,6 +40,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverServerStateMetrics,
     SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
+    SqlserverUptimeMetrics,
 )
 from datadog_checks.sqlserver.utils import Database
 
@@ -2137,6 +2139,63 @@ def test_sqlserver_xe_session_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_uptime_metrics(aggregator, dd_run_check, init_config, instance_docker_metrics):
+    mocked_results = [(3600,)]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    uptime_metrics = SqlserverUptimeMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._database_metrics = [uptime_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
+    aggregator.assert_metric('sqlserver.uptime', value=3600, tags=tags)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'engine_edition,expected_enabled',
+    [
+        pytest.param(ENGINE_EDITION_SQL_DATABASE, True, id='azure_sql_database'),
+        pytest.param(ENGINE_EDITION_AZURE_MANAGED_INSTANCE, True, id='azure_managed_instance'),
+        pytest.param(ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS, False, id='azure_synapse'),
+    ],
+)
+def test_sqlserver_uptime_metrics_engine_editions(
+    init_config, instance_docker_metrics, engine_edition, expected_enabled
+):
+    # Unlike the rest of the server state query, uptime is collected on Azure SQL Database, which is the
+    # deployment where a restart is least visible to the user.
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    static_info = {**STATIC_SERVER_INFO, STATIC_INFO_ENGINE_EDITION: engine_edition}
+
+    uptime_metrics = SqlserverUptimeMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=static_info,
+        execute_query_handler=None,
+    )
+
+    assert uptime_metrics.enabled is expected_enabled
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_sqlserver_database_metrics_defaults(
     aggregator,
     dd_run_check,
@@ -2162,6 +2221,7 @@ def test_sqlserver_database_metrics_defaults(
         SqlserverSecondaryLogShippingMetrics: False,
         SqlserverServerStateMetrics: True,
         SqlserverTempDBFileSpaceUsageMetrics: True,
+        SqlserverUptimeMetrics: True,
     }
     instance_docker_metrics['database_autodiscovery'] = True
 
