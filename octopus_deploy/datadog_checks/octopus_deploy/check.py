@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import datetime
+import time
 from collections.abc import Iterable
 
 from cachetools import TTLCache
@@ -16,8 +17,16 @@ from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, 
 
 from .config_models import ConfigMixin
 
-TTL_CACHE_MAXSIZE = 50
+# Deployment and release metadata is immutable once created, so it is safe to cache a large amount of it.
+TTL_CACHE_MAXSIZE = 10000
 TTL_CACHE_TTL = 3600
+
+# Number of ids sent to a single bulk `?ids=` lookup, to stay clear of URL length limits.
+BULK_ID_CHUNK_SIZE = 50
+
+THROTTLED_STATUS_CODE = 429
+MAX_THROTTLE_RETRIES = 3
+MAX_THROTTLE_WAIT_SECONDS = 10
 
 EVENT_TO_ALERT_TYPE = {
     'MachineHealthy': 'success',
@@ -47,6 +56,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._projects_discovery = {}
         self._environments_discovery = {}
         self._environments_cache = {}
+        self._space_projects_cache = {}
         self._deployments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._releases_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         endpoint = self.instance.get("octopus_endpoint")
@@ -56,6 +66,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def check(self, _):
         self._update_times()
+        self._space_projects_cache.clear()
         self._process_spaces()
         self._collect_server_nodes_metrics()
 
@@ -66,10 +77,28 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         )
         self._to_completed_time = self.current_datetime
 
+    def _throttle_wait_seconds(self, response, attempt):
+        # Retry-After may also be an HTTP-date; fall back to exponential backoff when it isn't a plain delay.
+        retry_after = response.headers.get('Retry-After')
+        if retry_after is not None:
+            try:
+                return min(float(retry_after), MAX_THROTTLE_WAIT_SECONDS)
+            except (TypeError, ValueError):
+                pass
+        return min(2**attempt, MAX_THROTTLE_WAIT_SECONDS)
+
     def _process_endpoint(self, endpoint, params=None, report_service_check=False):
         try:
             params = {} if params is None else params
-            response = self.http.get(f"{self.config.octopus_endpoint}/{endpoint}", params=params)
+            for attempt in range(MAX_THROTTLE_RETRIES + 1):
+                response = self.http.get(f"{self.config.octopus_endpoint}/{endpoint}", params=params)
+                if response.status_code != THROTTLED_STATUS_CODE or attempt == MAX_THROTTLE_RETRIES:
+                    break
+                wait_seconds = self._throttle_wait_seconds(response, attempt)
+                self.log.warning(
+                    "Throttled by the octopus API on endpoint %s, retrying in %s seconds", endpoint, wait_seconds
+                )
+                time.sleep(wait_seconds)
             response.raise_for_status()
             if report_service_check:
                 self.gauge('api.can_connect', 1, tags=self._base_tags)
@@ -144,16 +173,22 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 key=lambda project_group: project_group.get("Name"),
             )
 
+    def _get_projects_by_group(self, space_id, project_group_id):
+        """Projects in a project group, from a per-run listing of every project in the space."""
+        if space_id not in self._space_projects_cache:
+            projects_by_group = {}
+            for project in self._process_paginated_endpoint(f"api/{space_id}/projects").get('Items', []):
+                projects_by_group.setdefault(project.get("ProjectGroupId"), []).append(project)
+            self._space_projects_cache[space_id] = projects_by_group
+        return self._space_projects_cache[space_id].get(project_group_id, [])
+
     def _init_default_projects_discovery(self, space_id, project_group_id):
         self.log.info("Default Projects discovery: %s", self.config.projects)
         if space_id not in self._default_projects_discovery:
             self._default_projects_discovery[space_id] = {}
         if project_group_id not in self._default_projects_discovery[space_id]:
             self._default_projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_paginated_endpoint(
-                    f"api/{space_id}/projectgroups/{project_group_id}/projects",
-                    report_service_check=True,
-                ).get('Items', []),
+                lambda: self._get_projects_by_group(space_id, project_group_id),
                 limit=self.config.projects.limit,
                 include=normalize_discover_config_include(self.config.projects),
                 exclude=self.config.projects.exclude,
@@ -167,10 +202,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._projects_discovery[space_id] = {}
         if project_group_id not in self._projects_discovery[space_id]:
             self._projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_paginated_endpoint(
-                    f"api/{space_id}/projectgroups/{project_group_id}/projects",
-                    report_service_check=True,
-                ).get('Items', []),
+                lambda: self._get_projects_by_group(space_id, project_group_id),
                 limit=projects_config.limit,
                 include=normalize_discover_config_include(projects_config),
                 exclude=projects_config.exclude,
@@ -196,14 +228,19 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("space.count", 1, tags=tags)
             self.log.debug("Processing space %s", space_name)
             self._process_environments(space_id, space_name)
+            monitored_projects = {}
             self._process_project_groups(
-                space_id, space_name, space_config.get("project_groups") if space_config else None
+                space_id,
+                space_name,
+                space_config.get("project_groups") if space_config else None,
+                monitored_projects,
             )
+            self._process_space_tasks(space_id, space_name, monitored_projects)
             self._collect_machine_metrics(space_id)
             if self.collect_events:
                 self._collect_new_events(space_id, space_name)
 
-    def _process_project_groups(self, space_id, space_name, project_groups_config):
+    def _process_project_groups(self, space_id, space_name, project_groups_config, monitored_projects):
         if project_groups_config:
             self._init_project_groups_discovery(space_id, ProjectGroups(**project_groups_config))
             project_groups = list(self._project_groups_discovery[space_id].get_items())
@@ -234,9 +271,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 project_group_id,
                 project_group_name,
                 project_group_config.get("projects") if project_group_config else None,
+                monitored_projects,
             )
 
-    def _process_projects(self, space_id, space_name, project_group_id, project_group_name, projects_config):
+    def _process_projects(
+        self, space_id, space_name, project_group_id, project_group_name, projects_config, monitored_projects
+    ):
         if projects_config:
             self._init_projects_discovery(space_id, project_group_id, Projects(**projects_config))
             projects = list(self._projects_discovery[space_id][project_group_id].get_items())
@@ -247,9 +287,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             else:
                 projects = [
                     (None, project.get("Name"), project, None)
-                    for project in self._process_paginated_endpoint(
-                        f"api/{space_id}/projectgroups/{project_group_id}/projects"
-                    ).get('Items', [])
+                    for project in self._get_projects_by_group(space_id, project_group_id)
                 ]
         self.log.debug("Monitoring %s Projects for %s in %s", len(projects), project_group_name, space_name)
         for _, _, project, _ in projects:
@@ -264,8 +302,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             if not self.config.disable_generic_tags and self.config.unified_service_tagging:
                 tags.append(f'service:{project_name}')
             self.gauge("project.count", 1, tags=tags)
-            self._process_queued_and_running_tasks(space_id, space_name, project_id, project_name)
-            self._process_completed_tasks(space_id, space_name, project_id, project_name)
+            monitored_projects[project_id] = project_name
 
     def _process_environments(self, space_id, space_name):
         if self.config.environments:
@@ -311,22 +348,61 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 key=lambda environment: environment.get("Name"),
             )
 
-    def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
-        self.log.debug("Collecting running and queued tasks for project %s", project_name)
-        params = {'name': 'Deploy', 'project': project_id, 'states': ["Queued", "Executing"]}
-        response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
-
-    def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
-        self.log.debug("Collecting completed tasks for project %s", project_name)
-        params = {
+    def _process_space_tasks(self, space_id, space_name, monitored_projects):
+        if not monitored_projects:
+            return
+        self.log.debug("Collecting tasks for space %s", space_name)
+        in_progress_params = {'name': 'Deploy', 'states': ["Queued", "Executing"]}
+        completed_params = {
             'name': 'Deploy',
-            'project': project_id,
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
         }
-        response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
+        tasks = self._process_paginated_endpoint(f"api/{space_id}/tasks", in_progress_params).get(
+            'Items', []
+        ) + self._process_paginated_endpoint(f"api/{space_id}/tasks", completed_params).get('Items', [])
+
+        tasks = [task for task in tasks if task.get("ProjectId") in monitored_projects]
+        self._prefetch_deployments(space_id, [task.get("Arguments", {}).get("DeploymentId") for task in tasks])
+        self._process_tasks(space_id, space_name, monitored_projects, tasks)
+
+    def _get_by_ids(self, space_id, resource, ids):
+        items = []
+        for chunk_start in range(0, len(ids), BULK_ID_CHUNK_SIZE):
+            chunk = ids[chunk_start : chunk_start + BULK_ID_CHUNK_SIZE]
+            items += self._process_paginated_endpoint(f"api/{space_id}/{resource}", {'ids': chunk}).get('Items', [])
+        return items
+
+    def _prefetch_deployments(self, space_id, deployment_ids):
+        """Populate the deployment and release caches for a whole space with bulk lookups by id."""
+        missing_deployments = sorted(
+            {
+                deployment_id
+                for deployment_id in deployment_ids
+                if deployment_id and deployment_id not in self._deployments_cache
+            }
+        )
+        if not missing_deployments:
+            return
+        deployments = self._get_by_ids(space_id, "deployments", missing_deployments)
+
+        missing_releases = sorted(
+            {
+                deployment.get("ReleaseId")
+                for deployment in deployments
+                if deployment.get("ReleaseId") and deployment.get("ReleaseId") not in self._releases_cache
+            }
+        )
+        for release in self._get_by_ids(space_id, "releases", missing_releases):
+            self._releases_cache[release.get("Id")] = release.get("Version")
+
+        for deployment in deployments:
+            release_version = self._releases_cache.get(deployment.get("ReleaseId"))
+            if release_version is None:
+                # Leave it uncached so it is retried individually rather than tagged as None for the whole TTL.
+                continue
+            environment_name = self._environments_cache.get(deployment.get("EnvironmentId"))
+            self._deployments_cache[deployment.get("Id")] = (release_version, environment_name)
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -355,9 +431,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = -1
         return queued_time, executing_time, completed_time
 
-    def _process_tasks(self, space_id, space_name, project_name, tasks_json):
-        self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
+    def _process_tasks(self, space_id, space_name, monitored_projects, tasks_json):
+        self.log.debug("Discovered %s tasks for space %s", len(tasks_json), space_name)
         for task in tasks_json:
+            project_name = monitored_projects.get(task.get("ProjectId"))
             task_id = task.get("Id")
             server_node = task.get("ServerNode")
             task_state = task.get("State")

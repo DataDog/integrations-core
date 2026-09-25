@@ -19,52 +19,26 @@ from datadog_checks.dev.http import MockResponse
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
 PARAMS_TO_FILENAME_MAPPING = {
-    # project 2 tasks
-    'name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=2': 'project_1_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-1/states=Queued,Executing/skip=0/take=30': 'project_1_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_1_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_1_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_1_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_1_completed_high_limit_pg1',
-    # project 2 tasks
-    'name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=2': 'project_2_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-2/states=Queued,Executing/skip=0/take=30': 'project_2_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_2_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_2_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_2_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_2_completed_high_limit_pg1',
-    # project 3 tasks
-    'name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=2': 'project_3_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-3/states=Queued,Executing/skip=0/take=30': 'project_3_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_3_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_3_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_3_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=2/take=2': 'project_3_completed_low_limit_pg2',
-    'name=Deploy/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_3_completed_high_limit_pg1',
-    # project 4 tasks
-    'name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=2': 'project_4_in_progress_low_limit_pg1',
-    'name=Deploy/project=Projects-4/states=Queued,Executing/skip=0/take=30': 'project_4_in_progress_high_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'project_4_none_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'project_4_none_completed_high_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'project_4_completed_low_limit_pg1',
-    'name=Deploy/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
-    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'project_4_completed_high_limit_pg1',
+    # space-wide queued/executing tasks
+    'name=Deploy/states=Queued,Executing/skip=0/take=2': 'space_in_progress_low_limit_pg1',
+    'name=Deploy/states=Queued,Executing/skip=0/take=30': 'space_in_progress_high_limit_pg1',
+    'name=Deploy/states=Queued,Executing/skip=0/take=300': 'space_in_progress_high_limit_pg1',
+    # space-wide tasks completed in an empty window (the first run of a check)
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=2': 'space_none_completed_low_limit_pg1',
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=30': 'space_none_completed_high_limit_pg1',
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:00.123000+00:00/skip=0/take=300': 'space_none_completed_high_limit_pg1',
+    # space-wide tasks completed during the collection interval
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=2': 'space_completed_low_limit_pg1',
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=2/take=2': 'space_completed_low_limit_pg2',
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=30': 'space_completed_high_limit_pg1',
+    'name=Deploy/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/'
+    'toCompletedDate=2024-09-23 14:45:15.123000+00:00/skip=0/take=300': 'space_completed_high_limit_pg1',
     # events
     'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:15.123000+00:00/'
     'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
@@ -81,11 +55,21 @@ PARAMS_TO_FILENAME_MAPPING = {
     'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:00.123000+00:00/'
     'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
     'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=30': 'no_events_high_limit_pg1',
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:15.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=300': 'events_high_limit_pg1',
+    'from=2024-09-23 14:45:00.123000+00:00/to=2024-09-23 14:45:00.123000+00:00/'
+    'eventCategories=MachineHealthy,MachineUnhealthy,MachineUnavailable,CertificateExpired,DeploymentFailed,'
+    'DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted/skip=0/take=300': 'no_events_high_limit_pg1',
     # the rest of the paginated endpoints
     'skip=0/take=2': 'low_limit_pg1',
     'skip=2/take=2': 'low_limit_pg2',
     'skip=0/take=30': 'high_limit_pg1',
+    'skip=0/take=300': 'high_limit_pg1',
 }
+
+# Endpoints the check reads in bulk with `?ids=`, mocked from the per-id fixtures of the same collection.
+BULK_ID_ENDPOINTS = ('deployments', 'releases')
 
 
 # https://docs.python.org/3/library/unittest.mock-examples.html#coping-with-mutable-arguments
@@ -151,10 +135,27 @@ def mock_responses():
         for method_subdir in method_subdirs:
             process_dir(method_subdir, responses_map)
 
+    def bulk_by_ids(method, request_path, ids):
+        """Emulate the Octopus `?ids=` collection filter using the individual per-id fixtures."""
+        items = []
+        for item_id in ids:
+            item = responses_map.get(method, {}).get(f'{request_path}/{item_id}', {}).get('response')
+            if item is not None:
+                items.append(item)
+        return {
+            'Items': items,
+            'TotalResults': len(items),
+            'ItemsPerPage': len(items),
+            'NumberOfPages': 1,
+            'LastPageNumber': 0,
+        }
+
     def method(method, url, file='response', headers=None, params=None):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
+        if params and params.get('ids') is not None and request_path.split('/')[-1] in BULK_ID_ENDPOINTS:
+            return bulk_by_ids(method, request_path, params['ids'])
         if params:
             param_string = ""
             for key, val in params.items():
