@@ -1,0 +1,76 @@
+# Full metric-coverage environment for the rabbitmq check and the OTel
+# rabbitmqreceiver. Both scrape the management HTTP API (:15672) of a real
+# broker. An idle broker reports zero for most rate/counter metrics, so this
+# environment keeps two workloads running against it:
+#
+#   - perf-test    continuous publish/consume/ack (the official RabbitMQ load
+#                  tool) -> message.published/acknowledged/delivered,
+#                  consumer.count and the queue.* rate/count metrics.
+#   - activity-gen a churn sidecar for what perf-test does not exercise: durable
+#                  queues + persistent messages (msg_store / queue_index),
+#                  queue/exchange declare+delete, connection/channel churn, and
+#                  unroutable (dropped) messages. See ../activity-gen.py.
+#
+# The node.* and erlang.* metrics come naturally from the running broker.
+#
+# NOTE: the OTel rabbitmqreceiver ships with every rabbitmq.node.* metric
+# DISABLED by default (only the 6 message/consumer metrics are on). To verify
+# the node.* mappings against this fixture, the scraping collector must enable
+# them in its receiver config -- see ../README.md.
+services:
+  rabbitmq:
+    image: "rabbitmq:${RABBITMQ_VERSION:-4.0}-management"
+    # Stable node name so the node.* time series are stable across restarts.
+    hostname: rabbitmq-full
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      # Lift the loopback-only restriction on the guest user so the workload
+      # containers and the scrapers can authenticate over the compose network
+      # (guest is loopback-only by default and would otherwise be rejected).
+      - ./config/rabbitmq.conf:/etc/rabbitmq/conf.d/20-full-coverage.conf:ro
+    # No host-port publish: the consumers (perf-test, activity-gen, and the
+    # evalya rabbitmq-full task's scraper) reach the broker over the managed
+    # network via the DB_HOST label. Publishing 15672/5672 to the host only
+    # invites conflicts with a local broker. Add `--publish` by hand to inspect.
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_port_connectivity"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+  # Continuous publish/consume/ack via the official PerfTest tool. Manual acks
+  # (no -a) so message.acknowledged / queue.messages.ack move; a bounded rate so
+  # the fixture stays light.
+  perf-test:
+    image: "pivotalrabbitmq/perf-test:latest"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    command:
+      - "--uri=amqp://guest:guest@rabbitmq:5672"
+      - "--producers=2"
+      - "--consumers=2"
+      - "--queue=perf-test-full"
+      - "--rate=50"
+
+  # Churn sidecar: everything perf-test leaves at zero. pika is pip-installed at
+  # start (small, no custom image to maintain). Honors ACTIVITY_GEN=0 to idle.
+  activity-gen:
+    image: "python:3.12-slim"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      DB_HOST: rabbitmq
+      AMQP_PORT: "5672"
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    volumes:
+      - ../activity-gen.py:/opt/activity-gen.py:ro
+    command: ["sh", "-c", "pip install --quiet --no-cache-dir pika==1.3.2 && exec python -u /opt/activity-gen.py"]
