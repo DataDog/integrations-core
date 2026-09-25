@@ -1,0 +1,307 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from __future__ import annotations
+
+import time
+from functools import partial
+from typing import Any, Callable
+
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.types import InitConfigType, InstanceType
+
+from .client import CatalystCenterClient
+from .collectors import (
+    collect_application_health,
+    collect_assurance_issues,
+    collect_client_experience,
+    collect_client_health,
+    collect_devices,
+    collect_events,
+    collect_interfaces,
+    collect_l3_topology,
+    collect_network_health,
+    collect_sda_fabric,
+    collect_security,
+    collect_site_health,
+    collect_site_topology,
+    collect_stacks,
+    collect_topology,
+    list_sites,
+)
+from .config_models import ConfigMixin
+from .constants import EVENT_DEFAULT_LOOKBACK_MINUTES, EVENT_WINDOW_MAX_SECONDS, L3_TOPOLOGY_TYPES
+from .errors import CatalystApiError
+from .ndm_models import (
+    DeviceMetadata,
+    InterfaceMetadata,
+    batch_payloads,
+    create_device_metadata,
+    create_interface_metadata,
+)
+
+NDM_METADATA_EVENT_TYPE = 'network-devices-metadata'
+
+
+class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
+    __NAMESPACE__ = 'cisco_catalyst_center'
+
+    def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
+        super().__init__(name, init_config, instances)
+        self._client: CatalystCenterClient | None = None
+        # End of the last assurance-event window that was collected, in epoch milliseconds. The
+        # check object outlives a single cycle, which is what lets each window start where the
+        # previous one ended.
+        self._events_polled_through: int | None = None
+        # Each open issue's last reported occurrence, by issueId. None until the first cycle.
+        self._reported_issues: dict[str, int | None] | None = None
+
+    @property
+    def client(self) -> CatalystCenterClient:
+        """The API client, built on first use so that config validation runs first."""
+        if self._client is None:
+            self._client = CatalystCenterClient(self.instance, http=self.http, log=self.log)
+        return self._client
+
+    def _interface_views(self) -> tuple[str, ...]:
+        """Which interface views to request.
+
+        A view replaces the field set rather than extending it, so each one costs its own
+        paginated call -- which is why statistics and PoE are separately switchable.
+        """
+        views = ['configuration']
+        if self.config.collect_interface_statistics:
+            views.append('statistics')
+        if self.config.collect_interface_poe:
+            # `poE` is the appliance's own spelling of the view name, not a typo.
+            views.append('poE')
+        return tuple(views)
+
+    def _event_window(self) -> tuple[int, int] | None:
+        """The window to poll assurance events for, in epoch milliseconds, or None to skip.
+
+        Each window begins where the previous one ended, so an event is counted exactly once
+        whatever the collection interval is. The first cycle has no predecessor and reaches back
+        `events_initial_lookback_minutes`; after a long outage the start is clamped to the widest
+        window the endpoint accepts.
+        """
+        now = int(time.time() * 1000)
+        if self._events_polled_through is None:
+            lookback = self.config.events_initial_lookback_minutes or EVENT_DEFAULT_LOOKBACK_MINUTES
+            start = now - lookback * 60 * 1000
+        else:
+            start = self._events_polled_through
+
+        floor = now - EVENT_WINDOW_MAX_SECONDS * 1000
+        if start < floor:
+            self.log.warning(
+                'Assurance events were last collected through %s, further back than the endpoint '
+                'serves in one window; resuming from %s and losing the events in between',
+                start,
+                floor,
+            )
+            start = floor
+
+        if start >= now:
+            # The clock moved backwards, or two cycles landed in the same millisecond. The endpoint
+            # rejects an inverted window, and an empty one has nothing to report.
+            return None
+
+        return start, now
+
+    def _run(self, name: str, collector: Callable[[], Any]) -> bool:
+        """Run one collector, containing its failure.
+
+        A single unreachable domain must not cost the whole cycle: losing site health should not
+        also lose device health. `collection.success` reflects whether *anything* failed, so a
+        partial collection is still visible rather than silently degraded.
+        """
+        try:
+            collector()
+        except CatalystApiError as exc:
+            # Carries Cisco's x-correlation-id, which is the only reference TAC will act on.
+            self.log.error('Catalyst Center %s collection failed: %s', name, exc)
+            return False
+        except Exception:
+            self.log.exception('Unexpected failure collecting Catalyst Center %s', name)
+            return False
+        return True
+
+    def _send_ndm_metadata(
+        self, devices: list[dict[str, Any]], interfaces: dict[str, dict[str, Any]], namespace: str
+    ) -> None:
+        """Emit device and interface metadata for Network Device Monitoring.
+
+        The namespace is what ties these records to the ones the SNMP check produces for the same
+        hardware, so it is logged at debug: a mismatch is invisible in the UI and shows up only as
+        devices that never merge.
+        """
+        collect_timestamp = int(time.time())
+
+        device_metadata: list[DeviceMetadata] = [create_device_metadata(record, namespace) for record in devices]
+        interface_metadata: list[InterfaceMetadata] = [
+            create_interface_metadata(record, namespace) for record in interfaces.values()
+        ]
+
+        self.log.debug(
+            'Submitting NDM metadata for %s devices and %s interfaces in namespace %r',
+            len(device_metadata),
+            len(interface_metadata),
+            namespace,
+        )
+
+        for items in (device_metadata, interface_metadata):
+            for payload in batch_payloads(namespace, items, collect_timestamp):
+                self.event_platform_event(payload.model_dump_json(exclude_none=True), NDM_METADATA_EVENT_TYPE)
+
+    def check(self, _: InstanceType) -> None:
+        # The instance's `tags` option is a convention every integration honours, so it is
+        # folded in ahead of anything this check derives itself.
+        base_tags = list(self.instance.get('tags') or [])
+        # The host as the user wrote it in conf.yaml, not the client's base URL: users are told
+        # to omit the scheme, so the client's https:// prefix would otherwise leak into the tag.
+        base_tags.append(f'catalyst_center_host:{self.config.catalyst_center_host}')
+        namespace = self.config.namespace or 'default'
+
+        devices: list[dict[str, Any]] = []
+
+        def _devices() -> None:
+            nonlocal devices
+            devices = collect_devices(
+                self,
+                self.client,
+                collect_wireless=bool(self.config.collect_wireless),
+                base_tags=base_tags,
+                namespace=namespace,
+            )
+            self.gauge('device.count', len(devices), tags=base_tags)
+
+        # Devices first: it is the only call that produces the inventory the stack collector
+        # needs, and if it fails there is nothing to fan out over anyway.
+        healthy = self._run('devices', _devices)
+
+        if devices and self.config.collect_stacks:
+            healthy &= self._run(
+                'stacks', lambda: collect_stacks(self, self.client, devices, base_tags=base_tags, namespace=namespace)
+            )
+
+        interfaces: dict[str, dict[str, Any]] = {}
+
+        if self.config.collect_interfaces:
+
+            def _interfaces() -> None:
+                nonlocal interfaces
+                interfaces = collect_interfaces(
+                    self,
+                    self.client,
+                    views=self._interface_views(),
+                    base_tags=base_tags,
+                    namespace=namespace,
+                )
+
+            healthy &= self._run('interfaces', _interfaces)
+
+        sites: list[dict[str, Any]] = []
+
+        if self.config.collect_site_health:
+
+            def _sites() -> None:
+                nonlocal sites
+                sites = collect_site_health(self, self.client, base_tags=base_tags)
+
+            healthy &= self._run('site health', _sites)
+
+        # One call each, no fan-out, so these are not switchable.
+        healthy &= self._run('network health', lambda: collect_network_health(self, self.client, base_tags=base_tags))
+        healthy &= self._run('client health', lambda: collect_client_health(self, self.client, base_tags=base_tags))
+
+        if self.config.collect_client_experience:
+            # One POST, aggregated on the appliance, so no per-client series.
+            healthy &= self._run(
+                'client experience',
+                lambda: collect_client_experience(self, self.client, base_tags=base_tags),
+            )
+
+        # -- Optional domains, all gated off by default -------------------------------
+        if self.config.collect_topology:
+            healthy &= self._run('topology', lambda: collect_topology(self, self.client, base_tags=base_tags))
+            healthy &= self._run('site topology', lambda: collect_site_topology(self, self.client, base_tags=base_tags))
+            # constants.py's first entry is the documented default, keeping spec.yaml and this
+            # fallback from silently disagreeing about which graph type is collected out of the box.
+            for topology_type in self.config.l3_topology_types or (L3_TOPOLOGY_TYPES[0],):
+                # partial rather than a lambda: it binds topology_type eagerly, so the loop
+                # variable cannot be rebound before _run invokes the collector.
+                healthy &= self._run(
+                    f'L3 topology ({topology_type})',
+                    partial(collect_l3_topology, self, self.client, topology_type, base_tags=base_tags),
+                )
+
+        if self.config.collect_sda_fabric:
+            healthy &= self._run(
+                'SD-Access fabric',
+                lambda: collect_sda_fabric(self, self.client, devices, base_tags=base_tags),
+            )
+
+        if self.config.collect_assurance_issues:
+
+            def _issues() -> None:
+                # Only replaced on success, so a failed cycle re-reports rather than skipping.
+                self._reported_issues = collect_assurance_issues(
+                    self,
+                    self.client,
+                    base_tags=base_tags,
+                    reported=self._reported_issues,
+                )
+
+            healthy &= self._run('assurance issues', _issues)
+
+        if self.config.collect_events:
+            window = self._event_window()
+            if window is not None:
+                start_time, end_time = window
+                polled = self._run(
+                    'assurance events',
+                    partial(collect_events, self, self.client, start_time, end_time, base_tags=base_tags),
+                )
+                healthy &= polled
+                if polled:
+                    # Advance only on success, so a failed cycle retries its window rather than
+                    # leaving a hole. Losing one device-family group still counts as success:
+                    # retrying would double-count the groups that did submit.
+                    self._events_polled_through = end_time
+
+        if self.config.collect_application_health:
+            if not sites:
+                # networkApplications requires a siteId, and site health is otherwise the only
+                # call that lists sites. Without this, switching site health off would collect no
+                # application metrics while still reporting success.
+                self.log.debug('No sites collected yet; enumerating the site hierarchy for application health')
+
+                def _list_sites() -> None:
+                    nonlocal sites
+                    sites = list_sites(self.client)
+
+                healthy &= self._run('site list', _list_sites)
+
+            # Logged because a count of zero is the only visible symptom of a site list that came
+            # back empty: the collector below would then submit nothing while the cycle still
+            # reports success.
+            self.log.debug('Collecting application health for %s sites', len(sites))
+
+            # One request per site on top of that, so the cost scales with the hierarchy.
+            healthy &= self._run(
+                'application health',
+                lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
+            )
+
+        if self.config.collect_security:
+            healthy &= self._run('security', lambda: collect_security(self, self.client, base_tags=base_tags))
+
+        if self.config.send_ndm_metadata:
+            healthy &= self._run('NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace))
+
+        # A metric rather than a service check: new integrations here do not ship service checks.
+        # Emitted on failure too -- a monitor on missing data cannot tell an unreachable appliance
+        # from a check that is not running, but a 0 on a series still arriving can.
+        self.gauge('collection.success', int(healthy), tags=base_tags)
