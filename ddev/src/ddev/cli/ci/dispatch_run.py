@@ -136,6 +136,19 @@ class ResolvedRun(BaseModel):
     base_sha: str | None = None
     is_fork: bool = False
 
+    @property
+    def owner(self) -> str:
+        return self.repository.partition('/')[0]
+
+    @property
+    def repo(self) -> str:
+        return self.repository.partition('/')[2]
+
+    @property
+    def concurrency_key(self) -> str:
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
+        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
+
 
 def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
     """Write the resolved run's manifest as machine-readable JSON under its output directory.
@@ -283,14 +296,29 @@ def resolve_pull_request_run(
     from ddev.utils.github_errors import GitHubAuthenticationError
 
     client_logger = None
+    observer = None
+    rate_limiter = None
     if monitor is not None:
+        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
         from ddev.monitoring.adapter import ComponentLogAdapter
+        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
+        from ddev.utils.rate_limiting import RateLimitEvent
 
         client_logger = ComponentLogAdapter(monitor)
+        github_monitor = observer = GitHubMonitor(monitor)
+        log_event = log_rate_limit_events(client_logger)
+
+        def on_rate_limit_event(event: RateLimitEvent) -> None:
+            log_event(event)
+            github_monitor.rate_limit_event(event)
+
+        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
         monitor.logger.info('Resolving pull request', pr_number=resolver.number, all_targets=all_targets)
 
     async def resolve() -> ResolvedRun | None:
-        async with async_github_client(token=token, logger=client_logger) as client:
+        async with async_github_client(
+            token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter
+        ) as client:
             pull = await resolver.resolve(client)
             if pull is None:
                 if monitor is not None:

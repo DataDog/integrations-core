@@ -15,12 +15,16 @@ from ddev.utils.github_async.models import (
     PullRequest,
     PullRequestRef,
     PullRequestState,
+    WorkflowJob,
+    WorkflowRun,
 )
 from tests.utils.github_async.payloads import (
     file_commit_payload,
     file_content_payload,
     full_pull_request_payload,
     git_ref_payload,
+    workflow_job,
+    workflow_run_payload,
 )
 
 
@@ -75,6 +79,55 @@ def test_file_commit_parses_with_null_content() -> None:
     """`file-commit.content` is nullable; the commit is what callers need and must still parse."""
     commit = FileCommit.model_validate(file_commit_payload(commit_sha="e" * 40))
     assert commit.commit.sha == "e" * 40
+
+
+def test_workflow_run_parses_null_status():
+    """The `workflow-run` schema declares `status` nullable, so a null value must parse."""
+    run = WorkflowRun.model_validate(workflow_run_payload(status=None))
+
+    assert run.status is None
+    assert run.is_completed is False
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        pytest.param("completed", 90.0, id="completed"),
+        pytest.param("in_progress", None, id="unfinished"),
+    ],
+)
+def test_workflow_run_duration_reads_updated_at_only_once_completed(status: str, expected: float | None):
+    """gh treats `updated_at` as the end time, which only holds once the run completed."""
+    run = WorkflowRun.model_validate(
+        workflow_run_payload(
+            status=status,
+            run_started_at="2026-01-01T10:00:00Z",
+            updated_at="2026-01-01T10:01:30Z",
+        )
+    )
+
+    assert run.duration_seconds == expected
+
+
+@pytest.mark.parametrize(
+    ("started_at", "completed_at", "expected"),
+    [
+        pytest.param("2026-09-24T15:39:24Z", "2026-09-24T15:44:30Z", 306.0, id="valid"),
+        pytest.param("2026-09-24T15:39:24Z", "2026-09-24T15:39:24Z", 0.0, id="genuine-zero"),
+        pytest.param("2026-09-24T15:39:24", "2026-09-24T15:44:30", 306.0, id="naive-but-consistent"),
+        pytest.param("2026-09-24T15:39:24Z", "2026-09-24T15:44:30", None, id="mixed-zones"),
+        pytest.param("2026-09-24T15:44:30Z", "2026-09-24T15:39:24Z", None, id="reversed"),
+        pytest.param("not-a-timestamp", "2026-09-24T15:44:30Z", None, id="invalid-start"),
+        pytest.param("2026-09-24T15:39:24Z", None, None, id="missing-end"),
+    ],
+)
+def test_workflow_job_duration_comes_only_from_valid_ordered_timestamps(
+    started_at: str, completed_at: str | None, expected: float | None
+):
+    """A job's duration is its own execution window, never an invented zero for unusable timing."""
+    job = WorkflowJob.model_validate(workflow_job(started_at=started_at, completed_at=completed_at))
+
+    assert job.duration_seconds == expected
 
 
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:

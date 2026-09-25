@@ -41,7 +41,7 @@ from ddev.event_bus.orchestrator import (
 )
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import ComponentMonitor, MonitoringRuntime
-from tests.helpers.monitoring import RecordingSink
+from tests.helpers.monitoring import RecordingSink, projector_for
 
 # Test Structure Documentation
 # --------------------------
@@ -2023,7 +2023,7 @@ def make_memo_scope(runtime: MonitoringRuntime) -> Callable[[BaseMessage], Abstr
 
 def test_a_message_scope_covers_processing_and_the_success_and_error_hooks():
     sink = RecordingSink()
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('memo_id', 'tag'))
     orchestrator = MockOrchestrator(
         logging.getLogger("test_scope"), grace_period=0.1, message_scope=make_memo_scope(runtime)
     )
@@ -2034,13 +2034,13 @@ def test_a_message_scope_covers_processing_and_the_success_and_error_hooks():
 
     assert [record.name for record in sink.records] == ["attempted", "handled", "attempted", "confirmed"]
     for record in sink.records:
-        assert record.fields["memo_id"] == record.tags["tag"]
+        assert record.tags["memo_id"] == record.tags["tag"]
     assert runtime.context.fields == {}
 
 
 def test_concurrent_sync_processors_keep_their_message_scopes_apart():
     sink = RecordingSink()
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('memo_id', 'tag'))
     overlap = threading.Barrier(2, timeout=5)
 
     class OverlappingWorker(SyncProcessor[Memo]):
@@ -2064,7 +2064,7 @@ def test_concurrent_sync_processors_keep_their_message_scopes_apart():
         orchestrator.submit_message(Memo("memo2"))
         orchestrator.run()
 
-    observed = {(record.fields["memo_id"], record.tags["tag"]) for record in sink.records}
+    observed = {(record.tags["memo_id"], record.tags["tag"]) for record in sink.records}
     assert observed == {("memo1", "memo1"), ("memo2", "memo2")}
     assert len(sink.records) == 2
 

@@ -13,7 +13,7 @@
 
 * Require `datadog-checks-base>=38.0.0` since config discovery's IPv6 handling relies on it. ([#24562](https://github.com/DataDog/integrations-core/pull/24562))
 
-## 6.7.0 / 2026-08-05
+## 6.7.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

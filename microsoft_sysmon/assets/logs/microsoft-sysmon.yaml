@@ -4327,6 +4327,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.src_endpoint.uid`
+              sources:
+                - Event.System.Computer
+              target: ocsf.src_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
               name: Map `ocsf.answers` to `ocsf.answers`
               sources:
                 - ocsf.answers

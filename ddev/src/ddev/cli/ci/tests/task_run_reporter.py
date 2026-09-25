@@ -6,16 +6,18 @@ from __future__ import annotations
 import asyncio
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Protocol
 
 import httpx
 
+from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     render_comment,
     render_compact_comment,
-    render_minimal_comment,
     render_shutdown_notice,
+    render_truncated_comment,
     summary_line,
 )
 from ddev.event_bus.orchestrator import AsyncProcessor
@@ -24,6 +26,8 @@ from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_errors import GitHubBodyTooLongError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ddev.cli.ci.tests.messages import UpdatePRComment
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async import AsyncGitHubClient
@@ -40,12 +44,16 @@ SHUTDOWN_WRITE_TIMEOUT = 4.0
 class CommentRenderer(Protocol):
     """Renders a whole report from a snapshot. Every tier takes the same arguments."""
 
-    def __call__(self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str: ...
+    def __call__(
+        self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+    ) -> str: ...
 
 
-# Smaller renderings to fall back on, largest first, when a body is refused for being too long.
-# Whether one differs from the tier above it depends on the snapshot, so each is compared once rendered.
-FALLBACK_TIERS: tuple[CommentRenderer, ...] = (render_compact_comment, render_minimal_comment)
+# Smaller renderings to fall back on when a body is refused for being too long. `render_comment`
+# already returns the largest tier that fits our own measurement, so these are for the case where
+# GitHub's accounting disagreed with it; how many of them differ from what was sent depends on the
+# snapshot, so each is rendered and compared by size rather than assumed to be smaller.
+FALLBACK_TIERS: tuple[CommentRenderer, ...] = (render_compact_comment, render_truncated_comment)
 
 
 @dataclass(frozen=True)
@@ -72,10 +80,14 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         options: RunReporterOptions,
         *,
         monitor: ComponentMonitor,
+        clock: Callable[[], datetime] | None = None,
     ):
         super().__init__(name)
         self._client = client
         self._options = options
+        # Read once per report, so the fallback tiers of one write pass stay byte-identical when the
+        # snapshot has nothing to shed.
+        self._clock: Callable[[], datetime] = clock or (lambda: datetime.now(timezone.utc))
         self._comment_id: int | None = None
         # Exclude rejected comments from subsequent marker lookups.
         self._unusable_comment_ids: set[int] = set()
@@ -88,6 +100,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._lock = asyncio.Lock()
         self._logger = monitor.logger
         self.monitor = monitor
+        self._metrics = MetricsHelper(monitor.metrics)
 
     @property
     def latest_body(self) -> str | None:
@@ -106,12 +119,17 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
 
     async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
-        body = render_comment(message.progress)
+        now = self._clock()
+        body = render_comment(message.progress, now=now)
 
         # Serialize revision checks and writes so older updates cannot overwrite newer ones.
         async with self._lock:
             if message.revision <= self._latest_revision:
-                self._logger.info("Stale UpdatePRComment ignored (latest rendered is %s)", self._latest_revision)
+                self._logger.info(
+                    "Stale PR comment revision %s ignored (latest rendered is %s)",
+                    message.revision,
+                    self._latest_revision,
+                )
                 return
 
             # Retain the report before any write that could fail or be interrupted.
@@ -125,8 +143,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 published = True
             else:
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, message.progress)
+                try:
+                    published = await self._write(pr_number, body, message.progress, revision=message.revision, now=now)
+                except Exception:
+                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    raise
                 self._pr_comment_failed = not published
+                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
 
             if message.progress.done and published:
                 self._final_report_published = True
@@ -137,8 +160,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         Timing out before acquiring the lock leaves the retained report unchanged.
         """
         async with asyncio.timeout(SHUTDOWN_WRITE_TIMEOUT), self._lock:
+            now = self._clock()
             progress = self._latest_progress
-            body = render_shutdown_notice(request) if progress is None else render_comment(progress, shutdown=request)
+            body = (
+                render_shutdown_notice(request, now=now)
+                if progress is None
+                else render_comment(progress, shutdown=request, now=now)
+            )
             # Shutdown runs outside message processing, so it carries its own revision and reason.
             with self.monitor.scope(revision=self._latest_revision, shutdown=request.kind.value):
                 self._latest_body = body
@@ -151,8 +179,13 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return
 
                 self._pr_comment_failed = True
-                published = await self._write(pr_number, body, progress, shutdown=request)
+                try:
+                    published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                except Exception:
+                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    raise
                 self._pr_comment_failed = not published
+                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
                 if published:
                     self._logger.info("Run reported as %s", request.kind.value, published=True)
 
@@ -162,20 +195,29 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         body: str,
         progress: DispatcherProgress | None,
         *,
+        revision: int | None = None,
         shutdown: ShutdownRequest | None = None,
+        now: datetime | None = None,
     ) -> bool:
         """Return whether publication succeeded, using smaller bodies or a replacement comment.
 
-        The GitHub client handles transient retries.
+        The GitHub client handles transient retries. `revision` is the progress revision the body
+        renders, or `None` for the terminal report a shutdown publishes.
         """
         rendered = body
         # Render fallback tiers only when needed, skipping duplicate bodies.
-        tiers = (render(progress, shutdown=shutdown) for render in FALLBACK_TIERS) if progress is not None else iter(())
+        tiers = (
+            (render(progress, shutdown=shutdown, now=now) for render in FALLBACK_TIERS)
+            if progress is not None
+            else iter(())
+        )
         for _ in range(MAX_WRITE_PASSES):
             try:
                 await self._submit(pr_number, rendered)
             except GitHubBodyTooLongError as error:
-                smaller = next((candidate for candidate in tiers if candidate != rendered), None)
+                # Only a genuinely smaller body is worth another round trip: a tier can render larger
+                # than what was just refused, because the refused body may already be a lower tier.
+                smaller = next((candidate for candidate in tiers if len(candidate) < len(rendered)), None)
                 if smaller is None:
                     self._logger.error("PR comment too long at every tier: %s", error)
                     return False
@@ -192,12 +234,28 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 self._logger.error("PR comment write failed: %s", error)
                 return False
             else:
-                self._logger.info(
-                    "PR comment written",
-                    comment_id=self._comment_id,
-                    bytes=len(rendered),
-                    published=True,
-                )
+                if shutdown is not None:
+                    self._logger.info(
+                        "PR comment written for shutdown: %s",
+                        shutdown.kind.value,
+                        comment_id=self._comment_id,
+                        bytes=len(rendered),
+                        published=True,
+                    )
+                else:
+                    # A non-shutdown write always renders a progress snapshot; assert rather than
+                    # render meaningless counts if that contract is broken.
+                    assert progress is not None and revision is not None
+                    self._logger.info(
+                        "PR comment written for revision %s (finished=%s, failed=%s, pending=%s)",
+                        revision,
+                        progress.complete,
+                        progress.failed,
+                        progress.total - progress.complete,
+                        comment_id=self._comment_id,
+                        bytes=len(rendered),
+                        published=True,
+                    )
                 return True
 
         self._logger.error("PR comment write found no comment it may edit")

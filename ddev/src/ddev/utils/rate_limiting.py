@@ -9,7 +9,8 @@ import asyncio
 import dataclasses
 import time
 from collections.abc import Callable
-from enum import StrEnum
+from enum import StrEnum, auto
+from time import monotonic
 from typing import Any, Literal
 
 from aiolimiter import AsyncLimiter
@@ -74,6 +75,7 @@ class RateLimitEventType(StrEnum):
     BUDGET = "budget"
     SECONDARY_LIMIT = "secondary_limit"
     PACING = "pacing"
+    WAIT = "wait"
 
 
 class PacingReason(StrEnum):
@@ -84,6 +86,23 @@ class PacingReason(StrEnum):
     EXHAUSTED = "exhausted"
     SECONDARY_LIMIT = "secondary_limit"
     ABANDONED = "abandoned"
+
+
+class WaitReason(StrEnum):
+    """What held a request back for a WaitEvent."""
+
+    BUCKET = auto()
+    RATIONING = auto()
+    EXHAUSTED = auto()
+    SECONDARY_LIMIT = auto()
+
+
+class WaitOutcome(StrEnum):
+    """How a WaitEvent's wait ended."""
+
+    COMPLETED = auto()
+    ABANDONED = auto()
+    CANCELLED = auto()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -126,7 +145,23 @@ class PacingEvent:
     type: Literal[RateLimitEventType.PACING] = RateLimitEventType.PACING
 
 
-RateLimitEvent = BucketEvent | BudgetEvent | SecondaryLimitEvent | PacingEvent
+@dataclasses.dataclass(frozen=True)
+class WaitEvent:
+    """Fired when a wait that actually blocked ends, however it ended.
+
+    `elapsed_seconds` is measured on the monotonic clock. `requested_seconds` is the delay the wait
+    set out to cover, which the local bucket does not expose, so it is None for a bucket wait.
+    """
+
+    reason: WaitReason
+    elapsed_seconds: float
+    outcome: WaitOutcome
+    requested_seconds: float | None = None
+    name: str = ""
+    type: Literal[RateLimitEventType.WAIT] = RateLimitEventType.WAIT
+
+
+RateLimitEvent = BucketEvent | BudgetEvent | SecondaryLimitEvent | PacingEvent | WaitEvent
 
 
 class RateLimitWaitAbandoned(TimeoutError):
@@ -265,9 +300,10 @@ class BudgetGovernor:
         self.next_slot = slot + interval
         return slot
 
-    async def wait(self) -> None:
+    async def wait(self, name: str = "") -> None:
         """Reserve one slot, then sleep until its target and any hard-pause floor elapse.
 
+        `name` identifies the limiter the wait held back: one governor is shared by every limiter.
         Raises RateLimitWaitAbandoned if the target ever exceeds the configured max_wait_seconds.
         """
         deadline, reason = self.reserve()
@@ -278,27 +314,49 @@ class BudgetGovernor:
         self.on_event(PacingEvent(wait_seconds=wait_seconds, reason=reason))
         give_up_at = None if self.max_wait_seconds is None else start + self.max_wait_seconds
         floor = max(deadline, self.pause_until)
-        for _ in range(MAX_WAIT_ITERATIONS):
-            current_floor = max(deadline, self.pause_until)
-            now = self.now()
-            delay = current_floor - now
-            if delay <= 0:
-                return
-            if give_up_at is not None and current_floor > give_up_at:
-                # The floor is past the budget: the request is doomed, so fail now rather than
-                # sleep into a wait we already know we will abandon.
-                self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.ABANDONED))
-                raise RateLimitWaitAbandoned(waited_seconds=now - start, remaining_seconds=delay)
-            if current_floor > floor:
-                # The floor only grows when pause_until does, i.e. a secondary-limit observe
-                # extended the wait mid-sleep; emit so the extension is observable.
-                self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.SECONDARY_LIMIT))
-                floor = current_floor
-            await asyncio.sleep(delay)
-        raise RuntimeError(
-            f"BudgetGovernor.wait failed to converge after {MAX_WAIT_ITERATIONS} iterations "
-            f"(remaining delay: {max(deadline, self.pause_until) - self.now()}s)"
-        )
+        started = monotonic()
+        slept = False
+        outcome = WaitOutcome.CANCELLED
+        try:
+            for _ in range(MAX_WAIT_ITERATIONS):
+                current_floor = max(deadline, self.pause_until)
+                now = self.now()
+                delay = current_floor - now
+                if delay <= 0:
+                    outcome = WaitOutcome.COMPLETED
+                    return
+                if give_up_at is not None and current_floor > give_up_at:
+                    # The floor is past the budget: the request is doomed, so fail now rather than
+                    # sleep into a wait we already know we will abandon.
+                    self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.ABANDONED))
+                    outcome = WaitOutcome.ABANDONED
+                    raise RateLimitWaitAbandoned(waited_seconds=now - start, remaining_seconds=delay)
+                if current_floor > floor:
+                    # The floor only grows when pause_until does, i.e. a secondary-limit observe
+                    # extended the wait mid-sleep; emit so the extension is observable.
+                    self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.SECONDARY_LIMIT))
+                    floor = current_floor
+                    reason = PacingReason.SECONDARY_LIMIT
+                slept = True
+                await asyncio.sleep(delay)
+            outcome = WaitOutcome.ABANDONED
+            raise RuntimeError(
+                f"BudgetGovernor.wait failed to converge after {MAX_WAIT_ITERATIONS} iterations "
+                f"(remaining delay: {max(deadline, self.pause_until) - self.now()}s)"
+            )
+        finally:
+            # One event per wait, however many extensions it absorbed. A wait abandoned before its
+            # first sleep never blocked, and its PacingEvent already reports the abandonment.
+            if slept and reason is not PacingReason.NONE:
+                self.on_event(
+                    WaitEvent(
+                        reason=WaitReason(reason),
+                        elapsed_seconds=monotonic() - started,
+                        outcome=outcome,
+                        requested_seconds=wait_seconds,
+                        name=name,
+                    )
+                )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -355,9 +413,23 @@ class InstrumentedAsyncLimiter:
 
     async def __aenter__(self) -> InstrumentedAsyncLimiter:
         if self.budget_governor is not None:
-            await self.budget_governor.wait()
+            await self.budget_governor.wait(name=self.name)
         throttled = not self.limiter.has_capacity()
-        await self.limiter.__aenter__()
+        started = monotonic()
+        outcome = WaitOutcome.CANCELLED
+        try:
+            await self.limiter.__aenter__()
+            outcome = WaitOutcome.COMPLETED
+        finally:
+            if throttled:
+                self.on_event(
+                    WaitEvent(
+                        reason=WaitReason.BUCKET,
+                        elapsed_seconds=monotonic() - started,
+                        outcome=outcome,
+                        name=self.name,
+                    )
+                )
         self.on_event(BucketEvent(throttled=throttled, name=self.name))
         return self
 

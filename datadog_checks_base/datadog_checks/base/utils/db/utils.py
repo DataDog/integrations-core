@@ -246,15 +246,15 @@ def default_json_event_encoding(o):
     raise TypeError
 
 
-def obfuscate_sql_with_metadata(query, options=None, replace_null_character=False):
+def obfuscate_sql_with_metadata(query, options=None, replace_null_character=True):
     """
     Obfuscate a SQL query and return the obfuscated query and metadata.
     :param str query: The SQL query to obfuscate.
     :param dict options: Obfuscation options to pass to the obfuscator.
-    :param bool replace_null_character: Whether to replace embedded null characters \x00 before obfuscating.
-        Note: Setting this parameter to true involves an extra string traversal and copy.
-        Do set this to true if the database allows embedded null characters in text fields, for example SQL Server.
-        Otherwise obfuscation will fail if the query contains embedded null characters.
+    :param bool replace_null_character: Whether to remove embedded null characters \\x00 before obfuscating.
+        The agent bindings for obfuscation and logging reject an embedded null with ValueError.
+        When the query contains no null, this removal does not copy the string.
+        Pass False to keep the byte and let obfuscation raise.
     :return: A dict containing the obfuscated query and metadata.
     :rtype: dict
     """

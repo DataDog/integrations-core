@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import replace
+from collections.abc import Callable
+from datetime import datetime, timezone
 
 import httpx
 import pytest
@@ -15,32 +16,33 @@ import pytest
 from ddev.cli.ci.tests import pr_comment, task_run_reporter
 from ddev.cli.ci.tests.messages import UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import (
-    CANCELLED_NOTE,
-    CANCELLED_WITHOUT_RESULTS_NOTE,
     COMMENT_MARKER,
     FAILED_HEADING,
     SHUTDOWN_HEADINGS,
-    STOPPED_NOTE,
-    STOPPED_WITHOUT_RESULTS_NOTE,
 )
-from ddev.cli.ci.tests.progress import JobAttemptProgress, JobProgress, ProgressError
+from ddev.cli.ci.tests.progress import DispatcherProgress, ProgressError
 from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunReporter
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
+from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import IssueComment
-from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
 from ddev.utils.rate_limiting import RateLimitWaitAbandoned
 from tests.cli.ci.tests.helpers import (
+    JOB_URL,
     TOTAL_JOBS,
+    attempt,
+    batch_progress,
     comment_page,
     failing_progress,
+    failing_report,
+    job_progress,
     jobs_reported,
-    make_job,
+    recording_runtime,
     uniform_progress,
 )
-from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient
+from tests.helpers.github_async import DEFAULT_COMMENT_ID, FakeAsyncGitHubClient, make_issue_comment
 from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 OWNER = "DataDog"
@@ -70,20 +72,16 @@ def _reporter(
     *,
     pr_number: int | None = PR_NUMBER,
     handler: logging.Handler | None = None,
+    clock: Callable[[], datetime] | None = None,
+    monitor: ComponentMonitor | None = None,
 ) -> TaskRunReporter:
     return TaskRunReporter(
         "run-reporter",
         client,
         RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number),
-        monitor=make_monitor('run-reporter', handler=handler),
+        monitor=monitor or make_monitor('run-reporter', handler=handler),
+        clock=clock,
     )
-
-
-SHUTDOWN_WITHOUT_RESULTS_NOTES = {
-    ShutdownKind.CANCELLED: CANCELLED_WITHOUT_RESULTS_NOTE,
-    ShutdownKind.FAILED: STOPPED_WITHOUT_RESULTS_NOTE,
-    ShutdownKind.TIMED_OUT: STOPPED_WITHOUT_RESULTS_NOTE,
-}
 
 
 def _shutdown_request(kind: ShutdownKind) -> ShutdownRequest:
@@ -96,7 +94,7 @@ def _shutdown_request(kind: ShutdownKind) -> ShutdownRequest:
 
 
 def _marked_comment(comment_id: int = 77, note: str = "ours") -> IssueComment:
-    return IssueComment(id=comment_id, body=f"{COMMENT_MARKER}\n{note}")
+    return make_issue_comment(id=comment_id, body=f"{COMMENT_MARKER}\n{note}")
 
 
 def _http_error(status_code: int) -> httpx.HTTPStatusError:
@@ -165,11 +163,11 @@ def test_created_body_carries_the_marker():
 @pytest.mark.parametrize(
     ("comments", "expected_comment_id"),
     [
-        pytest.param((IssueComment(id=1, body="a human comment"), _marked_comment()), 77, id="marked-comment-reused"),
+        pytest.param((make_issue_comment(body="a human comment"), _marked_comment()), 77, id="marked-comment-reused"),
         pytest.param((_marked_comment(88, "previous"),), 88, id="marked-comment-on-a-later-page"),
-        pytest.param((IssueComment(id=1, body="Dispatcher tests · passed"),), None, id="unmarked-comment-ignored"),
+        pytest.param((make_issue_comment(body="Dispatcher tests: passed"),), None, id="unmarked-comment-ignored"),
         pytest.param(
-            (IssueComment(id=31, body=f"> {COMMENT_MARKER}\n> ## Dispatcher tests\n\nlooks wrong to me"),),
+            (make_issue_comment(id=31, body=f"> {COMMENT_MARKER}\n> ## Dispatcher tests\n\nlooks wrong to me"),),
             None,
             id="quote-copying-the-marker-ignored",
         ),
@@ -216,9 +214,13 @@ def test_a_comment_we_cannot_edit_is_replaced_by_one_we_own(error: httpx.HTTPSta
     client = FakeAsyncGitHubClient()
     client.mock_response("list_issue_comments", comment_page(_marked_comment(77, "not ours")))
     client.mock_response("update_issue_comment", error, once=True)
-    reporter = _reporter(client)
+    monitoring, sink = recording_runtime()
+    reporter = _reporter(client, monitor=monitoring.component("run-reporter"))
 
     asyncio.run(reporter.process_message(_update(1)))
+
+    assert [record.value for record in sink.records_named("operations.count")] == [1]
+    assert [record.value for record in sink.records_named("operations.failed")] == [0]
 
     # First it tried to edit the comment it found, then it created its own.
     assert len(client.calls_to("update_issue_comment")) == 1
@@ -292,6 +294,24 @@ def test_concurrent_revisions_are_serialized():
     reported = [jobs_reported(body) for body in bodies]
     assert reported == sorted(reported)
     assert reported[-1] == 3
+
+
+async def test_pr_comment_log_messages_name_their_revision():
+    client = FakeAsyncGitHubClient()
+    handler = RecordingJsonHandler()
+    reporter = _reporter(client, handler=handler)
+
+    await reporter.process_message(_update(1))
+    await reporter.process_message(_update(2, done=True))
+    # A delivery of a superseded revision, as concurrent batches can produce.
+    await reporter.process_message(_update(1))
+    await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
+
+    messages = [event["event"] for event in handler.events]
+    assert "PR comment written for revision 1 (finished=1, failed=0, pending=9)" in messages
+    assert "PR comment written for revision 2 (finished=10, failed=0, pending=0)" in messages
+    assert "Stale PR comment revision 1 ignored (latest rendered is 2)" in messages
+    assert "PR comment written for shutdown: cancelled" in messages
 
 
 # ---------------------------------------------------------------------------
@@ -459,6 +479,66 @@ def test_a_token_refused_for_every_comment_gives_up_rather_than_looping():
     assert len(client.calls_to("update_issue_comment")) == 1
     assert len(client.calls_to("create_issue_comment")) == 1
     assert reporter.pr_comment_failed
+
+
+def test_each_publication_reports_one_operation_outcome():
+    monitoring, sink = recording_runtime()
+    monitor = monitoring.component("run-reporter")
+    reporter = _reporter(FakeAsyncGitHubClient(), monitor=monitor)
+
+    with monitor.scope(done=False, revision=1):
+        asyncio.run(reporter.process_message(_update(1)))
+    with monitor.scope(done=True, revision=2):
+        asyncio.run(reporter.process_message(_update(2, done=True)))
+
+    assert [record.value for record in sink.records_named("operations.count")] == [1, 1]
+    assert [record.value for record in sink.records_named("operations.failed")] == [0, 0]
+    assert all(
+        record.tags["dispatcher.operation"] == "publish_report" for record in sink.records_named("operations.count")
+    )
+
+
+def test_a_write_that_settled_as_failed_reports_one_failed_operation():
+    client = FakeAsyncGitHubClient()
+    client.mock_response("list_issue_comments", comment_page(_marked_comment()))
+    client.mock_response("update_issue_comment", _auth_error(403))
+    client.mock_response("create_issue_comment", _auth_error(403))
+    monitoring, sink = recording_runtime()
+    reporter = _reporter(client, monitor=monitoring.component("run-reporter"))
+
+    asyncio.run(reporter.process_message(_update(1)))
+
+    assert [record.value for record in sink.records_named("operations.count")] == [1]
+    assert [record.value for record in sink.records_named("operations.failed")] == [1]
+
+
+def test_an_escaped_write_error_fails_the_publication_operation_and_propagates():
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", RuntimeError("the comment API is down"))
+    monitoring, sink = recording_runtime()
+    reporter = _reporter(client, monitor=monitoring.component("run-reporter"))
+
+    with pytest.raises(RuntimeError, match="the comment API is down"):
+        asyncio.run(reporter.process_message(_update(1)))
+
+    assert [record.value for record in sink.records_named("operations.failed")] == [1]
+
+
+@pytest.mark.parametrize(
+    ("pr_number", "revisions", "expected"),
+    [
+        pytest.param(PR_NUMBER, [1, 1], [1], id="stale-revision"),
+        pytest.param(None, [1], [], id="no-pull-request"),
+    ],
+)
+def test_an_ignored_publication_reports_no_operation(pr_number: int | None, revisions: list[int], expected: list[int]):
+    monitoring, sink = recording_runtime()
+    reporter = _reporter(FakeAsyncGitHubClient(), pr_number=pr_number, monitor=monitoring.component("run-reporter"))
+
+    for revision in revisions:
+        asyncio.run(reporter.process_message(_update(revision)))
+
+    assert [record.value for record in sink.records_named("operations.count")] == expected
 
 
 # ---------------------------------------------------------------------------
@@ -662,47 +742,47 @@ def test_the_real_cause_of_an_unrelated_validation_error_reaches_the_log():
 
 
 def _tiered_update(revision: int, *, done: bool = False) -> UpdatePRComment:
-    """A snapshot with failures *and* an unavailable result, so all three tiers differ."""
-    progress = failing_progress(done=done)
-    unavailable = JobProgress(
-        job=make_job("mysql-py3.12-linux", target="mysql", environment="py3.12"),
-        attempts=(
-            JobAttemptProgress(
-                attempt=1,
-                job_id=11,
-                status=Status.SUCCESS,
-                conclusion=WorkflowJobConclusion.SUCCESS,
-                failed_steps=(),
-                job_url=None,
-                reports=(),
-                error=ProgressError.NO_ARTIFACTS,
-            ),
-        ),
-    )
-    batch = progress.batches[0]
-    widened = replace(batch, jobs_progress=(*batch.jobs_progress, unavailable))
-    return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=replace(progress, batches=(widened,)))
+    """A snapshot the tiers render differently, plus a result that could not be collected.
+
+    What a tier sheds is the test names under each target, so the snapshot has to carry enough of
+    them to make the full body meaningfully bigger than the nameless one. Below that the compact
+    tier is byte-identical to the full one and the reporter skips it, which is correct but leaves
+    the ladder with nothing to walk.
+    """
+    jobs = [
+        job_progress(
+            attempt(Status.FAILURE, reports=(failing_report(*[f"test_number_{n}" for n in range(40)]),)),
+            target=f"integration-{index:02d}",
+        )
+        for index in range(12)
+    ]
+    jobs.append(job_progress(attempt(error=ProgressError.NO_ARTIFACTS, job_url=None), target="mysql"))
+    progress = DispatcherProgress(batches=(batch_progress("batch-01", *jobs, status=Status.FAILURE),), done=done)
+    return UpdatePRComment(id=f"msg-{revision}", revision=revision, progress=progress)
 
 
-def test_the_ladder_walks_all_three_tiers():
-    """Full, then compact, then minimal -- each smaller than the last."""
+def test_a_refused_body_is_answered_with_a_smaller_one_that_keeps_its_links():
+    """The names are what a fallback sheds; the job links are what it keeps.
+
+    A fallback that dropped a target's link while another still carried test names would have spent
+    the budget on the detail rather than on the way in to the run that produced it.
+    """
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _too_long_error(), once=True)
-    client.mock_response("create_issue_comment", _too_long_error(), once=True)
+    reporter = _reporter(client)
 
-    asyncio.run(_reporter(client).process_message(_tiered_update(1, done=True)))
+    asyncio.run(reporter.process_message(_tiered_update(1, done=True)))
 
     bodies = [call.kwargs["body"] for call in client.calls_to("create_issue_comment")]
-    assert len(bodies) == 3
-    sizes = [len(body.encode("utf-8")) for body in bodies]
-    assert sizes[2] < sizes[1] < sizes[0]
-    # Tier 2 sheds the secondary sections; tier 3 sheds the per-test detail but keeps the failures.
-    assert "Unavailable results" in bodies[0]
-    assert "Unavailable results" not in bodies[1]
-    assert "test_number_0" in bodies[1]
-    assert "test_number_0" not in bodies[2]
-    assert "Failures" in bodies[2]
-    assert "<table>" in bodies[2]
+    assert len(bodies) == 2
+    assert len(bodies[1].encode("utf-8")) < len(bodies[0].encode("utf-8"))
+    assert "test_number_0" in bodies[0]
+    assert "test_number_0" not in bodies[1]
+    # The smaller body still names every integration, links every batch and links every target.
+    assert "<code>integration-00</code>" in bodies[1]
+    assert "Batches · " in bodies[1]
+    assert JOB_URL in bodies[1]
+    assert not reporter.pr_comment_failed
 
 
 def test_a_too_long_body_never_escapes_the_reporter():
@@ -730,21 +810,30 @@ def test_the_retained_report_is_the_full_one_even_when_a_smaller_tier_was_sent()
 
 
 def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypatch):
-    """The case the tiers exist for: GitHub refusing a body our own measurement passed.
+    """The case the fallbacks exist for: GitHub refusing a body our own measurement passed.
 
-    The renderer truncates itself to the limit, so the tiers are really there for GitHub's accounting
-    disagreeing with ours. Simulated by a server that accepts only the smallest tier.
+    The renderer already returns the largest tier that fits, so the fallbacks are there purely for
+    GitHub's accounting disagreeing with ours. Simulated by a server that accepts only the smallest
+    body the renderer can produce for this snapshot.
     """
     message = _tiered_update(1, done=True)
-    tiers = [
-        pr_comment.render_comment(message.progress),
-        pr_comment.render_compact_comment(message.progress),
-        pr_comment.render_minimal_comment(message.progress),
+    # One render instant shared with the reporter, so the bodies below and the ones it sends match.
+    now = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
+    rendered = [
+        pr_comment.render_comment(message.progress, now=now),
+        pr_comment.render_compact_comment(message.progress, now=now),
+        pr_comment.render_truncated_comment(message.progress, now=now),
     ]
+    # A tier that renders the same bytes as the one above it is never sent twice, and one that
+    # renders larger is not worth a round trip, so neither appears in what the reporter attempts.
+    tiers: list[str] = []
+    for tier in rendered:
+        if not tiers or len(tier) < len(tiers[-1]):
+            tiers.append(tier)
+    assert len(tiers) >= 2, "the snapshot has to make at least one fallback differ"
     # Every tier is within our own limit, so nothing here is caught before it is sent.
     assert all(len(tier.encode("utf-8")) <= pr_comment.COMMENT_BODY_LIMIT for tier in tiers)
     strict_limit = len(tiers[-1].encode("utf-8"))
-    assert len(tiers[1].encode("utf-8")) > strict_limit, "the middle tier must not already fit"
 
     client = FakeAsyncGitHubClient()
     attempted: list[str] = []
@@ -759,7 +848,7 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
         return await original(owner, repo, issue_number, body, timeout)
 
     monkeypatch.setattr(client, "create_issue_comment", stricter_github)
-    reporter = _reporter(client)
+    reporter = _reporter(client, clock=lambda: now)
 
     asyncio.run(reporter.process_message(message))
 
@@ -776,12 +865,11 @@ async def test_a_stopped_run_is_reported_even_with_nothing_gathered(kind: Shutdo
 
     await reporter.publish_shutdown(_shutdown_request(kind))
 
-    created = client.last_call("create_issue_comment")
-    assert SHUTDOWN_HEADINGS[kind] in created.kwargs["body"]
-    assert SHUTDOWN_WITHOUT_RESULTS_NOTES[kind] in created.kwargs["body"]
-    # The gathered-results note would promise a section this body does not have.
-    gathered_note = CANCELLED_NOTE if kind is ShutdownKind.CANCELLED else STOPPED_NOTE
-    assert gathered_note not in created.kwargs["body"]
+    body = client.last_call("create_issue_comment").kwargs["body"]
+    assert SHUTDOWN_HEADINGS[kind] in body
+    # No snapshot exists, so there is nothing for the notice to promise a section of.
+    assert "Batches · " not in body
+    assert "<details>" not in body
 
 
 @pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
@@ -826,26 +914,26 @@ async def test_a_stopped_run_reports_what_it_had_gathered(kind: ShutdownKind):
     assert reporter.latest_body is not None
     assert SHUTDOWN_HEADINGS[kind] in reporter.latest_body
     assert jobs_reported(reporter.latest_body) == 1
-    assert SHUTDOWN_WITHOUT_RESULTS_NOTES[kind] not in reporter.latest_body
+    # The snapshot it had is in the report rather than replaced by an empty notice.
+    assert "Batches · " in reporter.latest_body
 
 
 async def test_a_fatal_reason_survives_the_fallback_tiers():
     """A failed report retains its cause through both size fallbacks before publication succeeds."""
     client = FakeAsyncGitHubClient()
     client.mock_response("update_issue_comment", _too_long_error(), once=True)
-    client.mock_response("update_issue_comment", _too_long_error(), once=True)
     reporter = _reporter(client)
-    # Failures *and* an unavailable result, so the three tiers render genuinely different bodies.
+    # Failures *and* a result that never arrived, so the fallback renders a genuinely smaller body.
     await reporter.process_message(_tiered_update(1, done=True))
 
     request = ShutdownRequest.failed(RuntimeError("a batch response failed validation"))
     await reporter.publish_shutdown(request)
 
     calls = client.calls_to("update_issue_comment")
-    assert len(calls) == 3  # refused twice, landed on the third
+    assert len(calls) == 2  # refused once, landed on the fallback
     bodies = [call.kwargs["body"] for call in calls]
     sizes = [len(body.encode("utf-8")) for body in bodies]
-    assert sizes[2] < sizes[1] < sizes[0]
+    assert sizes[1] < sizes[0]
     assert all(FAILED_HEADING in body for body in bodies)
     assert all("a batch response failed validation" in body for body in bodies)
     assert not reporter.pr_comment_failed
@@ -872,7 +960,8 @@ async def test_a_shutdown_report_waiting_on_the_report_lock_expires_without_canc
 ):
     """A terminal lock timeout must leave the active writer and subsequent publication usable."""
     client = FakeAsyncGitHubClient()
-    reporter = _reporter(client)
+    monitoring, sink = recording_runtime()
+    reporter = _reporter(client, monitor=monitoring.component("run-reporter"))
     write_started = asyncio.Event()
     release_write = asyncio.Event()
     create_comment = client.create_issue_comment
@@ -896,6 +985,7 @@ async def test_a_shutdown_report_waiting_on_the_report_lock_expires_without_canc
                     await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
 
         assert (reporter.latest_body, reporter.pr_comment_failed) == retained
+        assert sink.records_named("operations.count") == []
         release_write.set()
         await asyncio.wait_for(progress_write, timeout=2)
         assert not reporter.pr_comment_failed
@@ -903,6 +993,8 @@ async def test_a_shutdown_report_waiting_on_the_report_lock_expires_without_canc
         await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
         body = client.last_call("update_issue_comment").kwargs["body"]
         assert SHUTDOWN_HEADINGS[ShutdownKind.CANCELLED] in body
+        assert [record.value for record in sink.records_named("operations.count")] == [1, 1]
+        assert [record.value for record in sink.records_named("operations.failed")] == [0, 0]
     finally:
         release_write.set()
         await asyncio.gather(progress_write, return_exceptions=True)
