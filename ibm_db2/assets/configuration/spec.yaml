@@ -73,6 +73,14 @@ files:
         value:
           type: integer
           example: 10
+      - name: dbm
+        fleet_configurable: true
+        description: |
+          Set to `true` to enable Database Monitoring.
+        value:
+          type: boolean
+          example: false
+          display_default: false
 
       - template: instances/db
         overrides:

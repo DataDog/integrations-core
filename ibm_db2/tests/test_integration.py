@@ -46,7 +46,7 @@ def test_table_space_tags(aggregator, instance, dd_run_check):
 @pytest.mark.usefixtures('dd_environment')
 def test_table_space_state_change(aggregator, instance, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check._table_space_states['USERSPACE1'] = 'test'
+    check._metrics._table_space_states['USERSPACE1'] = 'test'
     dd_run_check(check)
 
     aggregator.assert_event('State of `USERSPACE1` changed from `test` to `NORMAL`.')
@@ -54,7 +54,9 @@ def test_table_space_state_change(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, instance, dd_run_check):
+def test_custom_queries(aggregator, instance, dd_run_check, monkeypatch):
+    # Run the custom queries job inline so its metrics are submitted before the assertions.
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     instance['custom_queries'] = [
         {
             'metric_prefix': 'ibm_db2',
@@ -83,7 +85,9 @@ def test_custom_queries(aggregator, instance, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries_init_config(aggregator, instance, dd_run_check):
+def test_custom_queries_init_config(aggregator, instance, dd_run_check, monkeypatch):
+    # Run the custom queries job inline so its metrics are submitted before the assertions.
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     init_config = {
         'global_custom_queries': [
             {
@@ -121,7 +125,7 @@ def test_metadata(instance, datadog_agent, dd_run_check):
     dd_run_check(check)
 
     # only major and minor are consistent values
-    major, minor = DB2_VERSION.split('.')
+    major, minor = DB2_VERSION.split('.')[:2]
 
     version_metadata = {
         'version.scheme': 'ibm_db2',
