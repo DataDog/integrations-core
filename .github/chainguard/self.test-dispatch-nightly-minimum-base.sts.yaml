@@ -1,0 +1,17 @@
+# Allows the nightly minimum base package dispatch on master to run test batches and report results.
+# Narrower than self.test-dispatch: this run resolves no pull request, so it needs no
+# `pull_requests` permission.
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  event_name: ^workflow_run$
+  ref: ^refs/heads/master$
+  ref_type: ^branch$
+  job_workflow_ref: ^DataDog/integrations-core/\.github/workflows/test-dispatch-nightly-minimum-base\.yml@refs/heads/master$
+  repository: ^DataDog/integrations-core$
+
+permissions:
+  actions: write # Dispatch/cancel batches and read runs, jobs, and artifacts.
+  statuses: write # Publish the aggregate result on the tested commit.

@@ -1,0 +1,200 @@
+# Shadows the nightly minimum base package tests through the Dispatcher.
+#
+# `nightly-base-package.yml` and `nightly-base-package-windows.yml` remain authoritative and are
+# untouched; this run reports a separate non-blocking status and decides nothing. The legacy pair is
+# split only to stay under GitHub's 256-job matrix cap, which batching removes, so one run here
+# covers both Linux and Windows.
+#
+# Trust model. This is the privileged half and has no entry point other than the completion of
+# `Test Dispatch Nightly Minimum Base Trigger`. That trigger accepts `workflow_dispatch`, so it can
+# be started on any branch; the gate below therefore requires master, and the checkout pins
+# `refs/heads/master` rather than the event's head SHA. Without both, a branch-side manual run would
+# execute that branch's ddev while this job holds the scoped token.
+name: Test Dispatch Nightly Minimum Base
+
+on:
+  workflow_run:
+    workflows:
+      - Test Dispatch Nightly Minimum Base Trigger
+    types:
+      - completed
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dispatch:
+    name: dispatch
+    runs-on: ubuntu-22.04
+    # Allow cleanup after the Dispatcher's three-hour ceiling.
+    timeout-minutes: 185
+    permissions:
+      contents: read
+      id-token: write # the octo-sts exchange; every write happens with the scoped token
+
+    # One nightly at a time. A run still going when the next night's fires is stale by definition.
+    concurrency:
+      group: test-dispatch-nightly-minimum-base
+      cancel-in-progress: true
+
+    if: >-
+      github.repository == 'DataDog/integrations-core'
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.head_branch == 'master'
+      && contains(fromJSON('["schedule","workflow_dispatch"]'), github.event.workflow_run.event)
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Trusted code, never the trigger's head SHA: the trigger can be dispatched from any
+          # branch, and this job holds a scoped token.
+          ref: refs/heads/master
+          # Depth 2 holds the first parent, which `--commit` compares against.
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Resolve master's tip
+        id: commit
+        run: |
+          set -euo pipefail
+          # The commit tested is what was just checked out, not a value carried in the event.
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Get a scoped token
+        id: octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: DataDog/integrations-core
+          policy: self.test-dispatch-nightly-minimum-base
+
+      - name: Mark the run pending
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          HEAD_SHA: ${{ steps.commit.outputs.sha }}
+          STATUS_CONTEXT: Dispatcher / nightly MBP (beta, non-blocking)
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Refusing to post the pending status: no scoped token or full SHA."
+            exit 1
+          fi
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=${STATUS_CONTEXT}" \
+            -f "state=pending" \
+            -f "description=Planning and dispatching batches" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"posted \(.context) as \(.state), pointing at \(.target_url)"'
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Set up ddev
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure the trusted checkout
+        run: |
+          set -euo pipefail
+          ddev config set upgrade_check false
+          ddev config override
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-dispatcher-api-key
+
+      - name: Configure Datadog
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+        run: |
+          set -euo pipefail
+          # The key and site are stored for Dispatcher monitoring; dispatching does not use them.
+          ddev config set orgs.default.api_key "$DD_API_KEY"
+          ddev config set orgs.default.site datadoghq.com
+
+      - name: Plan and dispatch the batches
+        id: dispatch
+        env:
+          DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+          args=(
+            ci dispatch-tests
+            --commit "$COMMIT_SHA"
+            --repo DataDog/integrations-core
+            --workflow test-batch.yml
+            --workflow-ref master
+            --output-dir "$GITHUB_WORKSPACE/dispatcher-output"
+            # Repository-wide, like the nightly it shadows: every eligible target, not a diff.
+            --all
+            # Additive, so each target yields its ordinary job and a minimum base package replica.
+            # Only the replicas correspond to what the legacy nightly tests.
+            --minimum-base-package
+            --pytest-args '-m "not flaky"'
+            # Load-bearing, not labelling. `test-batch.yml` derives each batch's concurrency group
+            # and status name from this, which is what keeps a nightly batch from cancelling or
+            # overwriting a master-push batch testing the same commit.
+            --tags 'context:nightly-base-package'
+          )
+          # Deliver cancellation signals directly to ddev's cleanup handler.
+          exec ddev "${args[@]}"
+
+      # Settle pending statuses even after cancellation or setup failure.
+      - name: Settle the run's aggregate result
+        if: always()
+        timeout-minutes: 1
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          HEAD_SHA: ${{ steps.commit.outputs.sha }}
+          STATUS_CONTEXT: Dispatcher / nightly MBP (beta, non-blocking)
+          DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Refusing to settle the status: no scoped token or full SHA."
+            exit 1
+          fi
+          state=failure
+          description="Nightly minimum base package dispatch did not complete"
+          if [[ "$DISPATCH_OUTCOME" == success ]]; then
+            state=success
+            description="Nightly minimum base package dispatch completed"
+          fi
+
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "context=${STATUS_CONTEXT}" \
+            -f "state=${state}" \
+            -f "description=${description}" \
+            -f "target_url=${RUN_URL}" \
+            --jq '"settled \(.context) as \(.state), pointing at \(.target_url)"'
+
+      # Coverage is deliberately not uploaded. The ordinary half of the plan does produce it, but it
+      # would be a second upload for a master commit the push run already covered. Add it only if
+      # the shadow comparison turns out to need it.
+      - name: Show what the run produced
+        if: always()
+        run: |
+          if [[ -d dispatcher-output ]]; then
+            find dispatcher-output -type f | sort
+          else
+            echo "no output directory"
+          fi
+
+      - name: Upload the run's output
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: dispatcher-output
+          path: dispatcher-output
+          if-no-files-found: warn
