@@ -68,7 +68,7 @@ exception class belonging to the underlying HTTP library. Catch these instead:
 | `HTTPClientReadTimeoutError` | The timeout elapsed while waiting for response data. |
 | `HTTPClientStatusError` | An error status was raised through `raise_for_status()`. |
 
-A check reporting connectivity therefore looks like this:
+A check that skips optional data when its endpoint is unavailable therefore looks like this:
 
 ```python
 from datadog_checks.base.utils.http_exceptions import HTTPClientError
@@ -77,9 +77,8 @@ try:
     response = self.http.get(url)
     response.raise_for_status()
 except HTTPClientError as e:
-    self.service_check('can_connect', AgentCheck.CRITICAL, message=str(e))
-else:
-    self.service_check('can_connect', AgentCheck.OK)
+    self.log.debug('Could not retrieve version metadata: %s', e)
+    return
 ```
 
 Body decoding is the one exception to that rule. Calling `response.json()` on a body that is not valid JSON raises the
