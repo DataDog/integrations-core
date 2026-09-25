@@ -6,6 +6,8 @@ from collections.abc import Iterable
 from fnmatch import fnmatch
 from pathlib import Path
 
+from ddev.utils.integration_naming import integration_dir_name
+
 
 def canonicalize_path(path: str | Path) -> Path:
     """Single source of truth for path canonicalization across the fs layer.
@@ -129,24 +131,13 @@ class FileAccessPolicy:
         self._integration_root = self._resolve_integration_root(integration_name)
 
     def _resolve_integration_root(self, integration_name: str) -> Path:
-        """Resolve the directory `ddev create check` would use for `integration_name`.
+        """Resolve the directory `ddev create` would use for `integration_name`.
 
-        Raises ValueError if `integration_name` is not a name `ddev create` would accept.
+        Raises ValueError if `integration_name` is not a name `ddev create` would accept,
+        which includes any name that does not reduce to a single path segment under the
+        write root.
         """
-        # Imported lazily: `ddev.cli` eagerly imports `ddev.cli.meta.ai`, which imports back
-        # into `ddev.ai`, so importing it at module load time here would risk a circular import.
-        from ddev.cli.create._naming import is_creatable_integration_name, normalize_package_name
-
-        if not isinstance(integration_name, str) or not is_creatable_integration_name(integration_name):
-            raise ValueError(f"Invalid integration name: {integration_name!r}")
-
-        # normalize_package_name only touches "-_. ", so a value containing "/" would
-        # otherwise survive normalization and let integration_name name an arbitrary
-        # directory outside the intended integration root.
-        normalized = normalize_package_name(integration_name).strip("_")
-        if not normalized or len(Path(normalized).parts) != 1:
-            raise ValueError(f"Invalid integration name: {integration_name!r}")
-        return self._write_root / normalized
+        return self._write_root / integration_dir_name(integration_name)
 
     @property
     def write_root(self) -> Path:

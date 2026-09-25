@@ -280,20 +280,12 @@ def test_integration_root_normalizes_like_ddev_create(tmp_path, integration_name
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("value", ["", "   ", "---", None, 123])
+# One representative value per rule: the exhaustive table lives with the rule's owner,
+# `integration_dir_name` (tests/utils/test_integration_naming.py). What matters here is
+# that construction refuses to build a policy around a name that function rejects, rather
+# than silently scoping deletions to a bogus root.
+@pytest.mark.parametrize("value", ["", None, "../escape", "datadog_operator"])
 def test_construction_rejects_invalid_integration_name(tmp_path, value) -> None:
-    with pytest.raises(ValueError, match="Invalid integration name"):
-        FileAccessPolicy(write_root=tmp_path, integration_name=value)
-
-
-@pytest.mark.parametrize("value", ["ddev/src", "../escape", "/etc", "a/b/c"])
-def test_construction_rejects_path_separators(tmp_path, value) -> None:
-    with pytest.raises(ValueError, match="Invalid integration name"):
-        FileAccessPolicy(write_root=tmp_path, integration_name=value)
-
-
-@pytest.mark.parametrize("value", ["datadog_operator", "Datadog Checks", "DATADOG-anything"])
-def test_construction_rejects_reserved_datadog_prefix(tmp_path, value) -> None:
     with pytest.raises(ValueError, match="Invalid integration name"):
         FileAccessPolicy(write_root=tmp_path, integration_name=value)
 
