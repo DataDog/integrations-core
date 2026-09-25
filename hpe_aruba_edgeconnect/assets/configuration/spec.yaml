@@ -35,6 +35,23 @@ files:
       value:
         type: string
 
+    - name: orchestrator_login_type
+      fleet_configurable: true
+      description: |
+        Authentication backend the Orchestrator uses to verify `orchestrator_username` and
+        `orchestrator_password`. Set this when the account is defined on a remote authentication
+        server rather than locally on the Orchestrator:
+
+        - `0` for a local Orchestrator account
+        - `1` for RADIUS
+        - `2` for TACACS+
+
+        When unset, the Orchestrator applies its own default, which is local authentication.
+      value:
+        type: integer
+        example: 2
+        display_default: null
+
     - name: namespace
       fleet_configurable: true
       description: Namespace to use for NDM device metadata. Defaults to "default".

@@ -328,6 +328,58 @@ def test_login_orchestrator_csrf_token():
 
 
 @pytest.mark.parametrize(
+    'login_type, expected_payload',
+    [
+        pytest.param(
+            None,
+            {'user': 'admin', 'password': 'pass'},
+            id='unset-omits-field',
+        ),
+        pytest.param(
+            0,
+            {'user': 'admin', 'password': 'pass', 'loginType': 0},
+            id='local',
+        ),
+        pytest.param(
+            2,
+            {'user': 'admin', 'password': 'pass', 'loginType': 2},
+            id='tacacs',
+        ),
+    ],
+)
+def test_login_orchestrator_sends_configured_login_type(login_type, expected_payload):
+    http = MagicMock()
+    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
+    http.session.headers = {}
+    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+
+    client = OrchestratorClient(http, '10.0.0.1', login_type)
+    client.login('admin', 'pass')
+
+    assert http.post.call_args.kwargs['json'] == expected_payload
+
+
+def test_orchestrator_login_type_reused_on_reauthentication():
+    """A 401 mid-collection re-logs in, which must keep using the configured backend."""
+    http = MagicMock()
+    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
+    http.session.headers = {}
+    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+    http.get.side_effect = [
+        MagicMock(status_code=401),
+        MagicMock(status_code=200, raise_for_status=MagicMock(), json=MagicMock(return_value=[])),
+    ]
+
+    client = OrchestratorClient(http, '10.0.0.1', 2)
+    client.login('admin', 'pass')
+    client.get_appliances()
+
+    assert http.post.call_count == 2
+    for call in http.post.call_args_list:
+        assert call.kwargs['json']['loginType'] == 2
+
+
+@pytest.mark.parametrize(
     'client_factory, login_url',
     [
         pytest.param(
