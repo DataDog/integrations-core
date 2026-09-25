@@ -289,10 +289,17 @@ class KafkaCheck(AgentCheck):
 
     def _get_consumer_groups(self):
         # Get all consumer groups to monitor
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+        if self.config._monitor_unlisted_consumer_groups:
             return [grp for grp in self.client.list_consumer_groups() if grp]
-        else:
-            return self.config._consumer_groups
+
+        if self.config._consumer_groups_compiled_regex:
+            return [
+                grp
+                for grp in self.client.list_consumer_groups()
+                if grp and self.config._consumer_groups_compiled_group_regex.match(grp)
+            ]
+
+        return self.config._consumer_groups
 
     def _get_offsets_for_groups(self, consumer_groups):
         groups = []
