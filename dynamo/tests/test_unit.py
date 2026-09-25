@@ -69,18 +69,23 @@ def test_check_collects_mapped_metrics(
 
 
 def test_emits_critical_openmetrics_service_check_when_service_is_down(
-    dd_run_check, aggregator, frontend_instance, mock_http_response
+    dd_run_check, aggregator, frontend_instance, fake_http, fake_http_response
 ):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http_response(status_code=404)
+    fake_http_response(
+        frontend_instance['openmetrics_endpoint'],
+        status_code=404,
+        match_options={'stream': True},
+    )
     check = DynamoCheck("dynamo", {}, [frontend_instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check("dynamo.openmetrics.health", ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
 
 
 def test_check_skipped_when_gpu_monitoring_disabled(frontend_instance):
