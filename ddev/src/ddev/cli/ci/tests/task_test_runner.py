@@ -10,7 +10,6 @@ import gzip
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime
 from itertools import count
 from pathlib import Path
 from time import monotonic
@@ -67,20 +66,6 @@ def _serialize_test_tags(fields: Mapping[str, Any]) -> str:
 
 def _sanitize_test_tag_value(value: str) -> str:
     return value.replace(',', '_').replace('\n', '_').replace('\r', '_')
-
-
-def workflow_duration_seconds(run: WorkflowRun) -> float | None:
-    """Use gh's completed-run timing convention, omitting unavailable or invalid timestamps.
-
-    https://github.com/cli/cli/blob/trunk/pkg/cmd/run/shared/shared.go
-    """
-    if run.run_started_at is None or run.updated_at is None:
-        return None
-    try:
-        duration = (datetime.fromisoformat(run.updated_at) - datetime.fromisoformat(run.run_started_at)).total_seconds()
-    except (ValueError, TypeError):
-        return None
-    return duration if duration >= 0 else None
 
 
 def encode_job_list(jobs: list[dict[str, Any]]) -> str:
@@ -305,7 +290,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             # Shutdown must not try to cancel a completed run while its artifacts are still being collected.
             if completed:
                 self._runs_in_flight.pop(message.batch_id, None)
-                if (duration := workflow_duration_seconds(run.data)) is not None:
+                if (duration := run.data.duration_seconds) is not None:
                     self.monitor.metrics.distribution('batch.duration', duration)
 
             # Report workflow progress first. The jobs request may be delayed by the API rate limit.

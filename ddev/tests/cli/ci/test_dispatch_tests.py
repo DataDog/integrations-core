@@ -954,6 +954,7 @@ def test_an_executed_run_reports_its_execution_metrics(
             'batch.jobs.count': 1,
             'jobs.count': 1,
             'batch.duration': 1,
+            'job.duration': 1,
             'artifacts.download.duration': 1,
             'runs.count': 1,
             'runs.failed': 1,
