@@ -1,0 +1,35 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Integration key and secret key",
+      "basic": {
+        "user_setting": {
+          "key": "integration_key",
+          "label": "Integration key",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret_key",
+          "label": "Secret key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "host",
+      "label": "Host",
+      "editable": true,
+      "required": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "cisco-duo-logs" }
+  ]
+}
