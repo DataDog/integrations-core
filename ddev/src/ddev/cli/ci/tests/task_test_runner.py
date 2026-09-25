@@ -10,9 +10,9 @@ import gzip
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime
 from itertools import count
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
 from pydantic import ValidationError
@@ -28,6 +28,7 @@ from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
+from ddev.utils.github_async.retry import SAFE_RETRY, on_status
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
@@ -37,6 +38,10 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # GitHub rejects a workflow dispatch whose whole `inputs` object exceeds this.
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
+
+# Jobs are listed right after the run is dispatched, before GitHub makes the run's jobs listing
+# visible, and until then that endpoint answers 404.
+JOBS_LISTING_RETRY = SAFE_RETRY.also_on(on_status(404))
 
 
 class JobListTooLargeError(Exception):
@@ -61,20 +66,6 @@ def _serialize_test_tags(fields: Mapping[str, Any]) -> str:
 
 def _sanitize_test_tag_value(value: str) -> str:
     return value.replace(',', '_').replace('\n', '_').replace('\r', '_')
-
-
-def workflow_duration_seconds(run: WorkflowRun) -> float | None:
-    """Use gh's completed-run timing convention, omitting unavailable or invalid timestamps.
-
-    https://github.com/cli/cli/blob/trunk/pkg/cmd/run/shared/shared.go
-    """
-    if run.run_started_at is None or run.updated_at is None:
-        return None
-    try:
-        duration = (datetime.fromisoformat(run.updated_at) - datetime.fromisoformat(run.run_started_at)).total_seconds()
-    except (ValueError, TypeError):
-        return None
-    return duration if duration >= 0 else None
 
 
 def encode_job_list(jobs: list[dict[str, Any]]) -> str:
@@ -280,7 +271,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         sequences = count(1)
         known_jobs: dict[str, WorkflowJob] = {}
         previous_state: ExecutionState | None = None
+        previous_poll: float | None = None
         while True:
+            poll_started = monotonic()
+            if previous_poll is not None:
+                self.monitor.metrics.distribution('requests.polling_interval', poll_started - previous_poll)
+            previous_poll = poll_started
             try:
                 run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
             except ValidationError as error:
@@ -294,7 +290,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             # Shutdown must not try to cancel a completed run while its artifacts are still being collected.
             if completed:
                 self._runs_in_flight.pop(message.batch_id, None)
-                if (duration := workflow_duration_seconds(run.data)) is not None:
+                if (duration := run.data.duration_seconds) is not None:
                     self.monitor.metrics.distribution('batch.duration', duration)
 
             # Report workflow progress first. The jobs request may be delayed by the API rate limit.
@@ -394,7 +390,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         jobs: list[WorkflowJob] = []
         try:
             async for page in self._client.list_workflow_jobs(
-                self._options.owner, self._options.repo, run_id, per_page=100
+                self._options.owner, self._options.repo, run_id, per_page=100, retry=JOBS_LISTING_RETRY
             ):
                 jobs.extend(page.data.jobs)
         except ValidationError as error:

@@ -1,0 +1,45 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Username and API Key",
+      "basic": {
+        "user_setting": {
+          "key": "username",
+          "label": "Username",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "host_region",
+      "label": "Host region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "usap", "label": "North America, Latin America and Asia Pacific" },
+          { "value": "euza", "label": "Europe and Africa" },
+          { "value": "anz", "label": "Australia and New Zealand" },
+          { "value": "jp", "label": "Japan" },
+          { "value": "sg", "label": "Singapore" },
+          { "value": "in", "label": "India" },
+          { "value": "uae", "label": "Middle East (UAE)" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "trend-micro-email-security-logs" }
+  ]
+}

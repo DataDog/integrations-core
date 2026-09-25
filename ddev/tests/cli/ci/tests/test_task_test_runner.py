@@ -12,11 +12,12 @@ import secrets
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 from pydantic import ValidationError
 
 from ddev.cli.ci.dispatch_run import ResolvedRun
-from ddev.cli.ci.tests import messages
+from ddev.cli.ci.tests import messages, task_test_runner
 from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
@@ -27,12 +28,11 @@ from ddev.cli.ci.tests.task_test_runner import (
     JobListTooLargeError,
     TaskTestRunner,
     TestRunnerOptions,
-    workflow_duration_seconds,
 )
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.monitoring import ComponentMonitor
 from ddev.monitoring.metrics import MetricKind
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
@@ -50,6 +50,7 @@ from tests.cli.ci.tests.helpers import (
     make_job,
     recording_runtime,
 )
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
@@ -109,7 +110,15 @@ def make_artifact_for(idx: int, job: BatchJob) -> Artifact:
 
 
 def make_workflow_job(name: str, conclusion: str = "success") -> WorkflowJob:
-    return WorkflowJob(id=1, run_id=123, name=name, status="completed", conclusion=conclusion)
+    return WorkflowJob(
+        id=1,
+        run_id=123,
+        name=name,
+        status="completed",
+        conclusion=conclusion,
+        started_at="2026-01-01T10:00:00Z",
+        completed_at="2026-01-01T10:01:30Z",
+    )
 
 
 def mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]):
@@ -234,6 +243,40 @@ async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
     assert [record.kind.value for record in sink.records_named('artifacts.download.duration')] == ['distribution']
 
 
+async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """A batch's first poll has no predecessor, even when an earlier batch was polled by the same runner.
+
+    The samples are the runner's own, so they carry the run's metric dimensions and its component.
+    """
+    fake = FakeAsyncGitHubClient()
+    mock_artifacts(fake, [])
+    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    ticks = iter(range(0, 1000, 10))
+    monkeypatch.setattr(task_test_runner, "monotonic", lambda: float(next(ticks)))
+    monitoring, sink = recording_runtime()
+    monitoring.set_run_fields(ci_pipeline_id="12345", context="pr", team="agent-integrations")
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    for batch_id, polls in (("batch-1", 3), ("batch-2", 2)):
+        for _ in range(polls - 1):
+            fake.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
+        await runner.process_message(make_batch(batch_id))
+
+    intervals = sink.records_named("requests.polling_interval")
+    assert [record.value for record in intervals] == [10.0, 10.0, 10.0]
+    assert {tuple(sorted(record.tags.items())) for record in intervals} == {
+        (
+            ("ci.pipeline.id", "12345"),
+            ("dispatcher.component", "test-runner"),
+            ("dispatcher.context", "pr"),
+            ("team", "agent-integrations"),
+        )
+    }
+    assert {record.kind for record in intervals} == {MetricKind.DISTRIBUTION}
+
+
 @pytest.mark.asyncio
 async def test_an_accepted_dispatch_counts_the_batch_and_its_jobs(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
@@ -294,33 +337,6 @@ async def test_a_completed_workflow_without_timing_reports_no_batch_duration(tmp
     assert sink.records_named("batch.duration") == []
 
 
-@pytest.mark.parametrize(
-    ("run_started_at", "updated_at", "expected"),
-    [
-        pytest.param("2026-01-01T10:00:00Z", "2026-01-01T10:01:30Z", 90.0, id="valid"),
-        pytest.param("2026-01-01T10:00:00Z", "2026-01-01T10:00:00Z", 0.0, id="genuine-zero"),
-        pytest.param("2026-01-01T10:00:00", "2026-01-01T10:01:30", 90.0, id="naive-but-consistent"),
-        pytest.param("2026-01-01T10:00:00Z", "2026-01-01T10:01:30", None, id="mixed-zones"),
-        pytest.param("2026-01-01T10:01:30Z", "2026-01-01T10:00:00Z", None, id="reversed"),
-        pytest.param("not-a-timestamp", "2026-01-01T10:00:00Z", None, id="invalid-start"),
-        pytest.param(None, "2026-01-01T10:00:00Z", None, id="missing-start"),
-        pytest.param("2026-01-01T10:00:00Z", None, None, id="missing-end"),
-    ],
-)
-def test_workflow_duration_comes_only_from_valid_ordered_timestamps(
-    run_started_at: str | None, updated_at: str | None, expected: float | None
-):
-    run = WorkflowRun(
-        id=123,
-        status="completed",
-        html_url="https://github.com/o/r/actions/runs/123",
-        run_started_at=run_started_at,
-        updated_at=updated_at,
-    )
-
-    assert workflow_duration_seconds(run) == expected
-
-
 # ---------------------------------------------------------------------------
 # conclusion_to_status
 # ---------------------------------------------------------------------------
@@ -372,6 +388,43 @@ def failed_by_operation(sink: RecordingSink) -> dict[str, float]:
     for record in sink.records_named('operations.failed'):
         totals[record.tags['dispatcher.operation']] = totals.get(record.tags['dispatcher.operation'], 0) + record.value
     return totals
+
+
+async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """GitHub answers 404 on a freshly dispatched run's jobs listing until that listing becomes visible."""
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(
+            200,
+            json={
+                "total_count": 1,
+                "jobs": [
+                    {
+                        "id": 1,
+                        "run_id": 123,
+                        "name": "j1",
+                        "status": "queued",
+                        "started_at": "2026-01-01T10:00:00Z",
+                        "completed_at": None,
+                    }
+                ],
+            },
+        ),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        jobs = await runner._list_jobs(123, "batch-1", "listing workflow jobs")
+    finally:
+        await client.aclose()
+
+    assert [job.id for job in jobs] == [1]
+    assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
 async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):
@@ -905,7 +958,19 @@ async def test_final_results_use_jobs_available_after_artifact_collection(tmp_pa
     batch = make_batch()
     job = batch.job_list[0]
     client.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
-    mock_jobs(client, [WorkflowJob(id=1, run_id=123, name=job.name, status=WorkflowJobStatus.IN_PROGRESS)])
+    mock_jobs(
+        client,
+        [
+            WorkflowJob(
+                id=1,
+                run_id=123,
+                name=job.name,
+                status=WorkflowJobStatus.IN_PROGRESS,
+                started_at="2026-01-01T10:00:00Z",
+                completed_at=None,
+            )
+        ],
+    )
     mock_artifacts(client, [make_artifact_for(1, job)])
     download_artifact = client.download_artifact
 
@@ -931,7 +996,14 @@ async def test_final_results_preserve_only_completed_observations(tmp_path: Path
     batch.job_list.append(make_job("unfinished", environment="py3.12"))
     batch.jobs_count = len(batch.job_list)
     completed_job = make_workflow_job(batch.job_list[0].name)
-    unfinished_job = WorkflowJob(id=2, run_id=123, name="unfinished", status=WorkflowJobStatus.IN_PROGRESS)
+    unfinished_job = WorkflowJob(
+        id=2,
+        run_id=123,
+        name="unfinished",
+        status=WorkflowJobStatus.IN_PROGRESS,
+        started_at="2026-01-01T10:00:00Z",
+        completed_at=None,
+    )
     client.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
     client.mock_response(
         "list_workflow_jobs", WorkflowJobsList(total_count=2, jobs=[completed_job, unfinished_job]), once=True
@@ -942,7 +1014,14 @@ async def test_final_results_preserve_only_completed_observations(tmp_path: Path
         mock_jobs(
             client,
             [
-                WorkflowJob(id=1, run_id=123, name=completed_job.name, status=WorkflowJobStatus.IN_PROGRESS),
+                WorkflowJob(
+                    id=1,
+                    run_id=123,
+                    name=completed_job.name,
+                    status=WorkflowJobStatus.IN_PROGRESS,
+                    started_at="2026-01-01T10:00:00Z",
+                    completed_at=None,
+                ),
                 unfinished_job,
             ],
         )
