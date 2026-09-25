@@ -571,6 +571,13 @@ class PostgresRemoteQueryHandler:
                         parsed, creds, client, execution_dbname, started_at, stats, tracing=tracing
                     )
                 except psycopg_errors.QueryCanceled:
+                    if rq_events.check_is_cancelled(self._check):
+                        # The cancellation thread interrupted the statement (a cancel
+                        # request lands as QueryCanceled on the blocked read): report the
+                        # sanitized retryable cancelled outcome, not a timeout.
+                        raise rq_contract.RemoteQueryFailure(
+                            'cancelled', 'Remote query run was cancelled.', True
+                        ) from None
                     raise rq_contract.RemoteQueryFailure(
                         'timeout', 'Remote query was canceled by the server (statement timeout or cancellation).', True
                     ) from None
@@ -634,6 +641,10 @@ class PostgresRemoteQueryHandler:
         page uploads nested inside it, and the shared source-page writer opens the
         page-upload attempt and finalize spans. `tracing` is fail-open: every span failure
         is swallowed without changing an event, a receipt, a retry, or an error.
+
+        The connection comes from `PostgreSql.remote_query_connection`, so it is registered
+        for the whole window the query uses it and the check can interrupt the statement
+        server-side when it is unscheduled.
         """
         delivery = request.result_delivery
         limits = delivery.limits
@@ -656,7 +667,7 @@ class PostgresRemoteQueryHandler:
         # (idempotently) so a setup interrupted mid-flight still closes its span.
         setup_span = tracing.enter_phase('database_setup')
         try:
-            with self._check.db_pool.get_connection(execution_dbname) as conn:
+            with self._check.remote_query_connection(execution_dbname) as conn:
                 with conn.cursor() as control:
                     in_transaction = False
                     try:

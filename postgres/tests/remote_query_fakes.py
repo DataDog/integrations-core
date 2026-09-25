@@ -250,6 +250,12 @@ class FakeConnection:
     def __init__(self, pool):
         self.pool = pool
 
+    def cancel_safe(self, *, timeout=None):
+        """Record the server-side interrupt and release a blocked read waiting on it."""
+        self.pool.cancel_safe_calls.append(timeout)
+        if self.pool.cancel_interrupt is not None:
+            self.pool.cancel_interrupt.set()
+
     @contextmanager
     def cursor(self, name=None):
         if name is None:
@@ -274,6 +280,7 @@ class FakePool:
         copy_error=None,
         copy_error_at=None,
         read_log=None,
+        cancel_interrupt=None,
     ):
         # Plain result rows are framed into one-record COPY blocks — the database, not the
         # producer, frames native CSV — while copy_blocks and block_provider give tests
@@ -293,9 +300,18 @@ class FakePool:
         self.read_log = read_log
         self.requested_dbnames = []
         self.cursors = []
+        # Server-side interrupts seen on this pool's connections, and the event a
+        # `cancel_safe` on any connection sets — a blocked `read` can wait on it.
+        self.cancel_safe_calls = []
+        self.cancel_interrupt = cancel_interrupt
+        self.close_all_calls = 0
 
     def is_closed(self):
         return self.closed
+
+    def close_all(self):
+        self.close_all_calls += 1
+        self.closed = True
 
     @contextmanager
     def get_connection(self, dbname):
@@ -328,9 +344,19 @@ def make_check(
     autodiscovery=None,
     **metadata,
 ):
+    pool = pool if pool is not None else FakePool()
+
+    @contextmanager
+    def remote_query_connection(dbname):
+        # The fake of PostgreSql.remote_query_connection: the plain pool connection,
+        # without the live-connection registry the real check interrupts on cancel.
+        with pool.get_connection(dbname) as conn:
+            yield conn
+
     check = SimpleNamespace(
         _config=SimpleNamespace(host=host, port=port, dbname=dbname, **metadata),
-        db_pool=pool if pool is not None else FakePool(),
+        db_pool=pool,
+        remote_query_connection=remote_query_connection,
         hostname=hostname,
     )
     if check_database_identifier is not None:

@@ -37,15 +37,21 @@ def remaining_wall_ms(deadline: float) -> int:
     return max(1, int((deadline - time.monotonic()) * 1000))
 
 
-def raise_if_cancelled(check: Any) -> None:
-    # The Agent runtime exposes `is_cancelled` as a plain bool attribute on the check
-    # object, while other runtimes (and test doubles) may expose a callable hook; honor
-    # both shapes. An absent attribute carries no cancellation signal.
+def check_is_cancelled(check: Any) -> bool:
+    """Whether the check reports itself cancelled, honoring both runtime shapes.
+
+    The Agent runtime exposes `is_cancelled` as a plain bool attribute on the check
+    object, while other runtimes (and test doubles) may expose a callable hook. An
+    absent attribute carries no cancellation signal.
+    """
     is_cancelled = getattr(check, 'is_cancelled', None)
     if is_cancelled is None:
-        return
-    cancelled = is_cancelled() if callable(is_cancelled) else is_cancelled
-    if cancelled:
+        return False
+    return bool(is_cancelled() if callable(is_cancelled) else is_cancelled)
+
+
+def raise_if_cancelled(check: Any) -> None:
+    if check_is_cancelled(check):
         raise RemoteQueryFailure('cancelled', 'Remote query run was cancelled.', retryable=True)
 
 

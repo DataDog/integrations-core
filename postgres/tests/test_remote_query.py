@@ -8,6 +8,8 @@ import logging
 import socket
 import subprocess
 import sys
+import threading
+import time
 from contextlib import contextmanager
 from types import SimpleNamespace
 
@@ -18,6 +20,7 @@ from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from datadog_checks.postgres import PostgreSql, remote_query
+from datadog_checks.postgres import postgres as postgres_module
 from datadog_checks.postgres.config_models.instance import RemoteQueries
 
 from .remote_query_fakes import (
@@ -48,6 +51,10 @@ from .remote_query_fakes import (
     valid_request,
     wide_row_pool,
 )
+
+# Upper bound for waits on another thread; the tests only ever wait for a signal that
+# is already on its way.
+WAIT_TIMEOUT_S = 5
 
 
 @pytest.fixture
@@ -987,3 +994,171 @@ def test_producer_fails_the_root_for_an_admission_failure(monkeypatch):
         ('fail', 'target_not_found', 0),
         'close',
     ]
+
+
+# ---------------------------------------------------------------------------
+# Unschedule lifecycle: server-side interruption and deferred teardown
+# ---------------------------------------------------------------------------
+
+
+def wait_until(predicate, timeout=WAIT_TIMEOUT_S):
+    """Bounded wait for a condition another thread is about to make true."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        time.sleep(0.01)
+    return False
+
+
+def bridge_failure_metadata(events, code, message_contains=None):
+    """Assert the last bridge-collected event is the expected failure, and return its metadata."""
+    assert events[-1][0] == 'error'
+    metadata = json.loads(events[-1][1])
+    assert metadata['status'] == 'FAILED'
+    assert metadata['error']['code'] == code
+    if message_contains is not None:
+        assert message_contains in metadata['error']['message']
+    return metadata
+
+
+def interrupted_blocks(interrupt_event, first_block):
+    """COPY blocks: the first row flows, then the read blocks until the statement is interrupted.
+
+    The cooperative guard only runs between reads, so a read blocked here is reachable
+    only by the server-side interrupt the cancellation thread sends.
+    """
+
+    def provider():
+        yield first_block
+        assert interrupt_event.wait(timeout=WAIT_TIMEOUT_S), 'the interrupt never arrived'
+        raise psycopg_errors.QueryCanceled('canceling statement due to user request')
+
+    return provider
+
+
+def test_unschedule_interrupts_blocked_remote_query_and_defers_teardown(monkeypatch, runtime_check):
+    """A statement blocked before its first result row is interrupted at unschedule.
+
+    The cooperative guard has not run yet on a blocked read, so the cancel thread sends
+    the protocol-level interrupt through the live-connection registry; the run unwinds
+    (rollback, upload abort, retryable cancelled outcome) and only then, deferred by the
+    bridge admission, does the teardown release the pool.
+    """
+    patch_upload_credentials(monkeypatch)
+    interrupt_event = threading.Event()
+    pool = FakePool(
+        block_provider=interrupted_blocks(interrupt_event, native_record(1)),
+        cancel_interrupt=interrupt_event,
+    )
+    runtime_check.db_pool = pool
+    client = FakeUploadClient()
+    monkeypatch.setattr(remote_query.rq_upload, 'RequestsUploadClient', lambda **kwargs: client)
+    events = []
+
+    thread = threading.Thread(
+        target=lambda: runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
+    )
+    thread.start()
+    assert wait_until(lambda: bool(runtime_check._remote_query_connections)), 'the connection was never registered'
+
+    runtime_check.cancel()
+
+    thread.join(timeout=WAIT_TIMEOUT_S)
+    assert not thread.is_alive()
+
+    # The interrupt reached the blocked statement and the run reported the sanitized
+    # retryable cancelled outcome, not a timeout.
+    assert pool.cancel_safe_calls == [postgres_module.REMOTE_QUERY_CANCEL_REQUEST_TIMEOUT_S]
+    metadata = bridge_failure_metadata(events, 'cancelled', 'Remote query run was cancelled.')
+    assert metadata['error']['retryable'] is True
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+    assert client.abort_calls == 1
+    # The teardown ran after the unwind: the pool was closed by the deferred finalize.
+    assert pool.closed is True
+    assert runtime_check._remote_query_connections == set()
+
+
+def test_unschedule_mid_copy_stops_the_run_between_reads(monkeypatch, runtime_check):
+    """A cancel landing while rows stream stops the run at the next cooperative guard.
+
+    The statement is interrupted as on the blocked path, the read unblocks, and the guard
+    — which runs after every block — fails the run as retryable cancelled instead of
+    letting it continue on a check being torn down.
+    """
+    patch_upload_credentials(monkeypatch)
+    interrupt_event = threading.Event()
+    second_block = native_record(2)
+
+    def provider():
+        yield native_record(1)
+        assert interrupt_event.wait(timeout=WAIT_TIMEOUT_S), 'the interrupt never arrived'
+        yield second_block
+
+    pool = FakePool(block_provider=provider, cancel_interrupt=interrupt_event)
+    runtime_check.db_pool = pool
+    client = FakeUploadClient()
+    monkeypatch.setattr(remote_query.rq_upload, 'RequestsUploadClient', lambda **kwargs: client)
+    events = []
+
+    thread = threading.Thread(
+        target=lambda: runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
+    )
+    thread.start()
+    assert wait_until(lambda: bool(runtime_check._remote_query_connections)), 'the connection was never registered'
+
+    runtime_check.cancel()
+
+    thread.join(timeout=WAIT_TIMEOUT_S)
+    assert not thread.is_alive()
+
+    # The interrupt was sent and the cooperative guard stopped the run as cancelled.
+    assert pool.cancel_safe_calls == [postgres_module.REMOTE_QUERY_CANCEL_REQUEST_TIMEOUT_S]
+    metadata = bridge_failure_metadata(events, 'cancelled', 'Remote query run was cancelled.')
+    assert metadata['error']['retryable'] is True
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
+    assert client.abort_calls == 1
+    assert pool.closed is True
+    assert runtime_check._remote_query_connections == set()
+
+
+def test_connection_registry_bracket_ends_when_the_run_does(monkeypatch, runtime_check):
+    """A finished run leaves nothing in the live-connection registry.
+
+    A later cancel must not interrupt the already-returned connection: the registration
+    covers exactly the window the query held it.
+    """
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(rows=[(1,)])
+    runtime_check.db_pool = pool
+    client = FakeUploadClient()
+    monkeypatch.setattr(remote_query.rq_upload, 'RequestsUploadClient', lambda **kwargs: client)
+    events = []
+
+    runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
+
+    assert [event[0] for event in events] == ['metadata', 'final']
+    assert runtime_check._remote_query_connections == set()
+
+    runtime_check.cancel()
+
+    assert pool.cancel_safe_calls == []
+    assert pool.closed is True
+
+
+def test_statement_cancellation_on_a_cancelled_check_reports_cancelled(monkeypatch):
+    """A QueryCanceled raised while the check is cancelled reports the sanitized
+    cancelled outcome; the timeout classification is for a live check alone."""
+    patch_upload_credentials(monkeypatch)
+    pool = FakePool(
+        rows=[(1,)],
+        copy_error=psycopg_errors.QueryCanceled('canceling statement due to user request'),
+    )
+    check = make_check(pool=pool)
+    check.is_cancelled = True
+
+    events = collect_events(valid_request(), check, client=FakeUploadClient())
+
+    assert_failed_event(events, 'cancelled', 'Remote query run was cancelled.')
+    assert event_metadata(events[-1])['error']['retryable'] is True
+    assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
