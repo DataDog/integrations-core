@@ -753,18 +753,18 @@ def test_query_errors_include_sql_and_classification(instance_basic, aggregator,
     assert f'error_kind:{kind}' in aggregator.metrics('dd.mysql.data_observability.query_errors')[0].tags
 
 
-def test_connection_failure_reports_blocked_queries_with_cooldown(instance_basic, aggregator, monkeypatch):
+def test_connection_failure_reports_pending_queries_on_every_attempt(instance_basic, aggregator, monkeypatch):
     current_time = [1000.0]
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
     check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
     check.data_observability._get_db_connection = MagicMock(side_effect=pymysql.err.OperationalError(2003, 'refused'))
     with patch.object(MySql, 'event_platform_event') as events:
-        for elapsed in (0, 10, 60):
+        for elapsed in (0, 10, 20):
             current_time[0] = 1000.0 + elapsed
             with pytest.raises(pymysql.err.OperationalError):
                 check.data_observability.run_job()
     payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
-    assert len(payloads) == 4
+    assert len(payloads) == 6
     assert {p['query'] for p in payloads} == {q['query'] for q in MULTI_QUERIES}
     assert all(p['error_kind'] == 'connection_error' and p['error_phase'] == 'connect' for p in payloads)
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')

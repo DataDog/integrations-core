@@ -32,8 +32,6 @@ CRON_STARTUP_LOOKBACK_SECONDS = 300
 
 DEFAULT_COLLECTION_INTERVAL_SECONDS = 10
 
-CONNECTION_ERROR_REPORT_INTERVAL_SECONDS = 60
-
 DBNAME_PATTERN = re.compile(r'^[A-Za-z0-9_$]+$')
 
 
@@ -43,7 +41,6 @@ class CronScheduledQuery:
     query: Query
     scheduler: CronScheduler
     pending_retry: DueQuery | None = None
-    last_connection_error_report: float | None = None
 
 
 @dataclass
@@ -53,7 +50,6 @@ class IntervalScheduledQuery:
     interval_seconds: int
     last_execution: float | None = None
     pending_retry: DueQuery | None = None
-    last_connection_error_report: float | None = None
 
 
 ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
@@ -338,11 +334,10 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     result = self._error_result(error, time.time() - now_at_fire_start, 'execute')
                     if result['error_kind'] == 'sql_error':
                         result['error_kind'] = 'connection_error'
-                    self._report_connection_errors([due], error, 'execute', now_at_fire_start, result)
+                    self._emit_result(due, result, now_at_fire_start)
                     self._report_connection_errors(due_queries[index + 1 :], error, 'blocked')
                 raise
             now_at_fire_end = time.time()
-            due.scheduled_query.last_connection_error_report = None
             if isinstance(due.scheduled_query, IntervalScheduledQuery):
                 due.scheduled_query.last_execution = now_at_fire_end
 
@@ -353,22 +348,14 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         due_queries: list[DueQuery],
         error: Exception,
         phase: str,
-        fire_start: float | None = None,
-        result: dict[str, Any] | None = None,
     ) -> None:
         if self._cancel_event.is_set():
             return
-        now = time.time()
+        result = self._error_result(error, 0, phase)
         for due in due_queries:
-            last = due.scheduled_query.last_connection_error_report
-            report_event = last is None or now - last >= CONNECTION_ERROR_REPORT_INTERVAL_SECONDS
-            if report_event:
-                due.scheduled_query.last_connection_error_report = now
-            self._emit_result(due, result or self._error_result(error, 0, phase), fire_start, report_event=report_event)
+            self._emit_result(due, result, None)
 
-    def _emit_result(
-        self, due: DueQuery, result: dict[str, Any], fire_start: float | None, *, report_event: bool = True
-    ) -> None:
+    def _emit_result(self, due: DueQuery, result: dict[str, Any], fire_start: float | None) -> None:
         query = due.query
         tags = self._build_base_tags() + [f'monitor_id:{query.monitor_id}']
 
@@ -407,8 +394,6 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     raw=True,
                 )
 
-            if not report_event:
-                return
             payload = self._build_event_payload(query, result)
             raw_event = json.dumps(payload, default=default_json_event_encoding)
             self._log.debug(
