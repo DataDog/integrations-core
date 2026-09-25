@@ -1222,6 +1222,17 @@ class TestLimits:
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 42
 
+    def test_metric_limit_init_config_warns(self, aggregator):
+        check = LimitedCheck("test", {"max_returned_metrics": 42}, [{}])
+        warnings = check.get_warnings()
+        assert len(warnings) == 1
+        assert "'max_returned_metrics' option is ignored in the 'init_config' section" in warnings[0]
+
+        # The init_config value is ignored, so the default limit still applies.
+        for _ in range(12):
+            check.gauge("metric", 0)
+        assert len(aggregator.metrics("metric")) == 10
+
     def test_metric_limit_instance_config_zero_limited(self, aggregator):
         instances = [{"max_returned_metrics": 0}]
         check = LimitedCheck("test", {}, instances)
