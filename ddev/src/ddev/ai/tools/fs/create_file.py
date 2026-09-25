@@ -48,6 +48,10 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
         async with self._registry.lock_for(str(path)):
             if tool_input.replace_if_existing:
                 already_existed = path.exists()
+                if already_existed:
+                    _, fail = self._read_verified(str(path))
+                    if fail:
+                        return fail
                 try:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text(tool_input.content, encoding="utf-8")
