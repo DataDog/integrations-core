@@ -1,0 +1,45 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "90f34d0c-4825-4f46-ad53-9a8ee4b3fc9c",
+  "app_id": "thermal",
+  "owner": "windows-products",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor hardware temperatures and thermal constraints on Windows and macOS hosts.",
+    "title": "Thermal",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::OS & System",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 90085008,
+      "source_type_name": "Thermal",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.thermal.",
+        "check": "system.thermal.temperature",
+        "metadata_path": "metadata.csv"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

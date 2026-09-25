@@ -50,6 +50,7 @@ nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
 intersystems_iris = "InterSystems IRIS"
+thermal = "Thermal"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -63,6 +64,7 @@ dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
 intersystems_iris = "intersystems_iris."
+thermal = "system.thermal."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -283,4 +285,4 @@ dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
 intersystems_iris = ["linux", "windows", "mac_os"]
-
+thermal = ["windows", "mac_os"]

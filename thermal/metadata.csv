@@ -1,0 +1,8 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+system.thermal.passive_limit,gauge,,percent,,[Windows] The percentage of maximum performance currently permitted by passive thermal throttling for the thermal zone.,1,thermal,passive limit,,
+system.thermal.pressure_level,gauge,,,,"[macOS] The system thermal pressure level: 0 nominal, 1 moderate, 2 heavy, 3 trapping, or 4 sleeping.",-1,thermal,pressure level,,
+system.thermal.temperature,gauge,,degree celsius,,[Windows] The current temperature of the thermal zone.,0,thermal,temperature,,
+system.thermal.temperature.battery,gauge,,degree celsius,,[macOS] The highest available battery temperature reported by AppleSMC.,0,thermal,battery temperature,,
+system.thermal.temperature.cpu,gauge,,degree celsius,,[macOS] The highest available CPU temperature reported by AppleSMC.,0,thermal,cpu temperature,,
+system.thermal.temperature.gpu,gauge,,degree celsius,,[macOS] The highest available GPU temperature reported by AppleSMC.,0,thermal,gpu temperature,,
+system.thermal.temperature.ssd,gauge,,degree celsius,,[macOS] The highest available SSD temperature reported by AppleSMC.,0,thermal,ssd temperature,,
