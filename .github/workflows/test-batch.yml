@@ -93,8 +93,11 @@ permissions: {}
 
 # PR revisions have different checkout SHAs, so `concurrency_key` keeps their batch groups stable.
 # Older callers fall back to checkout identity; Dispatcher cleanup covers runs the groups cannot.
+# `context` separates run types: a scheduled run and a master push can test the same commit at the
+# same time, and batch ids restart at `batch-01` on every run, so without it the newer run's first
+# batch would cancel the older run's.
 concurrency:
-  group: test-batch-${{ inputs.concurrency_key || inputs.checkout_sha }}-${{ inputs.batch_id }}
+  group: test-batch-${{ inputs.context }}-${{ inputs.concurrency_key || inputs.checkout_sha }}-${{ inputs.batch_id }}
   cancel-in-progress: true
 
 defaults:
@@ -110,6 +113,7 @@ jobs:
       statuses: write
     outputs:
       matrix: ${{ steps.decode.outputs.matrix }}
+      status_context: ${{ steps.decode.outputs.status_context }}
     steps:
       - name: Decode the job list
         id: decode
@@ -137,8 +141,16 @@ jobs:
             exit 1
           fi
 
+          # Run types that share a commit must not overwrite each other's status. The baseline
+          # contexts keep today's name so nothing keyed on it breaks; anything else is qualified.
+          case "$TEST_CONTEXT" in
+            master|pr|standard) status_context="Dispatcher / ${BATCH_ID} (beta, non-blocking)" ;;
+            *)                  status_context="Dispatcher (${TEST_CONTEXT}) / ${BATCH_ID} (beta, non-blocking)" ;;
+          esac
+
           {
             echo "count=${count}"
+            echo "status_context=${status_context}"
             echo "matrix<<__MATRIX__"
             cat jobs.json
             echo
@@ -185,14 +197,14 @@ jobs:
       - name: Mark the batch pending
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BATCH_ID: ${{ inputs.batch_id }}
+          STATUS_CONTEXT: ${{ steps.decode.outputs.status_context }}
           HEAD_SHA: ${{ inputs.head_sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           JOB_COUNT: ${{ steps.decode.outputs.count }}
         run: |
           set -euo pipefail
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
+            -f "context=${STATUS_CONTEXT}" \
             -f "state=pending" \
             -f "description=Running ${JOB_COUNT} job(s)" \
             -f "target_url=${RUN_URL}" \
@@ -452,7 +464,7 @@ jobs:
       - name: Settle the batch's result
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BATCH_ID: ${{ inputs.batch_id }}
+          STATUS_CONTEXT: ${{ needs.setup.outputs.status_context }}
           HEAD_SHA: ${{ inputs.head_sha }}
           TEST_RESULT: ${{ inputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -467,7 +479,7 @@ jobs:
           esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
+            -f "context=${STATUS_CONTEXT}" \
             -f "state=${state}" \
             -f "description=${description}" \
             -f "target_url=${RUN_URL}" \

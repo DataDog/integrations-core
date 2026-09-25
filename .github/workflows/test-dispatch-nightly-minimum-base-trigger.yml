@@ -1,0 +1,28 @@
+name: Test Dispatch Nightly Minimum Base Trigger
+
+# Completion signal for the nightly minimum base package receiver, which watches for successful
+# completed runs of this workflow by name and then plans and runs the tests. This workflow carries
+# no privileges and runs nothing: the receiver is the only privileged half, and keeping the schedule
+# here means the receiver needs no trigger of its own to be started by.
+#
+# The receiver refuses anything that did not come from master, so a manual run on another branch
+# starts nothing.
+
+on:
+  # The legacy nightly keeps a manual door open for ad-hoc runs, for instance after a new
+  # integration or a base package dependency bump. Keep the same affordance here.
+  workflow_dispatch:
+  schedule:
+  # 6 AM UTC, an hour after the legacy nightly it shadows.
+  - cron: "0 6 * * *"
+
+permissions: {}
+
+jobs:
+  trigger:
+    name: Trigger the nightly minimum base package dispatch
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Trigger only
+        run: echo "The nightly minimum base package receiver runs from this workflow's completion."
