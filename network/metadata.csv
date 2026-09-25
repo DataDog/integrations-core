@@ -255,6 +255,7 @@ system.net.udp6.connections,gauge,,connection,,The number of UDP IPv6 sockets cu
 system.net.ena.queue.rx_cnt,count,,packet,second,The number of packets received by a queue (Linux only).,0,system,ena queue rx pkts,
 system.net.ena.queue.rx_bytes,count,,byte,second,The number of bytes received by a queue (Linux only).,0,system,ena queue rx bytes,
 system.net.ena.queue.rx_bad_csum,count,,packet,second,The number of packets received by a queue with an incorrect checksum (Linux only).,-1,system,ena queue rx bad csum,
+system.net.ena.queue.rx_csum_bad,count,,packet,second,The number of packets received by a queue with an incorrect checksum (Linux only). Linux 5.17 renamed the underlying ethtool statistic from rx_bad_csum to rx_csum_bad.,-1,system,ena queue rx csum bad,
 system.net.ena.queue.rx_good_csum,count,,packet,second,The number of packets received by a queue with an correct checksum (Linux only).,0,system,ena queue rx good csum,
 system.net.ena.queue.rx_csum_good,count,,packet,,The number packets received by a queue with a good checksum (Linux only).,0,system,ena queue rx good csum,
 system.net.ena.queue.rx_csum_unchecked,count,,packet,,The number packets received by a queue with an unchecked checksum (Linux only).,0,system,ena queue rx unchecked csum,
