@@ -1,0 +1,36 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and Secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "api_base_endpoint",
+      "label": "API base endpoint",
+      "help": "API base endpoint used to make requests to the BeyondTrust Password Safe public API. Example: https://beyondtrustcloud.com/BeyondTrust/api/public/v3.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "beyondtrust-password-safe-logs" }
+  ]
+}
