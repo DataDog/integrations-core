@@ -23,6 +23,9 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
     def _register(self, path: str, content: str) -> None:
         self._registry.record(self._owner_id, path, content)
 
+    def _forget(self, path: str) -> None:
+        self._registry.forget(self._owner_id, path)
+
     def _assert_writable(self, path: str) -> Path:
         return self._registry.policy.assert_writable(path)
 

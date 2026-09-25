@@ -100,22 +100,19 @@ async def test_copy_directory_oserror(copy_tool: CopyPathTool, tmp_path) -> None
     assert result.error is not None
 
 
-async def test_copy_write_denied(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    tool = CopyPathTool(policy)
-
+async def test_copy_write_denied(copy_tool: CopyPathTool, tmp_path) -> None:
     src = tmp_path / "src.txt"
     src.write_text("data", encoding="utf-8")
     dst = tmp_path.parent / "outside_write_root.txt"
 
-    result = await tool.run({"source": str(src), "destination": str(dst)})
+    result = await copy_tool.run({"source": str(src), "destination": str(dst)})
 
     assert result.success is False
     assert result.error is not None
 
 
 async def test_copy_read_denied(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=("*.secret",))
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=("*.secret",))
     tool = CopyPathTool(policy)
 
     src = tmp_path.parent / "credentials.secret"
@@ -188,7 +185,7 @@ async def test_copy_directory_overwrite_flag_replaces_conflicts(copy_tool: CopyP
 async def test_copy_directory_destination_symlink_outside_write_root_is_rejected(tmp_path) -> None:
     write_root = tmp_path / "write_root"
     write_root.mkdir()
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=())
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=())
     tool = CopyPathTool(policy)
 
     outside = tmp_path / "outside"
@@ -214,7 +211,7 @@ async def test_copy_directory_denied_child_is_rejected(tmp_path) -> None:
     # write_root is a subdirectory; src lives outside it so deny patterns apply to its contents.
     write_root = tmp_path / "write_root"
     write_root.mkdir()
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(".env",))
     tool = CopyPathTool(policy)
 
     src = tmp_path / "src_dir"

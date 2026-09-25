@@ -44,8 +44,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
         ``provider_registry`` is the same configured registry used to validate agent
         definitions and constructs provider-specific agents on demand.
 
-        ``file_access_policy`` must have ``write_root`` set to the integration
-        output directory so that agent writes are confined to that path.
+        ``file_access_policy`` bounds agent writes to its configured ``write_root``,
+        which in production is the whole repository rather than a per-integration
+        directory. Tools that need a narrower boundary (e.g. ``delete_file``) use
+        ``file_access_policy``'s own deletion policy instead (see
+        ``FileAccessPolicy.assert_deletable``).
 
         """
         max_timeout = runtime_variables.get("max_timeout")

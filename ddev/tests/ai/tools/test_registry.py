@@ -171,7 +171,7 @@ def from_names(tool_names: list[str], tmp_path, *, scope: AgentScope = SCOPE) ->
     return ToolRegistry.from_names(
         tool_names,
         scope=scope,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")),
         agent_config=AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=tool_names),
         process_factory=PROCESS_FACTORY,
     )
@@ -224,6 +224,36 @@ def test_from_names_fs_tools_share_file_registry(tmp_path):
         pytest.skip("Need at least 2 fs tools to test shared registry")
     registries = [t._registry for t in fs_tools]
     assert all(r is registries[0] for r in registries)
+
+
+async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="My Integration")
+    integration_root = policy._integration_root
+    integration_root.mkdir()
+    file_registry = FileRegistry(policy=policy)
+    registry = ToolRegistry.from_names(
+        ["delete_file"],
+        scope=SCOPE,
+        file_registry=file_registry,
+        agent_config=make_agent_config(tools=["delete_file"]),
+        process_factory=PROCESS_FACTORY,
+    )
+
+    inside = integration_root / "inside.txt"
+    inside.write_text("x", encoding="utf-8")
+    file_registry.record(OWNER_ID, str(inside), "x")
+    outside = tmp_path / "outside.txt"
+    outside.write_text("x", encoding="utf-8")
+    file_registry.record(OWNER_ID, str(outside), "x")
+
+    outside_result = await registry.run("delete_file", {"path": str(outside)})
+    assert outside_result.success is False
+    assert "outside the integration directory" in outside_result.error
+    assert outside.exists()
+
+    inside_result = await registry.run("delete_file", {"path": str(inside)})
+    assert inside_result.success is True
+    assert not inside.exists()
 
 
 # ---------------------------------------------------------------------------
@@ -311,7 +341,7 @@ def test_filter_read_only_unknown_still_raises():
 
 def test_from_names_reuses_supplied_file_registry(tmp_path):
     """Multiple ToolRegistries can share one FileRegistry; tools carry their own owner_id."""
-    shared = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+    shared = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration"))
     reg_a = ToolRegistry.from_names(
         ["read_file", "create_file"],
         scope=AgentScope(owner_id="a", role=AgentRole.PHASE, phase_id="a"),

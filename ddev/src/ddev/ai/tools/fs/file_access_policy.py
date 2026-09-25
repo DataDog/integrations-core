@@ -6,6 +6,8 @@ from collections.abc import Iterable
 from fnmatch import fnmatch
 from pathlib import Path
 
+from ddev.utils.integration_naming import integration_dir_name
+
 
 def canonicalize_path(path: str | Path) -> Path:
     """Single source of truth for path canonicalization across the fs layer.
@@ -65,6 +67,23 @@ DEFAULT_DENY_PATTERNS: tuple[str, ...] = (
     "~/.docker/*",
 )
 
+# Relative to the integration root.
+PROTECTED_STRUCTURAL_PATTERNS: tuple[str, ...] = (
+    "manifest.json",
+    "pyproject.toml",
+    "hatch.toml",
+    "metadata.csv",
+    "README.md",
+    "assets/configuration/spec.yaml",
+    "datadog_checks/*/config_models/**",
+    "datadog_checks/*/data/conf.yaml.example",
+)
+
+
+def _is_protected_structural_path(relative: Path) -> bool:
+    rel = relative.as_posix()
+    return any(fnmatch(rel, pattern) for pattern in PROTECTED_STRUCTURAL_PATTERNS)
+
 
 class FileAccessError(Exception):
     """Raised when a file access violates the configured policy."""
@@ -96,6 +115,7 @@ class FileAccessPolicy:
     def __init__(
         self,
         write_root: Path | str,
+        integration_name: str,
         deny_patterns: Iterable[str] = DEFAULT_DENY_PATTERNS,
     ) -> None:
         self._write_root = canonicalize_path(write_root)
@@ -108,14 +128,20 @@ class FileAccessPolicy:
             (path if "/" in p else basename).append(p)
         self._basename_patterns: tuple[str, ...] = tuple(basename)
         self._path_patterns: tuple[str, ...] = tuple(_canonicalize_pattern(p) for p in path)
+        self._integration_root = self._resolve_integration_root(integration_name)
+
+    def _resolve_integration_root(self, integration_name: str) -> Path:
+        """Resolve the directory `ddev create` would use for `integration_name`.
+
+        Raises ValueError if `integration_name` is not a name `ddev create` would accept,
+        which includes any name that does not reduce to a single path segment under the
+        write root.
+        """
+        return self._write_root / integration_dir_name(integration_name)
 
     @property
     def write_root(self) -> Path:
         return self._write_root
-
-    @property
-    def deny_patterns(self) -> tuple[str, ...]:
-        return self._deny_patterns
 
     @property
     def basename_patterns(self) -> tuple[str, ...]:
@@ -139,4 +165,37 @@ class FileAccessPolicy:
         resolved = canonicalize_path(path)
         if not resolved.is_relative_to(self._write_root):
             raise FileAccessError(f"Write denied: {resolved} is outside write root {self._write_root}")
+        return resolved
+
+    def assert_deletable(self, path: str | Path) -> Path:
+        """Resolve `path` and verify it may be deleted under the deletion policy.
+
+        Distinct from `assert_writable`: deletion is scoped to `integration_root`, a
+        boundary narrower than `write_root`, and protected structural files plus deny
+        patterns are enforced even inside it — unlike ordinary writes, where both are
+        allowed inside `write_root` — because deletion is irreversible.
+        """
+        # canonicalize_path (below) fully resolves symlinks, including a symlink leaf
+        # itself, so it can never be used to detect that the leaf is a symlink. Check
+        # that on the pre-resolution path instead, before it's resolved away.
+        is_symlink_leaf = Path(path).expanduser().is_symlink()
+        resolved = canonicalize_path(path)
+
+        if not resolved.is_relative_to(self._integration_root):
+            raise FileAccessError(
+                f"Delete denied: {resolved} is outside the integration directory {self._integration_root}"
+            )
+
+        if is_symlink_leaf:
+            raise FileAccessError(f"Delete denied: {resolved} is a symlink")
+
+        if resolved.is_dir():
+            raise FileAccessError(f"Delete denied: {resolved} is a directory")
+
+        if _is_protected_structural_path(resolved.relative_to(self._integration_root)):
+            raise FileAccessError(f"Delete denied: {resolved} is a protected structural file")
+
+        if self._is_denied(resolved):
+            raise FileAccessError(f"Delete denied by policy: {resolved}")
+
         return resolved

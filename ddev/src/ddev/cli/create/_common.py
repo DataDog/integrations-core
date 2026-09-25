@@ -16,7 +16,12 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import click
 
-from ddev.cli.create._naming import is_valid_integration_name, normalize_package_name
+from ddev.utils.integration_naming import (
+    integration_dir_name,
+    is_valid_integration_name,
+    normalize_display_name,
+    normalize_package_name,
+)
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -244,11 +249,10 @@ def _resolve_check_only_inputs(
           e.g. ``partner_thing`` for a ``partner_`` author prefix). The Python package
           name (``{check_name}``) comes from the prefilled fields, not from this value.
     """
-    from ddev.cli.create._naming import normalize_display_name
     from ddev.cli.create._scaffold import prefill_check_only_fields
     from ddev.utils.fs import Path
 
-    target_integration_dir = normalize_package_name(name)
+    target_integration_dir = integration_dir_name(name)
     root = Path(location).resolve() if location else app.repo.path
     integration_dir = root / target_integration_dir
     manifest_path = integration_dir / 'manifest.json'
@@ -272,7 +276,7 @@ def _resolve_check_only_inputs(
     if not author_normalized:
         app.abort('Unable to determine author from manifest')
 
-    # `target_integration_dir` runs through `normalize_package_name`, which converts
+    # `target_integration_dir` is normalized by `integration_dir_name`, which converts
     # hyphens to underscores. The author prefix must use the same normalization, or
     # a hyphenated author (e.g. "My-Partner") wouldn't match the underscore form in
     # the directory name, leaving the prefix in place and causing
@@ -285,7 +289,12 @@ def _resolve_check_only_inputs(
 
 
 def _validate_integration_name(app: Application, name: str) -> None:
-    """Reject names that would break path templating, package name normalization, or policy."""
+    """Reject names that would break path templating, package name normalization, or policy.
+
+    The checks below exist only to turn the individual rules into specific, actionable CLI
+    messages. `integration_dir_name` owns the rules themselves, so it gets the final say:
+    anything it rejects is rejected here too, even if no branch above anticipated it.
+    """
     if not name:
         app.abort('Integration name must not be empty.')
     if not is_valid_integration_name(name):
@@ -295,3 +304,8 @@ def _validate_integration_name(app: Application, name: str) -> None:
         )
     if name.lower().startswith('datadog'):
         app.abort('Integration names cannot start with `datadog`.')
+
+    try:
+        integration_dir_name(name)
+    except ValueError as exc:
+        app.abort(str(exc))

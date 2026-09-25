@@ -33,7 +33,7 @@ def write(p: Path, text: str) -> None:
 
 @pytest.fixture
 def file_access_policy(tmp_path) -> FileAccessPolicy:
-    return FileAccessPolicy(write_root=tmp_path)
+    return FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")
 
 
 @pytest.fixture

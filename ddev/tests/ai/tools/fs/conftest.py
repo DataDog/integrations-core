@@ -2,11 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from ddev.ai.tools.fs.append_file import AppendFileTool
 from ddev.ai.tools.fs.copy_path import CopyPathTool
 from ddev.ai.tools.fs.create_file import CreateFileTool
+from ddev.ai.tools.fs.delete_file import DeleteFileTool
 from ddev.ai.tools.fs.edit_file import EditFileTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -23,7 +26,7 @@ def owner_id() -> str:
 
 @pytest.fixture
 def permissive_policy(tmp_path) -> FileAccessPolicy:
-    return FileAccessPolicy(write_root=tmp_path, deny_patterns=())
+    return FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=())
 
 
 @pytest.fixture
@@ -49,6 +52,21 @@ def edit_tool(registry: FileRegistry, owner_id: str) -> EditFileTool:
 @pytest.fixture
 def append_tool(registry: FileRegistry, owner_id: str) -> AppendFileTool:
     return AppendFileTool(registry, owner_id)
+
+
+@pytest.fixture
+def integration_root(permissive_policy: FileAccessPolicy) -> Path:
+    """The directory `permissive_policy._integration_root` resolved to. Requires a test
+    module to override `permissive_policy` with an `integration_name`, e.g. test_delete_file.py."""
+    root = permissive_policy._integration_root
+    assert root is not None, "permissive_policy must be overridden with an integration_name for this fixture"
+    root.mkdir()
+    return root
+
+
+@pytest.fixture
+def delete_tool(registry: FileRegistry, owner_id: str) -> DeleteFileTool:
+    return DeleteFileTool(registry, owner_id)
 
 
 @pytest.fixture

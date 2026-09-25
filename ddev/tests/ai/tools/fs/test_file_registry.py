@@ -12,7 +12,7 @@ OWNER_B = "agent-b"
 
 @pytest.fixture
 def registry(tmp_path) -> FileRegistry:
-    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+    return FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration"))
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +95,39 @@ def test_record_does_not_cross_agents(registry: FileRegistry, tmp_path) -> None:
     assert registry.verify(OWNER_A, path, "from-b") is False
     assert registry.verify(OWNER_B, path, "from-b") is True
     assert registry.verify(OWNER_B, path, "from-a") is False
+
+
+# ---------------------------------------------------------------------------
+# forget
+# ---------------------------------------------------------------------------
+
+
+def test_forget_removes_known_path(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "hello")
+
+    registry.forget(OWNER_A, path)
+
+    assert registry.is_known(OWNER_A, path) is False
+
+
+def test_forget_only_affects_the_given_owner(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(OWNER_A, path, "hello")
+    registry.record(OWNER_B, path, "hello")
+
+    registry.forget(OWNER_A, path)
+
+    assert registry.is_known(OWNER_A, path) is False
+    assert registry.is_known(OWNER_B, path) is True
+
+
+def test_forget_unknown_path_is_a_no_op(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+
+    registry.forget(OWNER_A, path)  # must not raise
+
+    assert registry.is_known(OWNER_A, path) is False
 
 
 # ---------------------------------------------------------------------------

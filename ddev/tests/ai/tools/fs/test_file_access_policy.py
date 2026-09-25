@@ -30,23 +30,20 @@ def test_canonicalize_path_accepts_path_object(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_assert_readable_returns_canonical_path(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    returned = policy.assert_readable(str(tmp_path / "file.txt"))
+def test_assert_readable_returns_canonical_path(permissive_policy: FileAccessPolicy, tmp_path) -> None:
+    returned = permissive_policy.assert_readable(str(tmp_path / "file.txt"))
     assert returned == tmp_path / "file.txt"
 
 
-def test_assert_writable_returns_canonical_path(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    returned = policy.assert_writable(str(tmp_path / "file.txt"))
+def test_assert_writable_returns_canonical_path(permissive_policy: FileAccessPolicy, tmp_path) -> None:
+    returned = permissive_policy.assert_writable(str(tmp_path / "file.txt"))
     assert returned == tmp_path / "file.txt"
 
 
-def test_assert_readable_expands_tilde(tmp_path, monkeypatch) -> None:
+def test_assert_readable_expands_tilde(permissive_policy: FileAccessPolicy, tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    returned = policy.assert_readable("~/file.txt")
+    returned = permissive_policy.assert_readable("~/file.txt")
     assert returned == tmp_path / "file.txt"
 
 
@@ -55,32 +52,28 @@ def test_assert_readable_expands_tilde(tmp_path, monkeypatch) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_write_inside_root_allowed(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    policy.assert_writable(str(tmp_path / "sub" / "file.txt"))
+def test_write_inside_root_allowed(permissive_policy: FileAccessPolicy, tmp_path) -> None:
+    permissive_policy.assert_writable(str(tmp_path / "sub" / "file.txt"))
 
 
-def test_write_outside_root_denied(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
+def test_write_outside_root_denied(permissive_policy: FileAccessPolicy, tmp_path) -> None:
     with pytest.raises(FileAccessError, match="outside write root"):
-        policy.assert_writable(str(tmp_path.parent / "outside.txt"))
+        permissive_policy.assert_writable(str(tmp_path.parent / "outside.txt"))
 
 
-def test_write_traversal_denied(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
+def test_write_traversal_denied(permissive_policy: FileAccessPolicy, tmp_path) -> None:
     with pytest.raises(FileAccessError, match="outside write root"):
-        policy.assert_writable(str(tmp_path / ".." / "escape.txt"))
+        permissive_policy.assert_writable(str(tmp_path / ".." / "escape.txt"))
 
 
-def test_write_symlink_escaping_root_denied(tmp_path) -> None:
+def test_write_symlink_escaping_root_denied(permissive_policy: FileAccessPolicy, tmp_path) -> None:
     outside = tmp_path.parent / "outside_target"
     outside.mkdir(exist_ok=True)
     link = tmp_path / "link_to_outside"
     link.symlink_to(outside)
 
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
     with pytest.raises(FileAccessError, match="outside write root"):
-        policy.assert_writable(str(link / "file.txt"))
+        permissive_policy.assert_writable(str(link / "file.txt"))
 
 
 # ---------------------------------------------------------------------------
@@ -89,26 +82,26 @@ def test_write_symlink_escaping_root_denied(tmp_path) -> None:
 
 
 def test_read_denied_basename_inside_write_root_is_allowed(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(".env",))
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=(".env",))
     policy.assert_readable(str(tmp_path / ".env"))
 
 
 def test_read_denied_path_pattern_inside_write_root_is_allowed(tmp_path) -> None:
     secrets = tmp_path / "secrets"
     secrets.mkdir()
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(f"{secrets}/*",))
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=(f"{secrets}/*",))
     policy.assert_readable(str(secrets / "key.txt"))
 
 
 def test_write_denied_basename_inside_write_root_is_allowed(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(".env",))
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=(".env",))
     policy.assert_writable(str(tmp_path / ".env"))
 
 
 def test_write_denied_path_pattern_inside_write_root_is_allowed(tmp_path) -> None:
     secrets = tmp_path / "secrets"
     secrets.mkdir()
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=(f"{secrets}/*",))
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=(f"{secrets}/*",))
     policy.assert_writable(str(secrets / "x.txt"))
 
 
@@ -123,7 +116,7 @@ def test_write_denied_path_pattern_inside_write_root_is_allowed(tmp_path) -> Non
 )
 def test_basename_pattern_denies_read_outside_write_root(tmp_path, filename) -> None:
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root)  # default patterns
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration")  # default patterns
     with pytest.raises(FileAccessError, match="Read denied"):
         policy.assert_readable(str(tmp_path / filename))
 
@@ -131,13 +124,13 @@ def test_basename_pattern_denies_read_outside_write_root(tmp_path, filename) -> 
 @pytest.mark.parametrize("filename", ["app.py", "README.md", "config.yaml", "env.txt"])
 def test_basename_pattern_allows_unrelated_outside_write_root(tmp_path, filename) -> None:
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root)
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration")
     policy.assert_readable(str(tmp_path / filename))
 
 
 def test_custom_basename_pattern_denies_outside_write_root(tmp_path) -> None:
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=("*.secret",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=("*.secret",))
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(tmp_path / "api.secret"))
     policy.assert_readable(str(tmp_path / "api.public"))
@@ -152,7 +145,7 @@ def test_path_pattern_denies_outside_write_root(tmp_path) -> None:
     write_root = tmp_path / "sandbox"
     denied = tmp_path / "secrets"
     denied.mkdir()
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{denied}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{denied}/*",))
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(denied / "x.txt"))
     # fnmatch's '*' is greedy across '/', so subpaths are also denied
@@ -164,14 +157,16 @@ def test_path_pattern_allows_siblings_outside_write_root(tmp_path) -> None:
     write_root = tmp_path / "sandbox"
     denied = tmp_path / "secrets"
     denied.mkdir()
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{denied}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{denied}/*",))
     policy.assert_readable(str(tmp_path / "public.txt"))
 
 
 def test_specific_path_pattern_denies_only_that_file(tmp_path) -> None:
     write_root = tmp_path / "sandbox"
     (tmp_path / "secrets").mkdir()
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{tmp_path}/secrets/credentials",))
+    policy = FileAccessPolicy(
+        write_root=write_root, integration_name="my_integration", deny_patterns=(f"{tmp_path}/secrets/credentials",)
+    )
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(tmp_path / "secrets" / "credentials"))
     # same name elsewhere is fine
@@ -182,7 +177,9 @@ def test_path_pattern_with_glob_in_middle(tmp_path) -> None:
     write_root = tmp_path / "sandbox"
     base = tmp_path / "dir"
     base.mkdir()
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{base}/*credentials*",))
+    policy = FileAccessPolicy(
+        write_root=write_root, integration_name="my_integration", deny_patterns=(f"{base}/*credentials*",)
+    )
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(base / "my_credentials_file"))
     # '*' spans '/', so a deeper file with 'credentials' in the name is still denied
@@ -199,7 +196,7 @@ def test_path_pattern_resolves_symlinked_root(tmp_path) -> None:
     link = tmp_path / "link_secrets"
     link.symlink_to(real)
 
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{link}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{link}/*",))
     # accessing via the real path is denied
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(real / "key"))
@@ -218,7 +215,7 @@ def test_symlink_to_denied_target_is_blocked(tmp_path) -> None:
     public = tmp_path / "innocent_link"
     public.symlink_to(target)
 
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{denied}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{denied}/*",))
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(public))
 
@@ -228,7 +225,7 @@ def test_traversal_does_not_bypass(tmp_path) -> None:
     denied = tmp_path / "secrets"
     denied.mkdir()
     (denied / "key").write_text("x")
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{denied}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{denied}/*",))
     with pytest.raises(FileAccessError):
         policy.assert_readable(str(tmp_path / "public" / ".." / "secrets" / "key"))
 
@@ -238,14 +235,10 @@ def test_traversal_does_not_bypass(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_deny_patterns_property_preserves_input(tmp_path) -> None:
-    patterns = ("*.pem", "~/.ssh/*", ".env")
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=patterns)
-    assert policy.deny_patterns == patterns
-
-
 def test_basename_patterns_filters_to_basename_only(tmp_path) -> None:
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=("*.pem", "~/.ssh/*", ".env"))
+    policy = FileAccessPolicy(
+        write_root=tmp_path, integration_name="my_integration", deny_patterns=("*.pem", "~/.ssh/*", ".env")
+    )
     assert set(policy.basename_patterns) == {"*.pem", ".env"}
 
 
@@ -257,7 +250,111 @@ def test_basename_patterns_filters_to_basename_only(tmp_path) -> None:
 @pytest.mark.parametrize("root", ["~/.aws", "~/.kube", "~/.gnupg", "~/.docker", "~/.config/gcloud", "~/.ssh"])
 def test_read_denied_by_default_path_pattern(tmp_path, root) -> None:
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root)
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration")
     resolved_root = canonicalize_path(root)
     with pytest.raises(FileAccessError, match="Read denied"):
         policy.assert_readable(str(resolved_root / "config"))
+
+
+# ---------------------------------------------------------------------------
+# integration_root resolution
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "integration_name,expected_name",
+    [
+        ("HPE Aruba Edge", "hpe_aruba_edge"),
+        ("my-cool.Check", "my_cool_check"),
+        ("simple", "simple"),
+    ],
+)
+def test_integration_root_normalizes_like_ddev_create(tmp_path, integration_name, expected_name) -> None:
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name=integration_name)
+    target = tmp_path / expected_name / "check.py"
+    assert policy.assert_deletable(str(target)) == target
+
+
+# ---------------------------------------------------------------------------
+# integration_name validation
+# ---------------------------------------------------------------------------
+
+
+# One representative value per rule: the exhaustive table lives with the rule's owner,
+# `integration_dir_name` (tests/utils/test_integration_naming.py). What matters here is
+# that construction refuses to build a policy around a name that function rejects, rather
+# than silently scoping deletions to a bogus root.
+@pytest.mark.parametrize("value", ["", None, "../escape", "datadog_operator"])
+def test_construction_rejects_invalid_integration_name(tmp_path, value) -> None:
+    with pytest.raises(ValueError, match="Invalid integration name"):
+        FileAccessPolicy(write_root=tmp_path, integration_name=value)
+
+
+# ---------------------------------------------------------------------------
+# assert_deletable
+# ---------------------------------------------------------------------------
+
+
+def test_assert_deletable_returns_canonical_path_inside_integration_root(
+    permissive_policy: FileAccessPolicy,
+) -> None:
+    target = permissive_policy._integration_root / "check.py"
+    assert permissive_policy.assert_deletable(str(target)) == target
+
+
+def test_assert_deletable_denies_outside_integration_root(permissive_policy: FileAccessPolicy, tmp_path) -> None:
+    with pytest.raises(FileAccessError, match="outside the integration directory"):
+        permissive_policy.assert_deletable(str(tmp_path / "outside.txt"))
+
+
+def test_assert_deletable_denies_symlink_leaf(permissive_policy: FileAccessPolicy) -> None:
+    integration_root = permissive_policy._integration_root
+    integration_root.mkdir()
+    target = integration_root / "real.txt"
+    target.write_text("x")
+    link = integration_root / "link.txt"
+    link.symlink_to(target)
+
+    with pytest.raises(FileAccessError, match="is a symlink"):
+        permissive_policy.assert_deletable(str(link))
+
+
+def test_assert_deletable_denies_directory(permissive_policy: FileAccessPolicy) -> None:
+    integration_root = permissive_policy._integration_root
+    subdir = integration_root / "subdir"
+    subdir.mkdir(parents=True)
+
+    with pytest.raises(FileAccessError, match="is a directory"):
+        permissive_policy.assert_deletable(str(subdir))
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "manifest.json",
+        "pyproject.toml",
+        "hatch.toml",
+        "metadata.csv",
+        "README.md",
+        "assets/configuration/spec.yaml",
+        "datadog_checks/mycheck/config_models/defaults.py",
+        "datadog_checks/mycheck/data/conf.yaml.example",
+    ],
+)
+def test_assert_deletable_denies_protected_structural_paths(permissive_policy: FileAccessPolicy, relative) -> None:
+    target = permissive_policy._integration_root / relative
+
+    with pytest.raises(FileAccessError, match="protected structural file"):
+        permissive_policy.assert_deletable(str(target))
+
+
+@pytest.mark.parametrize("filename", [".env", "secret.pem", "private.key"])
+def test_assert_deletable_denies_deny_pattern_files_inside_integration_root(tmp_path, filename) -> None:
+    # Default deny patterns (not disabled), unlike the other assert_deletable tests above,
+    # since this is specifically testing that deny patterns are enforced even inside the
+    # deletion boundary — unlike ordinary writes, where they're bypassed inside write_root.
+    policy = FileAccessPolicy(write_root=tmp_path, integration_name="My Integration")
+    target = policy._integration_root / filename
+
+    with pytest.raises(FileAccessError, match="Delete denied by policy"):
+        policy.assert_deletable(str(target))

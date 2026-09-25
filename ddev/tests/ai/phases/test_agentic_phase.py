@@ -388,7 +388,7 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
     run_callbacks = Callbacks([AgentLogger(checkpoint_manager.root).as_callback_set()])
     resources = RunResources(
         provider_registry=build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret")),
-        file_access_policy=FileAccessPolicy(write_root=flow_dir),
+        file_access_policy=FileAccessPolicy(write_root=flow_dir, integration_name="my_integration"),
         agents={"writer": make_agent_config(tools=["spawn_subagent"])},
         callbacks=run_callbacks,
     )

@@ -69,7 +69,9 @@ def real_fs_tool_registry(tmp_path) -> ToolRegistry:
     """A real ToolRegistry wired with the actual EditFileTool/CreateFileTool, so truncation-hint
     tests exercise the real ToolRegistry.get() and each tool's real truncated_call_hint, not a
     stand-in."""
-    file_registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
+    file_registry = FileRegistry(
+        policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration", deny_patterns=())
+    )
     owner_id = "test-agent"
     return ToolRegistry([EditFileTool(file_registry, owner_id), CreateFileTool(file_registry, owner_id)])
 

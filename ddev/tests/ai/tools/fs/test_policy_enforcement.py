@@ -29,7 +29,7 @@ def sandbox(tmp_path):
 
 @pytest.fixture
 def sandboxed_registry(sandbox) -> FileRegistry:
-    return FileRegistry(policy=FileAccessPolicy(write_root=sandbox))
+    return FileRegistry(policy=FileAccessPolicy(write_root=sandbox, integration_name="my_integration"))
 
 
 # ---------------------------------------------------------------------------
@@ -137,8 +137,8 @@ async def test_read_file_refuses_denied_names_outside_write_root(tmp_path, sandb
     assert "Read denied" in result.error
 
 
-async def test_read_file_allows_normal_files(tmp_path) -> None:
-    registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
+async def test_read_file_allows_normal_files(permissive_policy: FileAccessPolicy, tmp_path) -> None:
+    registry = FileRegistry(policy=permissive_policy)
     target = tmp_path / "data.txt"
     target.write_text("ok")
 
@@ -154,7 +154,7 @@ async def test_read_file_allows_normal_files(tmp_path) -> None:
 
 async def test_read_by_one_agent_does_not_authorize_another_to_edit(sandbox) -> None:
     """Agent A reads a file; agent B tries to edit it without reading — must fail."""
-    policy = FileAccessPolicy(write_root=sandbox, deny_patterns=())
+    policy = FileAccessPolicy(write_root=sandbox, integration_name="my_integration", deny_patterns=())
     registry = FileRegistry(policy=policy)
     target = sandbox / "shared.txt"
     target.write_text("hello")
@@ -171,7 +171,7 @@ async def test_read_by_one_agent_does_not_authorize_another_to_edit(sandbox) -> 
 
 
 async def test_each_agent_can_edit_after_its_own_read(sandbox) -> None:
-    policy = FileAccessPolicy(write_root=sandbox, deny_patterns=())
+    policy = FileAccessPolicy(write_root=sandbox, integration_name="my_integration", deny_patterns=())
     registry = FileRegistry(policy=policy)
     target = sandbox / "shared.txt"
     target.write_text("one")
@@ -200,7 +200,9 @@ async def test_each_agent_can_edit_after_its_own_read(sandbox) -> None:
 async def test_grep_refuses_denied_root(tmp_path) -> None:
     # write_root is a subdirectory; the search path at tmp_path level is outside it and denied.
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{tmp_path}/*",))
+    policy = FileAccessPolicy(
+        write_root=write_root, integration_name="my_integration", deny_patterns=(f"{tmp_path}/*",)
+    )
     tool = GrepTool(policy)
     with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock()) as mock_run:
         result = await tool.run({"pattern": "secret", "path": str(tmp_path / "foo")})
@@ -211,7 +213,7 @@ async def test_grep_refuses_denied_root(tmp_path) -> None:
 
 async def test_grep_refuses_denied_name(tmp_path) -> None:
     write_root = tmp_path / "sandbox"
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(".env",))
     tool = GrepTool(policy)
     with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock()) as mock_run:
         result = await tool.run({"pattern": "SECRET", "path": str(tmp_path / ".env")})
@@ -220,21 +222,19 @@ async def test_grep_refuses_denied_name(tmp_path) -> None:
     mock_run.assert_not_called()
 
 
-async def test_grep_allows_normal_path(tmp_path) -> None:
+async def test_grep_allows_normal_path(permissive_policy: FileAccessPolicy, tmp_path) -> None:
     target = tmp_path / "data.txt"
     target.write_text("hello world")
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    tool = GrepTool(policy)
+    tool = GrepTool(permissive_policy)
     result = await tool.run({"pattern": "hello", "path": str(target)})
     assert result.success is True
 
 
-async def test_grep_non_recursive_returns_file_matches(tmp_path) -> None:
+async def test_grep_non_recursive_returns_file_matches(permissive_policy: FileAccessPolicy, tmp_path) -> None:
     """Non-recursive grep on a single file returns actual matches (no post-filter applied)."""
     target = tmp_path / "data.txt"
     target.write_text("hello world\n")
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    tool = GrepTool(policy)
+    tool = GrepTool(permissive_policy)
     result = await tool.run({"pattern": "hello", "path": str(target), "recursive": False})
     assert result.success is True
     assert "hello" in (result.data or "")
@@ -245,7 +245,7 @@ async def test_grep_inside_write_root_returns_denied_name_files(tmp_path) -> Non
     sandbox = tmp_path / "sandbox"
     sandbox.mkdir()
     (sandbox / ".env").write_text("SECRET=hello\n")
-    policy = FileAccessPolicy(write_root=sandbox, deny_patterns=(".env",))
+    policy = FileAccessPolicy(write_root=sandbox, integration_name="my_integration", deny_patterns=(".env",))
     tool = GrepTool(policy)
     result = await tool.run({"pattern": "hello", "path": str(sandbox), "recursive": True})
     assert result.success is True
@@ -262,7 +262,7 @@ async def test_grep_post_filter_strips_denied_path_pattern_matches(tmp_path) -> 
     (project / "ok.txt").write_text("hello world\n")
     (secrets / "leak.txt").write_text("hello world\n")
 
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{secrets}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{secrets}/*",))
     tool = GrepTool(policy)
     result = await tool.run({"pattern": "hello", "path": str(tmp_path), "recursive": True})
     assert result.success is True
@@ -280,7 +280,7 @@ async def test_grep_post_filter_strips_symlink_to_denied(tmp_path) -> None:
     (secrets / "key.txt").write_text("hello world\n")
     (project / "link.txt").symlink_to(secrets / "key.txt")
 
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(f"{secrets}/*",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(f"{secrets}/*",))
     tool = GrepTool(policy)
     result = await tool.run({"pattern": "hello", "path": str(project), "recursive": True})
     assert result.success is True
@@ -297,7 +297,7 @@ async def test_grep_excludes_basename_pattern_matches(tmp_path) -> None:
     (project / "config.py").write_text("token=abc\n")
     (project / ".env").write_text("token=abc\n")
 
-    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env",))
+    policy = FileAccessPolicy(write_root=write_root, integration_name="my_integration", deny_patterns=(".env",))
     tool = GrepTool(policy)
     result = await tool.run({"pattern": "token", "path": str(project), "recursive": True})
     assert result.success is True
@@ -310,11 +310,12 @@ async def test_grep_excludes_basename_pattern_matches(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_create_file_with_tilde_path_writes_to_home_when_authorized(tmp_path, monkeypatch) -> None:
+async def test_create_file_with_tilde_path_writes_to_home_when_authorized(
+    permissive_policy: FileAccessPolicy, tmp_path, monkeypatch
+) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("USERPROFILE", str(tmp_path))  # Windows uses USERPROFILE, not HOME
-    policy = FileAccessPolicy(write_root=tmp_path, deny_patterns=())
-    registry = FileRegistry(policy=policy)
+    registry = FileRegistry(policy=permissive_policy)
     tool = CreateFileTool(registry, OWNER_ID)
 
     result = await tool.run({"path": "~/x.txt", "content": "hello"})
@@ -325,7 +326,7 @@ async def test_create_file_with_tilde_path_writes_to_home_when_authorized(tmp_pa
 
 async def test_create_file_with_tilde_path_refused_when_outside_write_root(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
-    policy = FileAccessPolicy(write_root=tmp_path / "sub", deny_patterns=())
+    policy = FileAccessPolicy(write_root=tmp_path / "sub", integration_name="my_integration", deny_patterns=())
     registry = FileRegistry(policy=policy)
     tool = CreateFileTool(registry, OWNER_ID)
 
