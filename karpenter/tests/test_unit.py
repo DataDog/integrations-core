@@ -3,12 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.karpenter import KarpenterCheck
 
 from .common import RENAMED_LABELS, TEST_METRICS, TEST_V1_METRICS, get_fixture_path
+
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    assert KarpenterCheck.DEFAULT_METRIC_LIMIT == 0
 
 
 def test_check_mock_karpenter_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
