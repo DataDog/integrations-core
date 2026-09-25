@@ -1203,13 +1203,15 @@ def test_normalize_queries_null_byte_log_does_not_raise(dbm_instance):
 
     The agent log binding raises ValueError on an embedded null. Logging the raw
     text turns that one row into a statement-metrics job crash.
+
+    Obfuscation is forced to fail even though the helper strips embedded nulls
+    before calling the agent. The handler still logs the original row, so a raw
+    null in that warning must raise here the way the agent log binding would.
     """
     check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def obfuscate_sql(query, options=None):
-        if isinstance(query, str) and '\x00' in query:
-            raise ValueError('embedded null character')
-        return query
+        raise ValueError('embedded null character')
 
     def warning(msg, *args, **kwargs):
         for arg in args:
