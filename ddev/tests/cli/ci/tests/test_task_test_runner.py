@@ -21,7 +21,13 @@ from ddev.cli.ci.tests import messages, task_test_runner
 from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
-from ddev.cli.ci.tests.status import Status, conclusion_to_status
+from ddev.cli.ci.tests.status import (
+    Status,
+    conclusion_to_status,
+    has_finished_running,
+    has_started_running,
+    is_queued,
+)
 from ddev.cli.ci.tests.task_test_runner import (
     CANCEL_REQUEST_TIMEOUT,
     WORKFLOW_INPUTS_LIMIT,
@@ -52,6 +58,7 @@ from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.github_async import (
     DEFAULT_DISPATCH_HTML_URL,
     DEFAULT_DURATION_SECONDS,
+    DEFAULT_QUEUE_DURATION_SECONDS,
     FakeAsyncGitHubClient,
     make_artifact,
     make_artifacts_list,
@@ -312,6 +319,31 @@ def test_conclusion_to_status(conclusion: str | None, expected: Status):
     result = conclusion_to_status(conclusion)
     assert result is expected
     assert isinstance(result, Status)
+
+
+@pytest.mark.parametrize(
+    ("status", "conclusion", "queued", "started", "finished"),
+    [
+        pytest.param(WorkflowJobStatus.QUEUED, None, True, False, False, id="queued"),
+        pytest.param(WorkflowJobStatus.WAITING, None, True, False, False, id="waiting"),
+        pytest.param(WorkflowJobStatus.PENDING, None, True, False, False, id="pending"),
+        pytest.param(WorkflowJobStatus.REQUESTED, None, False, False, False, id="requested"),
+        pytest.param(WorkflowJobStatus.IN_PROGRESS, None, False, True, False, id="in-progress"),
+        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.SUCCESS, False, True, True, id="success"),
+        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.FAILURE, False, True, True, id="failure"),
+        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.TIMED_OUT, False, True, True, id="timed-out"),
+        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.SKIPPED, False, False, False, id="skipped"),
+        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.CANCELLED, False, False, False, id="cancelled"),
+        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.NEUTRAL, False, False, False, id="neutral"),
+    ],
+)
+def test_a_jobs_state_on_a_runner(
+    status: WorkflowJobStatus, conclusion: WorkflowJobConclusion | None, queued: bool, started: bool, finished: bool
+):
+    """Only a job that ran has timing worth measuring; `requested` is not a wait for a runner."""
+    job = make_workflow_job(status=status, conclusion=conclusion)
+
+    assert (is_queued(job), has_started_running(job), has_finished_running(job)) == (queued, started, finished)
 
 
 # ---------------------------------------------------------------------------
@@ -745,6 +777,151 @@ async def test_uses_batch_id_not_message_id_for_correlation(tmp_path: Path):
     finished = finished_messages(runner)[0]
     assert finished.id == "msg-uuid-xyz"
     assert finished.batch_id == "batch-07"
+
+
+# ---------------------------------------------------------------------------
+# process_message — queued, running and queue-wait metrics
+# ---------------------------------------------------------------------------
+
+
+def batch_with(job: BatchJob, batch_id: str = "batch-1") -> TestBatch:
+    return TestBatch(id=batch_id, batch_id=batch_id, job_list=[job], jobs_count=1, integrations=[job.target])
+
+
+async def test_queued_and_running_gauges_track_each_poll_and_settle_at_zero(tmp_path: Path):
+    """The gauges follow the batch's jobs through the polls and settle at zero once it completes."""
+    fake = FakeAsyncGitHubClient()
+    for run_status in ("in_progress", "in_progress", "completed"):
+        fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
+    job = make_job()
+    for job_status in (WorkflowJobStatus.QUEUED, WorkflowJobStatus.IN_PROGRESS, WorkflowJobStatus.COMPLETED):
+        listing = make_response(make_workflow_jobs_list([make_workflow_job(name=job.name, status=job_status)]))
+        fake.mock_response("list_workflow_jobs", listing, once=True)
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job, batch_id="batch-07"))
+
+    queued = sink.records_named("jobs.queued")
+    running = sink.records_named("jobs.running")
+    assert [record.value for record in queued] == [1, 0, 0]
+    assert [record.value for record in running] == [0, 1, 0]
+    assert {record.kind for record in queued + running} == {MetricKind.GAUGE}
+    # The batch is part of each series' identity, so concurrent batches of one run do not overwrite each other.
+    assert {
+        (record.tags["dispatcher.batch.job.platform"], record.tags["dispatcher.batch.id"])
+        for record in queued + running
+    } == {("linux", "batch-07")}
+
+
+async def test_a_completed_workflow_ends_its_gauges_at_zero_when_the_final_listing_fails(tmp_path: Path):
+    """The poll that sees the workflow complete is the batch series' last point, so it must not repeat a stale job."""
+    fake = FakeAsyncGitHubClient()
+    for run_status in ("in_progress", "completed"):
+        fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
+    job = make_job()
+    running = make_workflow_job(name=job.name, status=WorkflowJobStatus.IN_PROGRESS)
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([running])), once=True)
+    fake.mock_response("list_workflow_jobs", RuntimeError("listing unavailable"))
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    assert [record.value for record in sink.records_named("jobs.running")] == [1, 0]
+    assert [record.value for record in sink.records_named("jobs.queued")] == [0, 0]
+
+
+async def test_workflow_jobs_the_batch_did_not_plan_are_not_counted(tmp_path: Path):
+    """Setup and teardown jobs also wait for runners, but they are not the tests the batch dispatched."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    mock_jobs(fake, [make_workflow_job(name="setup", status=WorkflowJobStatus.QUEUED)])
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(make_job("j1")))
+
+    assert [record.value for record in sink.records_named("jobs.queued")] == [0]
+
+
+async def test_queue_duration_is_emitted_once_per_job_attempt_across_polls_and_reconcile(tmp_path: Path):
+    """Repeated observations of one job attempt yield one sample, wherever it is first seen."""
+    fake = FakeAsyncGitHubClient()
+    for run_status in ("in_progress", "completed"):
+        fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
+    job = make_job()
+    running = make_workflow_job(name=job.name, status=WorkflowJobStatus.IN_PROGRESS)
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([running])), once=True)
+    completed = make_workflow_job(name=job.name)
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([completed])), once=True)
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    samples = sink.records_named("job.queue.duration")
+    assert [record.value for record in samples] == [DEFAULT_QUEUE_DURATION_SECONDS]
+    assert samples[0].kind is MetricKind.DISTRIBUTION
+    assert samples[0].tags["dispatcher.batch.job.integration"] == "ntp"
+    assert samples[0].tags["dispatcher.batch.job.platform"] == "linux"
+    assert {record.tags["dispatcher.component"] for record in samples} == {"test-runner"}
+
+
+async def test_a_job_first_seen_completed_at_reconcile_still_reports_its_queue_wait(tmp_path: Path):
+    """A short job can finish between two polls, so the reconcile listing is a last chance to sample it."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run(), once=True)
+    job = make_job()
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list()), once=True)
+    settled = make_response(make_workflow_jobs_list([make_workflow_job(name=job.name)]))
+    fake.mock_response("list_workflow_jobs", settled, once=True)
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    assert [record.value for record in sink.records_named("job.queue.duration")] == [DEFAULT_QUEUE_DURATION_SECONDS]
+
+
+async def test_a_job_that_never_ran_reports_no_queue_wait(tmp_path: Path):
+    """A job cancelled before a runner picked it up has no wait to report."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    job = make_job()
+    mock_jobs(fake, [make_workflow_job(name=job.name, conclusion=WorkflowJobConclusion.CANCELLED)])
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    assert sink.records_named("job.queue.duration") == []
+
+
+async def test_a_rerun_gets_its_own_queue_wait_sample(tmp_path: Path):
+    """A rerun is a new job attempt with a new ID, so its own wait is a new sample."""
+    fake = FakeAsyncGitHubClient()
+    for run_status in ("in_progress", "completed"):
+        fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
+    job = make_job()
+    first_attempt = make_workflow_job(id=1, name=job.name, status=WorkflowJobStatus.IN_PROGRESS)
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([first_attempt])), once=True)
+    rerun = make_workflow_job(id=2, name=job.name)
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([rerun])), once=True)
+    mock_artifacts(fake, [])
+    monitoring, sink = recording_runtime()
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    samples = sink.records_named("job.queue.duration")
+    assert [record.value for record in samples] == [DEFAULT_QUEUE_DURATION_SECONDS, DEFAULT_QUEUE_DURATION_SECONDS]
 
 
 # ---------------------------------------------------------------------------
