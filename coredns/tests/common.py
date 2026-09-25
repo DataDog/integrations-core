@@ -78,6 +78,7 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.go.gc_duration_seconds.sum',
     NAMESPACE + '.go.goroutines',
     NAMESPACE + '.go.memstats.alloc_bytes',
+    NAMESPACE + '.go.memstats.alloc_bytes.count',
     NAMESPACE + '.go.memstats.buck_hash_sys_bytes',
     NAMESPACE + '.go.memstats.frees_total.count',
     NAMESPACE + '.go.memstats.gc_sys_bytes',
