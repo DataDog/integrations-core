@@ -1,0 +1,1 @@
+Add KDS delta-sync metrics (`kds.delta_delivery`, `kds.delta_generation_errors`, `kds.delta_streams_active`, `kds.resources_sync`).
