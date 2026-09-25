@@ -596,6 +596,9 @@ services:
 - id: scylla
   paths:
   - scylla/datadog_checks/scylla/
+- id: sglang
+  paths:
+  - sglang/datadog_checks/sglang/
 - id: silk
   paths:
   - silk/datadog_checks/silk/

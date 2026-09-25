@@ -1,0 +1,102 @@
+# Python runtime metrics exposed by prometheus_client.
+python_gc_objects_collected: python.gc.objects.collected
+python_gc_objects_uncollectable: python.gc.objects.uncollectable
+python_gc_collections: python.gc.collections
+python_info: python.info
+process_virtual_memory_bytes: process.virtual_memory_bytes
+process_resident_memory_bytes: process.resident_memory_bytes
+process_start_time_seconds: process.start_time_seconds
+process_cpu_seconds: process.cpu_seconds
+process_open_fds: process.open_fds
+process_max_fds: process.max_fds
+# Compatibility alias: SGLang releases expose either the unprefixed prometheus_client metric or
+# the namespaced metric, not both.
+sglang:process_cpu_seconds: process.cpu_seconds
+
+# API-server metrics.
+sglang:routing_keys_active: routing_keys.active
+sglang:http_requests_active: http.requests.active
+sglang:http_requests: http.requests
+sglang:http_responses: http.responses
+
+# Scheduler and KV-cache metrics.
+sglang:cache_config_info: cache_config_info
+sglang:num_running_reqs: num_requests.running
+sglang:num_queue_reqs: num_requests.waiting
+sglang:num_grammar_queue_reqs: num_requests.grammar_waiting
+sglang:num_running_reqs_offline_batch: num_requests.offline_batch_running
+sglang:num_used_tokens: kv_cache.used_tokens
+sglang:token_usage: kv_cache.usage
+sglang:full_token_usage: kv_cache.full_attention_usage
+sglang:swa_token_usage: kv_cache.swa_usage
+sglang:mamba_usage: mamba_pool.usage
+sglang:pending_prealloc_token_usage: kv_cache.pending_preallocation_usage
+sglang:cache_hit_rate: kv_cache.hit_rate
+sglang:max_total_num_tokens: kv_cache.max_tokens
+sglang:decode_sum_seq_lens: decode.sequence_length_sum
+sglang:gen_throughput: generation_throughput.tokens_per_second
+sglang:utilization: scheduler.utilization
+sglang:new_token_ratio: scheduler.new_token_ratio
+sglang:is_cuda_graph: cuda_graph.active
+sglang:cuda_graph_passes: cuda_graph.passes
+
+# Request and token metrics.
+sglang:prompt_tokens: prompt_tokens
+sglang:generation_tokens: generation_tokens
+sglang:cached_tokens: cached_tokens
+sglang:realtime_tokens: realtime_tokens
+sglang:num_requests: requests
+sglang:num_aborted_requests: requests.aborted
+sglang:num_retracted_reqs: requests.retracted
+sglang:num_paused_reqs: requests.paused
+sglang:num_retracted_requests: requests.retracted_total
+sglang:num_retracted_input_tokens: retracted_input_tokens
+sglang:num_retracted_output_tokens: retracted_output_tokens
+
+# Request latency and size histograms. Buckets are distributions by default.
+sglang:time_to_first_token_seconds: time_to_first_token.seconds
+sglang:inter_token_latency_seconds: inter_token_latency.seconds
+sglang:e2e_request_latency_seconds: e2e_request_latency.seconds
+sglang:queue_time_seconds: queue_time.seconds
+sglang:per_stage_req_latency_seconds: request.stage_latency.seconds
+sglang:prompt_tokens_histogram: request.prompt_tokens
+sglang:uncached_prompt_tokens_histogram: request.uncached_prompt_tokens
+sglang:generation_tokens_histogram: request.generation_tokens
+
+# Speculative decoding metrics.
+sglang:spec_accept_length: spec_decode.accept_length
+sglang:spec_accept_rate: spec_decode.accept_rate
+sglang:spec_cap_length: spec_decode.capture_length
+sglang:spec_block_accept_length: spec_decode.block_accept_length
+sglang:spec_num_steps: spec_decode.steps
+sglang:spec_num_draft_tokens: spec_decode.draft_tokens
+sglang:spec_verify_calls: spec_decode.verify_calls
+
+# Model startup and optional GPU-efficiency metrics. The startup and weight-load pairs below are
+# compatibility aliases for different SGLang releases; a release exposes one name from each pair.
+sglang:engine_startup_time: startup.seconds
+sglang:engine_load_weights_time: weight_load.seconds
+sglang:startup_time_seconds: startup.seconds
+sglang:weight_load_duration_seconds: weight_load.seconds
+sglang:startup_cuda_graph_time_seconds: startup.cuda_graph.seconds
+sglang:forward_execution_seconds: forward_execution.seconds
+sglang:scheduler_idle_seconds: scheduler.idle.seconds
+sglang:scheduler_process_cpu_seconds: scheduler.process_cpu.seconds
+sglang:estimated_flops_per_gpu: estimated_flops_per_gpu
+sglang:estimated_read_bytes_per_gpu: estimated_read_bytes_per_gpu
+sglang:estimated_write_bytes_per_gpu: estimated_write_bytes_per_gpu
+
+# Disaggregated prefill/decode queue and transfer metrics.
+sglang:num_prefill_prealloc_queue_reqs: disaggregation.prefill_preallocation_queue
+sglang:num_prefill_bootstrap_queue_reqs: disaggregation.prefill_bootstrap_queue
+sglang:num_prefill_inflight_queue_reqs: disaggregation.prefill_inflight_queue
+sglang:num_decode_prealloc_queue_reqs: disaggregation.decode_preallocation_queue
+sglang:num_decode_transfer_queue_reqs: disaggregation.decode_transfer_queue
+sglang:kv_transfer_speed_gb_s: disaggregation.kv_transfer.gigabytes_per_second
+sglang:kv_transfer_latency_ms: disaggregation.kv_transfer.latency_milliseconds
+sglang:kv_transfer_bootstrap_ms: disaggregation.kv_transfer.bootstrap_milliseconds
+sglang:kv_transfer_alloc_ms: disaggregation.kv_transfer.allocation_milliseconds
+sglang:kv_transfer_total_mb: disaggregation.kv_transfer.megabytes
+sglang:num_bootstrap_failed_reqs: disaggregation.bootstrap_failures
+sglang:num_transfer_failed_reqs: disaggregation.transfer_failures
+sglang:num_prefill_retries: disaggregation.prefill_retries

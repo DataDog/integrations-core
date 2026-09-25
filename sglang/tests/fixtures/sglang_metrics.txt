@@ -1,0 +1,98 @@
+# Fixture captured from SGLang v0.5.10.post1 on 2026-09-22 after an inference request.
+# Source: GET /metrics from a server launched with --enable-metrics.
+# HELP sglang:http_requests_active Number of currently active HTTP requests
+# TYPE sglang:http_requests_active gauge
+sglang:http_requests_active{endpoint="/generate",method="POST"} 0
+# HELP sglang:num_running_reqs The number of running requests.
+# TYPE sglang:num_running_reqs gauge
+sglang:num_running_reqs{model_name="facebook/opt-125m",tp_rank="0"} 0
+# HELP sglang:num_queue_reqs The number of requests in the waiting queue.
+# TYPE sglang:num_queue_reqs gauge
+sglang:num_queue_reqs{model_name="facebook/opt-125m",tp_rank="0"} 0
+# HELP sglang:num_used_tokens The number of used tokens.
+# TYPE sglang:num_used_tokens gauge
+sglang:num_used_tokens{model_name="facebook/opt-125m",tp_rank="0"} 37
+# HELP sglang:token_usage The token usage.
+# TYPE sglang:token_usage gauge
+sglang:token_usage{model_name="facebook/opt-125m",tp_rank="0"} 0.25
+# HELP sglang:cache_hit_rate The prefix cache hit rate.
+# TYPE sglang:cache_hit_rate gauge
+sglang:cache_hit_rate{model_name="facebook/opt-125m",tp_rank="0"} 0.2
+# HELP sglang:max_total_num_tokens Maximum total number of tokens in the KV cache pool.
+# TYPE sglang:max_total_num_tokens gauge
+sglang:max_total_num_tokens{model_name="facebook/opt-125m",tp_rank="0"} 430839
+# HELP sglang:gen_throughput The generation throughput (token/s).
+# TYPE sglang:gen_throughput gauge
+sglang:gen_throughput{model_name="facebook/opt-125m",tp_rank="0"} 425.5
+# HELP sglang:utilization The utilization.
+# TYPE sglang:utilization gauge
+sglang:utilization{model_name="facebook/opt-125m",tp_rank="0"} 0.7
+# HELP sglang:is_cuda_graph Whether CUDA graph execution is active.
+# TYPE sglang:is_cuda_graph gauge
+sglang:is_cuda_graph{model_name="facebook/opt-125m",tp_rank="0"} 1
+# HELP sglang:prompt_tokens_total Number of prefill tokens processed.
+# TYPE sglang:prompt_tokens_total counter
+sglang:prompt_tokens_total{model_name="facebook/opt-125m",tp_rank="0"} 5
+# HELP sglang:generation_tokens_total Number of generation tokens processed.
+# TYPE sglang:generation_tokens_total counter
+sglang:generation_tokens_total{model_name="facebook/opt-125m",tp_rank="0"} 32
+# HELP sglang:cached_tokens_total Number of cached prompt tokens.
+# TYPE sglang:cached_tokens_total counter
+sglang:cached_tokens_total{model_name="facebook/opt-125m",tp_rank="0"} 1
+# HELP sglang:num_requests_total Number of requests processed.
+# TYPE sglang:num_requests_total counter
+sglang:num_requests_total{model_name="facebook/opt-125m",tp_rank="0"} 1
+# HELP sglang:num_retracted_reqs The number of currently retracted requests.
+# TYPE sglang:num_retracted_reqs gauge
+sglang:num_retracted_reqs{model_name="facebook/opt-125m",tp_rank="0"} 0
+# HELP sglang:spec_accept_length Average speculative decoding acceptance length.
+# TYPE sglang:spec_accept_length gauge
+sglang:spec_accept_length{model_name="facebook/opt-125m",tp_rank="0"} 0
+# HELP sglang:spec_accept_rate Average speculative decoding acceptance rate.
+# TYPE sglang:spec_accept_rate gauge
+sglang:spec_accept_rate{model_name="facebook/opt-125m",tp_rank="0"} 0
+# HELP sglang:engine_startup_time Time taken for the engine to start.
+# TYPE sglang:engine_startup_time gauge
+sglang:engine_startup_time{model_name="facebook/opt-125m",tp_rank="0"} 9.2
+# HELP sglang:engine_load_weights_time Time taken to load model weights.
+# TYPE sglang:engine_load_weights_time gauge
+sglang:engine_load_weights_time{model_name="facebook/opt-125m",tp_rank="0"} 1.4
+# HELP sglang:process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE sglang:process_cpu_seconds_total counter
+sglang:process_cpu_seconds_total 28.3
+# HELP sglang:time_to_first_token_seconds Time to first token in seconds.
+# TYPE sglang:time_to_first_token_seconds histogram
+sglang:time_to_first_token_seconds_bucket{le="0.1",model_name="facebook/opt-125m"} 1
+sglang:time_to_first_token_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+sglang:time_to_first_token_seconds_count{model_name="facebook/opt-125m"} 1
+sglang:time_to_first_token_seconds_sum{model_name="facebook/opt-125m"} 0.02
+# HELP sglang:inter_token_latency_seconds Inter-token latency in seconds.
+# TYPE sglang:inter_token_latency_seconds histogram
+sglang:inter_token_latency_seconds_bucket{le="0.01",model_name="facebook/opt-125m"} 31
+sglang:inter_token_latency_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 31
+sglang:inter_token_latency_seconds_count{model_name="facebook/opt-125m"} 31
+sglang:inter_token_latency_seconds_sum{model_name="facebook/opt-125m"} 0.05
+# HELP sglang:e2e_request_latency_seconds End-to-end request latency in seconds.
+# TYPE sglang:e2e_request_latency_seconds histogram
+sglang:e2e_request_latency_seconds_bucket{le="0.1",model_name="facebook/opt-125m"} 1
+sglang:e2e_request_latency_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+sglang:e2e_request_latency_seconds_count{model_name="facebook/opt-125m"} 1
+sglang:e2e_request_latency_seconds_sum{model_name="facebook/opt-125m"} 0.07
+# HELP sglang:queue_time_seconds Request queue time in seconds.
+# TYPE sglang:queue_time_seconds histogram
+sglang:queue_time_seconds_bucket{le="0.001",model_name="facebook/opt-125m"} 1
+sglang:queue_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+sglang:queue_time_seconds_count{model_name="facebook/opt-125m"} 1
+sglang:queue_time_seconds_sum{model_name="facebook/opt-125m"} 0
+# HELP sglang:prompt_tokens_histogram Prompt tokens per request.
+# TYPE sglang:prompt_tokens_histogram histogram
+sglang:prompt_tokens_histogram_bucket{le="8",model_name="facebook/opt-125m"} 1
+sglang:prompt_tokens_histogram_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+sglang:prompt_tokens_histogram_count{model_name="facebook/opt-125m"} 1
+sglang:prompt_tokens_histogram_sum{model_name="facebook/opt-125m"} 5
+# HELP sglang:generation_tokens_histogram Generation tokens per request.
+# TYPE sglang:generation_tokens_histogram histogram
+sglang:generation_tokens_histogram_bucket{le="64",model_name="facebook/opt-125m"} 1
+sglang:generation_tokens_histogram_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+sglang:generation_tokens_histogram_count{model_name="facebook/opt-125m"} 1
+sglang:generation_tokens_histogram_sum{model_name="facebook/opt-125m"} 32
