@@ -42,8 +42,8 @@ def monitored(
 ) -> tuple[AsyncGitHubClient, GitHubMonitor, RecordingSink, RecordingJsonHandler]:
     """A client reporting through a runtime whose context holds dimensions the family must not carry.
 
-    That includes a caller's `reason`, `status_code` and `rate_limit_resource` tags, which must never
-    stand in for an emission's own.
+    That includes a caller's `reason`, `status_code`, `rate_limit_resource` and `rate_limiter` tags,
+    which must never stand in for an emission's own.
     """
     monitoring, sink = recording_runtime()
     handler = RecordingJsonHandler()
@@ -56,6 +56,7 @@ def monitored(
         reason='forged',
         status_code='999',
         rate_limit_resource='forged',
+        rate_limiter='forged',
     )
     monitor = GitHubMonitor(monitoring.component('github-async', integration='ntp'), now=lambda: NOW)
     client = AsyncGitHubClient('token', rate_limiter=rate_limiter, transport=transport, observer=monitor)
@@ -254,9 +255,13 @@ def test_a_throttle_wait_reports_its_actual_time_and_keeps_the_requested_one_in_
     _, monitor, sink, handler = monitored(httpx.MockTransport(lambda request: httpx.Response(200)))
 
     monitor.rate_limit_event(
-        WaitEvent(reason=WaitReason.EXHAUSTED, elapsed_seconds=12.5, outcome=outcome, requested_seconds=51.0)
+        WaitEvent(
+            reason=WaitReason.EXHAUSTED, elapsed_seconds=12.5, outcome=outcome, requested_seconds=51.0, name='artifacts'
+        )
     )
 
-    assert samples(sink, 'throttle.wait.duration') == [(12.5, {**PIPELINE, 'dispatcher.reason': 'exhausted'})]
+    assert samples(sink, 'throttle.wait.duration') == [
+        (12.5, {**PIPELINE, 'dispatcher.reason': 'exhausted', 'dispatcher.rate_limiter': 'artifacts'})
+    ]
     [event] = handler.events
     assert (event['outcome'], event['elapsed_seconds'], event['requested_seconds']) == (outcome, 12.5, 51.0)

@@ -675,7 +675,7 @@ def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, re
     assert result.exit_code == 0, result.output
     # The 30 seconds GitHub asked for, plus the governor's one-second buffer.
     assert [(record.value, dict(record.tags)) for record in sink.records_named('throttle.wait.duration')] == [
-        (31, {'ci.pipeline.id': '12345', 'dispatcher.reason': 'secondary_limit'})
+        (31, {'ci.pipeline.id': '12345', 'dispatcher.reason': 'secondary_limit', 'dispatcher.rate_limiter': 'github'})
     ]
     # Resolution's own requests are observed too, under the same pipeline ID.
     assert [
