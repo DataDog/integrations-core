@@ -17,6 +17,7 @@
   description: |
     The password of `username`.
   secret: true
+  formats: ["secret"]
   fleet_configurable: true
   value:
     type: string
