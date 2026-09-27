@@ -63,8 +63,6 @@ from ddev.utils.github_async.models import (
     ArtifactsList,
     IssueComment,
     WorkflowDispatchResult,
-    WorkflowJob,
-    WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
 )
@@ -78,7 +76,16 @@ from tests.cli.ci.tests.helpers import (
     make_job,
     recording_runtime,
 )
-from tests.helpers.github_async import DEFAULT_COMMENT_ID, DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
+from tests.helpers.github_async import (
+    DEFAULT_COMMENT_ID,
+    DEFAULT_DISPATCH_HTML_URL,
+    FakeAsyncGitHubClient,
+    make_artifacts_list,
+    make_workflow_dispatch_result,
+    make_workflow_job,
+    make_workflow_jobs_list,
+    make_workflow_run,
+)
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 # Every test here runs a Dispatcher to completion, and `on_finalize` writes the run summary. Without
@@ -156,15 +163,9 @@ def client(request) -> FakeAsyncGitHubClient:
     fake = FakeAsyncGitHubClient()
     fake.mock_response(
         "get_workflow_run",
-        WorkflowRun(
-            id=123,
-            name="test-batch",
-            status="completed",
-            conclusion=conclusion,
-            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-        ),
+        make_workflow_run(name="test-batch", conclusion=conclusion),
     )
-    fake.mock_response("list_workflow_run_artifacts", ArtifactsList(total_count=0, artifacts=[]))
+    fake.mock_response("list_workflow_run_artifacts", make_artifacts_list())
     return fake
 
 
@@ -219,31 +220,21 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
         requests[request.url.path] = bucket.name
         requests_sent[request.url.path] += 1
         if request.url.path.endswith("/dispatches"):
-            return httpx.Response(200, json={"workflow_run_id": 123, "run_url": str(request.url), "html_url": run_url})
+            return httpx.Response(
+                200,
+                json=make_workflow_dispatch_result(
+                    workflow_run_id=123, run_url=str(request.url), html_url=run_url
+                ).model_dump(mode="json"),
+            )
         if request.url.path.endswith("/artifacts"):
-            return httpx.Response(200, json={"total_count": 0, "artifacts": []})
+            return httpx.Response(200, json=make_artifacts_list().model_dump(mode="json"))
         if request.url.path.endswith("/jobs"):
             return httpx.Response(
                 200,
-                json={
-                    "total_count": 1,
-                    "jobs": [
-                        {
-                            "id": 1,
-                            "run_id": 123,
-                            "name": job.name,
-                            "status": "completed",
-                            "conclusion": "success",
-                            "started_at": "2026-01-01T10:00:00Z",
-                            "completed_at": "2026-01-01T10:01:30Z",
-                        }
-                    ],
-                },
+                json=make_workflow_jobs_list([make_workflow_job(name=job.name)]).model_dump(mode="json"),
             )
         assert request.url.path == "/repos/DataDog/integrations-core/actions/runs/123"
-        return httpx.Response(
-            200, json={"id": 123, "status": "completed", "conclusion": "success", "html_url": run_url}
-        )
+        return httpx.Response(200, json=make_workflow_run(html_url=run_url).model_dump(mode="json"))
 
     def make_client(
         token: str,
@@ -337,24 +328,12 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
     job = make_job()
     client.mock_response(
         "get_workflow_run",
-        WorkflowRun(id=123, status="in_progress", html_url="https://github.com/o/r/actions/runs/123"),
+        make_workflow_run(status="in_progress", html_url="https://github.com/o/r/actions/runs/123"),
         once=True,
     )
     client.mock_response(
         "list_workflow_jobs",
-        WorkflowJobsList(
-            total_count=1,
-            jobs=[
-                WorkflowJob(
-                    id=1,
-                    run_id=123,
-                    name=job.name,
-                    status=WorkflowJobStatus.IN_PROGRESS,
-                    started_at="2026-01-01T10:00:00Z",
-                    completed_at=None,
-                )
-            ],
-        ),
+        make_workflow_jobs_list([make_workflow_job(name=job.name, status=WorkflowJobStatus.IN_PROGRESS)]),
         once=True,
     )
     client.mock_response("list_workflow_jobs", RuntimeError("Final job metadata unavailable"))
@@ -414,13 +393,7 @@ def a_run_that_never_finishes(client: FakeAsyncGitHubClient) -> None:
     """Keep every dispatched run `in_progress`, so a batch is still polling when the signal lands."""
     client.mock_response(
         "get_workflow_run",
-        WorkflowRun(
-            id=123,
-            name="test-batch",
-            status="in_progress",
-            conclusion=None,
-            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-        ),
+        make_workflow_run(name="test-batch", status="in_progress"),
     )
 
 
@@ -498,7 +471,7 @@ def stop_from_inside_the_run(
 
 
 def dispatched_run(run_id: int) -> WorkflowDispatchResult:
-    return WorkflowDispatchResult(
+    return make_workflow_dispatch_result(
         workflow_run_id=run_id,
         run_url=f"https://api.github.com/repos/o/r/actions/runs/{run_id}",
         html_url=f"https://github.com/o/r/actions/runs/{run_id}",
@@ -506,11 +479,10 @@ def dispatched_run(run_id: int) -> WorkflowDispatchResult:
 
 
 def running_run(run_id: int) -> WorkflowRun:
-    return WorkflowRun(
+    return make_workflow_run(
         id=run_id,
         name="test-batch",
         status="in_progress",
-        conclusion=None,
         html_url=f"https://github.com/o/r/actions/runs/{run_id}",
     )
 
@@ -527,7 +499,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
     client.mock_response("create_workflow_dispatch", dispatched_run(456), once=True)
     client.mock_response("get_workflow_run", running_run(123), run_id=123)
     client.mock_response("get_workflow_run", running_run(456), run_id=456)
-    client.mock_response("list_workflow_jobs", WorkflowJobsList(total_count=0, jobs=[]), run_id=123)
+    client.mock_response("list_workflow_jobs", make_workflow_jobs_list(), run_id=123)
     client.mock_response("list_workflow_jobs", invalid_response_error(), run_id=456)
     if shutdown_mode_fails:
         client.mock_response("enter_shutdown_mode", RuntimeError("shutdown mode is broken"))
