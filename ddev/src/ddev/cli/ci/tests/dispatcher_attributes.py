@@ -321,6 +321,9 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
     'rate_limit_resource': AttributeSpec(
         'github.rate_limit.resource',
     ),
+    'rate_limiter': AttributeSpec(
+        'dispatcher.rate_limiter',
+    ),
     'error': AttributeSpec(
         'error.message',
         console_tag=True,
@@ -427,7 +430,7 @@ def metric_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:
 
 # The GitHub request metrics are sampled per attempt, so every run, batch or job dimension the
 # context holds would multiply their series. They carry only these, whatever else is bound.
-GITHUB_METRIC_FIELDS = frozenset({'ci_pipeline_id', 'status_code', 'reason', 'rate_limit_resource'})
+GITHUB_METRIC_FIELDS = frozenset({'ci_pipeline_id', 'status_code', 'reason', 'rate_limit_resource', 'rate_limiter'})
 
 
 def github_metric_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:

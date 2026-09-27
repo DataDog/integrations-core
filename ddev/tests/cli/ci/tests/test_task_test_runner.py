@@ -35,10 +35,8 @@ from ddev.monitoring.metrics import MetricKind
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
-    ArtifactsList,
     WorkflowJob,
     WorkflowJobConclusion,
-    WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
 )
@@ -51,7 +49,17 @@ from tests.cli.ci.tests.helpers import (
     recording_runtime,
 )
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
-from tests.helpers.github_async import DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient
+from tests.helpers.github_async import (
+    DEFAULT_DISPATCH_HTML_URL,
+    DEFAULT_DURATION_SECONDS,
+    FakeAsyncGitHubClient,
+    make_artifact,
+    make_artifacts_list,
+    make_response,
+    make_workflow_job,
+    make_workflow_jobs_list,
+    make_workflow_run,
+)
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
 # ---------------------------------------------------------------------------
@@ -59,70 +67,17 @@ from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_m
 # ---------------------------------------------------------------------------
 
 
-def wrap(data: Any) -> GitHubResponse[Any]:
-    return GitHubResponse(data=data, headers={})
-
-
-DEFAULT_URL = object()
-
-
-def make_artifact(idx: int, expired: bool = False, archive_download_url: Any = DEFAULT_URL) -> Artifact:
-    url = f"https://api.github.com/artifact/{idx}/zip" if archive_download_url is DEFAULT_URL else archive_download_url
-    return Artifact(
-        id=idx,
-        name=f"artifact-{idx}",
-        size_in_bytes=100,
-        url=f"https://api.github.com/artifact/{idx}",
-        archive_download_url=url,
-        expired=expired,
-    )
-
-
-def make_workflow_run(
-    status: str = "completed",
-    conclusion: str | None = "success",
-    run_started_at: str | None = None,
-    updated_at: str | None = None,
-) -> WorkflowRun:
-    return WorkflowRun(
-        id=123,
-        name="test-batch",
-        status=status,
-        conclusion=conclusion if status == "completed" else None,
-        html_url="https://github.com/o/r/actions/runs/123",
-        run_started_at=run_started_at,
-        updated_at=updated_at,
-    )
-
-
-def artifacts_page(artifacts: list[Artifact]) -> GitHubResponse[ArtifactsList]:
-    return wrap(ArtifactsList(total_count=len(artifacts), artifacts=list(artifacts)))
-
-
 def mock_artifacts(fake: FakeAsyncGitHubClient, artifacts: list[Artifact]):
-    fake.mock_response("list_workflow_run_artifacts", artifacts_page(artifacts))
+    fake.mock_response("list_workflow_run_artifacts", make_response(make_artifacts_list(artifacts)))
 
 
 def make_artifact_for(idx: int, job: BatchJob) -> Artifact:
     """Artifact whose name matches a job's deterministic artifact name (the upload/download contract)."""
-    artifact = make_artifact(idx)
-    return artifact.model_copy(update={"name": job.artifact_name()})
-
-
-def make_workflow_job(name: str, conclusion: str = "success") -> WorkflowJob:
-    return WorkflowJob(
-        id=1,
-        run_id=123,
-        name=name,
-        status="completed",
-        conclusion=conclusion,
-        started_at="2026-01-01T10:00:00Z",
-        completed_at="2026-01-01T10:01:30Z",
-    )
+    return make_artifact(id=idx, name=job.artifact_name())
 
 
 def mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]):
-    fake.mock_response("list_workflow_jobs", wrap(WorkflowJobsList(total_count=len(jobs), jobs=list(jobs))))
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list(jobs)))
 
 
 def make_runner(
@@ -191,8 +146,8 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
     workflow input, the check-run name, and the emitted ``BatchFinished`` show which one is used.
     """
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
-    mock_artifacts(fake, [make_artifact(1), make_artifact(2)])
+    fake.mock_response("get_workflow_run", make_workflow_run(html_url="https://github.com/o/r/actions/runs/123"))
+    mock_artifacts(fake, [make_artifact(id=1), make_artifact(id=2)])
     runner = make_runner(fake, tmp_path)
 
     batch = TestBatch(
@@ -213,8 +168,8 @@ async def run_happy_path(tmp_path: Path) -> tuple[FakeAsyncGitHubClient, BatchFi
 @pytest.mark.asyncio
 async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
-    mock_artifacts(fake, [make_artifact(1), make_artifact(2)])
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    mock_artifacts(fake, [make_artifact(id=1), make_artifact(id=2)])
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
@@ -252,7 +207,7 @@ async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
     """
     fake = FakeAsyncGitHubClient()
     mock_artifacts(fake, [])
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     ticks = iter(range(0, 1000, 10))
     monkeypatch.setattr(task_test_runner, "monotonic", lambda: float(next(ticks)))
     monitoring, sink = recording_runtime()
@@ -261,7 +216,7 @@ async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
 
     for batch_id, polls in (("batch-1", 3), ("batch-2", 2)):
         for _ in range(polls - 1):
-            fake.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
+            fake.mock_response("get_workflow_run", make_workflow_run(status="in_progress"), once=True)
         await runner.process_message(make_batch(batch_id))
 
     intervals = sink.records_named("requests.polling_interval")
@@ -280,7 +235,7 @@ async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
 @pytest.mark.asyncio
 async def test_an_accepted_dispatch_counts_the_batch_and_its_jobs(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
@@ -308,9 +263,7 @@ async def test_a_completed_workflow_reports_its_own_running_duration(tmp_path: P
     fake = FakeAsyncGitHubClient()
     fake.mock_response(
         "get_workflow_run",
-        make_workflow_run(
-            "completed", "success", run_started_at="2026-01-01T10:00:00Z", updated_at="2026-01-01T10:01:30Z"
-        ),
+        make_workflow_run(),
     )
     mock_artifacts(fake, [])
     monitoring, sink = recording_runtime()
@@ -319,7 +272,7 @@ async def test_a_completed_workflow_reports_its_own_running_duration(tmp_path: P
     await runner.process_message(make_batch())
 
     duration = sink.records_named("batch.duration")
-    assert [record.value for record in duration] == [90.0]
+    assert [record.value for record in duration] == [DEFAULT_DURATION_SECONDS]
     assert duration[0].kind is MetricKind.DISTRIBUTION
 
 
@@ -327,7 +280,7 @@ async def test_a_completed_workflow_reports_its_own_running_duration(tmp_path: P
 async def test_a_completed_workflow_without_timing_reports_no_batch_duration(tmp_path: Path):
     """A missing start is omitted, not approximated from another clock."""
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run(run_started_at=None))
     mock_artifacts(fake, [])
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
@@ -399,19 +352,9 @@ async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
         httpx.Response(404),
         httpx.Response(
             200,
-            json={
-                "total_count": 1,
-                "jobs": [
-                    {
-                        "id": 1,
-                        "run_id": 123,
-                        "name": "j1",
-                        "status": "queued",
-                        "started_at": "2026-01-01T10:00:00Z",
-                        "completed_at": None,
-                    }
-                ],
-            },
+            json=make_workflow_jobs_list([make_workflow_job(name="j1", status=WorkflowJobStatus.QUEUED)]).model_dump(
+                mode="json"
+            ),
         ),
     ]
     client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
@@ -445,9 +388,9 @@ async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_p
 async def test_collection_publishes_outcomes_before_a_cancellable_artifact_request(tmp_path: Path):
     client, artifacts = FakeAsyncGitHubClient(), FakeAsyncGitHubClient()
     batch = make_batch()
-    mock_jobs(client, [make_workflow_job(batch.job_list[0].name, "failure")])
-    client.mock_response("get_workflow_run", make_workflow_run("completed", "failure"))
-    mock_artifacts(artifacts, [make_artifact(1)])
+    mock_jobs(client, [make_workflow_job(name=batch.job_list[0].name, conclusion=WorkflowJobConclusion.FAILURE)])
+    client.mock_response("get_workflow_run", make_workflow_run(conclusion="failure"))
+    mock_artifacts(artifacts, [make_artifact(id=1)])
     entered = asyncio.Event()
 
     async def blocked_download(*args: Any, **kwargs: Any) -> None:
@@ -650,7 +593,7 @@ async def test_optional_navigation_context_reaches_the_batch_workflow(
     tmp_path: Path, origin_run_url: str | None, pr_number: int | None, expected: dict[str, str]
 ):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path, origin_run_url=origin_run_url, pr_number=pr_number)
 
@@ -673,7 +616,7 @@ async def test_optional_navigation_context_reaches_the_batch_workflow(
 async def test_pytest_args_reach_the_batch_workflow(tmp_path: Path, pytest_args: str, expected: str | None):
     """Losing these runs tests the caller excluded: `master.yml` passes `-m "not flaky"`."""
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path, pytest_args=pytest_args)
 
@@ -691,7 +634,7 @@ async def test_the_batch_is_told_whether_it_is_testing_a_fork(tmp_path: Path, is
     leaves the workflow on its own default of trusting the commit.
     """
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path, is_fork=is_fork)
 
@@ -737,7 +680,7 @@ async def test_downloads_all_batch_artifacts(tmp_path: Path):
 
 async def test_lifecycle_log_messages_identify_their_batch_run_and_artifacts(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    mock_artifacts(fake, [make_artifact(1)])
+    mock_artifacts(fake, [make_artifact(id=1)])
     handler = RecordingJsonHandler()
     runner = make_runner(fake, tmp_path, handler=handler)
 
@@ -790,7 +733,7 @@ async def test_uses_batch_id_not_message_id_for_correlation(tmp_path: Path):
     # The logical batch identity comes from batch_id; the message id is a separate identity and must
     # not be used for the workflow inputs or the emitted BatchFinished.
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path)
 
@@ -816,9 +759,11 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path):
     # The two jobs differ in an artifact-relevant field (environment) so their base names differ.
     j1, j2 = make_job("j1", environment="py3.13"), make_job("j2", environment="py3.12")
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "failure"))
+    fake.mock_response("get_workflow_run", make_workflow_run(conclusion="failure"))
     mock_artifacts(fake, [make_artifact_for(1, j1), make_artifact_for(2, j2)])
-    mock_jobs(fake, [make_workflow_job("j1", "success"), make_workflow_job("j2", "failure")])
+    mock_jobs(
+        fake, [make_workflow_job(name="j1"), make_workflow_job(name="j2", conclusion=WorkflowJobConclusion.FAILURE)]
+    )
     runner = make_runner(fake, tmp_path)
 
     await runner.process_message(
@@ -847,7 +792,7 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path):
     # well-formed entry: its artifact is located but workflow_job is None.
     job = make_job("j1")
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [make_artifact_for(1, job)])
     # list_workflow_jobs defaults to an empty page.
     runner = make_runner(fake, tmp_path)
@@ -868,9 +813,9 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path):
     # A job with no artifacts on disk still yields a well-formed entry with artifact_name_path None.
     job = make_job("j1")
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
-    mock_jobs(fake, [make_workflow_job("j1", "success")])
+    mock_jobs(fake, [make_workflow_job(name="j1")])
     runner = make_runner(fake, tmp_path)
 
     await runner.process_message(
@@ -891,7 +836,7 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path):
 @pytest.mark.asyncio
 async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     fake.mock_response("list_workflow_jobs", RuntimeError("boom-list-jobs"))
     monitoring, sink = recording_runtime()
@@ -924,7 +869,7 @@ async def test_process_message_reports_completed_workflow_status(
     tmp_path: Path, conclusion: str | None, expected: Status
 ):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", conclusion))
+    fake.mock_response("get_workflow_run", make_workflow_run(conclusion=conclusion))
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path)
 
@@ -939,7 +884,7 @@ async def test_process_message_polls_until_completed(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     # Initial get + polls until "completed"; FIFO one-shots replay in order.
     for status in ("queued", "in_progress", "in_progress", "completed"):
-        fake.mock_response("get_workflow_run", make_workflow_run(status, "success"), once=True)
+        fake.mock_response("get_workflow_run", make_workflow_run(status=status), once=True)
     mock_artifacts(fake, [])
     runner = make_runner(fake, tmp_path)
 
@@ -957,26 +902,17 @@ async def test_final_results_use_jobs_available_after_artifact_collection(tmp_pa
     client = FakeAsyncGitHubClient()
     batch = make_batch()
     job = batch.job_list[0]
-    client.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
+    client.mock_response("get_workflow_run", make_workflow_run(status="in_progress"), once=True)
     mock_jobs(
         client,
-        [
-            WorkflowJob(
-                id=1,
-                run_id=123,
-                name=job.name,
-                status=WorkflowJobStatus.IN_PROGRESS,
-                started_at="2026-01-01T10:00:00Z",
-                completed_at=None,
-            )
-        ],
+        [make_workflow_job(name=job.name, status=WorkflowJobStatus.IN_PROGRESS)],
     )
     mock_artifacts(client, [make_artifact_for(1, job)])
     download_artifact = client.download_artifact
 
     async def download_with_settled_job(archive_download_url: str, dest_path: Path, **kwargs: Any) -> None:
         await download_artifact(archive_download_url, dest_path, **kwargs)
-        mock_jobs(client, [make_workflow_job(job.name)])
+        mock_jobs(client, [make_workflow_job(name=job.name)])
 
     client.download_artifact = download_with_settled_job  # type: ignore[method-assign]
     runner = make_runner(client, tmp_path)
@@ -995,35 +931,16 @@ async def test_final_results_preserve_only_completed_observations(tmp_path: Path
     batch = make_batch()
     batch.job_list.append(make_job("unfinished", environment="py3.12"))
     batch.jobs_count = len(batch.job_list)
-    completed_job = make_workflow_job(batch.job_list[0].name)
-    unfinished_job = WorkflowJob(
-        id=2,
-        run_id=123,
-        name="unfinished",
-        status=WorkflowJobStatus.IN_PROGRESS,
-        started_at="2026-01-01T10:00:00Z",
-        completed_at=None,
-    )
-    client.mock_response("get_workflow_run", make_workflow_run("in_progress"), once=True)
-    client.mock_response(
-        "list_workflow_jobs", WorkflowJobsList(total_count=2, jobs=[completed_job, unfinished_job]), once=True
-    )
+    completed_job = make_workflow_job(name=batch.job_list[0].name)
+    unfinished_job = make_workflow_job(id=2, name="unfinished", status=WorkflowJobStatus.IN_PROGRESS)
+    client.mock_response("get_workflow_run", make_workflow_run(status="in_progress"), once=True)
+    client.mock_response("list_workflow_jobs", make_workflow_jobs_list([completed_job, unfinished_job]), once=True)
     if last_listing == "failed":
         client.mock_response("list_workflow_jobs", RuntimeError("listing unavailable"))
     elif last_listing == "stale":
         mock_jobs(
             client,
-            [
-                WorkflowJob(
-                    id=1,
-                    run_id=123,
-                    name=completed_job.name,
-                    status=WorkflowJobStatus.IN_PROGRESS,
-                    started_at="2026-01-01T10:00:00Z",
-                    completed_at=None,
-                ),
-                unfinished_job,
-            ],
+            [make_workflow_job(name=completed_job.name, status=WorkflowJobStatus.IN_PROGRESS), unfinished_job],
         )
     runner = make_runner(client, tmp_path)
 
@@ -1042,15 +959,15 @@ async def test_final_results_preserve_only_completed_observations(tmp_path: Path
 @pytest.mark.parametrize(
     "unavailable",
     [
-        pytest.param(make_artifact(2, expired=True), id="expired"),
-        pytest.param(make_artifact(2, archive_download_url=None), id="missing-url"),
+        pytest.param(make_artifact(id=2, expired=True), id="expired"),
+        pytest.param(make_artifact(id=2, archive_download_url=None), id="missing-url"),
     ],
 )
 @pytest.mark.asyncio
 async def test_unavailable_artifacts_degrade_collection(tmp_path: Path, unavailable: Artifact):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
-    mock_artifacts(fake, [make_artifact(1), unavailable])
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    mock_artifacts(fake, [make_artifact(id=1), unavailable])
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
@@ -1068,7 +985,7 @@ async def test_unavailable_artifacts_degrade_collection(tmp_path: Path, unavaila
 @pytest.mark.asyncio
 async def test_process_message_emits_batch_finished_when_listing_artifacts_fails(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
+    fake.mock_response("get_workflow_run", make_workflow_run())
     fake.mock_response("list_workflow_run_artifacts", RuntimeError("boom-list-artifacts"))
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
@@ -1093,8 +1010,8 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
 @pytest.mark.asyncio
 async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("completed", "success"))
-    mock_artifacts(fake, [make_artifact(1), make_artifact(2), make_artifact(3)])
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    mock_artifacts(fake, [make_artifact(id=1), make_artifact(id=2), make_artifact(id=3)])
     fake.mock_response(
         "download_artifact",
         RuntimeError("download failure for artifact 2"),
@@ -1122,16 +1039,6 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
 # ---------------------------------------------------------------------------
 # Unparsable responses
 # ---------------------------------------------------------------------------
-
-
-def running_run() -> WorkflowRun:
-    return WorkflowRun(
-        id=123,
-        name="test-batch",
-        status="in_progress",
-        conclusion=None,
-        html_url="https://github.com/o/r/actions/runs/123",
-    )
 
 
 @pytest.mark.parametrize(
@@ -1173,7 +1080,7 @@ def running_run() -> WorkflowRun:
             False,
             [],
             {"dispatch_batch": 0, "fetch_workflow": 0, "refresh_jobs": 1},
-            [90.0],
+            [DEFAULT_DURATION_SECONDS],
             id="completed-jobs-page",
         ),
         # Artifacts are collected after completion, when the run is already released.
@@ -1183,7 +1090,7 @@ def running_run() -> WorkflowRun:
             False,
             [],
             {"dispatch_batch": 0, "fetch_workflow": 0, "refresh_jobs": 0, "collect_artifacts": 1},
-            [90.0],
+            [DEFAULT_DURATION_SECONDS],
             id="artifact-page",
         ),
     ],
@@ -1201,7 +1108,7 @@ async def test_an_unparsable_response_stops_the_batch_and_keeps_its_run_cancella
     """An invalid response stops the batch without losing a known unfinished run."""
     fake = FakeAsyncGitHubClient()
     if workflow_running:
-        fake.mock_response("get_workflow_run", running_run())
+        fake.mock_response("get_workflow_run", make_workflow_run(status="in_progress"))
     fake.mock_response(failure_point, invalid_response_error())
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
@@ -1270,7 +1177,7 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
         ],
     )
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", running_run())
+    fake.mock_response("get_workflow_run", make_workflow_run(status="in_progress"))
     fake.mock_response("list_workflow_jobs", unparsable)
     handler = RecordingJsonHandler()
     runner = make_runner(fake, tmp_path, handler=handler)
@@ -1326,7 +1233,7 @@ async def test_a_batch_that_failed_mid_poll_stays_cancellable(tmp_path: Path):
     leaves a few hundred jobs burning runner minutes with nothing left to reap them.
     """
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("queued"), once=True)
+    fake.mock_response("get_workflow_run", make_workflow_run(status="queued"), once=True)
     fake.mock_response("get_workflow_run", RuntimeError("boom-mid-poll"), once=True)
     runner = make_runner(fake, tmp_path)
 
@@ -1339,7 +1246,7 @@ async def test_a_batch_that_failed_mid_poll_stays_cancellable(tmp_path: Path):
 
 async def test_cancellation_reporting_identifies_the_batch_and_run_it_stops(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
-    fake.mock_response("get_workflow_run", make_workflow_run("queued"), once=True)
+    fake.mock_response("get_workflow_run", make_workflow_run(status="queued"), once=True)
     fake.mock_response("get_workflow_run", RuntimeError("boom-mid-poll"), once=True)
     handler = RecordingJsonHandler()
     runner = make_runner(fake, tmp_path, handler=handler)
@@ -1362,7 +1269,7 @@ async def test_a_run_that_finished_on_its_own_is_not_cancelled(tmp_path: Path):
     run that is already done costs one that is not.
     """
     client = FakeAsyncGitHubClient()
-    client.mock_response("get_workflow_run", wrap(make_workflow_run()))
+    client.mock_response("get_workflow_run", make_response(make_workflow_run()))
     mock_artifacts(client, [])
     mock_jobs(client, [])
     runner = make_runner(client, tmp_path)
@@ -1382,7 +1289,7 @@ async def test_cancelling_a_run_does_not_wait_out_the_clients_default_timeout(tm
     stalled call would mean no run is cancelled at all.
     """
     client = FakeAsyncGitHubClient()
-    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    client.mock_response("get_workflow_run", make_response(make_workflow_run(status="in_progress")))
     runner = make_runner(client, tmp_path)
     runner.bus = RecordingBus()  # type: ignore[assignment]
 
@@ -1408,7 +1315,7 @@ async def test_a_run_still_going_when_the_batch_is_cancelled_is_cancelled_too(tm
     cancelled mid-flight is still there for the cleanup to find.
     """
     client = FakeAsyncGitHubClient()
-    client.mock_response("get_workflow_run", wrap(make_workflow_run(status="in_progress", conclusion=None)))
+    client.mock_response("get_workflow_run", make_response(make_workflow_run(status="in_progress")))
     runner = make_runner(client, tmp_path)
     runner.bus = RecordingBus()  # type: ignore[assignment]
 

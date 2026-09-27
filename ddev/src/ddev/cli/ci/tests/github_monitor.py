@@ -96,7 +96,12 @@ class GitHubMonitor:
         with suppress(Exception):
             if not isinstance(event, WaitEvent):
                 return
-            self._metrics.distribution('throttle.wait.duration', event.elapsed_seconds, reason=event.reason)
+            self._metrics.distribution(
+                'throttle.wait.duration',
+                event.elapsed_seconds,
+                reason=event.reason,
+                rate_limiter=event.name or None,
+            )
             # DEBUG even when abandoned: the limiter's own events already warn about that.
             self._logger.debug(
                 'GitHub rate limit wait ended',
