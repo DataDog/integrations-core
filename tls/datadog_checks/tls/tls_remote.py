@@ -68,9 +68,11 @@ class TLSRemoteCheck(object):
         with sock:
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                with self.agent_check.get_tls_context().wrap_socket(
-                    sock, server_hostname=self.agent_check._server_hostname
-                ) as secure_sock:
+                # Certificate files can rotate while this check instance remains alive.
+                context = self.agent_check.get_tls_context(refresh=True)
+                for intermediate_cert in self.agent_check._intermediate_cert_cache.values():
+                    context.load_verify_locations(cadata=intermediate_cert)
+                with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     protocol_version = secure_sock.version()
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
@@ -252,14 +254,14 @@ class TLSRemoteCheck(object):
             access_time = get_timestamp()
 
             cert_id = sha256(intermediate_cert).digest()
-            if cert_id not in self.agent_check._intermediate_cert_id_cache:
+            if cert_id not in self.agent_check._intermediate_cert_cache:
                 try:
                     # `cadata` accepts DER bytes directly here (the base path uses PEM strings instead).
                     self.agent_check.get_tls_context().load_verify_locations(cadata=intermediate_cert)
                 except Exception as e:
                     self.log.error('Error loading intermediate certificate from `%s`: %s', uri, e)
                     continue
-                self.agent_check._intermediate_cert_id_cache.add(cert_id)
+                self.agent_check._intermediate_cert_cache[cert_id] = intermediate_cert
 
             self.agent_check._intermediate_cert_uri_cache[uri] = access_time
             self.load_intermediate_certs(intermediate_cert, max_depth - 1)

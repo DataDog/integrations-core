@@ -104,8 +104,8 @@ class TLSCheck(AgentCheck):
         # Only fetch intermediate certs from the indicated URIs occasionally
         self._intermediate_cert_uri_cache = {}
 
-        # Only load intermediate certs once
-        self._intermediate_cert_id_cache = set()
+        # Retain downloaded intermediates so refreshed TLS contexts keep the same CA trust.
+        self._intermediate_cert_cache = {}
 
         local_cert_path = instances[0].get('local_cert_path', '')
 

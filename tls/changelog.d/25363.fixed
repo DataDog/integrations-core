@@ -1,0 +1,1 @@
+Reload rotated TLS client certificates without restarting the Agent while preserving cached intermediate CA certificates.
