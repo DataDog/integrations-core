@@ -787,6 +787,7 @@ async def test_a_cancelled_wait_is_still_reported_for_the_time_it_blocked(
             elapsed_seconds=pytest.approx(5.0 if cancel_during == "governor" else 31.0),
             outcome=outcome("governor"),
             requested_seconds=pytest.approx(31.0),
+            name="github",
         )
     ]
     if cancel_during != "governor":

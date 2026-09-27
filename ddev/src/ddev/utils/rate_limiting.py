@@ -300,9 +300,10 @@ class BudgetGovernor:
         self.next_slot = slot + interval
         return slot
 
-    async def wait(self) -> None:
+    async def wait(self, name: str = "") -> None:
         """Reserve one slot, then sleep until its target and any hard-pause floor elapse.
 
+        `name` identifies the limiter the wait held back: one governor is shared by every limiter.
         Raises RateLimitWaitAbandoned if the target ever exceeds the configured max_wait_seconds.
         """
         deadline, reason = self.reserve()
@@ -353,6 +354,7 @@ class BudgetGovernor:
                         elapsed_seconds=monotonic() - started,
                         outcome=outcome,
                         requested_seconds=wait_seconds,
+                        name=name,
                     )
                 )
 
@@ -411,7 +413,7 @@ class InstrumentedAsyncLimiter:
 
     async def __aenter__(self) -> InstrumentedAsyncLimiter:
         if self.budget_governor is not None:
-            await self.budget_governor.wait()
+            await self.budget_governor.wait(name=self.name)
         throttled = not self.limiter.has_capacity()
         started = monotonic()
         outcome = WaitOutcome.CANCELLED
