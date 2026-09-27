@@ -1,0 +1,33 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "region",
+      "label": "Region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "us", "label": "US" },
+          { "value": "anz", "label": "ANZ" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "greenhouse-logs" }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "domain",
+      "label": "Domain",
+      "editable": true,
+      "required": true,
+      "domain": {}
+    },
+    {
+      "key": "audit",
+      "label": "Collect Audit & Threat logs",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "detection",
+      "label": "Collect Detection logs",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "kandji-logs" }
+  ]
+}

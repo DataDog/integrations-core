@@ -1,0 +1,91 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Email address and password",
+      "basic": {
+        "user_setting": {
+          "key": "email_address",
+          "label": "Email address",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "password",
+          "label": "Password",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "gateway_performance",
+      "label": "Collect gateway performance metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "bandwidth",
+      "label": "Collect bandwidth metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "digital_experience",
+      "label": "Collect Digital Experience metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "web",
+      "label": "Collect web metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "casb",
+      "label": "Collect CASB metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "threat",
+      "label": "Collect threat metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "zero_trust",
+      "label": "Collect Zero Trust metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "iboss-metrics" }
+  ]
+}
