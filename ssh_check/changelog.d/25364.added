@@ -1,0 +1,1 @@
+Add `ed25519` support to the `private_key_type` option.
