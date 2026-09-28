@@ -703,6 +703,20 @@ class TestMetrics:
             check.gauge(metric_name, '85k')
         aggregator.assert_metric(metric_name, count=0)
 
+    def test_histogram_bucket_multiple_buckets(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.submit_histogram_bucket('histogram', 3, 0, 1, True, 'host', ['foo:bar'])
+        check.submit_histogram_bucket('histogram', 4, 1, 2, True, 'host', ['foo:bar'], multiple_buckets=True)
+
+        aggregator.assert_histogram_bucket(
+            'test.histogram', 3, 0, 1, True, 'host', ['foo:bar'], count=1, multiple_buckets=False
+        )
+        aggregator.assert_histogram_bucket(
+            'test.histogram', 4, 1, 2, True, 'host', ['foo:bar'], count=1, multiple_buckets=True
+        )
+
 
 class TestEvents:
     def test_valid_event(self, aggregator):

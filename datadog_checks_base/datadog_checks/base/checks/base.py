@@ -816,9 +816,19 @@ class AgentCheck(object):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
     def submit_histogram_bucket(
-        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False
+        self,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        raw=False,
+        flush_first_value=False,
+        multiple_buckets=False,
     ):
-        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool) -> None
+        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -839,7 +849,13 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        self._aggregator().submit_histogram_bucket(
+        current_aggregator = self._aggregator()
+        submit_method = (
+            current_aggregator.submit_histogram_bucket_multi
+            if multiple_buckets
+            else current_aggregator.submit_histogram_bucket
+        )
+        submit_method(
             self,
             self.check_id,
             self._format_namespace(name, raw),
