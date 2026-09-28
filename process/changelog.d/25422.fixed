@@ -1,0 +1,1 @@
+Accept the `.inf` string for an unbounded `thresholds` upper bound so it survives JSON transport from Remote Config.
