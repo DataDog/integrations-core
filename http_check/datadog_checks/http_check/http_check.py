@@ -10,13 +10,18 @@ import time
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
-import requests
 import socks
 from cryptography import x509
-from requests import Response  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.http import should_bypass_proxy
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path, parse_proxy_url
@@ -32,11 +37,11 @@ DATA_METHODS = ["POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 
 def get_error_http_outcome(error):
     """Return the `http_outcome` tag value to use when no HTTP response was received."""
-    if isinstance(error, requests.exceptions.SSLError):
+    if isinstance(error, HTTPClientSSLError):
         return "ssl_error"
-    if isinstance(error, (requests.exceptions.Timeout, socket.timeout)):
+    if isinstance(error, (HTTPClientTimeoutError, socket.timeout)):
         return "timeout"
-    if isinstance(error, requests.exceptions.ConnectionError):
+    if isinstance(error, HTTPClientConnectionError):
         return "connection_error"
     return "socket_error"
 
@@ -122,17 +127,17 @@ class HTTPCheck(AgentCheck):
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
-        r = None  # type: Response
+        r: HTTPResponse | None = None
         peer_cert = None  # type: bytes | None
         http_outcome = None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
-            self.http.session.trust_env = False
+            self.http.trust_env = False
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
             if method.upper() in DATA_METHODS and not headers.get("Content-Type"):
-                self.http.options["headers"]["Content-Type"] = "application/x-www-form-urlencoded"
+                self.http.set_header("Content-Type", "application/x-www-form-urlencoded")
 
             http_method = method.lower()
             if http_method == "options":
@@ -147,8 +152,7 @@ class HTTPCheck(AgentCheck):
             )
         except (
             socket.timeout,
-            requests.exceptions.ConnectionError,
-            requests.exceptions.Timeout,
+            HTTPClientRequestError,
         ) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
@@ -161,7 +165,7 @@ class HTTPCheck(AgentCheck):
                 )
             )
 
-        except socket.error as e:
+        except (socket.error, HTTPClientStatusError) as e:
             length = int((time.time() - start) * 1000)
             self.log.info(
                 "%s is DOWN, error: %s. Connection failed after %s ms",
@@ -186,7 +190,7 @@ class HTTPCheck(AgentCheck):
             if r is not None:
                 http_outcome = str(r.status_code)
             if use_cert_from_response:
-                peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
+                peer_cert = r.get_peer_cert(binary_form=True)
 
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile("^url:").match, tags_list)):
@@ -243,9 +247,7 @@ class HTTPCheck(AgentCheck):
         finally:
             if r is not None:
                 r.close()
-            # resets the wrapper Session object
-            self.http._session.close()
-            self.http._session = None
+            self.http.close()
 
         if enable_http_outcome_tag and http_outcome is not None:
             tags_list.append("http_outcome:{}".format(http_outcome))
@@ -268,10 +270,14 @@ class HTTPCheck(AgentCheck):
             self.gauge("network.http.cant_connect", cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            if peer_cert is None:
-                status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
-            else:
+            if peer_cert is not None:
                 status, days_left, seconds_left, msg = self._inspect_cert(peer_cert, instance)
+            elif use_cert_from_response and r is not None:
+                msg = 'Unable to retrieve the peer certificate from the HTTP response.'
+                self.log.debug(msg)
+                status, days_left, seconds_left = AgentCheck.UNKNOWN, None, None
+            else:
+                status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
 
             tags_list = list(tags)
             tags_list.append("url:{}".format(addr))
@@ -406,11 +412,7 @@ class HTTPCheck(AgentCheck):
 
         sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
         proxies = self.http.options.get('proxies', {})
-        if (
-            proxies
-            and (proxy_url := proxies.get("https"))
-            and not should_bypass_proxy(url, self.http.no_proxy_uris or [])
-        ):
+        if proxies and (proxy_url := proxies.get("https")) and not self.http.should_bypass_proxy(url):
             proxy = parse_proxy_url(proxy_url)
             sock.set_proxy(**proxy)
 
