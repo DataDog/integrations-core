@@ -498,6 +498,14 @@ class ProcessCheck(AgentCheck):
             self.log.debug("Unable to get pid set, process %s does not exist", pid)
             return set()
 
+    @staticmethod
+    def _coerce_threshold_bound(value):
+        # Remote Config transmits `thresholds` as JSON, which can't represent a
+        # raw float infinity -- the UI sends the sentinel string ".inf" instead
+        # (matching the YAML `.inf` literal documented in spec.yaml). Coerce it
+        # back to a real float here so the comparisons below work either way.
+        return float('inf') if value == '.inf' else value
+
     def _process_service_check(self, name, nb_procs, bounds, tags):
         """
         Report a service check, for each process in search_string.
@@ -513,8 +521,8 @@ class ProcessCheck(AgentCheck):
         if not bounds and nb_procs < 1:
             status = AgentCheck.CRITICAL
         elif bounds:
-            warning = bounds.get('warning', [1, float('inf')])
-            critical = bounds.get('critical', [1, float('inf')])
+            warning = [self._coerce_threshold_bound(v) for v in bounds.get('warning', [1, float('inf')])]
+            critical = [self._coerce_threshold_bound(v) for v in bounds.get('critical', [1, float('inf')])]
 
             if warning[1] < nb_procs or nb_procs < warning[0]:
                 status = AgentCheck.WARNING

@@ -418,10 +418,17 @@ def test_process_service_check(aggregator):
     process._process_service_check(
         'no_top_critical', 0, {'warning': [2, float('inf')], 'critical': [2, float('inf')]}, []
     )
+    # Remote Config sends `.inf` as the string sentinel ".inf" (JSON can't
+    # represent a raw float infinity); it must be coerced the same as the
+    # native float above, not compared directly against `nb_procs`.
+    process._process_service_check('string_inf_ok', 3, {'warning': [2, '.inf'], 'critical': [2, '.inf']}, [])
+    process._process_service_check('string_inf_many', 10_000, {'warning': [2, '.inf'], 'critical': [2, '.inf']}, [])
 
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_ok'], status=process.OK)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_many'], status=process.OK)
 
 
 def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):

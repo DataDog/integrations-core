@@ -114,11 +114,11 @@ instances:
     #
     # thresholds:
     #   warning:
-    #   - <BELOW_VALUE>
-    #   - <TOP_VALUE>
+    #   - 5
+    #   - 10
     #   critical:
-    #   - <BELOW_VALUE>
-    #   - <TOP_VALUE>
+    #   - 2
+    #   - '.inf'
 
     ## @param collect_children - boolean - optional - default: false
     ## If true, the check also collects metrics from all child processes of a matched process.

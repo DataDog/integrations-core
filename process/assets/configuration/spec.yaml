@@ -137,17 +137,23 @@ files:
           - name: warning
             type: array
             items:
-              type: number
+              anyOf:
+              - type: number
+              - type: string
+                enum: ['.inf']
             minItems: 2
           - name: critical
             type: array
             items:
-              type: number
+              anyOf:
+              - type: number
+              - type: string
+                enum: ['.inf']
             minItems: 2
           compact_example: true
           example:
-            warning: [<BELOW_VALUE> , <TOP_VALUE>]
-            critical: [<BELOW_VALUE> , <TOP_VALUE>]
+            warning: [5, 10]
+            critical: [2, '.inf']
         fleet_configurable: true
       - name: collect_children
         description: |
