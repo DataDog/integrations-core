@@ -155,6 +155,20 @@ instances:
     #
     # infrastructure_mode: full
 
+    ## @param hostname_source - string - optional - default: guest_agent
+    ## The source to use for the `hostname` of VM resources. Valid values are 'guest_agent' (default) and
+    ## 'proxmox_name'.
+    ##
+    ## 'guest_agent' queries the QEMU Guest Agent for the VM's live OS-reported hostname. This requires the
+    ## guest agent to be installed and running inside the VM; on Windows guests, the reported hostname is
+    ## always uppercase due to the legacy NetBIOS naming convention used by the underlying Windows API.
+    ##
+    ## 'proxmox_name' uses the VM's name as configured in Proxmox (the `proxmox_name` tag) directly, without
+    ## querying the guest agent. This avoids the Windows casing behavior and the extra API call, at the cost
+    ## of not reflecting the VM's actual live hostname if it differs from the configured name.
+    #
+    # hostname_source: guest_agent
+
     ## @param collected_task_types - list of strings - optional - default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
     ## Which Proxmox task types to collect.
     ##
