@@ -1,0 +1,162 @@
+# Full metric-coverage environment for the mongo check and the OpenTelemetry
+# mongodbreceiver.
+#
+# The mongo dashboard and monitors need two node roles that no single endpoint
+# exposes: `chunks.*` and `sessions.count` come only from a check instance on a
+# mongos, while `replset.*` and `oplog.*` come only from an instance on a
+# replica-set member. So this is the smallest sharded cluster that has both:
+#
+#   - config    single-member config server replica set.
+#   - shard-a   shard01 primary.
+#   - shard-b   shard01 delayed secondary (hidden, priority 0, no vote,
+#               secondaryDelaySecs 5), so replset.optime_lag is a steady non-zero
+#               value instead of flickering at 0, and the opcountersrepl/repl.*
+#               counters move. With no vote, a majority write concern never waits
+#               on the delay.
+#   - mongos    the router.
+#   - rs-init   one-shot: initiates both replica sets.
+#   - seed      one-shot: adds the shard, creates the monitoring user, and seeds a
+#               sharded, pre-split, indexed collection (seed.sh).
+#   - activity-gen  continuous workload through mongos (activity-gen.sh).
+#   - mongo-full    fixture entrypoint: forwards mongos (27017), shard-a (27018),
+#                   and shard-b (27019), gated on the whole environment.
+#
+# Every mongo service reads MONGO_VERSION (the variable the pytest suite uses) and
+# the DB_USERNAME/DB_PASSWORD credential. mongosh is required, so 6.0+.
+# Access control is not enforced: a sharded cluster with --auth needs a keyFile
+# for internal auth. The user exists on mongos and on the shard, so a consumer
+# that authenticates with a wrong credential still fails.
+x-mongo: &mongo
+  image: "mongo:${MONGO_VERSION:-8.0}"
+  healthcheck:
+    test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ping: 1}).ok"]
+    interval: 5s
+    timeout: 5s
+    retries: 20
+    start_period: 10s
+
+services:
+  # logicalSessionRefreshMillis defaults to 5 minutes; lowered on every node so
+  # the config server creates config.system.sessions and the routers flush
+  # sessions into it (what sessions.count reads) within one scrape interval.
+  config:
+    <<: *mongo
+    command: >
+      mongod --configsvr --replSet cfg --port 27017 --bind_ip_all
+      --setParameter logicalSessionRefreshMillis=10000
+
+  shard-a:
+    <<: *mongo
+    command: >
+      mongod --shardsvr --replSet shard01 --port 27017 --bind_ip_all
+      --setParameter logicalSessionRefreshMillis=10000
+
+  shard-b:
+    <<: *mongo
+    command: >
+      mongod --shardsvr --replSet shard01 --port 27017 --bind_ip_all
+      --setParameter logicalSessionRefreshMillis=10000
+
+  rs-init:
+    image: "mongo:${MONGO_VERSION:-8.0}"
+    depends_on:
+      config:
+        condition: service_healthy
+      shard-a:
+        condition: service_healthy
+      shard-b:
+        condition: service_healthy
+    restart: "no"
+    entrypoint:
+      - sh
+      - -ec
+      - |
+        mongosh --quiet --host config --eval '
+          try { rs.status() } catch (e) {
+            rs.initiate({_id: "cfg", configsvr: true, members: [{_id: 0, host: "config:27017"}]});
+          }
+          print("rs-init: cfg initiated");'
+        mongosh --quiet --host shard-a --eval '
+          try { rs.status() } catch (e) {
+            rs.initiate({_id: "shard01", members: [
+              {_id: 0, host: "shard-a:27017", priority: 1},
+              {_id: 1, host: "shard-b:27017", priority: 0, votes: 0, hidden: true, secondaryDelaySecs: 5}
+            ]});
+          }
+          print("rs-init: shard01 initiated");'
+        for h in config shard-a; do
+          until mongosh --quiet --host "$$h" --eval 'db.hello().isWritablePrimary' | grep -q true; do sleep 1; done
+          echo "rs-init: $$h is primary"
+        done
+
+  mongos:
+    <<: *mongo
+    depends_on:
+      config:
+        condition: service_healthy
+      rs-init:
+        condition: service_completed_successfully
+    command: >
+      mongos --configdb cfg/config:27017 --port 27017 --bind_ip_all
+      --setParameter logicalSessionRefreshMillis=10000
+
+  seed:
+    image: "mongo:${MONGO_VERSION:-8.0}"
+    depends_on:
+      mongos:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      DB_USERNAME: "${DB_USERNAME:-datadog}"
+      DB_PASSWORD: "${DB_PASSWORD:-datadog}"
+    volumes:
+      - ../seed.sh:/opt/seed.sh:ro
+    command: ["sh", "/opt/seed.sh"]
+
+  activity-gen:
+    image: "mongo:${MONGO_VERSION:-8.0}"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      DB_HOST: mongos
+      DB_PORT: "27017"
+      DB_USERNAME: "${DB_USERNAME:-datadog}"
+      DB_PASSWORD: "${DB_PASSWORD:-datadog}"
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent mongo-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    command: ["sh", "/opt/activity-gen.sh"]
+
+  # Fixture entrypoint (published as mongo-full). evalya only starts the target
+  # service and its depends_on chain, and stops a service once nothing still
+  # running depends on it, so the entrypoint depends on every long-lived node
+  # directly (not only through the one-shots) and on the workload. socat keeps
+  # every role reachable at the entrypoint's hostname, which is what the provides
+  # labels advertise. No host ports are published, so the fixture cannot clash
+  # with a local mongod or another run.
+  mongo-full:
+    image: alpine/socat:latest
+    depends_on:
+      config:
+        condition: service_healthy
+      shard-a:
+        condition: service_healthy
+      shard-b:
+        condition: service_healthy
+      mongos:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        socat TCP-LISTEN:27017,fork,reuseaddr TCP:mongos:27017 &
+        socat TCP-LISTEN:27018,fork,reuseaddr TCP:shard-a:27017 &
+        socat TCP-LISTEN:27019,fork,reuseaddr TCP:shard-b:27017 &
+        wait
