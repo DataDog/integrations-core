@@ -13,13 +13,26 @@ from typing import Any
 
 import httpx
 import pytest
+from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
-from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
-from ddev.utils.rate_limiting import RelaxedRateLimits
+from ddev.utils.github_async.models import PullRequest
+from ddev.utils.rate_limiting import InstrumentedAsyncLimiter, RelaxedRateLimits
 from tests.cli.ci.tests.helpers import comment_page
-from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.github_async import (
+    FakeAsyncGitHubClient,
+    make_artifact,
+    make_artifacts_list,
+    make_issue_comment,
+    make_pull_request,
+    make_response,
+)
 from tests.utils.github_async.helpers import first_page
+
+
+def a_pull_request(number: int) -> PullRequest:
+    """A payload for the fake to hand back. These tests are about the fake's dispatch, not the model."""
+    return make_pull_request(number=number, html_url=f'https://x/{number}')
 
 
 @pytest.fixture
@@ -39,7 +52,7 @@ def test_unknown_method_without_default_raises(fake: FakeAsyncGitHubClient) -> N
 
 
 async def test_sticky_mock_with_inner_data_is_auto_wrapped(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=42, html_url='https://x/42'))
+    fake.mock_response('create_pull_request', a_pull_request(42))
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -48,9 +61,7 @@ async def test_sticky_mock_with_inner_data_is_auto_wrapped(fake: FakeAsyncGitHub
 
 
 async def test_sticky_mock_with_full_response_passes_through(fake: FakeAsyncGitHubClient) -> None:
-    full = GitHubResponse.model_validate(
-        {'data': PullRequest(number=99, html_url='https://x/99'), 'headers': {'x-rate-limit': '5'}}
-    )
+    full = make_response(a_pull_request(99), {'x-rate-limit': '5'})
     fake.mock_response('create_pull_request', full)
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -60,7 +71,7 @@ async def test_sticky_mock_with_full_response_passes_through(fake: FakeAsyncGitH
 
 
 async def test_sticky_mock_partial_match_only_fires_for_matching_call(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=7, html_url='https://x/7'), draft=True)
+    fake.mock_response('create_pull_request', a_pull_request(7), draft=True)
 
     # Default fires for non-matching calls.
     default = await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=False)
@@ -72,8 +83,8 @@ async def test_sticky_mock_partial_match_only_fires_for_matching_call(fake: Fake
 
 
 async def test_most_recent_sticky_mock_wins(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=1, html_url='https://x/1'))
-    fake.mock_response('create_pull_request', PullRequest(number=2, html_url='https://x/2'))
+    fake.mock_response('create_pull_request', a_pull_request(1))
+    fake.mock_response('create_pull_request', a_pull_request(2))
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -89,8 +100,8 @@ async def test_exception_response_raises(fake: FakeAsyncGitHubClient) -> None:
 
 
 async def test_one_shot_consumed_then_falls_through_to_sticky(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=10, html_url='https://x/10'), once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=99, html_url='https://x/99'))  # sticky
+    fake.mock_response('create_pull_request', a_pull_request(10), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(99))  # sticky
 
     first = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
     second = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -105,7 +116,7 @@ async def test_multiple_one_shots_fire_in_registration_order(fake: FakeAsyncGitH
     """The retry pattern: first call errors, second succeeds."""
     err = httpx.HTTPStatusError('try again', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500))
     fake.mock_response('create_pull_request', err, once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=5, html_url='https://x/5'), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(5), once=True)
 
     with pytest.raises(httpx.HTTPStatusError):
         await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -117,7 +128,7 @@ async def test_multiple_one_shots_fire_in_registration_order(fake: FakeAsyncGitH
 async def test_one_shot_with_match_kwargs_only_consumed_when_match(fake: FakeAsyncGitHubClient) -> None:
     fake.mock_response(
         'create_pull_request',
-        PullRequest(number=7, html_url='https://x/7'),
+        a_pull_request(7),
         once=True,
         draft=True,
     )
@@ -136,15 +147,15 @@ async def test_one_shot_with_match_kwargs_only_consumed_when_match(fake: FakeAsy
 
 
 async def test_assert_all_responses_consumed_passes_when_empty(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=5, html_url='https://x/5'), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(5), once=True)
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
     fake.assert_all_responses_consumed()  # must not raise
 
 
 async def test_assert_all_responses_consumed_fails_with_pending(fake: FakeAsyncGitHubClient) -> None:
-    fake.mock_response('create_pull_request', PullRequest(number=1, html_url='https://x/1'), once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=2, html_url='https://x/2'), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(1), once=True)
+    fake.mock_response('create_pull_request', a_pull_request(2), once=True)
 
     await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
 
@@ -165,6 +176,7 @@ async def test_assert_called_once_with_passes_on_single_exact_match(fake: FakeAs
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -232,6 +244,7 @@ async def test_assert_called_with_passes_on_exact_match(fake: FakeAsyncGitHubCli
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -261,7 +274,7 @@ async def test_list_issue_comments_yields_the_pages_it_was_given(fake: FakeAsync
     """A page is itself a list of comments, so pages are registered explicitly rather than inferred."""
     fake.mock_response(
         'list_issue_comments',
-        [comment_page(IssueComment(id=1, body='a')), comment_page(IssueComment(id=2, body='b'))],
+        [comment_page(make_issue_comment(body='a')), comment_page(make_issue_comment(id=2, body='b'))],
     )
 
     pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
@@ -271,7 +284,9 @@ async def test_list_issue_comments_yields_the_pages_it_was_given(fake: FakeAsync
 
 
 async def test_list_issue_comments_yields_one_page_for_one_response(fake: FakeAsyncGitHubClient):
-    fake.mock_response('list_issue_comments', comment_page(IssueComment(id=1, body='a'), IssueComment(id=2, body='b')))
+    fake.mock_response(
+        'list_issue_comments', comment_page(make_issue_comment(body='a'), make_issue_comment(id=2, body='b'))
+    )
 
     pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
 
@@ -295,7 +310,7 @@ async def test_assert_not_called_fails_when_method_was_called(fake: FakeAsyncGit
 async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubClient) -> None:
     err = httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500))
     fake.mock_response('create_pull_request', err, once=True)
-    fake.mock_response('create_pull_request', PullRequest(number=5, html_url='https://x/5'))
+    fake.mock_response('create_pull_request', a_pull_request(5))
 
     with pytest.raises(httpx.HTTPStatusError):
         await fake.create_pull_request('o', 'r', 'T', 'h', 'b', draft=True)
@@ -308,6 +323,7 @@ async def test_calls_are_recorded_regardless_of_response(fake: FakeAsyncGitHubCl
 # here: `test_every_mirror_is_in_the_call_table` fails when one is added without being registered,
 # which is the case a hand-written test per method cannot catch.
 SHUTDOWN_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
+VIEW_RATE_LIMITER = InstrumentedAsyncLimiter(AsyncLimiter(10))
 
 MIRROR_CALLS = [
     ('get_pull_request', lambda f, _: f.get_pull_request('o', 'r', 5), {'pull_number': 5}),
@@ -337,6 +353,7 @@ MIRROR_CALLS = [
         {'workflow_id': 'wf.yml'},
     ),
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    ('with_rate_limit', lambda f, _: f.with_rate_limit(VIEW_RATE_LIMITER), {'rate_limiter': VIEW_RATE_LIMITER}),
     ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
     (
         'create_pr_review_comment',
@@ -364,6 +381,14 @@ MIRROR_CALLS = [
         'download_artifact',
         lambda f, tmp: f.download_artifact('https://x/zip', tmp / 'out'),
         {'archive_download_url': 'https://x/zip'},
+    ),
+    ('get_ref', lambda f, _: f.get_ref('o', 'r', 'heads/main'), {'ref': 'heads/main'}),
+    ('create_ref', lambda f, _: f.create_ref('o', 'r', 'refs/heads/x', 'abc123'), {'sha': 'abc123'}),
+    ('get_content', lambda f, _: f.get_content('o', 'r', 'release.json'), {'path': 'release.json'}),
+    (
+        'create_or_update_file_contents',
+        lambda f, _: f.create_or_update_file_contents('o', 'r', 'release.json', message='m', content='e30K'),
+        {'content': 'e30K'},
     ),
 ]
 
@@ -481,7 +506,7 @@ async def test_a_mirror_records_the_arguments_it_was_called_with(
 
 
 async def test_list_workflow_run_artifacts_yields_a_single_page(fake: FakeAsyncGitHubClient) -> None:
-    page = ArtifactsList(total_count=1, artifacts=[Artifact(id=1, name='a', expired=False)])
+    page = make_artifacts_list([make_artifact(id=1, name='a')])
     fake.mock_response('list_workflow_run_artifacts', page)
 
     pages = [p async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]
@@ -493,8 +518,8 @@ async def test_list_workflow_run_artifacts_yields_a_single_page(fake: FakeAsyncG
 
 
 async def test_list_workflow_run_artifacts_yields_multiple_pages(fake: FakeAsyncGitHubClient) -> None:
-    page1 = ArtifactsList(total_count=2, artifacts=[Artifact(id=1, name='a', expired=False)])
-    page2 = ArtifactsList(total_count=2, artifacts=[Artifact(id=2, name='b', expired=False)])
+    page1 = make_artifacts_list([make_artifact(id=1, name='a')], total_count=2)
+    page2 = make_artifacts_list([make_artifact(id=2, name='b')], total_count=2)
     fake.mock_response('list_workflow_run_artifacts', [page1, page2])
 
     ids = [p.data.artifacts[0].id async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]

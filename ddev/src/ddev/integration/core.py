@@ -211,8 +211,12 @@ class Integration:
         return self.is_integration and not self.is_package
 
     @cached_property
-    def is_testable(self) -> bool:
+    def has_hatch_config(self) -> bool:
         return (self.path / 'hatch.toml').is_file()
+
+    @cached_property
+    def is_testable(self) -> bool:
+        return self.has_hatch_config and (self.path / 'tests').is_dir()
 
     @cached_property
     def is_shippable(self) -> bool:

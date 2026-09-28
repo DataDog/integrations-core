@@ -23,7 +23,6 @@ gates:
     - '!silverstripe_cms'
     - '!snmp'
     - '!varnish'
-# New custom gates for services whose thresholds had to be lowered when migrating to Datadog Code Coverage.
 - type: total_coverage_percentage
   config:
     threshold: 74
@@ -79,7 +78,6 @@ gates:
     threshold: 52
     services:
     - datadog_checks_dev
-# Existing custom gates.
 - type: total_coverage_percentage
   config:
     threshold: 45
@@ -166,9 +164,6 @@ services:
 - id: cert_manager
   paths:
   - cert_manager/datadog_checks/cert_manager/
-- id: checkpoint_harmony_endpoint
-  paths:
-  - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint/
 - id: cilium
   paths:
   - cilium/datadog_checks/cilium/
@@ -250,6 +245,9 @@ services:
 - id: duckdb
   paths:
   - duckdb/datadog_checks/duckdb/
+- id: dynamo
+  paths:
+  - dynamo/datadog_checks/dynamo/
 - id: ecs_fargate
   paths:
   - ecs_fargate/datadog_checks/ecs_fargate/
@@ -364,6 +362,9 @@ services:
 - id: infiniband
   paths:
   - infiniband/datadog_checks/infiniband/
+- id: intersystems_iris
+  paths:
+  - intersystems_iris/datadog_checks/intersystems_iris/
 - id: istio
   paths:
   - istio/datadog_checks/istio/

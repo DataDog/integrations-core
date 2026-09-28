@@ -33,6 +33,28 @@ def test_all_command_passes_when_all_validations_succeed(ddev):
     assert set(invoked) == set(ALL_NAMES)
 
 
+def test_all_command_writes_pr_comment_before_aborting_without_github_credentials(ddev, tmp_path):
+    output = tmp_path / "pr-comment.md"
+    selected = {"config": VALIDATIONS["config"]}
+
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=selected),
+        patch("subprocess.run", return_value=completed_process(returncode=1, stderr="invalid config")),
+    ):
+        result = ddev(
+            "validate",
+            "all",
+            "--pr-comment-output",
+            str(output),
+            *FAST_ORCHESTRATOR_OPTS,
+        )
+
+    assert result.exit_code != 0
+    assert "| `config` | Validate default configuration files against spec.yaml | ❌ |" in output.read_text(
+        encoding="utf-8"
+    )
+
+
 def test_all_command_aborts_on_failure_with_details(ddev):
     def fake_run(cmd, **kwargs):
         if "config" in cmd:
@@ -111,9 +133,20 @@ def test_all_command_fix_passes_correct_flags(ddev):
             )
 
 
-def test_all_command_aborts_when_no_validations_configured(ddev):
+def test_all_command_writes_pr_comment_before_aborting_when_no_validations_configured(ddev, tmp_path):
+    output = tmp_path / "pr-comment.md"
+
     with patch("ddev.cli.validate.all._load_validations", return_value={}):
-        result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
+        result = ddev(
+            "validate",
+            "all",
+            "--pr-comment-output",
+            str(output),
+            *FAST_ORCHESTRATOR_OPTS,
+        )
 
     assert result.exit_code != 0
     assert NO_VALIDATIONS_ERROR in result.output
+    comment_body = output.read_text(encoding="utf-8")
+    assert f"> **Error:** {NO_VALIDATIONS_ERROR}" in comment_body
+    assert "[View full run](https://github.com/DataDog/integrations-core/actions/runs/12345)" in comment_body

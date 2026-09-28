@@ -23,7 +23,7 @@ from .common import (
 )
 from .kube import delete_jobs, retry_apply, wait_for_job_workload_condition
 
-EVENT_JOBS = ['event-workload', 'event-finish-workload']
+EVENT_JOBS = ['event-workload', 'event-pending-workload', 'event-finish-workload']
 EVENT_POLL_ATTEMPTS = 15
 
 
@@ -56,6 +56,10 @@ def test_e2e_workload_events(dd_agent_check, aggregator, kubectl_env, dd_get_sta
     check = KueueCheck(CHECK_NAME, {}, [live_instance(dd_get_state)])
     run_check(check)
 
+    retry_apply('event-pending-workload.yaml', env=kubectl_env)
+    pending_workload = wait_for_job_workload_condition('event-pending-workload', 'QuotaReserved=False', env=kubectl_env)
+    assert_workload_event(check, aggregator, 'pending', pending_workload)
+
     retry_apply('event-workload.yaml', env=kubectl_env)
     admitted_workload = wait_for_job_workload_condition('event-workload', 'Admitted=True', env=kubectl_env)
     for transition in ('created', 'quota_reserved', 'admitted'):
@@ -81,6 +85,7 @@ def live_instance(dd_get_state):
 
 def assert_workload_event(check, aggregator, transition, workload_name):
     """Poll the check until the workload event for a transition shows up."""
+    alert_type = 'warning' if transition == 'pending' else 'info'
     for attempt in range(EVENT_POLL_ATTEMPTS):
         run_check(check)
         try:
@@ -89,7 +94,7 @@ def assert_workload_event(check, aggregator, transition, workload_name):
                 exact_match=False,
                 event_type=f'kueue.workload.{transition}',
                 source_type_name='kueue',
-                alert_type='info',
+                alert_type=alert_type,
             )
             return
         except AssertionError:

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import contextvars
 import logging
 import math
 import signal
@@ -13,6 +14,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from concurrent.futures import wait as wait_for_futures
+from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
 from types import FrameType
 from typing import assert_never, cast
@@ -26,11 +28,13 @@ from .exceptions import (
     ProcessorQueueError,
     SkipMessageError,
 )
+from .shutdown import ShutdownKind, ShutdownRequest
 
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 # What `signal.getsignal` hands back: a Python callable, one of the `SIG_*` constants, or None for a
 # handler installed outside Python.
 type SignalHandler = Callable[[int, FrameType | None], object] | int | signal.Handlers | None
+type MessageScope = Callable[[BaseMessage], AbstractContextManager[None]]
 
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
 # How long the loop may block before re-reading the timeout and the stop flag.
@@ -144,6 +148,7 @@ class EventBusOrchestrator(ABC):
         grace_period: float = 10,
         executor: Executor | None = None,
         fail_fast: bool = False,
+        message_scope: MessageScope | None = None,
     ):
         """
         Args:
@@ -163,6 +168,8 @@ class EventBusOrchestrator(ABC):
                        the orchestrator. If False (default), such exceptions are logged
                        and processing continues. ``FatalProcessingError`` always stops the
                        orchestrator regardless of this flag.
+            message_scope: Context manager for each processor invocation, including success/error
+                           hooks. Derive context from the message; queues do not transfer it.
         """
         resolved_max_timeout = max_timeout if max_timeout is not None else math.inf
         self.__validate_parameters(resolved_max_timeout, grace_period)
@@ -178,6 +185,7 @@ class EventBusOrchestrator(ABC):
         self._sync_work: set[Future] = set()
         self._sync_work_lock = threading.Lock()
         self._stop_claim = threading.Lock()
+        self._message_scope = message_scope
         self._fail_fast = fail_fast
         self._subscribers: dict[type[BaseMessage], list[Processor]] = {}
         self._processors: list[Processor] = []
@@ -188,6 +196,7 @@ class EventBusOrchestrator(ABC):
         self._stopping = threading.Event()
         self._displaced_signal_handlers: dict[signal.Signals, SignalHandler] = {}
         self._interrupted = False
+        self._shutdown_request: ShutdownRequest | None = None
 
     def __validate_parameters(self, max_timeout: float, grace_period: float):
         """
@@ -204,6 +213,11 @@ class EventBusOrchestrator(ABC):
     def stopping(self) -> bool:
         """Whether the bus has begun shutting down, readable from any thread."""
         return self._stopping.is_set()
+
+    @property
+    def shutdown_request(self) -> ShutdownRequest | None:
+        """The first shutdown request, or ``None`` while no request has been made."""
+        return self._shutdown_request
 
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
@@ -264,29 +278,23 @@ class EventBusOrchestrator(ABC):
         """
         self._interrupted = self._interrupted or received == signal.SIGINT
         self._logger.warning("Received %s: the bus will wind down", received.name)
-        self.request_stop()
+        self.request_shutdown(ShutdownRequest.cancelled())
 
-    def request_stop(self) -> None:
-        """Ask the bus to wind down, from any thread.
+    def request_shutdown(self, request: ShutdownRequest) -> bool:
+        """Record the first shutdown request and notify processors once.
 
-        The loop acts on it within ``STOP_CHECK_INTERVAL``, so a caller under a deadline it does not
-        control, such as a cancelled CI job, reaches ``finalize`` without waiting out the grace period.
-        ``on_initialize`` and ``on_message_received`` are abandoned if they are still waiting, since the
-        loop awaits them directly and would otherwise be held for as long as they take.
-
-        Sets :attr:`stopping`, then runs every registered processor's
-        :meth:`BaseProcessor.on_stop_requested`. A second caller returns at once rather than waiting for
-        those to finish.
+        Return ``True`` if accepted, or ``False`` if shutdown was already requested.
+        Safe to call from any thread.
         """
-        # A one-shot latch, never released, so the first caller is the one that notifies. Non-blocking
-        # because a signal handler runs on the thread it interrupted: waiting here for a lock that
-        # thread already holds would deadlock it, and the handler is often the one for SIGTERM.
+        # Never release the claim; repeated or reentrant requests must return without waiting.
         if not self._stop_claim.acquire(blocking=False):
-            return
+            return False
 
+        self._shutdown_request = request
         self._stopping.set()
         self._logger.info("Stop requested; the bus will wind down")
         self._notify_processors_of_stop()
+        return True
 
     def _notify_processors_of_stop(self) -> None:
         for processor in self._processors:
@@ -339,23 +347,77 @@ class EventBusOrchestrator(ABC):
         if self._interrupted and propagate_keyboard_interrupt:
             raise KeyboardInterrupt
 
-    async def _entry_point(self):
-        exception = None
+    async def _entry_point(self) -> None:
+        pending_error: BaseException | None = None
+        finalization_error: BaseException | None = None
+        pending_context = "initialization"
         try:
             await self.initialize()
+            pending_context = "message processing"
             await self.process_messages()
-        except Exception as e:
-            exception = e
+        except asyncio.CancelledError as error:
+            self.request_shutdown(ShutdownRequest.cancelled())
+            pending_error = error
+        except Exception as error:
+            self.request_shutdown(ShutdownRequest.failed(error))
+            pending_error = error
+        except BaseException:
+            # Finalize before propagating other BaseException subclasses.
+            await self.finalize(None)
             raise
-        finally:
+
+        exception = self._primary_failure()
+        if exception is None and isinstance(pending_error, Exception):
+            exception = pending_error
+        try:
             await self.finalize(exception)
+        except (asyncio.CancelledError, Exception) as error:
+            finalization_error = error
+
+        # Select after finalization, outside exception handlers, to preserve the original chain.
+        primary = self._primary_failure()
+        if primary is not None:
+            if pending_error is not None:
+                self._record_secondary_failure(pending_error, primary, secondary_context=pending_context)
+            if finalization_error is not None and finalization_error is not pending_error:
+                self._record_secondary_failure(finalization_error, primary, secondary_context="finalization")
+            raise primary
+        if finalization_error is not None:
+            if pending_error is not None:
+                self._record_secondary_failure(pending_error, finalization_error, secondary_context=pending_context)
+            raise finalization_error
+        if pending_error is not None:
+            raise pending_error
+
+    def _primary_failure(self) -> Exception | None:
+        """Return the first accepted failure, if any."""
+        request = self.shutdown_request
+        if request is not None and request.kind is ShutdownKind.FAILED:
+            return request.error
+        return None
+
+    def _record_secondary_failure(
+        self, secondary: BaseException, primary: BaseException, *, secondary_context: str
+    ) -> None:
+        """Log the secondary traceback and attach a note without changing the primary's chain."""
+        if secondary is primary:
+            return
+        diagnostic = secondary
+        if isinstance(secondary, (MessageProcessingError, OrchestratorHookError, ProcessorHookError)):
+            if secondary.original_exception is primary:
+                return
+            # An interrupted handler may leave its wrapper unraised.
+            if secondary.__traceback__ is None:
+                diagnostic = secondary.original_exception
+        self._logger.error("Secondary exception during %s: %s", secondary_context, secondary, exc_info=diagnostic)
+        primary.add_note(f"Additional exception during {secondary_context}: {secondary!r}")
 
     async def initialize(self):
         """
         Initializes the orchestrator.
         """
         self._running = True
-        # Before the hook, so a signal arriving during it winds the bus down rather than killing it.
+        # Initialization must also respond to shutdown signals.
         self.install_signal_handlers()
         try:
             await self._bounded_by_stop(self.on_initialize(), HookName.ON_INITIALIZE)
@@ -366,9 +428,7 @@ class EventBusOrchestrator(ABC):
                 OrchestratorHookError(HookName.ON_INITIALIZE, e),
                 self.on_error,
             )
-        # Only now, so what the hook submitted is already queued. A deferred put is read because the
-        # callback that queues it precedes the task completion that wakes the loop, and the hook has
-        # no task to be ordered behind: a zero grace period would stop the bus before it ran.
+        # Keep initialization submissions synchronous so they precede the queue's idle check.
         self._loop = asyncio.get_running_loop()
 
     @abstractmethod
@@ -376,9 +436,7 @@ class EventBusOrchestrator(ABC):
         """
         Hook for subclasses to perform initial setup (e.g. submit initial messages).
 
-        Abandoned if :meth:`request_stop` is called, from any thread, while this is still waiting, so
-        it may be cancelled part-way and ``on_finalize`` then runs against whatever it had reached.
-        A hook that must finish what it starts should check :attr:`stopping` itself and return.
+        Shutdown cancels a pending hook. Finalization must tolerate partial initialization.
         """
         pass
 
@@ -390,30 +448,33 @@ class EventBusOrchestrator(ABC):
         """
         self._running = False
         self._stopping.set()
-        # Before the hook, so it reports settled state: a sync processor still running would otherwise
-        # keep mutating what the hook has already published.
-        await self._drain_executor()
         try:
-            await self.on_finalize(exception)
-        except (FatalProcessingError, asyncio.CancelledError):
-            raise
-        except Exception as e:
-            await self._apply_error_policy(
-                OrchestratorHookError(HookName.ON_FINALIZE, e),
-                self.on_error,
-            )
+            # Finalization must observe settled processor state.
+            await self._drain_executor()
+            # A failure may have been recorded while draining.
+            primary = self._primary_failure()
+            if primary is not None:
+                exception = primary
+            try:
+                await self.on_finalize(exception)
+            except (FatalProcessingError, asyncio.CancelledError):
+                raise
+            except Exception as error:
+                await self._apply_error_policy(
+                    OrchestratorHookError(HookName.ON_FINALIZE, error),
+                    self.on_error,
+                )
         finally:
-            # A handler outlives the loop it was installed on, so leaving it behind would have a later
-            # bus in the same process deliver signals to this dead one.
+            # Restore handlers even if executor draining is interrupted.
             self.remove_signal_handlers()
 
     async def _run_in_worker[T: BaseMessage](self, work: Callable[[T], None], message: T) -> None:
-        """Run blocking work on the processor pool, tracked until it finishes.
+        """Track the executor future because cancelling its awaiter cannot stop a running thread.
 
-        Tracked through the pool's own future rather than this call, because cancelling the caller
-        only cancels work the pool has not started yet; anything already running carries on.
+        Executor submission does not propagate contextvars; each invocation needs its own copy.
         """
-        future = self._executor.submit(work, message)
+        context = contextvars.copy_context()
+        future = self._executor.submit(context.run, work, message)
         with self._sync_work_lock:
             self._sync_work.add(future)
         future.add_done_callback(self._forget_sync_work)
@@ -425,25 +486,17 @@ class EventBusOrchestrator(ABC):
             self._sync_work.discard(future)
 
     def _pending_sync_work(self) -> set[Future]:
-        """The work still on the pool.
-
-        Copied under the lock rather than iterated in place: the done callbacks run on worker threads,
-        so iterating the live set is iterating one another thread is mutating, which CPython raises on.
-        """
+        """Copy pending work under the lock; worker callbacks modify the set concurrently."""
         with self._sync_work_lock:
             in_flight = set(self._sync_work)
 
         return {future for future in in_flight if not future.done()}
 
     async def _drain_executor(self) -> None:
-        """Wait for sync processors still running, and retire the pool if it is ours.
+        """Wait for our sync work, including work on a borrowed executor.
 
-        Cancelling a task cannot interrupt a `process_message` already running in a thread, and the
-        threads outlive the loop, so without this the process blocks on them at interpreter exit,
-        after the run has reported. Waiting here makes that time attributable instead.
-
-        Waiting is not conditional on ownership: a pool lent to us still runs our work, and the hook
-        reports state that work is still writing.
+        Running threads cannot be cancelled, so finalization must wait for them.
+        Shut down the executor only if we own it.
         """
         pending = self._pending_sync_work()
         if pending:
@@ -473,9 +526,7 @@ class EventBusOrchestrator(ABC):
         other exception is wrapped as :class:`OrchestratorHookError` and routed
         through :meth:`on_error`.
 
-        Abandoned if :meth:`request_stop` is called, from any thread, while this is still waiting, in
-        which case the message is not dispatched. A hook that must finish what it starts should check
-        :attr:`stopping` itself and return.
+        Shutdown cancels a pending hook without dispatching the message.
         """
         pass
 
@@ -496,32 +547,56 @@ class EventBusOrchestrator(ABC):
         The default implementation re-raises so unmodified orchestrators fall through
         to the ``fail_fast`` policy.
 
-        Best-effort once a stop has been requested: whoever asked may be working to a deadline, and
-        the process can be killed before this returns. Keep it short.
+        Shutdown cancels pending recovery. A handler started after a shutdown request
+        gets one scheduling turn to complete; otherwise ``fail_fast`` applies.
         """
         raise error
 
     async def _apply_error_policy[E: Exception](self, wrapped_error: E, handler: ErrorHandler[E]) -> None:
-        """
-        Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
+        """Apply the handler and ``fail_fast`` policy described by :meth:`on_error`.
 
-        See :meth:`on_error` for the contract. ``FatalProcessingError`` and
-        ``asyncio.CancelledError`` always propagate as explicit signal exceptions.
+        Orchestrator handlers need shutdown-aware waits. Processor handlers are
+        cancelled with their tracked processing tasks.
         """
+        hook_name = getattr(wrapped_error, "hook_name", type(wrapped_error).__name__)
         try:
-            await handler(wrapped_error)
+            if isinstance(wrapped_error, OrchestratorHookError):
+                handled = await self._bounded_by_stop(
+                    handler(wrapped_error),
+                    HookName.ON_ERROR,
+                    start_when_stopping=True,
+                )
+            else:
+                await handler(wrapped_error)
+                return
         except (FatalProcessingError, asyncio.CancelledError):
             raise
         except Exception as e:
             if self._fail_fast:
                 raise
-            hook_name = getattr(wrapped_error, "hook_name", type(wrapped_error).__name__)
+            if (primary := self._primary_failure()) is not None:
+                self._record_secondary_failure(e, primary, secondary_context=f"on_error handling {hook_name}")
+                return
             self._logger.error(
                 "on_error handler for '%s' raised %s while processing %s",
                 hook_name,
                 e,
                 wrapped_error,
             )
+            return
+        if handled:
+            return
+        # An interrupted handler has not recovered from the original error.
+        if self._fail_fast:
+            raise wrapped_error
+        if (primary := self._primary_failure()) is not None:
+            self._record_secondary_failure(wrapped_error, primary, secondary_context=f"on_error handling {hook_name}")
+            return
+        self._logger.error(
+            "Shutdown interrupted on_error for '%s'; unhandled error: %s",
+            hook_name,
+            wrapped_error,
+        )
 
     def _remaining_time(self, start_time: float) -> float:
         """
@@ -563,7 +638,17 @@ class EventBusOrchestrator(ABC):
 
                 self.__process_finished_tasks(done, current_get_task, running_tasks)
         except OrchestratorTimeout as timeout:
+            # Recorded before the drain below, so finalization knows this exit for what it is.
+            self.request_shutdown(ShutdownRequest.timed_out(timeout))
             cancel_reason = str(timeout)
+        except asyncio.CancelledError:
+            # Notify processors before draining a cancelled bus.
+            self.request_shutdown(ShutdownRequest.cancelled())
+            raise
+        except Exception as error:
+            # The error policy has already decided this error stops the bus.
+            self.request_shutdown(ShutdownRequest.failed(error))
+            raise
         finally:
             # If we exit the loop and tasks are still running (e.g. timeout or forced break),
             # we must clean them up before returning to ensure finalize() runs in a safe state.
@@ -634,27 +719,52 @@ class EventBusOrchestrator(ABC):
 
         return False
 
-    async def _bounded_by_stop(self, hook: Awaitable[None], name: HookName) -> None:
-        """Run a lifecycle hook the loop awaits directly, abandoning it if a stop is requested.
+    async def _bounded_by_stop(
+        self,
+        hook: Awaitable[None],
+        name: HookName,
+        *,
+        start_when_stopping: bool = False,
+    ) -> bool:
+        """Own the hook task until completion or cancellation; return False if stopped early.
 
-        Without this a hook waiting on I/O holds the loop for as long as that takes, however long ago
-        the stop was asked for, and a caller with a deadline never reaches `finalize`.
+        ``start_when_stopping`` allows normal finalization recovery and gives error
+        handlers one scheduling turn when shutdown has already been requested.
+        The hook must cooperate with cancellation before this wait can finish.
         """
         work = asyncio.ensure_future(hook)
-        # Bounded by `asyncio.wait` rather than a sleeping waiter task: its timeout does not go through
-        # `asyncio.sleep`, so this cannot become a spin loop if something replaces that.
-        while not self.stopping:
-            done, _ = await asyncio.wait({work}, timeout=STOP_CHECK_INTERVAL)
-            if done:
-                # Awaited so a hook that failed still reaches the error policy rather than being lost
-                # with the future it failed in.
-                await work
-                return
-
-        work.cancel()
-        self._logger.warning("Abandoned %s: a stop was requested while it was still waiting", name)
-        with contextlib.suppress(asyncio.CancelledError):
-            await work
+        retrieved = False
+        one_turn = start_when_stopping and self.shutdown_request is not None
+        try:
+            while True:
+                # Normal finalization sets stopping without requesting shutdown.
+                should_cancel = self.stopping if not start_when_stopping else self.shutdown_request is not None
+                if should_cancel and not one_turn:
+                    self._logger.warning("Abandoned %s: a stop was requested", name)
+                    return False
+                done, _ = await asyncio.wait({work}, timeout=0 if one_turn else STOP_CHECK_INTERVAL)
+                if done:
+                    retrieved = True
+                    await work
+                    return True
+                one_turn = False
+        except asyncio.CancelledError:
+            # Notify processors before draining the cancelled hook.
+            self.request_shutdown(ShutdownRequest.cancelled())
+            raise
+        finally:
+            if not retrieved:
+                if not work.done():
+                    work.cancel()
+                try:
+                    await work
+                except asyncio.CancelledError:
+                    pass
+                except Exception as e:
+                    if (primary := self._primary_failure()) is not None:
+                        self._record_secondary_failure(e, primary, secondary_context=f"{name} cleanup")
+                    else:
+                        self._logger.error("Abandoned %s raised %s", name, e, exc_info=e)
 
     async def __wait_for_message(self, get_task: asyncio.Task, wait_time: float) -> bool:
         """Whether a message arrived within ``wait_time``.
@@ -777,29 +887,31 @@ class EventBusOrchestrator(ABC):
             )
             return
 
-        try:
-            match processor:
-                case AsyncProcessor():
-                    await cast(AsyncProcessor, processor).process_message(message)
-                case SyncProcessor():
-                    await self._run_in_worker(processor.process_message, message)
-                case _:
-                    assert_never(processor)
-        except (FatalProcessingError, asyncio.CancelledError):
-            raise
-        except Exception as processing_error:
-            await self._apply_error_policy(
-                MessageProcessingError(processor.name, message, processing_error),
-                processor.on_error,
-            )
-            return
+        scope = self._message_scope(message) if self._message_scope is not None else nullcontext()
+        with scope:
+            try:
+                match processor:
+                    case AsyncProcessor():
+                        await cast(AsyncProcessor, processor).process_message(message)
+                    case SyncProcessor():
+                        await self._run_in_worker(processor.process_message, message)
+                    case _:
+                        assert_never(processor)
+            except (FatalProcessingError, asyncio.CancelledError):
+                raise
+            except Exception as processing_error:
+                await self._apply_error_policy(
+                    MessageProcessingError(processor.name, message, processing_error),
+                    processor.on_error,
+                )
+                return
 
-        try:
-            await processor.on_success(message)
-        except (FatalProcessingError, asyncio.CancelledError):
-            raise
-        except Exception as e:
-            await self._apply_error_policy(
-                ProcessorHookError(HookName.ON_SUCCESS, processor.name, message, e),
-                processor.on_error,
-            )
+            try:
+                await processor.on_success(message)
+            except (FatalProcessingError, asyncio.CancelledError):
+                raise
+            except Exception as e:
+                await self._apply_error_policy(
+                    ProcessorHookError(HookName.ON_SUCCESS, processor.name, message, e),
+                    processor.on_error,
+                )

@@ -679,7 +679,12 @@ class Connection(object):
         if host:
             conn_str += 'Server={};'.format(host)
         if database:
-            conn_str += 'Database={};'.format(database)
+            if is_freetds_driver and '};' in database:
+                raise ConfigurationError(
+                    "SQL Server database names containing the sequence '};' cannot be represented in FreeTDS ODBC "
+                    "connection strings. Use Microsoft ODBC Driver for SQL Server or rename the database."
+                )
+            conn_str += 'Database={};'.format(escape_func(database))
         if username:
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
@@ -702,8 +707,11 @@ class Connection(object):
         retry_conn_count = ''
         if self.server_version >= self.SQLSERVER_2014:
             retry_conn_count = 'ConnectRetryCount=2;'
+        # quote the database name so it is parsed as a single value instead of
+        # separate connection-string attributes
+        initial_catalog = _escape_adodbapi_connection_string_value(database) if database else database
         conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(
-            retry_conn_count, self.adoprovider, host, database
+            retry_conn_count, self.adoprovider, host, initial_catalog
         )
 
         if username:

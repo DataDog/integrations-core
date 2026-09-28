@@ -59,7 +59,7 @@ Always ensure the shape of the API endpoint, including the request body and the
 response schema, is validated and that every decision is backed by evidence with
 a reference. Never assume a shape.
 
-The source of truth is GitHub's official OpenAPI description, pinned to the API
+The baseline contract is GitHub's official OpenAPI description, pinned to the API
 version this client targets. That version is the `GITHUB_API_VERSION` constant
 in `client.py` (the same value sent in the `X-GitHub-Api-Version` request
 header). Always resolve the description for that exact version rather than a
@@ -87,6 +87,11 @@ With that schema in hand:
 - Cite the reference for the schema decisions you make, the same way the existing
   models do in their docstrings (a `https://docs.github.com/...` or
   `rest-api-description` link).
+
+Narrow compatibility exceptions are allowed when verified GitHub responses or
+official endpoint documentation demonstrate a schema mismatch. Document the reason
+and cite the evidence beside the model, and cover the affected behavior in an
+endpoint test.
 
 ## Document every endpoint method with a GitHub API reference
 
@@ -160,3 +165,14 @@ Each method must map to a single GitHub endpoint so that behavior, error
 handling, and rate-limit accounting stay predictable and one-to-one with the API.
 If a caller needs a composite result, compose the single-endpoint methods at the
 call site rather than hiding multiple requests behind one method.
+
+## Testing code that uses the client
+
+Code that uses the client is tested with `FakeAsyncGitHubClient` and the `make_<model>` factories in
+`tests/helpers/github_async/factories.py`, which default every field so a test passes only what it
+asserts on. The raw payloads in `tests/utils/github_async/payloads.py` are only for the client's own
+wire-level tests.
+
+When an endpoint adds a model, add its `make_<model>` factory in the same change, and when a model
+gains a field, add that field to its factory with a default. Otherwise tests of code using the client
+fall back to building the model by hand, which is what the factories exist to prevent.

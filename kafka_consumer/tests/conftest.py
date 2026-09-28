@@ -83,7 +83,7 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
         runs=1,
     ):
         kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
-        kafka_instance['enable_cluster_monitoring'] = True
+        kafka_instance['enable_kafka_console'] = True
         if instance_extra:
             kafka_instance.update(instance_extra)
 

@@ -1,1 +1,0 @@
-Skip partitions with no committed offset instead of reporting a negative offset and inflated `kafka.consumer_lag`.

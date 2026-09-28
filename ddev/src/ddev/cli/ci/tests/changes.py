@@ -1,42 +1,31 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Selection of the commits a CI run compares to find what it must test."""
+"""Where a CI run gets the changes it must test: a first-parent comparison against the checkout,
+which is a pull request's merge commit or the tested commit itself."""
 
 from __future__ import annotations
 
-import enum
 from typing import TYPE_CHECKING
 
+from ddev.utils.git import ChangedFile
+
 if TYPE_CHECKING:
-    from ddev.utils.git import ChangedFile, GitRepository
+    from ddev.utils.git import GitRepository
 
 
-class CIContext(enum.Enum):
-    """The comparison context that determines which revisions are diffed."""
-
-    PULL_REQUEST = enum.auto()
-    DEFAULT_BRANCH = enum.auto()
+class ChangeResolutionError(Exception):
+    """Raised when the changes a run is responsible for cannot be established."""
 
 
-def get_changed_files(
-    git: GitRepository,
-    tested_commit: str,
-    *,
-    context: CIContext,
-    target_branch: str | None = None,
-) -> list[ChangedFile]:
-    """Return the changes the tested commit is responsible for.
-
-    A pull request is compared with the merge base of its target branch, so unrelated commits
-    landing on that branch meanwhile do not count as changes. On the default branch the comparison
-    is against the tested commit's first parent, which is the commit's own contribution.
-    """
-    if context is CIContext.PULL_REQUEST:
-        if not target_branch:
-            raise ValueError("A target branch is required to compare a pull request against its merge base")
-        base = target_branch
-    else:
-        base = f"{tested_commit}^1"
-
-    return git.changed_files(base, tested_commit)
+def changes_in_commit(git: GitRepository, commit: str) -> list[ChangedFile]:
+    """Return what *commit* itself contributed, comparing it with its first parent."""
+    try:
+        return git.changed_files(f"{commit}^1", commit)
+    except OSError as error:
+        raise ChangeResolutionError(
+            f"Could not compare {commit} with its parent: {error}\n"
+            "The checkout needs the parent commit, which `fetch-depth: 2` provides."
+        ) from error
+    except ValueError as error:
+        raise ChangeResolutionError(f"Could not read the diff of {commit}: {error}") from error

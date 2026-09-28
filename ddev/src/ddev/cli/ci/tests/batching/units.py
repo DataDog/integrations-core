@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar, NamedTuple, Protocol
@@ -17,6 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from ddev.integration.core import Integration
+    from ddev.monitoring import ComponentMonitor
 
 
 class PlatformSpec(NamedTuple):
@@ -34,6 +34,12 @@ PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),
     PlatformName.MACOS: PlatformSpec("macOS", "macos-14-large"),
 }
+
+# The runners a plan may schedule on. Plan content follows the tested tree's `.ddev/config.toml` and
+# `hatch.toml`, so this is the set of places that influence can put a job, and the reason a
+# self-hosted label never goes in it. A `runners` override needs its label adding here. One label
+# per job: `runs-on` with an array is conjunctive, so a hosted image is only schedulable alone.
+ALLOWED_RUNNER_LABELS = frozenset({"ubuntu-22.04", "windows-2022", "macos-14-large"})
 
 # Targets rendered before everything else, in this order.
 DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
@@ -53,36 +59,18 @@ DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
 JOB_NAME_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*]')
 
 
-logger = logging.getLogger(__name__)
-
-
 @dataclass(frozen=True)
 class ResolvedEnvironment:
-    """One environment a target runs, already routed onto a platform.
+    """A candidate environment routed onto a platform.
 
-    The two availability flags carry intent rather than a decision. They exist so a later change can
-    split unit and E2E work into separate jobs per environment and platform, which is why they are
-    per-environment here instead of per-target. Nothing splits on them yet: the workflow runs both
-    kinds of test and each works out at runtime whether it has anything to do, which is how CI
-    behaves today.
-
-    Splitting is deferred because Hatch cannot answer the question at planning time. It resolves
-    `platform.*` overrides against the machine it runs on, so `platform.windows.e2e-env = false`
-    (ibm_mq, ibm_ace, network, sqlserver) is invisible when planning on Linux, and it resolves
-    `env.*` overrides against the ambient environment, so azure_iot_edge's E2E availability depends
-    on a secret the planner does not have. Neither is knowable from one host. Note the `env.*` case
-    fails toward reporting no E2E work, so it drops coverage rather than wasting compute once
-    anything gates on these flags. The per-integration tooling configuration that replaces
-    `manifest.json` and `.ddev/config.toml` is where each environment will declare this
-    deterministically, and that is what these flags should be driven from.
+    Availability flags request test stages, not guaranteed work. Conditional E2E availability
+    stays enabled here so the worker can resolve it against its own platform and environment.
     """
 
     name: str
     platform: PlatformName
     python_version: str  # `major.minor`, picks both the runner Python and the E2E Agent image
-    # TODO(manifest): drive these from the per-integration tooling configuration planned to replace
-    # `manifest.json`, which can declare them per platform deterministically, and split unit and
-    # E2E work into separate jobs once it can.
+    # TODO(manifest): use explicit per-platform availability before splitting unit and E2E jobs.
     test_available: bool = True  # ddev's `test_env`
     e2e_available: bool = False  # ddev's `e2e_env`
 
@@ -180,7 +168,7 @@ def _display_order_key(target: str) -> tuple[int, str]:
     return DISPLAY_ORDER_OVERRIDE.get(target, len(DISPLAY_ORDER_OVERRIDE)), target
 
 
-def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
+def expand_test_units(targets: Sequence[TargetDefinition], *, monitor: ComponentMonitor) -> list[TestUnit]:
     """Expand targets into deterministically ordered test units, one per resolved environment.
 
     A platform whose environments are all constrained elsewhere gets no units, which is the
@@ -206,7 +194,7 @@ def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
 
             platform_environments = environments_by_platform.get(platform_id, [])
             if not platform_environments:
-                logger.warning("%s runs on %s but no environment tests it", target.name, platform_id)
+                monitor.logger.warning("%s runs on %s but no environment tests it", target.name, platform_id)
                 continue
 
             for environment in platform_environments:

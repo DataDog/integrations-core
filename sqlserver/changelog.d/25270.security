@@ -1,0 +1,1 @@
+Encode database names in SQL Server ODBC and ADO connection strings so names with special characters are not parsed as separate connection attributes.

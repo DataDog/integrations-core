@@ -6,15 +6,15 @@
 GitHub's workflow-run/-job conclusions are a wide set of strings (see the models in
 ``ddev.utils.github_async.models``). ``Status`` is the narrow, binary vocabulary the batch
 and PR-comment layers use internally, and ``conclusion_to_status`` is the single place that
-collapses a GitHub conclusion into it.
+collapses a GitHub conclusion into it. The job-state helpers below say where a job is in its
+life on a runner, for the metrics that measure queueing and execution.
 """
 
 from __future__ import annotations
 
 from enum import StrEnum, auto
 
-from ddev.utils.github_async.models.check_run import CheckRunConclusion
-from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
+from ddev.utils.github_async.models.workflow import WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
 
 
 class Status(StrEnum):
@@ -28,9 +28,7 @@ class Status(StrEnum):
 def conclusion_to_status(conclusion: str | None) -> Status:
     """Map a GitHub Actions conclusion to the internal :class:`Status`.
 
-    Note: ``None`` maps to ``Status.FAILURE`` here while a check run reports ``"neutral"``
-    for the same input. The asymmetry is intentional — status consumers want a binary
-    outcome, the check UI prefers an explicit ``"neutral"`` badge.
+    ``None`` maps to ``Status.FAILURE``: a run that finished without saying how did not succeed.
     """
     if conclusion == WorkflowJobConclusion.SUCCESS:
         return Status.SUCCESS
@@ -39,23 +37,24 @@ def conclusion_to_status(conclusion: str | None) -> Status:
     return Status.FAILURE
 
 
-def conclusion_to_check_run_conclusion(conclusion: str | None) -> CheckRunConclusion:
-    """Map a GitHub Actions conclusion to the one a check run can report.
+def is_queued(job: WorkflowJob) -> bool:
+    """Whether a job is waiting for a runner. `requested` is GitHub's own bookkeeping, not a wait."""
+    return job.status in {WorkflowJobStatus.QUEUED, WorkflowJobStatus.WAITING, WorkflowJobStatus.PENDING}
 
-    The two sets are not the same. ``workflow-run.conclusion`` is a nullable string with no declared
-    enum, so it can carry values a check run has no member for; ``startup_failure`` is the known one
-    (https://github.com/github/rest-api-description/issues/1989). A check run accepts only the eight
-    its request schema declares
-    (https://docs.github.com/en/rest/checks/runs#update-a-check-run).
 
-    Anything unrecognised reports as a failure rather than being passed through, which GitHub would
-    reject. ``None`` reports as neutral, matching :func:`conclusion_to_status`'s note that the check UI
-    prefers an explicit badge where the internal status prefers a binary outcome.
+def has_finished_running(job: WorkflowJob) -> bool:
+    """Whether a job completed after running on a runner.
+
+    Skipped and cancelled jobs may never have started, so their timestamps measure neither how long
+    a job runs nor how long it waited for a runner.
     """
-    if conclusion is None:
-        return CheckRunConclusion.NEUTRAL
+    return job.status is WorkflowJobStatus.COMPLETED and job.conclusion in {
+        WorkflowJobConclusion.SUCCESS,
+        WorkflowJobConclusion.FAILURE,
+        WorkflowJobConclusion.TIMED_OUT,
+    }
 
-    try:
-        return CheckRunConclusion(conclusion)
-    except ValueError:
-        return CheckRunConclusion.FAILURE
+
+def has_started_running(job: WorkflowJob) -> bool:
+    """Whether a job is known to have started on a runner, including one that finished between polls."""
+    return job.status is WorkflowJobStatus.IN_PROGRESS or has_finished_running(job)

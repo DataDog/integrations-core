@@ -1,7 +1,8 @@
 # This dockerfile is used to build the devcontainer environment.
 # more info about vscode devcontainer: https://code.visualstudio.com/docs/devcontainers/containers
-FROM mcr.microsoft.com/devcontainers/python:1-3.13-bullseye
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y liblz4-dev libunwind-dev ca-certificates curl gnupg
+FROM mcr.microsoft.com/devcontainers/python:1-3.13-bookworm
+RUN rm -f /etc/apt/sources.list.d/yarn.list && \
+    apt update && DEBIAN_FRONTEND=noninteractive apt install -y liblz4-dev libunwind-dev ca-certificates curl gnupg
 # Docker and docker-compose installation
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -12,8 +13,10 @@ RUN echo \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 # Install msodbcsql18, sqlcmd psql, mysql
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
-RUN curl https://packages.microsoft.com/config/debian/11/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
+# The Debian 12 prod.list pins signed-by=/usr/share/keyrings/microsoft-prod.gpg, so the
+# key has to be dearmored to that exact path rather than dropped in trusted.gpg.d.
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+RUN curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
 RUN DEBIAN_FRONTEND=noninteractive apt update && ACCEPT_EULA=Y apt install -y msodbcsql18=18.3.3.1-1 mssql-tools18 unixodbc-dev libgssapi-krb5-2 postgresql-client default-mysql-client
 RUN echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
 # Install mongosh

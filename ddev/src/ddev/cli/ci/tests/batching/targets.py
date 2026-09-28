@@ -17,6 +17,13 @@ if TYPE_CHECKING:
 
 NON_TESTABLE_FILES = frozenset({"auto_conf.yaml"})
 
+# Repository instruction files guide contributors but cannot change test behavior. This policy is
+# separate from `NON_TESTABLE_FILES`, which applies only to direct target selection.
+IGNORED_PATH_PATTERNS = (
+    re.compile(r"(?:^|/)AGENTS\.md$"),
+    re.compile(r"(?:^|/)CLAUDE\.md$"),
+)
+
 # Integrations ddev still considers testable (they have a `hatch.toml`) but that CI no longer
 # runs. This is CI policy layered on top of ddev's `is_testable`, which does not encode it.
 UNTESTABLE_TARGETS = frozenset({"mesos_slave"})
@@ -101,6 +108,13 @@ class TargetRule(Protocol):
     def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterable[str]: ...
 
 
+def _relevant_affected_paths(changed_file: ChangedFile) -> Iterator[str]:
+    """Yield affected paths that can influence target selection."""
+    for path in changed_file.affected_paths:
+        if not any(pattern.search(path) for pattern in IGNORED_PATH_PATTERNS):
+            yield path
+
+
 @dataclass(frozen=True)
 class DirectTargetRule:
     """Recognize every directly modified testable target in the change set.
@@ -114,7 +128,7 @@ class DirectTargetRule:
 
     def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
         for changed_file in changed_files:
-            for path in changed_file.affected_paths:
+            for path in _relevant_affected_paths(changed_file):
                 target = self._target_for_path(path, facts)
                 if target is not None:
                     yield target
@@ -147,7 +161,11 @@ class RepositoryWideRule:
         if not self.is_core:
             return
 
-        if any(self.patterns.search(path) for changed_file in changed_files for path in changed_file.affected_paths):
+        if any(
+            self.patterns.search(path)
+            for changed_file in changed_files
+            for path in _relevant_affected_paths(changed_file)
+        ):
             yield from facts.eligible_targets()
 
 

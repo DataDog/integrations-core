@@ -235,6 +235,14 @@ class IntegrationRegistry:
             if integration.is_testable:
                 yield integration
 
+    def iter_hatch_configured(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        """
+        Iterate over all targets that have a Hatch configuration.
+        """
+        for integration in self.__iter_filtered(selection):
+            if integration.has_hatch_config:
+                yield integration
+
     def iter_shippable(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
         """
         Iterate over all integrations that can be shipped by the Agent.

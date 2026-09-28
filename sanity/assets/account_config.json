@@ -1,0 +1,40 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_token",
+          "label": "API Token",
+          "help": "API token for your Sanity project.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Sanity",
+      "fixed": {
+        "fixed_base_url": "https://api.sanity.io"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "sanity-logs"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v2021-02-01/activity",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
+}

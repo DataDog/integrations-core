@@ -1,0 +1,1 @@
+Fix the Python requirement and test environment, which incorrectly targeted Python 3.12 even though Kafka Actions was introduced after Agent 7.72.0 moved to Python 3.13.

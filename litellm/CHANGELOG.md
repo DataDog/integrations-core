@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.0 / 2026-09-10
+
+***Added***:
+
+* Add new metrics introduced up to LiteLLM version 1.95.0. ([#24955](https://github.com/DataDog/integrations-core/pull/24955))
+
 ## 2.5.0 / 2026-06-09 / Agent 7.81.0
 
 ***Added***:

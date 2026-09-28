@@ -10929,5 +10929,419 @@
             "vsphere_folder:host",
             "vsphere_type:host"
         ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 4.0,
+        "hostname": "VM-on-fake-host",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:unknown",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 8.0,
+        "hostname": "VM4-2",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 1.0,
+        "hostname": "VM4-20",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 2.0,
+        "hostname": "VM4-4",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 4.0,
+        "hostname": "VM4-14",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 8.0,
+        "hostname": "VM4-9",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 1.0,
+        "hostname": "VM4-15",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 2.0,
+        "hostname": "VM4-5",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 4.0,
+        "hostname": "VM4-3",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 8.0,
+        "hostname": "VM4-12",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 1.0,
+        "hostname": "VM4-11",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 2.0,
+        "hostname": "vm4-6",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 4.0,
+        "hostname": "VM4-13",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 8.0,
+        "hostname": "VM4-1",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 1.0,
+        "hostname": "VM4-19",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 2.0,
+        "hostname": "VM4-18",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 4.0,
+        "hostname": "vm4-7",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 8.0,
+        "hostname": "VM4-17",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 1.0,
+        "hostname": "VM4-10",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 2.0,
+        "hostname": "VM4-16",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 4.0,
+        "hostname": "vm4-8",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 8.0,
+        "hostname": "VM3-1",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 1.0,
+        "hostname": "$VM3-2",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.summary.config.numCpu",
+        "value": 2.0,
+        "hostname": "$VM5",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.host.summary.hardware.numCpuCores",
+        "value": 16.0,
+        "hostname": "10.0.0.101",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_compute:Cluster2",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:host"
+        ]
+    },
+    {
+        "name": "vsphere.host.summary.hardware.numCpuCores",
+        "value": 16.0,
+        "hostname": "10.0.0.102",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_compute:Cluster2",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:host"
+        ]
+    },
+    {
+        "name": "vsphere.host.summary.hardware.numCpuCores",
+        "value": 32.0,
+        "hostname": "10.0.0.103",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_compute:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:host"
+        ]
+    },
+    {
+        "name": "vsphere.host.summary.hardware.numCpuCores",
+        "value": 8.0,
+        "hostname": "10.0.0.104",
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_compute:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:host"
+        ]
     }
 ]

@@ -1,0 +1,1 @@
+On Kubernetes and Docker, disable agent telemetry by default for Agents started by ``ddev env start`` so E2E test agents no longer submit COAT metrics.

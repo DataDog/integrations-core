@@ -1,0 +1,1 @@
+Explicitly declare `warning`/`critical` as named properties of the `thresholds` option so it can be validated when configured remotely via Fleet Automation.

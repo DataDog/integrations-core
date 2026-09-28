@@ -1,0 +1,1 @@
+Load SNMP profiles with the libyaml-backed YAML loader when available, and stop the discovery loop when the check is no longer running.

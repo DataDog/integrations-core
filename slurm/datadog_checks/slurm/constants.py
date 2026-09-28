@@ -22,6 +22,15 @@ SACCT_PARAMS = [
 ]
 SCONTROL_PARAMS = ["listpid"]
 
+# `scontrol listpid` exits 1 whenever it finds no job steps. This bare message, printed
+# without slurm's "scontrol: error:" prefix, is the whole of stderr only when the node is
+# genuinely idle -- every failure inside stepd_available() also returns an empty step list
+# and so prints it too, after its own prefixed error line.
+SCONTROL_NO_STEPS_MSG = "No job steps exist on this node."
+# stepd_available() failing to stat SlurmdSpoolDir. A static property of the host rather
+# than a per-interval event: the node is not running slurmd.
+SCONTROL_MISSING_SPOOLDIR_MSG = "Domain socket directory"
+
 PARTITION_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},

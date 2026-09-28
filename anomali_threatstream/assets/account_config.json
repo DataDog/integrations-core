@@ -3,7 +3,8 @@
   "additional_config_fields": [
     {
       "key": "api_domain",
-      "label": "Domain",
+      "label": "API Domain",
+      "help": "Enter the API domain assigned to your Anomali ThreatStream instance, for example, api.threatstream.com. The domain must end in threatstream.com.",
       "editable": true,
       "required": true,
       "domain": {

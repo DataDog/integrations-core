@@ -1,0 +1,1 @@
+Collect the `req_transport_retries_exceeded` and `req_rnr_retries_exceeded` hardware counters, and log at debug level any configured counter name that does not match a file in sysfs.

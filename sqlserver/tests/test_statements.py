@@ -1106,6 +1106,24 @@ def _mock_database_list():
     return fetchall_results, mock_cursor
 
 
+def _plan_row(signature: str, plan_handle: str | None = None) -> dict[str, object]:
+    return {
+        'query_signature': signature,
+        'query_hash': f'query-hash-{signature}',
+        'query_plan_hash': f'plan-hash-{signature}',
+        'plan_handle': plan_handle or f'plan-handle-{signature}',
+        'text': 'SELECT 1',
+        'dd_tables': [],
+        'dd_commands': ['SELECT'],
+        'dd_comments': [],
+        'database_name': 'master',
+        'is_proc': plan_handle is not None,
+        'is_encrypted': False,
+        'procedure_signature': None,
+        'procedure_name': None,
+    }
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     'query_metrics, expected_lookback',
@@ -1400,21 +1418,7 @@ def test_collect_execution_plans_toggle(instance_docker, collect_plans_value, ex
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
 
-    fake_row = {
-        'query_signature': 'abc123',
-        'query_hash': '0xDEAD',
-        'query_plan_hash': '0xBEEF',
-        'plan_handle': '0000',
-        'text': 'SELECT 1',
-        'dd_tables': [],
-        'dd_commands': [],
-        'dd_comments': None,
-        'database_name': 'master',
-        'is_proc': False,
-        'is_encrypted': False,
-        'procedure_signature': None,
-        'procedure_name': None,
-    }
+    fake_row = _plan_row('abc123')
 
     fake_plan_event = {
         'dbm_type': 'plan',
@@ -1456,3 +1460,52 @@ def test_collect_execution_plans_toggle(instance_docker, collect_plans_value, ex
         mock_collect_plans.assert_called_once()
     else:
         mock_collect_plans.assert_not_called()
+
+
+@pytest.mark.unit
+def test_plan_lookup_failure_allows_later_rows_and_retry(aggregator, dbm_instance):
+    """A failed plan is tried once per pass without stopping later plans."""
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    failed_row = _plan_row('failed', plan_handle='failed-plan')
+    duplicate_row = _plan_row('duplicate', plan_handle='failed-plan')
+    later_row = _plan_row('later')
+    plan = ('<ShowPlanXML/>', False)
+
+    with mock.patch.object(
+        check.statement_metrics,
+        '_load_plan',
+        side_effect=[RuntimeError('plan lookup timed out'), plan, plan],
+    ) as load_plan:
+        rows = [failed_row, duplicate_row, later_row]
+        first_pass = list(check.statement_metrics._collect_plans(rows, mock.Mock(), float('inf')))
+        assert failed_row['plan_handle'] not in check.statement_metrics._seen_plans_ratelimiter
+        retry_pass = list(check.statement_metrics._collect_plans([failed_row], mock.Mock(), float('inf')))
+
+    assert [event['db']['query_signature'] for event in first_pass] == [later_row['query_signature']]
+    assert [call.args[0] for call in load_plan.call_args_list] == [
+        failed_row['plan_handle'],
+        later_row['plan_handle'],
+        failed_row['plan_handle'],
+    ]
+    assert len(retry_pass) == 1
+    aggregator.assert_metric(
+        'dd.sqlserver.statements.error',
+        value=1,
+        tags=check.debug_tags() + ["error:load-plan-<class 'RuntimeError'>"],
+    )
+
+
+@pytest.mark.unit
+def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
+    """Cancellation during a failing plan lookup still aborts plan collection."""
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def cancel_during_lookup(*_args):
+        check.statement_metrics._cancel_event.set()
+        raise RuntimeError('connection closed')
+
+    with (
+        mock.patch.object(check.statement_metrics, '_load_plan', side_effect=cancel_during_lookup),
+        pytest.raises(Exception, match='Job loop cancelled'),
+    ):
+        list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
