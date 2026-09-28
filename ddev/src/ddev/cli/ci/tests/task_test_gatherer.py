@@ -28,10 +28,10 @@ from ddev.cli.ci.tests.progress import (
     JobProgress,
     ProgressError,
 )
-from ddev.cli.ci.tests.status import Status, conclusion_to_status
+from ddev.cli.ci.tests.status import Status, conclusion_to_status, has_finished_running
 from ddev.event_bus.orchestrator import SyncProcessor
 from ddev.monitoring import ComponentMonitor
-from ddev.utils.github_async.models.workflow import WorkflowJobConclusion, WorkflowJobStatus
+from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 from ddev.utils.junit import parse_junit_dir
 
 if TYPE_CHECKING:
@@ -198,17 +198,12 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         """Emit the GitHub execution time of one completed job attempt. Hold `self._lock`.
 
         Job IDs are unique per attempt, so the recorded-ID set collapses repeated progress and
-        final-result observations without collapsing reruns. Only a job that ran to an outcome says
+        final-result observations without collapsing reruns. Only a job that finished running says
         how long it takes: a skipped or cancelled one would add near-zero or partial values. A
         timed-out job is kept, since a runaway duration is the one that most needs measuring.
         Unusable timing is omitted rather than zeroed, so a later observation with valid timing still can.
         """
-        if (
-            workflow_job.status is not WorkflowJobStatus.COMPLETED
-            or workflow_job.conclusion
-            not in {WorkflowJobConclusion.SUCCESS, WorkflowJobConclusion.FAILURE, WorkflowJobConclusion.TIMED_OUT}
-            or workflow_job.id in self._durations_reported
-        ):
+        if not has_finished_running(workflow_job) or workflow_job.id in self._durations_reported:
             return
         duration = workflow_job.duration_seconds
         if duration is None:

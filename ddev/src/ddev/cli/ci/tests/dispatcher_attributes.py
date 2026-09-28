@@ -118,6 +118,9 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'dispatcher.batch.id',
         console_tag=True,
         test_tag=True,
+        # Concurrent batches of one run emit the same gauges; the batch keeps their series apart so
+        # one batch's points do not overwrite another's.
+        metric_tag=True,
     ),
     'batch_job_count': AttributeSpec(
         'dispatcher.batch.job_count',
