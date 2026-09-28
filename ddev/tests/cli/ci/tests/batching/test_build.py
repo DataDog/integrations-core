@@ -197,6 +197,21 @@ def test_build_batches_end_to_end_split_defaults():
     assert batch.jobs_count == 1
 
 
+def test_build_batches_tests_the_configured_infrastructure_targets():
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("mysql")])
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "mysql": [env("py3.11")]})
+    changed = [modified(".github/actions/setup-ddev/action.yml")]
+
+    batches = build_test_batches(
+        repo,
+        changed,
+        environment_provider=provider,
+        config=BatchingConfig(test_infrastructure_targets=("mysql",)),
+    )
+
+    assert [job.target for batch in batches for job in batch.job_list] == ["mysql"]
+
+
 @pytest.mark.parametrize(
     ("attributes", "supported"),
     [
