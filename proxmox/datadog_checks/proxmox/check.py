@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from collections.abc import Callable
 from typing import Any, cast
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
@@ -249,7 +250,9 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         tags.append(f'proxmox_event_type:{task_type}')
         tags.append(f'proxmox_user:{user}')
 
-        timestamp = task.get('endtime', get_timestamp(get_current_datetime()))
+        timestamp = task.get('endtime')
+        if timestamp is None:
+            timestamp = get_timestamp(get_current_datetime())
         hostname = resource.get('hostname', None)
 
         if resource_type != 'node':
@@ -509,7 +512,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         if self.config.collect_tasks:
             self._run_optional_collection('tasks', self._collect_tasks)
 
-    def _run_optional_collection(self, name, collect):
+    def _run_optional_collection(self, name: str, collect: Callable[[], None]) -> None:
         """Run a collector whose failure must not prevent the other collectors from running."""
         try:
             collect()

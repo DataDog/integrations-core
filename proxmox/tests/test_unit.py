@@ -925,25 +925,24 @@ def test_tasks_api_error_response(dd_run_check, instance, caplog):
     indirect=True,
 )
 def test_failed_node_retries_from_last_successful_collection(
-    dd_run_check, instance, mock_http_get, monkeypatch, caplog
+    dd_run_check, aggregator, instance, mock_http_get, monkeypatch, caplog
 ):
     # One timestamp for check initialization, then one per node and check run.
     collect_times = [datetime.fromtimestamp(ts, timezone.utc) for ts in (100, 200, 300, 400, 500)]
     monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
-    # node-1 fails on the first run only; node-2 always succeeds.
+
+    def tasks_response(endtime):
+        return MockResponse(status_code=200, json_data={'data': [{'type': 'aptupdate', 'endtime': endtime}]})
+
+    # node-1 is unavailable on the first run while it runs a task, then recovers; node-2 always succeeds.
     task_responses = {
         '/nodes/node-1/tasks': iter(
             [
                 MockResponse(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
-                MockResponse(status_code=200, json_data={'data': []}),
+                tasks_response(150),
             ]
         ),
-        '/nodes/node-2/tasks': iter(
-            [
-                MockResponse(status_code=200, json_data={'data': []}),
-                MockResponse(status_code=200, json_data={'data': []}),
-            ]
-        ),
+        '/nodes/node-2/tasks': iter([tasks_response(150), tasks_response(350)]),
     }
     default_get = mock_http_get.side_effect
 
@@ -960,7 +959,7 @@ def test_failed_node_retries_from_last_successful_collection(
 
     dd_run_check(check)
     assert "Failed to collect tasks for node node-1" in caplog.text
-    assert check.last_event_collect_times == {'node-2': collect_times[2]}
+    assert [(event['host'], event['timestamp']) for event in aggregator.events] == [('node-2', 150)]
 
     dd_run_check(check)
     assert [(call.args[0].split('/')[-2], call.kwargs['params']['since']) for call in task_calls(mock_http_get)] == [
@@ -970,7 +969,12 @@ def test_failed_node_retries_from_last_successful_collection(
         ('node-1', 100),
         ('node-2', 300),
     ]
-    assert check.last_event_collect_times == {'node-1': collect_times[3], 'node-2': collect_times[4]}
+    # The node-1 task missed while the node was unavailable is emitted once it recovers.
+    assert [(event['host'], event['timestamp']) for event in aggregator.events] == [
+        ('node-2', 150),
+        ('node-1', 150),
+        ('node-2', 350),
+    ]
 
 
 @pytest.mark.parametrize(
