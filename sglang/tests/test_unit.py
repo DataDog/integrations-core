@@ -38,6 +38,38 @@ def test_check_collects_metrics_with_percentiles_enabled(dd_run_check, aggregato
     aggregator.assert_service_check('sglang.openmetrics.health', ServiceCheck.OK)
 
 
+def test_startup_and_weight_update_metrics_keep_distinct_meanings(dd_run_check, aggregator, instance):
+    check = SglangCheck('sglang', {}, [instance])
+    response = MockResponse(
+        content='''
+        # TYPE sglang:engine_startup_time gauge
+        sglang:engine_startup_time 9.2
+        # TYPE sglang:engine_load_weights_time gauge
+        sglang:engine_load_weights_time 6.1
+        # TYPE sglang:startup_time_seconds gauge
+        sglang:startup_time_seconds{phase="load_weight"} 6.3
+        # TYPE sglang:weight_load_duration_seconds gauge
+        sglang:weight_load_duration_seconds{source="disk"} 1.4
+        '''
+    )
+
+    with mock.patch('requests.Session.get', return_value=response):
+        dd_run_check(check)
+
+    for metric in (
+        'sglang.startup.seconds',
+        'sglang.weight_load.seconds',
+        'sglang.startup.phase.seconds',
+        'sglang.weight_update.seconds',
+    ):
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metric_has_tag('sglang.startup.phase.seconds', 'phase:load_weight')
+    aggregator.assert_metric_has_tag('sglang.weight_update.seconds', 'source:disk')
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
 def test_emits_critical_openmetrics_service_check_when_service_is_down(
     dd_run_check, aggregator, instance, mock_http_response
 ):

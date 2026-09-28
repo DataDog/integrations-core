@@ -72,12 +72,11 @@ sglang:spec_num_steps: spec_decode.steps
 sglang:spec_num_draft_tokens: spec_decode.draft_tokens
 sglang:spec_verify_calls: spec_decode.verify_calls
 
-# Model startup and optional GPU-efficiency metrics. The startup and weight-load pairs below are
-# compatibility aliases for different SGLang releases; a release exposes one name from each pair.
+# Model startup, weight updates, and optional GPU-efficiency metrics.
 sglang:engine_startup_time: startup.seconds
 sglang:engine_load_weights_time: weight_load.seconds
-sglang:startup_time_seconds: startup.seconds
-sglang:weight_load_duration_seconds: weight_load.seconds
+sglang:startup_time_seconds: startup.phase.seconds
+sglang:weight_load_duration_seconds: weight_update.seconds
 sglang:startup_cuda_graph_time_seconds: startup.cuda_graph.seconds
 sglang:forward_execution_seconds: forward_execution.seconds
 sglang:scheduler_idle_seconds: scheduler.idle.seconds
