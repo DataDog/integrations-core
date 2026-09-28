@@ -1,0 +1,46 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Access key and secret key",
+      "basic": {
+        "user_setting": {
+          "key": "access_key",
+          "label": "Access key",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret_key",
+          "label": "Secret key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "collect_activity",
+      "label": "Collect activity logs",
+      "editable": true,
+      "required": true,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "collect_vulnerability",
+      "label": "Collect vulnerability logs",
+      "editable": true,
+      "required": true,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "tenable-io-logs" }
+  ]
+}
