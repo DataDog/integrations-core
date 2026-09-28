@@ -42,15 +42,17 @@ def build_test_units(
     *,
     environment_provider: EnvironmentProvider,
     rules: Sequence[TargetRule] | None = None,
+    infrastructure_targets: Sequence[str] = (),
     monitor: ComponentMonitor,
 ) -> list[TestUnit]:
     """Turn changed files into the complete, deterministic list of test units.
 
-    Without explicit `rules`, the default set is used, with the repository-wide rule enabled only
-    for the core repository.
+    Without explicit `rules`, the default set is used, with the repository-wide and infrastructure
+    rules enabled only for the core repository. `infrastructure_targets` feeds the latter and is
+    ignored when `rules` is given.
     """
     if rules is None:
-        rules = default_target_rules(is_core=repo.name == "core")
+        rules = default_target_rules(is_core=repo.name == "core", infrastructure_targets=infrastructure_targets)
 
     facts = RegistryRepositoryFacts(repo.integrations)
     target_names = find_affected_targets(changed_files, facts, rules=rules)
@@ -116,6 +118,7 @@ def build_test_batches(
         changed_files,
         environment_provider=environment_provider,
         rules=rules,
+        infrastructure_targets=config.test_infrastructure_targets,
         monitor=monitor,
     )
     jobs = expand_batch_jobs(units, minimum_base_package=minimum_base_package)
