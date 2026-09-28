@@ -153,15 +153,16 @@ def _remediation() -> dict[str, str | list[dict[str, int | str]]]:
             {
                 'order': 1,
                 'text': (
-                    'Confirm the endpoint target still exists. If it came from Autodiscovery, run agent configcheck '
-                    'and correct stale configuration, such as the IP of a pod that no longer exists.'
+                    'Confirm the endpoint target still exists. If it came from Autodiscovery, run '
+                    '`datadog-agent configcheck` and correct stale configuration, such as the IP of a pod that no '
+                    'longer exists.'
                 ),
             },
             {
                 'order': 2,
                 'text': (
-                    'Test the connection from the network namespace of the reporting Agent or Cluster Check Runner, '
-                    'for example with curl.'
+                    'Test the connection from the network namespace of the reporting Agent or Cluster Check Runner. '
+                    'Run: `curl -sv --connect-timeout 5 <endpoint>`'
                 ),
             },
             {
@@ -173,7 +174,10 @@ def _remediation() -> dict[str, str | list[dict[str, int | str]]]:
             },
             {
                 'order': 4,
-                'text': 'The issue resolves automatically after the endpoint becomes reachable.',
+                'text': (
+                    'The issue resolves automatically after the endpoint becomes reachable. To verify from the same '
+                    'reporting Agent or Cluster Check Runner, run: `datadog-agent check <openmetrics-based check>`'
+                ),
             },
         ],
     }
