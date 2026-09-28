@@ -49,6 +49,8 @@ services:
   # publish/deliver/ack counters and queue-depth gauges moving across scrapes.
   # Publishing faster than consumers ack builds a backlog; --qos keeps most of it
   # ready rather than unacked, and x-max-length caps it so it cannot grow unbounded.
+  # The publish rate alternates above and below the consumer rate so rates and
+  # queue depth rise and fall across scrapes instead of plateauing.
   load:
     image: pivotalrabbitmq/perf-test:latest
     depends_on:
@@ -70,8 +72,10 @@ services:
       - "4"
       - --auto-delete
       - "false"
-      - --rate
-      - "60"
+      - --variable-rate
+      - "30:60"
+      - --variable-rate
+      - "90:60"
       - --consumer-rate
       - "45"
       - --confirm

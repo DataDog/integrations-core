@@ -27,9 +27,12 @@ sources and are out of scope. Six services:
 - **load** — `pivotalrabbitmq/perf-test`, a continuous AMQP workload. A real AMQP client
   is required: `rabbitmqadmin` (HTTP) cannot populate channel, connection, or delivery
   counters. perf-test's publishers and acking consumers keep those counters and the
-  queue-depth gauges moving across scrapes. Publishers outpace consumers, and `--qos 50`
-  keeps that backlog ready rather than unacked, so both `messages_ready` and
-  `messages_unacknowledged` are non-zero; `x-max-length=2000` bounds it.
+  queue-depth gauges moving across scrapes. The publish rate alternates every 60s between
+  below and above the consumer rate (`--variable-rate`), so rates and queue depth rise
+  and fall instead of plateauing. The high phase builds a backlog that the low phase only
+  partly drains, and `--qos 50` keeps it ready rather than unacked, so both
+  `messages_ready` and `messages_unacknowledged` stay non-zero; `x-max-length=2000`
+  bounds it.
 - **activity-gen** — periodic queue declare/delete churn (`activity-gen.sh`) so the
   node-wide `rabbitmq.queues.created/declared/deleted.count` counters keep advancing;
   perf-test's long-lived queues do not produce churn. Set `ACTIVITY_GEN=0` (host env) to
