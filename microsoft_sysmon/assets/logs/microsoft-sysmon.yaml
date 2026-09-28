@@ -4074,7 +4074,7 @@ pipeline:
               target: $targetElem.rdata
               preserveSource: true
               overrideOnConflict: false
-          preserve_source: false
+          preserveSource: false
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -4324,6 +4324,13 @@ pipeline:
               sources:
                 - Event.System.Computer
               target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `Event.System.Computer` to `ocsf.src_endpoint.uid`
+              sources:
+                - Event.System.Computer
+              target: ocsf.src_endpoint.uid
               preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper

@@ -30,6 +30,20 @@ def test_default_create_writes_manifest_without_overrides(ddev, empty_repo, subc
     'subcommand',
     ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
 )
+def test_default_create_includes_owner_placeholder(ddev, empty_repo, subcommand):
+    """Every generated manifest must include an owner key, matching every shipped manifest."""
+    result = ddev('create', subcommand, 'my_integration')
+    assert result.exit_code == 0, result.output
+
+    manifest_path = empty_repo.path / 'my_integration' / 'manifest.json'
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest['owner'] == '<FILL IN>'
+
+
+@pytest.mark.parametrize(
+    'subcommand',
+    ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
+)
 def test_skip_manifest_does_not_affect_new_integration_scaffolding(ddev, empty_repo, subcommand):
     result = ddev('create', subcommand, 'my_integration', '--skip-manifest')
     assert result.exit_code == 0, result.output

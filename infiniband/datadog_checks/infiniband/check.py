@@ -6,7 +6,13 @@ import os
 import re
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
+from datadog_checks.base.errors import SkipInstanceError
 
 from .metrics import IB_COUNTERS, RDMA_COUNTERS, STATUS_COUNTERS
 
@@ -22,6 +28,15 @@ RATE_MULTIPLIERS = {
     "m": 1_000_000,
     "g": 1_000_000_000,
 }
+# IBTA defines PortXmitData/PortRcvData in units of 4-byte words, not octets, and the
+# kernel applies the division itself (see >> 2 in mlx5's pma_cnt_ext_assign and
+# pma_cnt_ext_assign_ppcnt). metadata.csv declares these metrics in bytes, so the raw
+# sysfs value must be scaled back up. The divisor is a fixed 4 per spec, independent of
+# link width, so this is a constant rather than something derived from the port rate.
+COUNTER_MULTIPLIERS = {
+    "port_rcv_data": 4,
+    "port_xmit_data": 4,
+}
 TAG_VALUE_RE = re.compile(r'[^a-z0-9_.-]+')
 RATE_RE = re.compile(r'^\s*(?P<value>\d+(?:\.\d+)?)\s*(?P<prefix>[kmg]?)b/sec\b', re.IGNORECASE)
 
@@ -31,6 +46,12 @@ class InfinibandCheck(AgentCheck):
     __NAMESPACE__ = 'infiniband'
 
     def __init__(self, name, init_config, instances):
+        # This check ships as part of the GPU monitoring SKU; only run it when GPU
+        # monitoring is on. Raised before any other setup so a disabled instance does
+        # no sysfs work and is skipped by the loader rather than reported as an error.
+        if not is_affirmative(datadog_agent.get_config('gpu.enabled')):
+            raise SkipInstanceError("GPU monitoring (gpu.enabled) is not enabled.")
+
         super(InfinibandCheck, self).__init__(name, init_config, instances)
         self.tags = self.instance.get('tags', [])
         self.base_path = self.instance.get('infiniband_path', '/sys/class/infiniband')
@@ -160,18 +181,38 @@ class InfinibandCheck(AgentCheck):
 
         self.gauge("port.rate", value, tags)
 
+    def _log_absent_counters(
+        self, counters_path: str, found: set[str], configured: set[str], additional: set[str]
+    ) -> None:
+        # Under glob-and-filter a misspelled or driver-inappropriate counter name yields no
+        # metric, no warning and no error -- it looks exactly like a counter the hardware does
+        # not expose. Surfacing the difference is the only way this kind of drift stays
+        # visible, whether it originates in our own allowlists or a user's additional_* option.
+        absent = (configured | additional) - found
+        if absent:
+            self.log.debug(
+                "%d counters configured but not found in %s: %s",
+                len(absent),
+                counters_path,
+                ", ".join(sorted(absent)),
+            )
+
     def _collect_counter_metrics(self, port_path, tags):
         counters_path = os.path.join(port_path, "counters")
         if not os.path.isdir(counters_path):
             self.log.debug("Skipping device %s as counters directory does not exist", counters_path)
             return
 
+        found = set()
         for file in glob.glob(f"{counters_path}/*"):
             filename = os.path.basename(file)
+            found.add(filename)
             if (
                 filename in IB_COUNTERS or filename in self.additional_counters
             ) and filename not in self.exclude_counters:
                 self._submit_counter_metric(file, filename, tags)
+
+        self._log_absent_counters(counters_path, found, IB_COUNTERS, self.additional_counters)
 
     def _collect_hw_counter_metrics(self, port_path, tags):
         hw_counters_path = os.path.join(port_path, "hw_counters")
@@ -179,12 +220,16 @@ class InfinibandCheck(AgentCheck):
             self.log.debug("Skipping device %s as hw_counters directory does not exist", hw_counters_path)
             return
 
+        found = set()
         for file in glob.glob(f"{hw_counters_path}/*"):
             filename = os.path.basename(file)
+            found.add(filename)
             if (
                 filename in RDMA_COUNTERS or filename in self.additional_hw_counters
             ) and filename not in self.exclude_hw_counters:
                 self._submit_counter_metric(file, f"rdma.{filename}", tags)
+
+        self._log_absent_counters(hw_counters_path, found, RDMA_COUNTERS, self.additional_hw_counters)
 
     def _collect_status_metrics(self, port_path, tags):
         for status_file in STATUS_COUNTERS:
@@ -200,10 +245,16 @@ class InfinibandCheck(AgentCheck):
                     value = int(parts[0].strip())
                     metric_tags = list(tags)
 
-                    # Add state as a tag if it exists
+                    # Add state as a tag if it exists. The kernel's phys_state table holds
+                    # CamelCase names plus "Phy Test" (internal space) and "<unknown>", so the
+                    # raw string has to be normalized like every other tag this check emits or
+                    # it produces malformed tag values. Note normalization lowercases but does
+                    # not split CamelCase, so LinkErrorRecovery becomes "linkerrorrecovery" --
+                    # the shipped monitors filter on that spelling.
                     if len(parts) > 1:
-                        state = parts[1].strip()
-                        metric_tags.append(f"port_{status_file}:{state}")
+                        state = self._normalize_tag_value(parts[1])
+                        if state:
+                            self._append_tag(metric_tags, f"port_{status_file}:{state}")
 
                     if self.collection_type in {'gauge', 'both'}:
                         self.gauge(f"port_{status_file}", value, metric_tags)
@@ -216,7 +267,7 @@ class InfinibandCheck(AgentCheck):
         if raw_value is None:
             return
 
-        value = int(raw_value)
+        value = int(raw_value) * COUNTER_MULTIPLIERS.get(metric_name, 1)
         if self.collection_type in {'gauge', 'both'}:
             self.gauge(metric_name, value, tags)
 

@@ -11,8 +11,8 @@ from httpx import HTTPStatusError, Request, Response
 from ddev.cli.release.branch.tag import _bump_integrations_core_version
 from ddev.cli.release.branch.tag import _open_datadog_agent_bump_pr as REAL_OPEN_DATADOG_AGENT_BUMP_PR
 from ddev.utils.git import GitRepository
-from ddev.utils.github_async.models import FileContent, PullRequest
 from ddev.utils.github_errors import GitHubAuthenticationError
+from tests.helpers.github_async import make_file_content, make_pull_request
 
 ORIGIN_REF = 'origin/7.56.x'
 
@@ -562,12 +562,8 @@ def _mock_release_json(fake_async_github, release_json=AGENT_RELEASE_JSON):
     """Register the datadog-agent `release.json` the fake serves on `get_content`."""
     fake_async_github.mock_response(
         'get_content',
-        FileContent(
-            type='file',
-            encoding='base64',
+        make_file_content(
             size=len(release_json),
-            name='release.json',
-            path='release.json',
             content=base64.b64encode(release_json.encode()).decode(),
             sha='blobsha',
         ),
@@ -759,9 +755,7 @@ def test_agent_pr_duplicate_creation_reports_existing_pr(ddev, agent_pr, fake_as
     "A pull request already exists"; the PR is there, so its URL must be reported."""
     existing_url = 'https://github.com/DataDog/datadog-agent/pull/123'
     fake_async_github.mock_response('create_pull_request', _http_status_error(422, method='POST'))
-    fake_async_github.mock_response(
-        'list_pull_requests', [PullRequest(number=123, html_url=existing_url, changed_files=1)]
-    )
+    fake_async_github.mock_response('list_pull_requests', [make_pull_request(number=123, html_url=existing_url)])
 
     result = _run_final_tag(ddev)
 

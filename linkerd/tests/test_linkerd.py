@@ -6,6 +6,7 @@ import os
 import pytest
 import requests_mock
 
+from datadog_checks.dev.kubernetes import assert_all_discovery_candidates_stable_kubernetes
 from datadog_checks.linkerd import LinkerdCheck
 
 from .common import (
@@ -18,6 +19,9 @@ from .common import (
     MOCK_INSTANCE_NEW,
     OPTIONAL_METRICS_V2_E2E,
 )
+
+# The fixture runs five Linkerd control-plane proxies and four Emojivoto proxies.
+LINKERD_DISCOVERY_INSTANCES = 9
 
 
 def get_fixture_path(filename):
@@ -102,3 +106,38 @@ def test_e2e(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery) -> None:
+    aggregator = dd_agent_check_discovery(
+        check_rate=True,
+        discovery_min_instances=LINKERD_DISCOVERY_INSTANCES,
+        discovery_timeout=60,
+    )
+    # These traffic metrics are consistently exposed by every injected Linkerd proxy in the fixture.
+    for metric_name in (
+        'linkerd.request.count',
+        'linkerd.response.count',
+        'linkerd.tcp.read_bytes.count',
+        'linkerd.tcp.write_bytes.count',
+    ):
+        aggregator.assert_metric(metric_name)
+
+    aggregator.assert_service_check(
+        'linkerd.openmetrics.health',
+        status=LinkerdCheck.OK,
+        count=2 * LINKERD_DISCOVERY_INSTANCES,
+    )
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check, linkerd_kubeconfig: str) -> None:
+    assert_all_discovery_candidates_stable_kubernetes(
+        dd_agent_check,
+        LinkerdCheck,
+        linkerd_kubeconfig,
+        namespace='linkerd',
+        pod_selector='linkerd.io/control-plane-component=controller',
+        container_name='linkerd-proxy',
+    )

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import math
+
 from datadog_checks.base.checks.openmetrics.v2.labels import canonicalize_numeric_label
 from datadog_checks.base.checks.openmetrics.v2.utils import decumulate_histogram_buckets
 
@@ -45,8 +47,8 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             lower_bound = canonicalize_numeric_label(sample.labels['lower_bound'])
                             upper_bound = canonicalize_numeric_label(sample.labels['upper_bound'])
 
-                            if lower_bound == upper_bound:
-                                # this can happen for -inf/-inf bucket that we don't want to send (always 0)
+                            if lower_bound == upper_bound and math.isinf(lower_bound):
+                                # skip only the degenerate -inf/-inf bucket; finite equal bounds (e.g. le=0) are valid
                                 logger.warning(
                                     'Metric: %s has bucket boundaries equal, skipping: %s', metric_name, sample.labels
                                 )
@@ -75,8 +77,8 @@ def get_histogram(check, metric_name, modifiers, global_options):
                         lower_bound = canonicalize_numeric_label(sample.labels['lower_bound'])
                         upper_bound = canonicalize_numeric_label(sample.labels['upper_bound'])
 
-                        if lower_bound == upper_bound:
-                            # this can happen for -inf/-inf bucket that we don't want to send (always 0)
+                        if lower_bound == upper_bound and math.isinf(lower_bound):
+                            # skip only the degenerate -inf/-inf bucket; finite equal bounds (e.g. le=0) are valid
                             logger.warning(
                                 'Metric: %s has bucket boundaries equal, skipping: %s', metric_name, sample.labels
                             )

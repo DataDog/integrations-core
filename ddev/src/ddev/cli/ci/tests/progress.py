@@ -100,6 +100,14 @@ class JobProgress:
         return self.latest is not None and self.latest.state is ExecutionState.FINISHED
 
     @property
+    def collected_result(self) -> JobAttemptProgress | None:
+        """An empty report tuple is collected; `None` means the attempt was only observed."""
+        latest = self.latest
+        if latest is None or latest.state is not ExecutionState.FINISHED or latest.reports is None:
+            return None
+        return latest
+
+    @property
     def retry_count(self) -> int:
         """Executions minus one. Not ``run_attempt - 1``: histories can be sparse."""
         return max(0, len(self.attempts) - 1)

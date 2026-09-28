@@ -19,10 +19,15 @@ from ddev.cli.release.test_agent.monitoring import (
     render_monitor_panel,
 )
 from ddev.cli.terminal import Terminal
-from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import WorkflowJob, WorkflowJobsList, WorkflowRun
+from ddev.utils.github_async.models import WorkflowJobConclusion
 from ddev.utils.github_errors import GitHubAuthenticationError
-from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.github_async import (
+    FakeAsyncGitHubClient,
+    make_response,
+    make_workflow_job,
+    make_workflow_jobs_list,
+    make_workflow_run,
+)
 
 monitoring_module = importlib.import_module('ddev.cli.release.test_agent.monitoring')
 
@@ -162,28 +167,12 @@ def test_dispatched_workflow_has_run_metadata() -> None:
 async def test_collect_monitor_state_fetches_workflow_jobs(fake_async_github: FakeAsyncGitHubClient) -> None:
     fake_async_github.mock_response(
         'get_workflow_run',
-        WorkflowRun(
-            id=123,
-            name='test-agent',
-            status='completed',
-            conclusion='failure',
-            html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
-        ),
+        make_workflow_run(name='test-agent', conclusion='failure'),
     )
     fake_async_github.mock_response(
         'list_workflow_jobs',
-        WorkflowJobsList(
-            total_count=1,
-            jobs=[
-                WorkflowJob(
-                    id=456,
-                    run_id=123,
-                    name='test-agent / py3.12',
-                    status='completed',
-                    conclusion='failure',
-                    html_url='https://github.com/DataDog/integrations-core/actions/runs/123/job/456',
-                )
-            ],
+        make_workflow_jobs_list(
+            [make_workflow_job(id=456, name='test-agent / py3.12', conclusion=WorkflowJobConclusion.FAILURE)]
         ),
     )
 
@@ -210,34 +199,14 @@ async def test_monitor_workflows_does_not_raise_on_job_failure(fake_async_github
     terminal = Terminal(verbosity=0, enable_color=False, interactive=False)
     fake_async_github.mock_response(
         'get_workflow_run',
-        GitHubResponse(
-            data=WorkflowRun(
-                id=123,
-                name='test-agent',
-                status='completed',
-                conclusion='failure',
-                html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
-            ),
-            headers={},
-        ),
+        make_response(make_workflow_run(name='test-agent', conclusion='failure')),
     )
     fake_async_github.mock_response(
         'list_workflow_jobs',
-        GitHubResponse(
-            data=WorkflowJobsList(
-                total_count=1,
-                jobs=[
-                    WorkflowJob(
-                        id=456,
-                        run_id=123,
-                        name='test-agent / py3.12',
-                        status='completed',
-                        conclusion='failure',
-                        html_url='https://github.com/DataDog/integrations-core/actions/runs/123/job/456',
-                    )
-                ],
-            ),
-            headers={},
+        make_response(
+            make_workflow_jobs_list(
+                [make_workflow_job(id=456, name='test-agent / py3.12', conclusion=WorkflowJobConclusion.FAILURE)]
+            )
         ),
     )
 
@@ -311,20 +280,11 @@ async def test_monitor_workflows_does_not_use_alternate_screen(
     monkeypatch.setattr(monitoring_module, 'Live', FakeLive)
     fake_async_github.mock_response(
         'get_workflow_run',
-        GitHubResponse(
-            data=WorkflowRun(
-                id=123,
-                name='test-agent',
-                status='completed',
-                conclusion='success',
-                html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
-            ),
-            headers={},
-        ),
+        make_response(make_workflow_run(name='test-agent')),
     )
     fake_async_github.mock_response(
         'list_workflow_jobs',
-        GitHubResponse(data=WorkflowJobsList(total_count=0, jobs=[]), headers={}),
+        make_response(make_workflow_jobs_list()),
     )
 
     await monitor_workflows(
