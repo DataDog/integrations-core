@@ -387,16 +387,27 @@ class ProcessCheck(AgentCheck):
         return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
+        # Build the ppid map ourselves instead of psutil.Process.children(recursive=True),
+        # which aborts entirely if any single pid on the system is inaccessible.
+        ppid_map = defaultdict(list)
+        for p in psutil.pids():
+            try:
+                ppid_map[psutil.Process(p).ppid()].append(p)
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                self.log.debug('Could not read ppid for pid %s, excluded from child collection: %s', p, e)
+                continue
+
         children_pids = set()
         for pid in pids:
-            try:
-                children = psutil.Process(pid).children(recursive=True)
-                self.log.debug('%s children were collected for process %s', len(children), pid)
-                for child in children:
-                    children_pids.add(child.pid)
-            except psutil.NoSuchProcess:
-                self.log.debug("Unable to get children for process because process %s does not exist", pid)
+            stack = [pid]
+            while stack:
+                current = stack.pop()
+                for child_pid in ppid_map.get(current, ()):
+                    if child_pid not in children_pids:
+                        children_pids.add(child_pid)
+                        stack.append(child_pid)
 
+        self.log.debug('%s children were collected for %s pids', len(children_pids), len(pids))
         return children_pids
 
     def check(self, _):
