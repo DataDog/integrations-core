@@ -464,7 +464,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 response = self.http.get(url, params=params)
                 tasks = self._response_data(response, url, list, [])
             except API_ERRORS as e:
-                self.log.warning("Failed to collect tasks for node %s; endpoint: %s; %s", node_name, url, e)
+                self.warning("Failed to collect tasks for node %s; endpoint: %s; %s", node_name, url, e)
                 continue
 
             if len(tasks) >= TASK_COLLECTION_LIMIT:

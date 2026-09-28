@@ -898,16 +898,18 @@ def test_tasks_null_data(dd_run_check, aggregator, instance):
     indirect=True,
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_tasks_api_error_response(dd_run_check, instance, caplog):
+def test_tasks_api_error_response(dd_run_check, instance):
     new_instance = copy.deepcopy(instance)
     new_instance['collect_tasks'] = True
     check = ProxmoxCheck('proxmox', {}, [new_instance])
 
     dd_run_check(check)
 
-    assert "Failed to collect tasks for node ip-122-82-3-112" in caplog.text
-    assert "HTTP 403" in caplog.text
-    assert "Permission check failed (/ , Sys.Audit)" in caplog.text
+    endpoint = 'http://localhost:8006/api2/json/nodes/ip-122-82-3-112/tasks'
+    assert check.warnings == [
+        f"Failed to collect tasks for node ip-122-82-3-112; endpoint: {endpoint}; "
+        f"Proxmox API returned HTTP 403 for {endpoint}: Permission check failed (/ , Sys.Audit)"
+    ]
 
 
 @pytest.mark.parametrize(
