@@ -24,11 +24,13 @@ from .constants import (
     RESOURCE_COUNT_METRICS,
     RESOURCE_METRIC_NAME,
     RESOURCE_TYPE_MAP,
+    TASK_COLLECTION_LIMIT,
     VM_RESOURCE,
 )
 from .resource_filters import create_resource_filter, is_resource_collected_by_filters
 
 NULL_DEFAULT = object()
+API_ERRORS = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException)
 
 
 def resource_type_for_event_type(event_type):
@@ -185,15 +187,24 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
         null_default: T | object = NULL_DEFAULT,
     ) -> T:
         """Raise API errors and return validated response data."""
-        try:
-            response_json = response.json()
-        except JSONDecodeError:
-            response.raise_for_status()
-            raise
+        if not response.ok:
+            error = f"Proxmox API returned HTTP {response.status_code} for {url}"
+            if detail := self._error_detail(response):
+                error = f"{error}: {detail}"
+            raise HTTPError(error, response=response)
 
-        data = self._extract_data(response_json, url, expected_type, null_default)
-        response.raise_for_status()
-        return data
+        return self._extract_data(response.json(), url, expected_type, null_default)
+
+    @staticmethod
+    def _error_detail(response: Any) -> str | None:
+        """Return the Proxmox error message from an error response, falling back to the HTTP reason."""
+        try:
+            body = response.json()
+        except ValueError:
+            body = None
+        if isinstance(body, dict) and body.get('message'):
+            return str(body['message']).strip()
+        return response.reason
 
     def _get_vm_hostname(self, vm_id, vm_name, node):
         try:
@@ -444,14 +455,23 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.log.debug("Collecting events for node %s since %s", node_name, since)
 
             collection_time = get_current_datetime()
-            params = {'since': since}
+            params = {'since': since, 'limit': TASK_COLLECTION_LIMIT}
             url = f"{self.config.proxmox_server}/nodes/{node_name}/tasks"
             try:
                 response = self.http.get(url, params=params)
                 tasks = self._response_data(response, url, list, [])
-            except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException) as e:
+            except API_ERRORS as e:
                 self.log.warning("Failed to collect tasks for node %s; endpoint: %s; %s", node_name, url, e)
                 continue
+
+            if len(tasks) >= TASK_COLLECTION_LIMIT:
+                # Proxmox returns the most recent tasks first, so older tasks in the window are dropped.
+                self.log.warning(
+                    "Node %s returned %s tasks since %s, the maximum requested; older tasks may have been skipped",
+                    node_name,
+                    len(tasks),
+                    since,
+                )
 
             for task in tasks:
                 task_type = task.get('type')
@@ -475,15 +495,23 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.set_metadata('version', version)
             self.gauge("api.up", 1, tags=self.base_tags + ['proxmox_status:up'])
 
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException) as e:
+        except API_ERRORS as e:
             self.log.error(
                 "Encountered an Exception when hitting the Proxmox API %s: %s", self.config.proxmox_server, e
             )
             self.gauge("api.up", 0, tags=self.base_tags + ['proxmox_status:down'])
             raise
 
+        # Resources are required: the other collectors rely on the resources they discover.
         self._collect_resource_metrics()
-        self._collect_performance_metrics()
-        self._collect_ha_metrics()
+        self._run_optional_collection('performance metrics', self._collect_performance_metrics)
+        self._run_optional_collection('HA metrics', self._collect_ha_metrics)
         if self.config.collect_tasks:
-            self._collect_tasks()
+            self._run_optional_collection('tasks', self._collect_tasks)
+
+    def _run_optional_collection(self, name, collect):
+        """Run a collector whose failure must not prevent the other collectors from running."""
+        try:
+            collect()
+        except API_ERRORS as e:
+            self.warning("Skipping Proxmox %s collection: %s", name, e)

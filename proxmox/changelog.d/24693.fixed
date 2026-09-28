@@ -1,1 +1,1 @@
-Handle null Proxmox API responses and isolate task collection failures by node.
+Handle null and error Proxmox API responses. Failures on the performance metrics, HA, or task endpoints are reported as check warnings instead of stopping the other collectors, and task collection failures are isolated per node.

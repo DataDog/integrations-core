@@ -725,7 +725,8 @@ def test_performance_metrics_null_data(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, count=0)
 
 
-PERMISSION_DENIED_RESPONSE = {'data': None, 'message': 'Permission check failed (/ , Sys.Audit)'}
+# Proxmox returns API errors with an HTTP error status and, on current versions, the reason in `message`.
+PERMISSION_DENIED_RESPONSE = {'data': None, 'message': 'Permission check failed (/ , Sys.Audit)\n'}
 TWO_NODE_RESOURCES = {
     'data': [
         {'id': 'node/node-1', 'node': 'node-1', 'status': 'online', 'type': 'node'},
@@ -734,51 +735,97 @@ TWO_NODE_RESOURCES = {
 }
 
 
+def task_calls(mock_http_get):
+    return [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
+
+
 @pytest.mark.parametrize(
-    'mock_http_get',
+    ('mock_http_get', 'expected_error'),
     [
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(
-                        status_code=200,
-                        json_data=PERMISSION_DENIED_RESPONSE,
-                    )
+                    '/api2/json/cluster/resources': MockResponse(status_code=403, json_data=PERMISSION_DENIED_RESPONSE)
                 }
             },
-            id='resources',
+            r'HTTP 403 for .*/cluster/resources: Permission check failed \(/ , Sys.Audit\)',
+            id='with-message',
         ),
+        pytest.param(
+            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=403, json_data={'data': None})}},
+            r'HTTP 403 for .*/cluster/resources',
+            id='without-message',
+        ),
+        pytest.param(
+            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=502, content='Bad Gateway')}},
+            r'HTTP 502 for .*/cluster/resources',
+            id='non-json-body',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_resources_api_error_response(dd_run_check, instance, expected_error):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=expected_error):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'failed_collection', 'failed_endpoint', 'collected_metric'),
+    [
         pytest.param(
             {
                 'http_error': {
                     '/api2/json/cluster/metrics/export': MockResponse(
-                        status_code=403,
-                        json_data=PERMISSION_DENIED_RESPONSE,
+                        status_code=403, json_data=PERMISSION_DENIED_RESPONSE
                     )
                 }
             },
+            'performance metrics',
+            '/cluster/metrics/export',
+            'proxmox.ha.quorum',
             id='performance-metrics',
         ),
         pytest.param(
             {
                 'http_error': {
                     '/api2/json/cluster/ha/status/current': MockResponse(
-                        status_code=200,
-                        json_data=PERMISSION_DENIED_RESPONSE,
+                        status_code=403, json_data=PERMISSION_DENIED_RESPONSE
                     )
                 }
             },
+            'HA metrics',
+            '/cluster/ha/status/current',
+            'proxmox.cpu.current',
             id='ha',
         ),
     ],
-    indirect=True,
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_api_error_response(dd_run_check, instance):
-    check = ProxmoxCheck('proxmox', {}, [instance])
+@mock.patch("datadog_checks.proxmox.check.get_current_datetime")
+def test_optional_collection_error_does_not_block_other_collectors(
+    get_current_datetime, dd_run_check, aggregator, instance, failed_collection, failed_endpoint, collected_metric
+):
+    get_current_datetime.return_value = datetime.fromtimestamp(1752552000, timezone.utc)
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
 
-    with pytest.raises(Exception, match=r'Permission check failed \(/ , Sys.Audit\)'):
-        dd_run_check(check, extract_message=True)
+    dd_run_check(check)
+
+    assert check.warnings == [
+        f"Skipping Proxmox {failed_collection} collection: Proxmox API returned HTTP 403 for "
+        f"http://localhost:8006/api2/json{failed_endpoint}: Permission check failed (/ , Sys.Audit)"
+    ]
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
+    )
+    aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
+    aggregator.assert_metric(collected_metric, at_least=1)
+    assert len(aggregator.events) == len(ALL_EVENTS)
 
 
 @pytest.mark.parametrize(
@@ -840,7 +887,7 @@ def test_tasks_null_data(dd_run_check, aggregator, instance):
             {
                 'http_error': {
                     '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
-                        status_code=200,
+                        status_code=403,
                         json_data=PERMISSION_DENIED_RESPONSE,
                     )
                 }
@@ -859,6 +906,7 @@ def test_tasks_api_error_response(dd_run_check, instance, caplog):
     dd_run_check(check)
 
     assert "Failed to collect tasks for node ip-122-82-3-112" in caplog.text
+    assert "HTTP 403" in caplog.text
     assert "Permission check failed (/ , Sys.Audit)" in caplog.text
 
 
@@ -868,9 +916,7 @@ def test_tasks_api_error_response(dd_run_check, instance, caplog):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
-                    '/api2/json/nodes/node-1/tasks': MockResponse(status_code=200, json_data={'data': []}),
-                    '/api2/json/nodes/node-2/tasks': MockResponse(status_code=200, json_data={'data': []}),
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES)
                 }
             },
             id='two-nodes',
@@ -878,22 +924,53 @@ def test_tasks_api_error_response(dd_run_check, instance, caplog):
     ],
     indirect=True,
 )
-def test_tasks_use_per_node_collection_windows(dd_run_check, instance, mock_http_get, monkeypatch):
-    collect_times = [
-        datetime.fromtimestamp(100, timezone.utc),
-        datetime.fromtimestamp(200, timezone.utc),
-        datetime.fromtimestamp(300, timezone.utc),
-    ]
+def test_failed_node_retries_from_last_successful_collection(
+    dd_run_check, instance, mock_http_get, monkeypatch, caplog
+):
+    # One timestamp for check initialization, then one per node and check run.
+    collect_times = [datetime.fromtimestamp(ts, timezone.utc) for ts in (100, 200, 300, 400, 500)]
     monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
+    # node-1 fails on the first run only; node-2 always succeeds.
+    task_responses = {
+        '/nodes/node-1/tasks': iter(
+            [
+                MockResponse(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
+                MockResponse(status_code=200, json_data={'data': []}),
+            ]
+        ),
+        '/nodes/node-2/tasks': iter(
+            [
+                MockResponse(status_code=200, json_data={'data': []}),
+                MockResponse(status_code=200, json_data={'data': []}),
+            ]
+        ),
+    }
+    default_get = mock_http_get.side_effect
+
+    def get(url, *args, **kwargs):
+        for suffix, responses in task_responses.items():
+            if url.endswith(suffix):
+                return next(responses)
+        return default_get(url, *args, **kwargs)
+
+    mock_http_get.side_effect = get
     new_instance = copy.deepcopy(instance)
     new_instance['collect_tasks'] = True
     check = ProxmoxCheck('proxmox', {}, [new_instance])
 
     dd_run_check(check)
+    assert "Failed to collect tasks for node node-1" in caplog.text
+    assert check.last_event_collect_times == {'node-2': collect_times[2]}
 
-    task_calls = [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
-    assert [call.kwargs['params']['since'] for call in task_calls] == [100, 100]
-    assert check.last_event_collect_times == {'node-1': collect_times[1], 'node-2': collect_times[2]}
+    dd_run_check(check)
+    assert [(call.args[0].split('/')[-2], call.kwargs['params']['since']) for call in task_calls(mock_http_get)] == [
+        ('node-1', 100),
+        ('node-2', 100),
+        # node-1 retries from its last successful collection; node-2 moves on.
+        ('node-1', 100),
+        ('node-2', 300),
+    ]
+    assert check.last_event_collect_times == {'node-1': collect_times[3], 'node-2': collect_times[4]}
 
 
 @pytest.mark.parametrize(
@@ -904,37 +981,30 @@ def test_tasks_use_per_node_collection_windows(dd_run_check, instance, mock_http
                 'http_error': {
                     '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
                     '/api2/json/nodes/node-1/tasks': MockResponse(
-                        status_code=500,
-                        json_data={'data': None, 'message': 'node unavailable'},
+                        status_code=200, json_data={'data': [{'type': 'vzstart'}, {'type': 'vzstop'}]}
                     ),
-                    '/api2/json/nodes/node-2/tasks': MockResponse(status_code=200, json_data={'data': []}),
+                    '/api2/json/nodes/node-2/tasks': MockResponse(
+                        status_code=200, json_data={'data': [{'type': 'vzstart'}]}
+                    ),
                 }
             },
-            id='first-node-unavailable',
+            id='node-1-reaches-limit',
         ),
     ],
     indirect=True,
 )
-def test_task_error_does_not_block_other_nodes(dd_run_check, instance, mock_http_get, monkeypatch, caplog):
-    collect_times = [
-        datetime.fromtimestamp(100, timezone.utc),
-        datetime.fromtimestamp(200, timezone.utc),
-        datetime.fromtimestamp(300, timezone.utc),
-    ]
-    monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
+def test_tasks_warn_when_limit_reached(dd_run_check, instance, mock_http_get, monkeypatch, caplog):
+    monkeypatch.setattr('datadog_checks.proxmox.check.TASK_COLLECTION_LIMIT', 2)
     new_instance = copy.deepcopy(instance)
     new_instance['collect_tasks'] = True
+    new_instance['collected_task_types'] = []
     check = ProxmoxCheck('proxmox', {}, [new_instance])
 
     dd_run_check(check)
 
-    task_calls = [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
-    assert [call.args[0] for call in task_calls] == [
-        'http://localhost:8006/api2/json/nodes/node-1/tasks',
-        'http://localhost:8006/api2/json/nodes/node-2/tasks',
-    ]
-    assert check.last_event_collect_times == {'node-2': collect_times[2]}
-    assert "Failed to collect tasks for node node-1" in caplog.text
+    assert [call.kwargs['params']['limit'] for call in task_calls(mock_http_get)] == [2, 2]
+    assert "Node node-1 returned 2 tasks since" in caplog.text
+    assert "Node node-2 returned" not in caplog.text
 
 
 @pytest.mark.parametrize(
