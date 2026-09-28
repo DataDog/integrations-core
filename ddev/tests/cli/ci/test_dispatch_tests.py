@@ -890,7 +890,7 @@ def test_command_metrics_project_centralized_tags(
     )
 
     def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
-        monitor.metrics.count('planned', environment='py3.13', integration='ntp', blob='unselected')
+        monitor.metrics.count('planned', environment='py3.13', target='ntp', blob='unselected')
         return []
 
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
@@ -902,7 +902,7 @@ def test_command_metrics_project_centralized_tags(
     assert series['type'] == 1
     tags = series['tags']
     assert 'dispatcher.batch.job.environment:py3.13' in tags
-    assert 'dispatcher.batch.job.integration:ntp' in tags
+    assert 'dispatcher.batch.job.target:ntp' in tags
     assert 'git.repository.id_v2:github.com/datadog/integrations-core' in tags
     assert 'dispatcher.context:pr' in tags
     assert not any('pr.number' in tag for tag in tags)
@@ -983,7 +983,7 @@ def test_an_executed_run_reports_its_execution_metrics(
     # Run-level records carry no job dimensions: a mixed batch must not split them per integration.
     assert not any(tag.startswith('dispatcher.batch.job') for tag in runs.tags)
     counted = sink.records_named('jobs.count')[0]
-    assert counted.tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert counted.tags['dispatcher.batch.job.target'] == 'ntp'
     assert counted.tags['dispatcher.batch.job.environment'] == 'py3.13'
     operation_failures = {}
     for record in sink.records_named('operations.failed'):
@@ -1036,7 +1036,7 @@ def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
     assert [record.value for record in sink.records_named('batches.failed')] == [1]
     failed = sink.records_named('jobs.failed')
     assert [record.value for record in failed] == [1]
-    assert failed[0].tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert failed[0].tags['dispatcher.batch.job.target'] == 'ntp'
     assert [record.value for record in sink.records_named('jobs.incomplete')] == [0]
     assert [record.value for record in sink.records_named('jobs.skipped')] == [0]
 

@@ -586,7 +586,7 @@ def test_a_cancelled_run_counts_its_uncollected_jobs_as_incomplete(client: FakeA
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
     incomplete = sink.records_named('jobs.incomplete')
     assert [record.value for record in incomplete] == [1]
-    assert incomplete[0].tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert incomplete[0].tags['dispatcher.batch.job.target'] == 'ntp'
     assert incomplete[0].tags['dispatcher.component'] == 'dispatcher'
     assert sink.records_named('jobs.failed') == []
     assert sink.records_named('batches.failed') == []
@@ -682,11 +682,10 @@ def test_shutdown_before_progress_counts_only_launched_jobs(client: FakeAsyncGit
     assert dispatcher.outcome is not None
     assert {batch.state for batch in dispatcher.outcome.progress.batches} == {ExecutionState.PLANNED}
     assert [record.value for record in sink.records_named('batches.count')] == [1]
-    launched = [record.tags['dispatcher.batch.job.integration'] for record in sink.records_named('jobs.count')]
+    launched = [record.tags['dispatcher.batch.job.target'] for record in sink.records_named('jobs.count')]
     assert launched == ['ntp']
     incomplete = [
-        (record.value, record.tags['dispatcher.batch.job.integration'])
-        for record in sink.records_named('jobs.incomplete')
+        (record.value, record.tags['dispatcher.batch.job.target']) for record in sink.records_named('jobs.incomplete')
     ]
     assert incomplete == [(1, 'ntp')]
 

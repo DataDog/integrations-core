@@ -30,7 +30,7 @@ MAPPING_FIELDS = {
     'done': False,
     'batch_id': 'batch-01',
     'job_status': 'success',
-    'integration': 'postgres',
+    'target': 'postgres',
     'base_sha': None,
     'unknown': 'diagnostic',
 }
@@ -55,7 +55,7 @@ MAPPING_FIELDS = {
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
         (
@@ -74,7 +74,7 @@ MAPPING_FIELDS = {
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
         (
@@ -86,7 +86,7 @@ MAPPING_FIELDS = {
                 'dispatcher.pr.number': '42',
                 'team': 'agent-integrations',
                 'dispatcher.batch.id': 'batch-01',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
         (
@@ -100,7 +100,7 @@ MAPPING_FIELDS = {
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
     ],
@@ -152,7 +152,7 @@ def test_batch_fields_include_batch_metadata():
             make_job(e2e_tests=True, agent_image='datadog/agent:latest', minimum_base_package=True),
             {
                 'job': 'job-1',
-                'integration': 'ntp',
+                'target': 'ntp',
                 'environment': 'py3.13',
                 'platform': 'linux',
                 'python_version': '3.13',
@@ -166,7 +166,7 @@ def test_batch_fields_include_batch_metadata():
             make_job(environment='', agent_image=None),
             {
                 'job': 'job-1',
-                'integration': 'ntp',
+                'target': 'ntp',
                 'platform': 'linux',
                 'python_version': '3.13',
                 'unit_tests': True,
