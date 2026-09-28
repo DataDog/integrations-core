@@ -239,8 +239,9 @@ def test_check_collect_children_skips_inaccessible_pid(reset_process_list_cache,
     }
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
-    with patch('psutil.pids', return_value=list(processes)), patch(
-        'psutil.Process', side_effect=lambda pid: processes[pid]
+    with (
+        patch('psutil.pids', return_value=list(processes)),
+        patch('psutil.Process', side_effect=lambda pid: processes[pid]),
     ):
         dd_run_check(process)
     aggregator.assert_metric('system.processes.number', value=3, tags=generate_expected_tags(instance))
