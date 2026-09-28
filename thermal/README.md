@@ -4,9 +4,9 @@
 
 This check monitors hardware temperatures and thermal constraints on Windows and macOS hosts.
 
-On Windows, the check collects the temperature and passive performance limit for each thermal zone exposed by the operating system. On macOS, it collects available CPU, GPU, SSD, and battery temperatures from AppleSMC, along with the system thermal pressure level.
+On Windows, the check collects the temperature and passive performance limit for each thermal zone exposed by the operating system. On macOS, it collects available CPU, GPU, SSD, and battery temperatures from the Apple System Management Controller (AppleSMC), along with the system thermal pressure level.
 
-Sensors that are unavailable on a host are omitted rather than reported as zero. The set of available metrics can vary by hardware model.
+The check omits sensors that are unavailable on a host instead of reporting them as zero. The set of available metrics can vary by hardware model.
 
 **Minimum Agent version:** 7.82.0 on Windows and 7.84.0 on macOS.
 
@@ -14,13 +14,13 @@ Sensors that are unavailable on a host are omitted rather than reported as zero.
 
 ### Installation
 
-The Thermal integration is included in the [Datadog Agent][1] package. No additional installation is needed.
+The Thermal integration is included in the [Datadog Agent][1] package. No additional installation is required.
 
 ### Configuration
 
-The Thermal check is not enabled by default.
+The Thermal check is not enabled by default. To enable it, complete the following steps:
 
-1. Copy the [sample `thermal.d/conf.yaml`][2] to `thermal.d/conf.yaml` in the `conf.d` folder at the root of the Agent's [configuration directory][3]. No check-specific options are required:
+1. Copy the sample [`thermal.d/conf.yaml`][2] to `thermal.d/conf.yaml` in the `conf.d` folder at the root of the Agent's [configuration directory][3]. No check-specific options are required:
 
    ```yaml
    init_config:
@@ -37,7 +37,7 @@ The Thermal check is not enabled by default.
 
 On Windows hosts without thermal zones, such as some virtual machines, the check runs without submitting metrics. On macOS, the check submits only the sensors exposed by the hardware.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
@@ -69,9 +69,9 @@ The Thermal integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7] with an [Agent Flare][8].
+Need help? Contact [Datadog support][7] with an [Agent flare][8].
 
-[1]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: /account/settings/agent/latest
 [2]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/thermal.d/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/#agent-configuration-directory
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
