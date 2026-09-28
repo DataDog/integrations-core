@@ -8,6 +8,7 @@ from typing import cast
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import AgentConfig, TaskConfig
@@ -437,6 +438,42 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
     err = exc_info.value
     assert err.input_tokens == 5 + 10 + 7
     assert err.output_tokens == 3 + 5 + 4
+
+
+async def test_run_goal_loop_flow_stop_from_worker_retry_carries_loop_tokens(tmp_path):
+    """FlowStopRequested raised by the worker's repair turn must carry every token already spent
+    in this goal loop (here, the initial reviewer verdict), or that usage would be dropped from
+    the eventual failure checkpoint."""
+
+    class RaisingWorkerProcess:
+        async def start(self, prompt: str):
+            raise FlowStopRequested("blocked", input_tokens=40, output_tokens=20)
+
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=10,
+        total_output_tokens=5,
+        context_usage=None,
+    )
+    factory, _, _ = _reviewer_factory([make_response(make_goal_verdict(False, "missing X"), 5, 3)])
+
+    with pytest.raises(FlowStopRequested) as exc_info:
+        await run_goal_loop(
+            task=TaskConfig(name="t1", prompt="x", goal="g"),
+            goal_text="g",
+            rendered_task_prompt="TASK",
+            worker_process=RaisingWorkerProcess(),
+            initial_result=initial_result,
+            parent_agent_config=make_agent_config(tools=[]),
+            process_factory=factory,
+            callbacks=Callbacks(),
+            phase_id="p1",
+            compact_if_needed=_noop_compact,
+        )
+
+    assert exc_info.value.input_tokens == 40 + 5
+    assert exc_info.value.output_tokens == 20 + 3
 
 
 async def test_run_goal_loop_parse_retry_succeeds(tmp_path):

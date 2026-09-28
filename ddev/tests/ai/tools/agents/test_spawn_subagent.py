@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from ddev.ai.agent.exceptions import AgentError
+from ddev.ai.agent.exceptions import AgentError, FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason, ToolCall
 from ddev.ai.config.models import AgentConfig
@@ -199,6 +199,25 @@ async def test_react_process_failure(
     assert "error" in names and "finish" in names
     assert names.index("error") < names.index("finish")
     assert next(e for e in events if e["event"] == "finish")["success"] is False
+
+
+async def test_flow_stop_requested_preserves_child_tokens(
+    process_factory: ProcessFactoryBuilder,
+    raising_agent: type[RaisingAgent],
+    subagent_log: SubagentLog,
+):
+    """The parent decides whether a child's stop request escalates to the whole run, but the
+    tokens that child already spent must still be reported — not silently dropped as if the
+    child had produced nothing."""
+    factory = process_factory(
+        lambda: raising_agent(FlowStopRequested("no such endpoint", input_tokens=120, output_tokens=60))
+    )
+    result = await make_tool(factory)(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="blocked"))
+
+    assert result.success is False
+    assert "blocked" in result.error and "no such endpoint" in result.error
+    assert result.total_input_tokens == 120
+    assert result.total_output_tokens == 60
 
 
 # ---------------------------------------------------------------------------

@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
+from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason
 from ddev.ai.tools.agents.spawn_identical_subagents import (
@@ -119,6 +120,30 @@ async def test_partial_failure(
     )
     assert result.success is True
     assert result.data.count("— ok") == 2
+
+
+async def test_flow_stop_requested_child_tokens_counted_in_aggregate(
+    process_factory: ProcessFactoryBuilder,
+    mock_agent: type[MockAgent],
+    raising_agent: type[RaisingAgent],
+    make_response: ResponseFactory,
+):
+    """A child that asks to stop must still contribute its tokens to the tool's total — the parent
+    decides whether to escalate, but the tokens already spent are real regardless."""
+
+    def agent_factory():
+        agent_factory.n += 1
+        if agent_factory.n == 2:
+            return raising_agent(FlowStopRequested("blocked", input_tokens=40, output_tokens=20))
+        return mock_agent([make_response(text="ok")])
+
+    agent_factory.n = 0
+    result = await make_tool(process_factory(agent_factory))(
+        SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments("a", "b"))
+    )
+
+    assert result.total_input_tokens == 10 + 40
+    assert result.total_output_tokens == 5 + 20
 
 
 async def test_all_fail(process_factory: ProcessFactoryBuilder, raising_agent: type[RaisingAgent]):
