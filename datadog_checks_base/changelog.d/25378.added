@@ -1,0 +1,1 @@
+Add the `omit_histogram_bound_tags` OpenMetrics V2 option, which submits histogram bucket distributions without the `upper_bound` and `lower_bound` tags on Agents that support it.
