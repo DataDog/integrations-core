@@ -41,8 +41,15 @@
         "metadata_path": "metadata.csv"
       }
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "Cisco Catalyst Center Overview": "assets/dashboards/cisco_catalyst_center_overview.json",
+      "Cisco Catalyst Center Devices and Interfaces": "assets/dashboards/cisco_catalyst_center_devices_and_interfaces.json"
+    },
+    "monitors": {
+      "Collection failure": "assets/monitors/collection_failure.json",
+      "Managed device unreachable": "assets/monitors/managed_device_unreachable.json",
+      "Degraded network health": "assets/monitors/degraded_network_health.json"
+    },
     "saved_views": {}
   },
   "author": {
