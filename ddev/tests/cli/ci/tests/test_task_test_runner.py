@@ -260,7 +260,7 @@ async def test_an_accepted_dispatch_counts_the_batch_and_its_jobs(tmp_path: Path
     assert [record.value for record in sink.records_named('batch.jobs.count')] == [2]
     counted = sink.records_named('jobs.count')
     assert [record.value for record in counted] == [1, 1]
-    assert [record.tags['dispatcher.batch.job.integration'] for record in counted] == ['ntp', 'kafka']
+    assert [record.tags['dispatcher.batch.job.target'] for record in counted] == ['ntp', 'kafka']
     assert {record.tags['dispatcher.component'] for record in counted} == {'test-runner'}
 
 
@@ -521,9 +521,9 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
     common_tags = (
         "dispatcher.base_branch:master,dispatcher.base_sha:base-sha-ccc,dispatcher.batch.id:batch-1,"
         "dispatcher.batch.job.e2e_tests:false,dispatcher.batch.job.environment:py3.13,"
-        "dispatcher.batch.job.integration:ntp,dispatcher.batch.job.minimum_base_package:false,"
+        "dispatcher.batch.job.minimum_base_package:false,"
         "dispatcher.batch.job.name:{name},dispatcher.batch.job.platform:linux,"
-        "dispatcher.batch.job.python_version:3.13,dispatcher.batch.job.unit_tests:true,"
+        "dispatcher.batch.job.python_version:3.13,dispatcher.batch.job.target:ntp,dispatcher.batch.job.unit_tests:true,"
         "dispatcher.checkout_sha:merge-sha-bbb,dispatcher.context:pr,dispatcher.pr.number:123,"
         "dispatcher.run.is_fork:false,team:agent-integrations"
     )
@@ -867,7 +867,7 @@ async def test_queue_duration_is_emitted_once_per_job_attempt_across_polls_and_r
     samples = sink.records_named("job.queue.duration")
     assert [record.value for record in samples] == [DEFAULT_QUEUE_DURATION_SECONDS]
     assert samples[0].kind is MetricKind.DISTRIBUTION
-    assert samples[0].tags["dispatcher.batch.job.integration"] == "ntp"
+    assert samples[0].tags["dispatcher.batch.job.target"] == "ntp"
     assert samples[0].tags["dispatcher.batch.job.platform"] == "linux"
     assert {record.tags["dispatcher.component"] for record in samples} == {"test-runner"}
 

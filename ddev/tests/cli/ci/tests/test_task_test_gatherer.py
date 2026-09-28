@@ -487,11 +487,11 @@ def test_an_accepted_final_result_reports_the_batches_outcomes(tmp_path: Path):
     drain_queue(gatherer.bus.queue)
     assert [record.value for record in sink.records_named("batches.failed")] == [1]
     failed = [
-        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.failed")
+        (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.failed")
     ]
     assert failed == [(1, "ntp"), (0, "kafka"), (0, "redis")]
     skipped = [
-        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.skipped")
+        (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.skipped")
     ]
     assert skipped == [(0, "ntp"), (1, "kafka"), (0, "redis")]
     assert {record.tags["dispatcher.component"] for record in sink.records_named("jobs.failed")} == {"test-gatherer"}
@@ -544,7 +544,7 @@ def test_completed_attempts_report_their_github_duration_once(tmp_path: Path):
     durations = sink.records_named("job.duration")
     assert [record.value for record in durations] == [DEFAULT_DURATION_SECONDS, 150.0]
     assert all(record.kind is MetricKind.DISTRIBUTION for record in durations)
-    assert [record.tags["dispatcher.batch.job.integration"] for record in durations] == ["ntp", "ntp"]
+    assert [record.tags["dispatcher.batch.job.target"] for record in durations] == ["ntp", "ntp"]
     assert [record.tags["dispatcher.batch.job.environment"] for record in durations] == ["py3.13", "py3.13"]
     assert [record.tags["dispatcher.batch.job.status"] for record in durations] == ["success", "failure"]
     assert {record.tags["dispatcher.component"] for record in durations} == {"test-gatherer"}
@@ -619,7 +619,7 @@ def test_a_final_result_reports_a_duration_progress_never_observed(tmp_path: Pat
 
     [duration] = sink.records_named("job.duration")
     assert duration.value == DEFAULT_DURATION_SECONDS
-    assert duration.tags["dispatcher.batch.job.integration"] == "ntp"
+    assert duration.tags["dispatcher.batch.job.target"] == "ntp"
     assert duration.tags["dispatcher.batch.job.status"] == "success"
 
 
@@ -677,11 +677,11 @@ def test_an_observed_attempt_the_commit_never_collected_reports_no_outcome(tmp_p
     )
     drain_queue(gatherer.bus.queue)
 
-    reported = [record.tags["dispatcher.batch.job.integration"] for record in sink.records_named("jobs.failed")]
+    reported = [record.tags["dispatcher.batch.job.target"] for record in sink.records_named("jobs.failed")]
     assert reported == ["ntp"]
     assert [record.value for record in sink.records_named("jobs.failed")] == [0]
     assert [
-        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.skipped")
+        (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.skipped")
     ] == [(0, "ntp")]
 
 
