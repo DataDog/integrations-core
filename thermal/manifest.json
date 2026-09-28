@@ -31,7 +31,10 @@
       },
       "metrics": {
         "prefix": "system.thermal.",
-        "check": "system.thermal.temperature",
+        "check": [
+          "system.thermal.temperature",
+          "system.thermal.pressure_level"
+        ],
         "metadata_path": "metadata.csv"
       }
     }

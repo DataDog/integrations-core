@@ -35,7 +35,7 @@ The Thermal check is not enabled by default. To enable it, complete the followin
 
 [Run the Agent's status subcommand][5] and look for `thermal` under the **Checks** section.
 
-On Windows hosts without thermal zones, such as some virtual machines, the check runs without submitting metrics. On macOS, the check submits only the sensors exposed by the hardware.
+On Windows and macOS, the check submits only the thermal metrics exposed by the host. If the host exposes no supported thermal data, as on some virtual machines, the check runs without submitting metrics.
 
 ## Data collected
 
@@ -54,8 +54,8 @@ On macOS, the `system.thermal.pressure_level` metric has a `pressure_level:<name
 | `0` | `pressure_level:nominal` | No thermal constraint. |
 | `1` | `pressure_level:moderate` | Mild thermal pressure. |
 | `2` | `pressure_level:heavy` | Substantial thermal pressure. |
-| `3` | `pressure_level:trapping` | Severe thermal pressure that requires the system to limit work. |
-| `4` | `pressure_level:sleeping` | Critical thermal pressure that may force the system to sleep. |
+| `3` | `pressure_level:trapping` | The system is trapping heat and cannot reduce or maintain its temperature, so it begins limiting work. |
+| `4` | `pressure_level:sleeping` | Critical thermal pressure that starts the system sleep process. |
 
 The check uses `pressure_level:unknown` if macOS returns an unrecognized pressure value.
 
