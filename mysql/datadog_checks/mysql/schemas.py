@@ -6,12 +6,12 @@ from __future__ import annotations
 
 import contextlib
 import datetime
-import json
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Iterator
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.format import json
 from datadog_checks.mysql.cursor import CommenterDictCursor, CommenterSSDictCursor
 from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
@@ -54,15 +54,13 @@ def supports_single_query_collection(version, is_mariadb: bool) -> bool:
 def _as_list(value: Any) -> list:
     """Coerce a JSON_ARRAYAGG result into a list of dicts.
 
-    pymysql may hand back JSON columns either already decoded (list) or as a raw ``str``/``bytes``
-    payload depending on the driver's type conversion. ``NULL`` (no matching rows) becomes ``[]``.
+    pymysql may hand back JSON columns either already decoded (list) or as a raw `str`/`bytes`
+    payload depending on the driver's type conversion. `NULL` (no matching rows) becomes `[]`.
     """
     if value is None:
         return []
-    if isinstance(value, (bytes, bytearray)):
-        value = value.decode("utf-8")
-    if isinstance(value, str):
-        value = json.loads(value)
+    if isinstance(value, (str, bytes, bytearray)):
+        value = json.decode(value)
     return value or []
 
 
@@ -104,7 +102,7 @@ def group_indexes(rows: list[dict]) -> list[dict]:
     """Group flat index key-part rows into per-index dicts, matching the previously shipped collector.
 
     Each input row is one key part; rows are grouped by index name and key parts are ordered by
-    ``seq_in_index`` (JSON_ARRAYAGG does not preserve order).
+    `seq_in_index` (JSON_ARRAYAGG does not preserve order).
     """
     by_index: dict[str, dict] = {}
     order: list[str] = []
@@ -152,7 +150,7 @@ def normalize_foreign_keys(rows: list[dict]) -> list[dict]:
 def group_partitions(rows: list[dict]) -> list[dict]:
     """Group flat partition/subpartition rows into per-partition dicts, matching the previously shipped collector.
 
-    ``table_rows`` and ``data_length`` are summed across a partition's subpartition rows.
+    `table_rows` and `data_length` are summed across a partition's subpartition rows.
     """
     partitions: dict[str, dict] = {}
     order: list[str] = []
@@ -205,9 +203,9 @@ class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
 
 
 class _ChunkedTableCursor:
-    """Adapts the chunked (shape B) generator to the cursor ``fetchone`` interface.
+    """Adapts the chunked (shape B) generator to the cursor `fetchone` interface.
 
-    The base ``SchemaCollector`` drives collection by repeatedly calling ``_get_next(cursor)``; this
+    The base `SchemaCollector` drives collection by repeatedly calling `_get_next(cursor)`; this
     wrapper lets the chunked strategy yield fully-assembled table records the same way the
     single-query strategy yields one DB row per table.
     """
@@ -274,16 +272,25 @@ class MySqlSchemaCollector(SchemaCollector):
                     self._database_count,
                 )
 
+    def _query_hint(self) -> str:
+        """The MySQL optimizer hint that enforces the per-query timeout, for the query templates' `{hint}`.
+
+        MariaDB has no equivalent hint, so `_execute` wraps its statements instead.
+        """
+        timeout = self._query_timeout()
+        if (
+            timeout is None
+            or self._check.is_mariadb
+            or not self._check.version.version_compatible(MYSQL_MIN_QUERY_TIMEOUT_VERSION)
+        ):
+            return ""
+        return "/*+ MAX_EXECUTION_TIME({}) */".format(max(1, int(timeout * 1000)))
+
     def _execute(self, cursor, query: str, params=None):
         self._metadata._raise_if_cancelled()
         timeout = self._query_timeout()
-        if timeout is not None:
-            if self._check.is_mariadb:
-                query = "SET STATEMENT max_statement_time={} FOR {}".format(timeout, query)
-            elif self._check.version.version_compatible(MYSQL_MIN_QUERY_TIMEOUT_VERSION):
-                timeout_ms = max(1, int(timeout * 1000))
-                query = query.replace("SELECT", "SELECT /*+ MAX_EXECUTION_TIME({}) */".format(timeout_ms), 1)
-
+        if timeout is not None and self._check.is_mariadb:
+            query = "SET STATEMENT max_statement_time={} FOR {}".format(timeout, query)
         cursor.execute(query, params)
 
     @property
@@ -314,7 +321,7 @@ class MySqlSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[dict]:
         with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
-            self._execute(cursor, SQL_DATABASES)
+            self._execute(cursor, SQL_DATABASES.format(hint=self._query_hint()))
             databases = [dict(row) for row in cursor.fetchall()]
         self._database_count = len(databases)
         return CancellableDatabases(databases, self._metadata._raise_if_cancelled)
@@ -325,7 +332,7 @@ class MySqlSchemaCollector(SchemaCollector):
             yield _ChunkedTableCursor(self._iter_chunked_tables(database_name))
             return
 
-        query = get_schema_json_query(self._check.version)
+        query = get_schema_json_query(self._check.version, hint=self._query_hint())
         params = [database_name] * 5
         # SSCursor streams rows one at a time, keeping integration memory to roughly one table's
         # worth of already-aggregated metadata plus the payload chunk buffer.
@@ -390,13 +397,14 @@ class MySqlSchemaCollector(SchemaCollector):
     def _iter_chunked_tables(self, database_name: str) -> Iterator[dict]:
         """Shape B: stream the table list, then fetch detail one chunk of tables at a time.
 
-        Yields intermediate records shaped like ``{name, engine, row_format, create_time, _columns,
-        _indexes, _foreign_keys, _partitions}`` where the ``_*`` values are flat detail rows that
-        ``_build_table`` normalizes identically to the single-query strategy.
+        Yields intermediate records shaped like `{name, engine, row_format, create_time, _columns,
+        _indexes, _foreign_keys, _partitions}` where the `_*` values are flat detail rows that
+        `_build_table` normalizes identically to the single-query strategy.
         """
+        hint = self._query_hint()
         conn = self._metadata.get_db_connection()
         with conn.cursor(CommenterDictCursor) as cursor:
-            self._execute(cursor, SQL_TABLES, database_name)
+            self._execute(cursor, SQL_TABLES.format(hint=hint), database_name)
             tables = [dict(row) for row in cursor.fetchall()]
 
         for tables_chunk in get_list_chunks(tables, TABLES_CHUNK_SIZE):
@@ -404,12 +412,18 @@ class MySqlSchemaCollector(SchemaCollector):
             placeholders = ",".join(["%s"] * len(table_names))
             params = [database_name] + table_names
 
-            columns_by_table = self._fetch_grouped(conn, SQL_COLUMNS.format(placeholders), params)
-            indexes_by_table = self._fetch_grouped(
-                conn, get_indexes_query(self._check.version, self._check.is_mariadb, placeholders), params
+            columns_by_table = self._fetch_grouped(
+                conn, SQL_COLUMNS.format(hint=hint, placeholders=placeholders), params
             )
-            foreign_keys_by_table = self._fetch_grouped(conn, SQL_FOREIGN_KEYS.format(placeholders), params)
-            partitions_by_table = self._fetch_grouped(conn, SQL_PARTITION.format(placeholders), params)
+            indexes_by_table = self._fetch_grouped(
+                conn, get_indexes_query(self._check.version, self._check.is_mariadb, placeholders, hint), params
+            )
+            foreign_keys_by_table = self._fetch_grouped(
+                conn, SQL_FOREIGN_KEYS.format(hint=hint, placeholders=placeholders), params
+            )
+            partitions_by_table = self._fetch_grouped(
+                conn, SQL_PARTITION.format(hint=hint, placeholders=placeholders), params
+            )
 
             for table in tables_chunk:
                 name = table["name"]

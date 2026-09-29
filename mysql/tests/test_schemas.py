@@ -250,23 +250,49 @@ def test_use_single_query_opts_out_on_supported_server(use_single_query, expecte
     assert collector._resolve_strategy() == expected
 
 
+def _run_every_schema_query(collector) -> list[str]:
+    """Run the database list, the chunked table list and detail queries, and the single query."""
+    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
+    db_cursor.fetchall.side_effect = [[{"name": "app"}], [{"name": "t1"}]] + [[]] * 4
+
+    collector._get_databases()
+    list(collector._iter_chunked_tables("app"))
+    collector._strategy = STRATEGY_SINGLE_QUERY
+    with collector._get_cursor("app"):
+        pass
+
+    return [call.args[0] for call in db_cursor.execute.call_args_list]
+
+
+MYSQL_TIMEOUT_HINT = "SELECT /*+ MAX_EXECUTION_TIME(60000) */"
+MARIADB_TIMEOUT_PREFIX = "SET STATEMENT max_statement_time=60.0 FOR "
+
+
 @pytest.mark.parametrize(
-    "is_mariadb,version,expected_query",
+    "is_mariadb,version,expected_timeout",
     [
-        (False, "5.6.51", "SELECT 1"),
-        (False, "5.7.7", "SELECT 1"),
-        (False, "5.7.8", "SELECT /*+ MAX_EXECUTION_TIME(60000) */ 1"),
-        (False, "5.7.44", "SELECT /*+ MAX_EXECUTION_TIME(60000) */ 1"),
-        (True, "10.11.18", "SET STATEMENT max_statement_time=60.0 FOR SELECT 1"),
+        (False, "5.6.51", None),
+        (False, "5.7.7", None),
+        (False, "5.7.8", MYSQL_TIMEOUT_HINT),
+        (False, "8.0.35", MYSQL_TIMEOUT_HINT),
+        (True, "10.11.18", MARIADB_TIMEOUT_PREFIX),
     ],
 )
-def test_execute_applies_supported_query_timeout(is_mariadb, version, expected_query):
+def test_every_schema_query_applies_supported_query_timeout(is_mariadb, version, expected_timeout):
     collector = _make_collector(STRATEGY_CHUNKED, is_mariadb=is_mariadb, version=version)
-    cursor = mock.MagicMock()
 
-    collector._execute(cursor, "SELECT 1")
+    queries = _run_every_schema_query(collector)
 
-    cursor.execute.assert_called_once_with(expected_query, None)
+    assert len(queries) == 7
+    for query in queries:
+        if expected_timeout == MYSQL_TIMEOUT_HINT:
+            assert MYSQL_TIMEOUT_HINT in query
+        elif expected_timeout == MARIADB_TIMEOUT_PREFIX:
+            assert query.startswith(MARIADB_TIMEOUT_PREFIX)
+            assert "MAX_EXECUTION_TIME" not in query
+        else:
+            assert "MAX_EXECUTION_TIME" not in query
+            assert not query.startswith("SET STATEMENT")
 
 
 @pytest.mark.parametrize("max_execution_time", [0, -1])
@@ -275,6 +301,7 @@ def test_non_positive_max_execution_time_disables_query_timeout(max_execution_ti
     cursor = mock.MagicMock()
 
     assert collector._query_timeout() is None
+    assert collector._query_hint() == ""
     collector._execute(cursor, "SELECT 1")
     cursor.execute.assert_called_once_with("SELECT 1", None)
 
@@ -292,6 +319,26 @@ def test_chunked_collection_fetches_connection_once_per_database():
     assert [table["name"] for table in tables] == ["t1", "t2"]
     assert db_cursor.execute.call_count == 9
     get_db_connection.assert_called_once()
+
+
+def test_chunked_collection_passes_table_names_as_query_parameters():
+    """Table names come from the server and must never be interpolated into SQL."""
+    collector = _make_collector(STRATEGY_CHUNKED, version="5.7.44")
+    table_names = ["normal_table", 'bad"table', "x') UNION SELECT user()#"]
+    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
+    db_cursor.fetchall.side_effect = [[{"name": name} for name in table_names]] + [[]] * 4
+
+    list(collector._iter_chunked_tables("mydb"))
+
+    # The first query lists the tables; the rest fetch column, index, foreign key, and partition detail.
+    detail_calls = db_cursor.execute.call_args_list[1:]
+    assert len(detail_calls) == 4
+    for call in detail_calls:
+        query, params = call.args
+        assert params == ["mydb"] + table_names
+        assert query.count("%s") == len(params)
+        for name in table_names:
+            assert name not in query
 
 
 def _single_query_row():
