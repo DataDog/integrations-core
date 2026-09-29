@@ -54,4 +54,19 @@ mongosh --quiet "$URI" --eval '
   act.events.insertMany(docs.map((d) => ({kind: d.status, at: d.created})));
   print("chunks=" + db.getSiblingDB("config").chunks.countDocuments({}));'
 
+# Subjects for the lock contention in activity-gen.sh. Created through mongos so
+# both databases are registered, with shard01 as primary, before activity-gen
+# touches them directly on shard-a.
+log "seeding lockdrill (hot documents, capped collection) and lockdrill_aux"
+mongosh --quiet "$URI" --eval '
+  const drill = db.getSiblingDB("lockdrill");
+  for (const id of [1, 2]) {
+    drill.hot.updateOne({_id: id}, {$setOnInsert: {n: 0}}, {upsert: true});
+  }
+  if (!drill.getCollectionNames().includes("capped")) {
+    drill.createCollection("capped", {capped: true, size: 1048576});
+  }
+  db.getSiblingDB("lockdrill_aux").t.insertOne({at: new Date()});
+  print("lockdrill ok");'
+
 log "seed complete"

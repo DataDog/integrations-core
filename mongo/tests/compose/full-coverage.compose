@@ -17,7 +17,8 @@
 #   - rs-init   one-shot: initiates both replica sets.
 #   - seed      one-shot: adds the shard, creates the monitoring user, and seeds a
 #               sharded, pre-split, indexed collection (seed.sh).
-#   - activity-gen  continuous workload through mongos (activity-gen.sh).
+#   - activity-gen  continuous workload through mongos, plus bounded lock
+#                   contention on shard-a (activity-gen.sh).
 #   - mongo-full    fixture entrypoint: forwards mongos (27017), shard-a (27018),
 #                   and shard-b (27019), gated on the whole environment.
 #
@@ -122,6 +123,8 @@ services:
     environment:
       DB_HOST: mongos
       DB_PORT: "27017"
+      # The lock contention's mongod-only commands target the shard primary.
+      DB_SHARD_HOST: shard-a
       DB_USERNAME: "${DB_USERNAME:-datadog}"
       DB_PASSWORD: "${DB_PASSWORD:-datadog}"
       # Set ACTIVITY_GEN=0 (host env) for a quiescent mongo-full: the container

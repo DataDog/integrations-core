@@ -4,7 +4,8 @@
 # most of them). Each iteration is one mongosh session through mongos, so the
 # connection and session counters churn too. Writes replicate to the delayed
 # secondary, which keeps opcountersrepl and the repl.* counters moving.
-# Consumes DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD from the fixture.
+# Consumes DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD and DB_SHARD_HOST from the
+# fixture.
 set -eu
 
 URI="mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT:-27017}/activity?authSource=admin"
@@ -28,6 +29,92 @@ while :; do
     const s = db.getMongo().startSession();
     while (true) { s.getDatabase("activity").events.findOne(); sleep(5000); }
   ' || true
+  sleep 5
+done &
+
+# Lock contention. serverStatus only reports locks.<type>.acquireWaitCount and
+# timeAcquiringMicros once an acquisition has waited on a conflicting mode, and
+# the one-at-a-time traffic below never conflicts. A slow writer holds intent
+# locks (IX) on lockdrill.hot almost continuously, two fast writers and a dbStats
+# keep more intent requests (IS/IX) arriving, and two holders periodically
+# request conflicting modes, so the holders wait on the slow writer and the fast
+# requests queue behind the holders:
+#   - createIndexes (S for the drain, X to commit) and dropIndexes (X): Collection;
+#   - dbHash (S) and a cross-database renameCollection (X on the target): Database;
+#   - fsync lock (S) and setUserWriteBlockMode (X): Global.
+# Writes to the capped collection take the Metadata lock in X mode. dbHash,
+# fsync, and the cross-database rename are mongod-only, so they and the writers
+# run directly on the shard primary (where the waits are counted); the cluster
+# commands run through mongos. Every lock held beyond its command is released in
+# a finally, and each holder first clears one a killed predecessor left behind.
+SHARD_URI="mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_SHARD_HOST}:${DB_SHARD_PORT:-27017}/lockdrill?authSource=admin&directConnection=true"
+MONGOS_LOCK_URI="mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT:-27017}/lockdrill?authSource=admin"
+
+log "starting lock contention"
+# The $where runs in a single plan step, which does not yield, so each update
+# holds its locks for the ~100 ms sleep. It targets its own document: sharing
+# one with the fast writers turns the sleep into write-conflict retries.
+while :; do
+  mongosh --quiet "$SHARD_URI" --eval '
+    while (true) {
+      try {
+        db.hot.updateOne({_id: 2, $where: "sleep(100); return true;"}, {$inc: {n: 1}});
+      } catch (e) {
+        if (e.codeName !== "UserWritesBlocked") throw e;
+      }
+    }' || log "slow lock writer failed; restarting"
+  sleep 5
+done &
+
+for w in 1 2; do
+  while :; do
+    mongosh --quiet "$SHARD_URI" --eval '
+      while (true) {
+        try {
+          db.hot.updateOne({_id: 1}, {$inc: {n: 1}});
+          db.hot.findOne({_id: 1});
+          db.runCommand({dbStats: 1});
+        } catch (e) {
+          // Expected while setUserWriteBlockMode briefly blocks writes.
+          if (e.codeName !== "UserWritesBlocked") throw e;
+        }
+        sleep(1);
+      }' || log "lock writer $w failed; restarting"
+    sleep 5
+  done &
+done
+
+while :; do
+  mongosh --quiet "$SHARD_URI" --eval '
+    const admin = db.getSiblingDB("admin");
+    const unlock = () => {
+      try { admin.runCommand({fsyncUnlock: 1}); return true; }
+      catch (e) { if (e.codeName === "IllegalOperation") return false; throw e; }
+    };
+    while (unlock()) {}
+    while (true) {
+      db.hot.createIndex({n: 1});
+      db.hot.dropIndex({n: 1});
+      db.runCommand({dbHash: 1});
+      db.getSiblingDB("lockdrill_aux").t.insertOne({at: new Date()});
+      admin.runCommand({renameCollection: "lockdrill_aux.t", to: "lockdrill.renamed", dropTarget: true});
+      admin.runCommand({fsync: 1, lock: true});
+      try { sleep(100); } finally { unlock(); }
+      sleep(3000);
+    }' || log "shard lock holder failed; restarting"
+  sleep 5
+done &
+
+while :; do
+  mongosh --quiet "$MONGOS_LOCK_URI" --eval '
+    const admin = db.getSiblingDB("admin");
+    const unblock = () => admin.runCommand({setUserWriteBlockMode: 1, global: false});
+    unblock();
+    while (true) {
+      db.capped.insertOne({at: new Date()});
+      try { admin.runCommand({setUserWriteBlockMode: 1, global: true}); } finally { unblock(); }
+      sleep(3000);
+    }' || log "mongos lock holder failed; restarting"
   sleep 5
 done &
 
