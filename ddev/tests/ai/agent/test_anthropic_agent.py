@@ -1373,7 +1373,7 @@ async def test_compaction_preserves_a_valid_conversation_for_the_next_request(pr
 @pytest.mark.parametrize('preserve_pending', [False, True])
 @pytest.mark.parametrize('failure', ['empty', 'truncated', 'tool_call', 'connection', 'cancelled'])
 async def test_unsuccessful_compaction_keeps_original_history_and_prompt(preserve_pending: bool, failure: str):
-    """A rejected summary or failed request must not discard the conversation needed for retry."""
+    """A rejected summary or failed request raises but must leave the live conversation intact."""
     agent, _ = make_agent()
     agent._history = [
         {'role': 'user', 'content': 'Original task'},

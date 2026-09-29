@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Final, cast, overload
+from typing import TYPE_CHECKING, Any, Final, overload
 
 import anthropic
 from anthropic.types import MessageParam
@@ -32,7 +32,6 @@ from ddev.ai.tools.registry import ToolRegistry
 if TYPE_CHECKING:
     from anthropic.types import (
         CacheControlEphemeralParam,
-        ContentBlockParam,
         Message,
         TextBlockParam,
         ToolParam,
@@ -118,17 +117,28 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         content = message["content"]
         if isinstance(content, str):
             return message
-        blocks = [block.model_dump(exclude_none=True) if isinstance(block, BaseModel) else block for block in content]
-        return cast(
-            MessageParam,
-            {**message, "content": [b for b in blocks if b["type"] not in {"thinking", "redacted_thinking"}]},
+        blocks: list[Any] = [
+            block.model_dump(exclude_none=True) if isinstance(block, BaseModel) else block for block in content
+        ]
+        return MessageParam(
+            role=message["role"],
+            content=[b for b in blocks if b["type"] not in {"thinking", "redacted_thinking"}],
         )
 
     async def compact(self) -> AgentResponse | None:
+        """Collapse history to the original task plus an LLM summary.
+
+        Raises `AgentError` if the summary is empty, truncated, or contains tool calls. The original
+        history is left intact, and callers decide whether that fails the run.
+        """
         return await self._compact_history(preserve_pending=False)
 
     async def compact_preserving_last_turn(self) -> AgentResponse | None:
-        """Summarize prior work while keeping the pending assistant tool calls executable."""
+        """Summarize prior work while keeping the pending assistant tool calls executable.
+
+        Raises `AgentError` if the summary is empty, truncated, or contains tool calls. The original
+        history is left intact, and callers decide whether that fails the run.
+        """
         return await self._compact_history(preserve_pending=True)
 
     async def _compact_history(self, *, preserve_pending: bool) -> AgentResponse | None:
@@ -143,9 +153,11 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             # A final response can contain server results whose calls were in earlier pause_turn
             # responses, or citations tied to that research. Summarize those together and replay
             # only the local calls that will receive tool results after compaction.
-            content = cast("list[ContentBlockParam]", history_to_summarize[-1]["content"])
-            pending_message = {"role": "assistant", "content": [b for b in content if b["type"] == "tool_use"]}
-            research = [b for b in content if b["type"] != "tool_use"]
+            last = history_to_summarize[-1]["content"]
+            if not isinstance(last, list) or not any(b["type"] == "tool_use" for b in last):
+                return await self._compact_history(preserve_pending=False)
+            pending_message = {"role": "assistant", "content": [b for b in last if b["type"] == "tool_use"]}
+            research = [b for b in last if b["type"] != "tool_use"]
             history_to_summarize = history_to_summarize[:-1]
             if research:
                 history_to_summarize.append({"role": "assistant", "content": research})
