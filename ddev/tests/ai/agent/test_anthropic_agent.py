@@ -1262,3 +1262,142 @@ async def test_stream_cancellation_propagates_without_recording_history() -> Non
         await agent.send("Hi")
 
     assert agent.history == []
+
+
+@pytest.mark.parametrize('web_tool', ['web_search', 'web_fetch'])
+async def test_compaction_summarizes_web_continuations_before_resuming_local_tools(web_tool: str):
+    """PR #25427: compaction must not orphan server results or citations from paused research."""
+    if web_tool == 'web_search':
+        server_call = make_server_tool_use('srv1', 'API pagination')
+        server_result = make_web_search_result('srv1', result_count=1)
+    else:
+        server_call = make_server_fetch_use('srv1', 'https://example.com/doc')
+        server_result = make_web_fetch_result('srv1', 'https://example.com/doc', '2026-01-01T00:00:00Z')
+    cited_text = anthropic.types.TextBlock(
+        type='text',
+        text='The API supports pagination.',
+        citations=[
+            anthropic.types.CitationsWebSearchResultLocation(
+                type='web_search_result_location',
+                url='https://example.com/doc',
+                title='API docs',
+                cited_text='pagination',
+                encrypted_index='original-context',
+            )
+        ],
+    )
+    pending = make_tool_use_block(id='pending')
+    agent, _ = make_agent()
+    agent._client.messages.stream = make_stream_mock(
+        [
+            make_response('end_turn', [make_text_block('Starting research')]),
+            make_response('pause_turn', [server_call]),
+            make_response('tool_use', [server_result, cited_text, pending]),
+            make_response('end_turn', [make_text_block('The API supports pagination.')]),
+            make_response('end_turn', [make_text_block('Done')]),
+        ]
+    )
+    await agent.send('Research the API')
+    await agent.send('Continue researching')
+    await agent.compact_preserving_last_turn()
+    transcript = agent._client.messages.stream.call_args.kwargs['messages'][0]['content'][0]['text']
+    assert server_call.id in transcript
+    assert server_result.type in transcript
+    assert cited_text.text in transcript
+    await agent.send([ToolResultMessage(tool_call_id='pending', result=ToolResult(success=True, data='file data'))])
+    messages = agent._client.messages.stream.call_args.kwargs['messages']
+    # Only the executable local call is replayed; research and its citation context are summarized.
+    assert messages[-2]['content'] == [pending.model_dump(exclude_none=True)]
+    assert messages[-1]['content'][0]['tool_use_id'] == 'pending'
+
+
+@pytest.mark.parametrize('preserve_pending', [False, True])
+async def test_compaction_preserves_a_valid_conversation_for_the_next_request(preserve_pending: bool):
+    """Compaction must not replay orphan results or signed thinking when resuming tool work."""
+    thinking = anthropic.types.ThinkingBlock(type='thinking', thinking='private reasoning', signature='signed')
+    redacted = anthropic.types.RedactedThinkingBlock(type='redacted_thinking', data='encrypted')
+    agent, _ = make_agent()
+    agent._client.messages.stream = make_stream_mock(
+        [
+            make_response('tool_use', [thinking, make_tool_use_block(id='old')]),
+            make_response(
+                'tool_use' if preserve_pending else 'end_turn',
+                [redacted, make_tool_use_block(id='pending') if preserve_pending else make_text_block('Finished')],
+            ),
+            make_response('end_turn', [thinking, make_text_block('Verified facts and remaining work.')]),
+            make_response('end_turn', [make_text_block('Done')]),
+        ]
+    )
+    await agent.send('Research the API')
+    await agent.send(
+        [ToolResultMessage(tool_call_id='old', result=ToolResult(success=True, data='important evidence'))]
+    )
+    if preserve_pending:
+        await agent.compact_preserving_last_turn()
+    else:
+        await agent.compact()
+
+    summary_request = agent._client.messages.stream.call_args_list[2].kwargs
+    assert len(summary_request['messages']) == 1
+    transcript = summary_request['messages'][0]['content'][0]['text']
+    assert 'important evidence' in transcript
+    assert 'private reasoning' not in transcript
+    assert 'encrypted' not in transcript
+    assert 'pending' not in transcript
+
+    next_input = (
+        [ToolResultMessage(tool_call_id='pending', result=ToolResult(success=True, data='new evidence'))]
+        if preserve_pending
+        else 'Continue'
+    )
+    await agent.send(next_input)
+    request = agent._client.messages.stream.call_args.kwargs
+    assert request['system'][0]['text'] == 'You are helpful.'
+    assert request['messages'][1]['content'] == 'Verified facts and remaining work.'
+    outstanding = set()
+    for message in request['messages']:
+        content = message['content']
+        if not isinstance(content, list):
+            assert not outstanding
+            continue
+        for block in content:
+            assert block['type'] not in {'thinking', 'redacted_thinking'}
+            if block['type'] == 'tool_use':
+                outstanding.add(block['id'])
+            elif block['type'] == 'tool_result':
+                outstanding.remove(block['tool_use_id'])
+                assert block['tool_use_id'] == 'pending'
+    assert not outstanding
+
+
+@pytest.mark.parametrize('preserve_pending', [False, True])
+@pytest.mark.parametrize('failure', ['empty', 'truncated', 'tool_call', 'connection', 'cancelled'])
+async def test_unsuccessful_compaction_keeps_original_history_and_prompt(preserve_pending: bool, failure: str):
+    """A rejected summary or failed request raises but must leave the live conversation intact."""
+    agent, _ = make_agent()
+    agent._history = [
+        {'role': 'user', 'content': 'Original task'},
+        {'role': 'assistant', 'content': 'Important evidence'},
+        {'role': 'user', 'content': 'Continue'},
+        {'role': 'assistant', 'content': [make_tool_use_block()] if preserve_pending else 'More evidence'},
+    ]
+    original = agent.history
+    responses = {
+        'empty': make_response('end_turn', [make_text_block('  ')]),
+        'truncated': make_response('max_tokens', [make_text_block('Partial summary')]),
+        'tool_call': make_response('tool_use', [make_tool_use_block()]),
+    }
+    if failure in responses:
+        agent._client.messages.stream = make_stream_mock([responses[failure]])
+    else:
+        error = (
+            asyncio.CancelledError() if failure == 'cancelled' else anthropic.APIConnectionError(request=MagicMock())
+        )
+        agent._client.messages.stream = MagicMock(return_value=_stream_cm_raising_on_final_message(error))
+    with pytest.raises(asyncio.CancelledError if failure == 'cancelled' else AgentError):
+        if preserve_pending:
+            await agent.compact_preserving_last_turn()
+        else:
+            await agent.compact()
+    assert agent.history == original
+    assert agent.system_prompt == 'You are helpful.'

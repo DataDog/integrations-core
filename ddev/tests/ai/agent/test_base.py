@@ -4,7 +4,7 @@
 
 import pytest
 
-from ddev.ai.agent.base import _COMPACT_SYSTEM_PROMPT, BaseAgent
+from ddev.ai.agent.base import COMPACT_SYSTEM_PROMPT, BaseAgent
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -114,7 +114,7 @@ async def test_compact_uses_compaction_system_prompt() -> None:
     agent = ConcreteAgent(responses=["summary"])
     agent._history = make_history(4)
     await agent.compact()
-    assert agent.send_calls[0]["system_prompt"] == _COMPACT_SYSTEM_PROMPT
+    assert agent.send_calls[0]["system_prompt"] == COMPACT_SYSTEM_PROMPT
 
 
 async def test_compact_restores_original_system_prompt() -> None:
