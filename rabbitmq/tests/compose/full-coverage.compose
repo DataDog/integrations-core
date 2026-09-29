@@ -18,7 +18,11 @@
 #   - unroutable  producer-only publisher to an unbound routing key, for the
 #                 unroutable-dropped counters.
 #   - conn-churn  looping short-lived AMQP clients, for the connection/channel
-#                 opened/closed counters and a varying consumer count.
+#                 opened/closed counters, a varying consumer count, and a
+#                 varying unacked count.
+#   - autoack     auto-ack consumer, for the *.messages.delivered.count counters.
+#   - redeliver   nack/requeue consumer on a durable queue, for the redelivery
+#                 counters and rabbitmq.queue.messages.persistent.
 #   - rabbitmq-full  fixture entrypoint: forwards the broker's ports and gates on
 #                    the workload, so depending on it brings up everything.
 services:
@@ -114,7 +118,10 @@ services:
 
   # Short-lived AMQP clients on a loop. The `load` connections live for the whole
   # run, so without this the connection/channel opened/closed counters and the
-  # consumer count stay flat after startup.
+  # consumer count stay flat after startup. The consumer is capped below the
+  # publish rate with no prefetch limit, so the queue's unacked count climbs
+  # through each cycle; `load`'s is pinned at its --qos, which leaves
+  # rabbitmq.queue.messages_unacknowledged.rate at 0.
   conn-churn:
     image: pivotalrabbitmq/perf-test:latest
     depends_on:
@@ -128,9 +135,53 @@ services:
           java -jar /perf_test/perf-test.jar \
             --uri amqp://guest:guest@rabbitmq-broker:5672 \
             --producers 1 --consumers 1 --queue churn-conn --auto-delete true \
-            --rate 10 --time 20 >/dev/null 2>&1 || true
+            --rate 10 --consumer-rate 5 --time 20 >/dev/null 2>&1 || true
           sleep 10
         done
+
+  # Long-lived auto-ack consumer. The *.messages.delivered.count counters only
+  # count deliveries in automatic acknowledgement mode, and every other
+  # consumer here acks manually. Idles with ACTIVITY_GEN=0.
+  autoack:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 1 --queue autoack --auto-delete false \
+          --autoack --rate 10
+
+  # Consumer that nacks with requeue, so messages are redelivered: drives
+  # rabbitmq.queue.messages.redeliver.count and .redelivered.count. The
+  # persistent flag makes perf-test declare the queue durable and publish
+  # persistent messages, and since nacked messages never leave, the queue always
+  # holds some, for rabbitmq.queue.messages.persistent. x-max-length bounds it.
+  # Idles with ACTIVITY_GEN=0.
+  redeliver:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 1 --queue redeliver --auto-delete false \
+          --flag persistent --nack --rate 5 --consumer-rate 10 --qos 10 \
+          --queue-args x-max-length=200
 
   activity-gen:
     image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
@@ -166,6 +217,10 @@ services:
       unroutable:
         condition: service_started
       conn-churn:
+        condition: service_started
+      autoack:
+        condition: service_started
+      redeliver:
         condition: service_started
     entrypoint: ["sh", "-c"]
     command:
