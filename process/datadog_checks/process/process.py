@@ -387,22 +387,31 @@ class ProcessCheck(AgentCheck):
         return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
-        # Build the ppid map ourselves instead of psutil.Process.children(recursive=True),
-        # which aborts entirely if any single pid on the system is inaccessible.
-        ppid_map = defaultdict(list)
-        for p in psutil.pids():
-            try:
-                ppid_map[psutil.Process(p).ppid()].append(p)
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                self.log.debug('Could not read ppid for pid %s, excluded from child collection: %s', p, e)
-                continue
+        try:
+            # On platforms with a native bulk ppid lookup (Windows, Linux), this is a single
+            # fast call and is what psutil.Process.children(recursive=True) uses internally.
+            # On other platforms (eg. AIX), psutil builds this by calling ppid() once per pid
+            # with no AccessDenied handling, aborting entirely if a single pid is inaccessible.
+            ppid_map = psutil._ppid_map()
+        except psutil.AccessDenied:
+            ppid_map = {}
+            for p in psutil.pids():
+                try:
+                    ppid_map[p] = psutil.Process(p).ppid()
+                except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                    self.log.debug('Could not read ppid for pid %s, excluded from child collection: %s', p, e)
+                    continue
+
+        reverse_ppid_map = defaultdict(list)
+        for pid, ppid in ppid_map.items():
+            reverse_ppid_map[ppid].append(pid)
 
         children_pids = set()
         for pid in pids:
             stack = [pid]
             while stack:
                 current = stack.pop()
-                for child_pid in ppid_map.get(current, ()):
+                for child_pid in reverse_ppid_map.get(current, ()):
                     if child_pid not in children_pids:
                         children_pids.add(child_pid)
                         stack.append(child_pid)

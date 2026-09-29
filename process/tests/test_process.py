@@ -229,8 +229,29 @@ def test_check_collect_children(mock_process, mock_pids, reset_process_list_cach
     aggregator.assert_metric('system.processes.number', value=1, tags=generate_expected_tags(instance))
 
 
+def test_check_collect_children_uses_fast_ppid_map(reset_process_list_cache, aggregator, dd_run_check):
+    # On platforms with a native bulk ppid lookup (eg. Windows, Linux), psutil._ppid_map() succeeds
+    # in a single call; the slower per-pid fallback (psutil.pids() + Process.ppid()) must not run.
+    instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    fake_process = MockProcess()
+    fake_process.pid = 1
+    with (
+        patch('psutil._ppid_map', return_value={1: 999, 2: 1, 3: 2}) as mock_ppid_map,
+        patch('psutil.pids') as mock_pids,
+        patch('psutil.Process', return_value=fake_process),
+    ):
+        dd_run_check(process)
+    mock_ppid_map.assert_called_once()
+    mock_pids.assert_not_called()
+    aggregator.assert_metric('system.processes.number', value=3, tags=generate_expected_tags(instance))
+
+
 def test_check_collect_children_skips_inaccessible_pid(reset_process_list_cache, aggregator, dd_run_check):
-    # pid 0 raises AccessDenied on ppid(), but its siblings/descendants must still be collected.
+    # On platforms without a native bulk ppid lookup (eg. AIX), psutil._ppid_map() itself calls
+    # ppid() once per pid with no AccessDenied handling and raises on the first inaccessible one
+    # (eg. pid 0). The fallback we build ourselves must skip inaccessible pids instead of failing
+    # for every matched process.
     processes = {
         0: PpidMockProcess(0, deny_access=True),
         1: PpidMockProcess(1, ppid_value=999),
@@ -240,6 +261,7 @@ def test_check_collect_children_skips_inaccessible_pid(reset_process_list_cache,
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     with (
+        patch('psutil._ppid_map', side_effect=psutil.AccessDenied(0)),
         patch('psutil.pids', return_value=list(processes)),
         patch('psutil.Process', side_effect=lambda pid: processes[pid]),
     ):
