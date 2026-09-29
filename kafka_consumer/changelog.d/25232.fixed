@@ -1,0 +1,1 @@
+Avoid fetching offsets for consumer groups that do not match the configured group pattern.
