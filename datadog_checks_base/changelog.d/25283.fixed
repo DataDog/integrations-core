@@ -1,0 +1,1 @@
+Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled.

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class BatchingConfig(BaseModel):
-    """Policy for turning discovered test units into batched plans, read from `[dispatcher.batching]`."""
+    """Policy for turning changed files into batched plans, read from `[dispatcher.batching]`."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -25,6 +25,9 @@ class BatchingConfig(BaseModel):
     max_jobs_per_batch: int = Field(default=240, gt=0, le=240)
     # Lets an integration with more jobs than one batch holds span several batches.
     allow_integration_splitting: bool = False
+    # Tested when a change touches the CI plumbing every test job runs, such as `setup-ddev`. `disk`
+    # runs unit, E2E, and minimum-base-package jobs on both Linux and Windows in a few minutes.
+    test_infrastructure_targets: tuple[str, ...] = ("disk",)
 
 
 class RetryLimitsConfig(BaseModel):
@@ -106,7 +109,7 @@ class DispatcherConfig(BaseModel):
     """
 
     batching: BatchingConfig = BatchingConfig()
-    """Policy for turning discovered test units into batches, from `[dispatcher.batching]`."""
+    """Policy for turning changed files into batches, from `[dispatcher.batching]`."""
 
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
     """Rate limiter tiers shared by every task, from `[dispatcher.github_rate_limits]`."""
