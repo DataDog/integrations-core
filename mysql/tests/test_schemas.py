@@ -4,6 +4,7 @@
 
 import datetime
 import json
+import threading
 from unittest import mock
 
 import pytest
@@ -362,7 +363,8 @@ def test_base_event_includes_flavor_and_bare_version():
     assert collector.kind == "mysql_databases"
 
 
-def test_collect_schemas_warns_when_no_tables_are_visible():
+def _make_collecting_collector(databases):
+    """Build a collector that can run `collect_schemas` end to end, where each database has no tables."""
     collector = _make_collector(STRATEGY_SINGLE_QUERY)
     collector._check.reported_hostname = "db-host"
     collector._check.database_identifier = "db-host"
@@ -372,9 +374,35 @@ def test_collect_schemas_warns_when_no_tables_are_visible():
     collector._check.agent_version = "7.70.0"
     collector._metadata._tags = None
     db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
-    db_cursor.fetchall.return_value = [{"name": "app"}, {"name": "other"}]
+    db_cursor.fetchall.return_value = databases
     collector._get_cursor = mock.Mock(return_value=mock.MagicMock())
     collector._get_next = mock.Mock(return_value=None)
+    return collector
+
+
+def test_collect_schemas_stops_at_next_database_when_cancelled():
+    collector = _make_collecting_collector([{"name": "app"}, {"name": "other"}])
+    cancel_event = threading.Event()
+
+    def raise_if_cancelled():
+        if cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
+
+    def cancel_during_collection(database_name):
+        cancel_event.set()
+        return mock.MagicMock()
+
+    collector._metadata._raise_if_cancelled.side_effect = raise_if_cancelled
+    collector._get_cursor.side_effect = cancel_during_collection
+
+    with pytest.raises(Exception, match="cancelled"):
+        collector.collect_schemas()
+
+    collector._get_cursor.assert_called_once_with("app")
+
+
+def test_collect_schemas_warns_when_no_tables_are_visible():
+    collector = _make_collecting_collector([{"name": "app"}, {"name": "other"}])
 
     collector.collect_schemas()
 

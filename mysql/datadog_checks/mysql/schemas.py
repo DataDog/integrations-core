@@ -8,7 +8,7 @@ import contextlib
 import datetime
 import json
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Iterator
+from typing import TYPE_CHECKING, Any, Callable, Iterator
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.mysql.cursor import CommenterDictCursor, CommenterSSDictCursor
@@ -218,6 +218,24 @@ class _ChunkedTableCursor:
         return next(self._rows, None)
 
 
+class CancellableDatabases(list):
+    """Database list that raises once the job is cancelled, before the next database starts.
+
+    The base `SchemaCollector` catches exceptions per database, so a cancellation raised by a query
+    is swallowed and collection moves on. The loop iterates this list outside that handler, so
+    raising here reaches `DBMAsyncJob._job_loop`, which reports it as a cancellation.
+    """
+
+    def __init__(self, databases: list[dict], raise_if_cancelled: Callable[[], None]):
+        super().__init__(databases)
+        self._raise_if_cancelled = raise_if_cancelled
+
+    def __iter__(self) -> Iterator[dict]:
+        for database in super().__iter__():
+            self._raise_if_cancelled()
+            yield database
+
+
 class MySqlSchemaCollector(SchemaCollector):
     _check: "MySql"
     _config: MySqlSchemaCollectorConfig
@@ -296,7 +314,7 @@ class MySqlSchemaCollector(SchemaCollector):
             self._execute(cursor, SQL_DATABASES)
             databases = [dict(row) for row in cursor.fetchall()]
         self._database_count = len(databases)
-        return databases
+        return CancellableDatabases(databases, self._metadata._raise_if_cancelled)
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name: str):
