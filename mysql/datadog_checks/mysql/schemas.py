@@ -10,6 +10,7 @@ import json
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Iterator
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.mysql.cursor import CommenterDictCursor, CommenterSSDictCursor
 from datadog_checks.mysql.queries import (
@@ -198,9 +199,9 @@ class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
         self.collection_interval = schemas_config.get("collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         self.payload_chunk_size = schemas_config.get("payload_chunk_size", DEFAULT_PAYLOAD_CHUNK_SIZE)
         self.max_execution_time = schemas_config.get("max_execution_time", DEFAULT_MAX_EXECUTION_TIME)
-        # None chooses by server version (see MYSQL_MIN_SINGLE_QUERY_VERSION). An explicit value
-        # forces that strategy on MySQL (debugging escape hatch); MariaDB is always chunked.
-        self.collection_strategy = schemas_config.get("collection_strategy")
+        # Undocumented escape hatch: false always uses the chunked strategy. When true, single-query is
+        # used only where the server supports it (see supports_single_query_collection).
+        self.use_single_query = is_affirmative(schemas_config.get("use_single_query", True))
 
 
 class _ChunkedTableCursor:
@@ -244,6 +245,7 @@ class MySqlSchemaCollector(SchemaCollector):
         self._metadata = metadata
         self._tables_found = False
         self._database_count = 0
+        self._strategy = STRATEGY_CHUNKED
         super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
 
     def _query_timeout(self) -> float | None:
@@ -256,6 +258,9 @@ class MySqlSchemaCollector(SchemaCollector):
     def collect_schemas(self) -> bool:
         self._tables_found = False
         self._database_count = 0
+        # Resolved once per run so the cursor and the row mapping always agree, even if the check
+        # thread updates the server version mid-collection.
+        self._strategy = self._resolve_strategy()
         try:
             return super().collect_schemas()
         finally:
@@ -299,13 +304,11 @@ class MySqlSchemaCollector(SchemaCollector):
             event["tags"] = self._metadata._tags
         return event
 
-    def _effective_strategy(self) -> str:
-        """Resolve the collection strategy based on flavor, configuration, and server version."""
-        if self._check.is_mariadb:
-            return STRATEGY_CHUNKED
-        if self._config.collection_strategy:
-            return self._config.collection_strategy
-        if supports_single_query_collection(self._check.version, self._check.is_mariadb):
+    def _resolve_strategy(self) -> str:
+        """Resolve the collection strategy based on configuration, flavor, and server version."""
+        if self._config.use_single_query and supports_single_query_collection(
+            self._check.version, self._check.is_mariadb
+        ):
             return STRATEGY_SINGLE_QUERY
         return STRATEGY_CHUNKED
 
@@ -318,7 +321,7 @@ class MySqlSchemaCollector(SchemaCollector):
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name: str):
-        if self._effective_strategy() == STRATEGY_CHUNKED:
+        if self._strategy == STRATEGY_CHUNKED:
             yield _ChunkedTableCursor(self._iter_chunked_tables(database_name))
             return
 
@@ -336,7 +339,7 @@ class MySqlSchemaCollector(SchemaCollector):
     def _map_row(self, database: dict, cursor_row: dict) -> dict:
         self._tables_found = True
         object = super()._map_row(database, cursor_row)
-        if self._effective_strategy() == STRATEGY_CHUNKED:
+        if self._strategy == STRATEGY_CHUNKED:
             table = self._build_table(
                 cursor_row,
                 cursor_row.get("_columns") or [],

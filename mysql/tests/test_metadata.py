@@ -120,11 +120,11 @@ def test_metadata_collection_interval_and_enabled(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-# ``None`` exercises the default (version-selected) strategy -- single_query on MySQL 8.0+, chunked
-# on 5.7 and MariaDB. ``'chunked'`` forces the chunked strategy, which works on every supported
-# version. Both must produce identical schema payloads.
-@pytest.mark.parametrize('collection_strategy', [None, 'chunked'])
-def test_collect_schemas(aggregator, dd_run_check, dbm_instance, collection_strategy):
+# `use_single_query=True` (the default) uses single-query on MySQL 8.0+ and chunked on 5.7 and MariaDB.
+# `False` always uses chunked, which works on every supported version. Both must produce identical
+# schema payloads.
+@pytest.mark.parametrize('use_single_query', [True, False])
+def test_collect_schemas(aggregator, dd_run_check, dbm_instance, use_single_query):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
     is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
@@ -666,10 +666,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance, collection_stra
         'datadog_test_schemas_second': exp_datadog_test_schemas_second,
     }
 
-    schemas_config = {"enabled": True}
-    if collection_strategy is not None:
-        schemas_config["collection_strategy"] = collection_strategy
-    dbm_instance['collect_schemas'] = schemas_config
+    dbm_instance['collect_schemas'] = {"enabled": True, "use_single_query": use_single_query}
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
 

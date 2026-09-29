@@ -31,9 +31,9 @@ def _make_collector(strategy, *, is_mariadb=False, version="8.0.35", config=None
     check.is_mariadb = is_mariadb
     check.version = MySQLVersion(version, "MariaDB" if is_mariadb else "MySQL", "unspecified")
     metadata = mock.MagicMock()
-    schemas_config = {"collection_strategy": strategy}
-    schemas_config.update(config or {})
-    return MySqlSchemaCollector(check, metadata, MySqlSchemaCollectorConfig(schemas_config))
+    collector = MySqlSchemaCollector(check, metadata, MySqlSchemaCollectorConfig(config or {}))
+    collector._strategy = strategy
+    return collector
 
 
 def test_normalize_columns_matches_legacy_transforms():
@@ -237,10 +237,17 @@ def test_supports_single_query_collection_none_version():
     assert supports_single_query_collection(None, False) is False
 
 
-def test_mariadb_cannot_force_single_query_strategy():
-    collector = _make_collector(STRATEGY_SINGLE_QUERY, is_mariadb=True)
+@pytest.mark.parametrize(
+    "use_single_query,expected",
+    [
+        (True, STRATEGY_SINGLE_QUERY),
+        (False, STRATEGY_CHUNKED),
+    ],
+)
+def test_use_single_query_opts_out_on_supported_server(use_single_query, expected):
+    collector = _make_collector(STRATEGY_CHUNKED, version="8.0.35", config={"use_single_query": use_single_query})
 
-    assert collector._effective_strategy() == STRATEGY_CHUNKED
+    assert collector._resolve_strategy() == expected
 
 
 @pytest.mark.parametrize(
