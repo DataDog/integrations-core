@@ -32,6 +32,7 @@ from ddev.ai.tools.registry import ToolRegistry
 if TYPE_CHECKING:
     from anthropic.types import (
         CacheControlEphemeralParam,
+        ContentBlockParam,
         Message,
         TextBlockParam,
         ToolParam,
@@ -136,10 +137,19 @@ class AnthropicAgent(BaseAgent[MessageParam]):
 
         original_history = self._history
         original_system = self._system_prompt
-        # Tool results in the prefix belong to older calls that must be summarized together.
-        # Retain only the pending assistant message, not its preceding tool-result message.
-        history_to_summarize = original_history[:-1] if preserve_pending else original_history
-        transcript = json.dumps([self._without_thinking(message) for message in history_to_summarize])
+        history_to_summarize = [self._without_thinking(message) for message in original_history]
+        pending_message: MessageParam | None = None
+        if preserve_pending:
+            # A final response can contain server results whose calls were in earlier pause_turn
+            # responses, or citations tied to that research. Summarize those together and replay
+            # only the local calls that will receive tool results after compaction.
+            content = cast("list[ContentBlockParam]", history_to_summarize[-1]["content"])
+            pending_message = {"role": "assistant", "content": [b for b in content if b["type"] == "tool_use"]}
+            research = [b for b in content if b["type"] != "tool_use"]
+            history_to_summarize = history_to_summarize[:-1]
+            if research:
+                history_to_summarize.append({"role": "assistant", "content": research})
+        transcript = json.dumps(history_to_summarize)
         self._history = []
         self._system_prompt = COMPACT_SYSTEM_PROMPT
         try:
@@ -161,14 +171,14 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             original_history[0],
             {"role": "assistant", "content": response.text},
         ]
-        if preserve_pending:
+        if pending_message is not None:
             compacted.extend(
                 [
                     {
                         "role": "user",
                         "content": "Continue the task; results for the following pending tool calls will follow.",
                     },
-                    self._without_thinking(original_history[-1]),
+                    pending_message,
                 ]
             )
         self._history = compacted

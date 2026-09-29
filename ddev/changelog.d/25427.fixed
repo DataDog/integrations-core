@@ -1,0 +1,1 @@
+Fix AI conversation compaction to preserve pending local tool calls while summarizing web research without replaying orphan results or citations.

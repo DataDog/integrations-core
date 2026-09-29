@@ -1264,6 +1264,53 @@ async def test_stream_cancellation_propagates_without_recording_history() -> Non
     assert agent.history == []
 
 
+@pytest.mark.parametrize('web_tool', ['web_search', 'web_fetch'])
+async def test_compaction_summarizes_web_continuations_before_resuming_local_tools(web_tool: str):
+    """PR #25427: compaction must not orphan server results or citations from paused research."""
+    if web_tool == 'web_search':
+        server_call = make_server_tool_use('srv1', 'API pagination')
+        server_result = make_web_search_result('srv1', result_count=1)
+    else:
+        server_call = make_server_fetch_use('srv1', 'https://example.com/doc')
+        server_result = make_web_fetch_result('srv1', 'https://example.com/doc', '2026-01-01T00:00:00Z')
+    cited_text = anthropic.types.TextBlock(
+        type='text',
+        text='The API supports pagination.',
+        citations=[
+            anthropic.types.CitationsWebSearchResultLocation(
+                type='web_search_result_location',
+                url='https://example.com/doc',
+                title='API docs',
+                cited_text='pagination',
+                encrypted_index='original-context',
+            )
+        ],
+    )
+    pending = make_tool_use_block(id='pending')
+    agent, _ = make_agent()
+    agent._client.messages.stream = make_stream_mock(
+        [
+            make_response('end_turn', [make_text_block('Starting research')]),
+            make_response('pause_turn', [server_call]),
+            make_response('tool_use', [server_result, cited_text, pending]),
+            make_response('end_turn', [make_text_block('The API supports pagination.')]),
+            make_response('end_turn', [make_text_block('Done')]),
+        ]
+    )
+    await agent.send('Research the API')
+    await agent.send('Continue researching')
+    await agent.compact_preserving_last_turn()
+    transcript = agent._client.messages.stream.call_args.kwargs['messages'][0]['content'][0]['text']
+    assert server_call.id in transcript
+    assert server_result.type in transcript
+    assert cited_text.text in transcript
+    await agent.send([ToolResultMessage(tool_call_id='pending', result=ToolResult(success=True, data='file data'))])
+    messages = agent._client.messages.stream.call_args.kwargs['messages']
+    # Only the executable local call is replayed; research and its citation context are summarized.
+    assert messages[-2]['content'] == [pending.model_dump(exclude_none=True)]
+    assert messages[-1]['content'][0]['tool_use_id'] == 'pending'
+
+
 @pytest.mark.parametrize('preserve_pending', [False, True])
 async def test_compaction_preserves_a_valid_conversation_for_the_next_request(preserve_pending: bool):
     """Compaction must not replay orphan results or signed thinking when resuming tool work."""
