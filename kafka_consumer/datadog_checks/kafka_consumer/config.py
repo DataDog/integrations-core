@@ -87,21 +87,27 @@ class KafkaConfig:
         self._kafka_cluster_id_override = instance.get('kafka_cluster_id_override')
         self._auto_detected_cluster_id = ""
 
-        self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
+        if 'enable_kafka_console' in instance and 'enable_cluster_monitoring' in instance:
+            raise ConfigurationError(
+                "`enable_kafka_console` and its legacy synonym `enable_cluster_monitoring` cannot both be set. "
+                "Configure only `enable_kafka_console`."
+            )
+        self._kafka_console_enabled = is_affirmative(
+            instance.get('enable_kafka_console', instance.get('enable_cluster_monitoring', False))
+        )
 
-        if self._cluster_monitoring_enabled:
+        if self._kafka_console_enabled:
             self._monitor_unlisted_consumer_groups = True
             if not is_affirmative(instance.get('monitor_unlisted_consumer_groups', False)):
                 self.log.debug(
-                    "Cluster monitoring is enabled. Automatically enabling consumer lag collection "
+                    "Kafka Console is enabled. Automatically enabling consumer lag collection "
                     "for all consumer groups (monitor_unlisted_consumer_groups)."
                 )
 
             self._data_streams_enabled = True
             if not is_affirmative(instance.get('data_streams_enabled', False)):
                 self.log.debug(
-                    "Cluster monitoring is enabled. Automatically enabling Data Streams monitoring "
-                    "(data_streams_enabled)."
+                    "Kafka Console is enabled. Automatically enabling Data Streams monitoring (data_streams_enabled)."
                 )
         else:
             self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))

@@ -1,0 +1,1 @@
+Restore manifest generation by default for `ddev create` and remove manifest-less configuration overrides.

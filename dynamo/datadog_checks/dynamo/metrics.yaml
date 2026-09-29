@@ -18,6 +18,10 @@ dynamo_frontend_time_to_first_token_seconds: frontend.time_to_first_token.second
 dynamo_frontend_inter_token_latency_seconds: frontend.inter_token_latency.seconds
 dynamo_frontend_embedding_latency_seconds: frontend.embedding_latency.seconds
 dynamo_frontend_tokenizer_latency_ms: frontend.tokenizer_latency_ms
+dynamo_frontend_tokenizer_cache_hits: frontend.tokenizer_cache_hits
+dynamo_frontend_tokenizer_cache_misses: frontend.tokenizer_cache_misses
+dynamo_frontend_event_loop_delay_seconds: frontend.event_loop_delay.seconds
+dynamo_frontend_event_loop_stall: frontend.event_loop_stall
 dynamo_frontend_cached_tokens: frontend.cached_tokens
 dynamo_frontend_kv_hit_rate: frontend.kv_hit_rate
 dynamo_frontend_kv_transfer_estimated_latency_seconds: frontend.kv_transfer_estimated_latency.seconds
@@ -61,6 +65,15 @@ dynamo_router_overhead_seq_hashing_ms: router.overhead.seq_hashing_ms
 dynamo_router_overhead_scheduling_ms: router.overhead.scheduling_ms
 dynamo_router_overhead_total_ms: router.overhead.total_ms
 
+# Runtime health, request-plane, and transport metrics exposed by the frontend and workers.
+dynamo_request_plane_queue_seconds: request_plane.queue.seconds
+dynamo_request_plane_send_seconds: request_plane.send.seconds
+dynamo_request_plane_roundtrip_ttft_seconds: request_plane.roundtrip_ttft.seconds
+dynamo_tokio_worker_busy_ratio: tokio.worker_busy_ratio
+dynamo_transport_tcp_bytes_sent: transport.tcp.bytes_sent
+dynamo_transport_tcp_bytes_received: transport.tcp.bytes_received
+dynamo_transport_tcp_errors: transport.tcp.errors
+
 # Metrics exposed by Dynamo backend workers (python -m dynamo.vllm/dynamo.sglang/dynamo.trtllm) on the
 # system status server enabled via the DYN_SYSTEM_PORT env var (commonly 8081, or 9090 under the k8s operator).
 # Source: lib/runtime/src/metrics/prometheus_names.rs (work_handler, task_tracker, distributed_runtime, kvstats)
@@ -68,6 +81,7 @@ dynamo_component_requests: component.requests
 dynamo_component_request_bytes: component.request_bytes
 dynamo_component_response_bytes: component.response_bytes
 dynamo_component_inflight_requests: component.inflight_requests
+dynamo_component_model_load_time_seconds: dynamo_component_model_load_time_seconds
 dynamo_component_request_duration_seconds: component.request_duration.seconds
 dynamo_component_errors: component.errors
 dynamo_component_cancellation: component.cancellation
@@ -93,6 +107,8 @@ dynamo_component_total_blocks: component.kv_cache.total_blocks
 dynamo_component_gpu_cache_usage_percent: component.kv_cache.gpu_cache_usage_percent
 dynamo_component_kv_cache_hit_rate: component.kv_cache.hit_rate
 dynamo_component_kv_cache_events_applied: component.kv_cache.events_applied
+dynamo_component_kv_publisher_zmq_events: component.kv_publisher.zmq_events
+dynamo_component_kv_publisher_zmq_filtered_events: component.kv_publisher.zmq_filtered_events
 # Aggregate request metrics exposed by the KV router through the component metrics hierarchy.
 dynamo_component_router_requests: component.router.requests
 dynamo_component_router_requests_started: component.router.requests_started

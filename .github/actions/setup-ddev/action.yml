@@ -4,7 +4,7 @@ description: Install uv, restore the shared Python dependency cache, and install
 inputs:
   install-mode:
     description: >-
-      Install source for ddev. Allowed values: local (install editable ddev and
+      Install source for ddev. Allowed values: local (install ddev and
       datadog_checks_dev from this checkout), pypi (install ddev from PyPI).
     required: false
     default: local
@@ -171,7 +171,7 @@ runs:
     - name: Install ddev from local folder
       if: ${{ inputs.install-mode == 'local' }}
       shell: bash
-      run: uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+      run: uv pip install --system ./datadog_checks_dev[cli] ./ddev
 
     - name: Install ddev from PyPI
       if: ${{ inputs.install-mode == 'pypi' }}

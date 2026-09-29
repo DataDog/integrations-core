@@ -7,11 +7,15 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 opj = os.path.join
+
+KUBECONFIG_STATE = 'argocd_kubeconfig'
 
 
 @pytest.fixture
@@ -44,10 +48,12 @@ def dd_environment(dd_save_state):
                 'http://argocd-notifications-controller-metrics.argocd.svc.cluster.local:9001/metrics'
             ),
         }
+        save_state(KUBECONFIG_STATE, kubeconfig)
         metadata = {
             'agent_type': 'kubernetes',
             'kubernetes': {
                 'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'argocd', 'data', 'auto_conf.yaml'),
             },
         }
 
@@ -55,3 +61,8 @@ def dd_environment(dd_save_state):
         dd_save_state("argocd_instance", instance)
 
         yield instance, metadata
+
+
+@pytest.fixture(scope='session')
+def argocd_kubeconfig():
+    return get_state(KUBECONFIG_STATE)

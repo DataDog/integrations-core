@@ -92,6 +92,8 @@ def fake_async_github(mocker: MockerFixture) -> FakeAsyncGitHubClient:
         default_timeout: float = 30.0,
         transport: Any = None,
         logger: Any = None,
+        observer: Any = None,
+        rate_limiter: Any = None,
     ) -> AsyncIterator[FakeAsyncGitHubClient]:
         yield fake
 

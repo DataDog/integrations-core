@@ -5,7 +5,7 @@
 
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.logger import console_formatter
-from ddev.monitoring.metrics import MetricKind, MetricRecord, Metrics, MetricsSink
+from ddev.monitoring.metrics import MetricKind, MetricRecord, Metrics, MetricsSink, TagProjector
 from ddev.monitoring.runtime import ComponentMonitor, MonitoringRuntime
 
 __all__ = [
@@ -16,5 +16,6 @@ __all__ = [
     'MetricsSink',
     'MonitorContext',
     'MonitoringRuntime',
+    'TagProjector',
     'console_formatter',
 ]

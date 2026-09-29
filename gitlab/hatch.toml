@@ -27,3 +27,14 @@ GITLAB_IMAGE = "gitlab/gitlab-ce"
 GITLAB_VERSION = "latest"
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 GITLAB_IMAGE = "gitlab/gitlab-ce"
+
+# Env for verifying the metrics that are not yet in METRICS_MAP. Uses a recent
+# GitLab (the Workhorse/Sidekiq exporters and the nested gitaly['configuration']
+# syntax are not available on the versions in the default matrix) and swaps in
+# gitlab-exporters.rb so every exporter is listening.
+[envs.exporters.env-vars]
+GITLAB_VERSION = "17.8.1-ce.0"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+GITLAB_IMAGE = "gitlab/gitlab-ce"
+GITLAB_CONFIG_FILE = "gitlab-exporters.rb"
+GITLAB_EXPORTERS_ENABLED = "true"

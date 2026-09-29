@@ -43,6 +43,7 @@ def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBui
         [dispatcher.batching]
         max_jobs_per_batch = 120
         allow_integration_splitting = true
+        test_infrastructure_targets = ["disk", "network"]
 
         [dispatcher.github_rate_limits]
         total_hourly_max_rate = 1500
@@ -68,6 +69,7 @@ def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBui
     assert result.github_retries.mutating.attempts == 1
     assert result.batching.max_jobs_per_batch == 120
     assert result.batching.allow_integration_splitting is True
+    assert result.batching.test_infrastructure_targets == ("disk", "network")
     assert result.global_timeout_seconds == 3600.0
     assert result.github_rate_limits.total_hourly_max_rate == 1500
     assert result.github_rate_limits.slow_integrations == frozenset({"mongo", "mysql"})

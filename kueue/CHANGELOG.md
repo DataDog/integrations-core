@@ -12,7 +12,7 @@
 
 * Add events for Kueue Workloads that cannot reserve quota. ([#25236](https://github.com/DataDog/integrations-core/pull/25236))
 
-## 1.1.0 / 2026-08-05
+## 1.1.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 
