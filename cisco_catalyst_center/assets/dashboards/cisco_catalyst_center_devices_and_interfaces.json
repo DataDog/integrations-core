@@ -1445,11 +1445,6 @@
                         "type": "formula",
                         "index": 0,
                         "order": "desc"
-                      },
-                      {
-                        "type": "formula",
-                        "index": 1,
-                        "order": "desc"
                       }
                     ]
                   }
@@ -1770,11 +1765,6 @@
                         "type": "formula",
                         "index": 0,
                         "order": "asc"
-                      },
-                      {
-                        "type": "formula",
-                        "index": 1,
-                        "order": "desc"
                       }
                     ]
                   }
@@ -2026,11 +2016,6 @@
                       {
                         "type": "formula",
                         "index": 0,
-                        "order": "desc"
-                      },
-                      {
-                        "type": "formula",
-                        "index": 1,
                         "order": "desc"
                       }
                     ]
@@ -2637,11 +2622,6 @@
                         "type": "formula",
                         "index": 0,
                         "order": "asc"
-                      },
-                      {
-                        "type": "formula",
-                        "index": 3,
-                        "order": "desc"
                       }
                     ]
                   }
