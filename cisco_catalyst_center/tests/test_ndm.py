@@ -251,7 +251,9 @@ def test_check_given_ndm_enabled_tags_each_device_metric_with_its_id_tags(dd_run
     # carries leaves the device's NDM record without its telemetry.
     dd_run_check(_ndm_enabled_check(instance))
 
-    for device in _ndm_devices(aggregator):
+    devices = _ndm_devices(aggregator)
+    assert devices
+    for device in devices:
         series = [m.tags for m in aggregator.metrics('cisco_catalyst_center.device.reachable')]
         [tags] = [t for t in series if f"device_uuid:{device['id']}" in t]
         assert set(device['id_tags']) <= set(tags), device['id']

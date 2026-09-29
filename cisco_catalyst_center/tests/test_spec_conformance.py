@@ -95,7 +95,10 @@ AP_CONFIGURATION_DETAIL_FIELDS = frozenset(
 
 def _ap_records():
     payload = load_wireless_synthetic('data_network_devices_wireless')
-    return [record for record in payload['response'] if record.get('apDetails')]
+    records = [record for record in payload['response'] if record.get('apDetails')]
+    # Every caller loops over these, and a loop over nothing passes without checking anything.
+    assert records, 'the synthetic wireless payload has no access point records'
+    return records
 
 
 def test_synthetic_ap_details_matches_the_documented_schema_exactly():

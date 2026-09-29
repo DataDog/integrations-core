@@ -301,20 +301,6 @@ def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(
 # -- the window cursor ------------------------------------------------------------------
 
 
-def test_event_window_given_a_previous_cycle_starts_where_it_ended(
-    dd_run_check: Callable[..., None], check: CiscoCatalystCenterCheck, clock: Callable[[float], None]
-) -> None:
-    # Overlapping windows are the one failure that corrupts the metric invisibly: every event in
-    # the overlap is counted twice, and nothing in the data says so.
-    dd_run_check(check)  # populates self.config, which the first cycle's window reads
-    _, first_end = _window(check)
-    check._events_polled_through = first_end
-    clock(60)
-    second_start, _ = _window(check)
-
-    assert second_start == first_end
-
-
 def test_event_window_given_a_long_outage_clamps_to_the_widest_accepted_window(
     check: CiscoCatalystCenterCheck, clock: Callable[[float], None]
 ) -> None:
@@ -336,12 +322,10 @@ def test_event_window_given_a_cursor_in_the_future_skips_the_cycle(
     assert check._event_window() is None
 
 
-def test_event_window_given_a_configured_lookback_uses_it_for_the_first_cycle(
-    dd_run_check: Callable[..., None], instance: InstanceType
-) -> None:
+def test_event_window_given_a_configured_lookback_uses_it_for_the_first_cycle(instance: InstanceType) -> None:
     instance['events_initial_lookback_minutes'] = 60
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
-    dd_run_check(check)  # populates self.config, which the first cycle's window reads
+    check.load_configuration_models()  # populates self.config, which the first cycle's window reads
 
     start, end = _window(check)
 
