@@ -39,9 +39,9 @@ def test_schema_collection_payload(aggregator, instance, dd_run_check):
     assert parent['type'] == 'TABLE'
     assert parent['owner'] == 'DB2INST1'
     assert parent['columns'] == [
-        {'name': 'ID', 'data_type': 'INTEGER', 'length': 4, 'scale': 0, 'nullable': False, 'default': None},
-        {'name': 'NAME', 'data_type': 'VARCHAR', 'length': 50, 'scale': 0, 'nullable': False, 'default': "'x'"},
-        {'name': 'PRICE', 'data_type': 'DECIMAL', 'length': 10, 'scale': 2, 'nullable': True, 'default': None},
+        {'name': 'ID', 'data_type': 'INTEGER', 'length': 4, 'scale': 0, 'is_nullable': False, 'default': None},
+        {'name': 'NAME', 'data_type': 'VARCHAR', 'length': 50, 'scale': 0, 'is_nullable': False, 'default': "'x'"},
+        {'name': 'PRICE', 'data_type': 'DECIMAL', 'length': 10, 'scale': 2, 'is_nullable': True, 'default': None},
     ]
     [primary_key] = parent['indexes']
     assert primary_key['is_primary'] and primary_key['is_unique']
