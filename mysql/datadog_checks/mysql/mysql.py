@@ -416,9 +416,10 @@ class MySql(DatabaseCheck):
 
     def check(self, _):
         if self._do_task is not None:
-            # A task reports only through its do-query-results events. It sends no metrics and no
-            # mysql.can_connect service check: those carry the tags of the user's own instance, so
-            # a task that fails to connect would flip that instance's status.
+            # A task reports through its do-query-results events and internal dd.mysql.do_task.*
+            # metrics only. It sends no integration metrics and no mysql.can_connect service check:
+            # those carry the tags of the user's own instance, so a task that fails to connect would
+            # flip that instance's status.
             MySQLDataObservabilityTask(self, self._do_task).run()
             return
 

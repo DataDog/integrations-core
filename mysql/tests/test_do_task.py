@@ -123,6 +123,23 @@ def _events(aggregator):
     return aggregator.get_event_platform_events(EVENT_TRACK_TYPE)
 
 
+def _metric_tags(check, *extra):
+    base = [tag for tag in check.tag_manager.get_tags() if not tag.startswith('dd.internal')]
+    return base + ['db_type:mysql', *extra]
+
+
+def _assert_count(aggregator, check, name, *tags, count=1):
+    aggregator.assert_metric(
+        name,
+        # The stub sums the values of count submissions.
+        value=count,
+        tags=_metric_tags(check, *tags),
+        count=count,
+        hostname='mysql.test',
+        metric_type=aggregator.COUNT,
+    )
+
+
 def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, instance_basic):
     check = _create_check(
         instance_basic,
@@ -176,11 +193,72 @@ def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, 
     assert first['result_id'] != second['result_id']
 
     # The task check shares the tags of the user's instance, so it must not report anything that
-    # could change that instance's status, and it starts none of the instance's async jobs.
+    # could change that instance's status, and it starts none of the instance's async jobs. Its
+    # only metrics are internal ones.
     assert not aggregator.service_checks(MySql.SERVICE_CHECK_NAME)
-    assert not aggregator.metric_names
+    assert aggregator.metric_names
+    assert all(name.startswith('dd.mysql.do_task.') for name in aggregator.metric_names)
     assert not aggregator.get_event_platform_events('dbm-health')
     assert not check._async_job_registry
+
+
+def test_metrics_report_runs_statements_and_events(aggregator, dd_run_check, instance_basic):
+    check = _create_check(
+        instance_basic,
+        [_statement('s0', 'SELECT id FROM customers'), _statement('s1', 'SELECT nope')],
+    )
+    conn = FakeConnection(
+        {
+            'SELECT id FROM customers': (['id'], [(1,), (2,)]),
+            'SELECT nope': pymysql.err.OperationalError(1054, "Unknown column 'nope'"),
+        }
+    )
+
+    _run(dd_run_check, check, conn)
+
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:completed')
+    _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:success')
+    _assert_count(
+        aggregator,
+        check,
+        'dd.mysql.do_task.statements',
+        'status:error',
+        'error_kind:sql_error',
+        'error_phase:execute',
+    )
+    _assert_count(aggregator, check, 'dd.mysql.do_task.events', count=2)
+    for status in ('success', 'error'):
+        aggregator.assert_metric(
+            'dd.mysql.do_task.statement_execution_time',
+            tags=_metric_tags(check, f'status:{status}'),
+            count=1,
+            hostname='mysql.test',
+            metric_type=aggregator.HISTOGRAM,
+        )
+    aggregator.assert_metric(
+        'dd.mysql.do_task.statement_rows',
+        value=2,
+        tags=_metric_tags(check),
+        count=1,
+        hostname='mysql.test',
+        metric_type=aggregator.HISTOGRAM,
+    )
+    for tag in _metric_tags(check):
+        assert TASK_ID not in tag
+    aggregator.assert_metric('dd.mysql.do_task.emit_failures', count=0)
+
+
+def test_failed_emit_is_counted_and_the_task_continues(aggregator, dd_run_check, instance_basic):
+    check = _create_check(instance_basic, [_statement('s0', 'SELECT 1'), _statement('s1', 'SELECT 2')])
+    conn = FakeConnection({'SELECT 1': (['1'], [(1,)]), 'SELECT 2': (['2'], [(2,)])})
+
+    with patch.object(check, 'event_platform_event', side_effect=[ValueError('boom'), None]):
+        _run(dd_run_check, check, conn)
+
+    _assert_count(aggregator, check, 'dd.mysql.do_task.emit_failures', 'exc_class:ValueError')
+    _assert_count(aggregator, check, 'dd.mysql.do_task.events')
+    _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:success', count=2)
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:completed')
 
 
 def test_each_execution_gets_a_new_result_id(aggregator, dd_run_check, instance_basic):
@@ -320,6 +398,19 @@ def test_connect_failure_reports_every_statement(aggregator, dd_run_check, insta
         assert (event['error_kind'], event['error_code'], event['error_phase']) == ('connection_error', 2003, 'connect')
         assert event['error'].startswith('Statement not executed: could not connect to the database')
 
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:connection_error')
+    _assert_count(
+        aggregator,
+        check,
+        'dd.mysql.do_task.statements',
+        'status:error',
+        'error_kind:connection_error',
+        'error_phase:connect',
+        count=2,
+    )
+    # The statements never ran, so they have no execution time.
+    aggregator.assert_metric('dd.mysql.do_task.statement_execution_time', count=0)
+
 
 def test_lost_connection_reconnects_for_the_next_statement(aggregator, dd_run_check, instance_basic):
     def lose_connection(conn):
@@ -373,6 +464,9 @@ def test_expired_task_reports_a_task_error_without_connecting(aggregator, dd_run
     )
     assert (event['chunk_index'], event['chunk_count']) == (0, 1)
     connect.assert_not_called()
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:expired')
+    _assert_count(aggregator, check, 'dd.mysql.do_task.events')
+    aggregator.assert_metric('dd.mysql.do_task.statements', count=0)
 
 
 def test_cancelled_check_skips_the_remaining_statements(aggregator, dd_run_check, instance_basic):
@@ -388,6 +482,8 @@ def test_cancelled_check_skips_the_remaining_statements(aggregator, dd_run_check
 
     assert [event['statement_id'] for event in _events(aggregator)] == ['s0']
     assert 'SELECT 2' not in conn.executed
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
+    aggregator.assert_metric('dd.mysql.do_task.runs', tags=_metric_tags(check, 'outcome:completed'), count=0)
 
 
 def test_large_results_are_split_into_chunks(aggregator, dd_run_check, instance_basic):
