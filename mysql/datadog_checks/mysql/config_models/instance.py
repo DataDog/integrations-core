@@ -148,6 +148,32 @@ class DatabaseIdentifier(BaseModel):
     template: Optional[str] = None
 
 
+class Statement(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    dbname: str
+    id: str
+    max_rows: int = Field(
+        ...,
+        description='Maximum rows returned for the statement, capped at 10000. Like a LIMIT,\nrows past it are not returned.\n',
+    )
+    query: str
+    timeout_seconds: int
+
+
+class DoTask(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    config_id: str
+    expires_at: int = Field(..., description='Unix time in seconds after which the task must not run.')
+    statements: tuple[Statement, ...]
+    task_id: str
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -298,6 +324,7 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
+    do_task: Optional[DoTask] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     exclude_hostname: Optional[bool] = None
