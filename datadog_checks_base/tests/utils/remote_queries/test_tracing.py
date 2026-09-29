@@ -13,6 +13,17 @@ from datadog_checks.base.utils.remote_queries import tracing as rq_tracing
 from .helpers import PARENT_ID, TRACE_ID, make_tracing
 
 
+def pin_development_tracing_open(monkeypatch):
+    """Pin the factory's development gate open for the factory tests below it.
+
+    Those tests cover the import and parent-context behavior beneath the gate, not the
+    gate itself, so they must not depend on the shipped development switch or on an
+    endpoint being set in this process's environment.
+    """
+    monkeypatch.setattr(rq_tracing, 'DEVELOPMENT_TRACING', True)
+    monkeypatch.setenv('DD_TRACE_AGENT_URL', 'http://127.0.0.1:8127')
+
+
 def test_root_span_carries_run_identity_and_the_success_terminal(delivery):
     tracing, tracer = make_tracing()
     stats = rq_contract.RemoteQueryRunStats(rows_emitted=3, pages_emitted=1, bytes_emitted=7)
@@ -138,16 +149,51 @@ def test_a_raising_tracer_degrades_to_noop_spans_without_touching_the_run(delive
     assert tracer.flushes == 1
 
 
+@pytest.mark.parametrize(
+    'development_tracing, endpoint, emits_spans',
+    [
+        # Fail closed: the development switch alone or the endpoint alone is not enough.
+        # Without the explicit endpoint no span is ever sent to ddtrace's default
+        # 127.0.0.1:8126, where the workspace's or a customer's own trace agent would
+        # receive it; an empty value is no endpoint.
+        (True, 'http://127.0.0.1:8127', True),
+        (True, None, False),
+        (True, '', False),
+        (False, 'http://127.0.0.1:8127', False),
+    ],
+)
+def test_factory_emits_producer_spans_only_in_development_with_an_explicit_endpoint(
+    monkeypatch, development_tracing, endpoint, emits_spans
+):
+    monkeypatch.setattr(rq_tracing, 'DEVELOPMENT_TRACING', development_tracing)
+    if endpoint is None:
+        monkeypatch.delenv('DD_TRACE_AGENT_URL', raising=False)
+    else:
+        monkeypatch.setenv('DD_TRACE_AGENT_URL', endpoint)
+
+    tracing = rq_tracing.open_remote_query_producer_tracing(None, 'postgres')
+
+    if emits_spans:
+        # The null tracing subclasses the real one, so the identity check carries the
+        # distinction.
+        assert tracing is not rq_tracing.NULL_PRODUCER_TRACING
+        assert isinstance(tracing, rq_tracing.RemoteQueryProducerTracing)
+    else:
+        assert tracing is rq_tracing.NULL_PRODUCER_TRACING
+
+
 def test_factory_falls_back_to_the_null_tracing_when_ddtrace_cannot_import(monkeypatch):
     # ddtrace's pytest plugin preloads parts of the package in this process, so the block
     # pins the exact submodule the factory imports: the from-import halts either way.
     monkeypatch.setitem(sys.modules, 'ddtrace.propagation.http', None)
+    pin_development_tracing_open(monkeypatch)
 
     assert rq_tracing.open_remote_query_producer_tracing(None, 'postgres') is rq_tracing.NULL_PRODUCER_TRACING
 
 
 @pytest.mark.parametrize('carrier', [None, {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 1}])
-def test_factory_builds_the_parent_context_from_the_validated_carrier(carrier):
+def test_factory_builds_the_parent_context_from_the_validated_carrier(monkeypatch, carrier):
+    pin_development_tracing_open(monkeypatch)
     validated = rq_contract.RemoteQueryTraceContext.model_validate(carrier) if carrier is not None else None
 
     tracing = rq_tracing.open_remote_query_producer_tracing(validated, 'clickhouse')

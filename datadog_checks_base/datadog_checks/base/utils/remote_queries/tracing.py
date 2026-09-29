@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import time
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
@@ -30,6 +31,13 @@ LOGGER = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Native producer spans (ddtrace)
 # ---------------------------------------------------------------------------
+
+# Development-only switch for the remote queries POC: the producer spans exist to show
+# the Agent's part of a run in the development harness's trace, while a real
+# customer's Agent reports to the customer's own org. Delete this constant (or set it
+# to False) to disable the Agent-side producer spans entirely; the upload requests'
+# trace-context header propagation is not gated by it.
+DEVELOPMENT_TRACING = True
 
 # The existing integrations tracing identity: every other check-owned span the Agent-bundled
 # ddtrace emits already runs under service ``datadog-agent-integrations``
@@ -513,6 +521,14 @@ def open_remote_query_producer_tracing(
 ) -> RemoteQueryProducerTracing:
     """Open one run's producer tracing against the supported global ddtrace singleton.
 
+    Producer spans are development-only: they are emitted only while
+    ``DEVELOPMENT_TRACING`` is true and the environment carries a non-empty
+    ``DD_TRACE_AGENT_URL`` — the same variable the singleton tracer reads as its own
+    agent URL — and the gate fails closed, so without the explicit development endpoint
+    no span is ever sent to ddtrace's default ``127.0.0.1:8126``, where the workspace's
+    own trace agent (reporting to the EU dogfood org) or a customer's agent would
+    receive them. Anywhere the gate is closed the null tracing answers instead.
+
     The import is lazy and wrapped: ddtrace initializes its supported singleton tracer
     and telemetry on import, which is accepted as-is, and any failure — the package
     unimportable on a non-Agent host, a raising tracer — answers the null tracing, so
@@ -520,6 +536,12 @@ def open_remote_query_producer_tracing(
     upload requests' tracing fallback. The singleton is never configured, patched, or
     shut down here.
     """
+    if not DEVELOPMENT_TRACING:
+        LOGGER.debug('Native remote query producer spans are disabled: development tracing is off')
+        return NULL_PRODUCER_TRACING
+    if not os.environ.get('DD_TRACE_AGENT_URL'):
+        LOGGER.debug('Native remote query producer spans are disabled: no explicit trace agent endpoint')
+        return NULL_PRODUCER_TRACING
     try:
         from ddtrace.propagation.http import HTTPPropagator
         from ddtrace.trace import Context, tracer
