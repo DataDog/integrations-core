@@ -1,0 +1,1 @@
+Add a task mode that runs one-off Data Observability SQL statements once and reports each result as an event.
