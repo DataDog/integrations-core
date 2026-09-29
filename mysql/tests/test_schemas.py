@@ -371,7 +371,8 @@ def test_collect_schemas_warns_when_no_tables_are_visible():
     collector._check.cloud_metadata = {}
     collector._check.agent_version = "7.70.0"
     collector._metadata._tags = None
-    collector._get_databases = mock.Mock(return_value=[{"name": "app"}, {"name": "other"}])
+    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
+    db_cursor.fetchall.return_value = [{"name": "app"}, {"name": "other"}]
     collector._get_cursor = mock.Mock(return_value=mock.MagicMock())
     collector._get_next = mock.Mock(return_value=None)
 

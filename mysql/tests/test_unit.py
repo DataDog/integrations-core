@@ -931,6 +931,7 @@ def test_check_gc_after_cancel():
         'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
         'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
         'data_observability': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'collect_schemas': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
     }
 
     check = MySql(common.CHECK_NAME, {}, instances=[instance])

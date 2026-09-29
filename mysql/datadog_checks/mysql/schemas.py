@@ -225,6 +225,7 @@ class MySqlSchemaCollector(SchemaCollector):
     def __init__(self, check: "MySql", metadata: "MySQLMetadata", config: MySqlSchemaCollectorConfig | None = None):
         self._metadata = metadata
         self._tables_found = False
+        self._database_count = 0
         super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
 
     def _query_timeout(self) -> float | None:
@@ -236,28 +237,18 @@ class MySqlSchemaCollector(SchemaCollector):
 
     def collect_schemas(self) -> bool:
         self._tables_found = False
-        database_count = 0
-        original_get_databases = self._get_databases
-
-        def _counting_get_databases():
-            nonlocal database_count
-            databases = original_get_databases()
-            database_count = len(databases)
-            return databases
-
-        self._get_databases = _counting_get_databases
+        self._database_count = 0
         try:
             return super().collect_schemas()
         finally:
-            self._get_databases = original_get_databases
             # Databases are visible, but MySQL hides tables from INFORMATION_SCHEMA unless the user
             # holds some privilege on them. An empty result usually means the datadog user needs
             # REFERENCES (or SELECT).
-            if database_count and not self._tables_found:
+            if self._database_count and not self._tables_found:
                 self._log.warning(
                     "No tables were found across any of the %d databases. This may indicate insufficient privileges "
                     "to view table metadata. The datadog user needs REFERENCES (or SELECT) privileges on the tables.",
-                    database_count,
+                    self._database_count,
                 )
 
     def _execute(self, cursor, query: str, params=None):
@@ -303,7 +294,9 @@ class MySqlSchemaCollector(SchemaCollector):
     def _get_databases(self) -> list[dict]:
         with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
             self._execute(cursor, SQL_DATABASES)
-            return [dict(row) for row in cursor.fetchall()]
+            databases = [dict(row) for row in cursor.fetchall()]
+        self._database_count = len(databases)
+        return databases
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name: str):
