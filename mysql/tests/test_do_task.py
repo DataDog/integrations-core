@@ -35,8 +35,6 @@ def _create_check(instance_basic, statements, expires_at=None):
     instance = deepcopy(instance_basic)
     instance.update(
         {
-            'dbm': False,
-            'only_custom_queries': True,
             'run_once': True,
             'do_task': {
                 'config_id': CONFIG_ID,
