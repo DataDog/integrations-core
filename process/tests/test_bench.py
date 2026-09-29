@@ -57,9 +57,9 @@ def test_collect_children_naive_per_pid_loop(benchmark):
         benchmark.pedantic(_naive_get_child_processes, args=({1},), rounds=3, iterations=1)
 
 
-def test_collect_children_fast_ppid_map(benchmark):
-    # The fixed implementation: a single call to psutil._ppid_map(), matching the fast
-    # path Process.children(recursive=True) already uses on Windows/Linux.
+def test_collect_children_fast_ppid_map(benchmark, monkeypatch):
+    # The fixed implementation: a single call to the platform's native bulk ppid lookup,
+    # matching the fast path Process.children(recursive=True) already uses on Windows/Linux.
     process = ProcessCheck(common.CHECK_NAME, {}, [{'name': 'foo', 'pid': 1, 'collect_children': True}])
     simulated_ppid_map = dict.fromkeys(range(1, SIMULATED_PID_COUNT + 1), 1)
 
@@ -67,8 +67,8 @@ def test_collect_children_fast_ppid_map(benchmark):
         time.sleep(SIMULATED_PPID_CALL_LATENCY)
         return simulated_ppid_map
 
-    with mock.patch('psutil._ppid_map', side_effect=slow_ppid_map):
-        benchmark.pedantic(process._get_child_processes, args=({1},), rounds=5, iterations=1)
+    monkeypatch.setattr(psutil._psplatform, 'ppid_map', slow_ppid_map, raising=False)
+    benchmark.pedantic(process._get_child_processes, args=({1},), rounds=5, iterations=1)
 
 
 def test_run(benchmark, dd_run_check):

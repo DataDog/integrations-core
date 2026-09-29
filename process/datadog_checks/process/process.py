@@ -387,13 +387,14 @@ class ProcessCheck(AgentCheck):
         return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
-        try:
-            # On platforms with a native bulk ppid lookup (Windows, Linux), this is a single
-            # fast call and is what psutil.Process.children(recursive=True) uses internally.
-            # On other platforms (eg. AIX), psutil builds this by calling ppid() once per pid
-            # with no AccessDenied handling, aborting entirely if a single pid is inaccessible.
-            ppid_map = psutil._ppid_map()
-        except psutil.AccessDenied:
+        if hasattr(psutil._psplatform, 'ppid_map'):
+            # Native bulk ppid lookup (Windows, Linux): a single fast call, same as what
+            # psutil.Process.children(recursive=True) uses internally.
+            ppid_map = psutil._psplatform.ppid_map()
+        else:
+            # No native bulk lookup (eg. AIX): psutil's own fallback calls ppid() once per
+            # pid with no AccessDenied handling, aborting entirely if a single pid is
+            # inaccessible. Rebuild it ourselves, skipping pids we can't read instead.
             ppid_map = {}
             for p in psutil.pids():
                 try:
