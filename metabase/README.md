@@ -10,6 +10,8 @@ Integrate Metabase with Datadog for:
 
 **Data Lineage**: View end-to-end lineage across Metabase collections, dashboards, and cards to understand dependencies and downstream impact.
 
+**Note**: Lineage is derived from your data warehouse, so the Metabase integration produces lineage only when at least one [supported data warehouse destination][3] is also connected to Datadog. Log collection has no such requirement.
+
 ## Setup
 
 ### Prerequisites
@@ -53,16 +55,25 @@ Integrate Metabase with Datadog for:
 
 ### Connect your Metabase account to Datadog
 
-1. Add your Metabase instance type, DNS alias or self-hosted domain, and API key.
-    |Parameters|Description|
+1. Navigate to the [Metabase integration tile][5] and enter the following information:
+
+    |Parameter|Description|
     |--------------------|--------------------|
-    |Metabase instance type|The hosting type of your Metabase instance. Valid values are `cloud` or `self-hosted`. Default is `cloud`.|
-    |Metabase DNS alias|The DNS alias of your Metabase cloud instance (required for cloud instances only). Must be at least three characters long and contain only lowercase letters, dashes, and numbers.|
-    |Metabase self-hosted instance domain|The domain of your self-hosted Metabase instance (required for self-hosted instances only). Must be publicly accessible via HTTPS only (e.g., example.com).|
-    |Metabase API key|The API key used to authenticate the API requests.|
+    |Account name|Used to identify this account in Datadog.|
+    |Instance type|The hosting type of your Metabase instance. Valid values are `cloud` or `self-hosted`. Default is `cloud`.|
+    |DNS alias|The DNS alias of your Metabase cloud instance (required for cloud instances only). Must be at least three characters long and contain only lowercase letters, dashes, and numbers.|
+    |Self-hosted instance domain|The domain of your self-hosted Metabase instance (required for self-hosted instances only). Must be publicly accessible through HTTPS only (for example, `example.com`).|
+    |API key|The API key used to authenticate the API requests.|
 
-2. Click the Save button to save your settings.
+2. Click **Save**.
 
+## What's next
+
+When your Metabase account is successfully connected, Datadog syncs and automatically derives lineage from warehouse tables and columns to Metabase cards and dashboards.
+
+Initial syncs may take up to several hours depending on the size of your Metabase deployment.
+
+After syncing, you can explore your Metabase assets and their upstream dependencies in the [Data Observability Catalog][4].
 
 ## Data Collected
 
@@ -84,3 +95,6 @@ For further assistance, contact [Datadog Support][2].
 
 [1]: https://www.metabase.com/
 [2]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/data_observability/quality_monitoring/data_warehouses/
+[4]: /data-obs/catalog
+[5]: /integrations/metabase

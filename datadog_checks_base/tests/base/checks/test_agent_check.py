@@ -1639,7 +1639,7 @@ def issue_check():
 
 
 def test_report_issue_minimal(datadog_agent, issue_check):
-    issue_check.report_issue(id="issue-1", issue_name="connection_failed")
+    issue_check.report_issue(id="issue-1", issue_name="connection_failed", issue_type="connection_failed")
 
     datadog_agent.assert_reported_issue(
         "test_check",
@@ -1647,6 +1647,7 @@ def test_report_issue_minimal(datadog_agent, issue_check):
         {
             'id': 'issue-1',
             'issue_name': 'connection_failed',
+            'issue_type': 'connection_failed',
             'title': None,
             'description': None,
             'category': None,
@@ -1663,7 +1664,8 @@ def test_report_issue_minimal(datadog_agent, issue_check):
 def test_report_issue_full(datadog_agent, issue_check):
     issue_check.report_issue(
         id="issue-2",
-        issue_name="permission_denied",
+        issue_name="Permission Denied",
+        issue_type="permission_denied",
         title="Permission denied",
         description="The check lacks required permissions.",
         category="permissions",
@@ -1681,7 +1683,8 @@ def test_report_issue_full(datadog_agent, issue_check):
         "issue-2",
         {
             'id': 'issue-2',
-            'issue_name': 'permission_denied',
+            'issue_name': 'Permission Denied',
+            'issue_type': 'permission_denied',
             'title': 'Permission denied',
             'description': 'The check lacks required permissions.',
             'category': 'permissions',
@@ -1699,15 +1702,16 @@ def test_report_issue_full(datadog_agent, issue_check):
 
 
 @pytest.mark.parametrize(
-    'issue_id, issue_name, expected_message',
+    'issue_id, issue_name, issue_type, expected_message',
     [
-        pytest.param('', 'connection_failed', 'Issue ID is required', id='missing id'),
-        pytest.param('issue-1', '', 'Issue Name is required', id='missing issue name'),
+        pytest.param('', 'connection_failed', 'connection_failed', 'Issue ID is required', id='missing id'),
+        pytest.param('issue-1', '', 'connection_failed', 'Issue Name is required', id='missing issue name'),
+        pytest.param('issue-1', 'connection_failed', '', 'Issue Type is required', id='missing issue type'),
     ],
 )
-def test_report_issue_requires_id_and_name(issue_check, issue_id, issue_name, expected_message):
+def test_report_issue_requires_required_fields(issue_check, issue_id, issue_name, issue_type, expected_message):
     with pytest.raises(ValueError, match=expected_message):
-        issue_check.report_issue(id=issue_id, issue_name=issue_name)
+        issue_check.report_issue(id=issue_id, issue_name=issue_name, issue_type=issue_type)
 
 
 def test_resolve_issue(datadog_agent, issue_check):

@@ -275,7 +275,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][17] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][18].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with [a file, a configmap, or a key-value store][18].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -321,6 +323,29 @@ spec:
   containers:
     - name: elasticsearch
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <ELASTICSEARCH_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: elastic
+        containerName: elasticsearch
+        initConfig: {}
+        instances:
+          - url: "http://%%host%%:9200"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 ##### Log collection
 
@@ -488,3 +513,4 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 [28]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
 [29]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html
 [30]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

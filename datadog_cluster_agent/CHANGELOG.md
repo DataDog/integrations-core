@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2026-09-02
+
+***Added***:
+
+* Collect DatadogInstrumentation controller resource and reconciliation telemetry by default. ([#24966](https://github.com/DataDog/integrations-core/pull/24966))
+
 ## 6.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

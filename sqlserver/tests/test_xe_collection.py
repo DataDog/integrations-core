@@ -4,7 +4,6 @@
 
 import logging
 import os
-import sys
 from unittest.mock import Mock, patch
 
 import pytest
@@ -24,11 +23,6 @@ from datadog_checks.sqlserver.xe_collection.xml_tools import (
 )
 
 CHECK_NAME = 'sqlserver'
-
-# Mock datadog_agent before imports - ensure it's properly patched at module level
-datadog_agent_mock = Mock()
-datadog_agent_mock.get_version.return_value = '7.30.0'
-sys.modules['datadog_agent'] = datadog_agent_mock
 
 
 # Helper functions
@@ -101,6 +95,7 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
+    check.agent_version = '7.30.0'
     check.tag_manager = TagManager()
     check.tag_manager.set_tag('test', 'tag')
     check.database_monitoring_query_activity = Mock()
@@ -860,11 +855,8 @@ class TestPayloadGeneration:
         assert normalized['duration_ms'] == 328.677
         assert 'query_start' in normalized  # Query start should be calculated from timestamp and duration
 
-    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
-    def test_create_event_payload(self, mock_agent, query_completion_handler):
+    def test_create_event_payload(self, query_completion_handler):
         """Test creation of event payload"""
-        mock_agent.get_version.return_value = '7.30.0'
-
         # Create a raw event
         raw_event = {
             'event_name': 'sql_batch_completed',
@@ -904,11 +896,8 @@ class TestPayloadGeneration:
         assert metadata['commands'] == ['SELECT']
         assert metadata['comments'] == []
 
-    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
-    def test_create_rqt_event(self, mock_agent, query_completion_handler):
+    def test_create_rqt_event(self, query_completion_handler):
         """Test creation of Raw Query Text event"""
-        mock_agent.get_version.return_value = '7.30.0'
-
         # Create event with SQL fields
         event = {
             'event_name': 'sql_batch_completed',
@@ -960,11 +949,8 @@ class TestPayloadGeneration:
         assert rqt_event['sqlserver']['query_start'] == '2023-01-01T11:59:50.123Z'
         assert rqt_event['sqlserver']['primary_sql_field'] == 'batch_text'
 
-    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
-    def test_create_rqt_event_attention(self, mock_agent, error_events_handler):
+    def test_create_rqt_event_attention(self, error_events_handler):
         """Test creation of Raw Query Text event for attention event"""
-        mock_agent.get_version.return_value = '7.30.0'
-
         # Create attention event with SQL fields - from the error_events_handler
         event = {
             'event_name': 'attention',
@@ -1062,11 +1048,8 @@ class TestPayloadGeneration:
         # Should return None when missing signature
         assert query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details) is None
 
-    @patch('datadog_checks.sqlserver.xe_collection.base.datadog_agent')
-    def test_create_rqt_event_error_reported(self, mock_agent, error_events_handler):
+    def test_create_rqt_event_error_reported(self, error_events_handler):
         """Test creation of Raw Query Text event for error_reported event"""
-        mock_agent.get_version.return_value = '7.30.0'
-
         # Create error_reported event with SQL fields
         event = {
             'event_name': 'error_reported',

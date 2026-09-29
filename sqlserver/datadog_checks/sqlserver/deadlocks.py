@@ -23,12 +23,7 @@ from datadog_checks.sqlserver.queries import (
     get_deadlocks_query,
     get_xe_sessions_query,
 )
-from datadog_checks.sqlserver.utils import is_azure_sql_database
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
+from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 600
 MAX_DEADLOCKS = 100
@@ -73,6 +68,9 @@ class Deadlocks(DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         self._conn_key_prefix = "dbm-deadlocks-"
+
+    def shutdown(self) -> None:
+        self._check = None
 
     def _close_db_conn(self):
         pass
@@ -166,6 +164,8 @@ class Deadlocks(DBMAsyncJob):
         raise NoXESessionError(NO_XE_SESSION_ERROR)
 
     def _query_deadlocks(self):
+        raise_if_cancelled(self._cancel_event)
+
         if self._xe_session_name is None:
             engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
             if is_azure_sql_database(engine_edition):
@@ -269,7 +269,7 @@ class Deadlocks(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "deadlocks",
             "collection_interval": self.collection_interval,

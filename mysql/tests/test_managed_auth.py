@@ -19,6 +19,7 @@ class MockAsyncJob(ManagedAuthConnectionMixin):
     """Mock async job class for testing the mixin."""
 
     def __init__(self, connection_args_provider, uses_managed_auth):
+        self._check = Mock(version=None)
         self._connection_args_provider = connection_args_provider
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0

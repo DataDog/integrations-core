@@ -18,12 +18,15 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 ### Configuration
 
-Kyverno consists of multiple controllers such as Backup, Admissions, Cleanup, and Reports controllers. Each of these controllers can be monitored. Each Kyverno controller has Prometheus-formatted metrics readily available at `/metrics` on port `8000`. For the Agent to start collecting metrics, the Kyverno controller pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample kyverno.d/conf.yaml][4]. 
+Kyverno consists of multiple controllers such as Backup, Admissions, Cleanup, and Reports controllers. Each of these controllers can be monitored. Each Kyverno controller has Prometheus-formatted metrics readily available at `/metrics` on port `8000`. Configure each controller with one of the Kubernetes Autodiscovery options below. You can find additional configuration options by reviewing the [sample kyverno.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `kyverno.controller.drop.count` metric is exposed only after an object is dropped by a controller.
 
 The only parameter required for configuring the Kyverno check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8000`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -77,6 +80,35 @@ spec:
     - name: controller
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+This example targets the Reports Controller Deployment. Create a separate resource for each additional Kyverno controller that you monitor:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kyverno-reports-controller
+  config:
+    checks:
+      - integration: kyverno
+        containerName: controller
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8000/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][11].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Log collection
 
@@ -125,3 +157,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/kyverno/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -75,7 +75,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout notification script
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           sparse-checkout: .github/workflows/scripts
@@ -83,7 +83,7 @@ jobs:
         id: dd-sts
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
-          policy: integrations-core
+          policy: integrations-core-release-notifications
       - name: Notify pending release via Datadog workflow
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}

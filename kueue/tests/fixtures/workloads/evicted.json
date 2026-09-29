@@ -42,14 +42,14 @@
           "status": "True",
           "reason": "Preempted",
           "lastTransitionTime": "2026-06-16T10:01:00Z",
-          "message": "Preempted to accommodate a workload (UID: preempting-workload-uid) due to prioritization in the ClusterQueue"
+          "message": "Preempted to accommodate a workload (UID: preempting-workload-uid, JobUID: preempting-job-uid) due to prioritization in the ClusterQueue; preemptor path: /default; preemptee path: /default"
         },
         {
           "type": "Preempted",
           "status": "True",
           "reason": "InClusterQueue",
           "lastTransitionTime": "2026-06-16T10:01:00Z",
-          "message": "Preempted to accommodate a workload (UID: preempting-workload-uid) due to prioritization in the ClusterQueue"
+          "message": "Preempted to accommodate a workload (UID: preempting-workload-uid, JobUID: preempting-job-uid) due to prioritization in the ClusterQueue; preemptor path: /default; preemptee path: /default"
         },
         {
           "type": "Finished",

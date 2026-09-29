@@ -92,13 +92,13 @@ files:
       value:
         type: boolean
         example: False
-      fleet_configurable: false
+      fleet_configurable: true
     - name: verify
       description: Indicates if a certificate is required and if it will be validated after a connection is established.
       value:
         type: boolean
         example: True
-      fleet_configurable: false
+      fleet_configurable: true
     - name: dbm
       description: |
         Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
@@ -106,7 +106,7 @@ files:
       value:
         type: boolean
         example: false
-      fleet_configurable: false
+      fleet_configurable: true
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -133,7 +133,7 @@ files:
       value:
         type: boolean
         example: false
-      fleet_configurable: false
+      fleet_configurable: true
     - name: use_legacy_queries
       description: Enable the legacy query set for collecting metrics. Set to `false` to disable.
       value:
@@ -156,7 +156,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collection_interval
           description: |
             Set the samples snapshot collection interval (in seconds). Each collection involves a single query to
@@ -164,7 +164,7 @@ files:
           value:
             type: number
             example: 1
-          fleet_configurable: false
+          fleet_configurable: true
         - name: payload_row_limit
           description: |
             Set the maximum number of active sessions to include in each samples snapshot.
@@ -190,7 +190,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves a single query to
@@ -199,7 +199,7 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
+          fleet_configurable: true
         - name: run_sync
           hidden: true
           description: |
@@ -235,7 +235,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collection_interval
           description: |
             Set the query completions collection interval (in seconds).
@@ -243,7 +243,7 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: false
+          fleet_configurable: true
         - name: samples_per_hour_per_query
           description: |
             Set the maximum number of samples to collect per hour per unique query signature.
@@ -294,6 +294,33 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
+    - name: collect_async_inserts
+      description: Configure collection of async insert flush events from system.asynchronous_insert_log.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of async insert flushes. Requires `dbm: true`.
+            These records represent individual flush events (dbm_type="async_inserts_flush"), including flush
+            status, exception (if any), bytes, and row count per flush.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+        - name: collection_interval
+          description: |
+            Set the flush log collection interval (in seconds). Each collection runs a single
+            query against system.asynchronous_insert_log.
+          value:
+            type: number
+            example: 60
+          fleet_configurable: false
+        - name: max_samples_per_collection
+          description: |
+            Maximum number of flush records to collect in a single run (applies LIMIT in SQL).
+          value:
+            type: integer
+            example: 1000
           fleet_configurable: false
     - name: query_errors
       description: Configure collection of query errors from system.query_log
@@ -569,6 +596,35 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
+    - name: collect_pending_async_inserts
+      description: Configure asynchronous insert buffer snapshot monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.
+            Requires `dbm: true`. Sends per-buffer records as DBM events (dbm_type="async_inserts_buffer")
+            including the query text, showing bytes pending, pending entry count, and scheduled
+            flush deadline per buffer.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+        - name: collection_interval
+          description: |
+            Set the buffer snapshot collection interval (in seconds). Each collection runs a single
+            query against system.asynchronous_inserts.
+          value:
+            type: number
+            example: 10
+          fleet_configurable: false
+        - name: max_samples_per_collection
+          description: |
+            Maximum number of buffers to collect in a single run (applies LIMIT in SQL).
+            Prevents overwhelming the agent with too many buffers at once.
+          value:
+            type: integer
+            example: 1000
           fleet_configurable: false
     - template: instances/db
       overrides:

@@ -38,6 +38,54 @@ tests:
         destination:
           ip: "35.184.126.116"
           port: 443
+      ocsf:
+        action: "Allowed"
+        action_id: 1
+        activity_id: 2
+        activity_name: "Close"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          direction: "Unknown"
+          direction_id: 0
+          protocol_name: "tcp"
+          session:
+            uid: "92244"
+        disposition: "Allowed"
+        disposition_id: 1
+        dst_endpoint:
+          ip: "35.184.126.116"
+          port: 443
+        firewall_rule:
+          name: "Permit all outbound"
+        metadata:
+          event_code: "TRAFFIC"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "012001018742"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 977161987
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.70.255.70"
+          port: 42799
+        time: 1620102277000
+        traffic:
+          bytes: 16680918
+          bytes_in: 265461
+          bytes_out: 16415457
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
+          packets: 15555
+          packets_in: 3644
+          packets_out: 11911
       parent_session_id: 0
       pkts_received: 3644
       pkts_sent: 11911
@@ -58,7 +106,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1
  -
-  sample: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+  sample: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.41, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
   result:
     custom:
       actionflags: "0xa0000 00000000000"
@@ -74,9 +122,25 @@ tests:
       message: "thisIsSampleMessage"
       network:
         client:
-          geoip:
-            invalidAddress: "10.2.75.414"
-          ip: "10.2.75.414"
+          geoip: {}
+          ip: "10.2.75.41"
+      ocsf:
+        activity_id: 99
+        activity_name: "AUTHENTICATION"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "AUTHENTICATION"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "001801010877"
+            vendor_name: "Palo Alto Networks"
+          sequence: 486021038
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        time: 1557161033000
       repeatcnt: 1
       seqno: 486021038
       serial: "001801010877"
@@ -89,8 +153,755 @@ tests:
       vsys: "testVM"
       vsys_id: 786
       vsys_name: "JVM"
-    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+    message: "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.41, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, 	clienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,	authproto=authproto"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
+ -
+  sample: "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=THREAT, subtype=virus, time_generated=2025/09/03 19:40:32, network.client.ip=172.16.28.190, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=L3_Orca to L3_Untrust, usr.id=jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=L3_Orca, destination_zone=L3_Untrust, logset=datadog-forwarder, sessionid=393715, repeatcnt=1, network.client.port=51022, network.destination.port=80, flags=0x40407a, proto=tcp, evt.name=block-url, misc=invoice_2025.pdf, threatid=Eicar Test File, category=malware, severity=medium, direction=client-to-server, seqno=7489817491394537149, actionflags=0x0, dstloc=United States, device_name=PA-3220"
+  result:
+    custom:
+      actionflags: "0x0"
+      app: "web-browsing"
+      category: "malware"
+      destination_zone: "L3_Untrust"
+      device_name: "PA-3220"
+      direction: "client-to-server"
+      dstloc: "United States"
+      evt:
+        name: "block-url"
+      flags: "0x40407a"
+      logset: "datadog-forwarder"
+      misc: "invoice_2025.pdf"
+      natdst: "93.184.216.34"
+      natsrc: "72.138.81.50"
+      network:
+        client:
+          geoip: {}
+          ip: "172.16.28.190"
+          port: 51022
+        destination:
+          ip: "93.184.216.34"
+          port: 80
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
+        evidences:
+          - actor:
+              app_name: "web-browsing"
+              session:
+                uid: "393715"
+              user:
+                name: "jdoe"
+            connection_info:
+              direction: "Unknown"
+              direction_id: 0
+              protocol_name: "tcp"
+            device:
+              name: "PA-3220"
+              type: "Firewall"
+              type_id: 9
+            dst_endpoint:
+              ip: "93.184.216.34"
+              port: 80
+              zone: "L3_Untrust"
+            file:
+              name: "invoice_2025.pdf"
+              type: "Regular File"
+              type_id: 1
+            src_endpoint:
+              ip: "172.16.28.190"
+              port: 51022
+              zone: "L3_Orca"
+        finding_info:
+          analytic:
+            category: "virus"
+            name: "L3_Orca to L3_Untrust"
+            type: "Rule"
+            type_id: 1
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "Eicar Test File"
+          uid: "7489817491394537149"
+        firewall_rule:
+          name: "L3_Orca to L3_Untrust"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "16201026426"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 7489817491394537149
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        status: "New"
+        status_detail: "block-url"
+        status_id: 1
+        time: 1756928432000
+      proto: "tcp"
+      repeatcnt: 1
+      rule: "L3_Orca to L3_Untrust"
+      seqno: 7489817491394537149
+      serial: 16201026426
+      sessionid: 393715
+      severity: "medium"
+      source_zone: "L3_Orca"
+      subtype: "virus"
+      threatid: "Eicar Test File"
+      type: "THREAT"
+      usr:
+        id: "jdoe"
+      vsys: "vsys1"
+    message: "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=THREAT, subtype=virus, time_generated=2025/09/03 19:40:32, network.client.ip=172.16.28.190, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=L3_Orca to L3_Untrust, usr.id=jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=L3_Orca, destination_zone=L3_Untrust, logset=datadog-forwarder, sessionid=393715, repeatcnt=1, network.client.port=51022, network.destination.port=80, flags=0x40407a, proto=tcp, evt.name=block-url, misc=invoice_2025.pdf, threatid=Eicar Test File, category=malware, severity=medium, direction=client-to-server, seqno=7489817491394537149, actionflags=0x0, dstloc=United States, device_name=PA-3220"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, serial=716201026426, type=THREAT, subtype=url, time_generated=2025/09/03 19:41:10, network.client.ip=172.16.28.191, network.destination.ip=93.184.216.35, rule=L3_Orca to L3_Untrust, usr.id=asmith, dstuser=, app=web-browsing, vsys=vsys1, source_zone=L3_Orca, destination_zone=L3_Untrust, logset=datadog-forwarder, sessionid=393801, repeatcnt=1, network.client.port=51099, network.destination.port=443, flags=0x40407a, proto=tcp, evt.name=block-url, misc=http://malware.example.com/payload.bin, threatid=Suspicious URL, category=malware, severity=high, direction=client-to-server, seqno=7489817491394537150, actionflags=0x0, device_name=PA-3220"
+  result:
+    custom:
+      actionflags: "0x0"
+      app: "web-browsing"
+      category: "malware"
+      destination_zone: "L3_Untrust"
+      device_name: "PA-3220"
+      direction: "client-to-server"
+      evt:
+        name: "block-url"
+      flags: "0x40407a"
+      logset: "datadog-forwarder"
+      network:
+        client:
+          geoip: {}
+          ip: "172.16.28.191"
+          port: 51099
+        destination:
+          ip: "93.184.216.35"
+          port: 443
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
+        evidences:
+          - actor:
+              app_name: "web-browsing"
+              session:
+                uid: "393801"
+              user:
+                name: "asmith"
+            connection_info:
+              direction: "Unknown"
+              direction_id: 0
+              protocol_name: "tcp"
+            device:
+              name: "PA-3220"
+              type: "Firewall"
+              type_id: 9
+            dst_endpoint:
+              ip: "93.184.216.35"
+              port: 443
+              zone: "L3_Untrust"
+            src_endpoint:
+              ip: "172.16.28.191"
+              port: 51099
+              zone: "L3_Orca"
+            url:
+              url_string: "http://malware.example.com/payload.bin"
+        finding_info:
+          analytic:
+            category: "url"
+            name: "L3_Orca to L3_Untrust"
+            type: "Rule"
+            type_id: 1
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "Suspicious URL"
+          uid: "7489817491394537150"
+        firewall_rule:
+          name: "L3_Orca to L3_Untrust"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "716201026426"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 7489817491394537150
+          version: "1.5.0"
+        severity: "High"
+        severity_id: 4
+        status: "New"
+        status_detail: "block-url"
+        status_id: 1
+        time: 1756928470000
+      proto: "tcp"
+      repeatcnt: 1
+      rule: "L3_Orca to L3_Untrust"
+      seqno: 7489817491394537150
+      serial: 716201026426
+      sessionid: 393801
+      severity: "high"
+      source_zone: "L3_Orca"
+      subtype: "url"
+      threatid: "Suspicious URL"
+      type: "THREAT"
+      usr:
+        id: "asmith"
+      vsys: "vsys1"
+    message: "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, serial=716201026426, type=THREAT, subtype=url, time_generated=2025/09/03 19:41:10, network.client.ip=172.16.28.191, network.destination.ip=93.184.216.35, rule=L3_Orca to L3_Untrust, usr.id=asmith, dstuser=, app=web-browsing, vsys=vsys1, source_zone=L3_Orca, destination_zone=L3_Untrust, logset=datadog-forwarder, sessionid=393801, repeatcnt=1, network.client.port=51099, network.destination.port=443, flags=0x40407a, proto=tcp, evt.name=block-url, misc=http://malware.example.com/payload.bin, threatid=Suspicious URL, category=malware, severity=high, direction=client-to-server, seqno=7489817491394537150, actionflags=0x0, device_name=PA-3220"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<14>Sep  3 19:42:05 PA-3220 timestamp=2025/09/03 19:42:05, serial=816201026426, type=THREAT, subtype=spyware, time_generated=2025/09/03 19:42:05, network.client.ip=172.16.28.192, network.destination.ip=93.184.216.36, rule=L3_Orca to L3_Untrust, usr.id=bchen, dstuser=, app=dns, vsys=vsys1, from=L3_Orca, to=L3_Untrust, logset=datadog-forwarder, sessionid=393902, repeatcnt=1, network.client.port=53001, network.destination.port=53, flags=0x40407a, proto=udp, evt.name=sinkhole, threatid=Suspicious DNS Query, category=command-and-control, severity=critical, seqno=7489817491394537151, actionflags=0x0, device_name=PA-3220, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888"
+  result:
+    custom:
+      actionflags: "0x0"
+      app: "dns"
+      category: "command-and-control"
+      device_name: "PA-3220"
+      evt:
+        name: "sinkhole"
+      flags: "0x40407a"
+      from: "L3_Orca"
+      logset: "datadog-forwarder"
+      network:
+        client:
+          geoip: {}
+          ip: "172.16.28.192"
+          port: 53001
+        destination:
+          ip: "93.184.216.36"
+          port: 53
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
+        evidences:
+          - actor:
+              app_name: "dns"
+              session:
+                uid: "393902"
+              user:
+                name: "bchen"
+            connection_info:
+              direction: "Unknown"
+              direction_id: 0
+              protocol_name: "udp"
+            device:
+              name: "PA-3220"
+              type: "Firewall"
+              type_id: 9
+            dst_endpoint:
+              ip: "93.184.216.36"
+              port: 53
+              zone: "L3_Untrust"
+            src_endpoint:
+              ip: "172.16.28.192"
+              port: 53001
+              zone: "L3_Orca"
+        finding_info:
+          analytic:
+            category: "spyware"
+            name: "L3_Orca to L3_Untrust"
+            type: "Rule"
+            type_id: 1
+            uid: "d6e5f4a3-3333-4444-5555-666677778888"
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "Suspicious DNS Query"
+          uid: "7489817491394537151"
+        firewall_rule:
+          name: "L3_Orca to L3_Untrust"
+          uid: "d6e5f4a3-3333-4444-5555-666677778888"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "816201026426"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 7489817491394537151
+          version: "1.5.0"
+        severity: "Critical"
+        severity_id: 5
+        status: "New"
+        status_detail: "sinkhole"
+        status_id: 1
+        time: 1756928525000
+      proto: "udp"
+      repeatcnt: 1
+      rule: "L3_Orca to L3_Untrust"
+      rule_uuid: "d6e5f4a3-3333-4444-5555-666677778888"
+      seqno: 7489817491394537151
+      serial: 816201026426
+      sessionid: 393902
+      severity: "critical"
+      subtype: "spyware"
+      threatid: "Suspicious DNS Query"
+      to: "L3_Untrust"
+      type: "THREAT"
+      usr:
+        id: "bchen"
+      vsys: "vsys1"
+    message: "<14>Sep  3 19:42:05 PA-3220 timestamp=2025/09/03 19:42:05, serial=816201026426, type=THREAT, subtype=spyware, time_generated=2025/09/03 19:42:05, network.client.ip=172.16.28.192, network.destination.ip=93.184.216.36, rule=L3_Orca to L3_Untrust, usr.id=bchen, dstuser=, app=dns, vsys=vsys1, from=L3_Orca, to=L3_Untrust, logset=datadog-forwarder, sessionid=393902, repeatcnt=1, network.client.port=53001, network.destination.port=53, flags=0x40407a, proto=udp, evt.name=sinkhole, threatid=Suspicious DNS Query, category=command-and-control, severity=critical, seqno=7489817491394537151, actionflags=0x0, device_name=PA-3220, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<14>Sep  3 19:43:20 PA-3220 timestamp=2025/09/03 19:43:20, serial=916201026426, type=SYSTEM, subtype=general, vsys=vsys1, evt.name=general, object=, module=general, severity=informational, opaque=Config installed successfully, seqno=7489817491394537152, actionflags=0x0, vsys_name=, device_name=PA-3220"
+  result:
+    custom:
+      actionflags: "0x0"
+      device_name: "PA-3220"
+      evt:
+        name: "general"
+      module: "general"
+      ocsf:
+        activity_id: 99
+        activity_name: "SYSTEM"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "SYSTEM"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "916201026426"
+            vendor_name: "Palo Alto Networks"
+          sequence: 7489817491394537152
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1756928600000
+      opaque: "Config installed successfully"
+      seqno: 7489817491394537152
+      serial: 916201026426
+      severity: "informational"
+      subtype: "general"
+      type: "SYSTEM"
+      vsys: "vsys1"
+    message: "<14>Sep  3 19:43:20 PA-3220 timestamp=2025/09/03 19:43:20, serial=916201026426, type=SYSTEM, subtype=general, vsys=vsys1, evt.name=general, object=, module=general, severity=informational, opaque=Config installed successfully, seqno=7489817491394537152, actionflags=0x0, vsys_name=, device_name=PA-3220"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<14>Sep  3 15:51:58 PA-1001 timestamp=2025/09/03 19:40:32, serial=677910583345, type=CONFIG, subtype=0, network.client.ip=10.45.129.55, vsys=, evt.name=edit, usr.id=Id-4, client=Client-1, evt.outcome=Outcome-1, path=Path-1, before_change_detail=Detail-1, after_change_detail=Detail-1, seqno=259645837095713, actionflags=0x0, vsys_name=, device_name=PA-1001"
+  result:
+    custom:
+      actionflags: "0x0"
+      after_change_detail: "Detail-1"
+      before_change_detail: "Detail-1"
+      client: "Client-1"
+      device_name: "PA-1001"
+      evt:
+        name: "edit"
+        outcome: "Outcome-1"
+      network:
+        client:
+          geoip: {}
+          ip: "10.45.129.55"
+      ocsf:
+        activity_id: 99
+        activity_name: "CONFIG"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "CONFIG"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "677910583345"
+            vendor_name: "Palo Alto Networks"
+          sequence: 259645837095713
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        time: 1756928432000
+      path: "Path-1"
+      seqno: 259645837095713
+      serial: 677910583345
+      subtype: 0
+      type: "CONFIG"
+      usr:
+        id: "Id-4"
+    message: "<14>Sep  3 15:51:58 PA-1001 timestamp=2025/09/03 19:40:32, serial=677910583345, type=CONFIG, subtype=0, network.client.ip=10.45.129.55, vsys=, evt.name=edit, usr.id=Id-4, client=Client-1, evt.outcome=Outcome-1, path=Path-1, before_change_detail=Detail-1, after_change_detail=Detail-1, seqno=259645837095713, actionflags=0x0, vsys_name=, device_name=PA-1001"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<14>Sep 11 00:50:45 PA-1001 timestamp=2025/09/03 19:40:32, serial=677910583345, type=TRAFFIC, subtype=drop, time_generated=2025/09/03 19:40:32, network.client.ip=198.51.100.14, network.destination.ip=198.51.100.16, natsrc=198.51.100.7, natdst=198.51.100.11, rule=Rule-11, usr.id=, dstuser=, app=App-8, vsys=vsys1, from=From-8, to=To-1, inbound_if=If-10, outbound_if=, logset=Logset-1, sessionid=22, repeatcnt=1, network.client.port=14376, network.destination.port=7015, natsport=0 natdport=0, flags=Flags-10, proto=tcp, evt.name=drop, bytes=16, network.bytes_read=16, network.bytes_written=0, start=2025/09/03 19:40:32, elapsed=0, category=Category-1, seqno=254601692706818, actionflags=0x0, network.client.geoip.country.name=Name-5, dstloc=Dstloc-2, pkts_sent=1, pkts_received=0, session_end_reason=policy-deny, device_name=PA-1001, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi= 0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0 chunks_sent=0 chunks_received=0"
+  result:
+    custom:
+      action_source: "from-policy"
+      actionflags: "0x0"
+      app: "App-8"
+      assoc_id: 0
+      bytes: 16
+      category: "Category-1"
+      chunks: 0
+      chunks_received: 0
+      chunks_sent: 0
+      device_name: "PA-1001"
+      dstloc: "Dstloc-2"
+      elapsed: 0
+      evt:
+        name: "drop"
+      flags: "Flags-10"
+      from: "From-8"
+      imsi: 0
+      inbound_if: "If-10"
+      logset: "Logset-1"
+      natdport: 0
+      natdst: "198.51.100.11"
+      natsport: 0
+      natsrc: "198.51.100.7"
+      network:
+        bytes_read: 16
+        bytes_written: 0
+        client:
+          geoip: {}
+          ip: "198.51.100.14"
+          port: 14376
+        destination:
+          ip: "198.51.100.16"
+          port: 7015
+      ocsf:
+        action: "Denied"
+        action_id: 2
+        activity_id: 3
+        activity_name: "Reset"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          direction: "Unknown"
+          direction_id: 0
+          protocol_name: "tcp"
+          session:
+            uid: "22"
+        disposition: "Dropped"
+        disposition_id: 6
+        dst_endpoint:
+          ip: "198.51.100.16"
+          port: 7015
+        firewall_rule:
+          name: "Rule-11"
+        metadata:
+          event_code: "TRAFFIC"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "677910583345"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 254601692706818
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "198.51.100.14"
+          port: 14376
+        time: 1756928432000
+        traffic:
+          bytes: 16
+          bytes_in: 0
+          bytes_out: 16
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
+          packets: 1
+          packets_in: 0
+          packets_out: 1
+      parent_session_id: 0
+      pkts_received: 0
+      pkts_sent: 1
+      proto: "tcp"
+      repeatcnt: 1
+      rule: "Rule-11"
+      seqno: 254601692706818
+      serial: 677910583345
+      session_end_reason: "policy-deny"
+      sessionid: 22
+      subtype: "drop"
+      to: "To-1"
+      tunnelid: 0
+      type: "TRAFFIC"
+      vsys: "vsys1"
+    message: "<14>Sep 11 00:50:45 PA-1001 timestamp=2025/09/03 19:40:32, serial=677910583345, type=TRAFFIC, subtype=drop, time_generated=2025/09/03 19:40:32, network.client.ip=198.51.100.14, network.destination.ip=198.51.100.16, natsrc=198.51.100.7, natdst=198.51.100.11, rule=Rule-11, usr.id=, dstuser=, app=App-8, vsys=vsys1, from=From-8, to=To-1, inbound_if=If-10, outbound_if=, logset=Logset-1, sessionid=22, repeatcnt=1, network.client.port=14376, network.destination.port=7015, natsport=0 natdport=0, flags=Flags-10, proto=tcp, evt.name=drop, bytes=16, network.bytes_read=16, network.bytes_written=0, start=2025/09/03 19:40:32, elapsed=0, category=Category-1, seqno=254601692706818, actionflags=0x0, network.client.geoip.country.name=Name-5, dstloc=Dstloc-2, pkts_sent=1, pkts_received=0, session_end_reason=policy-deny, device_name=PA-1001, action_source=from-policy, src_uuid=, dst_uuid=, tunnelid=0, imsi= 0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, assoc_id=0, chunks=0 chunks_sent=0 chunks_received=0"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<13>Sep 11 00:26:15 PA-1001 timestamp=2025/09/03 19:40:32, serial=677910583345, type=THREAT, subtype=vulnerability, time_generated=2025/09/03 19:40:32, network.client.ip=198.51.100.37, network.destination.ip=198.51.100.19, natsrc=198.51.100.15, natdst=10.28.127.52, rule=Rule-22, usr.id=, dstuser=, app=ssl, vsys=vsys1, from=From-8, to=To-1, inbound_if=If-5, outbound_if=If-12, logset=Logset-1, sessionid=536484, repeatcnt=1, network.client.port=7221, network.destination.port=443, natsport=10246, natdport=76807, flags=Flags-22, proto=tcp, evt.name=alert, misc=, threatid=Threatid-7, category=Category-1, severity=low, direction=client-to-server, seqno=188476845303802, actionflags=0x0, network.client.geoip.country.name=Name-10, dstloc=Dstloc-2, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=, filetype=, xff= referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=PA-1001, src_uuid=, dst_uuid=, http_method=, tunnel_id=N/A_id, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=hacktool, contentver=Contentver-3, assoc_id=0, ppid=4294967295, http_headers="
+  result:
+    custom:
+      actionflags: "0x0"
+      app: "ssl"
+      assoc_id: 0
+      category: "Category-1"
+      contentver: "Contentver-3"
+      device_name: "PA-1001"
+      direction: "client-to-server"
+      dstloc: "Dstloc-2"
+      evt:
+        name: "alert"
+      flags: "Flags-22"
+      from: "From-8"
+      imsi: 0
+      inbound_if: "If-5"
+      logset: "Logset-1"
+      natdport: 76807
+      natdst: "10.28.127.52"
+      natsport: 10246
+      natsrc: "198.51.100.15"
+      network:
+        client:
+          geoip: {}
+          ip: "198.51.100.37"
+          port: 7221
+        destination:
+          ip: "198.51.100.19"
+          port: 443
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Alert"
+        disposition_id: 19
+        evidences:
+          - actor:
+              app_name: "ssl"
+              session:
+                uid: "536484"
+            connection_info:
+              direction: "Unknown"
+              direction_id: 0
+              protocol_name: "tcp"
+            device:
+              name: "PA-1001"
+              type: "Firewall"
+              type_id: 9
+            dst_endpoint:
+              ip: "198.51.100.19"
+              port: 443
+              zone: "To-1"
+            src_endpoint:
+              ip: "198.51.100.37"
+              port: 7221
+              zone: "From-8"
+        finding_info:
+          analytic:
+            category: "vulnerability"
+            name: "Rule-22"
+            type: "Rule"
+            type_id: 1
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "Threatid-7"
+          uid: "188476845303802"
+        firewall_rule:
+          name: "Rule-22"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "677910583345"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 188476845303802
+          version: "1.5.0"
+        severity: "Low"
+        severity_id: 2
+        status: "New"
+        status_detail: "alert"
+        status_id: 1
+        time: 1756928432000
+      outbound_if: "If-12"
+      parent_session_id: 0
+      pcap_id: 0
+      ppid: 4294967295
+      proto: "tcp"
+      repeatcnt: 1
+      reportid: 0
+      rule: "Rule-22"
+      seqno: 188476845303802
+      serial: 677910583345
+      sessionid: 536484
+      severity: "low"
+      subtype: "vulnerability"
+      thr_category: "hacktool"
+      threatid: "Threatid-7"
+      to: "To-1"
+      type: "THREAT"
+      url_idx: 0
+      vsys: "vsys1"
+    message: "<13>Sep 11 00:26:15 PA-1001 timestamp=2025/09/03 19:40:32, serial=677910583345, type=THREAT, subtype=vulnerability, time_generated=2025/09/03 19:40:32, network.client.ip=198.51.100.37, network.destination.ip=198.51.100.19, natsrc=198.51.100.15, natdst=10.28.127.52, rule=Rule-22, usr.id=, dstuser=, app=ssl, vsys=vsys1, from=From-8, to=To-1, inbound_if=If-5, outbound_if=If-12, logset=Logset-1, sessionid=536484, repeatcnt=1, network.client.port=7221, network.destination.port=443, natsport=10246, natdport=76807, flags=Flags-22, proto=tcp, evt.name=alert, misc=, threatid=Threatid-7, category=Category-1, severity=low, direction=client-to-server, seqno=188476845303802, actionflags=0x0, network.client.geoip.country.name=Name-10, dstloc=Dstloc-2, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=, filetype=, xff= referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=PA-1001, src_uuid=, dst_uuid=, http_method=, tunnel_id=N/A_id, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=hacktool, contentver=Contentver-3, assoc_id=0, ppid=4294967295, http_headers="
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<12>Sep  4 17:47:22 fw13.example.invalid timestamp=2025/09/03 19:40:32, serial=199382820997315, type=THREAT, subtype=virus, time_generated=2025/09/03 19:40:32, network.client.ip=198.51.100.32, network.destination.ip=10.29.236.100, natsrc=198.51.100.12, natdst=10.23.74.101, rule=Rule-18, usr.id=, dstuser=, app=web-browsing, vsys=vsys1, from=From-13, to=To-10, inbound_if=If-6, outbound_if=If-9, logset=Logset-7, sessionid=8661436, repeatcnt=1, network.client.port=71356, network.destination.port=443, natsport=12296, natdport=76807, flags=Flags-17, proto=tcp, evt.name=reset-both, misc=Misc-7, threatid=Threatid-2, category=Category-5, severity=medium, direction=client-to-server, seqno=201724979983366, actionflags=0x8000000000000000, network.client.geoip.country.name=Name-13, dstloc=Dstloc-4, contenttype=, pcap_id=24291084202541, filedigest=, cloud=, url_idx=1, http.useragent=, filetype=, xff= referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=PA-1012, src_uuid=, dst_uuid=, http_method=, tunnel_id=N/A_id, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=java-class, contentver=Contentver-2, assoc_id=0, ppid=4294967295, http_headers="
+  result:
+    custom:
+      actionflags: "0x8000000000000000"
+      app: "web-browsing"
+      assoc_id: 0
+      category: "Category-5"
+      contentver: "Contentver-2"
+      device_name: "PA-1012"
+      direction: "client-to-server"
+      dstloc: "Dstloc-4"
+      evt:
+        name: "reset-both"
+      flags: "Flags-17"
+      from: "From-13"
+      imsi: 0
+      inbound_if: "If-6"
+      logset: "Logset-7"
+      misc: "Misc-7"
+      natdport: 76807
+      natdst: "10.23.74.101"
+      natsport: 12296
+      natsrc: "198.51.100.12"
+      network:
+        client:
+          geoip: {}
+          ip: "198.51.100.32"
+          port: 71356
+        destination:
+          ip: "10.29.236.100"
+          port: 443
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Reset"
+        disposition_id: 21
+        evidences:
+          - actor:
+              app_name: "web-browsing"
+              session:
+                uid: "8661436"
+            connection_info:
+              direction: "Unknown"
+              direction_id: 0
+              protocol_name: "tcp"
+            device:
+              name: "PA-1012"
+              type: "Firewall"
+              type_id: 9
+            dst_endpoint:
+              ip: "10.29.236.100"
+              port: 443
+              zone: "To-10"
+            file:
+              name: "Misc-7"
+              type: "Regular File"
+              type_id: 1
+            src_endpoint:
+              ip: "198.51.100.32"
+              port: 71356
+              zone: "From-13"
+        finding_info:
+          analytic:
+            category: "virus"
+            name: "Rule-18"
+            type: "Rule"
+            type_id: 1
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "Threatid-2"
+          uid: "201724979983366"
+        firewall_rule:
+          name: "Rule-18"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "199382820997315"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 201724979983366
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        status: "New"
+        status_detail: "reset-both"
+        status_id: 1
+        time: 1756928432000
+      outbound_if: "If-9"
+      parent_session_id: 0
+      pcap_id: 24291084202541
+      ppid: 4294967295
+      proto: "tcp"
+      repeatcnt: 1
+      reportid: 0
+      rule: "Rule-18"
+      seqno: 201724979983366
+      serial: 199382820997315
+      sessionid: 8661436
+      severity: "medium"
+      subtype: "virus"
+      thr_category: "java-class"
+      threatid: "Threatid-2"
+      to: "To-10"
+      type: "THREAT"
+      url_idx: 1
+      vsys: "vsys1"
+    message: "<12>Sep  4 17:47:22 fw13.example.invalid timestamp=2025/09/03 19:40:32, serial=199382820997315, type=THREAT, subtype=virus, time_generated=2025/09/03 19:40:32, network.client.ip=198.51.100.32, network.destination.ip=10.29.236.100, natsrc=198.51.100.12, natdst=10.23.74.101, rule=Rule-18, usr.id=, dstuser=, app=web-browsing, vsys=vsys1, from=From-13, to=To-10, inbound_if=If-6, outbound_if=If-9, logset=Logset-7, sessionid=8661436, repeatcnt=1, network.client.port=71356, network.destination.port=443, natsport=12296, natdport=76807, flags=Flags-17, proto=tcp, evt.name=reset-both, misc=Misc-7, threatid=Threatid-2, category=Category-5, severity=medium, direction=client-to-server, seqno=201724979983366, actionflags=0x8000000000000000, network.client.geoip.country.name=Name-13, dstloc=Dstloc-4, contenttype=, pcap_id=24291084202541, filedigest=, cloud=, url_idx=1, http.useragent=, filetype=, xff= referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=PA-1012, src_uuid=, dst_uuid=, http_method=, tunnel_id=N/A_id, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=java-class, contentver=Contentver-2, assoc_id=0, ppid=4294967295, http_headers="
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+
 

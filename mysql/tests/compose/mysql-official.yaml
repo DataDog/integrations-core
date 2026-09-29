@@ -1,0 +1,43 @@
+# Official `mysql` image (Docker Hub library), used for MySQL 9 instead of the
+# deprecated bitnamilegacy/mysql image. Modeled on percona.yaml: replication is
+# bootstrapped via /docker-entrypoint-initdb.d scripts and per-role config files.
+#
+# NOTE (flagged for CI validation): this compose has not been run in CI yet — the
+# healthcheck and GTID replication bootstrap for the official mysql 9 image need to be
+# confirmed on a real run. See DBMON-6806.
+services:
+  mysql-master:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_IMAGE_TAG}"
+    environment:
+      - MYSQL_ROOT_PASSWORD=mypass
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmypass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ./mysql-official-primary.conf:/etc/mysql/conf.d/primary.cnf
+      - ./mysql_official_primary_initdb:/docker-entrypoint-initdb.d
+
+  mysql-slave:
+    container_name: mysql-slave
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_IMAGE_TAG}"
+    environment:
+      - MYSQL_ROOT_PASSWORD=mypass
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmypass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
+      - ./mysql-official-replica.conf:/etc/mysql/conf.d/replica.cnf
+      - ./mysql_official_replica_initdb:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-master:
+        condition: service_healthy

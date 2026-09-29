@@ -126,21 +126,6 @@ def get_hostname_from_dn(dn):
         return None
 
 
-def get_fabric_hostname(obj):
-    """
-    This grabs the hostname from the object
-    The object looks something like this:
-    {
-    "dn": "topology/pod-1/node-101/sys/phys-[eth1/6]/CDeqptMacsectxpkts5min"
-    ...
-    }
-    """
-    attrs = get_attributes(obj)
-    dn = attrs['dn']
-
-    return get_hostname_from_dn(dn)
-
-
 def get_attributes(obj):
     """
     the json objects look like this:

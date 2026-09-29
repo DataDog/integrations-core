@@ -63,6 +63,13 @@ EXT_PROC_METRICS = [
     "envoy.http.ext_proc.send_immediate_resp_upstream_ignored",
 ]
 
+GLOBAL_RATE_LIMIT_METRICS = [
+    "envoy.cluster.ratelimit.error",
+    "envoy.cluster.ratelimit.failure_mode_allowed",
+    "envoy.cluster.ratelimit.ok",
+    "envoy.cluster.ratelimit.over_limit",
+]
+
 LOCAL_RATE_LIMIT_METRICS = [
     "envoy.http_local_rate_limit.enabled",
     "envoy.http_local_rate_limit.enforced",

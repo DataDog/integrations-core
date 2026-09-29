@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.4.0 / 2026-09-02
+
+***Added***:
+
+* Add the `system.crypto.fips_enabled` metric reporting whether the kernel is running in FIPS mode, read from `/proc/sys/crypto/fips_enabled`. ([#24869](https://github.com/DataDog/integrations-core/pull/24869))
+
 ## 4.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

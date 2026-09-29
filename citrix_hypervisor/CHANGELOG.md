@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.1 / 2026-09-02
+
+***Fixed***:
+
+* Apply ``tls_verify`` to the XML-RPC session login, previously only applied to the RRD metrics HTTP client. ([#24909](https://github.com/DataDog/integrations-core/pull/24909))
+
 ## 6.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

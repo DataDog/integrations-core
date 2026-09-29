@@ -1,0 +1,1 @@
+Fix Postgres query metrics dropping statements when plan time statistics decrease.

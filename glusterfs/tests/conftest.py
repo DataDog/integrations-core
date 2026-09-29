@@ -11,6 +11,7 @@ import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import WaitFor, docker_run, run_command
+from datadog_checks.glusterfs.metrics import BRICK_STATS
 
 from .common import CONFIG, INSTANCE
 
@@ -106,8 +107,14 @@ def gstatus_ready():
             if not bricks:
                 raise Exception("No brick data yet")
             for brick in bricks:
-                if 'block_size' not in brick:
-                    raise Exception("Brick stats not fully populated yet")
+                if not brick.get('online'):
+                    raise Exception(f"Brick {brick.get('name')} is not online yet")
+                # gstatus reports filesystem-derived stats as 'N/A' until it can stat the brick's
+                # backing device. The check skips 'N/A' values, so the metric would never be
+                # submitted and the E2E assertions would fail.
+                unpopulated = [field for field in BRICK_STATS if str(brick.get(field)).lower() in ('none', 'n/a')]
+                if unpopulated:
+                    raise Exception(f"Brick {brick.get('name')} stats not populated yet: {unpopulated}")
 
 
 def delete_volume():

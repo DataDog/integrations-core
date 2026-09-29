@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2026-09-02
+
+***Added***:
+
+* Add support for the native [VoltDB Python client](https://pypi.org/project/voltdbclient/) (binary protocol on the VoltDB client port, default `21212`) for direct database-node connections. Configure with `host` (single node) or `hosts` (a list of cluster members for connect-time failover). Optional `port` provides a default for entries without one. TLS is configured through `use_ssl` and `ssl_config_file` pointing at a VoltDB SSL properties file (JKS, PKCS12, or PEM). Statistics columns are now resolved by name against the VoltDB response metadata so the check tolerates VoltDB releases that add or drop columns to `@Statistics` outputs. The existing HTTP/JSON transport (with `url`, `password_hashed`, PEM-based TLS, and proxy options) is fully preserved for users connecting through the VoltDB Management Center (VMC) — existing `url`-based configurations continue to work unchanged. ([#24714](https://github.com/DataDog/integrations-core/pull/24714))
+
 ## 6.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

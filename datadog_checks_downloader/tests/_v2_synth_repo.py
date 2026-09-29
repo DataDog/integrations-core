@@ -7,13 +7,13 @@
 from __future__ import annotations
 
 import threading
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import partial
 from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
-from socketserver import TCPServer
+from socketserver import BaseRequestHandler, TCPServer
 
 from securesystemslib.keys import generate_ed25519_key
 from securesystemslib.signer import SSlibKey, SSlibSigner
@@ -143,10 +143,7 @@ class _ReuseTCPServer(TCPServer):
     allow_reuse_address = True
 
 
-@contextmanager
-def serve_directory(directory: Path) -> Iterator[str]:
-    """Serve ``directory`` over HTTP for the duration of the context."""
-    handler = partial(SimpleHTTPRequestHandler, directory=str(directory))
+def _serve(handler: Callable[..., BaseRequestHandler]) -> Iterator[str]:
     with _ReuseTCPServer(('127.0.0.1', 0), handler) as httpd:
         port = httpd.server_address[1]
         thread = threading.Thread(target=httpd.serve_forever, daemon=True)
@@ -156,3 +153,26 @@ def serve_directory(directory: Path) -> Iterator[str]:
         finally:
             httpd.shutdown()
             thread.join(timeout=2)
+
+
+@contextmanager
+def serve_directory(directory: Path) -> Iterator[str]:
+    """Serve ``directory`` over HTTP for the duration of the context."""
+    yield from _serve(partial(SimpleHTTPRequestHandler, directory=str(directory)))
+
+
+@contextmanager
+def serve_flaky_directory(directory: Path, fail_path: str, fail_count: int, fail_status: int) -> Iterator[str]:
+    """Like ``serve_directory``, but respond *fail_status* to the first *fail_count* requests for *fail_path*."""
+    remaining = [fail_count]
+
+    class _FlakyHandler(SimpleHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == fail_path and remaining[0] > 0:
+                remaining[0] -= 1
+                self.send_response(fail_status)
+                self.end_headers()
+                return
+            super().do_GET()
+
+    yield from _serve(partial(_FlakyHandler, directory=str(directory)))

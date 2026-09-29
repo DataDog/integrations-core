@@ -48,6 +48,8 @@ RDMA_COUNTERS = {
     "req_cqe_error",
     "req_cqe_flush_error",
     "req_remote_access_errors",
+    "req_rnr_retries_exceeded",
+    "req_transport_retries_exceeded",
     "req_remote_invalid_request",
     "resp_cqe_error",
     "resp_cqe_flush_error",

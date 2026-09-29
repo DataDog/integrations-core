@@ -21,6 +21,7 @@ from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
+    CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE,
     DEFAULT_MAX_QUERY_METRICS,
     HISTORICAL,
     HOST_RESOURCES,
@@ -52,6 +53,7 @@ from datadog_checks.vsphere.types import (
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     add_additional_tags,
+    cpu_count_metric_name,
     format_metric_name,
     get_mapped_instance_tag,
     get_tags_recursively,
@@ -353,6 +355,23 @@ class VSphereCheck(AgentCheck):
                 elif self._config.hostname_transform == 'lower':
                     hostname = hostname.lower()
                 mor_payload['hostname'] = hostname
+
+            cpu_count_property = CPU_COUNT_PROPERTY_BY_RESOURCE_TYPE.get(mor_type_str)
+            if cpu_count_property is not None:
+                cpu_count_value = properties.get(cpu_count_property)
+                if cpu_count_value is None:
+                    reason = 'no {}'.format(cpu_count_property)
+                elif not mor_payload.get('hostname'):
+                    # Without a hostname the count lands on the Agent's own host. Better missing.
+                    reason = 'no hostname'
+                else:
+                    # Top-level, not under `properties`: `clear_properties()` empties only that
+                    # sub-dict, so this survives refreshes for `check()` to re-submit every run.
+                    mor_payload["cpu_count"] = cpu_count_value
+                    reason = None
+
+                if reason:
+                    self.log.debug("Not collecting a CPU count for %s %s: %s", mor_type_str, mor_name, reason)
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
@@ -823,6 +842,17 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
+    def _resource_metric_tags(self, resource_tags):
+        # type: (List[str]) -> List[str]
+        """Build the tag list for a metric submitted against a resource's own hostname."""
+        base_tags = []  # type: List[str]
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
+        base_tags.extend(self._config.base_tags)
+        return base_tags
+
     def submit_property_metric(
         self,
         metric_name,  # type: str
@@ -1058,12 +1088,7 @@ class VSphereCheck(AgentCheck):
             )
             return
 
-        base_tags = []
-        if self._config.excluded_host_tags:
-            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
-        else:
-            base_tags.extend(resource_tags)
-        base_tags.extend(self._config.base_tags)
+        base_tags = self._resource_metric_tags(resource_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
@@ -1084,6 +1109,30 @@ class VSphereCheck(AgentCheck):
                 self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
 
         self.submit_simple_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
+
+    def submit_cpu_count_metrics(
+        self,
+        resource_type,  # type: Type[vim.ManagedEntity]
+        mor_props,  # type: Dict[str, Any]
+        resource_tags,  # type: List[str]
+    ):
+        # type: (...) -> None
+        """
+        Submit the CPU count gauge for one resource, reading the value cached by
+        `refresh_infrastructure_cache`. Called on every run so the metric emits at
+        `min_collection_interval` rather than at the cache refresh interval.
+        """
+        value = mor_props.get('cpu_count')
+        if value is None:
+            return
+
+        mor_type_str = MOR_TYPE_AS_STRING[resource_type]
+        self.gauge(
+            cpu_count_metric_name(mor_type_str),
+            value,
+            tags=self._resource_metric_tags(resource_tags),
+            hostname=mor_props.get('hostname'),
+        )
 
     def check(self, _):
         # type: (Any) -> None
@@ -1170,18 +1219,20 @@ class VSphereCheck(AgentCheck):
                 # delete property data from the cache since it won't be used until next cache refresh
                 self.infrastructure_cache.clear_properties()
 
-        # Submit the number of resources that are monitored
+        # Submit the number of resources that are monitored, and the CPU count metrics
         for resource_type in self._config.collected_resource_types:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
-                # Explicitly do not attach any host to those metrics.
                 resource_tags = mor_props.get('tags', [])
+                # Explicitly do not attach any host to those metrics.
                 self.count(
                     '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
                     1,
                     tags=self._config.base_tags + resource_tags,
                     hostname=None,
                 )
+
+                self.submit_cpu_count_metrics(resource_type, mor_props, resource_tags)
 
         # Creating a thread pool and starting metric collection
         self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)

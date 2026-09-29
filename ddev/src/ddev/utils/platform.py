@@ -6,8 +6,24 @@ from __future__ import annotations
 import os
 import sys
 from collections.abc import Callable
+from enum import StrEnum, auto
 from functools import lru_cache
 from importlib import import_module
+
+
+class PlatformName(StrEnum):
+    """A platform ddev knows how to target.
+
+    Values match `normalize_platform_name` output, `.ddev/config.toml` `platforms` entries, and
+    Hatch's `platforms` constraints, so a raw configuration string compares equal to its member.
+
+    `normalize_platform_name` still returns a plain string, since `platform.system()` can report
+    systems ddev does not target. This is unrelated to `Platform`, the host ddev runs on.
+    """
+
+    LINUX = auto()
+    WINDOWS = auto()
+    MACOS = auto()
 
 
 @lru_cache(maxsize=None)

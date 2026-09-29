@@ -72,6 +72,10 @@ def instance_ignore_missing_database():
     return False
 
 
+def instance_include_instance_metrics():
+    return True
+
+
 def instance_log_unobfuscated_plans():
     return False
 

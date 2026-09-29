@@ -53,22 +53,6 @@ def get_pr_number(app: Application) -> int | None:
     return None
 
 
-def get_workflow_run_url() -> str | None:
-    server = os.environ.get("GITHUB_SERVER_URL")
-    repo = os.environ.get("GITHUB_REPOSITORY")
-    run_id = os.environ.get("GITHUB_RUN_ID")
-    if server and repo and run_id:
-        return f"{server}/{repo}/actions/runs/{run_id}"
-    return None
-
-
-def write_step_summary(content: str) -> None:
-    if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
-        with contextlib.suppress(OSError):
-            with open(summary_path, "a", encoding="utf-8") as f:
-                f.write(content + "\n")
-
-
 def _build_preamble(error: str | None, warning: str | None) -> list[str]:
     parts: list[str] = [f"{COMMENT_HEADING}\n"]
     if error:
@@ -87,8 +71,14 @@ def _build_table(
 
     lines = ["| Validation | Description | Status |", "|---|---|---|"]
     for name in sorted(rows):
-        status = "✅" if rows[name].success else "❌"
-        description = configs.get(name, _VC()).description
+        result = rows[name]
+        config = configs.get(name, _VC())
+        status = "✅" if result.success else "❌"
+        description = config.description
+        if not result.success and config.failure_guidance:
+            # Newlines break the table row, so guidance uses <br> separators inside the cell.
+            guidance = config.failure_guidance.replace("\n", "<br>")
+            description = f"{description}<br><br>{guidance}"
         lines.append(f"| `{name}` | {description} | {status} |")
     return lines
 

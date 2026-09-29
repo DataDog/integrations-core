@@ -6,14 +6,18 @@ from typing import List, TypedDict
 Instance = TypedDict(
     'Instance',
     {
+        # Deprecated: use 'host' and 'port' instead. Kept for backwards
+        # compatibility with users who still pass the legacy HTTP URL.
         'url': str,
+        'host': str,
+        'port': int,
         'username': str,
         'password': str,
-        'password_hashed': bool,
+        'use_ssl': bool,
+        'ssl_config_file': str,
+        'connect_timeout': float,
+        'procedure_timeout': float,
         'statistics_components': List[str],
-        'tls_verify': bool,
-        'tls_cert': str,
-        'tls_ca_cert': str,
         'tags': List[str],
         'custom_queries': List[dict],
     },

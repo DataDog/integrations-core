@@ -1,0 +1,1 @@
+Add the ``enable_kafka_console`` option as a replacement for ``enable_cluster_monitoring`` while preserving the old option as an alias.

@@ -30,7 +30,10 @@ You can pick and choose which services you monitor depending on your needs.
 
 #### Metric collection
 
-This is an example configuration with Kubernetes annotations on your Flux pods. See the [sample configuration file][4] for all available configuration options.
+Choose one of the following Kubernetes Autodiscovery configurations. See the [sample configuration file][4] for all available configuration options.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 apiVersion: v1
@@ -54,6 +57,35 @@ spec:
     - name: 'manager'
 # (...)
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+This example targets the `source-controller` Deployment. Create a separate resource for each additional Flux controller that you monitor:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: source-controller
+  config:
+    checks:
+      - integration: fluxcd
+        containerName: manager
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:8080/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### Log collection
 
@@ -110,3 +142,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
+[14]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

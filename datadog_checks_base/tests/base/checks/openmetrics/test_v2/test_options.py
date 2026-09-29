@@ -337,6 +337,32 @@ class TestMetrics:
 
 
 class TestShareLabels:
+    def test_unconditional_labels_applied_regardless_of_payload_order(
+        self, aggregator, dd_run_check, mock_http_response
+    ):
+        """Tags must be the same regardless of where the share_labels source metric sits in the payload."""
+        mock_http_response(
+            """
+            # HELP requests_processed_total Total number of requests processed.
+            # TYPE requests_processed_total counter
+            requests_processed_total 999999
+            # HELP app_info Application build info.
+            # TYPE app_info untyped
+            app_info{region="us"} 1
+            """
+        )
+        check = get_check({'metrics': ['requests_processed'], 'share_labels': {'app_info': True}})
+        dd_run_check(check)
+
+        first_run_tags = sorted(aggregator.metrics('test.requests_processed.count')[0].tags)
+
+        aggregator.reset()
+        dd_run_check(check)
+
+        second_run_tags = sorted(aggregator.metrics('test.requests_processed.count')[0].tags)
+
+        assert first_run_tags == second_run_tags == sorted(['endpoint:test', 'region:us'])
+
     def test_unconditional_labels_all(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
             """
@@ -608,6 +634,7 @@ class TestShareLabels:
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': True}})
         dd_run_check(check)
 
+        # Already applied on the first run, regardless of payload order.
         aggregator.assert_metric(
             'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
         )
@@ -615,13 +642,13 @@ class TestShareLabels:
             'test.go_memstats_gc_sys_bytes',
             901120,
             metric_type=aggregator.GAUGE,
-            tags=['endpoint:test', 'bar:foo'],
+            tags=['endpoint:test', 'bar:foo', 'foo:bar'],
         )
         aggregator.assert_metric(
             'test.go_memstats_free_bytes',
             6396288,
             metric_type=aggregator.GAUGE,
-            tags=['endpoint:test', 'bar:baz'],
+            tags=['endpoint:test', 'bar:baz', 'foo:bar'],
         )
 
         dd_run_check(check)
@@ -747,10 +774,11 @@ class TestShareLabels:
 
         dd_run_check(check)
 
+        # Already applied on the first run, even though target_info appears after the metric it tags.
         aggregator.assert_metric(
             'test.go_memstats_alloc_bytes',
             value=6396288,
-            tags=['endpoint:test', 'foo:bar'],
+            tags=['endpoint:test', 'foo:bar', 'env:prod', 'region:europe'],
             metric_type=aggregator.GAUGE,
         )
 

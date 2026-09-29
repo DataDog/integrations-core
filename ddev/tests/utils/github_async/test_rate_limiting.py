@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import dataclasses
 import logging
 
@@ -10,9 +11,10 @@ import pytest
 from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import AsyncGitHubClient, async_github_client
-from ddev.utils.github_async.client import github_rate_limit_snapshot
+from ddev.utils.github_async.client import RequestAttempts, github_rate_limit_snapshot
 from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
 from ddev.utils.github_async.models import WorkflowRun
+from ddev.utils.github_async.observer import RequestFault
 from ddev.utils.github_errors import GitHubAuthenticationError
 from ddev.utils.rate_limiting import (
     BucketEvent,
@@ -22,11 +24,13 @@ from ddev.utils.rate_limiting import (
     PacingEvent,
     PacingReason,
     RateLimitEvent,
+    RelaxedRateLimits,
     SecondaryLimitEvent,
 )
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.utils.github_async.helpers import (
     TOKEN,
+    RecordingObserver,
     governed_client,
     json_response,
     make_zip,
@@ -35,7 +39,7 @@ from tests.utils.github_async.helpers import (
 )
 from tests.utils.github_async.payloads import workflow_run_payload
 
-LOGGER_NAME = "ddev.utils.github_async.defaults"
+LOGGER_NAME = "test-rate-limit-events"
 
 
 async def test_client_request_with_rate_limiter_consumes_token() -> None:
@@ -113,7 +117,7 @@ async def test_default_rate_limiter_is_constructed_and_observes_403() -> None:
     assert governor is not None
 
     with pytest.raises(httpx.HTTPStatusError):
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x", RequestAttempts())
 
     # The 403's retry-after was observed (before raise_for_status), arming the shared pause;
     # exact pause arithmetic is covered by the clocked governor tests.
@@ -129,7 +133,7 @@ async def test_retry_on_secondary_limit_returns_success(monkeypatch: pytest.Monk
     transport, calls = recording_transport([httpx.Response(403, headers={"retry-after": "5"}), httpx.Response(200)])
     client = governed_client(clock, transport, on_event=events.append)
 
-    response = await client._request("GET", "/x")
+    response = await client._rate_limited_request("GET", "/x", RequestAttempts())
 
     assert response.status_code == 200
     assert len(calls) == 2
@@ -160,7 +164,7 @@ async def test_retry_on_secondary_limit_without_valid_wait_returns_success(
     transport, calls = recording_transport([rate_limited_response, httpx.Response(200)])
     client = governed_client(clock, transport, on_event=events.append)
 
-    response = await client._request("GET", "/x")
+    response = await client._rate_limited_request("GET", "/x", RequestAttempts())
 
     assert response.status_code == 200
     assert len(calls) == 2
@@ -184,13 +188,114 @@ async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest
     )
     client = governed_client(clock, transport, on_event=events.append)
 
-    response = await client._request("GET", "/x")
+    response = await client._rate_limited_request("GET", "/x", RequestAttempts())
 
     assert response.status_code == 200
     assert len(calls) == 2
     governor = client._rate_limiter.budget_governor
     assert clock.current == pytest.approx(reset_at + governor.buffer_seconds)
     assert any(isinstance(e, PacingEvent) and e.reason is PacingReason.EXHAUSTED for e in events)
+
+
+async def test_attempts_are_counted_across_both_retry_layers_and_timed_without_their_waits(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A rate-limit replay is as much a retry as a 5xx replay, and waiting for either is not latency."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    monkeypatch.setattr("ddev.utils.github_async.client.monotonic", clock)
+    responses = [
+        httpx.Response(403, headers={"retry-after": "30"}),
+        httpx.Response(503),
+        json_response(workflow_run_payload()),
+    ]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        clock.advance(2)
+        return responses.pop(0)
+
+    observer = RecordingObserver()
+    client = governed_client(clock, httpx.MockTransport(handler), observer=observer)
+
+    await client.get_workflow_run("o", "r", 42)
+
+    assert [(attempt.number, attempt.fault, attempt.duration_seconds) for attempt in observer.attempts] == [
+        (1, RequestFault.SECONDARY_RATE_LIMIT, 2),
+        (2, RequestFault.SERVER_ERROR, 2),
+        (3, RequestFault.NONE, 2),
+    ]
+
+
+BLOCK = object()
+
+
+@pytest.mark.parametrize(
+    ("responses", "expected"),
+    [
+        pytest.param([BLOCK], [(1, RequestFault.CANCELLED)], id="in-flight"),
+        pytest.param(
+            [httpx.Response(503), BLOCK],
+            [(1, RequestFault.SERVER_ERROR), (2, RequestFault.CANCELLED)],
+            id="in-flight-replay",
+        ),
+        pytest.param(
+            [httpx.Response(403, headers={"retry-after": "30"}), BLOCK],
+            [(1, RequestFault.SECONDARY_RATE_LIMIT)],
+            id="during-rate-limit-wait",
+        ),
+    ],
+)
+async def test_a_cancelled_request_reports_only_the_sends_it_made_and_stays_cancelled(
+    monkeypatch: pytest.MonkeyPatch, responses: list[httpx.Response | object], expected: list[tuple[int, RequestFault]]
+) -> None:
+    """A send cut off by the caller still reached the wire, but a wait it never finished sent nothing.
+
+    The cancellation is the caller's, so it must propagate as-is rather than be retried or reported
+    as a failed request.
+    """
+    clock = FakeClock()
+    real_sleep = asyncio.sleep
+
+    async def sleep(delay: float) -> None:
+        clock.advance(delay)
+        # Unlike `advance_clock_on_sleep`, suspend, so a cancellation requested before the wait lands in it.
+        await real_sleep(0)
+
+    monkeypatch.setattr(asyncio, "sleep", sleep)
+    monkeypatch.setattr("ddev.utils.github_async.client.monotonic", clock)
+    calls: list[httpx.Request] = []
+
+    def cancel_request() -> None:
+        task = asyncio.current_task()
+        assert task is not None
+        task.cancel()
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        item = responses[len(calls)]
+        calls.append(request)
+        clock.advance(2)
+        if item is BLOCK:
+            cancel_request()
+            await asyncio.Event().wait()
+        assert isinstance(item, httpx.Response)
+        return item
+
+    def on_event(event: RateLimitEvent) -> None:
+        if isinstance(event, PacingEvent) and event.reason is PacingReason.SECONDARY_LIMIT:
+            cancel_request()
+
+    observer = RecordingObserver()
+    client = governed_client(clock, httpx.MockTransport(handler), on_event=on_event, observer=observer)
+    request = asyncio.create_task(client.get_workflow_run("o", "r", 42))
+
+    with pytest.raises(asyncio.CancelledError):
+        await request
+
+    assert request.cancelled()
+    assert [(attempt.number, attempt.fault) for attempt in observer.attempts] == expected
+    assert {attempt.duration_seconds for attempt in observer.attempts} == {2}
+    assert len(calls) == len(expected)
+    assert observer.failures == []
 
 
 @pytest.mark.parametrize("status_code", [401, 403])
@@ -200,38 +305,74 @@ async def test_authentication_error_is_actionable_and_not_retried(status_code: i
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
     with pytest.raises(GitHubAuthenticationError) as exc_info:
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x", RequestAttempts())
 
     assert len(calls) == 1
     assert exc_info.value.response.status_code == status_code
     assert "ddev config set github.token" in str(exc_info.value)
 
 
-async def test_no_retry_on_transport_error() -> None:
-    """A transport error is never retried (the action may have executed); it propagates immediately."""
+async def test_the_rate_limit_layer_does_not_retry_a_transport_error() -> None:
+    """A transport error is not a rate-limit signal, so this layer must leave it alone.
+
+    Retrying belongs to the retry strategy, which decides by whether the request can be replayed;
+    treating one as a rate-limit event here would retry it for every endpoint, dispatches included.
+    """
     transport, calls = recording_transport([httpx.ConnectError("boom")])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
     with pytest.raises(httpx.ConnectError):
-        await client._request("GET", "/x")
+        await client._rate_limited_request("GET", "/x", RequestAttempts())
 
     assert len(calls) == 1
 
 
-async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Two consecutive rate-limit responses with max_rate_limit_retries=1 raise after exactly two calls."""
+@pytest.mark.parametrize(
+    ("retries", "shutting_down", "expected_calls"),
+    [
+        pytest.param(1, False, 2, id="stops-after-max-retries"),
+        pytest.param(2, True, 1, id="shutting-down-does-not-retry"),
+    ],
+)
+async def test_the_rate_limit_layer_stops_re_acquiring_when_it_is_out_of_attempts(
+    monkeypatch: pytest.MonkeyPatch, retries: int, shutting_down: bool, expected_calls: int
+) -> None:
+    """Re-acquiring the limiter is this layer's backoff, so an attempt here is a wait.
+
+    Shutting down takes none of them: waiting out a reset would spend the whole window on one call.
+    """
     clock = FakeClock()
     advance_clock_on_sleep(clock, monkeypatch)
-    transport, calls = recording_transport(
-        [httpx.Response(403, headers={"retry-after": "5"}), httpx.Response(403, headers={"retry-after": "5"})]
+    rate_limited = httpx.Response(403, headers={"retry-after": "5"})
+    transport, calls = recording_transport([rate_limited, rate_limited])
+    client = governed_client(clock, transport, max_rate_limit_retries=retries)
+    if shutting_down:
+        client.enter_shutdown_mode()
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await client._rate_limited_request("GET", "/x", RequestAttempts())
+
+    assert len(calls) == expected_calls
+
+
+async def test_shutting_down_relaxes_pacing_only_when_the_caller_asks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The budget is shared with everything else using the token, so only the caller can abandon it.
+
+    What relaxing then does to the limiter is the limiter's own contract, covered in its suite; this is
+    only about whether the client forwards the request.
+    """
+    relaxed: list[dict[str, float]] = []
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=5000, time_period=3600), name="github")
+    monkeypatch.setattr(limiter, "relax", lambda **kwargs: relaxed.append(kwargs), raising=True)
+    client = AsyncGitHubClient(
+        token=TOKEN, rate_limiter=limiter, transport=httpx.MockTransport(lambda _: httpx.Response(200))
     )
-    client = governed_client(clock, transport, max_rate_limit_retries=1)
 
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client._request("GET", "/x")
+    client.enter_shutdown_mode()
+    assert relaxed == []
 
-    assert len(calls) == 2
-    assert type(exc_info.value) is httpx.HTTPStatusError
+    client.enter_shutdown_mode(rate_limits=RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0))
+    assert relaxed == [{"max_wait_seconds": 2.0, "max_rate": 10_000.0}]
 
 
 async def test_download_redirect_302_is_not_retried(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
@@ -317,7 +458,7 @@ def test_log_rate_limit_events_level_mapping(
     caplog: pytest.LogCaptureFixture, event: RateLimitEvent, expected_level: int
 ) -> None:
     with caplog.at_level(logging.DEBUG, logger=LOGGER_NAME):
-        log_rate_limit_events()(event)
+        log_rate_limit_events(logging.getLogger(LOGGER_NAME))(event)
 
     assert caplog.records
     assert caplog.records[-1].levelno == expected_level
@@ -331,6 +472,6 @@ def test_log_rate_limit_events_unknown_event_does_not_raise(caplog: pytest.LogCa
         type: str = "future"
 
     with caplog.at_level(logging.DEBUG, logger=LOGGER_NAME):
-        log_rate_limit_events()(FutureEvent())  # type: ignore[arg-type]
+        log_rate_limit_events(logging.getLogger(LOGGER_NAME))(FutureEvent())  # type: ignore[arg-type]
 
     assert caplog.records[-1].levelno == logging.DEBUG

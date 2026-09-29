@@ -208,9 +208,6 @@ def _load_excluded_spec() -> pathspec.PathSpec:
 def is_excluded_from_wheel(path: str | Path) -> bool:
     """
     Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
-    Matches:
-      - type annotation files: **/*.pyi, **/py.typed
-      - test directories listed with a trailing '/'
     """
     spec = _load_excluded_spec()
     rel = Path(path).as_posix()

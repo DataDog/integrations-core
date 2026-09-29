@@ -5,7 +5,8 @@ import os
 import re
 import shutil
 import sys
-from typing import Dict
+from typing import Dict, Optional, Sequence
+from xml.etree import ElementTree
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
@@ -13,6 +14,25 @@ from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 ODBC_INST_INI = 'odbcinst.ini'
+
+DBM_COMMENT_MARKERS = (
+    'ddps=',
+    'dddbs=',
+    'ddh=',
+    'dddb=',
+    'ddprs=',
+    'dde=',
+    'ddpv=',
+    'traceparent=',
+    'ddsh=',
+)
+
+
+def serialize_database_names(database_names: list[str]) -> str:
+    root = ElementTree.Element('databases')
+    for database_name in database_names:
+        ElementTree.SubElement(root, 'database').text = database_name
+    return ElementTree.tostring(root, encoding='unicode')
 
 
 # Database is used to store both the name and physical_database_name
@@ -32,6 +52,17 @@ class Database:
 
     def __str__(self):
         return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
+
+
+def raise_if_cancelled(cancel_event):
+    """Abort before issuing a query once the Agent has unscheduled the check owning the job.
+
+    Teardown waits for the job loop to stop, so a tick that keeps querying after a cancel holds up
+    the Agent. ``DBMAsyncJob._job_loop`` reports an exception raised after a cancel as a
+    cancellation rather than a crash, so raising here is how a job bails out of a tick.
+    """
+    if cancel_event.is_set():
+        raise Exception("Job loop cancelled. Aborting query.")
 
 
 def get_unixodbc_sysconfig(python_executable):
@@ -116,6 +147,16 @@ def is_statement_proc(text):
         if 0 <= idx_create < idx_proc and idx_proc >= 0:
             return True, _get_procedure_name(t, idx_proc)
     return False, None
+
+
+def has_dbm_comment_marker(text: Optional[str]) -> bool:
+    return bool(text) and any(marker in text for marker in DBM_COMMENT_MARKERS)
+
+
+def needs_comment_recovery(full_text: Optional[str], statement_comments: Optional[Sequence[str]]) -> bool:
+    return has_dbm_comment_marker(full_text) and not any(
+        has_dbm_comment_marker(comment) for comment in statement_comments or ()
+    )
 
 
 def _get_procedure_name(t, idx):

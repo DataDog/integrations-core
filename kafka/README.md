@@ -2,7 +2,7 @@
 
 ![Kafka Dashboard][1]
 
-**New:** [Kafka Monitoring][24] tracks consumer lag, throughput, schemas, and adds message reading capabilities.
+**New:** [Kafka Console][24] tracks consumer lag, throughput, schemas, and adds message reading capabilities.
 
 ## Overview
 

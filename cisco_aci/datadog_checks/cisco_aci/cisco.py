@@ -14,8 +14,6 @@ from datadog_checks.cisco_aci.faults import Faults
 from datadog_checks.cisco_aci.tags import CiscoTags
 from datadog_checks.cisco_aci.tenant import Tenant
 
-SOURCE_TYPE = 'cisco_aci'
-
 SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 
 
@@ -26,7 +24,6 @@ class CiscoACICheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(CiscoACICheck, self).__init__(name, init_config, instances)
         self.tenant_metrics = make_tenant_metrics()
-        self.external_host_tags = {}
         self._api_cache = {}
         self.check_tags = ['cisco']
         self.tagger = CiscoTags(log=self.log)
@@ -123,7 +120,14 @@ class CiscoACICheck(AgentCheck):
             raise
 
         try:
-            capacity = Capacity(api, self.instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
+            capacity = Capacity(
+                api,
+                self.instance,
+                self.instance.get('namespace', 'default'),
+                check_tags=self.check_tags,
+                gauge=self.gauge,
+                log=self.log,
+            )
             capacity.collect()
         except Exception as e:
             self.log.error('capacity collection failed: %s', e)
@@ -152,13 +156,11 @@ class CiscoACICheck(AgentCheck):
 
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
-        self.set_external_tags(self.get_external_host_tags())
-
         self.submit_telemetry_metrics(start_time, tags=self.check_tags)
 
         api.close()
 
-    def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge", hostname=None):
+    def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge"):
         if instance is None:
             instance = {}
 
@@ -166,13 +168,11 @@ class CiscoACICheck(AgentCheck):
         for mname, mval in metrics.items():
             tags_to_send = []
             if mval:
-                if hostname:
-                    tags_to_send += self.check_tags
                 tags_to_send += user_tags + tags
                 if obj_type == "gauge":
-                    self.gauge(mname, float(mval), tags=tags_to_send, hostname=hostname)
+                    self.gauge(mname, float(mval), tags=tags_to_send)
                 elif obj_type == "rate":
-                    self.rate(mname, float(mval), tags=tags_to_send, hostname=hostname)
+                    self.rate(mname, float(mval), tags=tags_to_send)
                 else:
                     log_line = "Trying to submit metric: %s with unknown type: %s"
                     self.log.debug(log_line, mname, obj_type)
@@ -182,10 +182,3 @@ class CiscoACICheck(AgentCheck):
         check_duration = current_time - start_time
         self.monotonic_count('datadog.cisco_aci.check_interval', current_time, tags=tags)
         self.gauge('datadog.cisco_aci.check_duration', check_duration, tags=tags)
-
-    def get_external_host_tags(self):
-        external_host_tags = []
-        for hostname, tags in self.external_host_tags.items():
-            host_tags = tags + self.check_tags
-            external_host_tags.append((hostname, {SOURCE_TYPE: host_tags}))
-        return external_host_tags

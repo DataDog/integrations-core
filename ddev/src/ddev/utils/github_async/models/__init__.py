@@ -30,9 +30,19 @@ if TYPE_CHECKING:
     from .check_run import CheckRunStatus as CheckRunStatus
     from .comment import IssueComment as IssueComment
     from .comment import PullRequestReviewComment as PullRequestReviewComment
+    from .git import CommitInfo as CommitInfo
+    from .git import ContentType as ContentType
+    from .git import FileCommit as FileCommit
+    from .git import FileContent as FileContent
+    from .git import GitObject as GitObject
+    from .git import GitReference as GitReference
     from .label import Label as Label
     from .pull_request import PullRequest as PullRequest
+    from .pull_request import PullRequestFile as PullRequestFile
+    from .pull_request import PullRequestFileStatus as PullRequestFileStatus
     from .pull_request import PullRequestRef as PullRequestRef
+    from .pull_request import PullRequestRepo as PullRequestRepo
+    from .pull_request import PullRequestSimple as PullRequestSimple
     from .pull_request import PullRequestState as PullRequestState
     from .user import GitHubUser as GitHubUser
     from .workflow import Artifact as Artifact
@@ -54,14 +64,24 @@ MODULE_BY_NAME: dict[str, str] = {
     'CheckRun': 'check_run',
     'CheckRunConclusion': 'check_run',
     'CheckRunStatus': 'check_run',
+    'CommitInfo': 'git',
+    'ContentType': 'git',
+    'FileCommit': 'git',
+    'FileContent': 'git',
     'GitHubUser': 'user',
+    'GitObject': 'git',
+    'GitReference': 'git',
     'IssueComment': 'comment',
     'JobStep': 'workflow',
     'JobStepStatus': 'workflow',
     'Label': 'label',
     'PullRequest': 'pull_request',
+    'PullRequestFile': 'pull_request',
+    'PullRequestFileStatus': 'pull_request',
     'PullRequestRef': 'pull_request',
+    'PullRequestRepo': 'pull_request',
     'PullRequestReviewComment': 'comment',
+    'PullRequestSimple': 'pull_request',
     'PullRequestState': 'pull_request',
     'WorkflowDispatchResult': 'workflow',
     'WorkflowJob': 'workflow',

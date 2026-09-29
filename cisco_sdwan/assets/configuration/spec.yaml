@@ -1,0 +1,155 @@
+name: Cisco SD-WAN
+fleet_configurable: true
+files:
+- name: cisco_sdwan.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: vmanage_endpoint
+      description: The IP address/endpoint of the Cisco Manager instance.
+      required: true
+      fleet_configurable: true
+      formats: ["url"]
+      value:
+        type: string
+        example: <VMANAGE_ENDPOINT>
+    - name: username
+      description: |
+        Username to authenticate to the Cisco Manager instance.
+        This user should have the "Device monitoring" permission group.
+      required: true
+      fleet_configurable: true
+      value:
+        type: string
+        example: <VMANAGE_USERNAME>
+    - name: password
+      description: Password to authenticate to the Cisco Manager instance.
+      required: true
+      secret: true
+      fleet_configurable: true
+      value:
+        type: string
+        example: <VMANAGE_PASSWORD>
+    - name: namespace
+      description: Namespace can be used to disambiguate devices with the same IP.
+      fleet_configurable: true
+      value:
+        type: string
+        example: cisco-sdwan
+        display_default: default
+    - name: max_attempts
+      description: Max number of retries to apply when polling Cisco Manager API.
+      fleet_configurable: true
+      value:
+        type: integer
+        example: 3
+    - name: max_pages
+      description: Max number of page to request when polling Cisco Manager API.
+      fleet_configurable: true
+      value:
+        type: integer
+        example: 100
+    - name: max_count
+      description: |
+        Max number of resources to query per request when polling Cisco Manager API.
+        Maximum is 10000.
+      fleet_configurable: true
+      value:
+        type: integer
+        example: 2000
+        maximum: 10000
+    - name: lookback_time_window_minutes
+      description: The time window to query when polling Cisco Manager metrics.
+      fleet_configurable: true
+      value:
+        type: integer
+        example: 10
+        display_default: 30
+    - name: use_http
+      description: Use HTTP instead of HTTPS when polling Cisco Manager.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: insecure
+      description: Skip server certificate verification when polling Cisco Manager.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: ca_file
+      description: Use custom certificate authority when polling Cisco Manager.
+      fleet_configurable: true
+      formats: ["path"]
+      value:
+        type: string
+        example: <PATH_TO_CA_FILE>
+    - name: collect_hardware_metrics
+      description: Enable collecting hardware metrics (CPU/Memory/Disk...).
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+    - name: collect_interface_metrics
+      description: Enable collecting interface metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+    - name: collect_tunnel_metrics
+      description: Enable collecting SD-WAN tunnel metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+    - name: collect_control_connection_metrics
+      description: Enable collecting control connections metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+    - name: collect_omp_peer_metrics
+      description: Enable collecting OMP Peer metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+    - name: collect_device_counters_metrics
+      description: Enable collecting device counters metrics (Crash/Reboot count).
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+    - name: collect_bfd_session_status
+      description: |
+        Enable collecting BFD session status metrics.
+        Enabling this may significantly impact the check run duration, as well as adding load
+        on the Cisco Manager instance.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: collect_hardware_status
+      description: Enable collecting hardware status metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: collect_cloud_applications_metrics
+      description: Enable collecting cloud application metrics (Latency/Loss/...).
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: collect_bgp_neighbor_states
+      description: Enable collecting BGP neighbor metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60

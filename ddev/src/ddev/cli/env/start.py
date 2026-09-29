@@ -132,6 +132,7 @@ def start(
         result = json.loads(result_file.read_text())
 
     metadata = result['metadata']
+    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
 
     # TODO Remove once we have migrated the `docker_run` function
     if serialized_volumes := metadata.get(E2EMetadata.ENV_VARS, {}).get(E2EEnvVars.DOCKER_VOLUMES):
@@ -144,17 +145,17 @@ def start(
     config = result['config']
     env_data.write_config(config)
 
-    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
+    agent_class = get_agent_interface(agent_type)
+    if running_on_ci() and not agent_class.supports_ci:
+        app.abort(text=f'{agent_type.capitalize()} is not supported on CI', code=0)
 
-    if agent_type == "vagrant" and running_on_ci():
-        app.abort(text="Vagrant is not supported on CI", code=0)
-
-    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
+    agent = agent_class(app, integration, environment, metadata, env_data.config_file)
 
     if not agent_build:
+        configured_agent_build = agent.get_configured_build(app.config.agent.config)
         agent_build = (
             os.getenv(E2EEnvVars.AGENT_BUILD_PY2 if agent.python_version[0] == 2 else E2EEnvVars.AGENT_BUILD)
-            or app.config.agent.config.get(agent_type)
+            or configured_agent_build
             or ''
         )
 
@@ -162,6 +163,8 @@ def start(
 
     try:
         agent.start(agent_build=agent_build, local_packages=local_packages, env_vars=agent_env_vars)
+        # Backends may add runtime metadata needed by later ddev processes.
+        env_data.write_metadata(metadata)
     except Exception as e:
         from ddev.cli.env.stop import stop
 

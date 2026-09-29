@@ -1,0 +1,1 @@
+Tag the Dispatcher `throttle.wait.duration` metric with the rate limiter that held the request back.

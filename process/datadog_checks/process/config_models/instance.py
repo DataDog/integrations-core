@@ -9,10 +9,9 @@
 
 from __future__ import annotations
 
-from types import MappingProxyType
-from typing import Any, Optional
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -30,6 +29,15 @@ class MetricPatterns(BaseModel):
     )
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+
+
+class Thresholds(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    critical: Optional[tuple[float, ...]] = Field(None, min_length=2)
+    warning: Optional[tuple[float, ...]] = Field(None, min_length=2)
 
 
 class InstanceConfig(BaseModel):
@@ -53,7 +61,7 @@ class InstanceConfig(BaseModel):
     search_string: Optional[tuple[str, ...]] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
-    thresholds: Optional[MappingProxyType[str, Any]] = None
+    thresholds: Optional[Thresholds] = None
     try_sudo: Optional[bool] = None
     use_oneshot: Optional[bool] = None
     user: Optional[str] = None

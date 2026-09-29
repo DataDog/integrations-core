@@ -7,16 +7,6 @@ from operator import attrgetter
 
 import pymysql
 
-from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.schemas import DEFAULT_SCHEMAS_COLLECTION_INTERVAL, MySqlSchemaCollector
-
-from .util import ManagedAuthConnectionMixin, connect_with_session_variables
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -24,6 +14,10 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mysql.cursor import CommenterDictCursor
+from datadog_checks.mysql.schemas import DEFAULT_SCHEMAS_COLLECTION_INTERVAL, MySqlSchemaCollector
+
+from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -105,13 +99,19 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if not self._db:
             conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
             if self._uses_managed_auth:
                 self._db_created_at = time.time()
         else:
             # ping() will by default automatically reconnect if the connection is lost
             self._db.ping()
         return self._db
+
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+        self._schema_collector = None
 
     def _close_db_conn(self):
         if self._db:
@@ -126,6 +126,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
@@ -188,7 +189,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
+            "agent_version": self._check.agent_version,
             "dbms": self._check.dbms,
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
