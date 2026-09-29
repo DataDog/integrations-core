@@ -236,13 +236,16 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         all_responses: list[Message] = []
         messages = request_messages
         for _ in range(MAX_CONTINUATIONS):
-            response = await self._client.messages.create(
+            # Streaming avoids the SDK's non-streaming timeout guard on large max_tokens values;
+            # get_final_message() accumulates the stream into the same Message shape create() returned.
+            async with self._client.messages.stream(
                 model=self._model,
                 max_tokens=self._max_tokens,
                 system=system_param,
                 messages=messages,
                 tools=tool_defs if tool_defs else anthropic.NOT_GIVEN,
-            )
+            ) as stream:
+                response = await stream.get_final_message()
             all_responses.append(response)
             if response.stop_reason != "pause_turn":
                 return CompletionResult(final_response=response, paused_turns=paused_turns, all_responses=all_responses)
@@ -432,7 +435,8 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         completion = await self._call_api(messages=messages, system_param=system_param, tool_defs=tool_defs)
         final = completion.final_response
 
-        # stop_reason is None only in streaming responses; we use non-streaming, so None is unexpected
+        # Individual stream events may lack a stop_reason, but get_final_message() returns the
+        # fully accumulated Message, which always carries a final stop_reason.
         if final.stop_reason is None:
             raise AgentError("Received null stop_reason from API")
 
