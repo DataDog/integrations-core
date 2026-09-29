@@ -296,7 +296,7 @@ class KafkaCheck(AgentCheck):
             return [
                 grp
                 for grp in self.client.list_consumer_groups()
-                if grp and self.config._consumer_groups_compiled_group_regex.match(grp)
+                if grp and self.config._consumer_groups_compiled_group_regex.fullmatch(grp)
             ]
 
         return self.config._consumer_groups

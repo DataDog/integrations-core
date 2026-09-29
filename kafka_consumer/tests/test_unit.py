@@ -1267,6 +1267,22 @@ def test_consumer_groups_regex_filters_groups_before_fetching_offsets(check, kaf
     )
 
 
+def test_consumer_groups_regex_prefilter_excludes_prefix_sharing_groups(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'orders': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = False
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = ['orders', 'orders-v2', 'orders-archive']
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+    kafka_consumer_check.get_consumer_offsets()
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with([('orders', None)])
+
+
 def test_consumer_groups_regex_prefilter_combines_explicit_and_regex_groups(check, kafka_instance):
     kafka_instance['consumer_groups'] = {'critical-orders': {}}
     kafka_instance['consumer_groups_regex'] = {'prod-.+': {}}
@@ -1320,27 +1336,3 @@ def test_consumer_groups_regex_prefilter_disabled_when_monitoring_unlisted_group
             ('staging-orders', None),
         ]
     )
-
-
-def test_consumer_groups_regex_prefilter_reduces_offset_fetch_fanout(check, kafka_instance):
-    kafka_instance['consumer_groups'] = {}
-    kafka_instance['consumer_groups_regex'] = {'matched-.+': {}}
-    kafka_instance['monitor_unlisted_consumer_groups'] = False
-
-    mock_client = seed_mock_client()
-    mock_client.list_consumer_groups.return_value = [
-        *[f'matched-{i}' for i in range(10)],
-        *[f'unmatched-{i}' for i in range(990)],
-    ]
-    mock_client.list_consumer_group_offsets.return_value = []
-
-    kafka_consumer_check = check(kafka_instance)
-    kafka_consumer_check.client = mock_client
-
-    kafka_consumer_check.get_consumer_offsets()
-
-    requested_groups = mock_client.list_consumer_group_offsets.call_args.args[0]
-
-    assert len(mock_client.list_consumer_groups.return_value) == 1000
-    assert len(requested_groups) == 10
-    assert requested_groups == [(f'matched-{i}', None) for i in range(10)]
