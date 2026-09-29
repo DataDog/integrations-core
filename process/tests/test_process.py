@@ -230,8 +230,7 @@ def test_check_collect_children(mock_process, mock_pids, reset_process_list_cach
 
 
 def test_check_collect_children_uses_fast_ppid_map(reset_process_list_cache, aggregator, dd_run_check, monkeypatch):
-    # Simulates a platform with a native bulk ppid lookup (eg. Windows, Linux): the slower
-    # per-pid fallback (psutil.pids() + Process.ppid()) must not run.
+    # Simulates a fast platform (eg. Windows, Linux); the per-pid fallback must not run.
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     fake_process = MockProcess()
     fake_process.pid = 1
@@ -249,8 +248,7 @@ def test_check_collect_children_uses_fast_ppid_map(reset_process_list_cache, agg
 
 
 def test_check_collect_children_skips_inaccessible_pid(reset_process_list_cache, aggregator, dd_run_check, monkeypatch):
-    # Simulates a platform without a native bulk ppid lookup (eg. AIX): our own fallback must
-    # skip inaccessible pids (eg. pid 0) instead of failing collection for every matched process.
+    # Simulates a slow platform (eg. AIX); an inaccessible pid must not drop the rest.
     processes = {
         0: PpidMockProcess(0, deny_access=True),
         1: PpidMockProcess(1, ppid_value=999),

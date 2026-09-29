@@ -78,8 +78,7 @@ class ProcessCheck(AgentCheck):
         self.try_sudo = self.instance.get('try_sudo', False)
         self.use_oneshot = is_affirmative(self.instance.get('use_oneshot', True))
 
-        # Whether the platform has a native bulk ppid lookup (eg. Windows, Linux), used to
-        # speed up child process collection. Computed once since it never changes at runtime.
+        # Platform capability, computed once rather than per check run.
         self._has_native_ppid_map = hasattr(psutil._psplatform, 'ppid_map')
 
         # ad stands for access denied
@@ -392,13 +391,11 @@ class ProcessCheck(AgentCheck):
 
     def _get_child_processes(self, pids):
         if self._has_native_ppid_map:
-            # Native bulk ppid lookup (Windows, Linux): a single fast call, same as what
-            # psutil.Process.children(recursive=True) uses internally.
+            # Single fast call, same as Process.children(recursive=True) uses internally.
             ppid_map = psutil._psplatform.ppid_map()
         else:
-            # No native bulk lookup (eg. AIX): psutil's own fallback calls ppid() once per
-            # pid with no AccessDenied handling, aborting entirely if a single pid is
-            # inaccessible. Rebuild it ourselves, skipping pids we can't read instead.
+            # No native bulk lookup (eg. AIX). Build it per-pid instead, skipping pids we
+            # can't read rather than aborting the whole batch like psutil's own fallback does.
             ppid_map = {}
             for p in psutil.pids():
                 try:

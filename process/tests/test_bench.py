@@ -10,9 +10,8 @@ from datadog_checks.process import ProcessCheck
 
 from . import common
 
-# Number of system pids to simulate, and the per-call latency of a single native bulk
-# ppid-map snapshot on Windows, as measured in
-# https://github.com/DataDog/integrations-core/pull/25367#pullrequestreview-5344915174
+# Simulated pid count and per-call latency of a native bulk ppid_map snapshot on Windows,
+# per https://github.com/DataDog/integrations-core/pull/25367#pullrequestreview-5344915174
 SIMULATED_PID_COUNT = 400
 SIMULATED_PPID_CALL_LATENCY = 0.008
 
@@ -29,8 +28,7 @@ class SlowMockProcess:
 
 
 def _naive_get_child_processes(pids):
-    # Reconstruction of the pre-fix implementation: calls Process(pid).ppid() once per
-    # every system pid, bypassing psutil's native bulk ppid_map fast path entirely.
+    # Reconstruction of the pre-fix implementation: Process(pid).ppid() called per system pid.
     ppid_map = {}
     for p in psutil.pids():
         try:
@@ -47,8 +45,7 @@ def _naive_get_child_processes(pids):
 
 
 def test_collect_children_naive_per_pid_loop(benchmark):
-    # Simulates the pre-fix cost on a platform where Process.ppid() itself re-runs a full
-    # bulk snapshot per call (eg. Windows): O(n) snapshots of O(n) cost each.
+    # Simulates the pre-fix O(n^2) cost on a platform like Windows.
     simulated_pids = list(range(1, SIMULATED_PID_COUNT + 1))
     with (
         mock.patch('psutil.pids', return_value=simulated_pids),
@@ -58,8 +55,7 @@ def test_collect_children_naive_per_pid_loop(benchmark):
 
 
 def test_collect_children_fast_ppid_map(benchmark, monkeypatch):
-    # The fixed implementation: a single call to the platform's native bulk ppid lookup,
-    # matching the fast path Process.children(recursive=True) already uses on Windows/Linux.
+    # The fixed implementation: a single native bulk ppid_map() call.
     simulated_ppid_map = dict.fromkeys(range(1, SIMULATED_PID_COUNT + 1), 1)
 
     def slow_ppid_map():
