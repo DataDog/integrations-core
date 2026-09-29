@@ -1301,6 +1301,10 @@ integration/scylla:
 - changed-files:
   - any-glob-to-any-file:
     - scylla/**/*
+integration/sglang:
+- changed-files:
+  - any-glob-to-any-file:
+    - sglang/**/*
 integration/shopify:
 - changed-files:
   - any-glob-to-any-file:
