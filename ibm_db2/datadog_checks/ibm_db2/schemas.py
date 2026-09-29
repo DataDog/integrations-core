@@ -58,7 +58,7 @@ SELECT schema_tables.schema_name, schema_tables.schema_owner,
                       KEY 'data_type' VALUE c.TYPENAME,
                       KEY 'length' VALUE c.LENGTH,
                       KEY 'scale' VALUE c.SCALE,
-                      KEY 'nullable' VALUE CASE WHEN c.NULLS = 'Y' THEN 'true' ELSE 'false' END FORMAT JSON,
+                      KEY 'is_nullable' VALUE CASE WHEN c.NULLS = 'Y' THEN 'true' ELSE 'false' END FORMAT JSON,
                       KEY 'default' VALUE c.DEFAULT
                   ) END
            FROM SYSIBM.SYSDUMMY1
