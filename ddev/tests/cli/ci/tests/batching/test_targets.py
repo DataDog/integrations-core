@@ -7,10 +7,12 @@ from dataclasses import dataclass
 
 import pytest
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.targets import (
     UNTESTABLE_TARGETS,
     AllTargetsRule,
     DirectTargetRule,
+    InfrastructureRule,
     RegistryRepositoryFacts,
     RepositoryWideRule,
     default_target_rules,
@@ -18,7 +20,7 @@ from ddev.cli.ci.tests.batching.targets import (
 )
 from tests.cli.ci.tests.helpers import FakeIntegration, FakeRegistry, copied, modified, renamed
 
-CORE_RULES = default_target_rules(is_core=True)
+CORE_RULES = default_target_rules(is_core=True, infrastructure_targets=("disk",))
 
 
 @dataclass(frozen=True)
@@ -219,6 +221,37 @@ def test_rename_with_an_ignored_end_still_evaluates_the_other(source, destinatio
     assert find_affected_targets(changed, facts("postgres", "mysql", "ddev"), rules=CORE_RULES) == expected
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param(".github/actions/setup-ddev/action.yml", id="setup-ddev"),
+        pytest.param(".github/actions/run-test-job/action.yml", id="run-test-job"),
+        pytest.param(".github/actions/setup-test-target-scripts/src/run-e2e-tests.sh", id="test-scripts"),
+        pytest.param(".github/actions/tag-job/action.yml", id="tag-job"),
+    ],
+)
+def test_infrastructure_change_selects_only_the_configured_targets(path):
+    # Every test job runs this plumbing, so it needs a few jobs to validate it rather than none or
+    # the whole repository.
+    changed = [modified(path)]
+
+    assert find_affected_targets(changed, facts("disk", "postgres", "mysql"), rules=CORE_RULES) == ["disk"]
+
+
+def test_infrastructure_rule_does_not_fire_outside_core():
+    rule = InfrastructureRule(is_core=False, targets=("disk",))
+
+    assert list(rule([modified(".github/actions/setup-ddev/action.yml")], facts("postgres"))) == []
+
+
+def test_infrastructure_rule_rejects_a_target_that_is_not_testable():
+    # A misspelled target would otherwise plan nothing and leave the change untested.
+    rule = InfrastructureRule(is_core=True, targets=("disk", "dsik"))
+
+    with pytest.raises(PlanningError, match="dsik"):
+        list(rule([modified(".github/actions/setup-ddev/action.yml")], facts("disk")))
+
+
 def test_repository_wide_rule_ignores_irrelevant_paths():
     rule = RepositoryWideRule(is_core=True)
     changed = [modified("postgres/tests/test_a.py")]
@@ -273,7 +306,9 @@ def test_default_target_rules_only_expand_the_repository_for_core():
         "datadog_checks_base",
         "postgres",
     ]
-    assert find_affected_targets(changed, known, rules=default_target_rules(is_core=False)) == ["datadog_checks_base"]
+    assert find_affected_targets(
+        changed, known, rules=default_target_rules(is_core=False, infrastructure_targets=("disk",))
+    ) == ["datadog_checks_base"]
 
 
 @pytest.mark.parametrize(

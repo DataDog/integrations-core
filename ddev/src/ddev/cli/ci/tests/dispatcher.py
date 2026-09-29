@@ -240,12 +240,22 @@ def build_dispatcher(
     all buckets share the provider's budget and pauses. The caller owns `monitoring`; each
     processor reports its own metrics through the monitor it is given.
     """
+    from ddev.cli.ci.tests.github_monitor import GitHubMonitor
     from ddev.utils.github_async import AsyncGitHubClient
 
-    client_logger = ComponentLogAdapter(monitoring.component('github-async'))
+    client_monitor = monitoring.component('github-async')
+    client_logger = ComponentLogAdapter(client_monitor)
+    github_monitor = GitHubMonitor(client_monitor)
     integrations = frozenset(integration for batch in batches for integration in batch.integrations)
-    rate_limiters = RateLimiterFactory(config.github_rate_limits, client_logger)
-    client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations), logger=client_logger)
+    rate_limiters = RateLimiterFactory(
+        config.github_rate_limits, client_logger, on_event=github_monitor.rate_limit_event
+    )
+    client = AsyncGitHubClient(
+        token,
+        rate_limiter=rate_limiters.get_limiter(integrations),
+        logger=client_logger,
+        observer=github_monitor,
+    )
 
     canonical_run_fields = run_fields(run, tags=tags)
     runner = TaskTestRunner(

@@ -1,0 +1,26 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Access Token ID and Secret Key",
+      "basic": {
+        "user_setting": {
+          "key": "access_token_id",
+          "label": "Access token ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret_key",
+          "label": "Secret key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "mux-metrics" }
+  ]
+}

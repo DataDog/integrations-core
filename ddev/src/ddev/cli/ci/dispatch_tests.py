@@ -197,6 +197,7 @@ def dispatch_tests(
         tag_fields,
     )
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
+    from ddev.cli.ci.tests.dispatcher_logging import ci_pipeline_id
     from ddev.monitoring import MonitoringRuntime, console_formatter
 
     tested_repository = f'{owner}/{repo}'
@@ -221,6 +222,8 @@ def dispatch_tests(
             **BASE_FIELDS,
             **repository_fields(owner, repo),
             **UNRESOLVED_RUN_FIELDS,
+            # Bind even when absent, so caller tags and scopes cannot forge the workflow's identity.
+            'ci_pipeline_id': ci_pipeline_id(),
         },
     )
     datadog_handler = attach_datadog_log_handler(app, monitoring, level=output_level)
