@@ -106,10 +106,10 @@ def test_repository_wide_rule_triggers_full_eligible_set_in_core():
 
 
 def test_repository_wide_rule_fires_on_a_rename_away_from_a_repository_wide_path():
-    # Moving a shared planning module out of its package removes it from every target that relied
+    # Moving a shared testing module out of its package removes it from every target that relied
     # on it, so the source path has to trigger the expansion even though the destination does not.
     rule = RepositoryWideRule(is_core=True)
-    changed = [renamed("ddev/src/ddev/cli/ci/tests/batching/units.py", "ddev/src/ddev/utils/units.py")]
+    changed = [renamed("ddev/src/ddev/testing/constants.py", "ddev/src/ddev/utils/constants.py")]
 
     assert list(rule(changed, facts("postgres", "mysql"))) == ["mysql", "postgres"]
 
@@ -133,16 +133,16 @@ def test_repository_wide_rule_still_fires_alongside_a_dependency_bump():
         pytest.param("ddev/src/ddev/cli/env/test.py", id="e2e-test-invocation"),
         pytest.param("ddev/src/ddev/testing/constants.py", id="testing-constants"),
         pytest.param("ddev/src/ddev/utils/hatch.py", id="hatch-environment-resolution"),
-        pytest.param("ddev/src/ddev/cli/ci/tests/batching/units.py", id="dispatcher-planning"),
-        pytest.param("ddev/src/ddev/cli/ci/tests/task_test_runner.py", id="dispatcher-execution"),
-        pytest.param("ddev/src/ddev/cli/ci/tests/task_test_gatherer.py", id="dispatcher-reporting"),
-        pytest.param("ddev/src/ddev/cli/ci/tests/messages.py", id="dispatcher-messages"),
+        pytest.param("ddev/src/ddev/plugin/external/hatch/environment_collector.py", id="hatch-environment-collector"),
         pytest.param("ddev/src/ddev/integration/core.py", id="integration-model"),
         pytest.param("ddev/src/ddev/repo/core.py", id="repository-model"),
+        pytest.param("datadog_checks_dev/datadog_checks/dev/plugin/pytest.py", id="pytest-plugin"),
+        pytest.param("datadog_checks_dev/pyproject.toml", id="dev-dependencies"),
+        pytest.param("datadog_checks_base/pyproject.toml", id="base-dependencies"),
     ],
 )
-def test_repository_wide_rule_triggers_full_set_for_ddev_test_planning_paths(path):
-    # A change to ddev code that governs how tests are discovered/planned/run retests everything.
+def test_repository_wide_rule_triggers_full_set_for_test_execution_paths(path):
+    # Test jobs run this code from the pull request, and each target depends on it differently.
     rule = RepositoryWideRule(is_core=True)
     changed = [modified(path)]
 
@@ -154,6 +154,8 @@ def test_repository_wide_rule_triggers_full_set_for_ddev_test_planning_paths(pat
     [
         pytest.param("ddev/src/ddev/cli/port_commit.py", id="unrelated-ddev-command"),
         pytest.param("agent_requirements.in", id="dependency-bump"),
+        # The Dispatcher runs from master, so its own run cannot exercise a pull request's changes.
+        pytest.param("ddev/src/ddev/cli/ci/tests/batching/units.py", id="dispatcher-code"),
     ],
 )
 def test_repository_wide_rule_ignores_paths_that_do_not_govern_testing(path):
@@ -180,10 +182,10 @@ def test_repository_wide_rule_does_not_fire_outside_core():
 @pytest.mark.parametrize(
     "path",
     [
-        # Without the ignore, `tests/.+` would select postgres and `ddev/src/ddev/cli/ci/tests/.+`
-        # would expand to every eligible target.
+        # Without the ignore, `tests/.+` would select postgres and `ddev/src/ddev/testing/.+` would
+        # expand to every eligible target.
         pytest.param("postgres/tests/AGENTS.md", id="direct-target-trigger"),
-        pytest.param("ddev/src/ddev/cli/ci/tests/batching/CLAUDE.md", id="repository-wide-trigger"),
+        pytest.param("ddev/src/ddev/testing/CLAUDE.md", id="repository-wide-trigger"),
     ],
 )
 def test_instruction_files_select_no_targets(path):
@@ -199,7 +201,7 @@ def test_instruction_files_select_no_targets(path):
         # The ignored source contributes nothing, so the relevant destination selects only its
         # direct target instead of the repository-wide expansion the source would trigger.
         pytest.param(
-            "ddev/src/ddev/cli/ci/tests/batching/AGENTS.md",
+            "ddev/src/ddev/testing/AGENTS.md",
             "postgres/tests/test_a.py",
             ["postgres"],
             id="ignored-source-relevant-destination",
@@ -208,7 +210,7 @@ def test_instruction_files_select_no_targets(path):
         # so the repository-wide source still expands to the full eligible set (`ddev` also
         # arrives via the direct rule, as for any ddev Python file).
         pytest.param(
-            "ddev/src/ddev/cli/ci/tests/batching/units.py",
+            "ddev/src/ddev/testing/constants.py",
             "postgres/AGENTS.md",
             ["ddev", "mysql", "postgres"],
             id="relevant-source-ignored-destination",
