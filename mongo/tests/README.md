@@ -36,7 +36,8 @@ replica-set member. The fixture is therefore the smallest sharded cluster that h
 - **activity-gen** — a continuous workload through mongos (`activity-gen.sh`): inserts,
   indexed and unindexed queries, small-batch reads for getMores, updates, deletes,
   aggregations, `listIndexes`, periodic DDL (replicated as commands), and one long-lived
-  session so `sessions.count` is non-zero.
+  session so `sessions.count` is non-zero. It also runs bounded lock contention in the
+  `lockdrill` database, described under [Lock metrics](#lock-metrics).
 - **mongo-full** — the entrypoint the evalya task targets: a `socat` forwarder that
   exposes mongos on 27017, shard-a on 27018, and shard-b on 27019. It depends on every
   long-lived node and on the workload, since evalya only starts a task's `depends_on`
@@ -106,4 +107,47 @@ Measured on MongoDB 8.0.32 with the three instances above: all 29 target metrics
   not happen here.
 - `mongodb.globallock.currentqueue.readers` / `.writers` — operations queued on lock
   contention; the monitors alert when these exceed 100, and a healthy node sits at 0.
+  These are point-in-time gauges: the lock contention below queues operations only in
+  bursts of about 100 ms, so a scrape still reads 0.
 - `mongodb.extra_info.page_faultsps` — major page faults; the data set fits in memory.
+
+### Lock metrics
+
+The `mongodb.locks.*` metrics (OTel: `mongodb.lock.acquire.{count,wait_count,time}`) read
+serverStatus `locks.<type>.{acquireCount,acquireWaitCount,timeAcquiringMicros}.<mode>`.
+MongoDB only reports a field once it is non-zero: `acquireWaitCount` and
+`timeAcquiringMicros` need an acquisition that waited on a conflicting mode, which
+one-at-a-time traffic never causes. So `activity-gen` also runs lock contention in the
+`lockdrill` database (seeded through mongos):
+
+- a slow writer, directly on shard-a: an update whose `$where` sleeps 100 ms, so it holds
+  its intent locks (IX on Global, Database, and Collection) almost continuously;
+- two fast writers and `dbStats`, directly on shard-a, which queue behind the holders
+  (IS/IX waits);
+- a holder on shard-a, every 3 s: `createIndexes` (S for the drain, X to commit) and
+  `dropIndexes` (X) on `lockdrill.hot`, `dbHash` (Database S), a cross-database
+  `renameCollection` from `lockdrill_aux` (Database X on the target), and `fsync` with
+  `lock: true` (Global S), unlocked in a `finally`;
+- a holder through mongos, every 3 s: an insert into the capped `lockdrill.capped` (Metadata
+  X) and `setUserWriteBlockMode` on then off (Global X on the shard), turned off in a
+  `finally`. Writes that land in that window fail with `UserWritesBlocked`, which the lock
+  writers ignore.
+
+Each lock held past its command is released in a `finally`, and each holder first clears
+one a killed predecessor left behind. `ACTIVITY_GEN=0` disables it with the rest of the
+workload. The waits are counted on shard-a (the `27018` instance); mongos reports only its
+`Mutex` lock.
+
+Measured on MongoDB 8.0.32 over three 15 s windows: every wait count and wait time for
+Global, Database, and Collection in all four modes, plus `Metadata` `acquireCount` in X
+mode, was non-zero in every window, both from the mongo check and from the OTel
+`mongodbreceiver`. Six fields stay absent, because MongoDB 8.0 never acquires those modes
+in steady state:
+
+- `locks.Metadata.acquireCount.R`: 8.0 takes the Metadata resource only in X mode, for
+  writes to capped collections.
+- `locks.oplog.{acquireCount,acquireWaitCount,timeAcquiringMicros}.R`: nothing in 8.0
+  takes the oplog collection lock in S mode.
+- `locks.oplog.{acquireWaitCount,timeAcquiringMicros}.w`: 8.0 writes and reads the oplog
+  without its collection lock (`AutoGetOplogFastPath` takes only the Global lock). Only
+  startup, repair, and oplog creation take IX on it, so no workload makes it wait.
