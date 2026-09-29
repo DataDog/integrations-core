@@ -18,7 +18,7 @@ fixture in `evalya.yaml`.
 referenced by the OOTB dashboards (`assets/dashboards/`) and the recommended monitors
 (`assets/monitors/`). That union is 61 metrics, of which 58 belong to this check;
 `data_streams.latency`, `data_streams.payload_size`, and `system.mem.total` come from other
-sources and are out of scope. Seven services:
+sources and are out of scope. Nine services:
 
 - **rabbitmq-broker** — a `-management` broker. This image exposes both the management API
   (15672) and the Prometheus/OpenMetrics plugin (15692) on one broker.
@@ -36,15 +36,29 @@ sources and are out of scope. Seven services:
 - **activity-gen** — periodic queue declare/delete churn (`activity-gen.sh`) so the
   node-wide `rabbitmq.queues.created/declared/deleted.count` counters keep advancing;
   perf-test's long-lived queues do not produce churn. Set `ACTIVITY_GEN=0` (host env) to
-  idle it.
+  idle it; the same switch idles `autoack` and `redeliver` (the containers stay up).
 - **unroutable** — a producer-only perf-test publishing to a routing key nothing is bound
   to, so the unroutable-dropped counters advance.
 - **conn-churn** — a looping short-lived perf-test (one producer, one consumer, 20s per
   cycle). `load`'s connections live for the whole run, so without it the
-  connection/channel opened/closed counters and the consumer count stay flat.
+  connection/channel opened/closed counters and the consumer count stay flat. Its
+  consumer is capped at 5 msg/s against a 10 msg/s publisher with no prefetch limit, so the
+  queue's unacked count climbs through each cycle and
+  `rabbitmq.queue.messages_unacknowledged.rate` leaves 0 (`load`'s unacked count is pinned
+  at its `--qos`, so its rate stays 0).
+- **autoack**: a long-lived perf-test whose consumer uses automatic acknowledgement
+  (`--autoack`). `rabbitmq.channel.messages.delivered.count` and
+  `rabbitmq.queue.messages.delivered.count` count only auto-ack deliveries; every other
+  consumer acks manually.
+- **redeliver**: a long-lived perf-test whose consumer nacks with requeue (`--nack`), so
+  every message is redelivered: drives `rabbitmq.queue.messages.redeliver.count`
+  (management) and `rabbitmq.queue.messages.redelivered.count` (OpenMetrics). With
+  `--flag persistent`, perf-test declares the queue durable and publishes persistent
+  messages; nacked messages never leave, so the queue always holds persistent messages for
+  `rabbitmq.queue.messages.persistent`. `x-max-length=200` bounds it.
 - **rabbitmq-full** — the entrypoint the evalya task targets: a `socat` forwarder for 5672,
   15672, and 15692, gated on the broker being healthy, `seed` completing, and `load`,
-  `activity-gen`, `unroutable`, and `conn-churn` starting. evalya only starts a task's target and its
+  `activity-gen`, `unroutable`, `conn-churn`, `autoack`, and `redeliver` starting. evalya only starts a task's target and its
   `depends_on` chain, so targeting the broker directly would run it with no workload.
 
 No ports are published to the host, so the fixture cannot clash with a local broker or a
@@ -91,10 +105,34 @@ OpenMetrics counters — the OpenMetrics v2 base check needs a prior sample to s
 ddev env agent rabbitmq <env> check rabbitmq -t 2 --json
 ```
 
-Measured result on broker 4.0.9 with both instances above: **56 of the 58 in-scope metrics
-emitted live**, the two exceptions being the RabbitMQ 4.x removals below. When a whole class
+Coverage counts a metric only when some scrape reports it **non-zero**. Measured on broker
+4.0.9 with both instances (the OpenMetrics instance also scraping the `detailed` endpoint for
+the `queue_coarse_metrics`, `queue_consumer_count`, `queue_delivery_metrics`, and
+`channel_queue_exchange_metrics` families), four `-t 2` runs about 35s apart, the first
+~45s after the fixture turned healthy: **56 of the 58 in-scope metrics emitted, 51 non-zero**, all live. The two absent
+metrics are the RabbitMQ 4.x removals below; the five that stay at 0 are listed under
+"Metrics left at zero". `rabbitmq.queue.messages.paged_out` needs the `load` backlog to build,
+so it reads 0 in the first minute. When a whole class
 of metrics (everything ending `.count`) is missing while the matching gauges are present,
 suspect a single-scrape run before touching the workload.
+
+### Metrics left at zero
+
+- `rabbitmq.node.sockets_used` (management API): RabbitMQ 4.0 no longer tracks TCP sockets
+  and reports `sockets_used: 0` (and `sockets_total: 0`) in `/api/nodes` regardless of load;
+  a 4.0.9 broker with 11 open AMQP connections returned 0. Unreachable on 4.x, for the same
+  reason as the two gauges below.
+- `rabbitmq.node.mem_alarm`, `rabbitmq.node.disk_alarm`,
+  `rabbitmq.alarms.free_disk_space.watermark`: 0 on a healthy broker. Intentionally not
+  driven. Raising them (`rabbitmqctl set_vm_memory_high_watermark` /
+  `set_disk_free_limit`) blocks every publishing connection broker-wide while active, which
+  stalls the publish, deliver, confirm, unroutable, and churn counters the rest of the
+  fixture exists to keep moving, and it needs Erlang-distribution access (a shared cookie
+  and a fixed node name) from a sidecar, which the fixture does not have.
+- `rabbitmq.connection.pending_packets`: packets queued on a connection's socket, non-zero
+  only while a client stops reading and TCP backs up. The perf-test clients keep up, so it
+  read 0 in every scrape. Driving it would need a bespoke AMQP client that stops reading its
+  socket; not done.
 
 ### Metrics not reachable on RabbitMQ 4.x
 
