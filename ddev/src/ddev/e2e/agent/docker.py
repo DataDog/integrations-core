@@ -174,8 +174,15 @@ class DockerAgent(AgentInterface):
         # Set Agent hostname for CI
         env_vars[AgentEnvVars.HOSTNAME] = _get_hostname()
 
-        # Run API on a random free port
-        env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
+        docker_network = self.metadata.get('docker_network')
+        if docker_network and docker_network.startswith('container:'):
+            raise ValueError('Docker network modes that share another container network namespace are not supported')
+        if self._is_windows_container and docker_network:
+            raise ValueError('Custom Docker networks are not supported for Windows Agent containers')
+
+        uses_host_network = not docker_network or docker_network == 'host'
+        if uses_host_network:
+            env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
         # Disable trace Agent by default (can be overridden by user-provided env_vars)
         env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
@@ -249,7 +256,7 @@ class DockerAgent(AgentInterface):
         # Windows containers accessing the host network must use `docker.for.win.localhost` or `host.docker.internal`:
         # https://docs.docker.com/docker-for-windows/networking/#use-cases-and-workarounds
         if not self._is_windows_container:
-            command.extend(['--network', 'host'])
+            command.extend(['--network', docker_network or 'host'])
 
         for volume in volumes:
             command.extend(['-v', volume])

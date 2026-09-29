@@ -1,3 +1,95 @@
+## Datadog Agent version [7.83.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7833)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.83.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7832)
+
+### Integration Updates
+* Datadog Checks Base [38.0.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* ClickHouse [7.2.1](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+
+## Datadog Agent version [7.83.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7831)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.83.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7830)
+
+### Integration Updates
+* Active Directory [4.8.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
+* Aerospike [5.5.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
+* Amazon Kafka [7.8.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* ASP.NET [4.8.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
+* Boundary [4.5.0](https://github.com/DataDog/integrations-core/blob/master/boundary/CHANGELOG.md)
+* Datadog Checks Base [38.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* Datadog Checks Downloader [9.3.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* Cisco ACI [5.1.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [7.2.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* CockroachDB [6.5.0](https://github.com/DataDog/integrations-core/blob/master/cockroachdb/CHANGELOG.md)
+* Directory [4.5.0](https://github.com/DataDog/integrations-core/blob/master/directory/CHANGELOG.md)
+* DO Query Actions [1.2.0](https://github.com/DataDog/integrations-core/blob/master/do_query_actions/CHANGELOG.md)
+* .NET CLR [4.8.0](https://github.com/DataDog/integrations-core/blob/master/dotnetclr/CHANGELOG.md)
+* DuckDB [1.4.0](https://github.com/DataDog/integrations-core/blob/master/duckdb/CHANGELOG.md)
+* Envoy [6.7.0](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* ESXi [4.4.0](https://github.com/DataDog/integrations-core/blob/master/esxi/CHANGELOG.md)
+* Exchange Server [4.8.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
+* Falco [2.5.0](https://github.com/DataDog/integrations-core/blob/master/falco/CHANGELOG.md)
+* flink [3.4.0](https://github.com/DataDog/integrations-core/blob/master/flink/CHANGELOG.md)
+* Gearman [5.4.0](https://github.com/DataDog/integrations-core/blob/master/gearmand/CHANGELOG.md)
+* HAProxy [8.5.0](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md)
+* Hazelcast [6.7.0](https://github.com/DataDog/integrations-core/blob/master/hazelcast/CHANGELOG.md)
+* HTTP [13.1.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM ACE [4.6.0](https://github.com/DataDog/integrations-core/blob/master/ibm_ace/CHANGELOG.md)
+* IBM Db2 [4.4.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
+* IBM MQ [8.11.0](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md)
+* IIS [5.8.0](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
+* Kafka Actions [2.9.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [9.0.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md) **BREAKING CHANGE**
+* Kong [6.5.0](https://github.com/DataDog/integrations-core/blob/master/kong/CHANGELOG.md)
+* KrakenD [2.0.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md) **BREAKING CHANGE**
+* Kueue [1.1.0](https://github.com/DataDog/integrations-core/blob/master/kueue/CHANGELOG.md)
+* Lustre [1.5.1](https://github.com/DataDog/integrations-core/blob/master/lustre/CHANGELOG.md)
+* MapR [3.5.0](https://github.com/DataDog/integrations-core/blob/master/mapr/CHANGELOG.md)
+* MarkLogic [6.5.1](https://github.com/DataDog/integrations-core/blob/master/marklogic/CHANGELOG.md)
+* Memcached [6.5.0](https://github.com/DataDog/integrations-core/blob/master/mcache/CHANGELOG.md)
+* Milvus [2.6.0](https://github.com/DataDog/integrations-core/blob/master/milvus/CHANGELOG.md)
+* MongoDB [10.12.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.20.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* n8n [2.1.1](https://github.com/DataDog/integrations-core/blob/master/n8n/CHANGELOG.md)
+* NGINX Ingress Controller [5.5.0](https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/CHANGELOG.md)
+* NGINX [10.0.0](https://github.com/DataDog/integrations-core/blob/master/nginx/CHANGELOG.md) **BREAKING CHANGE**
+* Nutanix [1.7.0](https://github.com/DataDog/integrations-core/blob/master/nutanix/CHANGELOG.md)
+* OpenLDAP [3.4.0](https://github.com/DataDog/integrations-core/blob/master/openldap/CHANGELOG.md)
+* OpenStack Controller [9.7.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* PDH [4.7.0](https://github.com/DataDog/integrations-core/blob/master/pdh_check/CHANGELOG.md)
+* PGBouncer [8.11.0](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
+* Postgres [23.11.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Prefect [1.1.0](https://github.com/DataDog/integrations-core/blob/master/prefect/CHANGELOG.md)
+* Process [5.5.2](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
+* Prometheus [6.4.0](https://github.com/DataDog/integrations-core/blob/master/prometheus/CHANGELOG.md)
+* Pulsar [3.7.1](https://github.com/DataDog/integrations-core/blob/master/pulsar/CHANGELOG.md)
+* Ray [3.5.1](https://github.com/DataDog/integrations-core/blob/master/ray/CHANGELOG.md)
+* RethinkDB [5.5.0](https://github.com/DataDog/integrations-core/blob/master/rethinkdb/CHANGELOG.md)
+* RiakCS [4.14.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
+* SAP HANA [5.7.0](https://github.com/DataDog/integrations-core/blob/master/sap_hana/CHANGELOG.md)
+* Scylla [5.5.0](https://github.com/DataDog/integrations-core/blob/master/scylla/CHANGELOG.md)
+* Silverstripe CMS [1.9.0](https://github.com/DataDog/integrations-core/blob/master/silverstripe_cms/CHANGELOG.md)
+* Slurm [2.5.1](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
+* SNMP [13.3.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* Spark [7.8.0](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [23.4.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Squid [5.5.0](https://github.com/DataDog/integrations-core/blob/master/squid/CHANGELOG.md)
+* SSH [4.9.0](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
+* Supervisord [4.5.0](https://github.com/DataDog/integrations-core/blob/master/supervisord/CHANGELOG.md)
+* Teleport [3.5.0](https://github.com/DataDog/integrations-core/blob/master/teleport/CHANGELOG.md)
+* Temporal [4.7.1](https://github.com/DataDog/integrations-core/blob/master/temporal/CHANGELOG.md)
+* tibco_ems [2.6.1](https://github.com/DataDog/integrations-core/blob/master/tibco_ems/CHANGELOG.md)
+* TLS [5.8.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* Traffic Server [3.7.0](https://github.com/DataDog/integrations-core/blob/master/traffic_server/CHANGELOG.md)
+* vSphere [9.5.0](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+* Windows Event Log [5.7.0](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/CHANGELOG.md)
+* Windows Service [6.9.0](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
+* WMI [4.2.0](https://github.com/DataDog/integrations-core/blob/master/wmi_check/CHANGELOG.md)
+
 ## Datadog Agent version [7.82.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7823)
 
 * There were no integration updates for this version of the Agent.
@@ -1719,7 +1811,7 @@
 * Fly.io [3.0.0](https://github.com/DataDog/integrations-core/blob/master/fly_io/CHANGELOG.md) **BREAKING CHANGE**
 * FoundationDB [3.3.1](https://github.com/DataDog/integrations-core/blob/master/foundationdb/CHANGELOG.md)
 * Gitlab Runner [7.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md) **BREAKING CHANGE**
-* Gitlab [10.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md)
+* Gitlab [10.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md) **BREAKING CHANGE**
 * GlusterFS [3.0.2](https://github.com/DataDog/integrations-core/blob/master/glusterfs/CHANGELOG.md)
 * Go Expvar [5.0.0](https://github.com/DataDog/integrations-core/blob/master/go_expvar/CHANGELOG.md) **BREAKING CHANGE**
 * Gunicorn [4.1.1](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
@@ -1742,7 +1834,7 @@
 * Kube Proxy [9.0.0](https://github.com/DataDog/integrations-core/blob/master/kube_proxy/CHANGELOG.md) **BREAKING CHANGE**
 * Kubernetes Scheduler [7.0.0](https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/CHANGELOG.md) **BREAKING CHANGE**
 * Kubeflow [2.0.0](https://github.com/DataDog/integrations-core/blob/master/kubeflow/CHANGELOG.md) **BREAKING CHANGE**
-* Kubelet [10.0.0](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
+* Kubelet [10.0.0](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md) **BREAKING CHANGE**
 * Kubernetes Cluster Autoscaler [3.0.0](https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/CHANGELOG.md) **BREAKING CHANGE**
 * KubeVirt API [2.0.0](https://github.com/DataDog/integrations-core/blob/master/kubevirt_api/CHANGELOG.md) **BREAKING CHANGE**
 * KubeVirt Controller [2.0.0](https://github.com/DataDog/integrations-core/blob/master/kubevirt_controller/CHANGELOG.md) **BREAKING CHANGE**
@@ -1854,7 +1946,7 @@
 * HTTP [11.4.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Kafka Consumer [6.5.2](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
 * Karpenter [2.3.0](https://github.com/DataDog/integrations-core/blob/master/karpenter/CHANGELOG.md)
-* MongoDB [10.0.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MongoDB [10.0.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md) **BREAKING CHANGE**
 * MySQL [15.5.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
 * OpenStack Controller [8.5.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
 * OpenStack [4.0.1](https://github.com/DataDog/integrations-core/blob/master/openstack/CHANGELOG.md)
@@ -1899,7 +1991,7 @@
 * Postgres [22.12.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
 * RabbitMQ [7.2.0](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/CHANGELOG.md)
 * RiakCS [4.4.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
-* SNMP [10.0.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* SNMP [10.0.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md) **BREAKING CHANGE**
 * snowflake [7.5.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
 * SQL Server [22.3.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
 * SSH [4.2.1](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
@@ -2329,7 +2421,7 @@
 * Kubernetes Scheduler [6.0.0](https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/CHANGELOG.md) **BREAKING CHANGE**
 * Kubelet [9.0.0](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md) **BREAKING CHANGE**
 * Kubernetes Cluster Autoscaler [2.1.0](https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/CHANGELOG.md)
-* Kubernetes State [10.0.0](https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/CHANGELOG.md)
+* Kubernetes State [10.0.0](https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/CHANGELOG.md) **BREAKING CHANGE**
 * Kyoto Tycoon [4.0.0](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/CHANGELOG.md) **BREAKING CHANGE**
 * kyverno [2.1.0](https://github.com/DataDog/integrations-core/blob/master/kyverno/CHANGELOG.md)
 * Lighttpd [5.0.0](https://github.com/DataDog/integrations-core/blob/master/lighttpd/CHANGELOG.md) **BREAKING CHANGE**
@@ -2504,7 +2596,7 @@
 * HDFS Namenode [5.0.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md) **BREAKING CHANGE**
 * Hive [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md) **BREAKING CHANGE**
 * HiveMQ [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md) **BREAKING CHANGE**
-* HTTP [10.0.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* HTTP [10.0.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md) **BREAKING CHANGE**
 * Hudi [3.0.0](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md) **BREAKING CHANGE**
 * HyperV [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hyperv/CHANGELOG.md) **BREAKING CHANGE**
 * IBM ACE [3.0.0](https://github.com/DataDog/integrations-core/blob/master/ibm_ace/CHANGELOG.md) **BREAKING CHANGE**
@@ -3815,7 +3907,7 @@
 * Kube metrics server [3.0.1](https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/CHANGELOG.md)
 * Kube Proxy [6.0.1](https://github.com/DataDog/integrations-core/blob/master/kube_proxy/CHANGELOG.md)
 * MongoDB [4.3.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
-* MySQL [10.0.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* MySQL [10.0.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md) **BREAKING CHANGE**
 * Oracle Database [4.0.1](https://github.com/DataDog/integrations-core/blob/master/oracle/CHANGELOG.md)
 * Postgres [13.3.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
 * RabbitMQ [3.4.0](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/CHANGELOG.md)
@@ -3906,7 +3998,7 @@
 * Postgres [13.1.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md) **BREAKING CHANGE**
 * Process [2.3.2](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
 * Spark [3.1.2](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
-* SQL Server [10.0.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* SQL Server [10.0.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md) **BREAKING CHANGE**
 * Vault [3.3.3](https://github.com/DataDog/integrations-core/blob/master/vault/CHANGELOG.md)
 * Windows Service [4.4.0](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
 
@@ -4845,7 +4937,7 @@
 * PGBouncer [3.1.0](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
 * PHP-FPM [1.12.0](https://github.com/DataDog/integrations-core/blob/master/php_fpm/CHANGELOG.md)
 * Postfix [1.10.1](https://github.com/DataDog/integrations-core/blob/master/postfix/CHANGELOG.md)
-* Postgres [11.0.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Postgres [11.0.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md) **BREAKING CHANGE**
 * PowerDNS Recursor [1.10.0](https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/CHANGELOG.md)
 * Presto [2.5.0](https://github.com/DataDog/integrations-core/blob/master/presto/CHANGELOG.md)
 * Process [2.1.0](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
@@ -6332,7 +6424,7 @@
 * Btrfs [1.8.1](https://github.com/DataDog/integrations-core/blob/master/btrfs/CHANGELOG.md)
 * Cacti [1.6.0](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
 * Cassandra Nodetool [1.5.1](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/CHANGELOG.md)
-* Datadog Checks Base [10.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Datadog Checks Base [10.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * Datadog Checks Downloader [2.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
 * Cisco ACI [1.8.1](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
 * Consul [1.11.0](https://github.com/DataDog/integrations-core/blob/master/consul/CHANGELOG.md)

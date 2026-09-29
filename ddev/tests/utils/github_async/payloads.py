@@ -20,7 +20,7 @@ def artifact(idx: int, expired: bool = False, **extra: Any) -> dict[str, Any]:
 def workflow_run_payload(
     id: int = 42,
     name: str = "CI",
-    status: str = "completed",
+    status: str | None = "completed",
     conclusion: str | None = "success",
     html_url: str = "https://github.com/owner/repo/actions/runs/42",
     created_at: str = "2024-01-01T00:00:00Z",
@@ -46,6 +46,7 @@ def workflow_job(
     status: str = "completed",
     conclusion: str | None = "success",
     html_url: str | None = None,
+    created_at: str = "2024-01-01T00:00:00Z",
     steps: list[dict[str, Any]] | None = None,
     **extra: Any,
 ) -> dict[str, Any]:
@@ -56,6 +57,11 @@ def workflow_job(
         "status": status,
         "conclusion": conclusion,
         "html_url": html_url if html_url is not None else f"https://github.com/owner/repo/actions/runs/42/job/{idx}",
+        # Timestamps follow the `job` schema: all three keys always present, `completed_at` null until
+        # the job finishes.
+        "created_at": created_at,
+        "started_at": "2024-01-01T00:00:00Z",
+        "completed_at": "2024-01-01T00:01:00Z" if status == "completed" else None,
         "steps": steps
         if steps is not None
         else [{"name": "Run tests", "status": "completed", "conclusion": "success", "number": 1}],

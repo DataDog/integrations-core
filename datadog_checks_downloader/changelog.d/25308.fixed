@@ -1,0 +1,1 @@
+Retry transient 5xx/429 and network errors on TUF metadata and wheel fetches instead of failing immediately.

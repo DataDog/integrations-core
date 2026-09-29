@@ -1,0 +1,1 @@
+Source the lint environment's pydantic pin from agent_requirements.in so it stays in sync with the Agent automatically.

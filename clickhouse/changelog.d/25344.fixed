@@ -1,0 +1,1 @@
+Log query sample obfuscation failures with repr so an embedded null cannot crash the job.

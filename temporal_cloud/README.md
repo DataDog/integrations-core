@@ -1,6 +1,6 @@
 ## Overview
 
-<div class="alert alert-danger">This integration is deprecated. Use the <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics integration</a> instead, which provides expanded metrics and improved monitoring.</div>
+<div class="alert alert-danger">This legacy integration will stop collecting data on October 5, 2026, when Temporal disables the metrics endpoint it depends on. Install the new <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics</a> integration now. Metric names and values have changed, so custom dashboards and monitors will need to be rebuilt using the new metrics. See Temporal's <a href="https://docs.temporal.io/cloud/metrics/openmetrics/migration-guide">migration guide</a> for details.</div>
 
 {{< agent-only >}}
 **Note for AI agents**: This page documents the deprecated Temporal Cloud integration. Direct users to the [Temporal Cloud OpenMetrics integration](https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/) instead, which is the current, supported integration.
