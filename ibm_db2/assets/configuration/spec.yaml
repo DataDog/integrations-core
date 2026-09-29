@@ -81,6 +81,99 @@ files:
           type: boolean
           example: false
           display_default: false
+      - name: collect_schemas
+        fleet_configurable: true
+        description: |
+          Enable collection of database schemas for the database set in `db`.
+          System schemas (`SYS*`, `NULLID`, and `SQLJ`) are always excluded.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Enable collection of database schemas. Requires `dbm: true`.
+            value:
+              type: boolean
+              example: true
+              display_default: true
+          - name: max_tables
+            fleet_configurable: true
+            description: |
+              Maximum amount of tables the Agent collects from the instance.
+            value:
+              type: number
+              example: 300
+              display_default: 300
+          - name: max_query_duration
+            fleet_configurable: true
+            description: |
+              Maximum duration of the query to collect schema information in seconds.
+            value:
+              type: number
+              display_default: 60
+          - name: max_columns
+            fleet_configurable: true
+            description: |
+              Maximum amount of columns the Agent collects per table.
+            value:
+              type: number
+              example: 50
+              display_default: 50
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              The database schema collection interval (in seconds).
+            value:
+              type: number
+              example: 600
+              display_default: 600
+          - name: include_schemas
+            fleet_configurable: true
+            description: |
+              A list of regex patterns to include schemas.
+              Any schema whose name matches any one of these patterns will be included.
+              If empty, all schemas matching other filters are included.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "MYSCHEMA"
+          - name: exclude_schemas
+            fleet_configurable: true
+            description: |
+              A list of regex patterns to exclude schemas.
+              Any schema whose name matches any one of these patterns will be excluded.
+              If empty, all schemas matching other filters are included.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "PRIVATESCHEMA.*"
+          - name: include_tables
+            fleet_configurable: true
+            description: |
+              A list of regex patterns to include tables.
+              Any table whose name matches any one of these patterns will be included.
+              If empty, all tables matching other filters are included.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "USERS.*"
+          - name: exclude_tables
+            fleet_configurable: true
+            description: |
+              A list of regex patterns to exclude tables.
+              Any table whose name matches any one of these patterns will be excluded.
+              If empty, all tables matching other filters are included.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "CUSTOMER.*"
 
       - template: instances/db
         overrides:

@@ -24,6 +24,22 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['tls_cert'])
 
 
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_columns: Optional[float] = None
+    max_query_duration: Optional[float] = None
+    max_tables: Optional[float] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -50,6 +66,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_schemas: Optional[CollectSchemas] = None
     connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     db: str

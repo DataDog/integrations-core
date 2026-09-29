@@ -72,6 +72,68 @@ instances:
     #
     # dbm: false
 
+    ## Enable collection of database schemas for the database set in `db`.
+    ## System schemas (`SYS*`, `NULLID`, and `SQLJ`) are always excluded.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of database schemas. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param max_tables - number - optional - default: 300
+        ## Maximum amount of tables the Agent collects from the instance.
+        #
+        # max_tables: 300
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the query to collect schema information in seconds.
+        #
+        # max_query_duration: <MAX_QUERY_DURATION>
+
+        ## @param max_columns - number - optional - default: 50
+        ## Maximum amount of columns the Agent collects per table.
+        #
+        # max_columns: 50
+
+        ## @param collection_interval - number - optional - default: 600
+        ## The database schema collection interval (in seconds).
+        #
+        # collection_interval: 600
+
+        ## @param include_schemas - list of strings - optional
+        ## A list of regex patterns to include schemas.
+        ## Any schema whose name matches any one of these patterns will be included.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # include_schemas:
+        #   - MYSCHEMA
+
+        ## @param exclude_schemas - list of strings - optional
+        ## A list of regex patterns to exclude schemas.
+        ## Any schema whose name matches any one of these patterns will be excluded.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # exclude_schemas:
+        #   - PRIVATESCHEMA.*
+
+        ## @param include_tables - list of strings - optional
+        ## A list of regex patterns to include tables.
+        ## Any table whose name matches any one of these patterns will be included.
+        ## If empty, all tables matching other filters are included.
+        #
+        # include_tables:
+        #   - USERS.*
+
+        ## @param exclude_tables - list of strings - optional
+        ## A list of regex patterns to exclude tables.
+        ## Any table whose name matches any one of these patterns will be excluded.
+        ## If empty, all tables matching other filters are included.
+        #
+        # exclude_tables:
+        #   - CUSTOMER.*
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
