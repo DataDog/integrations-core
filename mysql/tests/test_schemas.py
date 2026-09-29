@@ -279,6 +279,21 @@ def test_non_positive_max_execution_time_disables_query_timeout(max_execution_ti
     cursor.execute.assert_called_once_with("SELECT 1", None)
 
 
+def test_chunked_collection_fetches_connection_once_per_database():
+    collector = _make_collector(STRATEGY_CHUNKED, version="5.7.44")
+    get_db_connection = collector._metadata.get_db_connection
+    db_cursor = get_db_connection.return_value.cursor.return_value.__enter__.return_value
+    # The table list, then the four detail queries for each of the two chunks.
+    db_cursor.fetchall.side_effect = [[{"name": "t1"}, {"name": "t2"}]] + [[]] * 8
+
+    with mock.patch("datadog_checks.mysql.schemas.TABLES_CHUNK_SIZE", 1):
+        tables = list(collector._iter_chunked_tables("app"))
+
+    assert [table["name"] for table in tables] == ["t1", "t2"]
+    assert db_cursor.execute.call_count == 9
+    get_db_connection.assert_called_once()
+
+
 def _single_query_row():
     return {
         "name": "cities",

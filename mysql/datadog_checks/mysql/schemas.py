@@ -404,12 +404,12 @@ class MySqlSchemaCollector(SchemaCollector):
             placeholders = ",".join(["%s"] * len(table_names))
             params = [database_name] + table_names
 
-            columns_by_table = self._fetch_grouped(SQL_COLUMNS.format(placeholders), params)
+            columns_by_table = self._fetch_grouped(conn, SQL_COLUMNS.format(placeholders), params)
             indexes_by_table = self._fetch_grouped(
-                get_indexes_query(self._check.version, self._check.is_mariadb, placeholders), params
+                conn, get_indexes_query(self._check.version, self._check.is_mariadb, placeholders), params
             )
-            foreign_keys_by_table = self._fetch_grouped(SQL_FOREIGN_KEYS.format(placeholders), params)
-            partitions_by_table = self._fetch_grouped(SQL_PARTITION.format(placeholders), params)
+            foreign_keys_by_table = self._fetch_grouped(conn, SQL_FOREIGN_KEYS.format(placeholders), params)
+            partitions_by_table = self._fetch_grouped(conn, SQL_PARTITION.format(placeholders), params)
 
             for table in tables_chunk:
                 name = table["name"]
@@ -424,11 +424,14 @@ class MySqlSchemaCollector(SchemaCollector):
                     "_partitions": partitions_by_table.get(name, []),
                 }
 
-    def _fetch_grouped(self, query: str, params: list) -> dict[Any, list[dict]]:
-        """Run a detail query and group its rows by table_name (which is dropped from index/column
-        rows to match the single-query JSON output; foreign-key rows keep it, as in v1)."""
+    def _fetch_grouped(self, conn, query: str, params: list) -> dict[Any, list[dict]]:
+        """Run a detail query on `conn` and group its rows by table_name.
+
+        Takes the connection from the caller so a database's detail queries share one liveness
+        ping instead of pinging before each query.
+        """
         grouped: dict[Any, list[dict]] = defaultdict(list)
-        with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
+        with conn.cursor(CommenterDictCursor) as cursor:
             self._execute(cursor, query, params)
             for row in cursor.fetchall():
                 grouped[row["table_name"]].append(dict(row))
