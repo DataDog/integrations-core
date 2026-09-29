@@ -62,6 +62,7 @@ class MySQLDataObservabilityTask:
         self._version = None
         self._current_dbname: str | None = None
         self._current_timeout_seconds: int | None = None
+        self._metric_tags: list[str] | None = None
 
     def run(self) -> None:
         task = self._task
@@ -69,6 +70,7 @@ class MySQLDataObservabilityTask:
             # The Agent drops stale tasks too; this catches a task that sat in the queue.
             self._log.warning("Not running Data Observability task %s: it expired at %d", task.task_id, task.expires_at)
             self._emit_task_error('expired', f'Task expired at {task.expires_at} before it ran')
+            self._count('dd.mysql.do_task.runs', ['outcome:expired'])
             return
 
         statements = task.statements
@@ -81,6 +83,7 @@ class MySQLDataObservabilityTask:
                         task.task_id,
                         len(statements) - index,
                     )
+                    self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
                     return
                 if self._conn is None:
                     try:
@@ -91,8 +94,10 @@ class MySQLDataObservabilityTask:
                         result = _error_result(error, 0.0, 'connect')
                         for pending in statements[index:]:
                             self._emit_result(pending, result)
+                        self._count('dd.mysql.do_task.runs', ['outcome:connection_error'])
                         return
                 self._emit_result(statement, self._execute(statement))
+            self._count('dd.mysql.do_task.runs', ['outcome:completed'])
         finally:
             self._close()
 
@@ -209,6 +214,7 @@ class MySQLDataObservabilityTask:
         }
 
     def _emit_result(self, statement: Statement, result: dict[str, Any]) -> None:
+        self._record_statement(result)
         event = {
             **self._base_event(),
             'statement_id': statement.id,
@@ -251,11 +257,55 @@ class MySQLDataObservabilityTask:
     def _emit(self, event: dict[str, Any]) -> None:
         try:
             self._check.event_platform_event(json.encode(event), EVENT_TRACK_TYPE)
-        except Exception:
+        except Exception as error:
             self._log.exception(
                 "Failed to emit Data Observability task %s result for statement %s",
                 self._task.task_id,
                 event.get('statement_id'),
+            )
+            self._count('dd.mysql.do_task.emit_failures', [f'exc_class:{type(error).__name__}'])
+            return
+        self._count('dd.mysql.do_task.events')
+
+    def _record_statement(self, result: dict[str, Any]) -> None:
+        status_tag = f"status:{result['status']}"
+        tags = [status_tag]
+        if result['status'] == 'error':
+            tags += [f"error_kind:{result['error_kind']}", f"error_phase:{result['error_phase']}"]
+        self._count('dd.mysql.do_task.statements', tags)
+        if result['error_phase'] == 'connect':
+            # The statement never ran, so it has no execution time.
+            return
+        self._histogram('dd.mysql.do_task.statement_execution_time', result['duration_s'], [status_tag])
+        if result['status'] == 'success':
+            self._histogram('dd.mysql.do_task.statement_rows', result['row_count'])
+
+    def _base_metric_tags(self) -> list[str]:
+        if self._metric_tags is None:
+            self._metric_tags = [
+                tag for tag in self._check.tag_manager.get_tags() if not tag.startswith('dd.internal')
+            ] + ['db_type:mysql']
+        return self._metric_tags
+
+    def _count(self, name: str, tags: list[str] | None = None) -> None:
+        self._submit(self._check.count, name, 1, tags)
+
+    def _histogram(self, name: str, value: float, tags: list[str] | None = None) -> None:
+        self._submit(self._check.histogram, name, value, tags)
+
+    def _submit(self, submit: Any, name: str, value: float, tags: list[str] | None) -> None:
+        # Internal metrics must never cost the task a statement or a result.
+        try:
+            submit(
+                name,
+                value,
+                tags=self._base_metric_tags() + (tags or []),
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+        except Exception:
+            self._log.debug(
+                "Failed to submit %s for Data Observability task %s", name, self._task.task_id, exc_info=True
             )
 
 
