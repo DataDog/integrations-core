@@ -78,6 +78,10 @@ class ProcessCheck(AgentCheck):
         self.try_sudo = self.instance.get('try_sudo', False)
         self.use_oneshot = is_affirmative(self.instance.get('use_oneshot', True))
 
+        # Whether the platform has a native bulk ppid lookup (eg. Windows, Linux), used to
+        # speed up child process collection. Computed once since it never changes at runtime.
+        self._has_native_ppid_map = hasattr(psutil._psplatform, 'ppid_map')
+
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
         # This cache is for all PIDs so it's global, but it should be refreshed by instance
@@ -387,7 +391,7 @@ class ProcessCheck(AgentCheck):
         return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
-        if hasattr(psutil._psplatform, 'ppid_map'):
+        if self._has_native_ppid_map:
             # Native bulk ppid lookup (Windows, Linux): a single fast call, same as what
             # psutil.Process.children(recursive=True) uses internally.
             ppid_map = psutil._psplatform.ppid_map()
