@@ -9,7 +9,7 @@ from typing import Final
 from ddev.ai.agent.types import AgentResponse, ToolResultMessage
 from ddev.ai.tools.registry import ToolRegistry
 
-_COMPACT_SYSTEM_PROMPT: Final[str] = """\
+COMPACT_SYSTEM_PROMPT: Final[str] = """\
 You are summarizing an agentic conversation to free up context space.
 Produce a dense, structured summary that covers ALL of the following:
   1. The original task given to the agent
@@ -23,7 +23,7 @@ Rules:
 - The agent will read ONLY this summary to continue — it must be self-sufficient
 """
 
-_COMPACT_REQUEST: Final[str] = "Summarize the conversation so far following your instructions."
+COMPACT_REQUEST: Final[str] = "Summarize the conversation so far following your instructions."
 
 
 class BaseAgent[TMessage](ABC):
@@ -66,9 +66,9 @@ class BaseAgent[TMessage](ABC):
         original_prompt = self._history[0]
         original_system = self._system_prompt
 
-        self._system_prompt = _COMPACT_SYSTEM_PROMPT
+        self._system_prompt = COMPACT_SYSTEM_PROMPT
         try:
-            response = await self.send(_COMPACT_REQUEST, allowed_tools=[])
+            response = await self.send(COMPACT_REQUEST, allowed_tools=[])
         finally:
             self._system_prompt = original_system  # restore even if send() raises
 
