@@ -224,6 +224,7 @@ class MySqlSchemaCollector(SchemaCollector):
 
     def __init__(self, check: "MySql", metadata: "MySQLMetadata", config: MySqlSchemaCollectorConfig | None = None):
         self._metadata = metadata
+        self._tables_found = False
         super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
 
     def _query_timeout(self) -> float | None:
@@ -233,7 +234,34 @@ class MySqlSchemaCollector(SchemaCollector):
             return max_execution_time
         return None
 
+    def collect_schemas(self) -> bool:
+        self._tables_found = False
+        database_count = 0
+        original_get_databases = self._get_databases
+
+        def _counting_get_databases():
+            nonlocal database_count
+            databases = original_get_databases()
+            database_count = len(databases)
+            return databases
+
+        self._get_databases = _counting_get_databases
+        try:
+            return super().collect_schemas()
+        finally:
+            self._get_databases = original_get_databases
+            # Databases are visible, but MySQL hides tables from INFORMATION_SCHEMA unless the user
+            # holds some privilege on them. An empty result usually means the datadog user needs
+            # REFERENCES (or SELECT).
+            if database_count and not self._tables_found:
+                self._log.warning(
+                    "No tables were found across any of the %d databases. This may indicate insufficient privileges "
+                    "to view table metadata. The datadog user needs REFERENCES (or SELECT) privileges on the tables.",
+                    database_count,
+                )
+
     def _execute(self, cursor, query: str, params=None):
+        self._metadata._raise_if_cancelled()
         timeout = self._query_timeout()
         if timeout is not None:
             if self._check.is_mariadb:
@@ -255,6 +283,7 @@ class MySqlSchemaCollector(SchemaCollector):
         # suffix) for dbms_version.
         event["dbms_version"] = self._check.version.version
         event["flavor"] = self._check.version.flavor
+        event["agent_version"] = self._check.agent_version
         # Tag with the async job's DBM tags (service check tags unioned with the check tags, e.g.
         # including `port:`) rather than the bare check tags.
         if getattr(self._metadata, "_tags", None):
@@ -294,6 +323,7 @@ class MySqlSchemaCollector(SchemaCollector):
         return cursor.fetchone()
 
     def _map_row(self, database: dict, cursor_row: dict) -> dict:
+        self._tables_found = True
         object = super()._map_row(database, cursor_row)
         if self._effective_strategy() == STRATEGY_CHUNKED:
             table = self._build_table(

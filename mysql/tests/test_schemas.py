@@ -354,7 +354,28 @@ def test_map_row_chunked_matches_single_query():
 def test_base_event_includes_flavor_and_bare_version():
     collector = _make_collector(STRATEGY_SINGLE_QUERY)
     collector._check.version = MySQLVersion("8.0.35", "MySQL", "log")
+    collector._check.agent_version = "7.70.0"
     event = collector.base_event
     assert event["flavor"] == "MySQL"
     assert event["dbms_version"] == "8.0.35"
+    assert event["agent_version"] == "7.70.0"
     assert collector.kind == "mysql_databases"
+
+
+def test_collect_schemas_warns_when_no_tables_are_visible():
+    collector = _make_collector(STRATEGY_SINGLE_QUERY)
+    collector._check.reported_hostname = "db-host"
+    collector._check.database_identifier = "db-host"
+    collector._check.dbms = "mysql"
+    collector._check.tags = []
+    collector._check.cloud_metadata = {}
+    collector._check.agent_version = "7.70.0"
+    collector._metadata._tags = None
+    collector._get_databases = mock.Mock(return_value=[{"name": "app"}, {"name": "other"}])
+    collector._get_cursor = mock.Mock(return_value=mock.MagicMock())
+    collector._get_next = mock.Mock(return_value=None)
+
+    collector.collect_schemas()
+
+    collector._log.warning.assert_called_once()
+    assert "REFERENCES" in collector._log.warning.call_args[0][0]
