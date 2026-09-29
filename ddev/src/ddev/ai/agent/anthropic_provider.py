@@ -16,7 +16,7 @@ from ddev.ai.tools.registry import ToolRegistry
 
 # Friendly model aliases users write in agent configs, mapped to concrete Anthropic model strings.
 MODEL_ALIASES: Final[dict[str, str]] = {
-    "opus": "claude-opus-4-8",
+    "opus": "claude-opus-5-5",
     "sonnet": "claude-sonnet-5",
     "haiku": "claude-haiku-4-5",
 }
