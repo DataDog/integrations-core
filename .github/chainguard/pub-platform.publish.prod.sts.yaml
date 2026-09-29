@@ -1,0 +1,40 @@
+# Trust policy for Datadog Publishing Platform (IDP-1735) — PRODUCTION.
+#
+# Lets the pub_platform and pub_platform_internal Rapid services mint
+# short-lived dd-octo-sts installation tokens for this repository, replacing the
+# long-lived GitHub App private key they read from Vault today
+# (k8s/rapid-assets/pub-platform-internal/pub-plat-github).
+#
+# This repo is one of the two repos in Publishing Platform's ALLOWED_REPOS: the
+# services open integration-skeleton PRs against it, and read from it during
+# GitHub-to-Publishing-Platform migrations.
+#
+# Permissions are the minimum the write path actually uses — blobs, trees,
+# commits and refs (`contents: write`) plus opening, listing and merging pull
+# requests (`pull_requests: write`). Deliberately NOT granted: `checks`, which
+# is only needed for the shadow repo where APW validation runs, and any
+# review / label / issue / team scope, none of which this code path touches.
+#
+# Services:
+#   https://github.com/ddoghq/dd-source/tree/main/domains/assets/apps/apis/pub_platform
+#   https://github.com/ddoghq/dd-source/tree/main/domains/assets/apps/apis/pub_platform_internal
+# The only consumer of this token — every GitHub call is made from here:
+#   https://github.com/ddoghq/dd-source/blob/main/domains/integrationdevtools/shared/libs/pubplatform/services/github_pr.py
+#
+# Identities are allowlisted centrally in dd-source at
+# domains/seceng/sit/apps/source-security/dd-octo-sts/cmd/app/static-config/auth/prod/allow.json
+#
+# Datacenters mirror each service's rapid.json release.placement:
+#   pub-platform          -> us1.prod.dog, eu1.prod.dog
+#   pub-platform-internal -> us1.prod.dog
+issuer: https://ticino.identity.local-cluster.local-dc.fabric.dog:8443/v1/issuer/sycamore
+
+subject_pattern: "rapid-assets\\.pub-platform@kubernetes\\.(us1|eu1)\\.prod\\.dog|rapid-assets\\.pub-platform-internal@kubernetes\\.us1\\.prod\\.dog"
+
+claim_pattern:
+  email: "rapid-assets\\.pub-platform@kubernetes\\.(us1|eu1)\\.prod\\.dog|rapid-assets\\.pub-platform-internal@kubernetes\\.us1\\.prod\\.dog"
+
+permissions:
+  contents: write
+  pull_requests: write
+  metadata: read
