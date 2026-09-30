@@ -18,7 +18,7 @@ fixture in `evalya.yaml`.
 referenced by the OOTB dashboards (`assets/dashboards/`) and the recommended monitors
 (`assets/monitors/`). That union is 61 metrics, of which 58 belong to this check;
 `data_streams.latency`, `data_streams.payload_size`, and `system.mem.total` come from other
-sources and are out of scope. Nine services:
+sources and are out of scope. Ten services:
 
 - **rabbitmq-broker** — a `-management` broker. This image exposes both the management API
   (15672) and the Prometheus/OpenMetrics plugin (15692) on one broker.
@@ -36,16 +36,25 @@ sources and are out of scope. Nine services:
 - **activity-gen** — periodic queue declare/delete churn (`activity-gen.sh`) so the
   node-wide `rabbitmq.queues.created/declared/deleted.count` counters keep advancing;
   perf-test's long-lived queues do not produce churn. Set `ACTIVITY_GEN=0` (host env) to
-  idle it; the same switch idles `autoack` and `redeliver` (the containers stay up).
+  idle it; the same switch idles `autoack`, `redeliver`, and `unacked-swing` (the
+  containers stay up).
 - **unroutable** — a producer-only perf-test publishing to a routing key nothing is bound
   to, so the unroutable-dropped counters advance.
 - **conn-churn** — a looping short-lived perf-test (one producer, one consumer, 20s per
   cycle). `load`'s connections live for the whole run, so without it the
   connection/channel opened/closed counters and the consumer count stay flat. Its
-  consumer is capped at 5 msg/s against a 10 msg/s publisher with no prefetch limit, so the
-  queue's unacked count climbs through each cycle and
-  `rabbitmq.queue.messages_unacknowledged.rate` leaves 0 (`load`'s unacked count is pinned
-  at its `--qos`, so its rate stays 0).
+  consumer is not rate-capped, so the queue stays near empty. A capped consumer here would
+  build a backlog that is requeued on every close; that 30s sawtooth aliases against the
+  scrape intervals, and different scrapers then report different averages for the same
+  queue.
+- **unacked-swing**: a long-lived perf-test on the durable `unacked-swing` queue, for
+  `rabbitmq.queue.messages_unacknowledged.rate` (`load`'s unacked count is pinned at its
+  `--qos`, and `conn-churn`'s stays near 0, so neither moves it). A constant 4 msg/s
+  publisher feeds a consumer whose per-message latency alternates every 120s
+  (`--variable-latency`) between 2 msg/s and 8 msg/s of capacity. Unacked climbs to about
+  240, drains, and idles near 0 on a 240s cycle; `--qos 300` sits above that peak, so the
+  backlog is unacked rather than ready. The cycle is slow on purpose, so every scraper's
+  average stays close.
 - **autoack**: a long-lived perf-test whose consumer uses automatic acknowledgement
   (`--autoack`). `rabbitmq.channel.messages.delivered.count` and
   `rabbitmq.queue.messages.delivered.count` count only auto-ack deliveries; every other
@@ -58,8 +67,9 @@ sources and are out of scope. Nine services:
   `rabbitmq.queue.messages.persistent`. `x-max-length=200` bounds it.
 - **rabbitmq-full** — the entrypoint the evalya task targets: a `socat` forwarder for 5672,
   15672, and 15692, gated on the broker being healthy, `seed` completing, and `load`,
-  `activity-gen`, `unroutable`, `conn-churn`, `autoack`, and `redeliver` starting. evalya only starts a task's target and its
-  `depends_on` chain, so targeting the broker directly would run it with no workload.
+  `activity-gen`, `unroutable`, `conn-churn`, `autoack`, `redeliver`, and `unacked-swing`
+  starting. evalya only starts a task's target and its `depends_on` chain, so targeting the
+  broker directly would run it with no workload.
 
 No ports are published to the host, so the fixture cannot clash with a local broker or a
 concurrent run. To inspect it by hand, add a Compose override publishing the ports on
