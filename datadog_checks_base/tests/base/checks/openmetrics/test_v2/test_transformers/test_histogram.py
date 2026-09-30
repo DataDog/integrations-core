@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.replay.constants import EnvVars
 
 from ..utils import get_check
 
@@ -747,4 +748,16 @@ def test_omit_bound_tags_unsupported_agent(dd_run_check, mock_http_response, mon
     )
 
     with pytest.raises(Exception, match='`omit_histogram_bound_tags` is not supported by this Agent version'):
+        dd_run_check(check, extract_message=True)
+
+
+def test_omit_bound_tags_process_isolation(dd_run_check, mock_http_response, monkeypatch):
+    # The isolated child's aggregator stand-ins always report support, so the option must be rejected there
+    monkeypatch.setenv(EnvVars.MESSAGE_INDICATOR, 'indicator')
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check(
+        {'metrics': ['.+'], 'histogram_buckets_as_distributions': True, 'omit_histogram_bound_tags': True}
+    )
+
+    with pytest.raises(Exception, match='`omit_histogram_bound_tags` cannot be used with `process_isolation`'):
         dd_run_check(check, extract_message=True)

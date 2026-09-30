@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from copy import deepcopy
 from typing import Any
@@ -8,6 +9,7 @@ from typing import Any
 from datadog_checks.base.agent import aggregator
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.replay.constants import EnvVars
 
 from . import transformers
 
@@ -131,6 +133,11 @@ class MetricTransformer:
                 '`omit_histogram_bound_tags` has no effect unless `histogram_buckets_as_distributions` is enabled'
             )
             return False
+
+        # An isolated child only sees stand-ins for the aggregator, so it cannot tell whether the Agent supports
+        # the multi-bucket builtin. Fail here instead of erroring mid-run in the parent after partial submission.
+        if EnvVars.MESSAGE_INDICATOR in os.environ:
+            raise ConfigurationError('`omit_histogram_bound_tags` cannot be used with `process_isolation`')
 
         if not hasattr(aggregator, 'submit_histogram_bucket_multi'):
             raise ConfigurationError(
