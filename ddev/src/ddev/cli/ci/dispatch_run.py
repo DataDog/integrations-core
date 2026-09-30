@@ -296,14 +296,29 @@ def resolve_pull_request_run(
     from ddev.utils.github_errors import GitHubAuthenticationError
 
     client_logger = None
+    observer = None
+    rate_limiter = None
     if monitor is not None:
+        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
         from ddev.monitoring.adapter import ComponentLogAdapter
+        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
+        from ddev.utils.rate_limiting import RateLimitEvent
 
         client_logger = ComponentLogAdapter(monitor)
+        github_monitor = observer = GitHubMonitor(monitor)
+        log_event = log_rate_limit_events(client_logger)
+
+        def on_rate_limit_event(event: RateLimitEvent) -> None:
+            log_event(event)
+            github_monitor.rate_limit_event(event)
+
+        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
         monitor.logger.info('Resolving pull request', pr_number=resolver.number, all_targets=all_targets)
 
     async def resolve() -> ResolvedRun | None:
-        async with async_github_client(token=token, logger=client_logger) as client:
+        async with async_github_client(
+            token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter
+        ) as client:
             pull = await resolver.resolve(client)
             if pull is None:
                 if monitor is not None:

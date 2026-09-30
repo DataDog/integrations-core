@@ -1,0 +1,37 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "get_endpoint_details",
+      "label": "Collect endpoint details",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "sophos-central-cloud-logs" }
+  ]
+}

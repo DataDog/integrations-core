@@ -668,7 +668,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}] err=[{4}]"
                     ).format(row['query_signature'], row['query_hash'], row['query_plan_hash'], row['plan_handle'], e)
                     if self._config.log_unobfuscated_plans:
-                        self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
+                        self.log.warning("Failed to obfuscate plan=[%s] | %s", repr(raw_plan), context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
                     collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})

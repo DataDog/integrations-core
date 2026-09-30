@@ -35,7 +35,7 @@ def obfuscate_statement(
         statement = obfuscate_sql_with_metadata(raw_text, obfuscate_options)
     except Exception as e:
         if log_unobfuscated_queries:
-            logger.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_text, e)
+            logger.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(raw_text), e)
         else:
             logger.debug("Failed to obfuscate query | err=[%s]", e)
         return None

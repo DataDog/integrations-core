@@ -8,11 +8,11 @@ import base64
 import dataclasses
 import gzip
 import json
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import datetime
 from itertools import count
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
 from pydantic import ValidationError
@@ -21,13 +21,14 @@ from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, te
 from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
-from ddev.cli.ci.tests.status import conclusion_to_status
+from ddev.cli.ci.tests.status import conclusion_to_status, has_started_running, is_queued
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
+from ddev.utils.github_async.retry import SAFE_RETRY, on_status
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
@@ -37,6 +38,10 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # GitHub rejects a workflow dispatch whose whole `inputs` object exceeds this.
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
+
+# Jobs are listed right after the run is dispatched, before GitHub makes the run's jobs listing
+# visible, and until then that endpoint answers 404.
+JOBS_LISTING_RETRY = SAFE_RETRY.also_on(on_status(404))
 
 
 class JobListTooLargeError(Exception):
@@ -61,20 +66,6 @@ def _serialize_test_tags(fields: Mapping[str, Any]) -> str:
 
 def _sanitize_test_tag_value(value: str) -> str:
     return value.replace(',', '_').replace('\n', '_').replace('\r', '_')
-
-
-def workflow_duration_seconds(run: WorkflowRun) -> float | None:
-    """Use gh's completed-run timing convention, omitting unavailable or invalid timestamps.
-
-    https://github.com/cli/cli/blob/trunk/pkg/cmd/run/shared/shared.go
-    """
-    if run.run_started_at is None or run.updated_at is None:
-        return None
-    try:
-        duration = (datetime.fromisoformat(run.updated_at) - datetime.fromisoformat(run.run_started_at)).total_seconds()
-    except (ValueError, TypeError):
-        return None
-    return duration if duration >= 0 else None
 
 
 def encode_job_list(jobs: list[dict[str, Any]]) -> str:
@@ -128,6 +119,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._artifact_client = artifact_client
         self._options = options
         self._runs_in_flight: dict[str, int] = {}
+        self._queue_durations_reported: set[int] = set()
         self._logger = monitor.logger
         self.monitor = monitor
         self._metrics = MetricsHelper(monitor.metrics)
@@ -225,7 +217,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             len(artifact_dirs),
             artifact_count=len(artifact_dirs),
         )
-        jobs = await self._reconcile_final_jobs(run_id, message.batch_id, jobs)
+        jobs = await self._reconcile_final_jobs(run_id, message, jobs)
         batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
         status = conclusion_to_status(conclusion)
         self.submit_message(
@@ -249,6 +241,47 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         metrics.distribution('batch.jobs.count', batch.jobs_count)
         for job in batch.job_list:
             metrics.count('jobs.count', 1, **job_fields(job))
+
+    def _report_job_activity(self, batch: TestBatch, known_jobs: Mapping[str, WorkflowJob]) -> None:
+        """Gauge the batch's planned jobs waiting for a runner or running, by platform.
+
+        Every platform the batch plans gets a sample, so an empty queue is a zero rather than a gap.
+        """
+        planned = {job.name: job.platform for job in batch.job_list}
+        counts = {platform: [0, 0] for platform in planned.values()}
+        for workflow_job in known_jobs.values():
+            if (platform := planned.get(workflow_job.name)) is None:
+                continue
+            if is_queued(workflow_job):
+                counts[platform][0] += 1
+            elif workflow_job.status is WorkflowJobStatus.IN_PROGRESS:
+                counts[platform][1] += 1
+        for platform, (queued, running) in counts.items():
+            self.monitor.metrics.gauge('jobs.queued', queued, platform=platform, batch_id=batch.batch_id)
+            self.monitor.metrics.gauge('jobs.running', running, platform=platform, batch_id=batch.batch_id)
+
+    def _report_queue_durations(self, batch: TestBatch, observed: Iterable[WorkflowJob]) -> None:
+        """Emit each planned job's runner wait once, at its first observation of having started.
+
+        A short job can finish between two polls, so a completed job with a real outcome also proves
+        it started. Job IDs are unique per attempt, so the recorded set collapses repeated
+        observations without collapsing reruns. Unusable timing is skipped rather than zeroed, so a
+        later listing that carries valid timing still can.
+        """
+        planned = {job.name: job for job in batch.job_list}
+        for workflow_job in observed:
+            job = planned.get(workflow_job.name)
+            if (
+                job is None
+                or workflow_job.id in self._queue_durations_reported
+                or not has_started_running(workflow_job)
+            ):
+                continue
+            duration = workflow_job.queue_duration_seconds
+            if duration is None:
+                continue
+            self._queue_durations_reported.add(workflow_job.id)
+            self.monitor.metrics.distribution('job.queue.duration', duration, **job_fields(job))
 
     async def cancel_dispatched_runs(self) -> None:
         """Concurrently cancel all tracked unfinished runs."""
@@ -280,7 +313,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         sequences = count(1)
         known_jobs: dict[str, WorkflowJob] = {}
         previous_state: ExecutionState | None = None
+        previous_poll: float | None = None
         while True:
+            poll_started = monotonic()
+            if previous_poll is not None:
+                self.monitor.metrics.distribution('requests.polling_interval', poll_started - previous_poll)
+            previous_poll = poll_started
             try:
                 run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
             except ValidationError as error:
@@ -294,7 +332,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             # Shutdown must not try to cancel a completed run while its artifacts are still being collected.
             if completed:
                 self._runs_in_flight.pop(message.batch_id, None)
-                if (duration := workflow_duration_seconds(run.data)) is not None:
+                if (duration := run.data.duration_seconds) is not None:
                     self.monitor.metrics.distribution('batch.duration', duration)
 
             # Report workflow progress first. The jobs request may be delayed by the API rate limit.
@@ -308,6 +346,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 )
                 previous_state = progress.state
             await self._refresh_jobs(run_id, known_jobs, message.batch_id, "listing workflow jobs")
+            # A completed workflow has nothing queued or running, whatever a failed or lagging final
+            # listing left in `known_jobs`, and this is the batch series' last point.
+            self._report_job_activity(message, {} if completed else known_jobs)
+            self._report_queue_durations(message, known_jobs.values())
             self._publish_job_progress(message.id, progress, known_jobs, next(sequences))
 
             if completed:
@@ -381,11 +423,13 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
 
     async def _reconcile_final_jobs(
-        self, run_id: int, batch_id: str, observed_jobs: list[WorkflowJob]
+        self, run_id: int, batch: TestBatch, observed_jobs: list[WorkflowJob]
     ) -> list[WorkflowJob]:
         known_jobs = {job.name: job for job in observed_jobs}
         # The jobs response may lag behind the workflow status. Refresh it after downloading artifacts.
-        await self._refresh_jobs(run_id, known_jobs, batch_id, "reconciling final workflow jobs")
+        await self._refresh_jobs(run_id, known_jobs, batch.batch_id, "reconciling final workflow jobs")
+        # A job first seen here can still have waited for a runner, so it gets its queue sample too.
+        self._report_queue_durations(batch, known_jobs.values())
         # An unfinished job has no result yet. Do not mistake that for a test failure.
         return [job for job in known_jobs.values() if job.status is WorkflowJobStatus.COMPLETED]
 
@@ -394,7 +438,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         jobs: list[WorkflowJob] = []
         try:
             async for page in self._client.list_workflow_jobs(
-                self._options.owner, self._options.repo, run_id, per_page=100
+                self._options.owner, self._options.repo, run_id, per_page=100, retry=JOBS_LISTING_RETRY
             ):
                 jobs.extend(page.data.jobs)
         except ValidationError as error:
