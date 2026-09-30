@@ -12,7 +12,7 @@ from ddev.ai.config.registry import BrokenEntry, ResourceKind
 from ddev.ai.config.resolving.dependencies import validate_dependencies
 from ddev.ai.config.resolving.inlining import build_resolved_flow
 from ddev.ai.config.resolving.phases import resolve_scheduled_phases
-from ddev.ai.config.resolving.variables import resolve_variables
+from ddev.ai.config.resolving.variables import resolve_variables, validate_snapshot_readers
 
 if TYPE_CHECKING:
     from ddev.ai.config.registry import ResourceRegistry
@@ -59,6 +59,7 @@ class FlowResolver:
         errors.extend(validate_dependencies(flow_config, flow_name, flow_src))
         resolved_variables, var_errors = resolve_variables(self._registry, scheduled_phases, flow_config)
         errors.extend(var_errors)
+        errors.extend(validate_snapshot_readers(self._registry, scheduled_phases, flow_config))
         if errors:
             return FlowResult(flow_name, ConfigStatus.BROKEN, errors)
 

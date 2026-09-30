@@ -693,3 +693,42 @@ async def test_resume_with_inputs_reopens_modal_and_passes_converted_values(tmp_
         assert isinstance(screen, ExecutionScreen)
         assert screen.resume is True
         assert screen.runtime_variables == {"token": "fresh-value", "prd": prd}
+
+
+async def test_resume_reuses_captured_snapshot_after_source_is_deleted(tmp_path: Path) -> None:
+    """A snapshot input is pinned to the run's copy, so resume survives losing the original."""
+    from ddev.ai.runtime.input_snapshot import snapshot_path_inputs
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+    flow = replace(
+        _make_flow(n_phases=2),
+        inputs=FlowConfig(
+            name="test",
+            inputs=[FlowInput(name="spec", label="Spec", input_type=InputType.PATH, snapshot=True)],
+            flow=[],
+        ).inputs,
+    )
+    _write_incomplete_run(tmp_path, flow)
+    source = tmp_path / "spec.md"
+    source.write_text("original requirements", encoding="utf-8")
+    snapshot_path_inputs(flow, {"spec": str(source)}, tmp_path / flow_slug(flow))
+    source.unlink()
+
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        await pilot.click("#resume")
+        await pilot.pause()
+
+        assert isinstance(pilot.app.screen, LaunchModal)
+        _provide_prd(pilot.app.screen, tmp_path)
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+        screen = pilot.app.screen
+        assert isinstance(screen, ExecutionScreen)
+        assert Path(screen.runtime_variables["spec"]).read_text(encoding="utf-8") == "original requirements"

@@ -201,3 +201,60 @@ def test_defaulted_optional_runtime_input_resolves_variable_without_static_value
 
     assert diagnostics.status == ConfigStatus.OK
     assert diagnostics.resolved.variables == {}
+
+
+def snapshot_flow_entry(agent: str, *, variables: list[VariableDeclaration]):
+    return [
+        phase_entry("p", agent=agent, variables=variables),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[FlowInput(name="spec", label="Spec", input_type="path", snapshot=True)],
+        ),
+    ]
+
+
+def test_snapshot_input_requires_read_file_tool():
+    entries = [
+        agent_entry("writer", tools=["grep"]),
+        *snapshot_flow_entry("writer", variables=[VariableDeclaration(name="spec")]),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    error = next(e for e in diagnostics.errors if e.kind == ErrorKind.AGENT)
+    assert error.subject == "writer"
+    assert error.phase == "p"
+    assert "'spec'" in error.message
+    assert "'read_file'" in error.message
+
+
+def test_snapshot_input_accepted_when_agent_can_read():
+    entries = [
+        agent_entry("writer", tools=["read_file"]),
+        *snapshot_flow_entry("writer", variables=[VariableDeclaration(name="spec")]),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+
+
+def test_snapshot_input_ignored_when_phase_does_not_use_it():
+    entries = [
+        agent_entry("writer", tools=["grep"]),
+        *snapshot_flow_entry("writer", variables=[]),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+
+
+def test_snapshot_input_declared_by_agent_requires_read_file_tool():
+    entries = [
+        agent_entry("writer", tools=["grep"], variables=[VariableDeclaration(name="spec")]),
+        *snapshot_flow_entry("writer", variables=[]),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    assert any(e.kind == ErrorKind.AGENT and e.subject == "writer" for e in diagnostics.errors)
