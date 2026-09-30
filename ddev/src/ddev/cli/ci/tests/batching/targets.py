@@ -48,10 +48,10 @@ TESTABLE_PATH_PATTERN = re.compile(
 
 # Repository-wide paths that, when changed, trigger the full eligible target set.
 #
-# A path belongs here only if a pull request's own test jobs run it from the pull request checkout
-# and a change to it can break some targets but not others. The Dispatcher itself, including this
-# module, runs from master, so a pull request cannot exercise its own changes to it; its unit tests
-# still run through the direct rule on the `ddev` target.
+# A path belongs here only if a pull request's own run uses it from the pull request checkout and a
+# change to it can break some targets but not others, or only shows at full scale. The Dispatcher
+# itself, including this module, runs from master, so a pull request cannot exercise its own changes
+# to it; its unit tests still run through the direct rule on the `ddev` target.
 #
 # TODO(manifest): once ddev no longer depends on `manifest.json`, each integration should declare
 # its own triggers as structured configuration instead of this shared regex.
@@ -72,6 +72,9 @@ REPOSITORY_WIDE_PATTERNS = re.compile(
   | ddev/src/ddev/plugin/external/hatch/.+
   | ddev/src/ddev/integration/core\.py
   | ddev/src/ddev/repo/core\.py
+    # Dispatcher settings, which the planner reads from the pull request's tree. Batching, rate
+    # limits and retries only show their effect on a full run.
+  | \.ddev/dispatcher\.toml
     """,
     re.VERBOSE,
 )
