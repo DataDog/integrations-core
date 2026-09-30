@@ -137,6 +137,12 @@ All are read from the host environment and have working defaults.
 | `ACTIVITY_GEN` | `1` | `0` idles every workload service, including the alarm drill. |
 | `ALARM_DRILL` | `1` | `0` turns off only the alarm drill. |
 
+They are Compose interpolation variables, so a consumer sets them in the environment of
+the `evalya run` that starts the fixture: `ALARM_DRILL=0 evalya run ...` or
+`evalya run -e ALARM_DRILL=0 ...`. They are not declared under the task's `env` in
+`evalya.yaml` on purpose: a task's `env` (and an alias's override of it) reaches only the
+`rabbitmq-full` forwarder container, not the broker or the workload services.
+
 ### The alarm drill
 
 `rabbitmq.node.mem_alarm`, `rabbitmq.node.disk_alarm` (management) and
@@ -148,6 +154,9 @@ the broker starts, and then every 180s, it sets `vm_memory_high_watermark` to 0.
 `disk_free_limit` to 100000GB, which raises both alarms, holds them for 25s, and restores the
 values it read at startup (0.6 and 50000000 on the 4.0 image). The restore runs on exit
 and retries on failure; the settings are runtime-only, so a broker restart also clears them.
+If either startup read fails or is not a number, the drill logs why and exits before
+raising anything. If a restore still fails after its retries, the drill stops instead of
+raising the alarms again.
 
 The window is sized against the scrapers: the DD check and the OTel `rabbitmqreceiver`
 both default to 15s, and `/api/nodes` reports the alarm about 8s late at both ends, so a
