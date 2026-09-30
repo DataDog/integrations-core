@@ -26,36 +26,47 @@
           { "value": "au", "label": "Australia" }
         ]
       }
-    },
-    {
-      "key": "collect_alerts",
-      "label": "Collect Alerts",
-      "editable": true,
-      "required": true,
-      "checkbox": {
-        "default": true
-      }
-    },
-    {
-      "key": "collect_events",
-      "label": "Collect Events",
-      "editable": true,
-      "required": true,
-      "checkbox": {
-        "default": true
-      }
-    },
-    {
-      "key": "collect_audit_logs",
-      "label": "Collect Audit Logs",
-      "editable": true,
-      "required": true,
-      "checkbox": {
-        "default": true
-      }
     }
   ],
   "dataflow_config": [
-    { "dataflow_id": "obsidian-security-logs" }
+    {
+      "dataflow_id": "obsidian-security-alerts-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Alerts",
+        "help": "Collects Obsidian Security alerts.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_alerts",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "obsidian-security-events-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Events",
+        "help": "Collects Obsidian Security events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_events",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "obsidian-security-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit Logs",
+        "help": "Collects Obsidian Security audit logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_audit_logs",
+        "should_map_legacy_fields": true
+      }
+    }
   ]
 }
