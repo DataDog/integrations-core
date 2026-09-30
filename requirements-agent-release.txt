@@ -224,7 +224,7 @@ datadog-sqlserver==23.6.0
 datadog-squid==5.5.0
 datadog-ssh-check==4.9.0
 datadog-statsd==3.3.0
-datadog-strimzi==4.4.1
+datadog-strimzi==4.5.0
 datadog-supabase==2.5.0
 datadog-supervisord==4.5.0
 datadog-suricata==2.2.0
