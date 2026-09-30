@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import re
@@ -293,12 +292,11 @@ def verify_descriptor_response(
     response: Mapping[str, Any],
     upload_id: str,
     descriptor: RemoteQueryUploadDescriptor,
-    request_bytes: bytes,
 ) -> None:
     """Fail closed unless intake's descriptor receipt exactly confirms the registration."""
     if not isinstance(response, Mapping):
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake descriptor response was not a JSON object.')
-    extra_keys = set(response) - {'upload_id', 'format_version', 'include_schema', 'columns', 'sha256'}
+    extra_keys = set(response) - {'upload_id', 'format_version', 'include_schema', 'columns'}
     if extra_keys:
         raise RemoteQueryFailure(
             'invalid_receipt',
@@ -308,7 +306,6 @@ def verify_descriptor_response(
     verify_descriptor_receipt_field(response, 'format_version', descriptor.format_version)
     verify_descriptor_receipt_field(response, 'include_schema', descriptor.include_schema)
     verify_descriptor_receipt_field(response, 'columns', len(descriptor.columns))
-    verify_descriptor_receipt_field(response, 'sha256', hashlib.sha256(request_bytes).hexdigest())
 
 
 def verify_source_page_receipt(response: Mapping[str, Any], upload_id: str, page: SourcePageUploadMetadata) -> None:

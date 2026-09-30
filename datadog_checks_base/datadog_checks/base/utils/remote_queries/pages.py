@@ -184,7 +184,7 @@ class PageUploader:
                 'max_file_bytes_exceeded', 'The repeated schema plus the minimal page envelope exceeds maxFileBytes.'
             )
         body = descriptor_request_bytes(descriptor)
-        verify_descriptor_response(client.register_descriptor(creds, body), creds.upload_id, descriptor, body)
+        verify_descriptor_response(client.register_descriptor(creds, body), creds.upload_id, descriptor)
 
     def page_bound(self, offset: int, row_bounds: Sequence[int]) -> int:
         prefix = page_prefix(

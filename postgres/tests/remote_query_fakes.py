@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from contextlib import contextmanager
 from types import SimpleNamespace
@@ -57,7 +56,6 @@ class FakeUploadClient:
             'format_version': registered['format_version'],
             'include_schema': registered['include_schema'],
             'columns': len(registered['columns']),
-            'sha256': hashlib.sha256(body).hexdigest(),
         }
 
     def put_source_page(self, creds, page, body):

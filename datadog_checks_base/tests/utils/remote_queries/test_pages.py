@@ -36,7 +36,7 @@ def test_descriptor_registration_happens_once_before_any_row(delivery, creds):
 
 def test_writer_gates_rows_on_a_descriptor_receipt_that_confirms_the_registration(delivery, creds):
     """The registration gate fails closed before any row flows or the run finalizes."""
-    uploads = Uploads(descriptor_response={'upload_id': creds.upload_id, 'sha256': '0' * 64})
+    uploads = Uploads(descriptor_response={'upload_id': creds.upload_id})
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         make_writer(delivery, creds, uploads)
     assert failure.value.code == 'invalid_receipt'

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-import hashlib
 import io
 import json
 import logging
@@ -33,7 +32,7 @@ from .helpers import (
 def test_descriptor_receipt_confirms_the_registration_exactly():
     upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
     body = rq_contract.descriptor_request_bytes(upload_descriptor)
-    rq_upload.verify_descriptor_response(descriptor_receipt(body), 'upload-1', upload_descriptor, body)
+    rq_upload.verify_descriptor_response(descriptor_receipt(body), 'upload-1', upload_descriptor)
 
 
 @pytest.mark.parametrize(
@@ -51,9 +50,10 @@ def test_descriptor_receipt_confirms_the_registration_exactly():
         ('columns', None),
         ('columns', '1'),
         ('columns', 2),
-        ('sha256', None),
-        ('sha256', 'A' * 64),  # the pinned receipt is lowercase hex
-        ('sha256', hashlib.sha256(b'other canonical descriptor bytes').hexdigest()),
+        ('columns', 0),  # mismatched against the one registered column
+        ('columns', True),  # bool is not the registered integer type
+        ('upload_id', ''),
+        ('format_version', True),
     ],
 )
 def test_descriptor_receipt_rejects_missing_mistyped_or_mismatched_fields(field, bad):
@@ -65,31 +65,27 @@ def test_descriptor_receipt_rejects_missing_mistyped_or_mismatched_fields(field,
     else:
         receipt[field] = bad
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.verify_descriptor_response(receipt, 'upload-1', upload_descriptor, body)
+        rq_upload.verify_descriptor_response(receipt, 'upload-1', upload_descriptor)
     assert failure.value.code == 'invalid_receipt'
 
 
-def test_descriptor_receipt_allows_no_keys_beyond_the_pinned_five():
-    """The receipt's key set is exactly the five pinned keys: an unknown extra key — even
-    alongside five matching values — is unknown intake behavior and fails closed."""
+@pytest.mark.parametrize('extra_key', ['sha256', 'descriptor_sha256'])
+def test_descriptor_receipt_allows_no_keys_beyond_the_pinned_four(extra_key):
+    """The receipt's key set is exactly the four pinned keys: an unknown extra key — even
+    alongside four matching values — is unknown intake behavior and fails closed. A retired
+    digest key is exactly the kind of drift the strict set rejects (lockstep with intake)."""
     upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
     body = rq_contract.descriptor_request_bytes(upload_descriptor)
     receipt = descriptor_receipt(body)
-    rq_upload.verify_descriptor_response(receipt, 'upload-1', upload_descriptor, body)
+    rq_upload.verify_descriptor_response(receipt, 'upload-1', upload_descriptor)
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        # The legacy provisional echo key is exactly the kind of drift the pinned set rejects.
-        rq_upload.verify_descriptor_response(
-            {**receipt, 'descriptor_sha256': hashlib.sha256(body).hexdigest()},
-            'upload-1',
-            upload_descriptor,
-            body,
-        )
+        rq_upload.verify_descriptor_response({**receipt, extra_key: '0' * 64}, 'upload-1', upload_descriptor)
     assert failure.value.code == 'invalid_receipt'
 
 
 def test_descriptor_receipt_rejects_a_non_object_response():
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.verify_descriptor_response(None, 'upload-1', descriptor(), b'{}')
+        rq_upload.verify_descriptor_response(None, 'upload-1', descriptor())
     assert failure.value.code == 'invalid_receipt'
 
 

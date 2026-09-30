@@ -17,7 +17,6 @@ recorded in each benchmark's ``extra_info`` so before/after comparisons can targ
 run as a whole; phase-level attribution belongs to the native producer spans.
 """
 
-import hashlib
 import json
 from types import SimpleNamespace
 
@@ -62,7 +61,6 @@ class DiscardUploadClient:
             'format_version': registered['format_version'],
             'include_schema': registered['include_schema'],
             'columns': len(registered['columns']),
-            'sha256': hashlib.sha256(body).hexdigest(),
         }
 
     def put_source_page(self, creds, page, body):

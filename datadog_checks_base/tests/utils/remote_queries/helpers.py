@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-import hashlib
 import json
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
@@ -119,15 +118,13 @@ class Uploads:
         self.descriptor_bodies.append(body)
         if self.descriptor_response is not None:
             return self.descriptor_response
-        # Intake's pinned receipt: the registered descriptor's identity plus the sha256 over
-        # the canonical registration bytes.
+        # Intake's pinned receipt: the registered descriptor's identity and nothing else.
         registered = json.loads(body)
         return {
             'upload_id': creds.upload_id,
             'format_version': registered['format_version'],
             'include_schema': registered['include_schema'],
             'columns': len(registered['columns']),
-            'sha256': hashlib.sha256(body).hexdigest(),
         }
 
     def final_bytes_for(self, page):
@@ -194,7 +191,6 @@ def descriptor_receipt(body, **overrides):
         'format_version': registered['format_version'],
         'include_schema': registered['include_schema'],
         'columns': len(registered['columns']),
-        'sha256': hashlib.sha256(body).hexdigest(),
     }
     receipt.update(overrides)
     return receipt
