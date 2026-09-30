@@ -90,18 +90,14 @@ class TestCreateLabel:
         assert label.json()['color'] == 'ff0000'
 
 
-def test_create_pull_request_applies_labels(github_manager, mocker):
-    """Labels are applied to the new PR through the issues API, since the pulls API ignores them."""
-    response = mocker.MagicMock()
-    response.json.return_value = {'number': 42, 'html_url': 'https://github.com/o/r/pull/42'}
-    api_post = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_post', return_value=response)
+def test_add_labels_uses_issues_api(github_manager, mocker):
+    """Labels must go through the issues API, since the pulls API silently ignores them."""
+    api_post = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_post')
 
-    url = github_manager.create_pull_request(title='t', head='feature', base='master', body='b', labels=['qa/skip-qa'])
+    github_manager.add_labels(42, ['qa/skip-qa'])
 
-    assert url == 'https://github.com/o/r/pull/42'
-    labels_call = api_post.call_args_list[1]
-    assert labels_call.args[0].endswith('/issues/42/labels')
-    assert json.loads(labels_call.kwargs['content']) == {'labels': ['qa/skip-qa']}
+    assert api_post.call_args.args[0].endswith('/issues/42/labels')
+    assert json.loads(api_post.call_args.kwargs['content']) == {'labels': ['qa/skip-qa']}
 
 
 def test_dispatch_workflow_default_returns_none(github_manager, mocker):

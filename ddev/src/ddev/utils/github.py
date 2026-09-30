@@ -332,21 +332,21 @@ class GitHubManager:
     def create_milestone(self, title: str) -> None:
         self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
 
-    def create_pull_request(
-        self, title: str, head: str, base: str, body: str = '', labels: list[str] | None = None
-    ) -> str:
+    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> tuple[int, str]:
+        """Open a pull request and return its number and URL."""
         response = self.__api_post(
             self.PULLS_API.format(repo_id=self.repo_id),
             content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body}),
         )
         data = response.json()
-        # The create-pull-request endpoint does not accept labels, so they go through the issues API.
-        if labels:
-            self.__api_post(
-                self.ISSUE_LABELS_API.format(repo_id=self.repo_id, issue_number=data['number']),
-                content=json.dumps({'labels': labels}),
-            )
-        return data['html_url']
+        return data['number'], data['html_url']
+
+    def add_labels(self, issue_number: int, labels: list[str]) -> None:
+        # Pull requests are issues for labeling purposes; the pulls API does not accept labels.
+        self.__api_post(
+            self.ISSUE_LABELS_API.format(repo_id=self.repo_id, issue_number=issue_number),
+            content=json.dumps({'labels': labels}),
+        )
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')

@@ -132,13 +132,12 @@ def bump_milestone(app: Application, branch_name: str) -> None:
 
     app.display_waiting("Creating a pull request...")
     try:
-        pr_url = app.github.create_pull_request(
+        pr_number, pr_url = app.github.create_pull_request(
             title=f'Update current_milestone to {next_milestone}',
             head=bump_branch,
             base='master',
             body=f'Updates `current_milestone` in `release.json` to `{next_milestone}` '
             f'after cutting the `{branch_name}` release branch.',
-            labels=MILESTONE_PR_LABELS,
         )
         app.display_success(f'Pull request created: {pr_url}')
     except GitHubAuthenticationError:
@@ -150,6 +149,14 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )
+        return
+
+    # The pull request already exists at this point, so a labeling failure must not read as a creation failure.
+    labels = ', '.join(f'`{label}`' for label in MILESTONE_PR_LABELS)
+    try:
+        app.github.add_labels(pr_number, MILESTONE_PR_LABELS)
+    except HTTPError as e:
+        app.display_warning(f'Failed to add {labels} to {pr_url} ({e}). Please add the labels manually.')
 
 
 def compute_next_milestone(branch_name: str) -> str:
