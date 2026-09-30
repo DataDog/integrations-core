@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 10.14.0 / 2026-09-30
+
+***Added***:
+
+* Enable query metrics by default when Database Monitoring is enabled. ([#25197](https://github.com/DataDog/integrations-core/pull/25197))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
 ## 10.13.0 / 2026-09-02
 
 ***Added***:
