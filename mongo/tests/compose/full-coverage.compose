@@ -130,6 +130,10 @@ services:
       # Set ACTIVITY_GEN=0 (host env) for a quiescent mongo-full: the container
       # stays up but generates no traffic. Defaults to on.
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      # Set LOCK_DRILL=0 (host env) to skip the fsync lock and the cluster-wide
+      # setUserWriteBlockMode, which blocks every user write for its window. The
+      # rest of the lock contention still runs. Defaults to on.
+      LOCK_DRILL: "${LOCK_DRILL:-1}"
     volumes:
       - ../activity-gen.sh:/opt/activity-gen.sh:ro
     command: ["sh", "/opt/activity-gen.sh"]
