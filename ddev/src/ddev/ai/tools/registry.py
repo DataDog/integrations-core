@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING
@@ -145,6 +145,7 @@ class ToolRegistry:
         file_registry: FileRegistry,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
+        tool_factories: Mapping[str, Callable[[], ToolProtocol]] | None = None,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
@@ -153,6 +154,8 @@ class ToolRegistry:
         each owner must still read-before-write on its own.
 
         ``process_factory`` is only consumed by tools that spawn child agents.
+        ``tool_factories`` binds run-owned dependencies for selected tools. Factories are
+        called only for requested tools; the manifest still defines available names and permissions.
         """
         ctx = ToolContext(
             file_registry=file_registry,
@@ -169,8 +172,12 @@ class ToolRegistry:
             spec = TOOL_MANIFEST.get(name)
             if spec is None:
                 raise ValueError(f"Unknown tool name: {name!r}")
-            tool_cls = getattr(import_module(f"{__package__}.{spec.module}"), spec.cls)
-            tools.append(spec.factory(tool_cls, ctx))
+            factory = tool_factories.get(name) if tool_factories else None
+            if factory is not None:
+                tools.append(factory())
+            else:
+                tool_cls = getattr(import_module(f"{__package__}.{spec.module}"), spec.cls)
+                tools.append(spec.factory(tool_cls, ctx))
         return cls(tools, native_tool_names=native_tool_names)
 
     @property
