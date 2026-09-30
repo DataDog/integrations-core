@@ -26,11 +26,24 @@
 #                 counters and rabbitmq.queue.messages.persistent.
 #   - rabbitmq-full  fixture entrypoint: forwards the broker's ports and gates on
 #                    the workload, so depending on it brings up everything.
+#
+# The primary broker also runs ../alarm-drill.sh, which raises and clears the
+# memory and disk alarms on a cycle (ALARM_DRILL=0 turns it off).
 services:
   # Not named `rabbitmq`: consumers commonly alias this fixture under that task
   # id, and evalya then gives the entrypoint that hostname, shadowing the broker.
   rabbitmq-broker:
     image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    volumes:
+      - ../alarm-drill.sh:/opt/alarm-drill.sh:ro
+    environment:
+      # Set ALARM_DRILL=0 (host env) to keep the broker alarm-free; ACTIVITY_GEN=0
+      # also turns it off. Defaults to on.
+      ALARM_DRILL: "${ALARM_DRILL:-1}"
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    # The drill runs in the broker container so rabbitmqctl reaches the node with
+    # its own cookie and node name.
+    command: ["sh", "-c", "sh /opt/alarm-drill.sh & exec rabbitmq-server"]
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
       interval: 10s
