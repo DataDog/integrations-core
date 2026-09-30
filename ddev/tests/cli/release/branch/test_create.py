@@ -277,7 +277,9 @@ def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    create_pr = mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -285,6 +287,8 @@ def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     result = ddev('release', 'branch', 'create', '7.79.x')
 
     assert result.exit_code == 0, result.output
+    # The milestone bump only touches release.json, so it must not require QA.
+    assert create_pr.call_args.kwargs['labels'] == ['qa/skip-qa']
     assert 'Creating the `7.80.0` milestone' in result.output
     assert 'Updating release.json with new milestone `7.80.0`' in result.output
     assert 'Pull request created' in result.output

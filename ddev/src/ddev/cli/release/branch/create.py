@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
+MILESTONE_PR_LABELS = ['qa/skip-qa']
 
 
 @click.command
@@ -137,6 +138,7 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             base='master',
             body=f'Updates `current_milestone` in `release.json` to `{next_milestone}` '
             f'after cutting the `{branch_name}` release branch.',
+            labels=MILESTONE_PR_LABELS,
         )
         app.display_success(f'Pull request created: {pr_url}')
     except GitHubAuthenticationError:
