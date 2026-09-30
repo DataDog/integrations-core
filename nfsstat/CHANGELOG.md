@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.1 / 2026-09-30
+
+***Fixed***:
+
+* Fix nfsiostat resolution and invocation on Fleet Automation-managed hosts, skip incomplete nfsiostat samples instead of failing the check, and support NFS sources without an export path. ([#25139](https://github.com/DataDog/integrations-core/pull/25139))
+
 ## 3.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
