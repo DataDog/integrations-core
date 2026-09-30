@@ -1,56 +1,27 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Annotated
-
-import httpx
-from pydantic import AfterValidator, Field
-
-from ddev.ai.tools.core.base import BaseTool, BaseToolInput
-from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
-
-def requires_http_scheme(url: str) -> str:
-    if not url.startswith(("http://", "https://")):
-        raise ValueError("URL must start with http:// or https://")
-    return url
+from .base import HttpRequestInput, HttpRequestTool
 
 
-class HttpGetInput(BaseToolInput):
-    url: Annotated[
-        str,
-        Field(description="Full URL to probe (must start with http:// or https://)"),
-        AfterValidator(requires_http_scheme),
-    ]
-    timeout: Annotated[float, Field(description="Request timeout in seconds (default: 10)", gt=0)] = 10.0
+class HttpGetInput(HttpRequestInput):
+    pass
 
 
-class HttpGetTool(BaseTool[HttpGetInput]):
-    """Performs an HTTP GET request to check if an endpoint is reachable.
-    Use to validate that a metrics endpoint is accessible and inspect its response.
-    Returns the HTTP status code and response body (truncated if large)."""
+class HttpGetTool(HttpRequestTool[HttpGetInput]):
+    """Performs an HTTP GET request, e.g. to check that an endpoint is reachable or to fetch a
+    documented resource from a prepared local API.
+    Small responses are returned inline as the status line followed by the body. Large responses,
+    or any response when save_response is true, are saved to a run artifact file and a short JSON
+    result is returned instead, with the status, saved_to path, and a structural summary. Inspect
+    saved files with grep and read_file rather than reading them whole.
+    Redirects are not followed."""
 
     @property
     def name(self) -> str:
         return "http_get"
 
     async def __call__(self, tool_input: HttpGetInput) -> ToolResult:
-        url: str = tool_input.url
-        timeout: float = tool_input.timeout
-
-        try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.get(url)
-        except httpx.TimeoutException:
-            return ToolResult(success=False, error=f"Request timed out after {timeout}s")
-        except httpx.RequestError as e:
-            return ToolResult(success=False, error=f"Request failed for {url}: {e}")
-
-        body = response.text
-        result = truncate(body)
-
-        status_line = f"Status: {response.status_code}"
-        output = f"{status_line}\n\n{result.output}"
-
-        return make_tool_result(success=True, data=output, result=result)
+        return await self.execute_request(tool_input, method="GET")

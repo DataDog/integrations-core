@@ -40,11 +40,12 @@ def test_allowed_tools_excludes_both_spawn_tools():
         ([SPAWN_SUBAGENT_NAME], "spawn further"),
         ([SPAWN_IDENTICAL_NAME], "spawn further"),
         (["edit_file"], "disallowed"),
-        (["read_file"], None),
+        (["http_post"], "disallowed"),
+        (["read_file", "http_get"], None),
     ],
 )
 def test_validate_tools(requested: list[str], fragment: str | None):
-    error = make_tool(["read_file"])._validate_tools(requested, "child")
+    error = make_tool(["read_file", "http_get"])._validate_tools(requested, "child")
     if fragment is None:
         assert error is None
     else:
