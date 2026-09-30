@@ -653,3 +653,44 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1786999599837
+# Generated with PostgreSQL 18.6 and pgAudit 18.0: session and object audit logging.
+ -
+  sample: "2026-09-30 20:52:58.043 UTC [86678] LOG:  AUDIT: SESSION,1,1,READ,SELECT,,,SELECT 1,<not logged>"
+  result:
+    custom:
+      db:
+        date: 1790801578043
+        severity: "LOG"
+      postgres:
+        error_severity: "LOG"
+        message: "AUDIT: SESSION,1,1,READ,SELECT,,,SELECT 1,<not logged>"
+        pid: 86678
+        proc_id: "86678"
+        timestamp: "2026-09-30 20:52:58.043 UTC"
+    message: "AUDIT: SESSION,1,1,READ,SELECT,,,SELECT 1,<not logged>"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1790801578043
+ -
+  sample: "2026-09-30 20:52:58.114 UTC:[local]:postgres@postgres:[86692]:1:00000:2026-09-30 20:52:58 UTC:10/2:0:6abd76aa.152a4:psql:LOG:  AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.audit_sample,SELECT * FROM audit_sample,<not logged>"
+  result:
+    custom:
+      postgres:
+        application_name: "psql"
+        dbname: "postgres"
+        error_severity: "LOG"
+        line_num: 1
+        message: "AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.audit_sample,SELECT * FROM audit_sample,<not logged>"
+        pid: 86692
+        remote_host: "[local]"
+        session_id: "6abd76aa.152a4"
+        session_start: "2026-09-30 20:52:58 UTC"
+        timestamp: "2026-09-30 20:52:58.114 UTC"
+        txid: 0
+        user: "postgres"
+        vxid: "10/2"
+    message: "2026-09-30 20:52:58.114 UTC:[local]:postgres@postgres:[86692]:1:00000:2026-09-30 20:52:58 UTC:10/2:0:6abd76aa.152a4:psql:LOG:  AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.audit_sample,SELECT * FROM audit_sample,<not logged>"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
