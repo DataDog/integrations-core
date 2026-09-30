@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.7.1 / 2026-09-30
+
+***Fixed***:
+
+* Accept both lowercase and capitalized values for the ``filters.type`` config option. ([#25167](https://github.com/DataDog/integrations-core/pull/25167))
+
 ## 5.7.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
