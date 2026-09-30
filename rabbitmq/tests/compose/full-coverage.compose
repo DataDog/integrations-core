@@ -26,8 +26,11 @@
 #                 counters and rabbitmq.queue.messages.persistent.
 #   - slow-reader  bespoke stdlib AMQP client that reads its consumer socket
 #                  slowly, for rabbitmq.connection.pending_packets.
-#   - rabbitmq-full  fixture entrypoint: forwards the broker's ports and gates on
-#                    the workload, so depending on it brings up everything.
+#   - rabbitmq3-broker  a second, RabbitMQ 3.13 broker, for the socket metrics
+#                       4.x no longer reports (see ../README.md).
+#   - load3      light AMQP traffic on rabbitmq3-broker.
+#   - rabbitmq-full  fixture entrypoint: forwards both brokers' ports and gates
+#                    on the workload, so depending on it brings up everything.
 #
 # The primary broker also runs ../alarm-drill.sh, which raises and clears the
 # memory and disk alarms on a cycle (ALARM_DRILL=0 turns it off).
@@ -241,6 +244,37 @@ services:
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
     command: ["python3", "/opt/slow_reader.py"]
 
+  # Second broker on RabbitMQ 3.x. 4.0 stopped tracking TCP sockets, so
+  # rabbitmq.node.sockets_used reads 0 and rabbitmq.process.open_tcp_sockets /
+  # max_tcp_sockets are gone; 3.13 still reports all three. Kept separate from
+  # the 4.0 primary, whose endpoints every existing provide points at.
+  rabbitmq3-broker:
+    image: rabbitmq:${RABBITMQ3_VERSION:-3.13}-management
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # A couple of long-lived connections on the 3.13 broker, so the socket gauges
+  # count something. Idles with ACTIVITY_GEN=0.
+  load3:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      rabbitmq3-broker:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq3-broker:5672 \
+          --producers 1 --consumers 1 --queue perf3 --auto-delete false --rate 2
+
   activity-gen:
     image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
     depends_on:
@@ -259,7 +293,7 @@ services:
   # Fixture entrypoint (published as rabbitmq-full). evalya only starts the
   # target service and its depends_on chain, and nothing depends on the workload
   # services, so targeting the broker would run it idle. Gating the entrypoint on
-  # them pulls up the whole environment; socat keeps the broker reachable at the
+  # them pulls up the whole environment; socat keeps both brokers reachable at the
   # entrypoint's hostname, which is what the provides labels advertise.
   rabbitmq-full:
     image: alpine/socat:latest
@@ -284,10 +318,16 @@ services:
         condition: service_started
       slow-reader:
         condition: service_started
+      rabbitmq3-broker:
+        condition: service_healthy
+      load3:
+        condition: service_started
     entrypoint: ["sh", "-c"]
+    # The 3.13 broker's ports are shifted by one (5673, 15673, 15693).
     command:
       - |
         for port in 5672 15672 15692; do
           socat TCP-LISTEN:$$port,fork,reuseaddr TCP:rabbitmq-broker:$$port &
+          socat TCP-LISTEN:$$((port + 1)),fork,reuseaddr TCP:rabbitmq3-broker:$$port &
         done
         wait
