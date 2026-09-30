@@ -90,9 +90,10 @@ pipeline:
           _pg_ps %{data:postgres.ps}
           # Both body helpers parse the severity, optional SQLSTATE and message after the configured prefix.
           # Consume the position suffix without publishing cursorpos or internalpos: text cannot distinguish them.
-          _pg_body %{word:postgres.error_severity}:  (?:%{regex("[A-Z0-9]{5}"):postgres.state_code:nullIf("00000")}: )?%{data:postgres.message}(?: at character \d+)?
+          # Keep pgAudit's AUDIT: SESSION/OBJECT marker in the message instead of treating AUDIT as SQLSTATE.
+          _pg_body %{word:postgres.error_severity}:  (?:%{regex("(?!AUDIT: (?:SESSION|OBJECT),)[A-Z0-9]{5}"):postgres.state_code:nullIf("00000")}: )?%{data:postgres.message}(?: at character \d+)?
           # When %e already captures SQLSTATE, consume its verbose-body copy without creating an array.
-          _pg_body_with_prefix_state %{word:postgres.error_severity}:  (?:%{regex("[A-Z0-9]{5}")}: )?%{data:postgres.message}(?: at character \d+)?
+          _pg_body_with_prefix_state %{word:postgres.error_severity}:  (?:%{regex("(?!AUDIT: (?:SESSION|OBJECT),)[A-Z0-9]{5}")}: )?%{data:postgres.message}(?: at character \d+)?
         matchRules: |
           # log_line_prefix = '%m [%p] %d %a %u %h %c '
           pgprefix_dd_docs %{_pg_timestamp} \[%{_pg_pid}\] %{_pg_dbname} %{_pg_app_name} %{_pg_user} %{_pg_remote_host} %{_pg_session_id} %{_pg_body}
