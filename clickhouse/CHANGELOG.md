@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.1 / 2026-09-30
+
+***Fixed***:
+
+* Log query sample obfuscation failures with repr so an embedded null cannot crash the job. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
 ## 7.3.0 / 2026-09-02
 
 ***Added***:
