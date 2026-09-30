@@ -87,6 +87,17 @@ PARAMS_TO_FILENAME_MAPPING = {
     'skip=0/take=30': 'high_limit_pg1',
 }
 
+# The shipped page size is 300, while the pagination tests pin it to 30 or 2. Responses named
+# "high_limit" hold everything on a single page, so a request at the default resolves to the same
+# fixture as the take=30 case.
+PARAMS_TO_FILENAME_MAPPING.update(
+    {
+        key.replace('take=30', 'take=300'): filename
+        for key, filename in PARAMS_TO_FILENAME_MAPPING.items()
+        if key.endswith('take=30')
+    }
+)
+
 
 # https://docs.python.org/3/library/unittest.mock-examples.html#coping-with-mutable-arguments
 class CopyingMock(mock.MagicMock):
