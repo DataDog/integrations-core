@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.5.0 / 2026-09-30
+
+***Added***:
+
+* Add Gitaly catfile cache hit/miss, connections, service client requests, total repositories count, adaptive concurrency limit, and build info metrics, 69 Geo replication and verification metrics spanning 13 additional replicable types, and `sidekiq_enqueued_jobs_total`. Also add the `workhorse_endpoint` and `sidekiq_endpoint` options, which collect GitLab Workhorse HTTP request metrics and the Sidekiq exporter's memory and load-balancing metrics from the separate listeners those components serve them on. ([#25246](https://github.com/DataDog/integrations-core/pull/25246))
+
 ## 10.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
