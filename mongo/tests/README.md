@@ -53,10 +53,23 @@ concurrent run.
 | `MONGO_VERSION` | `8.0` | Image tag for every mongo service. Needs 6.0+ (`mongosh`). |
 | `DB_USERNAME` / `DB_PASSWORD` | `datadog` / `datadog` | The monitoring user created by `seed`. |
 | `ACTIVITY_GEN` | `1` | Set to `0` to keep `activity-gen` running but idle. |
+| `LOCK_DRILL` | `1` | Set to `0` to skip the `fsync` lock and the cluster-wide write block (see [Lock metrics](#lock-metrics)). |
 
-All three are read from the host environment (Compose interpolation). Access control is
-not enforced, because `--auth` on a sharded cluster needs a keyFile for internal auth; the
-user still exists, so a wrong credential fails to authenticate.
+All four are read from the host environment (Compose interpolation), so a consumer sets
+them in the environment of the `evalya run` that starts the fixture, for example
+`LOCK_DRILL=0 evalya run ...` or `evalya run -e LOCK_DRILL=0 ...`. A task-level `env`
+entry in `evalya.yaml`, or an alias's override of one, reaches only the `mongo-full`
+forwarder container, not `activity-gen` or the mongo nodes.
+
+`activity-gen.sh` also reads `ACTIVITY_DURATION` (seconds, default `0` = run forever).
+With a positive value the workload loop stops after that many seconds and the script
+exits, which stops the whole container: the long-lived session and the lock contention
+end with it, and evalya does not restart it. The compose file does not pass
+`ACTIVITY_DURATION` to the container, so `mongo-full` always runs the workload for its
+whole lifetime; the variable only applies when the script is run by other means.
+
+Access control is not enforced, because `--auth` on a sharded cluster needs a keyFile for
+internal auth; the user still exists, so a wrong credential fails to authenticate.
 
 ### Check configuration
 
@@ -130,13 +143,34 @@ one-at-a-time traffic never causes. So `activity-gen` also runs lock contention 
   `lock: true` (Global S), unlocked in a `finally`;
 - a holder through mongos, every 3 s: an insert into the capped `lockdrill.capped` (Metadata
   X) and `setUserWriteBlockMode` on then off (Global X on the shard), turned off in a
-  `finally`. Writes that land in that window fail with `UserWritesBlocked`, which the lock
-  writers ignore.
+  `finally`.
 
 Each lock held past its command is released in a `finally`, and each holder first clears
-one a killed predecessor left behind. `ACTIVITY_GEN=0` disables it with the rest of the
-workload. The waits are counted on shard-a (the `27018` instance); mongos reports only its
-`Mutex` lock.
+one a killed predecessor left behind. If `activity-gen` is stopped (for example
+`docker stop`, or evalya tearing the fixture down), a trap on the script's exit kills the
+holders and then runs `fsyncUnlock` and `setUserWriteBlockMode` off, best effort.
+`ACTIVITY_GEN=0` disables the lock contention with the rest of the workload. The waits are
+counted on shard-a (the `27018` instance); mongos reports only its `Mutex` lock.
+
+#### The lock drill and its side effect
+
+The `fsync` lock and `setUserWriteBlockMode` are the lock drill. `setUserWriteBlockMode`
+with `global: true` blocks **all** user writes across the cluster, not only those in
+`lockdrill`: every 3 s, for the window it is on, writes fail with `UserWritesBlocked`.
+That includes the fixture's own `activity-gen` iteration (a failed iteration is logged
+and the loop continues), the shard holder's index build (it logs `shard lock holder
+failed` and restarts 5 s later), and any consumer writing through the forwarded ports.
+The lock writers ignore the error. Read-only scrapers, such as the mongo check and the OTel
+`mongodbreceiver`, are not blocked; like any reader, they can queue briefly behind the
+holders' S and X requests.
+
+Set `LOCK_DRILL=0` to opt out. Neither holder then takes its lock: the slow and fast
+writers, `createIndexes`/`dropIndexes`, `dbHash`, the cross-database `renameCollection`, and
+the capped insert still run. The drill's two holders are the only Global S and X
+requests, and without them nothing waits on the Global lock: measured on 8.0 with
+`LOCK_DRILL=0`, shard-a reported no `locks.Global.acquireWaitCount` or
+`timeAcquiringMicros` field in any mode, while the Database, Collection, and Metadata
+fields were still populated.
 
 Measured on MongoDB 8.0.32 over three 15 s windows: every wait count and wait time for
 Global, Database, and Collection in all four modes, plus `Metadata` `acquireCount` in X
