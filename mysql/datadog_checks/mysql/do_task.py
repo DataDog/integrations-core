@@ -24,6 +24,7 @@ import pymysql
 
 from datadog_checks.base.utils.format import json
 
+from .cursor import CommenterCursor, CommenterSSCursor
 from .data_observability import EVENT_TRACK_TYPE
 from .util import connect_with_session_variables
 from .version_utils import parse_version
@@ -103,7 +104,7 @@ class MySQLDataObservabilityTask:
 
     def _connect(self) -> None:
         self._conn = connect_with_session_variables(mysql_version=self._version, **self._check._get_connection_args())
-        with closing(self._conn.cursor()) as cursor:
+        with closing(self._conn.cursor(CommenterCursor)) as cursor:
             if self._version is None:
                 cursor.execute("SELECT @@version, @@version_comment")
                 raw_version, version_comment = cursor.fetchone()
@@ -135,7 +136,7 @@ class MySQLDataObservabilityTask:
             variable, value = 'max_statement_time', timeout_seconds
         else:
             variable, value = 'max_execution_time', timeout_seconds * 1000
-        with closing(self._conn.cursor()) as cursor:
+        with closing(self._conn.cursor(CommenterCursor)) as cursor:
             cursor.execute(f"SET SESSION {variable} = %s", (value,))
         self._current_timeout_seconds = timeout_seconds
 
@@ -147,9 +148,10 @@ class MySQLDataObservabilityTask:
         start = time.time()
         try:
             self._set_statement_timeout(statement.timeout_seconds)
-            # SSCursor streams rows as fetchmany() asks for them, so the check never holds more than
-            # `limit` of them.
-            cursor = conn.cursor(pymysql.cursors.SSCursor)
+            # A streaming cursor fetches rows as fetchmany() asks for them, so the check never holds
+            # more than `limit` of them. Like every other Agent query, statements carry the
+            # service='datadog-agent' comment, which marks them as the Agent's in DBM.
+            cursor = conn.cursor(CommenterSSCursor)
             if statement.dbname != self._current_dbname:
                 cursor.execute(f"USE {_quote_identifier(statement.dbname)}")
                 self._current_dbname = statement.dbname
