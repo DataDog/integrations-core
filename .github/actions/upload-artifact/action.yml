@@ -1,0 +1,17 @@
+name: 'Upload artifact'
+description: 'Pinned actions/upload-artifact wrapper; the pin lives here so bumping it does not flip the resolution inputs hashed by .builders/inputs_hash.py'
+inputs:
+  name:
+    description: 'Artifact name'
+    required: true
+  path:
+    description: 'Path to upload'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Upload artifacts
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
