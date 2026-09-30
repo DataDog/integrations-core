@@ -69,6 +69,19 @@ def smart_retry(f):
     return cast(CallableT, wrapper)
 
 
+def cluster_display_name(cluster_reference):
+    # type: (vim.ClusterComputeResource) -> str
+    """Best-effort cluster name for log messages.
+
+    Reading `name` is a property fetch against vCenter, so it raises whenever the session behind the
+    managed object is gone. `_moId` is held locally on the object and is always readable.
+    """
+    try:
+        return cluster_reference.name
+    except Exception:
+        return getattr(cluster_reference, '_moId', 'unknown')
+
+
 class APIConnectionError(Exception):
     pass
 
@@ -401,60 +414,84 @@ class VSphereAPI(object):
         self.log.debug("Received %s vSAN events", len(events))
         return events
 
-    @smart_retry
+    # Not decorated with `@smart_retry`: the cluster references are bound to the session that
+    # `smart_connect` tears down, so a retry can only fail again with NotAuthenticated, masking the
+    # original error. Failures are handled per cluster instead.
     def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time):
         self.log.debug('Querying vSAN metrics')
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
         for cluster_reference, nested_ids in cluster_nested_elts.items():
-            self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
-            unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
-            if len(unprocessed_health_metrics) <= 0:
-                self.log.debug("No health metrics returned for cluster %s", cluster_reference.name)
+            try:
+                cluster_health_metrics, cluster_performance_metrics = self._get_cluster_vsan_metrics(
+                    vsan_perf_manager, cluster_reference, nested_ids, entity_ref_ids, id_to_tags, starting_time
+                )
+            except Exception as e:
+                # Keep going so that one unhealthy cluster doesn't cost us vSAN data for the whole vCenter.
+                self.log.warning(
+                    "Unable to fetch vSAN metrics for cluster %s, skipping it: %s",
+                    cluster_display_name(cluster_reference),
+                    e,
+                )
                 continue
-            processed_health_metrics = {}
-            group_id = unprocessed_health_metrics[0].groupId
-            group_health = unprocessed_health_metrics[0].groupHealth
+            if cluster_health_metrics is not None:
+                health_metrics.append(cluster_health_metrics)
+                performance_metrics.append(cluster_performance_metrics)
+        return [health_metrics, performance_metrics]
+
+    def _get_cluster_vsan_metrics(
+        self, vsan_perf_manager, cluster_reference, nested_ids, entity_ref_ids, id_to_tags, starting_time
+    ):
+        """Collect the vSAN health and performance metrics of a single cluster.
+
+        Returns `(None, None)` when the cluster reports no health metrics at all.
+        """
+        self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
+        unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
+        if len(unprocessed_health_metrics) <= 0:
+            self.log.debug("No health metrics returned for cluster %s", cluster_reference.name)
+            return None, None
+        processed_health_metrics = {}
+        group_id = unprocessed_health_metrics[0].groupId
+        group_health = unprocessed_health_metrics[0].groupHealth
+        processed_health_metrics.update(
+            {
+                'vsphere.vsan.cluster.health.count': {
+                    'group_id': group_id,
+                    'status': group_health,
+                    'vsphere_cluster': cluster_reference.name,
+                }
+            }
+        )
+        for health_test in unprocessed_health_metrics[0].groupTests:
+            test_name = health_test.testId.split('.')[-1]
             processed_health_metrics.update(
                 {
-                    'vsphere.vsan.cluster.health.count': {
+                    'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
                         'group_id': group_id,
                         'status': group_health,
+                        'test_id': health_test.testId,
+                        'test_status': health_test.testHealth,
                         'vsphere_cluster': cluster_reference.name,
                     }
                 }
             )
-            for health_test in unprocessed_health_metrics[0].groupTests:
-                test_name = health_test.testId.split('.')[-1]
-                processed_health_metrics.update(
-                    {
-                        'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
-                            'group_id': group_id,
-                            'status': group_health,
-                            'test_id': health_test.testId,
-                            'test_status': health_test.testHealth,
-                            'vsphere_cluster': cluster_reference.name,
-                        }
-                    }
-                )
-            health_metrics.append(processed_health_metrics)
 
-            vsan_perf_query_spec = []
-            for nested_id in nested_ids:
-                for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
-                    vsan_perf_query_spec.append(
-                        vim.cluster.VsanPerfQuerySpec(
-                            entityRefId=(entity_type + str(nested_id)),
-                            labels=list(ENTITY_REMAPPER[entity_type]),
-                            startTime=starting_time,
-                        )
+        vsan_perf_query_spec = []
+        for nested_id in nested_ids:
+            for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
+                vsan_perf_query_spec.append(
+                    vim.cluster.VsanPerfQuerySpec(
+                        entityRefId=(entity_type + str(nested_id)),
+                        labels=list(ENTITY_REMAPPER[entity_type]),
+                        startTime=starting_time,
                     )
-            discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
-            for entity_type in discovered_metrics:
-                for metric in entity_type.value:
-                    metric.metricId.dynamicProperty.append(
-                        id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
-                    )
-            performance_metrics.append(discovered_metrics)
-        return [health_metrics, performance_metrics]
+                )
+        discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
+        for entity_type in discovered_metrics:
+            for metric in entity_type.value:
+                metric.metricId.dynamicProperty.append(
+                    id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
+                )
+        return processed_health_metrics, discovered_metrics
