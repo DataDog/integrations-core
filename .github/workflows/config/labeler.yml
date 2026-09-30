@@ -297,6 +297,10 @@ integration/cisco_asa:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_asa/**/*
+integration/cisco_catalyst_center:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_catalyst_center/**/*
 integration/cisco_duo:
 - changed-files:
   - any-glob-to-any-file:

@@ -6,7 +6,7 @@ import os
 
 import psutil
 import pytest
-from mock import patch
+from mock import Mock, patch
 
 from datadog_checks.process import ProcessCheck
 
@@ -44,6 +44,9 @@ class MockProcess(object):
     def children(self, recursive=False):
         return []
 
+    def ppid(self):
+        return None
+
     # https://stackoverflow.com/questions/5093382/object-becomes-none-when-using-a-context-manager
     def oneshot(self):
         class MockOneShot(object):
@@ -54,6 +57,19 @@ class MockProcess(object):
                 pass
 
         return MockOneShot()
+
+
+class PpidMockProcess(MockProcess):
+    def __init__(self, pid, ppid_value=None, deny_access=False):
+        super(PpidMockProcess, self).__init__()
+        self.pid = pid
+        self._ppid_value = ppid_value
+        self._deny_access = deny_access
+
+    def ppid(self):
+        if self._deny_access:
+            raise psutil.AccessDenied(self.pid)
+        return self._ppid_value
 
 
 class NamedMockProcess(object):
@@ -204,12 +220,50 @@ def test_check(mock_process, reset_process_list_cache, aggregator, dd_run_check)
             )
 
 
+@patch('psutil.pids', return_value=[])
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_collect_children(mock_process, reset_process_list_cache, aggregator, dd_run_check):
+def test_check_collect_children(mock_process, mock_pids, reset_process_list_cache, aggregator, dd_run_check):
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     dd_run_check(process)
     aggregator.assert_metric('system.processes.number', value=1, tags=generate_expected_tags(instance))
+
+
+def test_check_collect_children_uses_fast_ppid_map(reset_process_list_cache, aggregator, dd_run_check, monkeypatch):
+    # Simulates a fast platform (eg. Windows, Linux); the per-pid fallback must not run.
+    instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
+    fake_process = MockProcess()
+    fake_process.pid = 1
+    fake_ppid_map = Mock(return_value={1: 999, 2: 1, 3: 2})
+    monkeypatch.setattr(psutil._psplatform, 'ppid_map', fake_ppid_map, raising=False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    with (
+        patch('psutil.pids') as mock_pids,
+        patch('psutil.Process', return_value=fake_process),
+    ):
+        dd_run_check(process)
+    fake_ppid_map.assert_called_once()
+    mock_pids.assert_not_called()
+    aggregator.assert_metric('system.processes.number', value=3, tags=generate_expected_tags(instance))
+
+
+def test_check_collect_children_skips_inaccessible_pid(reset_process_list_cache, aggregator, dd_run_check, monkeypatch):
+    # Simulates a slow platform (eg. AIX); an inaccessible pid must not drop the rest.
+    processes = {
+        0: PpidMockProcess(0, deny_access=True),
+        1: PpidMockProcess(1, ppid_value=999),
+        2: PpidMockProcess(2, ppid_value=1),
+        3: PpidMockProcess(3, ppid_value=2),
+    }
+    instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
+    monkeypatch.delattr(psutil._psplatform, 'ppid_map', raising=False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    with (
+        patch('psutil.pids', return_value=list(processes)),
+        patch('psutil.Process', side_effect=lambda pid: processes[pid]),
+    ):
+        dd_run_check(process)
+    aggregator.assert_metric('system.processes.number', value=3, tags=generate_expected_tags(instance))
 
 
 @patch('psutil.Process', return_value=MockProcess())
