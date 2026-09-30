@@ -49,6 +49,10 @@ files:
         When unset, the Orchestrator applies its own default, which is local authentication.
       value:
         type: integer
+        enum:
+        - 0
+        - 1
+        - 2
         example: 2
         display_default: null
 
