@@ -11,6 +11,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_identical_subagents import SpawnIdenticalSubagentsTool
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
+from ddev.ai.tools.core.protocol import ToolProtocol
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -215,6 +216,28 @@ def test_from_names_spawn_tools_get_runtime_context(name, tool_type, tmp_path):
     )
     assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
+
+
+async def test_bound_factories_only_build_selected_tools(tmp_path, fake_tool: FakeToolFactory):
+    # Run-bound dependencies must not grant tools omitted from the agent's configuration.
+    calls = []
+
+    def make_get() -> ToolProtocol:
+        calls.append("http_get")
+        return fake_tool("http_get", ToolResult(success=True, data="bound transport"))
+
+    registry = ToolRegistry.from_names(
+        ["http_get"],
+        scope=SCOPE,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")),
+        agent_config=make_agent_config(tools=["http_get"]),
+        process_factory=PROCESS_FACTORY,
+        tool_factories={"http_get": make_get, "http_post": lambda: pytest.fail("Unrequested POST constructed")},
+    )
+    result = await registry.run("http_get", {})
+    assert result.data == "bound transport"
+    assert calls == ["http_get"]
+    assert not (await registry.run("http_post", {})).success
 
 
 def test_from_names_fs_tools_share_file_registry(tmp_path):
