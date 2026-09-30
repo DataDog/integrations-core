@@ -15,6 +15,7 @@ import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.cursor import BaseCommenterCursor, CommenterSSCursor
 from datadog_checks.mysql.data_observability import EVENT_TRACK_TYPE
 from datadog_checks.mysql.do_task import MAX_EVENT_BYTES, MAX_TASK_STATEMENT_ROWS, _to_text
 
@@ -62,8 +63,10 @@ class FakeConnection:
         self.open = True
         self.executed = []
         self.fetch_sizes = []
+        self.cursor_classes = []
 
     def cursor(self, cursor_class=None):
+        self.cursor_classes.append(cursor_class)
         return FakeCursor(self)
 
     def close(self):
@@ -259,6 +262,17 @@ def test_failed_emit_is_counted_and_the_task_continues(aggregator, dd_run_check,
     _assert_count(aggregator, check, 'dd.mysql.do_task.events')
     _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:success', count=2)
     _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:completed')
+
+
+def test_every_query_carries_the_agent_comment(aggregator, dd_run_check, instance_basic):
+    check = _create_check(instance_basic, [_statement('s0', 'SELECT 1'), _statement('s1', 'SELECT 2')])
+    conn = FakeConnection({'SELECT 1': (['1'], [(1,)]), 'SELECT 2': (['2'], [(2,)])})
+
+    _run(dd_run_check, check, conn)
+
+    assert conn.cursor_classes
+    assert all(issubclass(cursor_class, BaseCommenterCursor) for cursor_class in conn.cursor_classes)
+    assert CommenterSSCursor in conn.cursor_classes
 
 
 def test_each_execution_gets_a_new_result_id(aggregator, dd_run_check, instance_basic):
