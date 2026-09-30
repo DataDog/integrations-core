@@ -66,5 +66,5 @@ supervisor==4.3.0
 tuf==4.0.0
 urllib3==2.8.0
 vertica-python==1.4.0
-voltdbclient==15.3.1
+voltdbclient==16.0.0
 wrapt==2.3.0
