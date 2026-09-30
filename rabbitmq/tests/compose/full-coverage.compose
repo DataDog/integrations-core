@@ -24,6 +24,8 @@
 #   - autoack     auto-ack consumer, for the *.messages.delivered.count counters.
 #   - redeliver   nack/requeue consumer on a durable queue, for the redelivery
 #                 counters and rabbitmq.queue.messages.persistent.
+#   - slow-reader  bespoke stdlib AMQP client that reads its consumer socket
+#                  slowly, for rabbitmq.connection.pending_packets.
 #   - rabbitmq-full  fixture entrypoint: forwards the broker's ports and gates on
 #                    the workload, so depending on it brings up everything.
 #
@@ -221,6 +223,24 @@ services:
           --rate 4 --qos 300 \
           --variable-latency 500000:120 --variable-latency 125000:120
 
+  # Bespoke client (../slow_reader.py): an auto-ack consumer that reads its
+  # socket at ~32 KiB/s while a second connection publishes ~100 KiB/s, so the
+  # broker always has bytes queued on that socket for
+  # rabbitmq.connection.pending_packets. No off-the-shelf client lags on purpose.
+  # Idles with ACTIVITY_GEN=0.
+  slow-reader:
+    image: python:3.13-alpine
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    volumes:
+      - ../slow_reader.py:/opt/slow_reader.py:ro
+    environment:
+      RABBITMQ_HOST: rabbitmq-broker
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    command: ["python3", "/opt/slow_reader.py"]
+
   activity-gen:
     image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
     depends_on:
@@ -261,6 +281,8 @@ services:
       redeliver:
         condition: service_started
       unacked-swing:
+        condition: service_started
+      slow-reader:
         condition: service_started
     entrypoint: ["sh", "-c"]
     command:
