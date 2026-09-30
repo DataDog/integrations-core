@@ -10,6 +10,7 @@ set -eu
 
 URI="mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT:-27017}/activity?authSource=admin"
 DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
+LOCK_DRILL="${LOCK_DRILL:-1}"
 
 log() { echo "activity-gen: $*"; }
 
@@ -41,7 +42,9 @@ done &
 # requests queue behind the holders:
 #   - createIndexes (S for the drain, X to commit) and dropIndexes (X): Collection;
 #   - dbHash (S) and a cross-database renameCollection (X on the target): Database;
-#   - fsync lock (S) and setUserWriteBlockMode (X): Global.
+#   - fsync lock (S) and setUserWriteBlockMode (X): Global. These two are the
+#     lock drill: setUserWriteBlockMode blocks every user write cluster-wide for
+#     its window, so LOCK_DRILL=0 skips both and keeps the rest running.
 # Writes to the capped collection take the Metadata lock in X mode. dbHash,
 # fsync, and the cross-database rename are mongod-only, so they and the writers
 # run directly on the shard primary (where the waits are counted); the cluster
@@ -49,6 +52,30 @@ done &
 # a finally, and each holder first clears one a killed predecessor left behind.
 SHARD_URI="mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_SHARD_HOST}:${DB_SHARD_PORT:-27017}/lockdrill?authSource=admin&directConnection=true"
 MONGOS_LOCK_URI="mongodb://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT:-27017}/lockdrill?authSource=admin"
+
+# fsync lock and the write block outlive the session that took them, so release
+# both if the script stops mid-window. The holders are killed first so none
+# re-takes a lock after the release.
+release_locks() {
+  trap '' TERM
+  kill -TERM 0 2>/dev/null || :
+  trap - TERM
+  # fsync first: setUserWriteBlockMode waits behind a held fsync lock.
+  timeout -k 1 4 mongosh --quiet "$SHARD_URI" --eval '
+    try { while (db.adminCommand({fsyncUnlock: 1}).ok) {} }
+    catch (e) { if (e.codeName !== "IllegalOperation") throw e; }' >/dev/null ||
+    log "releasing the fsync lock failed"
+  timeout -k 1 4 mongosh --quiet "$MONGOS_LOCK_URI" --eval '
+    db.adminCommand({setUserWriteBlockMode: 1, global: false})' >/dev/null ||
+    log "releasing setUserWriteBlockMode failed"
+  log "lock drill released"
+}
+if [ "$LOCK_DRILL" = "0" ]; then
+  log "lock drill disabled via LOCK_DRILL=0"
+else
+  trap release_locks EXIT
+  trap 'exit 1' INT TERM HUP
+fi
 
 log "starting lock contention"
 # The $where runs in a single plan step, which does not yield, so each update
@@ -85,7 +112,8 @@ for w in 1 2; do
 done
 
 while :; do
-  mongosh --quiet "$SHARD_URI" --eval '
+  LOCK_DRILL="$LOCK_DRILL" mongosh --quiet "$SHARD_URI" --eval '
+    const drill = process.env.LOCK_DRILL !== "0";
     const admin = db.getSiblingDB("admin");
     const unlock = () => {
       try { admin.runCommand({fsyncUnlock: 1}); return true; }
@@ -98,21 +126,26 @@ while :; do
       db.runCommand({dbHash: 1});
       db.getSiblingDB("lockdrill_aux").t.insertOne({at: new Date()});
       admin.runCommand({renameCollection: "lockdrill_aux.t", to: "lockdrill.renamed", dropTarget: true});
-      admin.runCommand({fsync: 1, lock: true});
-      try { sleep(100); } finally { unlock(); }
+      if (drill) {
+        admin.runCommand({fsync: 1, lock: true});
+        try { sleep(100); } finally { unlock(); }
+      }
       sleep(3000);
     }' || log "shard lock holder failed; restarting"
   sleep 5
 done &
 
 while :; do
-  mongosh --quiet "$MONGOS_LOCK_URI" --eval '
+  LOCK_DRILL="$LOCK_DRILL" mongosh --quiet "$MONGOS_LOCK_URI" --eval '
+    const drill = process.env.LOCK_DRILL !== "0";
     const admin = db.getSiblingDB("admin");
     const unblock = () => admin.runCommand({setUserWriteBlockMode: 1, global: false});
     unblock();
     while (true) {
       db.capped.insertOne({at: new Date()});
-      try { admin.runCommand({setUserWriteBlockMode: 1, global: true}); } finally { unblock(); }
+      if (drill) {
+        try { admin.runCommand({setUserWriteBlockMode: 1, global: true}); } finally { unblock(); }
+      }
       sleep(3000);
     }' || log "mongos lock holder failed; restarting"
   sleep 5
@@ -126,7 +159,10 @@ i=0
 # loop (set -e would otherwise stop the workload for the rest of the run).
 while :; do
   i=$(( i + 1 ))
-  # Wrapped in a function so mongosh does not print each result.
+  # Wrapped in a function so mongosh does not print each result. Run in the
+  # background and waited on, so a stop signal reaches the trap even while the
+  # iteration is stuck behind a held lock (sh defers traps until a foreground
+  # command returns).
   ITER="$i" mongosh --quiet "$URI" --eval '(() => {
     const i = Number(process.env.ITER);
     const cust = () => "c" + String(Math.floor(Math.random() * 1000)).padStart(3, "0");
@@ -166,7 +202,8 @@ while :; do
     // opcounters.delete / metrics.document.deleted, keeping the data set bounded.
     db.orders.deleteMany({created: {$lt: new Date(Date.now() - 120000)}});
     db.events.deleteMany({at: {$lt: new Date(Date.now() - 120000)}});
-  })()' || log "iteration $i failed; continuing"
+  })()' &
+  wait $! || log "iteration $i failed; continuing"
 
   [ $(( i % 20 )) -eq 0 ] && log "iteration $i"
   [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ] && break
