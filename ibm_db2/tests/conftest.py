@@ -7,14 +7,15 @@ import ibm_db
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
-from datadog_checks.ibm_db2 import IbmDb2Check
+from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.ibm_db2.connection import get_connection_data
 
 from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
 
 class DbManager(object):
     def __init__(self, config):
-        self.target, self.username, self.password = IbmDb2Check.get_connection_data(
+        self.target, self.username, self.password = get_connection_data(
             config['db'],
             config['username'],
             config['password'],
@@ -66,7 +67,9 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    with docker_run(COMPOSE_FILE, conditions=[db.initialize, WaitFor(db.connect)], attempts=2):
+    # The official image creates the Db2 instance at container start, which takes a few minutes.
+    setup_complete = CheckDockerLogs(COMPOSE_FILE, 'Setup has completed', attempts=60, wait=10)
+    with docker_run(COMPOSE_FILE, conditions=[setup_complete, db.initialize, WaitFor(db.connect)], attempts=2):
         yield CONFIG, E2E_METADATA
 
 

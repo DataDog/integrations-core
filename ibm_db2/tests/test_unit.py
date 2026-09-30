@@ -6,6 +6,7 @@ import pytest
 from requests import ConnectionError
 
 from datadog_checks.ibm_db2 import IbmDb2Check
+from datadog_checks.ibm_db2.connection import get_connection_data
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
 pytestmark = pytest.mark.unit
@@ -31,7 +32,7 @@ class TestPasswordScrubber:
 def test_retry_connection(aggregator, instance):
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
     conn1 = mock.MagicMock()
-    ibmdb2._conn = conn1
+    ibmdb2._connection.conn = conn1
 
     def mock_exception(*args, **kwargs):
         raise ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
@@ -41,14 +42,14 @@ def test_retry_connection(aggregator, instance):
             with pytest.raises(ConnectionError, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
                 ibmdb2.check(instance)
         # new connection made
-        assert ibmdb2._conn != conn1
+        assert ibmdb2._connection.conn != conn1
     aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.OK)
 
 
 def test_fails_to_reconnect(aggregator, instance):
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
     conn1 = mock.MagicMock()
-    ibmdb2._conn = conn1
+    ibmdb2._connection.conn = conn1
 
     def mock_exception(*args, **kwargs):
         raise ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
@@ -58,13 +59,13 @@ def test_fails_to_reconnect(aggregator, instance):
             with pytest.raises(ConnectionError, match='Unable to create new connection'):
                 ibmdb2.check(instance)
         # new connection could not be made
-        assert ibmdb2._conn is None
+        assert ibmdb2._connection.conn is None
     aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.CRITICAL)
 
 
 def test_ok_service_check_is_emitted_on_every_check_run(instance, aggregator):
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
-    ibmdb2._conn = mock.MagicMock()
+    ibmdb2._connection.conn = mock.MagicMock()
     with mock.patch('ibm_db.exec_immediate'):
         ibmdb2.check(instance)
     aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.OK)
@@ -81,8 +82,8 @@ def test_query_function_error(aggregator, instance):
 
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
     ibmdb2.log = mock.MagicMock()
-    ibmdb2._conn = mock.MagicMock()
-    ibmdb2.get_connection = mock.MagicMock()
+    ibmdb2._connection.conn = mock.MagicMock()
+    ibmdb2._connection.connect = mock.MagicMock()
     ibmdb2.query_instance = query_instance
 
     with pytest.raises(Exception):
@@ -95,8 +96,8 @@ def test_non_connection_errors_are_ignored(aggregator, instance):
     erroring_query.__name__ = 'Erroring query'
 
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
-    ibmdb2._conn = mock.MagicMock()
-    ibmdb2.get_connection = mock.MagicMock()
+    ibmdb2._connection.conn = mock.MagicMock()
+    ibmdb2._connection.connect = mock.MagicMock()
     ibmdb2._query_methods = (mock.Mock(), erroring_query, mock.Mock())
 
     ibmdb2.check(instance)
@@ -109,8 +110,8 @@ def test_connection_errors_stops_execution(aggregator, instance):
     erroring_query.__name__ = 'Erroring query'
 
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
-    ibmdb2._conn = mock.MagicMock()
-    ibmdb2.get_connection = mock.MagicMock()
+    ibmdb2._connection.conn = mock.MagicMock()
+    ibmdb2._connection.connect = mock.MagicMock()
     ibmdb2._query_methods = (mock.Mock(), erroring_query, mock.Mock())
 
     with pytest.raises(ConnectionError):
@@ -133,19 +134,29 @@ def test_parse_version(instance):
     assert check.parse_version(raw_version) == expected
 
 
-def test_get_connection_data(instance):
-    check = IbmDb2Check('ibm_db2', {}, [instance])
-
+def test_get_connection_data():
     expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1'
-    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, None)
+    assert (expected, '', '') == get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, None)
 
     expected = (
         'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;'
         'security=ssl;sslservercertificate=/path/cert'
     )
-    assert (expected, '', '') == check.get_connection_data(
-        'db1', 'user1', 'pass1', 'host1', 1000, 'none', '/path/cert', None
-    )
+    assert (expected, '', '') == get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', '/path/cert', None)
 
     expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;connecttimeout=1'
-    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, 1)
+    assert (expected, '', '') == get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, 1)
+
+
+def test_cancel_closes_check_and_custom_query_connections(instance):
+    instance['custom_queries'] = [{'metric_prefix': 'ibm_db2', 'query': 'SELECT 1', 'columns': [{}]}]
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check_conn = mock.MagicMock()
+    job_conn = mock.MagicMock()
+    check._connection.conn = check_conn
+    check._custom_metrics._connection.conn = job_conn
+
+    with mock.patch('ibm_db.close') as close:
+        check.cancel()
+
+    close.assert_has_calls([mock.call(job_conn), mock.call(check_conn)], any_order=True)
