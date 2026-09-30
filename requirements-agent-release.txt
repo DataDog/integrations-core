@@ -256,7 +256,7 @@ datadog-vsphere==10.0.0
 datadog-watchguard-firebox==1.2.0
 datadog-wazuh==1.3.0
 datadog-weaviate==4.5.0
-datadog-weblogic==3.3.0
+datadog-weblogic==3.3.1
 datadog-win32-event-log==5.7.0; sys_platform == 'win32'
 datadog-windows-performance-counters==3.5.0; sys_platform == 'win32'
 datadog-windows-service==6.9.0; sys_platform == 'win32'
