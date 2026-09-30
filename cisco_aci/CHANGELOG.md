@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2026-09-30
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
 ## 6.0.0 / 2026-09-02
 
 ***Changed***:

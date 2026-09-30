@@ -38,7 +38,7 @@ datadog-checks-base==38.3.2
 datadog-checks-dependency-provider==3.2.0
 datadog-checks-downloader==9.4.0
 datadog-cilium==7.0.0
-datadog-cisco-aci==6.0.0
+datadog-cisco-aci==6.1.0
 datadog-cisco-asa==1.0.0
 datadog-cisco-catalyst-center==1.0.0
 datadog-cisco-secure-client==1.0.0
