@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.0 / 2026-10-01
+
+***Added***:
+
+* Add the ``enable_kafka_console`` option as a replacement for ``enable_cluster_monitoring`` while preserving the old option as an alias. ([#25215](https://github.com/DataDog/integrations-core/pull/25215))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
 ## 9.1.1 / 2026-09-03
 
 ***Fixed***:
