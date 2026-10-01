@@ -38,11 +38,11 @@
         "resource_type": "documentation"
       },
       {
-        "resource_type": "other",
+        "resource_type": "api",
         "url": "https://docs.datadoghq.com/api/latest/databricks-integration/"
       },
       {
-        "resource_type": "other",
+        "resource_type": "terraform",
         "url": "https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/integration_databricks_account"
       }
     ]
