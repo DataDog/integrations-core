@@ -33,6 +33,8 @@ files:
       fleet_configurable: true
       value:
         type: integer
+        minimum: 1
+        maximum: 65535
         display_default: 5432
     - name: username
       display_priority: 22
