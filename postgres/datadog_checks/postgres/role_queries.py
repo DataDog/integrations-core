@@ -152,6 +152,8 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
 # Only explicitly stored ACLs are collected. An object with a NULL ACL has the compiled-in default privileges for
 # its type and owner; it is reported in `objects` with `has_default_acl` so the backend can resolve them, rather
 # than shipping the same owner and PUBLIC rows for every untouched object.
+# Column grants are stored only on columns granted individually: table-level grants never populate `attacl`, and
+# columns have no default privileges. A column row adds access on top of the relation's own privileges.
 QUERY_OBJECT_PRIVILEGES = """
 SELECT privileges.database_name,
        privileges.object_type,
@@ -195,6 +197,47 @@ FROM (
     LEFT JOIN pg_catalog.pg_roles AS grantor
       ON grantor.oid = acl.grantor
     WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
+      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
+      AND namespace.nspname NOT LIKE 'pg_toast%'
+      AND namespace.nspname NOT LIKE 'pg_temp%'
+
+    UNION ALL
+
+    SELECT current_database()::text AS database_name,
+           CASE relation.relkind
+               WHEN 'r' THEN 'table'
+               WHEN 'p' THEN 'partitioned_table'
+               WHEN 'v' THEN 'view'
+               WHEN 'm' THEN 'materialized_view'
+               WHEN 'f' THEN 'foreign_table'
+           END AS object_type,
+           namespace.nspname::text AS schema_name,
+           relation.relname::text AS object_name,
+           attribute.attname::text AS column_name,
+           CASE
+               WHEN acl.grantee = 0 THEN 'PUBLIC'
+               ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
+           END AS grantee_name,
+           COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+           acl.privilege_type::text AS privilege,
+           acl.is_grantable AS is_grantable,
+           owner.rolname::text AS owner_name
+    FROM pg_catalog.pg_attribute AS attribute
+    JOIN pg_catalog.pg_class AS relation
+      ON relation.oid = attribute.attrelid
+    JOIN pg_catalog.pg_namespace AS namespace
+      ON namespace.oid = relation.relnamespace
+    JOIN pg_catalog.pg_roles AS owner
+      ON owner.oid = relation.relowner
+    CROSS JOIN LATERAL pg_catalog.aclexplode(attribute.attacl) AS acl
+    LEFT JOIN pg_catalog.pg_roles AS grantee
+      ON grantee.oid = acl.grantee
+    LEFT JOIN pg_catalog.pg_roles AS grantor
+      ON grantor.oid = acl.grantor
+    WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f')
+      AND attribute.attnum > 0
+      AND NOT attribute.attisdropped
+      AND attribute.attacl IS NOT NULL
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'

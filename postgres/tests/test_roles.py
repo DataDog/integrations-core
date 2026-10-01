@@ -68,6 +68,14 @@ def role_catalog(roles_instance):
                 CREATE SCHEMA dd_role_obs AUTHORIZATION dd_role_obs_owner;
                 CREATE TABLE dd_role_obs.items (id integer);
                 ALTER TABLE dd_role_obs.items OWNER TO dd_role_obs_owner;
+                CREATE TABLE dd_role_obs.patients (id integer, name text, ssn text, retired text);
+                ALTER TABLE dd_role_obs.patients OWNER TO dd_role_obs_owner;
+                GRANT SELECT ON dd_role_obs.patients TO dd_role_obs_member;
+                GRANT SELECT (id, name), UPDATE (name) ON dd_role_obs.patients TO dd_role_obs_reader;
+                GRANT SELECT (ssn) ON dd_role_obs.patients TO dd_role_obs_reader;
+                REVOKE SELECT (ssn) ON dd_role_obs.patients FROM dd_role_obs_reader;
+                GRANT SELECT (retired) ON dd_role_obs.patients TO dd_role_obs_reader;
+                ALTER TABLE dd_role_obs.patients DROP COLUMN retired;
                 CREATE TABLE dd_role_obs.partitioned_items (id integer) PARTITION BY RANGE (id);
                 ALTER TABLE dd_role_obs.partitioned_items OWNER TO dd_role_obs_owner;
                 CREATE SEQUENCE dd_role_obs.item_sequence;
@@ -559,6 +567,35 @@ def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_i
         ('dd_role_obs_owner', 'EXECUTE'),
         ('PUBLIC', 'EXECUTE'),
         ('dd_role_obs_reader', 'EXECUTE'),
+    }
+
+
+@requires_over_14
+def test_collect_roles_column_privileges(integration_check, roles_instance, role_catalog, aggregator):
+    """Column grants are reported per column, so access to a column such as `ssn` can be answered.
+
+    Only columns granted individually have rows: a table-level grant stays on the table, and revoked or dropped
+    columns have none.
+    """
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    privilege_event = next(
+        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    )
+
+    assert {
+        (privilege['column_name'], privilege['grantee_name'], privilege['privilege'])
+        for privilege in privilege_event['object_privileges']
+        if privilege['schema_name'] == 'dd_role_obs'
+        and privilege['object_name'] == 'patients'
+        and privilege['grantee_name'] in ('dd_role_obs_member', 'dd_role_obs_reader')
+    } == {
+        ('', 'dd_role_obs_member', 'SELECT'),
+        ('id', 'dd_role_obs_reader', 'SELECT'),
+        ('name', 'dd_role_obs_reader', 'SELECT'),
+        ('name', 'dd_role_obs_reader', 'UPDATE'),
     }
 
 
