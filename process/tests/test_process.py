@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
 
 import psutil
 import pytest
@@ -503,9 +504,38 @@ def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_chec
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     dd_run_check(process)
     expected_tags = generate_expected_tags(instance)
-    aggregator.assert_service_check(
-        'process.up', count=1, tags=expected_tags + ['process:foo'], status=ProcessCheck.OK
-    )
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=ProcessCheck.OK)
+
+
+NOT_A_NUMBER = "thresholds.warning {} bound must be a number or the string '.inf'"
+
+
+@pytest.mark.parametrize(
+    'warning, expected_error',
+    [
+        pytest.param([1, 'inf'], NOT_A_NUMBER.format('upper'), id='inf'),
+        pytest.param([1, 'Infinity'], NOT_A_NUMBER.format('upper'), id='Infinity'),
+        pytest.param([1, '5'], NOT_A_NUMBER.format('upper'), id='numeric_str'),
+        pytest.param([1, 'NaN'], NOT_A_NUMBER.format('upper'), id='nan_str'),
+        pytest.param([1, float('nan')], NOT_A_NUMBER.format('upper'), id='nan_float'),
+        # What `JSON.stringify([1, Infinity])` produces.
+        pytest.param([1, None], NOT_A_NUMBER.format('upper'), id='null_bound'),
+        pytest.param([True, 5], NOT_A_NUMBER.format('lower'), id='bool'),
+        pytest.param(['.inf', 5], "thresholds.warning lower bound cannot be '.inf'", id='inf_lower'),
+        # Non-list shapes are left to the generated model's own error.
+        pytest.param(5, 'thresholds -> warning', id='not_a_list'),
+        pytest.param('.inf', 'thresholds -> warning', id='bare_inf_str'),
+    ],
+)
+def test_thresholds_rejected_at_config_load(dd_run_check, warning, expected_error):
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': {'warning': warning, 'critical': [1, '.inf']}}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+
+    with pytest.raises(Exception, match=re.escape(expected_error)) as exc_info:
+        dd_run_check(process)
+
+    assert 'ConfigurationError' in str(exc_info.value)
+    assert 'TypeError' not in str(exc_info.value)
 
 
 def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):

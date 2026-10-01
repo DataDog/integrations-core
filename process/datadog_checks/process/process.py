@@ -526,6 +526,8 @@ class ProcessCheck(AgentCheck):
         # raw float infinity -- the UI sends the sentinel string ".inf" instead
         # (matching the YAML `.inf` literal documented in spec.yaml). Coerce it
         # back to a real float here so the comparisons below work either way.
+        # `config_models.validators.instance_thresholds` guarantees it's the only
+        # string that can reach this point.
         return float('inf') if value == '.inf' else value
 
     def _process_service_check(self, name, nb_procs, bounds, tags):
