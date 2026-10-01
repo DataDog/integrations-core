@@ -395,6 +395,7 @@ def mock_results():
         client.call_procedure_async = lambda procedure, params=None: common.completed_future(
             mocked_call_procedure, procedure, params
         )
+        client.result = lambda future, procedure, params=None: future.result()
         client.raise_for_status = lambda r: None
         client.close = lambda: None
         yield

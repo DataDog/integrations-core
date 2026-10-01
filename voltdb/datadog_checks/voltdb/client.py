@@ -6,7 +6,7 @@ from concurrent.futures import Future
 from typing import List, Optional, Tuple
 
 import voltdbclient
-from voltclient import VoltClient, VoltNoConnectionsError
+from voltclient import VoltClient, VoltConnectionError, VoltNoConnectionsError
 
 
 class VoltDBError(Exception):
@@ -109,16 +109,29 @@ class Client(object):
         """Send a procedure call without waiting; returns a Future for its VoltResponse."""
         params = list(params) if params else []
         param_types = [_infer_volt_type(p) for p in params]
+        had_client = self._client is not None
         try:
             return self._get_client().call_async(procedure, param_types, params)
         except VoltNoConnectionsError:
-            # Every node is gone: rebuild from the seeds next time rather than
-            # waiting on the old pool's reconnect backoff.
+            # Every pooled connection is gone. Rebuild from the configured seeds, whose
+            # addresses may have changed (e.g. a full cluster restart), and send once more.
             self.close()
-            raise
+            if not had_client:
+                raise
+            self._log_debug('VoltDB pool has no live connections; reconnecting from the seeds.')
+            return self._get_client().call_async(procedure, param_types, params)
+
+    def result(self, future: Future, procedure: str, params: Optional[list] = None) -> voltdbclient.VoltResponse:
+        """Wait for a call sent with call_procedure_async. If its connection was lost while it
+        was in flight, send it once more: monitoring calls only read data, so a resend is safe."""
+        try:
+            return future.result()
+        except VoltConnectionError as exc:
+            self._log_debug('VoltDB call to %s lost its connection (%s); sending it once more.', procedure, exc)
+            return self.call_procedure_async(procedure, params).result()
 
     def call_procedure(self, procedure: str, params: Optional[list] = None) -> voltdbclient.VoltResponse:
-        return self.call_procedure_async(procedure, params).result()
+        return self.result(self.call_procedure_async(procedure, params), procedure, params)
 
     def raise_for_status(self, response: voltdbclient.VoltResponse) -> None:
         if response.status != self.SUCCESS:

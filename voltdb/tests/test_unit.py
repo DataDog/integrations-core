@@ -299,47 +299,148 @@ def test_client_call_procedure_delegates_and_infers_types(monkeypatch):
     )
 
 
-def test_client_rebuilds_pool_when_no_connections(monkeypatch):
-    """With every node gone the wrapper drops the pool, so the next run
-    bootstraps from the seeds again instead of waiting on reconnect backoff."""
+def _lost_call():
+    from voltclient import VoltConnectionError
+
+    raise VoltConnectionError('connection to db-2 lost')
+
+
+def test_client_resends_once_when_call_loses_its_connection(monkeypatch):
+    """A call whose connection dies while it is in flight is sent once more on the
+    same pool, which has already healed onto the remaining nodes."""
     import mock
-    from voltclient import VoltNoConnectionsError
 
     from datadog_checks.voltdb import client as client_mod
     from datadog_checks.voltdb.client import Client
 
+    good = mock.MagicMock(status=1)
     fake_volt = mock.MagicMock()
-    fake_volt.call_async.side_effect = VoltNoConnectionsError('all nodes down')
+    fake_volt.call_async.side_effect = [common.completed_future(_lost_call), common.completed_future(lambda: good)]
     monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: fake_volt)
 
     client = Client(endpoints=[('h.example', 21212)])
-    with pytest.raises(VoltNoConnectionsError, match='all nodes down'):
-        client.call_procedure('@Ping')
-    fake_volt.close.assert_called_once()
-    assert client._client is None
+    assert client.call_procedure('@SystemInformation', ['OVERVIEW']) is good
+    assert fake_volt.call_async.call_count == 2
+    fake_volt.close.assert_not_called()
 
 
-def test_client_keeps_pool_on_lost_call(monkeypatch):
-    """A call lost with its connection fails, but the pool heals itself, so the
-    wrapper keeps it."""
+def test_client_resends_only_once(monkeypatch):
+    """If the resend is lost too, the error surfaces; the pool is kept, since it
+    keeps healing in the background."""
     import mock
     from voltclient import VoltConnectionError
 
     from datadog_checks.voltdb import client as client_mod
     from datadog_checks.voltdb.client import Client
 
-    def lost():
-        raise VoltConnectionError('connection to db-2 lost')
-
     fake_volt = mock.MagicMock()
-    fake_volt.call_async.return_value = common.completed_future(lost)
+    fake_volt.call_async.side_effect = lambda *a: common.completed_future(_lost_call)
     monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: fake_volt)
 
     client = Client(endpoints=[('h.example', 21212)])
-    with pytest.raises(VoltConnectionError):
+    with pytest.raises(VoltConnectionError, match='db-2 lost'):
         client.call_procedure('@Ping')
-    fake_volt.close.assert_not_called()
+    assert fake_volt.call_async.call_count == 2
     assert client._client is fake_volt
+
+
+def test_client_does_not_resend_on_timeout(monkeypatch):
+    """A timeout means a slow cluster, not a lost connection: resending would only
+    double the wait."""
+    import mock
+    from voltclient import VoltTimeoutError
+
+    from datadog_checks.voltdb import client as client_mod
+    from datadog_checks.voltdb.client import Client
+
+    def timed_out():
+        raise VoltTimeoutError('no response within 60s')
+
+    fake_volt = mock.MagicMock()
+    fake_volt.call_async.return_value = common.completed_future(timed_out)
+    monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: fake_volt)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    with pytest.raises(VoltTimeoutError):
+        client.call_procedure('@Ping')
+    assert fake_volt.call_async.call_count == 1
+
+
+def test_client_rebuilds_pool_from_seeds_when_no_connections(monkeypatch):
+    """When every pooled connection is gone, the pool is rebuilt from the configured
+    seeds (whose addresses may have changed) and the call is sent once more."""
+    import mock
+    from voltclient import VoltNoConnectionsError
+
+    from datadog_checks.voltdb import client as client_mod
+    from datadog_checks.voltdb.client import Client
+
+    good = mock.MagicMock(status=1)
+    stale = mock.MagicMock()
+    stale.call_async.side_effect = VoltNoConnectionsError('all nodes down')
+    fresh = mock.MagicMock()
+    fresh.call_async.return_value = common.completed_future(lambda: good)
+    pools = iter([stale, fresh])
+    monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: next(pools))
+
+    client = Client(endpoints=[('h.example', 21212)])
+    client._get_client()
+    assert client.call_procedure('@Ping') is good
+    stale.close.assert_called_once()
+    assert client._client is fresh
+
+
+def test_client_does_not_rebuild_a_pool_it_just_built(monkeypatch):
+    """A pool built for this very call that already has no connections is not
+    rebuilt again: one pass over the seeds per call."""
+    import mock
+    from voltclient import VoltNoConnectionsError
+
+    from datadog_checks.voltdb import client as client_mod
+    from datadog_checks.voltdb.client import Client
+
+    constructions = []
+    fake_volt = mock.MagicMock()
+    fake_volt.call_async.side_effect = VoltNoConnectionsError('all nodes down')
+    monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: constructions.append(1) or fake_volt)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    with pytest.raises(VoltNoConnectionsError):
+        client.call_procedure('@Ping')
+    assert len(constructions) == 1
+    assert client._client is None
+
+
+def test_client_waits_for_next_run_when_cluster_not_started(monkeypatch):
+    """If no seed answers yet, the call fails after one pass over the seeds, and the
+    next check run connects from scratch once the cluster is up."""
+    import mock
+    from voltclient import VoltConnectionError
+
+    from datadog_checks.voltdb import client as client_mod
+    from datadog_checks.voltdb.client import Client
+
+    good = mock.MagicMock(status=1)
+    started = mock.MagicMock()
+    started.call_async.return_value = common.completed_future(lambda: good)
+    constructions = []
+
+    def volt_client(**_):
+        constructions.append(1)
+        if len(constructions) == 1:
+            raise VoltConnectionError('could not connect to any of the seed hosts')
+        return started
+
+    monkeypatch.setattr(client_mod, 'VoltClient', volt_client)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    with pytest.raises(VoltConnectionError, match='seed hosts'):
+        client.call_procedure('@Ping')
+    assert len(constructions) == 1
+    assert client._client is None
+
+    assert client.call_procedure('@Ping') is good
+    assert len(constructions) == 2
 
 
 def test_client_raise_for_status():
@@ -585,6 +686,7 @@ def test_columns_resolved_by_name(aggregator, dd_run_check):
         client.call_procedure_async = lambda procedure, params=None: common.completed_future(
             fake_call, procedure, params
         )
+        client.result = lambda future, procedure, params=None: future.result()
         client.raise_for_status = lambda r: None
         client.close = lambda: None
 
@@ -610,9 +712,11 @@ class RecordingClient(object):
 
     SUCCESS = 1
 
-    def __init__(self, fail_send=None):
+    def __init__(self, fail_send=None, fail_send_for=None):
         self.events = []
+        self.send_attempts = 0
         self._fail_send = fail_send
+        self._fail_send_for = fail_send_for or {}
 
     def _respond(self, procedure, params):
         import mock
@@ -629,8 +733,11 @@ class RecordingClient(object):
         return response
 
     def call_procedure_async(self, procedure, params=None):
+        self.send_attempts += 1
         if self._fail_send is not None:
             raise self._fail_send
+        if procedure in self._fail_send_for:
+            raise self._fail_send_for[procedure]
         self.events.append(('send', procedure, tuple(params or ())))
         events = self.events
         response = self._respond(procedure, params)
@@ -647,6 +754,9 @@ class RecordingClient(object):
         if self._fail_send is not None:
             raise self._fail_send
         return self._respond(procedure, params)
+
+    def result(self, future, procedure, params=None):
+        return future.result()
 
     def raise_for_status(self, response):
         pass
@@ -714,25 +824,49 @@ def test_duplicate_query_is_sent_once_ahead_then_synchronously(dd_run_check):
     assert client.events.count(('sync', '@Statistics', ('CPU',))) == 1
 
 
-def test_failed_send_falls_back_and_reports_critical(aggregator, dd_run_check):
-    """If calls can't be sent ahead of time the check reverts to the synchronous
-    path, so the connection error still lands on the service check."""
-    client = RecordingClient(fail_send=ConnectionRefusedError('no seeds reachable'))
+def test_unreachable_cluster_costs_one_connection_attempt_per_run(aggregator, dd_run_check):
+    """With the cluster down (e.g. not started yet), a run makes a single pass over
+    the seeds and reports it on the service check; no call retries on its own."""
+    from voltclient import VoltConnectionError
+
+    client = RecordingClient(fail_send=VoltConnectionError('could not connect to any of the seed hosts'))
     check = _native_check(client)
 
-    with pytest.raises(Exception, match='no seeds reachable'):
+    with pytest.raises(Exception, match='seed hosts'):
         dd_run_check(check)
     aggregator.assert_service_check('voltdb.can_connect', VoltDBCheck.CRITICAL)
+    assert client.send_attempts == 1
+    assert not [e for e in client.events if e[0] == 'sync']
     assert check._inflight == {}
+    assert check._send_error is None
+
+
+def test_send_error_for_one_call_affects_only_that_call(aggregator, dd_run_check):
+    """A call that can't be sent for a reason other than connectivity (e.g. a custom
+    query parameter that can't be serialized) is retried on its own; the rest of the
+    run is unaffected."""
+    client = RecordingClient(fail_send_for={'HeroStats': ValueError('value out of range')})
+    check = _native_check(
+        client,
+        statistics_components=['CPU'],
+        custom_queries=[{'query': 'HeroStats', 'columns': [{'name': 'custom.heroes', 'type': 'gauge'}]}],
+    )
+    dd_run_check(check)
+
+    aggregator.assert_service_check('voltdb.can_connect', VoltDBCheck.OK)
+    assert ('send', '@Statistics', ('CPU',)) in client.events
+    assert ('sync', 'HeroStats', ()) in client.events
 
 
 def test_check_before_queries_compile_still_reports_connection(aggregator):
     """check() called directly, before run() has compiled the queries, still
-    sends the version call and reports the connection failure."""
-    client = RecordingClient(fail_send=ConnectionRefusedError('refused'))
+    reaches the version call and reports the connection failure."""
+    from voltclient import VoltConnectionError
+
+    client = RecordingClient(fail_send=VoltConnectionError('refused'))
     check = _native_check(client)
 
-    with pytest.raises(ConnectionRefusedError):
+    with pytest.raises(VoltConnectionError):
         check.check({})
     aggregator.assert_service_check('voltdb.can_connect', VoltDBCheck.CRITICAL)
 
@@ -741,7 +875,7 @@ def test_http_mode_does_not_send_ahead():
     """The HTTP transport keeps its sequential behavior."""
     check = VoltDBCheck('voltdb', {}, [{'url': 'http://vmc.example:8080', 'username': 'u', 'password': 'p'}])
     check._client = RecordingClient()
-    assert check._submit_calls() == {}
+    assert check._submit_calls() == ({}, None)
 
 
 def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_all):

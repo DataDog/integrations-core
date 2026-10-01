@@ -4,6 +4,8 @@
 from concurrent.futures import Future  # noqa: F401
 from typing import Any, Dict, List, Optional, Tuple, cast  # noqa: F401
 
+from voltclient import VoltConnectionError
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
@@ -57,13 +59,16 @@ class VoltDBCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
         self._inflight = {}  # type: Dict[Tuple[str, tuple], Future]
+        self._send_error = None  # type: Optional[Exception]
 
     def _submit_calls(self):
-        # type: () -> Dict[Tuple[str, tuple], Future]
+        # type: () -> Tuple[Dict[Tuple[str, tuple], Future], Optional[Exception]]
         """Send every procedure call of this run up front so their round-trips
-        overlap; QueryManager then consumes the responses in its usual order."""
+        overlap; QueryManager then consumes the responses in its usual order.
+
+        Returns the in-flight calls, and the connection error that stopped sending, if any."""
         if self._config.mode != MODE_NATIVE:
-            return {}
+            return {}, None
 
         calls = [_VERSION_CALL]
         for query in self._query_manager.queries:
@@ -79,18 +84,24 @@ class VoltDBCheck(AgentCheck):
                 continue
             try:
                 inflight[(procedure, params)] = self._client.call_procedure_async(procedure, list(params))
+            except VoltConnectionError as exc:
+                # The cluster is unreachable: every call of this run reports this error rather
+                # than making its own connection attempt.
+                return inflight, exc
             except Exception as exc:
-                # The synchronous fallback in _call re-raises this where it gets reported.
-                self.log.debug('Could not send VoltDB calls ahead of time: %s', exc)
-                break
-        return inflight
+                # Anything else (e.g. a parameter that can't be serialized) concerns this call
+                # alone; it is retried synchronously, where the error gets reported.
+                self.log.debug('Could not send VoltDB call %s ahead of time: %s', procedure, exc)
+        return inflight, None
 
     def _call(self, procedure, params):
         # type: (str, list) -> Any
+        if self._send_error is not None:
+            raise self._send_error
         future = self._inflight.pop((procedure, tuple(params)), None)
         if future is None:
             return self._client.call_procedure(procedure, params)
-        return future.result()
+        return self._client.result(future, procedure, params)
 
     def _fetch_version(self):
         # type: () -> Optional[str]
@@ -193,12 +204,12 @@ class VoltDBCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        self._inflight = self._submit_calls()
+        self._inflight, self._send_error = self._submit_calls()
         try:
             self._check_can_connect_and_submit_version()
             self._query_manager.execute()
         finally:
-            self._inflight = {}
+            self._inflight, self._send_error = {}, None
 
 
 def _parse_query(query):
