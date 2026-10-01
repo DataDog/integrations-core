@@ -553,28 +553,55 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
 
 
 @pytest.mark.parametrize(
-    'sum_line, expected',
+    'payload, expected',
     [
-        pytest.param('req_ms_sum -3', True, id='out_of_spec'),
-        pytest.param('', False, id='conformant'),
+        pytest.param(
+            """
+            # HELP req_ms request duration
+            # TYPE req_ms histogram
+            req_ms_bucket{le="-1.0"} 4
+            req_ms_bucket{le="+Inf"} 10
+            req_ms_sum -3
+            req_ms_count 10
+            """,
+            True,
+            id='negative_thresholds_with_sum',
+        ),
+        pytest.param(
+            """
+            # HELP req_ms request duration
+            # TYPE req_ms histogram
+            req_ms_bucket{le="-1.0"} 4
+            req_ms_bucket{le="+Inf"} 10
+            req_ms_count 10
+            """,
+            False,
+            id='negative_thresholds_without_sum',
+        ),
+        pytest.param(
+            """
+            # HELP req_ms request duration
+            # TYPE req_ms histogram
+            req_ms_bucket{handler="a",le="-1.0"} 4
+            req_ms_bucket{handler="a",le="+Inf"} 10
+            req_ms_count{handler="a"} 10
+            req_ms_bucket{handler="b",le="5.0"} 4
+            req_ms_bucket{handler="b",le="+Inf"} 10
+            req_ms_sum{handler="b"} 9
+            req_ms_count{handler="b"} 10
+            """,
+            False,
+            id='sum_belongs_to_a_different_context',
+        ),
     ],
 )
 def test_negative_thresholds_with_sum_reported_as_out_of_spec(
-    aggregator, dd_run_check, mock_http_response, caplog, sum_line, expected
+    aggregator, dd_run_check, mock_http_response, caplog, payload, expected
 ):
     # OpenMetrics forbids a sum value on a histogram with negative thresholds, so flag it for whoever is
-    # investigating an unreliable .sum. A conformant payload must stay quiet.
+    # investigating an unreliable .sum. The constraint is per label context, not per metric family.
     caplog.set_level(logging.DEBUG)
-    mock_http_response(
-        f"""
-        # HELP req_ms request duration
-        # TYPE req_ms histogram
-        req_ms_bucket{{le="-1.0"}} 4
-        req_ms_bucket{{le="+Inf"}} 10
-        {sum_line}
-        req_ms_count 10
-        """
-    )
+    mock_http_response(payload)
     check = get_check(
         {
             'metrics': ['.+'],
