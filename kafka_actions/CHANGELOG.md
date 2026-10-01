@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.10.1 / 2026-10-01
+
+***Fixed***:
+
+* Fix the Python requirement and test environment, which incorrectly targeted Python 3.12 even though Kafka Actions was introduced after Agent 7.72.0 moved to Python 3.13. ([#25223](https://github.com/DataDog/integrations-core/pull/25223))
+
 ## 2.10.0 / 2026-09-02
 
 ***Added***:
