@@ -744,8 +744,7 @@ def test_query_errors_include_sql_and_classification(instance_basic, aggregator,
     payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
     assert len(payloads) == 2
     assert payloads[0]['error_kind'] == kind
-    assert payloads[0]['error_code'] == code
-    assert payloads[0]['error_phase'] == 'execute'
+    assert payloads[0]['error_code'] == str(code)
     assert payloads[0]['timeout_ms'] == 30000
     assert payloads[0]['columns'] == []
     assert payloads[0]['query'] == queries[0]['query']
@@ -766,21 +765,29 @@ def test_connection_failure_reports_pending_queries_on_every_attempt(instance_ba
     payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
     assert len(payloads) == 6
     assert {p['query'] for p in payloads} == {q['query'] for q in MULTI_QUERIES}
-    assert all(p['error_kind'] == 'connection_error' and p['error_phase'] == 'connect' for p in payloads)
+    assert all(p['error_kind'] == 'connection_error' for p in payloads)
     assert not aggregator.metrics('dd.mysql.data_observability.query_executions')
     assert len(aggregator.metrics('dd.mysql.data_observability.query_errors')) == 6
 
 
-def test_lost_connection_reports_failed_and_unstarted_queries(instance_basic, aggregator):
+@pytest.mark.parametrize(
+    'error',
+    [
+        pymysql.err.OperationalError(2013, 'lost connection'),
+        pymysql.err.OperationalError('server closed the connection'),
+    ],
+    ids=['connection_code', 'no_code'],
+)
+def test_lost_connection_reports_failed_and_unstarted_queries(instance_basic, aggregator, error):
     check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
     conn, cursor = _make_mock_conn(open=False)
-    cursor.execute.side_effect = [None, pymysql.err.OperationalError(2013, 'lost connection')]
+    cursor.execute.side_effect = [None, error]
     check.data_observability._db = conn
     with patch.object(MySql, 'event_platform_event') as events:
         with pytest.raises(pymysql.err.OperationalError):
             check.data_observability.run_job()
     payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
-    assert [p['error_phase'] for p in payloads] == ['execute', 'blocked']
+    assert [p['error'].startswith('Query not executed:') for p in payloads] == [False, True]
     assert all(p['error_kind'] == 'connection_error' for p in payloads)
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
     recovered, recovered_cursor = _make_mock_conn()
