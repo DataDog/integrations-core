@@ -115,7 +115,7 @@ datadog-iboss==1.2.0
 datadog-ignite==3.4.0
 datadog-iis==5.8.0; sys_platform == 'win32'
 datadog-impala==4.4.1
-datadog-infiniband==1.7.0; sys_platform == 'linux2'
+datadog-infiniband==2.0.0; sys_platform == 'linux2'
 datadog-intersystems-iris==1.0.0
 datadog-istio==9.5.3
 datadog-ivanti-connect-secure==1.2.0
