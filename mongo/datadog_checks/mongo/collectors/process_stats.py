@@ -36,7 +36,7 @@ class ProcessStatsCollector(MongoCollector):
         return deployment.hosting_type == HostingType.SELF_HOSTED and self.is_localhost
 
     @staticmethod
-    def _executable_name(process_name):
+    def _executable_name(process_name: str | None) -> str | None:
         """Reduce the serverStatus `process` field to a bare executable name."""
         if not process_name:
             return None

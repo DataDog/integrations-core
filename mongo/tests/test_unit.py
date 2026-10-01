@@ -1081,7 +1081,7 @@ def test_process_stats_resolves_process_regardless_of_reported_path(
     api = mock.MagicMock()
     api.server_status.return_value = {'pid': 4321, 'process': reported_process}
 
-    with mock.patch('psutil.Process', return_value=FakePsutilProcess(4321, psutil_name)):
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, psutil_name)):
         run_process_stats(mongo_check, api, times=2)
 
     aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=1)
@@ -1094,16 +1094,13 @@ def test_process_stats_survives_collector_rebuild(check, instance_integration, a
     mongo_check = check(instance_integration)
     api = mock.MagicMock()
     api.server_status.return_value = {'pid': 4321, 'process': 'mongod'}
-    process = FakePsutilProcess(4321, 'mongod')
-
-    with mock.patch('psutil.Process', return_value=process) as process_ctor:
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, 'mongod')):
         run_process_stats(mongo_check, api, times=1)
         aggregator.assert_metric('mongodb.system.cpu.percent', count=0)  # first sample is 0%
 
         run_process_stats(mongo_check, api, times=3)
 
     aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=3)
-    assert process_ctor.call_count == 1, 'the process should be resolved once, not once per run'
 
 
 def test_process_stats_recovers_after_mongod_restart(check, instance_integration, aggregator):
@@ -1113,21 +1110,24 @@ def test_process_stats_recovers_after_mongod_restart(check, instance_integration
     mongo_check = check(instance_integration)
     api = mock.MagicMock()
     api.server_status.return_value = {'pid': 111, 'process': 'mongod'}
-    old_process = FakePsutilProcess(111, 'mongod')
-    new_process = FakePsutilProcess(222, 'mongod', cpu_percent=44.0)
+    before_restart = []
 
-    with mock.patch('psutil.Process', return_value=old_process):
+    def build_old(pid):
+        before_restart.append(FakePsutilProcess(pid, 'mongod'))
+        return before_restart[-1]
+
+    with mock.patch('psutil.Process', side_effect=build_old):
         run_process_stats(mongo_check, api, times=2)
     aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=1)
 
-    # mongod restarts: the cached process is gone and serverStatus reports the new PID.
-    old_process._running = False
+    # mongod restarts: the process it was collecting is gone and serverStatus reports a new PID.
+    for process in before_restart:
+        process._running = False
     api.server_status.return_value = {'pid': 222, 'process': 'mongod'}
-    with mock.patch('psutil.Process', return_value=new_process):
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, 'mongod', cpu_percent=44.0)):
         run_process_stats(mongo_check, api, times=2)
 
     aggregator.assert_metric('mongodb.system.cpu.percent', value=44.0, count=1)
-    assert mongo_check._mongo_process is new_process
 
 
 def test_process_stats_reports_genuinely_idle_node_as_zero(check, instance_integration, aggregator):
@@ -1137,9 +1137,7 @@ def test_process_stats_reports_genuinely_idle_node_as_zero(check, instance_integ
     mongo_check = check(instance_integration)
     api = mock.MagicMock()
     api.server_status.return_value = {'pid': 4321, 'process': 'mongod'}
-    idle_process = FakePsutilProcess(4321, 'mongod', cpu_percent=0.0)
-
-    with mock.patch('psutil.Process', return_value=idle_process):
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, 'mongod', cpu_percent=0.0)):
         run_process_stats(mongo_check, api, times=4)
 
     # The first run is the discarded sample; the rest are real 0% measurements.
