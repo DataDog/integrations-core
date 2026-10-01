@@ -32,7 +32,7 @@ from ddev.cli.ci.tests.status import Status, conclusion_to_status, has_finished_
 from ddev.event_bus.orchestrator import SyncProcessor
 from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
-from ddev.utils.junit import parse_junit_dir
+from ddev.utils.junit import TestStatus, parse_junit_dir
 
 if TYPE_CHECKING:
     from ddev.cli.ci.tests.messages import TestBatch
@@ -45,13 +45,25 @@ if TYPE_CHECKING:
 #       coverage.xml                  Cobertura coverage report
 #       test-{unit|e2e}-{env}.xml     pytest JUnit report(s)
 # Each job's spec, workflow-job result, and artifact directory come pre-correlated on the message
-# (BatchFinished.batch_jobs). A timed-out batch fails every job; otherwise each job's status is its own
-# workflow-job conclusion, and a job with no correlated workflow job is a runner bug and raises.
+# (BatchFinished.batch_jobs). A timed-out batch fails every job; otherwise each job's status is its
+# own workflow-job conclusion. A job whose final state was never confirmed (no workflow job, or one
+# last seen before it completed) is resolved from the run's conclusion and the job's artifacts:
+# the final jobs listing can lag or fail after the run itself has finished.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
 # Every later update borrows the id of the message that changed progress. Revision `0` has no
 # cause, so it carries its own.
 INITIAL_UPDATE_MESSAGE_ID = "dispatcher-initial"
+
+
+def _has_failed_tests(reports: tuple[JUnitReport, ...]) -> bool:
+    """Whether any of the job's parsed reports holds a failed or errored test case."""
+    return any(
+        case.status in (TestStatus.FAILED, TestStatus.ERROR)
+        for report in reports
+        for suite in report.test_suites
+        for case in suite.test_cases
+    )
 
 
 class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
@@ -403,9 +415,8 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         artifacts organized exactly once per job.
         """
         batch_job = batch_job_result.job
-        status, failed_steps = self._job_status(batch_job_result, message)
-
         reports, error = self._gather_reports(batch_job_result)
+        status, failed_steps = self._job_status(batch_job_result, message, reports)
 
         result = JobResult(
             integration=batch_job.target,
@@ -443,11 +454,15 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         self._organize_artifacts(path, batch_job_result.job)
         return reports, None
 
-    @staticmethod
-    def _job_status(batch_job_result: BatchJobResult, message: BatchFinished) -> tuple[Status, list[str]]:
-        """Per-job (status, failed_steps). A timed-out batch fails every job; otherwise the job's own
-        conclusion decides. A missing workflow job raises: the runner correlates every job before
-        emitting, so a miss is a bug.
+    def _job_status(
+        self, batch_job_result: BatchJobResult, message: BatchFinished, reports: tuple[JUnitReport, ...]
+    ) -> tuple[Status, list[str]]:
+        """Per-job (status, failed_steps).
+
+        A timed-out batch fails every job, and a job whose workflow job completed reports its own
+        conclusion. `_unconfirmed_job_status` decides any other job: its workflow job is missing or
+        was last seen before it completed, because the final jobs listing can lag or fail after the
+        run has finished.
 
         `failed_steps` holds real step names only, so a timeout (recorded as the batch's `error`)
         contributes none. All failing steps are collected: on-failure steps mean there can be several.
@@ -456,11 +471,37 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             return (Status.FAILURE, [])
 
         workflow_job = batch_job_result.workflow_job
-        if workflow_job is None:
-            raise ValueError(f"No workflow job correlated for {batch_job_result.job.name!r}")
+        if workflow_job is not None and workflow_job.status is WorkflowJobStatus.COMPLETED:
+            failed_steps = [step.name for step in workflow_job.steps if step.conclusion == "failure"]
+            return (conclusion_to_status(workflow_job.conclusion), failed_steps)
 
-        failed_steps = [step.name for step in workflow_job.steps if step.conclusion == "failure"]
-        return (conclusion_to_status(workflow_job.conclusion), failed_steps)
+        return (self._unconfirmed_job_status(batch_job_result, message, reports), [])
+
+    def _unconfirmed_job_status(
+        self, batch_job_result: BatchJobResult, message: BatchFinished, reports: tuple[JUnitReport, ...]
+    ) -> Status:
+        """Decide the status of a job whose final state was never confirmed, once the run is over.
+
+        GitHub concludes a run `success` only when no job failed, so a successful run clears an
+        unconfirmed job. Otherwise the artifacts are the remaining evidence: failed or errored
+        tests mean the job failed, and anything else is inconclusive, because the job may have
+        failed outside its tests (e.g. in setup) or never produced reports.
+        """
+        if message.status is Status.SUCCESS:
+            status, reason = Status.SUCCESS, "the workflow run succeeded"
+        elif _has_failed_tests(reports):
+            status, reason = Status.FAILURE, "its artifacts hold failed tests"
+        else:
+            status, reason = Status.INCONCLUSIVE, "the run did not succeed and no test failed"
+        self._logger.warning(
+            "Job %s has no confirmed final state: reported as %s (%s)",
+            batch_job_result.job.name,
+            status.value,
+            reason,
+            job=batch_job_result.job.name,
+            job_status=status.value,
+        )
+        return status
 
     def _organize_artifacts(self, job_artifacts_path: Path, batch_job: BatchJob) -> None:
         """Copy coverage and JUnit files into the output tree, prefixed by the job's

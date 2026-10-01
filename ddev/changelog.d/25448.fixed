@@ -1,0 +1,1 @@
+Identify event bus messages by type and id in error text instead of embedding the full message.
