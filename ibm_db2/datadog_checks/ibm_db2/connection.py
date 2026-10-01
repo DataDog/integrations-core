@@ -76,6 +76,19 @@ class Db2Connection:
                 self._check.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
             self.conn = None
 
+    def ensure_connected(self) -> Any:
+        """Return an active driver connection, or raise `ConnectionError` if connecting fails."""
+        if self.conn is not None and ibm_db.active(self.conn):
+            return self.conn
+
+        self.close()
+        self.connect()
+        if self.conn is None:
+            raise ConnectionError("Unable to create new connection")
+        if self._on_reconnect is not None:
+            self._on_reconnect()
+        return self.conn
+
     def iter_rows(self, query: str, method: Callable[[Any], Any]) -> Iterator[Any]:
         """
         Execute `query` and yield rows fetched with `method` (an `ibm_db` fetch function).
