@@ -4,21 +4,38 @@
 from prometheus_client.samples import Sample
 
 
-def decumulate_histogram_buckets(sample_data):
+def decumulate_histogram_buckets(sample_data, logger=None, metric_name=None):
     """
     Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
+
+    `logger` and `metric_name` are only used to report payloads that are out of spec.
     """
     # TODO: investigate performance optimizations
     new_sample_data = []
     bucket_values_by_context_upper_bound = {}
+    negative_threshold_labels = None
+    has_sum = False
     for sample, tags, hostname in sample_data:
         if sample.name.endswith('_bucket'):
             context_key = compute_bucket_hash(sample.labels)
             if context_key not in bucket_values_by_context_upper_bound:
                 bucket_values_by_context_upper_bound[context_key] = {}
-            bucket_values_by_context_upper_bound[context_key][float(sample.labels['upper_bound'])] = sample.value
+            upper_bound = float(sample.labels['upper_bound'])
+            bucket_values_by_context_upper_bound[context_key][upper_bound] = sample.value
+            if upper_bound < 0 and negative_threshold_labels is None:
+                negative_threshold_labels = sample.labels
+        elif sample.name.endswith('_sum'):
+            has_sum = True
 
         new_sample_data.append([sample, tags, hostname])
+
+    if logger is not None and has_sum and negative_threshold_labels is not None:
+        logger.debug(
+            'Metric: %s is out of spec for OpenMetrics: Histogram MetricPoint MUST NOT contain a '
+            'sum value for Negative threshold buckets: %s',
+            metric_name,
+            negative_threshold_labels,
+        )
 
     sorted_buckets_by_context = {}
     for context in bucket_values_by_context_upper_bound:

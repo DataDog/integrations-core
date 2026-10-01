@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
+import pytest
 
 from ..utils import get_check
 
@@ -547,6 +550,41 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    'sum_line, expected',
+    [
+        pytest.param('req_ms_sum -3', True, id='out_of_spec'),
+        pytest.param('', False, id='conformant'),
+    ],
+)
+def test_negative_thresholds_with_sum_reported_as_out_of_spec(
+    aggregator, dd_run_check, mock_http_response, caplog, sum_line, expected
+):
+    # OpenMetrics forbids a sum value on a histogram with negative thresholds, so flag it for whoever is
+    # investigating an unreliable .sum. A conformant payload must stay quiet.
+    caplog.set_level(logging.DEBUG)
+    mock_http_response(
+        f"""
+        # HELP req_ms request duration
+        # TYPE req_ms histogram
+        req_ms_bucket{{le="-1.0"}} 4
+        req_ms_bucket{{le="+Inf"}} 10
+        {sum_line}
+        req_ms_count 10
+        """
+    )
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'histogram_buckets_as_distributions': True,
+            'collect_histogram_buckets': True,
+        }
+    )
+    dd_run_check(check)
+
+    assert ('MUST NOT contain a sum value' in caplog.text) is expected
 
 
 def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_check, mock_http_response):
