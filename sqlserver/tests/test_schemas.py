@@ -127,6 +127,8 @@ def test_indexes(dbm_instance, integration_check):
                     assert index['is_unique_constraint'] is not None
                     assert index['is_disabled'] is not None
                     assert index['column_names'] is not None
+                    assert index['key_columns'] is not None
+                    assert index['included_columns'] is not None
             if row['table_name'] == 'cities':
                 indexes = json.loads(row['indexes'])
                 assert indexes[0]['name'] is not None

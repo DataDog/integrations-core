@@ -51,12 +51,26 @@ GROUP BY object_id
 
 INDEX_QUERY = """
 SELECT
-    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
+    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
+    ISNULL(STRING_AGG(
+        CASE
+            WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN
+                CASE
+                    WHEN ic.is_descending_key = 1 THEN CAST(c.name AS NVARCHAR(MAX)) + N' DESC'
+                    ELSE CAST(c.name AS NVARCHAR(MAX))
+                END
+        END, ',') WITHIN GROUP (ORDER BY ic.key_ordinal), N'') AS key_columns,
+    ISNULL(STRING_AGG(
+        CASE
+            WHEN ic.is_included_column = 1 THEN CAST(c.name AS NVARCHAR(MAX))
+        END, ',') WITHIN GROUP (ORDER BY ic.index_column_id), N'') AS included_columns,
+    STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
 FROM
-    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
-    AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+    sys.indexes i
+    JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+    JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
 WHERE i.object_id = schema_tables.table_id
+    AND i.type <> 0
 GROUP BY i.object_id, i.name, i.type,
     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
 """
@@ -70,6 +84,22 @@ SELECT
     i.is_primary_key,
     i.is_unique_constraint,
     i.is_disabled,
+    ISNULL(STUFF((
+        SELECT ',' + CASE WHEN ic.is_descending_key = 1 THEN c.name + ' DESC' ELSE c.name END
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+            AND ic.is_included_column = 0 AND ic.key_ordinal > 0
+        ORDER BY ic.key_ordinal
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, ''), '') AS key_columns,
+    ISNULL(STUFF((
+        SELECT ',' + c.name
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+            AND ic.is_included_column = 1
+        ORDER BY ic.index_column_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, ''), '') AS included_columns,
     STUFF((
         SELECT ',' + c.name
         FROM sys.index_columns ic
@@ -79,6 +109,7 @@ SELECT
 FROM
     sys.indexes i
 WHERE i.object_id = schema_tables.table_id
+    AND i.type <> 0
 GROUP BY
     i.object_id,
     i.name,
