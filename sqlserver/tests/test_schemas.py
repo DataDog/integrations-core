@@ -84,7 +84,7 @@ def test_tables(dbm_instance, integration_check):
             if row['table_name']:
                 tables.append(row['table_name'])
 
-    assert set(tables) == {'cities', 'Restaurants', 'RestaurantReviews', 'landmarks'}
+    assert set(tables) == {'cities', 'Restaurants', 'RestaurantReviews', 'landmarks', 'index_coverage'}
 
 
 def test_columns(dbm_instance, integration_check):
@@ -132,6 +132,13 @@ def test_indexes(dbm_instance, integration_check):
             if row['table_name'] == 'cities':
                 indexes = json.loads(row['indexes'])
                 assert indexes[0]['name'] is not None
+            if row['table_name'] == 'index_coverage':
+                indexes = {index['name']: index for index in json.loads(row['indexes'])}
+                # (c) INCLUDE (a, e) and (c, a) INCLUDE (e) share column_names. The INCLUDE list does not.
+                assert indexes['ix_include']['key_columns'] == 'c'
+                assert indexes['ix_include']['included_columns'] == 'a,e'
+                assert indexes['ix_prefix']['key_columns'] == 'c,a'
+                assert indexes['ix_prefix']['included_columns'] == 'e'
 
 
 def test_collect_schemas(dbm_instance, integration_check):

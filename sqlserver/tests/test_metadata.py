@@ -332,6 +332,58 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             }
                         ],
                     },
+                    {
+                        'id': 'normalized_value',
+                        'name': 'index_coverage',
+                        'columns': [
+                            {
+                                'name': 'a',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                            {
+                                'name': 'c',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                            {
+                                'name': 'e',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                        ],
+                        'foreign_keys': [],
+                        'partitions': {'partition_count': 3},
+                        'indexes': [
+                            {
+                                'name': 'ix_include',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # (c) INCLUDE (a, e). column_names matches ix_prefix; included_columns does not.
+                                'key_columns': 'c',
+                                'included_columns': 'a,e',
+                                'column_names': 'a,c,e',
+                            },
+                            {
+                                'name': 'ix_prefix',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # (c, a) INCLUDE (e).
+                                'key_columns': 'c,a',
+                                'included_columns': 'e',
+                                'column_names': 'a,c,e',
+                            },
+                        ],
+                    },
                 ],
             }
         ],
