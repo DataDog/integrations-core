@@ -52,7 +52,7 @@ def test_symlinked_response_directory_is_rejected(tmp_path: Path):
     with pytest.raises(ResponseStoreError, match="escapes"):
         save(ResponseStore(run_root, "exec"))
 
-    assert saved_files(outside) == []
+    assert list(outside.iterdir()) == []
 
 
 def test_concurrent_saves_respect_quota(tmp_path: Path):
@@ -73,6 +73,17 @@ def test_concurrent_saves_respect_quota(tmp_path: Path):
     assert written <= 10_000
     assert outcomes.count(True) == len(saved_files(store.root)) // 2
     assert False in outcomes
+
+
+def test_unwritable_directory_raises_store_error_and_releases_quota(tmp_path: Path):
+    store = ResponseStore(tmp_path, "exec", quota_bytes=2_000)
+    save(store)
+
+    with patch("ddev.ai.tools.http.response_store.tempfile.mkstemp", side_effect=PermissionError("denied")):
+        with pytest.raises(ResponseStoreError, match="denied"):
+            save(store, "x" * 1500)
+
+    save(store, "x" * 1500)
 
 
 def test_interrupted_write_leaves_no_partial_files_and_releases_quota(tmp_path: Path):

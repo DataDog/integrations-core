@@ -98,19 +98,24 @@ class ResponseStore:
     def _ensure_root(self) -> Path:
         with self._lock:
             if not self._root_ready:
+                # Checked before creating anything: mkdir follows symlinks, so a symlinked parent
+                # would otherwise create directories outside the run root before being rejected.
+                if self._root.is_symlink() or not self._root.resolve().is_relative_to(self._run_root.resolve()):
+                    raise ResponseStoreError(f"Response directory escapes the run directory: {self._root}")
                 try:
                     self._root.mkdir(parents=True, exist_ok=True)
                 except OSError as e:
                     raise ResponseStoreError(f"Cannot create response directory: {e}") from e
-                if self._root.is_symlink() or not self._root.resolve().is_relative_to(self._run_root.resolve()):
-                    raise ResponseStoreError(f"Response directory escapes the run directory: {self._root}")
                 self._root_ready = True
         return self._root
 
 
 def _write_new(path: Path, data: bytes) -> None:
     """Write `data` to a temporary file and link it to `path`, failing if `path` already exists."""
-    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=".partial-")
+    try:
+        fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=".partial-")
+    except OSError as e:
+        raise ResponseStoreError(f"Cannot write response file {path}: {e}") from e
     tmp = Path(tmp_name)
     try:
         with os.fdopen(fd, "wb") as f:
