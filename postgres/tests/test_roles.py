@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
-from datadog_checks.postgres.version_utils import V13, V15
+from datadog_checks.postgres.version_utils import V13, V14, V15
 
 from .common import POSTGRES_VERSION
 from .utils import _get_superconn, requires_over_14, requires_over_15, run_one_check
@@ -692,6 +692,21 @@ def test_collect_roles_cancellation_stops_remaining_databases(
 
     assert _collected_databases(aggregator) == ['dogs_0']
     assert _database_time_statuses(aggregator) == [('dogs_0', 'success'), ('dogs_1', 'cancelled')]
+    aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:cancelled', count=1)
+
+
+def test_collect_roles_cancelled_before_start_reports_cancelled(integration_check, roles_instance, aggregator):
+    """A run skipped because the job is shutting down must not look like a successful run that found no roles."""
+    check = integration_check(roles_instance)
+    check.version = V14
+    collector = check.metadata_samples._role_collector
+    collector._cancel_event.set()
+
+    collector.collect_roles([])
+
+    assert not aggregator.get_event_platform_events('dbm-metadata')
+    aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:cancelled', count=1)
+    aggregator.assert_metric_has_tag('dd.postgres.roles.rows_count', 'status:cancelled', count=1)
 
 
 def test_collect_roles_updates_timestamp_on_failure(integration_check, roles_instance, monkeypatch):

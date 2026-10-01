@@ -183,7 +183,12 @@ class PostgresRoleCollector:
 
             return True
         finally:
-            status = "error" if had_error else "success"
+            # Cancellation can stop a run before any scope fails, or make a scope return as failed, so it takes
+            # precedence over both outcomes.
+            if self._cancel_event.is_set():
+                status = "cancelled"
+            else:
+                status = "error" if had_error else "success"
             metric_tags = self._check.tags + [f"status:{status}"]
             self._check.histogram(
                 "dd.postgres.roles.time",
