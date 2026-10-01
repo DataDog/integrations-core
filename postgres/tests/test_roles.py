@@ -555,6 +555,51 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
     assert any(event['kind'] == 'pg_roles' for event in metadata)
 
 
+def _collected_databases(aggregator):
+    return [
+        event['database_name']
+        for event in aggregator.get_event_platform_events('dbm-metadata')
+        if event['kind'] == 'pg_role_privileges'
+    ]
+
+
+def test_collect_roles_collects_every_database_within_budget(integration_check, roles_instance, aggregator):
+    roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-3]$']
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    assert _collected_databases(aggregator) == ['dogs_0', 'dogs_1', 'dogs_2', 'dogs_3']
+    aggregator.assert_metric('dd.postgres.roles.skipped_databases', count=0)
+
+
+def test_collect_roles_resumes_after_exceeding_budget(integration_check, roles_instance, aggregator):
+    """A run that exceeds the collection interval stops, and the next run resumes from the first skipped database.
+
+    Without resuming, the databases sorted last would be skipped on every run.
+    """
+    roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-3]$']
+    check = integration_check(roles_instance)
+    collector = check.metadata_samples._role_collector
+    # Every run exceeds a zero-second budget after its first database.
+    collector._config.collection_interval = 0
+
+    collected = []
+    # Keep the job uncancelled so the collector can be run again directly.
+    run_one_check(check, cancel=False)
+    try:
+        collected.append(_collected_databases(aggregator))
+        aggregator.assert_metric('dd.postgres.roles.skipped_databases', value=3, count=1)
+        for _ in range(4):
+            aggregator.reset()
+            collector.collect_roles([])
+            collected.append(_collected_databases(aggregator))
+    finally:
+        check.cancel()
+
+    assert collected == [['dogs_0'], ['dogs_1'], ['dogs_2'], ['dogs_3'], ['dogs_0']]
+
+
 def test_collect_roles_updates_timestamp_on_failure(integration_check, roles_instance, monkeypatch):
     check = integration_check(roles_instance)
     job = check.metadata_samples

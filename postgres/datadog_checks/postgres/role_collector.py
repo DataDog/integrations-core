@@ -116,6 +116,7 @@ class PostgresRoleCollector:
             exclude_databases=list(role_config.exclude_databases),
         )
         self._unsupported_version_logged = False
+        self._resume_from_database: str | None = None
         self._rows_count = 0
         self._payloads_count = 0
 
@@ -149,8 +150,33 @@ class PostgresRoleCollector:
                 self._log.exception("Error listing databases for role collection")
                 databases = []
 
-            for database_name in databases:
+            # The metadata job runs its collectors sequentially, so an unbounded fan-out delays every other
+            # metadata collection. Stop at the collection interval and resume from the first skipped database
+            # next run, so a deadline that is always hit still covers every database over time.
+            deadline = started_at / 1000 + self._config.collection_interval
+            databases = self._rotate_databases(databases)
+            self._resume_from_database = None
+            for index, database_name in enumerate(databases):
                 if self._cancel_event.is_set():
+                    break
+                # The first database always runs so every collection makes progress.
+                if index > 0 and time.time() > deadline:
+                    self._resume_from_database = database_name
+                    self._log.warning(
+                        "Role collection exceeded its %s second collection interval; skipped %d of %d databases, "
+                        "resuming from '%s' on the next run",
+                        self._config.collection_interval,
+                        len(databases) - index,
+                        len(databases),
+                        database_name,
+                    )
+                    self._check.count(
+                        "dd.postgres.roles.skipped_databases",
+                        len(databases) - index,
+                        tags=self._check.tags,
+                        hostname=self._check.reported_hostname,
+                        raw=True,
+                    )
                     break
                 if not self._collect_database_scope(database_name, tags_no_db):
                     had_error = True
@@ -265,6 +291,13 @@ class PostgresRoleCollector:
                     else:
                         cursor.execute(query)
                     return [row["database_name"] for row in cursor]
+
+    def _rotate_databases(self, databases: list[str]) -> list[str]:
+        """Start from the database the previous run stopped at, or from the beginning if it no longer exists."""
+        if self._resume_from_database in databases:
+            start = databases.index(self._resume_from_database)
+            return databases[start:] + databases[:start]
+        return databases
 
     def _configure_transaction(self, cursor: Any) -> None:
         self._check_cancelled()
