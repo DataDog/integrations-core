@@ -16,8 +16,9 @@ from cryptography import x509
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
-    HTTPClientError,
+    HTTPClientRequestError,
     HTTPClientSSLError,
+    HTTPClientStatusError,
     HTTPClientTimeoutError,
 )
 from datadog_checks.base.utils.http_protocol import HTTPResponse
@@ -151,8 +152,7 @@ class HTTPCheck(AgentCheck):
             )
         except (
             socket.timeout,
-            HTTPClientConnectionError,
-            HTTPClientTimeoutError,
+            HTTPClientRequestError,
         ) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
@@ -165,7 +165,7 @@ class HTTPCheck(AgentCheck):
                 )
             )
 
-        except (socket.error, HTTPClientError) as e:
+        except (socket.error, HTTPClientStatusError) as e:
             length = int((time.time() - start) * 1000)
             self.log.info(
                 "%s is DOWN, error: %s. Connection failed after %s ms",
