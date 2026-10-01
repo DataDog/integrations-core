@@ -309,6 +309,54 @@
                             "width": 6,
                             "height": 2
                         }
+                    },
+                    {
+                        "id": 9202221039564074,
+                        "definition": {
+                            "title": "Profile samples sent per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "per_second(query1)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_exporter_sent_profile_samples{$host,$service} by {service_version}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
                     }
                 ]
             },
@@ -1687,6 +1735,198 @@
                             "x": 8,
                             "y": 8,
                             "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7933458102752244,
+                        "definition": {
+                            "title": "Profile samples sent per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "per_second(query1)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_exporter_sent_profile_samples{$host,$service}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1059240671126952,
+                        "definition": {
+                            "title": "Profile samples sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_exporter_sent_profile_samples{$host,$service} by {exporter}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2031863123641197,
+                        "definition": {
+                            "title": "Failed send profile samples",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_exporter_send_failed_profile_samples{$host,$service}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 894757713525552,
+                        "definition": {
+                            "title": "Failed enqueue profile samples",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_exporter_enqueue_failed_profile_samples{$host,$service}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 12,
+                            "width": 6,
                             "height": 2
                         }
                     }
