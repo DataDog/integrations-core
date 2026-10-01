@@ -497,6 +497,59 @@ def test_histogram_buckets_as_distributions_with_zero_bucket(aggregator, dd_run_
     aggregator.assert_all_metrics_covered()
 
 
+def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregator, dd_run_check, mock_http_response):
+    # A first bucket with a negative upper bound must not keep a -Inf lower bound; it collapses to a point at its
+    # upper bound, mirroring how the Agent handles the +Inf top bucket. Otherwise its count is dropped downstream.
+    payload = """
+        # HELP req_ms request duration
+        # TYPE req_ms histogram
+        req_ms_bucket{le="-1.0"} 4
+        req_ms_bucket{le="5.0"} 10
+        req_ms_bucket{le="+Inf"} 10
+        req_ms_sum -3
+        req_ms_count 10
+        """
+    mock_http_response(payload)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'histogram_buckets_as_distributions': True,
+            'collect_histogram_buckets': True,
+        }
+    )
+    dd_run_check(check)
+
+    aggregator.assert_histogram_bucket(
+        'test.req_ms',
+        4,
+        -1.0,
+        -1.0,
+        True,
+        '',
+        ['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-1.0'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.req_ms',
+        6,
+        -1.0,
+        5.0,
+        True,
+        '',
+        ['endpoint:test', 'upper_bound:5.0', 'lower_bound:-1.0'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.req_ms',
+        0,
+        5.0,
+        float('Inf'),
+        True,
+        '',
+        ['endpoint:test', 'upper_bound:inf', 'lower_bound:5.0'],
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
 def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_check, mock_http_response):
     payload = """
         # HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.

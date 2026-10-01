@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from prometheus_client.samples import Sample
 
-NEGATIVE_INFINITY = float('-inf')
-
 
 def decumulate_histogram_buckets(sample_data):
     """
@@ -33,20 +31,15 @@ def decumulate_histogram_buckets(sample_data):
             if i == 0:
                 if context not in bucket_tuples_by_context_upper_bound:
                     bucket_tuples_by_context_upper_bound[context] = {}
-                if upper_b >= 0:
-                    # le=0 is valid per the OM spec; start non-negative buckets at zero, not -inf
-                    bucket_tuples_by_context_upper_bound[context][upper_b] = (
-                        0,
-                        upper_b,
-                        bucket_values_by_context_upper_bound[context][upper_b],
-                    )
-                else:
-                    # negative buckets start at -inf
-                    bucket_tuples_by_context_upper_bound[context][upper_b] = (
-                        NEGATIVE_INFINITY,
-                        upper_b,
-                        bucket_values_by_context_upper_bound[context][upper_b],
-                    )
+                # The first bucket is [-inf, upper_b], but the agent discards buckets with an infinite bound,
+                # so keep the lower bound finite: non-negative buckets start at zero, negative ones collapse
+                # to a point at upper_b (as the agent already does for the +inf top bucket).
+                lower_b = 0 if upper_b >= 0 else upper_b
+                bucket_tuples_by_context_upper_bound[context][upper_b] = (
+                    lower_b,
+                    upper_b,
+                    bucket_values_by_context_upper_bound[context][upper_b],
+                )
                 continue
             tmp = (
                 bucket_values_by_context_upper_bound[context][upper_b]
