@@ -11,6 +11,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
 from datadog_checks.base.utils.headers import get_default_headers
+from datadog_checks.base.utils.headers import set_header as set_header_value
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
 
@@ -265,15 +266,7 @@ class FakeHTTPClient:
         return found
 
     def set_header(self, name: str, value: str) -> None:
-        matching_names = [header_name for header_name in self.options['headers'] if header_name.lower() == name.lower()]
-        if not matching_names:
-            self.options['headers'][name] = value
-            return
-
-        retained_name = matching_names[0]
-        self.options['headers'][retained_name] = value
-        for duplicate_name in matching_names[1:]:
-            del self.options['headers'][duplicate_name]
+        set_header_value(self.options['headers'], name, value)
 
     def disable_auth(self) -> None:
         self.options['auth'] = SUPPRESSED_AUTH
