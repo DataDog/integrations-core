@@ -1,0 +1,18 @@
+diff --git a/src/rdkafka_request.c b/src/rdkafka_request.c
+index d381016..7d38d20 100644
+--- a/src/rdkafka_request.c
++++ b/src/rdkafka_request.c
+@@ -1369,9 +1369,10 @@ err:
+ 
+         actions = rd_kafka_handle_OffsetFetch_err_action(rkb, err, request);
+ 
+-        if (actions & RD_KAFKA_ERR_ACTION_REFRESH) {
+-                /* Re-query for coordinator */
+-                rd_kafka_cgrp_op(rkb->rkb_rk->rk_cgrp, NULL, RD_KAFKA_NO_REPLYQ,
++        if ((actions & RD_KAFKA_ERR_ACTION_REFRESH) && rk->rk_cgrp) {
++                /* Re-query for coordinator only if this client has a consumer
++                 * group. Admin requests may use clients without one. */
++                rd_kafka_cgrp_op(rk->rk_cgrp, NULL, RD_KAFKA_NO_REPLYQ,
+                                  RD_KAFKA_OP_COORD_QUERY, err);
+         }
+ 
