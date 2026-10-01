@@ -146,7 +146,7 @@ datadog-kubevirt-handler==2.5.1
 datadog-kueue==2.0.0
 datadog-kuma==2.5.0
 datadog-kyototycoon==4.5.0
-datadog-kyverno==3.4.1
+datadog-kyverno==3.5.0
 datadog-lighttpd==5.5.0
 datadog-linkerd==7.4.1
 datadog-linux-audit-logs==1.2.0; sys_platform == 'linux2'
