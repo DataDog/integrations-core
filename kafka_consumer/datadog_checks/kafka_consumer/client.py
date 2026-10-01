@@ -3,7 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, IsolationLevel, KafkaException, TopicPartition
+from confluent_kafka import (
+    Consumer,
+    ConsumerGroupTopicPartitions,
+    IsolationLevel,
+    KafkaError,
+    KafkaException,
+    TopicPartition,
+)
 from confluent_kafka.admin import AdminClient, OffsetSpec
 
 # AWS MSK IAM authentication support
@@ -278,11 +285,14 @@ class KafkaClient:
                 )[consumer_group]
             )
         offsets = []
+        coordinator_error = False
         for completed in as_completed(futures):
             try:
                 response_offset_info = completed.result()
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
+                if e.args[0].code() in (KafkaError.NOT_COORDINATOR, KafkaError.COORDINATOR_NOT_AVAILABLE):
+                    coordinator_error = True
                 continue
             tpo = []
             for tp in response_offset_info.topic_partitions:
@@ -296,6 +306,11 @@ class KafkaClient:
                     continue
                 tpo.append((tp.topic, tp.partition, tp.offset))
             offsets.append((response_offset_info.group_id, tpo))
+        if coordinator_error:
+            # The AdminClient caches each group's coordinator and keeps using it after a coordinator error,
+            # so a group that moved to another broker would fail on every run. A new client looks it up again.
+            self.log.debug("Closing the AdminClient so the next request looks up group coordinators again")
+            self.close_admin_client()
         return offsets
 
     def describe_consumer_group(self, consumer_group):
