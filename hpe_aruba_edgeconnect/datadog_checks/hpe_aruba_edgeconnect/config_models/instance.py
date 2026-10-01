@@ -109,6 +109,7 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
     orchestrator_ip: str
+    orchestrator_login_type: Optional[Literal[0, 1, 2]] = None
     orchestrator_password: str
     orchestrator_username: str
     password: Optional[str] = None
