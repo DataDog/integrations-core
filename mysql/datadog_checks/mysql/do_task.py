@@ -92,9 +92,9 @@ class MySQLDataObservabilityTask:
                     except Exception as error:
                         self._close()
                         self._log.warning("Data Observability task %s could not connect: %s", task.task_id, error)
-                        result = _error_result(error, 0.0, 'connect')
+                        result = _error_result(error, 0.0, connecting=True)
                         for pending in statements[index:]:
-                            self._emit_result(pending, result)
+                            self._emit_result(pending, result, executed=False)
                         self._count('dd.mysql.do_task.runs', ['outcome:connection_error'])
                         return
                 self._emit_result(statement, self._execute(statement))
@@ -143,7 +143,6 @@ class MySQLDataObservabilityTask:
     def _execute(self, statement: Statement) -> dict[str, Any]:
         conn = self._conn
         limit = min(statement.max_rows, MAX_TASK_STATEMENT_ROWS)
-        phase = 'execute'
         cursor = None
         start = time.time()
         try:
@@ -163,14 +162,13 @@ class MySQLDataObservabilityTask:
                 error = pymysql.err.ProgrammingError(
                     "Query returned no result set — only SELECT statements are supported"
                 )
-                return _error_result(error, time.time() - start, 'execute')
+                return _error_result(error, time.time() - start)
             columns = [description[0] for description in cursor.description]
-            phase = 'fetch'
             rows = cursor.fetchmany(limit)
             cursor.close()
         except Exception as error:
             duration = time.time() - start
-            result = _error_result(error, duration, phase)
+            result = _error_result(error, duration)
             if not conn.open:
                 result['error_kind'] = 'connection_error'
             # Keep the connection only after a plain server error. Anything else can leave it
@@ -202,7 +200,6 @@ class MySQLDataObservabilityTask:
             'error': None,
             'error_kind': None,
             'error_code': None,
-            'error_phase': None,
         }
 
     def _base_event(self) -> dict[str, Any]:
@@ -215,8 +212,8 @@ class MySQLDataObservabilityTask:
             'db_port': self._check._config.port,
         }
 
-    def _emit_result(self, statement: Statement, result: dict[str, Any]) -> None:
-        self._record_statement(result)
+    def _emit_result(self, statement: Statement, result: dict[str, Any], executed: bool = True) -> None:
+        self._record_statement(result, executed)
         event = {
             **self._base_event(),
             'statement_id': statement.id,
@@ -252,7 +249,6 @@ class MySQLDataObservabilityTask:
                 'error': message,
                 'error_kind': error_kind,
                 'error_code': None,
-                'error_phase': 'schedule',
             }
         )
 
@@ -269,13 +265,13 @@ class MySQLDataObservabilityTask:
             return
         self._count('dd.mysql.do_task.events')
 
-    def _record_statement(self, result: dict[str, Any]) -> None:
+    def _record_statement(self, result: dict[str, Any], executed: bool) -> None:
         status_tag = f"status:{result['status']}"
         tags = [status_tag]
         if result['status'] == 'error':
-            tags += [f"error_kind:{result['error_kind']}", f"error_phase:{result['error_phase']}"]
+            tags.append(f"error_kind:{result['error_kind']}")
         self._count('dd.mysql.do_task.statements', tags)
-        if result['error_phase'] == 'connect':
+        if not executed:
             # The statement never ran, so it has no execution time.
             return
         self._histogram('dd.mysql.do_task.statement_execution_time', result['duration_s'], [status_tag])
@@ -311,10 +307,10 @@ class MySQLDataObservabilityTask:
             )
 
 
-def _error_result(error: Exception, duration: float, phase: str) -> dict[str, Any]:
+def _error_result(error: Exception, duration: float, connecting: bool = False) -> dict[str, Any]:
     # Same classification as the Data Observability job, so both report one set of error kinds.
     code = error.args[0] if error.args and isinstance(error.args[0], int) else None
-    if phase == 'connect' or isinstance(error, pymysql.err.InterfaceError) or code in CONNECTION_ERROR_CODES:
+    if connecting or isinstance(error, pymysql.err.InterfaceError) or code in CONNECTION_ERROR_CODES:
         kind = 'connection_error'
     elif code in STATEMENT_TIMEOUT_ERROR_CODES:
         kind = 'statement_timeout'
@@ -323,7 +319,7 @@ def _error_result(error: Exception, duration: float, phase: str) -> dict[str, An
     else:
         kind = 'sql_error'
     message = str(error)
-    if phase == 'connect':
+    if connecting:
         message = f'Statement not executed: could not connect to the database: {error}'
     return {
         'status': 'error',
@@ -333,8 +329,7 @@ def _error_result(error: Exception, duration: float, phase: str) -> dict[str, An
         'duration_s': duration,
         'error': message,
         'error_kind': kind,
-        'error_code': code,
-        'error_phase': phase,
+        'error_code': str(code) if code is not None else None,
     }
 
 
