@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.8.0 / 2026-10-01
+
+***Added***:
+
+* Document the mlx5_core RoCE/PFC ethtool metrics collected when GPU monitoring is enabled: per-priority PFC counters tagged `prio:<0-7>`, link-level 802.3x pause counters, PCIe health, FEC and cable health, pause storm, and module health counters, plus the per-ring queue traffic metrics emitted alongside them. ([#25276](https://github.com/DataDog/integrations-core/pull/25276))
+
 ## 5.7.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
