@@ -95,26 +95,24 @@ def test_message_when_content_is_disabled():
     assert content not in message
 
 
-def test_invalid_url_submits_critical_service_check(aggregator, fake_http) -> None:
-    instance = {'name': 'invalid_url', 'url': 'https://example.com', 'check_certificate_expiration': False}
-    fake_http.register_response('GET', instance['url'], HTTPClientInvalidURLError('Invalid URL'))
-    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
-
-    check.check(instance)
-
-    tags = ['url:https://example.com', 'instance:invalid_url']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=tags, count=1)
-
-
-def test_generic_request_error_submits_critical_service_check(aggregator, fake_http) -> None:
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPClientInvalidURLError('Invalid URL'), id='invalid_url'),
+        pytest.param(HTTPClientRequestError('Request failed'), id='request_error'),
+    ],
+)
+def test_non_connection_request_error_submits_critical_socket_error_service_check(aggregator, fake_http, error):
     instance = {'name': 'request_error', 'url': 'https://example.com', 'check_certificate_expiration': False}
-    fake_http.register_response('GET', instance['url'], HTTPClientRequestError('Request failed'))
+    fake_http.register_response('GET', instance['url'], error)
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
 
     check.check(instance)
 
     tags = ['url:https://example.com', 'instance:request_error']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=tags, count=1)
+    [service_check] = aggregator.service_checks(HTTPCheck.SC_STATUS)
+    assert service_check.message.startswith('Socket error: {!r}. Connection failed after '.format(error))
 
 
 def test_check_closes_http_client(aggregator, fake_http_response):
