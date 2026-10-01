@@ -120,15 +120,19 @@ class PostgresRoleCollector:
         self._rows_count = 0
         self._payloads_count = 0
 
-    def collect_roles(self, tags_no_db: list[str]) -> bool:
-        """Collect the instance scope and each accessible logical database scope."""
+    def collect_roles(self, tags_no_db: list[str]) -> None:
+        """Collect the instance scope and each accessible logical database scope.
+
+        On a supported version, each run reports its outcome through the `status` tag on the
+        `dd.postgres.roles.*` metrics.
+        """
         if self._check.version is None or self._check.version < V14:
             if not self._unsupported_version_logged:
                 self._log.warning(
                     "Role collection requires PostgreSQL 14 or later; connected to %s", self._check.version
                 )
                 self._unsupported_version_logged = True
-            return False
+            return
 
         started_at = time.time() * 1000
         had_error = False
@@ -136,7 +140,7 @@ class PostgresRoleCollector:
         self._payloads_count = 0
         try:
             if self._cancel_event.is_set():
-                return False
+                return
 
             if not self._collect_instance_scope(tags_no_db):
                 had_error = True
@@ -144,7 +148,7 @@ class PostgresRoleCollector:
             try:
                 databases = self._get_databases()
             except RoleCollectionCancelled:
-                return False
+                return
             except Exception:
                 had_error = True
                 self._log.exception("Error listing databases for role collection")
@@ -180,8 +184,6 @@ class PostgresRoleCollector:
                     break
                 if not self._collect_database_scope(database_name, tags_no_db):
                     had_error = True
-
-            return True
         finally:
             # Cancellation can stop a run before any scope fails, or make a scope return as failed, so it takes
             # precedence over both outcomes.

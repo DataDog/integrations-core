@@ -559,7 +559,7 @@ def test_collect_roles_unsupported_version(integration_check, roles_instance, ag
     check = integration_check(roles_instance)
     check.version = V13
 
-    assert not check.metadata_samples._role_collector.collect_roles([])
+    check.metadata_samples._role_collector.collect_roles([])
 
     metadata = aggregator.get_event_platform_events('dbm-metadata')
     assert not [event for event in metadata if event['kind'] in {'pg_roles', 'pg_role_privileges'}]
