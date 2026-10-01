@@ -13,6 +13,14 @@ files:
         example: false
         type: boolean
       fleet_configurable: true
+    - name: propagate_agent_tags
+      description: |
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+      value:
+        example: false
+        type: boolean
+      fleet_configurable: true
     - template: init_config/db
     - template: init_config/default
   - template: instances
@@ -58,6 +66,37 @@ files:
       value:
         type: string
       fleet_configurable: true
+    - name: tns_alias
+      description: |
+        The alias for the database connect string (stored in `tnsnames.ora` or in LDAP) to a CDB.
+        It's an alternative to specifying `server` and `service_name`. `tns_alias` requires
+        an Oracle software installation.
+      value:
+        type: string
+      fleet_configurable: false
+    - name: tns_admin
+      description: |
+        The location of the Oracle client configuration files (`sqlnet.ora`, `tnsnames.ora`, `ldap.ora`).
+        This configuration is required only when using Oracle Instant Client. Oracle Instant Client
+        is required when `tns_alias` is set. Alternatively, you can set the environment variable
+        `TNS_ADMIN` before starting the Datadog Agent.
+      value:
+        type: string
+      fleet_configurable: false
+    - name: wallet
+      description: |
+        The directory containing the Oracle wallet. The Oracle wallet is used with the TCPS protocol.
+      value:
+        type: string
+      fleet_configurable: true
+    - name: query_timeout
+      description: |
+        The query timeout in seconds. Defaults to 20.
+      value:
+        type: integer
+        example: 20
+        display_default: 20
+      fleet_configurable: true
     - name: jdbc_driver_path
       description: |
         Set this parameter if you are not using the Oracle native client or Instant Client.
@@ -99,5 +138,261 @@ files:
         type: boolean
         example: false
         display_default: false
+    - name: query_samples
+      description: Configure collection of query samples.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query samples. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+        - name: include_all_sessions
+          description: |
+            Include all sessions in the query samples collection.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+          fleet_configurable: true
+        - name: active_session_history
+          description: |
+            Collect activity samples from `v$active_session_history` instead of the Agent performing sampling.
+
+            WARNING: Querying `v$active_session_history` requires optional Oracle licences and may result in
+            additional costs if enabled.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: query_metrics
+      description: Configure collection of query metrics.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics. Requires enabled query samples.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+        - name: collection_interval
+          description: |
+            The interval in seconds between query metrics collections.
+          value:
+            type: integer
+            example: 60
+            display_default: 60
+          fleet_configurable: true
+        - name: db_rows_limit
+          description: |
+            The maximum number of rows to fetch in a single query metrics collection.
+          value:
+            type: integer
+            example: 10000
+            display_default: 10000
+          fleet_configurable: true
+        - name: lookback
+          description: |
+            The lookback window in seconds used to select the query metrics to collect.
+          value:
+            type: integer
+          fleet_configurable: true
+        - name: max_run_time
+          description: |
+            The maximum run time in seconds for a single query metrics collection.
+          value:
+            type: integer
+            example: 20
+            display_default: 20
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: execution_plans
+      description: Configure collection of execution plans.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of execution plans. Requires query metrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+        - name: plan_cache_retention
+          description: |
+            The number of minutes to retain execution plan metadata in the Agent cache.
+          value:
+            type: integer
+            example: 15
+            display_default: 15
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: sysmetrics
+      description: Configure collection of database sysmetrics.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of database sysmetrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: tablespaces
+      description: Configure collection of tablespace usage.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of tablespace usage.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: process_memory
+      description: Configure collection of process memory usage.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of process memory usage.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: shared_memory
+      description: Configure collection of shared memory usage.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of database shared memory usages. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: inactive_sessions
+      description: Configure collection of inactive sessions.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of inactive sessions.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: user_sessions_count
+      description: Configure collection of the user sessions count.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of the user sessions count.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: asm
+      description: Configure collection of Automatic Storage Management (ASM) metrics.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of Automatic Storage Management (ASM) metrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: resource_manager
+      description: Configure collection of resource manager statistics.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of resource manager statistics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: locks
+      description: Configure collection of locks metrics.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of locks metrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          fleet_configurable: true
+      fleet_configurable: true
+    - name: metric_collection_interval
+      description: |
+        The interval in seconds between metric collections. Defaults to 60.
+      value:
+        type: integer
+        example: 60
+        display_default: 60
+      fleet_configurable: true
+    - name: database_instance_collection_interval
+      description: |
+        The interval in seconds between database instance metadata collections. Defaults to 300.
+      value:
+        type: integer
+        example: 300
+        display_default: 300
+      fleet_configurable: true
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent.
+      value:
+        type: string
+        default: null
+      fleet_configurable: true
+    - name: exclude_hostname
+      description: |
+        Omit the hostname from tags and events. This is useful when the database host is not monitored by an Agent.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+      fleet_configurable: true
+    - name: database_identifier
+      description: |
+        Controls how the database is identified. The default value is the resolved hostname for the instance,
+        which respects the `reported_hostname` option.
+
+        This value is used as-is for the display name of the instance but is normalized when applied as a tag.
+        Please see https://docs.datadoghq.com/getting_started/tagging/ for more details on Datadog tag normalization.
+      options:
+        - name: template
+          description: |
+            The template to use for the database identifier. The default value is `$resolved_hostname`.
+            You can use the following variables, prefixed by `$` in the template:
+            - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+            - server: The provided server of the instance.
+            - port: The port number of the instance.
+            - service_name: The provided service name of the instance.
+            - cdb_name: The resolved CDB name of the instance.
+            In addition, you can use any key from the `tags` section of the configuration.
+          value:
+            type: string
+            display_default: "$resolved_hostname"
+            example: "$resolved_hostname"
+          fleet_configurable: true
+      fleet_configurable: true
     - template: instances/db
     - template: instances/default
