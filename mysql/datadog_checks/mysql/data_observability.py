@@ -41,6 +41,7 @@ class CronScheduledQuery:
     query: Query
     scheduler: CronScheduler
     pending_retry: DueQuery | None = None
+    reported_connection_error: tuple[str | None, str] | None = None
 
 
 @dataclass
@@ -50,6 +51,7 @@ class IntervalScheduledQuery:
     interval_seconds: int
     last_execution: float | None = None
     pending_retry: DueQuery | None = None
+    reported_connection_error: tuple[str | None, str] | None = None
 
 
 ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
@@ -330,9 +332,8 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 for pending in due_queries[index:]:
                     pending.scheduled_query.pending_retry = pending
                 if not self._cancel_event.is_set():
-                    result = self._error_result(error, time.time() - now_at_fire_start, 'execute')
-                    if result['error_kind'] == 'sql_error':
-                        result['error_kind'] = 'connection_error'
+                    # The connection is gone, so this is a connection error whatever the server reported.
+                    result = self._error_result(error, time.time() - now_at_fire_start, 'lost')
                     self._emit_result(due, result, now_at_fire_start)
                     self._report_connection_errors(due_queries[index + 1 :], error, 'blocked')
                 raise
@@ -393,6 +394,18 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     raw=True,
                 )
 
+            # Connection errors are retried every collection, so an outage would repeat the same
+            # event for every pending query. Send one only when it differs from the last event
+            # handed off for this query. The state is in memory, so a restart sends it again.
+            connection_error = (
+                (result['error_code'], result['error'])
+                if result['status'] == 'error' and result['error_kind'] == 'connection_error'
+                else None
+            )
+            if connection_error is not None and connection_error == due.scheduled_query.reported_connection_error:
+                self._log.debug("Skipping unchanged connection error for monitor_id=%d", query.monitor_id)
+                return
+
             payload = self._build_event_payload(query, result)
             raw_event = json.dumps(payload, default=default_json_event_encoding)
             self._log.debug(
@@ -402,6 +415,8 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 result['row_count'],
             )
             self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
+            # Recorded only after a successful handoff, so a failed send is retried.
+            due.scheduled_query.reported_connection_error = connection_error
         except Exception as e:
             self._log.exception("Failed to emit metrics/event for monitor_id=%d", query.monitor_id)
             try:
