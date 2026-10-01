@@ -35,10 +35,12 @@ ORDER BY role_name
 """
 
 
+# Before PostgreSQL 16, dropping a role leaves memberships it granted pointing at its OID, so the grantor is
+# reported by OID rather than dropping a membership that is still in effect.
 QUERY_MEMBERSHIPS_PG14_15 = """
 SELECT group_role.rolname::text AS group_role_name,
        member_role.rolname::text AS member_role_name,
-       grantor_role.rolname::text AS grantor_role_name,
+       COALESCE(grantor_role.rolname::text, membership.grantor::text) AS grantor_role_name,
        membership.admin_option AS admin_option,
        member_role.rolinherit AS member_can_inherit
 FROM pg_catalog.pg_auth_members AS membership
@@ -46,7 +48,7 @@ JOIN pg_catalog.pg_roles AS group_role
   ON group_role.oid = membership.roleid
 JOIN pg_catalog.pg_roles AS member_role
   ON member_role.oid = membership.member
-JOIN pg_catalog.pg_roles AS grantor_role
+LEFT JOIN pg_catalog.pg_roles AS grantor_role
   ON grantor_role.oid = membership.grantor
 ORDER BY group_role_name, member_role_name, grantor_role_name
 """
@@ -55,7 +57,7 @@ ORDER BY group_role_name, member_role_name, grantor_role_name
 QUERY_MEMBERSHIPS_PG16_PLUS = """
 SELECT group_role.rolname::text AS group_role_name,
        member_role.rolname::text AS member_role_name,
-       grantor_role.rolname::text AS grantor_role_name,
+       COALESCE(grantor_role.rolname::text, membership.grantor::text) AS grantor_role_name,
        membership.admin_option AS admin_option,
        membership.inherit_option AS member_can_inherit
 FROM pg_catalog.pg_auth_members AS membership
@@ -63,7 +65,7 @@ JOIN pg_catalog.pg_roles AS group_role
   ON group_role.oid = membership.roleid
 JOIN pg_catalog.pg_roles AS member_role
   ON member_role.oid = membership.member
-JOIN pg_catalog.pg_roles AS grantor_role
+LEFT JOIN pg_catalog.pg_roles AS grantor_role
   ON grantor_role.oid = membership.grantor
 ORDER BY group_role_name, member_role_name, grantor_role_name
 """

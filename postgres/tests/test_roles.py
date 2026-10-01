@@ -10,6 +10,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
 from datadog_checks.postgres.version_utils import V13, V15
 
+from .common import POSTGRES_VERSION
 from .utils import _get_superconn, requires_over_14, requires_over_15, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -428,6 +429,58 @@ def test_collect_roles_redacts_custom_setting_values(integration_check, roles_in
         'pg_stat_statements.track': ('all', False),
         'role': ('dd_role_obs_reader', False),
     }
+
+
+@requires_over_14
+@pytest.mark.skipif(
+    POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 16,
+    reason='PostgreSQL 16 and later refuse to drop a role that granted a membership',
+)
+def test_collect_roles_keeps_membership_with_dropped_grantor(integration_check, roles_instance, aggregator):
+    """A membership whose grantor was dropped is still in effect and must still be reported.
+
+    Before PostgreSQL 16, dropping the grantor leaves its OID in pg_auth_members.grantor. Omitting the row would
+    report that the member does not belong to the group.
+    """
+    with _get_superconn(roles_instance) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                CREATE ROLE dd_role_obs_orphan_group NOLOGIN;
+                CREATE ROLE dd_role_obs_orphan_member NOLOGIN;
+                CREATE ROLE dd_role_obs_orphan_grantor NOLOGIN;
+                GRANT dd_role_obs_orphan_group TO dd_role_obs_orphan_grantor WITH ADMIN OPTION;
+                SET ROLE dd_role_obs_orphan_grantor;
+                GRANT dd_role_obs_orphan_group TO dd_role_obs_orphan_member;
+                RESET ROLE;
+                """
+            )
+            cursor.execute("SELECT 'dd_role_obs_orphan_grantor'::regrole::oid")
+            grantor_oid = cursor.fetchone()[0]
+            cursor.execute("DROP ROLE dd_role_obs_orphan_grantor")
+    try:
+        check = integration_check(roles_instance)
+
+        run_one_check(check)
+
+        role_event = next(
+            event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_roles'
+        )
+        assert [
+            membership['grantor_role_name']
+            for membership in role_event['memberships']
+            if membership['group_role_name'] == 'dd_role_obs_orphan_group'
+            and membership['member_role_name'] == 'dd_role_obs_orphan_member'
+        ] == [str(grantor_oid)]
+    finally:
+        with _get_superconn(roles_instance) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    DROP ROLE IF EXISTS dd_role_obs_orphan_member;
+                    DROP ROLE IF EXISTS dd_role_obs_orphan_group;
+                    """
+                )
 
 
 @requires_over_15
