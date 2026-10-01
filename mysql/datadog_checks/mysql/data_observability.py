@@ -273,8 +273,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             'duration_s': duration,
             'error': message,
             'error_kind': kind,
-            'error_code': code,
-            'error_phase': phase,
+            'error_code': str(code) if code is not None else None,
         }
 
     def _build_event_payload(self, query_spec: Query, result: dict[str, Any]) -> dict[str, Any]:
@@ -389,7 +388,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 self._check.count(
                     'dd.mysql.data_observability.query_errors',
                     1,
-                    tags=tags + [f'error_kind:{result["error_kind"]}', f'error_phase:{result["error_phase"]}'],
+                    tags=tags + [f'error_kind:{result["error_kind"]}'],
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
