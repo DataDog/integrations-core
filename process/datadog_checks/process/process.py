@@ -543,8 +543,8 @@ class ProcessCheck(AgentCheck):
         if not bounds and nb_procs < 1:
             status = AgentCheck.CRITICAL
         elif bounds:
-            warning = [self._coerce_threshold_bound(v) for v in bounds.get('warning', [1, float('inf')])]
-            critical = [self._coerce_threshold_bound(v) for v in bounds.get('critical', [1, float('inf')])]
+            warning = [self._coerce_threshold_bound(v) for v in bounds.get('warning') or [1, float('inf')]]
+            critical = [self._coerce_threshold_bound(v) for v in bounds.get('critical') or [1, float('inf')]]
 
             if warning[1] < nb_procs or nb_procs < warning[0]:
                 status = AgentCheck.WARNING
