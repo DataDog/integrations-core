@@ -1,0 +1,6 @@
+provides:
+  - id: sap-erp-resources-query
+    always_on: true
+    granular: false
+    data_type: resources
+    direction: inbound

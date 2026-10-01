@@ -1,0 +1,63 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Technical user",
+      "basic": {
+        "user_setting": {
+          "key": "sap_username",
+          "label": "Technical user",
+          "help": "Dedicated read-only SAP system user.",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "sap_password",
+          "label": "Password",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "sap_sales_order_service_root",
+      "label": "Sales Order (OData V4) service root URL",
+      "help": "HTTPS URL of the published API_SALESORDER service root, for example https://<host>/sap/opu/odata4/sap/api_salesorder/srvd_a2x/sap/salesorder/0001/.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "sap_system_number",
+      "label": "SAP system number",
+      "help": "The SAP-issued system number (from SAP for Me or SAP Cloud ALM). It identifies the system and cannot be changed after data is collected.",
+      "editable": false,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "sap_client",
+      "label": "SAP client",
+      "help": "Three-digit SAP client. Cannot be changed after data is collected.",
+      "editable": false,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "sap_sales_organizations",
+      "label": "Sales organizations",
+      "help": "Comma-separated sales organization codes to collect, for example 1010,1710. Patterns are not supported.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "sap-erp-resources-query"
+    }
+  ]
+}

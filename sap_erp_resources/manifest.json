@@ -1,0 +1,39 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "637c589e-a5ee-48c3-a62d-44a8a798ca61",
+  "app_id": "sap-erp-resources",
+  "owner": "agent-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SAP S/4HANA sales orders, items, and schedule lines as Datadog resources.",
+    "title": "SAP S/4HANA Sales Orders",
+    "media": [],
+    "classifier_tags": [
+      "Category::Cloud",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 90847583,
+      "source_type_name": "SAP S/4HANA Sales Orders",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

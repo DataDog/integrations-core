@@ -1297,6 +1297,10 @@ integration/sanity:
 - changed-files:
   - any-glob-to-any-file:
     - sanity/**/*
+integration/sap_erp_resources:
+- changed-files:
+  - any-glob-to-any-file:
+    - sap_erp_resources/**/*
 integration/sap_hana:
 - changed-files:
   - any-glob-to-any-file:
