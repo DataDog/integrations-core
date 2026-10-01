@@ -1,1 +1,1 @@
-Add backend-agnostic HTTP protocols, exceptions, and structural test fakes, so checks and their tests can avoid depending on `requests`.
+Add backend-agnostic HTTP protocols, exceptions, and structural test fakes, so checks and their tests can avoid depending on `requests`. Scrapers created by `GenericPrometheusCheck`, which backs the legacy Prometheus check, now apply the HTTP settings in `init_config`, such as `timeout` and the proxy options, which they previously ignored.
