@@ -125,7 +125,7 @@ datadog-juniper-srx-firewall==1.3.0
 datadog-kafka-actions==2.10.1
 datadog-kafka-consumer==9.2.0
 datadog-kafka==4.6.0
-datadog-karpenter==3.4.1
+datadog-karpenter==3.5.0
 datadog-keda==2.4.1
 datadog-keycloak==1.2.0
 datadog-kong==6.5.0
