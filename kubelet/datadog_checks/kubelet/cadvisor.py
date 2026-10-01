@@ -35,7 +35,7 @@ class CadvisorScraper(object):
         self.log = logging.getLogger(__name__)
 
         # Legacy cAdvisor uses a separate node-local endpoint, so give it an isolated HTTP client.
-        self._cadvisor_http = self.create_http_client({'skip_proxy': True})
+        self._cadvisor_http = self.create_http_client({})
 
     def detect_cadvisor(self, kubelet_url, cadvisor_port):
         """

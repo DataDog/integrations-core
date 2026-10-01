@@ -1,1 +1,1 @@
-Migrate to the backend-agnostic HTTP client and error types.
+Migrate to the backend-agnostic HTTP client and error types. Legacy cAdvisor requests now use the `init_config` and Agent proxy settings when set, and fall back to the proxy environment variables otherwise.
