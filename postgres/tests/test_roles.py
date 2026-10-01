@@ -585,6 +585,9 @@ def test_collect_roles_collects_every_database_within_budget(integration_check, 
         ('dogs_2', 'success'),
         ('dogs_3', 'success'),
     ]
+    aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:success', count=1)
+    # One instance payload plus one payload per database.
+    aggregator.assert_metric('dd.postgres.roles.payloads_count', value=5, count=1)
 
 
 def test_collect_roles_resumes_after_exceeding_budget(integration_check, roles_instance, aggregator):
@@ -612,6 +615,83 @@ def test_collect_roles_resumes_after_exceeding_budget(integration_check, roles_i
         check.cancel()
 
     assert collected == [['dogs_0'], ['dogs_1'], ['dogs_2'], ['dogs_3'], ['dogs_0']]
+
+
+@pytest.mark.parametrize(
+    'collect_roles_overrides, instance_overrides, expected_databases',
+    [
+        pytest.param({'include_databases': ['^dogs_[0-2]$']}, {}, ['dogs_0', 'dogs_1', 'dogs_2'], id='include'),
+        pytest.param(
+            {'include_databases': ['^dogs_[0-2]$'], 'exclude_databases': ['^dogs_1$']},
+            {},
+            ['dogs_0', 'dogs_2'],
+            id='include-and-exclude',
+        ),
+        pytest.param({'include_databases': ['^dogs_']}, {'dbstrict': True}, ['datadog_test'], id='dbstrict'),
+    ],
+)
+def test_collect_roles_database_filters(
+    integration_check, roles_instance, aggregator, collect_roles_overrides, instance_overrides, expected_databases
+):
+    roles_instance['collect_roles'].update(collect_roles_overrides)
+    roles_instance.update(instance_overrides)
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    assert _collected_databases(aggregator) == expected_databases
+
+
+def _fail_in_database(monkeypatch, database_name, failure):
+    original_collect_query = PostgresRoleCollector._collect_query
+
+    def collect_query(self, cursor, query, params, array_name, emitter):
+        if cursor.connection.info.dbname == database_name:
+            failure(self)
+        return original_collect_query(self, cursor, query, params, array_name, emitter)
+
+    monkeypatch.setattr(PostgresRoleCollector, '_collect_query', collect_query)
+
+
+def test_collect_roles_database_failure_does_not_affect_other_databases(
+    integration_check, roles_instance, aggregator, monkeypatch
+):
+    roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-2]$']
+    check = integration_check(roles_instance)
+
+    def fail(_collector):
+        raise RuntimeError("injected database failure")
+
+    _fail_in_database(monkeypatch, 'dogs_1', fail)
+
+    run_one_check(check)
+
+    assert _collected_databases(aggregator) == ['dogs_0', 'dogs_2']
+    assert _database_time_statuses(aggregator) == [
+        ('dogs_0', 'success'),
+        ('dogs_1', 'error'),
+        ('dogs_2', 'success'),
+    ]
+    aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:error', count=1)
+    aggregator.assert_metric('dd.postgres.roles.payloads_count', value=3, count=1)
+
+
+def test_collect_roles_cancellation_stops_remaining_databases(
+    integration_check, roles_instance, aggregator, monkeypatch
+):
+    """Cancelling mid-run must stop the fan-out so agent shutdown is not held up, and discard the open snapshot."""
+    roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-2]$']
+    check = integration_check(roles_instance)
+
+    def cancel(collector):
+        collector._cancel_event.set()
+
+    _fail_in_database(monkeypatch, 'dogs_1', cancel)
+
+    run_one_check(check)
+
+    assert _collected_databases(aggregator) == ['dogs_0']
+    assert _database_time_statuses(aggregator) == [('dogs_0', 'success'), ('dogs_1', 'cancelled')]
 
 
 def test_collect_roles_updates_timestamp_on_failure(integration_check, roles_instance, monkeypatch):
