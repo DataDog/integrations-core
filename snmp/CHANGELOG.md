@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 13.4.0 / 2026-10-01
+
+***Added***:
+
+* Add ``sfos_ip_sec_vpn_conn_status`` and ``sfos_ip_sec_vpn_active_status`` tags for Sophos XGS Firewall V20 IPsec VPN tunnels. ([#25008](https://github.com/DataDog/integrations-core/pull/25008))
+* Add ``ENTITY-SENSOR-MIB`` (thermal and fan sensor) support to the Palo Alto profile. ([#25009](https://github.com/DataDog/integrations-core/pull/25009))
+
+***Fixed***:
+
+* Load SNMP profiles with the libyaml-backed YAML loader when available, and stop the discovery loop when the check is no longer running. ([#25334](https://github.com/DataDog/integrations-core/pull/25334))
+
 ## 13.3.0 / 2026-08-21 / Agent 7.83.0
 
 ***Security***:
