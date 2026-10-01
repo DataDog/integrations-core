@@ -190,7 +190,6 @@ def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, 
         'error': None,
         'error_kind': None,
         'error_code': None,
-        'error_phase': None,
     }
     assert (second['statement_id'], second['rows']) == ('s1', [['42']])
     assert first['result_id'] != second['result_id']
@@ -227,7 +226,6 @@ def test_metrics_report_runs_statements_and_events(aggregator, dd_run_check, ins
         'dd.mysql.do_task.statements',
         'status:error',
         'error_kind:sql_error',
-        'error_phase:execute',
     )
     _assert_count(aggregator, check, 'dd.mysql.do_task.events', count=2)
     for status in ('success', 'error'):
@@ -311,12 +309,7 @@ def test_failed_statement_does_not_stop_the_others(aggregator, dd_run_check, ins
     connect = _run(dd_run_check, check, conn)
 
     failed, succeeded = _events(aggregator)
-    assert (failed['status'], failed['error_kind'], failed['error_code'], failed['error_phase']) == (
-        'error',
-        'sql_error',
-        1054,
-        'execute',
-    )
+    assert (failed['status'], failed['error_kind'], failed['error_code']) == ('error', 'sql_error', '1054')
     assert failed['rows'] == []
     assert (succeeded['status'], succeeded['rows']) == ('success', [['1']])
     # A plain server error leaves the connection usable.
@@ -351,7 +344,7 @@ def test_server_errors_are_classified(aggregator, dd_run_check, instance_basic, 
     _run(dd_run_check, check, FakeConnection({'SELECT slow()': error}))
 
     (event,) = _events(aggregator)
-    assert (event['error_kind'], event['error_code']) == (expected_kind, error.args[0])
+    assert (event['error_kind'], event['error_code']) == (expected_kind, str(error.args[0]))
 
 
 @pytest.mark.parametrize(
@@ -409,7 +402,7 @@ def test_connect_failure_reports_every_statement(aggregator, dd_run_check, insta
     assert [event['statement_id'] for event in events] == ['s0', 's1']
     assert len({event['result_id'] for event in events}) == 2
     for event in events:
-        assert (event['error_kind'], event['error_code'], event['error_phase']) == ('connection_error', 2003, 'connect')
+        assert (event['error_kind'], event['error_code']) == ('connection_error', '2003')
         assert event['error'].startswith('Statement not executed: could not connect to the database')
 
     _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:connection_error')
@@ -419,7 +412,6 @@ def test_connect_failure_reports_every_statement(aggregator, dd_run_check, insta
         'dd.mysql.do_task.statements',
         'status:error',
         'error_kind:connection_error',
-        'error_phase:connect',
         count=2,
     )
     # The statements never ran, so they have no execution time.
@@ -438,7 +430,7 @@ def test_lost_connection_reconnects_for_the_next_statement(aggregator, dd_run_ch
     connect = _run(dd_run_check, check, first, second)
 
     lost, succeeded = _events(aggregator)
-    assert (lost['error_kind'], lost['error_phase']) == ('connection_error', 'execute')
+    assert lost['error_kind'] == 'connection_error'
     assert succeeded['status'] == 'success'
     assert connect.call_count == 2
 
@@ -470,12 +462,7 @@ def test_expired_task_reports_a_task_error_without_connecting(aggregator, dd_run
     (event,) = _events(aggregator)
     assert 'statement_id' not in event
     assert 'result_id' not in event
-    assert (event['task_id'], event['status'], event['error_kind'], event['error_phase']) == (
-        TASK_ID,
-        'error',
-        'expired',
-        'schedule',
-    )
+    assert (event['task_id'], event['status'], event['error_kind']) == (TASK_ID, 'error', 'expired')
     assert (event['chunk_index'], event['chunk_count']) == (0, 1)
     connect.assert_not_called()
     _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:expired')
