@@ -600,6 +600,18 @@ def test_autodiscovery_case_sensitive_exclude_matching(mock_check):
     assert config.dbname == 'POSTGRES'
 
 
+def test_empty_collect_roles_block_uses_defaults(mock_check, minimal_instance):
+    """A bare `collect_roles:` key, as uncommenting the example config produces, parses to None."""
+    minimal_instance['collect_roles'] = None
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+
+    config, result = build_config(check=mock_check)
+
+    assert result.valid
+    assert config.collect_roles.model_dump() == dict_defaults.instance_collect_roles().model_dump()
+
+
 def test_autodiscovery_invalid_regex_pattern_warns(mock_check):
     # Invalid regex patterns should generate warnings
     instance = {

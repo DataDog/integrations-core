@@ -162,7 +162,7 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             },
             "collect_roles": {
                 **dict_defaults.instance_collect_roles().model_dump(),
-                **(instance.get('collect_roles', {})),
+                **(instance.get('collect_roles') or {}),
             },
             "collect_column_statistics": {
                 **dict_defaults.instance_collect_column_statistics().model_dump(),
@@ -467,7 +467,7 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
         'collect_column_statistics',
     ]
     for feature in dbm_required:
-        if instance.get(feature, {}).get('enabled') and not config.dbm:
+        if (instance.get(feature) or {}).get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature}` feature requires the `dbm` option to be enabled.')
 
 
