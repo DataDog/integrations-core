@@ -76,24 +76,33 @@ def memberships_query(*, pg16_plus: bool) -> str:
     return QUERY_MEMBERSHIPS_PG14_15
 
 
+# Applications can store arbitrary values, including secrets such as `pgrst.jwt_secret`, in custom
+# placeholder settings. Those always contain a dot and never appear in `pg_settings`, even when set in the
+# current session. Built-in settings never contain a dot, but some (such as `role`) are hidden from
+# `pg_settings`, so their values are kept on the name alone. Placeholder names keep the case they were
+# written in, while `pg_settings` names are lowercase.
 QUERY_ROLE_SETTINGS = """
 SELECT role_settings.rolname::text AS role_name,
        role_settings.database_name,
-       split_part(role_settings.setting, '=', 1) AS setting_name,
-       substr(
-           role_settings.setting,
-           strpos(role_settings.setting, '=') + 1
-       ) AS setting_value
+       role_settings.setting_name,
+       CASE WHEN known_setting.name IS NOT NULL OR strpos(role_settings.setting_name, '.') = 0
+            THEN role_settings.setting_value
+       END AS setting_value,
+       known_setting.name IS NULL AND strpos(role_settings.setting_name, '.') > 0 AS is_value_redacted
 FROM (
     SELECT role.rolname,
            COALESCE(database.datname::text, '') AS database_name,
-           unnest(settings.setconfig) AS setting
+           split_part(setting, '=', 1) AS setting_name,
+           substr(setting, strpos(setting, '=') + 1) AS setting_value
     FROM pg_catalog.pg_db_role_setting AS settings
+    CROSS JOIN LATERAL unnest(settings.setconfig) AS setting
     JOIN pg_catalog.pg_roles AS role
       ON role.oid = settings.setrole
     LEFT JOIN pg_catalog.pg_database AS database
       ON database.oid = settings.setdatabase
 ) AS role_settings
+LEFT JOIN pg_catalog.pg_settings AS known_setting
+  ON known_setting.name = lower(role_settings.setting_name)
 ORDER BY role_name, database_name, setting_name
 """
 

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import pytest
@@ -59,6 +60,10 @@ def role_catalog(roles_instance):
                 GRANT dd_role_obs_reader TO dd_role_obs_granted;
                 RESET ROLE;
                 ALTER ROLE dd_role_obs_reader IN DATABASE datadog_test SET statement_timeout = '5s';
+                ALTER ROLE dd_role_obs_owner SET pgrst.jwt_secret = 'dd-role-obs-secret';
+                ALTER ROLE dd_role_obs_owner SET "DdRoleObs.Api_Key" = 'dd-role-obs-mixed-case-secret';
+                ALTER ROLE dd_role_obs_owner SET pg_stat_statements.track = 'all';
+                ALTER ROLE dd_role_obs_owner SET role = 'dd_role_obs_reader';
                 CREATE SCHEMA dd_role_obs AUTHORIZATION dd_role_obs_owner;
                 CREATE TABLE dd_role_obs.items (id integer);
                 ALTER TABLE dd_role_obs.items OWNER TO dd_role_obs_owner;
@@ -273,6 +278,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'database_name': 'datadog_test',
         'setting_name': 'statement_timeout',
         'setting_value': '5s',
+        'is_value_redacted': False,
     } in role_event['settings']
 
     privilege_event = privilege_events[0]
@@ -394,6 +400,34 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         and dependency['referenced_object_name'] == 'items'
         for dependency in privilege_event['object_dependencies']
     )
+
+
+@requires_over_14
+def test_collect_roles_redacts_custom_setting_values(integration_check, roles_instance, role_catalog, aggregator):
+    """Values of custom placeholder settings must never be collected.
+
+    Applications store secrets such as PostgREST's `pgrst.jwt_secret` in role settings. Built-in settings, which
+    include hidden ones such as `role`, and settings registered by a loaded module keep their values.
+    """
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    metadata = aggregator.get_event_platform_events('dbm-metadata')
+    assert 'dd-role-obs-secret' not in json.dumps(metadata)
+    assert 'dd-role-obs-mixed-case-secret' not in json.dumps(metadata)
+    role_event = next(event for event in metadata if event['kind'] == 'pg_roles')
+
+    assert {
+        setting['setting_name']: (setting['setting_value'], setting['is_value_redacted'])
+        for setting in role_event['settings']
+        if setting['role_name'] == 'dd_role_obs_owner'
+    } == {
+        'pgrst.jwt_secret': (None, True),
+        'DdRoleObs.Api_Key': (None, True),
+        'pg_stat_statements.track': ('all', False),
+        'role': ('dd_role_obs_reader', False),
+    }
 
 
 @requires_over_15
