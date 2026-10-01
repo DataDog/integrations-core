@@ -258,7 +258,7 @@
                         "layout": {
                             "x": 0,
                             "y": 2,
-                            "width": 6,
+                            "width": 4,
                             "height": 2
                         }
                     },
@@ -304,9 +304,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 4,
                             "y": 2,
-                            "width": 6,
+                            "width": 4,
                             "height": 2
                         }
                     },
@@ -330,7 +330,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "per_second(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -352,9 +352,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
                             "height": 2
                         }
                     }
@@ -1758,7 +1758,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "per_second(query1)"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1936,7 +1936,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 12,
-                "height": 11,
+                "height": 15,
                 "is_column_break": true
             }
         },
@@ -2241,7 +2241,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 15,
                 "width": 12,
                 "height": 5
             }
@@ -2803,7 +2803,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 20,
                 "width": 12,
                 "height": 7
             }
@@ -3327,7 +3327,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 27,
                 "width": 12,
                 "height": 7
             }
