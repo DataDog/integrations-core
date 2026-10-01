@@ -506,7 +506,6 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
         req_ms_bucket{le="-1.0"} 4
         req_ms_bucket{le="5.0"} 10
         req_ms_bucket{le="+Inf"} 10
-        req_ms_sum -3
         req_ms_count 10
         """
     mock_http_response(payload)
