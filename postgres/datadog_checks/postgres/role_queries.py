@@ -149,6 +149,9 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
 """
 
 
+# Only explicitly stored ACLs are collected. An object with a NULL ACL has the compiled-in default privileges for
+# its type and owner; it is reported in `objects` with `has_default_acl` so the backend can resolve them, rather
+# than shipping the same owner and PUBLIC rows for every untouched object.
 QUERY_OBJECT_PRIVILEGES = """
 SELECT privileges.database_name,
        privileges.object_type,
@@ -186,15 +189,7 @@ FROM (
       ON namespace.oid = relation.relnamespace
     JOIN pg_catalog.pg_roles AS owner
       ON owner.oid = relation.relowner
-    CROSS JOIN LATERAL pg_catalog.aclexplode(
-        COALESCE(
-            relation.relacl,
-            pg_catalog.acldefault(
-                CASE WHEN relation.relkind = 'S' THEN 's' ELSE 'r' END::"char",
-                relation.relowner
-            )
-        )
-    ) AS acl
+    CROSS JOIN LATERAL pg_catalog.aclexplode(relation.relacl) AS acl
     LEFT JOIN pg_catalog.pg_roles AS grantee
       ON grantee.oid = acl.grantee
     LEFT JOIN pg_catalog.pg_roles AS grantor
@@ -222,12 +217,7 @@ FROM (
     FROM pg_catalog.pg_namespace AS namespace
     JOIN pg_catalog.pg_roles AS owner
       ON owner.oid = namespace.nspowner
-    CROSS JOIN LATERAL pg_catalog.aclexplode(
-        COALESCE(
-            namespace.nspacl,
-            pg_catalog.acldefault('n'::"char", namespace.nspowner)
-        )
-    ) AS acl
+    CROSS JOIN LATERAL pg_catalog.aclexplode(namespace.nspacl) AS acl
     LEFT JOIN pg_catalog.pg_roles AS grantee
       ON grantee.oid = acl.grantee
     LEFT JOIN pg_catalog.pg_roles AS grantor
@@ -265,12 +255,7 @@ FROM (
       ON namespace.oid = routine.pronamespace
     JOIN pg_catalog.pg_roles AS owner
       ON owner.oid = routine.proowner
-    CROSS JOIN LATERAL pg_catalog.aclexplode(
-        COALESCE(
-            routine.proacl,
-            pg_catalog.acldefault('f'::"char", routine.proowner)
-        )
-    ) AS acl
+    CROSS JOIN LATERAL pg_catalog.aclexplode(routine.proacl) AS acl
     LEFT JOIN pg_catalog.pg_roles AS grantee
       ON grantee.oid = acl.grantee
     LEFT JOIN pg_catalog.pg_roles AS grantor
@@ -298,12 +283,7 @@ FROM (
     FROM pg_catalog.pg_database AS database
     JOIN pg_catalog.pg_roles AS owner
       ON owner.oid = database.datdba
-    CROSS JOIN LATERAL pg_catalog.aclexplode(
-        COALESCE(
-            database.datacl,
-            pg_catalog.acldefault('d'::"char", database.datdba)
-        )
-    ) AS acl
+    CROSS JOIN LATERAL pg_catalog.aclexplode(database.datacl) AS acl
     LEFT JOIN pg_catalog.pg_roles AS grantee
       ON grantee.oid = acl.grantee
     LEFT JOIN pg_catalog.pg_roles AS grantor

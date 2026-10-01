@@ -109,6 +109,8 @@ def role_catalog(roles_instance):
                     LANGUAGE sql
                     AS 'SELECT count(*) FROM dd_role_obs.items WHERE id >= min_id';
                 ALTER PROCEDURE dd_role_obs.count_items_from(integer) OWNER TO dd_role_obs_owner;
+                GRANT EXECUTE ON FUNCTION dd_role_obs.item_stats(integer) TO dd_role_obs_reader;
+                GRANT EXECUTE ON PROCEDURE dd_role_obs.count_items_from(integer) TO dd_role_obs_reader;
                 CREATE AGGREGATE dd_role_obs.item_total(integer) (
                     SFUNC = int4pl, STYPE = integer, INITCOND = '0'
                 );
@@ -503,19 +505,61 @@ def test_collect_roles_names_routines_by_input_types(integration_check, roles_in
     privilege_event = next(
         event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
     )
-    expected = {
-        ('function', 'count_items()'),
-        ('function', 'item_stats(integer)'),
-        ('procedure', 'count_items_from(integer)'),
-        ('procedure', 'refresh_items()'),
-        ('aggregate', 'item_total(integer)'),
-    }
-    for array_name in ('objects', 'object_privileges'):
-        assert {
+
+    def routine_names(array_name):
+        return {
             (row['object_type'], row['object_name'])
             for row in privilege_event[array_name]
             if row['schema_name'] == 'dd_role_obs' and row['object_type'] in ('function', 'procedure', 'aggregate')
-        } == expected, array_name
+        }
+
+    granted = {
+        ('function', 'item_stats(integer)'),
+        ('procedure', 'count_items_from(integer)'),
+        ('aggregate', 'item_total(integer)'),
+    }
+    assert routine_names('objects') == granted | {('function', 'count_items()'), ('procedure', 'refresh_items()')}
+    # Only routines with explicit grants have privilege rows.
+    assert routine_names('object_privileges') == granted
+
+
+@requires_over_14
+def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_instance, role_catalog, aggregator):
+    """Objects on default privileges ship no privilege rows; explicitly granted objects ship their complete ACL.
+
+    The backend resolves default privileges from `has_default_acl`, the object type, and the owner. A grant stores
+    the full ACL, including the owner and PUBLIC entries it started from, so those rows must still be shipped.
+    """
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    privilege_event = next(
+        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    )
+
+    def find_object(name):
+        return next(
+            obj
+            for obj in privilege_event['objects']
+            if obj['schema_name'] == 'dd_role_obs' and obj['object_name'] == name
+        )
+
+    def privileges(name):
+        return {
+            (privilege['grantee_name'], privilege['privilege'])
+            for privilege in privilege_event['object_privileges']
+            if privilege['schema_name'] == 'dd_role_obs' and privilege['object_name'] == name
+        }
+
+    assert find_object('count_items()')['has_default_acl'] is True
+    assert privileges('count_items()') == set()
+    assert find_object('item_total(integer)')['has_default_acl'] is False
+    assert privileges('item_total(integer)') == {
+        ('dd_role_obs_owner', 'EXECUTE'),
+        ('PUBLIC', 'EXECUTE'),
+        ('dd_role_obs_reader', 'EXECUTE'),
+    }
 
 
 @requires_over_15
