@@ -38,6 +38,11 @@ git checkout $desired_commit
 Write-Host "Bootstrapping vcpkg..."
 .\bootstrap-vcpkg.bat
 
+# Apply the same patches as the Linux and macOS builders, which pass them to install-from-source.sh
+foreach ($patch in 'librdkafka-fix-coord-request-uaf.patch', 'librdkafka-fix-offsetfetch-null-cgrp.patch') {
+    git -C $librdkafka_dir apply --verbose "C:\mnt\patches\$patch"
+}
+
 # Get deps
 Set-Location "$librdkafka_dir"
 # Patch the the vcpkg manifest to to override the OpenSSL version and CURL version
