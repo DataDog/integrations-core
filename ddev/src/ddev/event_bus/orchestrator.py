@@ -63,6 +63,10 @@ class BaseMessage:
 
     id: str
 
+    def __str__(self) -> str:
+        # Text such as logs and error messages names a message; its fields can carry an entire test run.
+        return f"{type(self).__name__} {self.id!r}"
+
 
 class BaseProcessor[T: BaseMessage]:
     def __init__(self, name: str):
@@ -314,7 +318,7 @@ class EventBusOrchestrator(ABC):
         if self.stopping:
             # Dropped rather than raised: processors submit from `finally` blocks, where raising would
             # route an expected shutdown through the error policy.
-            self._logger.warning("Dropped %s(%s): the bus is shutting down", type(message).__name__, message.id)
+            self._logger.warning("Dropped %s: the bus is shutting down", message)
             return
 
         if self._loop is not None and self._loop.is_running():
@@ -577,12 +581,20 @@ class EventBusOrchestrator(ABC):
             if (primary := self._primary_failure()) is not None:
                 self._record_secondary_failure(e, primary, secondary_context=f"on_error handling {hook_name}")
                 return
-            self._logger.error(
-                "on_error handler for '%s' raised %s while processing %s",
-                hook_name,
-                e,
-                wrapped_error,
-            )
+            if e is wrapped_error:
+                # The default on_error re-raises what it received, so there is only one error to report.
+                self._logger.error(
+                    "on_error handler for '%s' re-raised its error: %s",
+                    hook_name,
+                    e,
+                )
+            else:
+                self._logger.error(
+                    "on_error handler for '%s' raised %s while processing %s",
+                    hook_name,
+                    e,
+                    wrapped_error,
+                )
             return
         if handled:
             return
