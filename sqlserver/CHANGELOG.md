@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 23.6.0 / 2026-10-01
+
+***Security***:
+
+* Encode database names in SQL Server ODBC and ADO connection strings so names with special characters are not parsed as separate connection attributes. ([#25270](https://github.com/DataDog/integrations-core/pull/25270))
+
+***Fixed***:
+
+* Isolate execution plan lookup failures so query metrics collection can continue. ([#25091](https://github.com/DataDog/integrations-core/pull/25091))
+* Fix SQL Server Agent history collection scaling. ([#25214](https://github.com/DataDog/integrations-core/pull/25214))
+* Log plan obfuscation failures with repr so an embedded null cannot crash the job. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
 ## 23.5.0 / 2026-09-02
 
 ***Deprecated***:
