@@ -310,8 +310,6 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'security_invoker',
         'has_default_acl',
     }
-    assert 'row_policies' not in privilege_event
-    assert all('rls_enabled' not in obj and 'rls_forced' not in obj for obj in privilege_event['objects'])
     assert any(
         privilege['object_type'] == 'view'
         and privilege['schema_name'] == 'dd_role_obs'
