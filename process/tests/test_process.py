@@ -507,6 +507,23 @@ def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_chec
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=ProcessCheck.OK)
 
 
+@pytest.mark.parametrize(
+    'thresholds, expected_status',
+    [
+        pytest.param({'warning': [1, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='within_range'),
+        pytest.param({'warning': [2, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.WARNING, id='below_lower_bound'),
+    ],
+)
+@patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
+def test_thresholds_inf_string_end_to_end(mock_process_iter, aggregator, dd_run_check, thresholds, expected_status):
+    # Goes through config model validation as well as the comparison, unlike `test_process_service_check`.
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': thresholds}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
+    expected_tags = generate_expected_tags(instance)
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=expected_status)
+
+
 NOT_A_NUMBER = "thresholds.warning {} bound must be a number or the string '.inf'"
 
 
