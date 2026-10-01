@@ -20,7 +20,7 @@ if ON_WINDOWS:
     DEFAULT_DEVICE_BASE_NAME = 'c:'
     DEFAULT_FILE_SYSTEM = 'ntfs'
     DEFAULT_MOUNT_POINT = 'c:'
-else:  # not windows
+else:  # not windoows
     DEFAULT_DEVICE_NAME = '/dev/sda1'
     DEFAULT_DEVICE_BASE_NAME = 'sda1'
     DEFAULT_FILE_SYSTEM = 'ext4'
