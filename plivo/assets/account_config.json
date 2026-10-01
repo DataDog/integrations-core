@@ -1,0 +1,40 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Auth ID and token",
+      "basic": {
+        "user_setting": {
+          "key": "auth_id",
+          "label": "Auth ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "auth_token",
+          "label": "Auth token",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "message_expiry_time",
+      "label": "Message Expiry Time",
+      "help": "The message expiry time in seconds is set to match the message expiry time configured in Plivo. Ensure that the expiry time remains synchronized with what is configured in Plivo. The default value is set to 3 hours (10800 seconds). Messages ingestion to Datadog will be delayed by this duration to ensure settled messages are fetched.",
+      "editable": true,
+      "required": false,
+      "integer": {
+        "min": 5,
+        "max": 10800,
+        "default": 10800
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "plivo-logs" }
+  ]
+}

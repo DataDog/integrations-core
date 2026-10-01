@@ -487,11 +487,11 @@ def test_an_accepted_final_result_reports_the_batches_outcomes(tmp_path: Path):
     drain_queue(gatherer.bus.queue)
     assert [record.value for record in sink.records_named("batches.failed")] == [1]
     failed = [
-        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.failed")
+        (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.failed")
     ]
     assert failed == [(1, "ntp"), (0, "kafka"), (0, "redis")]
     skipped = [
-        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.skipped")
+        (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.skipped")
     ]
     assert skipped == [(0, "ntp"), (1, "kafka"), (0, "redis")]
     assert {record.tags["dispatcher.component"] for record in sink.records_named("jobs.failed")} == {"test-gatherer"}
@@ -544,7 +544,7 @@ def test_completed_attempts_report_their_github_duration_once(tmp_path: Path):
     durations = sink.records_named("job.duration")
     assert [record.value for record in durations] == [DEFAULT_DURATION_SECONDS, 150.0]
     assert all(record.kind is MetricKind.DISTRIBUTION for record in durations)
-    assert [record.tags["dispatcher.batch.job.integration"] for record in durations] == ["ntp", "ntp"]
+    assert [record.tags["dispatcher.batch.job.target"] for record in durations] == ["ntp", "ntp"]
     assert [record.tags["dispatcher.batch.job.environment"] for record in durations] == ["py3.13", "py3.13"]
     assert [record.tags["dispatcher.batch.job.status"] for record in durations] == ["success", "failure"]
     assert {record.tags["dispatcher.component"] for record in durations} == {"test-gatherer"}
@@ -553,16 +553,11 @@ def test_completed_attempts_report_their_github_duration_once(tmp_path: Path):
 @pytest.mark.parametrize(
     ("conclusion", "reported"),
     [
-        pytest.param(WorkflowJobConclusion.SUCCESS, True, id="success"),
-        pytest.param(WorkflowJobConclusion.FAILURE, True, id="failure"),
-        pytest.param(WorkflowJobConclusion.TIMED_OUT, True, id="timed-out"),
+        pytest.param(WorkflowJobConclusion.TIMED_OUT, True, id="finished-running"),
         pytest.param(WorkflowJobConclusion.CANCELLED, False, id="cancelled"),
-        pytest.param(WorkflowJobConclusion.SKIPPED, False, id="skipped"),
-        pytest.param(WorkflowJobConclusion.NEUTRAL, False, id="neutral"),
-        pytest.param(WorkflowJobConclusion.ACTION_REQUIRED, False, id="action-required"),
     ],
 )
-def test_only_jobs_that_ran_to_an_outcome_report_a_duration(
+def test_only_jobs_that_finished_running_report_a_duration(
     tmp_path: Path, conclusion: WorkflowJobConclusion, reported: bool
 ):
     """A cancelled or skipped job's timing is near zero or partial, so it would skew the distribution."""
@@ -624,7 +619,7 @@ def test_a_final_result_reports_a_duration_progress_never_observed(tmp_path: Pat
 
     [duration] = sink.records_named("job.duration")
     assert duration.value == DEFAULT_DURATION_SECONDS
-    assert duration.tags["dispatcher.batch.job.integration"] == "ntp"
+    assert duration.tags["dispatcher.batch.job.target"] == "ntp"
     assert duration.tags["dispatcher.batch.job.status"] == "success"
 
 
@@ -682,11 +677,11 @@ def test_an_observed_attempt_the_commit_never_collected_reports_no_outcome(tmp_p
     )
     drain_queue(gatherer.bus.queue)
 
-    reported = [record.tags["dispatcher.batch.job.integration"] for record in sink.records_named("jobs.failed")]
+    reported = [record.tags["dispatcher.batch.job.target"] for record in sink.records_named("jobs.failed")]
     assert reported == ["ntp"]
     assert [record.value for record in sink.records_named("jobs.failed")] == [0]
     assert [
-        (record.value, record.tags["dispatcher.batch.job.integration"]) for record in sink.records_named("jobs.skipped")
+        (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.skipped")
     ] == [(0, "ntp")]
 
 
@@ -1043,19 +1038,50 @@ def test_malformed_junit_is_swallowed(tmp_path: Path):
     assert result.reports == ()  # malformed junit skipped; coverage.xml is not a JUnit report
 
 
-def test_missing_workflow_job_raises(tmp_path: Path):
-    # Correlation is the runner's job; a job without a workflow job on a non-timed-out batch is a bug.
+@pytest.mark.parametrize(
+    ("run_status", "job_status", "junit", "expected"),
+    [
+        pytest.param(Status.SUCCESS, None, JUNIT_PASSING, Status.SUCCESS, id="successful-run"),
+        pytest.param(Status.FAILURE, None, JUNIT_FAILING, Status.FAILURE, id="failed-tests-in-artifacts"),
+        pytest.param(Status.FAILURE, None, None, Status.INCONCLUSIVE, id="no-artifacts"),
+        pytest.param(Status.FAILURE, WorkflowJobStatus.IN_PROGRESS, JUNIT_PASSING, Status.INCONCLUSIVE, id="stale-job"),
+    ],
+)
+def test_an_unconfirmed_job_is_resolved_from_the_run_and_its_artifacts(
+    tmp_path: Path,
+    run_status: Status,
+    job_status: WorkflowJobStatus | None,
+    junit: str | None,
+    expected: Status,
+):
+    """A job never seen completed takes its status from the run's conclusion and its artifacts."""
     artifacts = tmp_path / "artifacts" / "100"
-    job_dir = _make_job_tree(artifacts, "j1")
-    monitoring, sink = recording_runtime()
-    gatherer = _make_gatherer(tmp_path, monitor=monitoring.component("test-gatherer"))
+    job_dir = _make_job_tree(artifacts, "j1", junit=junit, e2e=False) if junit is not None else None
+    workflow_job = None if job_status is None else make_workflow_job(name="j1", status=job_status)
+    handler = RecordingJsonHandler()
+    gatherer = _make_gatherer(tmp_path, handler=handler)
 
-    with pytest.raises(ValueError, match="No workflow job correlated"):
-        gatherer.process_message(
-            _batch_finished(artifacts, batch_jobs=[_batch_job_result(make_job("j1"), None, job_dir)])
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status=run_status,
+            batch_jobs=[_batch_job_result(make_job("j1"), workflow_job, job_dir)],
         )
+    )
 
-    assert [record.value for record in sink.records_named("operations.failed")] == [1]
+    result = gatherer._results_by_batch["batch-1"][0]
+    assert result.status is expected
+    assert result.failed_steps == []
+    [update] = drain_queue(gatherer.bus.queue)
+    assert (update.progress.passed, update.progress.failed, update.progress.inconclusive) == (
+        expected is Status.SUCCESS,
+        expected is Status.FAILURE,
+        expected is Status.INCONCLUSIVE,
+    )
+    warnings = [event for event in handler.events if "no confirmed final state" in event["event"]]
+    [warning] = warnings
+    assert warning["job"] == "j1"
+    assert warning["job_status"] == expected.value
 
 
 def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:

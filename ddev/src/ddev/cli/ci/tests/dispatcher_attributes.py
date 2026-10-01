@@ -118,6 +118,9 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'dispatcher.batch.id',
         console_tag=True,
         test_tag=True,
+        # Concurrent batches of one run emit the same gauges; the batch keeps their series apart so
+        # one batch's points do not overwrite another's.
+        metric_tag=True,
     ),
     'batch_job_count': AttributeSpec(
         'dispatcher.batch.job_count',
@@ -202,8 +205,8 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         console_tag=True,
         metric_tag=True,
     ),
-    'integration': AttributeSpec(
-        'dispatcher.batch.job.integration',
+    'target': AttributeSpec(
+        'dispatcher.batch.job.target',
         console_tag=True,
         test_tag=True,
         metric_tag=True,
@@ -505,7 +508,7 @@ def batch_fields(batch: TestBatch) -> dict[str, Any]:
 def job_fields(job: BatchJob) -> dict[str, Any]:
     fields: dict[str, Any] = {
         'job': job.name,
-        'integration': job.target,
+        'target': job.target,
         'platform': job.platform,
         'python_version': job.python_version,
         'unit_tests': job.unit_tests,

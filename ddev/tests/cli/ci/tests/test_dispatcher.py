@@ -324,7 +324,8 @@ def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
     assert outcome.progress.failed == 1
 
 
-def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsyncGitHubClient, tmp_path: Path):
+def test_missing_final_job_metadata_is_resolved_from_the_run_conclusion(client: FakeAsyncGitHubClient, tmp_path: Path):
+    """A successful run clears a job whose final listing failed, since GitHub fails a run with a failed job."""
     job = make_job()
     client.mock_response(
         "get_workflow_run",
@@ -341,8 +342,9 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
 
     dispatcher.run()
 
-    assert not dispatcher.outcome.progress.done
-    assert not dispatcher.outcome.successful
+    assert dispatcher.outcome.progress.done
+    assert dispatcher.outcome.progress.passed == 1
+    assert dispatcher.outcome.successful
 
 
 def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary):
@@ -586,7 +588,7 @@ def test_a_cancelled_run_counts_its_uncollected_jobs_as_incomplete(client: FakeA
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
     incomplete = sink.records_named('jobs.incomplete')
     assert [record.value for record in incomplete] == [1]
-    assert incomplete[0].tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert incomplete[0].tags['dispatcher.batch.job.target'] == 'ntp'
     assert incomplete[0].tags['dispatcher.component'] == 'dispatcher'
     assert sink.records_named('jobs.failed') == []
     assert sink.records_named('batches.failed') == []
@@ -682,11 +684,10 @@ def test_shutdown_before_progress_counts_only_launched_jobs(client: FakeAsyncGit
     assert dispatcher.outcome is not None
     assert {batch.state for batch in dispatcher.outcome.progress.batches} == {ExecutionState.PLANNED}
     assert [record.value for record in sink.records_named('batches.count')] == [1]
-    launched = [record.tags['dispatcher.batch.job.integration'] for record in sink.records_named('jobs.count')]
+    launched = [record.tags['dispatcher.batch.job.target'] for record in sink.records_named('jobs.count')]
     assert launched == ['ntp']
     incomplete = [
-        (record.value, record.tags['dispatcher.batch.job.integration'])
-        for record in sink.records_named('jobs.incomplete')
+        (record.value, record.tags['dispatcher.batch.job.target']) for record in sink.records_named('jobs.incomplete')
     ]
     assert incomplete == [(1, 'ntp')]
 

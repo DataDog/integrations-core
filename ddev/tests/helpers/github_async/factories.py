@@ -64,6 +64,9 @@ UNSET = Unset.TOKEN
 DEFAULT_STARTED_AT = '2026-01-01T10:00:00Z'
 DEFAULT_COMPLETED_AT = '2026-01-01T10:01:30Z'
 DEFAULT_DURATION_SECONDS = 90.0
+# A few seconds before `DEFAULT_STARTED_AT`, so a default job also waited for a runner.
+DEFAULT_CREATED_AT = '2026-01-01T09:59:55Z'
+DEFAULT_QUEUE_DURATION_SECONDS = 5.0
 
 
 def make_response[T](data: T, headers: dict[str, str] | None = None) -> GitHubResponse[T]:
@@ -395,6 +398,7 @@ def make_workflow_job(
     status: WorkflowJobStatus = WorkflowJobStatus.COMPLETED,
     conclusion: WorkflowJobConclusion | None | Unset = UNSET,
     html_url: str | None | Unset = UNSET,
+    created_at: str = DEFAULT_CREATED_AT,
     started_at: str = DEFAULT_STARTED_AT,
     completed_at: str | None | Unset = UNSET,
     steps: Sequence[JobStep] = (),
@@ -412,6 +416,7 @@ def make_workflow_job(
         status=status,
         conclusion=conclusion,
         html_url=html_url,
+        created_at=created_at,
         started_at=started_at,
         completed_at=completed_at,
         steps=list(steps),
