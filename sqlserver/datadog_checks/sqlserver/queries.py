@@ -49,8 +49,6 @@ WHERE
 GROUP BY object_id
 """
 
-# Each list is a separate aggregate. One SELECT cannot order two STRING_AGG
-# calls differently (Msg 8711: incompatible WITHIN GROUP orderings).
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
