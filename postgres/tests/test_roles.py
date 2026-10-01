@@ -101,6 +101,14 @@ def role_catalog(roles_instance):
                     LANGUAGE sql SECURITY DEFINER
                     AS 'SELECT count(*) FROM dd_role_obs.items';
                 ALTER FUNCTION dd_role_obs.count_items() OWNER TO dd_role_obs_owner;
+                CREATE FUNCTION dd_role_obs.item_stats(min_id integer, OUT item_count bigint, OUT max_id integer)
+                    LANGUAGE sql
+                    AS 'SELECT count(*), max(id) FROM dd_role_obs.items WHERE id >= min_id';
+                ALTER FUNCTION dd_role_obs.item_stats(integer) OWNER TO dd_role_obs_owner;
+                CREATE PROCEDURE dd_role_obs.count_items_from(IN min_id integer, OUT item_count bigint)
+                    LANGUAGE sql
+                    AS 'SELECT count(*) FROM dd_role_obs.items WHERE id >= min_id';
+                ALTER PROCEDURE dd_role_obs.count_items_from(integer) OWNER TO dd_role_obs_owner;
                 CREATE AGGREGATE dd_role_obs.item_total(integer) (
                     SFUNC = int4pl, STYPE = integer, INITCOND = '0'
                 );
@@ -479,6 +487,35 @@ def test_collect_roles_keeps_membership_with_dropped_grantor(integration_check, 
                     DROP ROLE IF EXISTS dd_role_obs_orphan_group;
                     """
                 )
+
+
+@requires_over_14
+def test_collect_roles_names_routines_by_input_types(integration_check, roles_instance, role_catalog, aggregator):
+    """Routines are named by their input argument types, the form `GRANT ... ON FUNCTION` accepts.
+
+    Parameter names and OUT parameters are not part of a routine's identity, and including them made names such
+    as `pg_stat_statements(...)` list dozens of output columns in every privilege row.
+    """
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    privilege_event = next(
+        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    )
+    expected = {
+        ('function', 'count_items()'),
+        ('function', 'item_stats(integer)'),
+        ('procedure', 'count_items_from(integer)'),
+        ('procedure', 'refresh_items()'),
+        ('aggregate', 'item_total(integer)'),
+    }
+    for array_name in ('objects', 'object_privileges'):
+        assert {
+            (row['object_type'], row['object_name'])
+            for row in privilege_event[array_name]
+            if row['schema_name'] == 'dd_role_obs' and row['object_type'] in ('function', 'procedure', 'aggregate')
+        } == expected, array_name
 
 
 @requires_over_15

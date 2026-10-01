@@ -248,7 +248,7 @@ FROM (
            (
                routine.proname
                || '('
-               || pg_catalog.pg_get_function_identity_arguments(routine.oid)
+               || pg_catalog.oidvectortypes(routine.proargtypes)
                || ')'
            )::text AS object_name,
            ''::text AS column_name,
@@ -387,7 +387,7 @@ FROM (
            (
                routine.proname
                || '('
-               || pg_catalog.pg_get_function_identity_arguments(routine.oid)
+               || pg_catalog.oidvectortypes(routine.proargtypes)
                || ')'
            )::text AS object_name,
            routine.oid::bigint AS object_oid,
