@@ -242,6 +242,8 @@ class PostgresRoleCollector:
             tags_no_db,
             database_name=database_name,
         )
+        started_at = time.time() * 1000
+        status = "error"
         try:
             with self._check.db_pool.get_connection(database_name) as conn:
                 with conn.transaction():
@@ -252,8 +254,10 @@ class PostgresRoleCollector:
                         self._collect_query(cursor, QUERY_OBJECTS, (), "objects", emitter)
                         self._collect_query(cursor, QUERY_OBJECT_DEPENDENCIES, (), "object_dependencies", emitter)
             emitter.flush_terminal()
+            status = "success"
             return True
         except RoleCollectionCancelled:
+            status = "cancelled"
             emitter.discard()
             return False
         except Exception:
@@ -262,6 +266,13 @@ class PostgresRoleCollector:
             return False
         finally:
             self._record_emitter(emitter)
+            self._check.histogram(
+                "dd.postgres.roles.database.time",
+                (time.time() * 1000) - started_at,
+                tags=self._check.tags_without_db + [f"db:{database_name}", f"status:{status}"],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
 
     def _get_databases(self) -> list[str]:
         params: list[str] = []

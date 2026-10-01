@@ -553,6 +553,7 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
     assert privilege_events
     assert all('collection_payloads_count' not in event for event in privilege_events)
     assert any(event['kind'] == 'pg_roles' for event in metadata)
+    assert _database_time_statuses(aggregator) == [('datadog_test', 'error')]
 
 
 def _collected_databases(aggregator):
@@ -563,6 +564,15 @@ def _collected_databases(aggregator):
     ]
 
 
+def _database_time_statuses(aggregator):
+    statuses = []
+    for metric in aggregator.metrics('dd.postgres.roles.database.time'):
+        assert sum(tag.startswith('db:') for tag in metric.tags) == 1
+        tags = dict(tag.split(':', 1) for tag in metric.tags if tag.startswith(('db:', 'status:')))
+        statuses.append((tags['db'], tags['status']))
+    return sorted(statuses)
+
+
 def test_collect_roles_collects_every_database_within_budget(integration_check, roles_instance, aggregator):
     roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-3]$']
     check = integration_check(roles_instance)
@@ -571,6 +581,12 @@ def test_collect_roles_collects_every_database_within_budget(integration_check, 
 
     assert _collected_databases(aggregator) == ['dogs_0', 'dogs_1', 'dogs_2', 'dogs_3']
     aggregator.assert_metric('dd.postgres.roles.skipped_databases', count=0)
+    assert _database_time_statuses(aggregator) == [
+        ('dogs_0', 'success'),
+        ('dogs_1', 'success'),
+        ('dogs_2', 'success'),
+        ('dogs_3', 'success'),
+    ]
 
 
 def test_collect_roles_resumes_after_exceeding_budget(integration_check, roles_instance, aggregator):
