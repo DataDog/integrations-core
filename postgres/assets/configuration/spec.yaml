@@ -574,6 +574,7 @@ files:
               - "alloydbmetadata"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          fleet_configurable: true
           value:
             type: integer
             example: 600
@@ -714,7 +715,7 @@ files:
         type: string
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
-      fleet_configurable: false
+      fleet_configurable: true
     - name: pg_stat_activity_view
       display_priority: 0
       hidden: true
@@ -1201,6 +1202,7 @@ files:
           fleet_configurable: false
     - name: aws
       display_priority: 0
+      fleet_configurable: true
       description: |
         This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -1222,7 +1224,7 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-          fleet_configurable: false
+          fleet_configurable: true
         - name: region
           description: |
             Equal to the region of the instance the agent is connecting to.
@@ -1230,7 +1232,7 @@ files:
           value:
             type: string
             example: us-east-1
-          fleet_configurable: false
+          fleet_configurable: true
         - name: managed_authentication
           description: |
             Configure section used for AWS IAM Authentication with RDS.
@@ -1262,6 +1264,7 @@ files:
 
     - name: gcp
       display_priority: 0
+      fleet_configurable: true
       description: |
         This block defines the configuration for Google Cloud SQL instances.
 
@@ -1280,7 +1283,7 @@ files:
           value:
             type: string
             example: foo-project
-          fleet_configurable: false
+          fleet_configurable: true
         - name: instance_id
           description: |
             Equal to the GCP resource's instance ID.
@@ -1290,10 +1293,11 @@ files:
           value:
             type: string
             example: foo-database
-          fleet_configurable: false
+          fleet_configurable: true
 
     - name: azure
       display_priority: 0
+      fleet_configurable: true
       description: |
         This block defines the configuration for Azure Database for PostgreSQL.
 
@@ -1316,7 +1320,7 @@ files:
           value:
             type: string
             example: flexible_server
-          fleet_configurable: false
+          fleet_configurable: true
         - name: fully_qualified_domain_name
           description: |
             Equal to the full qualified domain name of the Azure PostgreSQL database.
@@ -1325,7 +1329,7 @@ files:
           value:
             type: string
             example: my-postgres-database.database.windows.net
-          fleet_configurable: false
+          fleet_configurable: true
         - name: managed_authentication
           description: |
             Configuration section used for Azure AD Authentication.
