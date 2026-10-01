@@ -33,7 +33,9 @@ def decumulate_histogram_buckets(sample_data):
                     bucket_tuples_by_context_upper_bound[context] = {}
                 # The first bucket is [-inf, upper_b], but the agent discards buckets with an infinite bound,
                 # so keep the lower bound finite: non-negative buckets start at zero, negative ones collapse
-                # to a point at upper_b (as the agent already does for the +inf top bucket).
+                # to a point at upper_b (as the agent already does for the +inf top bucket). Negative
+                # thresholds are valid input, not malformed input we can reject:
+                # https://github.com/OpenObservability/OpenMetrics/blob/v1.0.0/specification/OpenMetrics.md#L250
                 lower_b = 0 if upper_b >= 0 else upper_b
                 bucket_tuples_by_context_upper_bound[context][upper_b] = (
                     lower_b,
