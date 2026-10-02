@@ -11,7 +11,7 @@ from urllib.parse import quote_plus
 import mock
 import pytest
 from bson import json_util
-from pymongo.errors import ConnectionFailure, OperationFailure
+from pymongo.errors import ConnectionFailure, NotPrimaryError, OperationFailure
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
@@ -238,37 +238,65 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     mock_list_database_names.assert_called_once()
 
 
+@pytest.mark.parametrize('replset_state', [0, 3, 5, 8, 9])
+def test_when_replicaset_state_not_readable_then_database_names_not_called(replset_state, dd_run_check, aggregator):
+    with mock.patch(
+        'pymongo.database.Database.command',
+        side_effect=[
+            {'host': 'test-hostname'},  # serverStatus
+            Exception('getCmdLineOpts exception'),  # getCmdLineOpts
+            {},  # isMaster
+            {'configsvr': True, 'set': 'replset', "myState": replset_state},  # replSetGetStatus
+        ],
+    ), mock.patch(
+        'pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'}
+    ), mock.patch(
+        'pymongo.mongo_client.MongoClient.list_database_names', return_value=[]
+    ) as mock_list_database_names:
+        # Given
+        check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+        check.refresh_collectors = mock.MagicMock()
+        # When
+        dd_run_check(check)
+        # Then the node is reachable but not readable, so the check stays OK and skips reads
+        aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+        mock_list_database_names.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'replset_state, expected_readable',
+    [(0, False), (1, True), (2, True), (3, False), (5, False), (7, False), (8, False), (9, False)],
+)
+def test_replicaset_deployment_is_readable(replset_state, expected_readable):
+    deployment = ReplicaSetDeployment(HostingType.SELF_HOSTED, 'replset', replset_state, [], 'me')
+    assert deployment.is_readable is expected_readable
+
+
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
         {'host': 'test-hostname'},  # serverStatus
         Exception('getCmdLineOpts exception'),  # getCmdLineOpts
         {},  # isMaster
-        {'configsvr': True, 'set': 'replset', "myState": 3},  # replSetGetStatus
+        {'configsvr': True, 'set': 'replset', "myState": 1},  # replSetGetStatus
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
-def test_when_replicaset_state_recovering_then_database_names_not_called(
+def test_collector_not_primary_error_does_not_fail_check(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
-    # Given
+    # Given a readable node where a collector raises NotPrimaryError mid-collection (state transition)
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    failing_collector = mock.MagicMock()
+    failing_collector.collect.side_effect = NotPrimaryError("node is recovering")
     check.refresh_collectors = mock.MagicMock()
+    check.collectors = [failing_collector]
     # When
     dd_run_check(check)
-    # Then
+    # Then the NotPrimaryError is swallowed and the check stays OK
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls(
-        [
-            mock.call('serverStatus'),
-            mock.call('getCmdLineOpts'),
-            mock.call('isMaster'),
-            mock.call('replSetGetStatus'),
-        ]
-    )
-    mock_server_info.assert_called_once()
-    mock_list_database_names.assert_not_called()
+    failing_collector.collect.assert_called_once()
 
 
 @pytest.mark.parametrize(
