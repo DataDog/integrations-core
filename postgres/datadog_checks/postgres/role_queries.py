@@ -110,8 +110,7 @@ ORDER BY role_name, database_name, setting_name
 
 
 QUERY_DEFAULT_PRIVILEGES = """
-SELECT current_database()::text AS database_name,
-       owner.rolname::text AS owner_name,
+SELECT owner.rolname::text AS owner_name,
        COALESCE(namespace.nspname::text, '') AS schema_name,
        CASE default_acl.defaclobjtype
            WHEN 'r' THEN 'table'
@@ -155,8 +154,7 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
 # Column grants are stored only on columns granted individually: table-level grants never populate `attacl`, and
 # columns have no default privileges. A column row adds access on top of the relation's own privileges.
 QUERY_OBJECT_PRIVILEGES = """
-SELECT privileges.database_name,
-       privileges.object_type,
+SELECT privileges.object_type,
        privileges.schema_name,
        privileges.object_name,
        privileges.column_name,
@@ -166,8 +164,7 @@ SELECT privileges.database_name,
        privileges.is_grantable,
        privileges.owner_name
 FROM (
-    SELECT current_database()::text AS database_name,
-           CASE relation.relkind
+    SELECT CASE relation.relkind
                WHEN 'r' THEN 'table'
                WHEN 'p' THEN 'partitioned_table'
                WHEN 'v' THEN 'view'
@@ -203,8 +200,7 @@ FROM (
 
     UNION ALL
 
-    SELECT current_database()::text AS database_name,
-           CASE relation.relkind
+    SELECT CASE relation.relkind
                WHEN 'r' THEN 'table'
                WHEN 'p' THEN 'partitioned_table'
                WHEN 'v' THEN 'view'
@@ -244,8 +240,7 @@ FROM (
 
     UNION ALL
 
-    SELECT current_database()::text AS database_name,
-           'schema'::text AS object_type,
+    SELECT 'schema'::text AS object_type,
            namespace.nspname::text AS schema_name,
            namespace.nspname::text AS object_name,
            ''::text AS column_name,
@@ -271,8 +266,7 @@ FROM (
 
     UNION ALL
 
-    SELECT current_database()::text AS database_name,
-           CASE routine.prokind
+    SELECT CASE routine.prokind
                WHEN 'p' THEN 'procedure'
                WHEN 'a' THEN 'aggregate'
                ELSE 'function'
@@ -310,8 +304,7 @@ FROM (
 
     UNION ALL
 
-    SELECT database.datname::text AS database_name,
-           'database'::text AS object_type,
+    SELECT 'database'::text AS object_type,
            ''::text AS schema_name,
            database.datname::text AS object_name,
            ''::text AS column_name,
@@ -337,8 +330,7 @@ FROM (
 
 
 QUERY_OBJECTS = """
-SELECT objects.database_name,
-       objects.object_type,
+SELECT objects.object_type,
        objects.schema_name,
        objects.object_name,
        objects.object_oid,
@@ -347,8 +339,7 @@ SELECT objects.database_name,
        objects.security_invoker,
        objects.has_default_acl
 FROM (
-    SELECT current_database()::text AS database_name,
-           CASE relation.relkind
+    SELECT CASE relation.relkind
                WHEN 'r' THEN 'table'
                WHEN 'p' THEN 'partitioned_table'
                WHEN 'v' THEN 'view'
@@ -382,8 +373,7 @@ FROM (
 
     UNION ALL
 
-    SELECT current_database()::text AS database_name,
-           'schema'::text AS object_type,
+    SELECT 'schema'::text AS object_type,
            namespace.nspname::text AS schema_name,
            namespace.nspname::text AS object_name,
            namespace.oid::bigint AS object_oid,
@@ -400,8 +390,7 @@ FROM (
 
     UNION ALL
 
-    SELECT current_database()::text AS database_name,
-           CASE routine.prokind
+    SELECT CASE routine.prokind
                WHEN 'p' THEN 'procedure'
                WHEN 'a' THEN 'aggregate'
                ELSE 'function'
@@ -430,8 +419,7 @@ FROM (
 
     UNION ALL
 
-    SELECT database.datname::text AS database_name,
-           'database'::text AS object_type,
+    SELECT 'database'::text AS object_type,
            ''::text AS schema_name,
            database.datname::text AS object_name,
            database.oid::bigint AS object_oid,
@@ -449,7 +437,6 @@ FROM (
 
 QUERY_OBJECT_DEPENDENCIES = """
 SELECT DISTINCT
-       current_database()::text AS database_name,
        CASE dependent.relkind
            WHEN 'v' THEN 'view'
            WHEN 'm' THEN 'materialized_view'

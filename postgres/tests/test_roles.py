@@ -306,7 +306,6 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     assert privilege_event['object_privileges']
     assert privilege_event['objects']
     assert set(privilege_event['object_privileges'][0]) == {
-        'database_name',
         'object_type',
         'schema_name',
         'object_name',
@@ -318,7 +317,6 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'owner_name',
     }
     assert set(privilege_event['objects'][0]) == {
-        'database_name',
         'object_type',
         'schema_name',
         'object_name',
@@ -327,6 +325,23 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'is_security_definer',
         'security_invoker',
         'has_default_acl',
+    }
+    assert set(privilege_event['default_privileges'][0]) == {
+        'owner_name',
+        'schema_name',
+        'object_type',
+        'grantee_name',
+        'grantor_name',
+        'privilege',
+        'is_grantable',
+    }
+    assert set(privilege_event['object_dependencies'][0]) == {
+        'dependent_object_type',
+        'dependent_schema_name',
+        'dependent_object_name',
+        'referenced_object_type',
+        'referenced_schema_name',
+        'referenced_object_name',
     }
     assert any(
         privilege['object_type'] == 'view'
