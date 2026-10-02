@@ -1099,6 +1099,65 @@ files:
             example:
               - "customer.*"
 
+    - name: collect_roles
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Enable collection of database roles.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: |
+            Enable collection of database roles. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            The database role collection interval (in seconds).
+          value:
+            type: number
+            example: 600
+        - name: max_query_duration
+          fleet_configurable: true
+          description: |
+            Maximum duration of the query to collect role information in seconds.
+          value:
+            type: number
+            example: 60
+        - name: include_databases
+          fleet_configurable: true
+          description: |
+            A list of regex patterns to include databases.
+            Any database whose name matches any one of these patterns will be included.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example: []
+        - name: exclude_databases
+          fleet_configurable: true
+          description: |
+            A list of regex patterns to exclude databases.
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+            default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
+              - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
+
     - name: collect_column_statistics
       description: |
         Enable collection of column statistics from pg_stats.
