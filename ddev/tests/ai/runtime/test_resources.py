@@ -13,7 +13,7 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.runtime.resources import RunResources
+from ddev.ai.runtime.resources import HTTP_RESPONSES_DIR_NAME, RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.http.base import FetchedResponse, HttpRequestInput, HttpRequestTool
 from tests.ai.config.utils import make_agent_config
@@ -79,7 +79,7 @@ async def test_http_artifacts_are_shared_across_agent_runtimes_and_preserved_on_
     get_path = Path(json.loads(get_result.data)["saved_to"])
     post_path = Path(json.loads(post_result.data)["saved_to"])
     assert get_path.parent == post_path.parent
-    assert get_path.parent.parent == run_root / "responses"
+    assert get_path.parent.parent == run_root / HTTP_RESPONSES_DIR_NAME
     assert get_path != post_path
     assert json.loads(get_path.read_text())["method"] == "GET"
     assert json.loads(post_path.read_text())["method"] == "POST"
