@@ -139,7 +139,6 @@ def test_indexes(dbm_instance, integration_check):
                 _assert_key_order({index['name']: index for index in json.loads(row['indexes'])})
 
 
-
 def _assert_include_split(indexes):
     # (c) INCLUDE (a, e) and (c, a) INCLUDE (e) share column_names. The INCLUDE list does not.
     assert indexes['ix_include']['key_columns'] == 'c'
