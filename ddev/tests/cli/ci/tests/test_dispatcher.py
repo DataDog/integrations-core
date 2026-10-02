@@ -324,7 +324,8 @@ def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
     assert outcome.progress.failed == 1
 
 
-def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsyncGitHubClient, tmp_path: Path):
+def test_missing_final_job_metadata_is_resolved_from_the_run_conclusion(client: FakeAsyncGitHubClient, tmp_path: Path):
+    """A successful run clears a job whose final listing failed, since GitHub fails a run with a failed job."""
     job = make_job()
     client.mock_response(
         "get_workflow_run",
@@ -341,8 +342,9 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
 
     dispatcher.run()
 
-    assert not dispatcher.outcome.progress.done
-    assert not dispatcher.outcome.successful
+    assert dispatcher.outcome.progress.done
+    assert dispatcher.outcome.progress.passed == 1
+    assert dispatcher.outcome.successful
 
 
 def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary):

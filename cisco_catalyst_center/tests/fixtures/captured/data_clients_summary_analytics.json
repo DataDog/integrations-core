@@ -1,0 +1,15 @@
+{
+  "page": {
+    "count": 0,
+    "cursor": "",
+    "limit": 100,
+    "offset": null,
+    "sortBy": null
+  },
+  "response": {
+    "aggregateAttributes": null,
+    "attributes": null,
+    "groups": null
+  },
+  "version": "1.0"
+}

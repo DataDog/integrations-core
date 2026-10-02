@@ -58,7 +58,7 @@ fi
 
 set +e
 set -x
-ddev env test $E2E_FLAGS --junit $TARGET_ARGS -- "$@" -k "not fips"
+ddev env test $E2E_FLAGS --ignore-teardown-errors --junit $TARGET_ARGS -- "$@" -k "not fips"
 exit_code=$?
 set +x
 
