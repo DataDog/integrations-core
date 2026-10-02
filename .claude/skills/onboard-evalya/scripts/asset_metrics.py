@@ -42,16 +42,19 @@ import re
 import sys
 from pathlib import Path
 
-# A metric reference is a namespaced token immediately followed by its ``{...}`` scope
-# filter, which every Datadog query carries. The aggregator prefix (``avg:redis.mem{...}``)
-# is optional because newer formula widgets store the metric bare
-# (``"query": "postgresql.rows_inserted{$scope}"``) with the aggregator in a sibling field.
-# Requiring a dot in the token and a trailing ``{`` avoids catching template vars (``$scope``),
-# formula operands (``a / b``), monitor window functions (``avg(last_5m)``), and tag keys inside
-# braces (``by {host}``). A dot-free metric with no scope filter is not matched; the coverage
-# loop is the safety net for such edge cases.
+# A metric reference is a token immediately followed by its `{...}` scope filter, which every
+# Datadog query carries. The aggregator prefix (`avg:redis.mem{...}`) is optional for dotted
+# names because newer formula widgets store the metric bare
+# (`"query": "postgresql.rows_inserted{$scope}"`) with the aggregator in a sibling field.
+# Dotless names (e.g. otel's `otelcol_receiver_refused_spans`) are matched only after an
+# aggregator prefix, so tag-grouping keywords (`by {host}`) are not mistaken for metrics.
+# The trailing `{` avoids catching template vars (`$scope`), formula operands (`a / b`), and
+# monitor window functions (`avg(last_5m)`).
 _AGG = r"(?:avg|sum|min|max|count|last|pct|percentile|median|stddev|normalize|weight):"
-_METRIC_QUERY = re.compile(rf"(?:{_AGG})?([a-z_][a-z0-9_.]*\.[a-z0-9_.]+)\s*\{{", re.IGNORECASE)
+_METRIC_QUERY = re.compile(
+    rf"(?:(?:{_AGG})?([a-z_][a-z0-9_.]*\.[a-z0-9_.]+)|{_AGG}([a-z_][a-z0-9_]*))\s*\{{",
+    re.IGNORECASE,
+)
 
 # Query strings live under these keys in dashboard widgets and monitor definitions.
 _QUERY_KEYS = ("q", "query")
@@ -99,7 +102,7 @@ def extract_metrics(asset: dict) -> set[str]:
     metrics: set[str] = set()
     for query in _walk_query_strings(asset):
         for match in _METRIC_QUERY.finditer(query):
-            metrics.add(match.group(1))
+            metrics.add(match.group(1) or match.group(2))
     return metrics
 
 
