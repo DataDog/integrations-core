@@ -49,6 +49,8 @@ async def test_launch_modal_occupies_at_least_half_viewport(make_launch_modal_ap
 
     async with app.run_test(size=viewport) as pilot:
         await pilot.pause()
+        app.screen.refresh(layout=True)
+        await app.screen.wait_for_refresh()
         dialog = app.screen.query_one("#dialog")
         actions = app.screen.query_one(".modal-actions")
         launch_button = app.screen.query_one("#btn-launch")

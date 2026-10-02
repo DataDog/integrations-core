@@ -153,6 +153,8 @@ async def test_diagnostics_modal_occupies_at_least_half_viewport(make_togo_app):
         await pilot.pause()
         app.screen.query_one("FlowCard").on_click()
         await pilot.pause()
+        app.screen.refresh(layout=True)
+        await app.screen.wait_for_refresh()
         dialog = app.screen.query_one("#dialog")
         actions = app.screen.query_one(".modal-actions")
         close_button = app.screen.query_one("#btn-close")
