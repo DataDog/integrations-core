@@ -390,16 +390,22 @@ async def test_resume_dependency_closure_reruns_descendants_of_failure(linear_fl
     assert phases_by_name["c"]._is_resume_frontier is False
 
 
-async def test_resume_with_no_checkpoints_frontier_is_root(linear_flow, make_orchestrator):
-    """Ctrl+C before any checkpoint: all phases run, the root is the frontier."""
+async def test_resume_with_no_checkpoints_raises(linear_flow, make_orchestrator):
+    """Resuming a flow that never checkpointed is refused rather than run silently as a plain launch."""
     orchestrator, _, _ = make_orchestrator(linear_flow, resume=True)
-    await orchestrator.on_initialize()
+    with pytest.raises(ConfigError, match="no incomplete run was recorded"):
+        await orchestrator.on_initialize()
 
-    phases_by_name = {p.name: p for p in orchestrator._subscribers.get(PhaseTrigger, [])}
-    assert set(phases_by_name) == {"a", "b", "c"}
-    assert phases_by_name["a"]._is_resume_frontier is True
-    assert phases_by_name["b"]._is_resume_frontier is False
-    assert phases_by_name["c"]._is_resume_frontier is False
+
+async def test_resume_fully_completed_run_raises(linear_flow, make_orchestrator):
+    """Resuming an already-finished run is refused rather than reported as an instant success."""
+    _write_checkpoints(
+        linear_flow,
+        {"a": {"status": "success"}, "b": {"status": "success"}, "c": {"status": "success"}},
+    )
+    orchestrator, _, _ = make_orchestrator(linear_flow, resume=True)
+    with pytest.raises(ConfigError, match="every scheduled phase already completed"):
+        await orchestrator.on_initialize()
 
 
 async def test_no_resume_ignores_checkpoints(linear_flow, make_orchestrator):
