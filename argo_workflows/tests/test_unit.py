@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.argo_workflows import ArgoWorkflowsCheck
@@ -90,8 +92,15 @@ V3_6_METRICS = {
         ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
     ],
 )
-def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
-    mock_http_response(file_path=fixture_file)
+def test_check_with_fixtures(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response, fixture_file, description
+):
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        Path(fixture_file).read_bytes(),
+        match_options={'stream': True},
+        headers={'Content-Type': 'text/plain'},
+    )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 
@@ -130,11 +139,19 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.OK)
     assert_service_checks(aggregator)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(status_code=404)
+def test_emits_critical_service_check_when_service_is_down(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        status_code=404,
+        match_options={'stream': True},
+    )
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
     aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
