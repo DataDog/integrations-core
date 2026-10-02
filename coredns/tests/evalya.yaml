@@ -1,0 +1,21 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: a plain CoreDNS instance (forward + cache +
+  # health + prometheus, reusing the pytest Corefile) plus a continuous query
+  # workload that keeps every rate/counter metric non-zero. No injection
+  # layer is needed here: every dashboard/monitor metric is emittable by a
+  # live OSS CoreDNS. See ./compose/full-coverage.compose and ./activity-gen.sh.
+  - id: coredns-full
+    task: ./compose/full-coverage.compose@coredns
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DNS_HOST: "{{ .hostname }}"
+      evalya.io/provides.DNS_PORT: "53"
+      evalya.io/provides.METRICS_PORT: "9153"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s

@@ -1,0 +1,49 @@
+# Full metric-coverage environment for the coredns check.
+#
+# Every target metric (dashboards + monitors) is emittable by a single, plain
+# CoreDNS instance under continuous query traffic: process/go metrics and the
+# request/response counters are always emitted once queries flow; cache hits
+# only appear once the same name is looked up twice inside the cache TTL. No
+# metric here needs data an OSS CoreDNS can't produce, so there is no seed
+# step and no injection layer -- just the live service plus a workload.
+services:
+  # Reuses the existing pytest Corefile (forward + cache + health + prometheus)
+  # instead of authoring a new one. Built from ./coredns/Dockerfile, which
+  # repackages the real coredns/coredns binary onto Alpine purely so the
+  # healthcheck below has a shell and `wget` -- coredns/coredns itself ships on
+  # scratch with neither.
+  coredns:
+    build:
+      context: ./coredns
+      args:
+        COREDNS_VERSION: "${COREDNS_VERSION:-1.8.5}"
+    command: ["-conf", "/data/Corefile"]
+    volumes:
+      - ../docker/coredns/Corefile-v1.8:/data/Corefile:ro
+    # Pulls activity-gen up whenever coredns is requested (see evalya.yaml).
+    # activity-gen does not depend on coredns in turn (it self-polls for
+    # readiness) to avoid a dependency cycle on the entrypoint service.
+    depends_on:
+      activity-gen:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # Continuous query workload so the rate/counter metrics (request/response
+  # counts, cache hits/misses, forward request duration and rcode) stay
+  # non-zero across scrapes, not just on the first query. See ../activity-gen.sh.
+  activity-gen:
+    image: alpine:3.20
+    restart: unless-stopped
+    environment:
+      DNS_HOST: coredns
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent coredns-full: the
+      # container stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    entrypoint: ["sh", "/opt/activity-gen.sh"]
