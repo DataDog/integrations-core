@@ -19,6 +19,8 @@ from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
 import requests
 import squarify
 from datadog import api, initialize
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from ddev.cli.application import Application
 from ddev.cli.size.utils.common_params import WheelsStorageTier
@@ -323,6 +325,21 @@ def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[st
     return [resolve_wheel_url(url, tier) for tier in tiers]
 
 
+WHEEL_REQUEST_MAX_RETRIES = 3
+WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
+WHEEL_REQUEST_TIMEOUT_SECONDS = 30
+
+# The wheels storage host resets the connection under load often enough to fail a disk-usage
+# measurement run several times a week, so connection failures get a few retries with backoff.
+# HTTP error statuses are not retried here: they're handled by request_wheel's tier fallback and
+# immediate-abort logic.
+WHEEL_REQUEST_SESSION = requests.Session()
+WHEEL_REQUEST_SESSION.mount(
+    "https://",
+    HTTPAdapter(max_retries=Retry(total=WHEEL_REQUEST_MAX_RETRIES, backoff_factor=WHEEL_REQUEST_RETRY_BACKOFF_SECONDS)),
+)
+
+
 def request_wheel(
     app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
 ) -> requests.Response:
@@ -338,7 +355,11 @@ def request_wheel(
     candidates = wheel_url_candidates(url, wheels_storage)
     tried: list[str] = []
     for index, candidate in enumerate(candidates):
-        response = requests.head(candidate) if head else requests.get(candidate, stream=True)
+        response = (
+            WHEEL_REQUEST_SESSION.head(candidate, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS)
+            if head
+            else WHEEL_REQUEST_SESSION.get(candidate, stream=True, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS)
+        )
         try:
             response.raise_for_status()
         except requests.HTTPError as e:
