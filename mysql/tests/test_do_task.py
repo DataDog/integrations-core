@@ -418,10 +418,20 @@ def test_connect_failure_reports_every_statement(aggregator, dd_run_check, insta
     aggregator.assert_metric('dd.mysql.do_task.statement_execution_time', count=0)
 
 
-def test_lost_connection_reconnects_for_the_next_statement(aggregator, dd_run_check, instance_basic):
+@pytest.mark.parametrize(
+    'error, code',
+    [
+        pytest.param(
+            pymysql.err.OperationalError(2013, 'Lost connection to MySQL server during query'), '2013', id='lost'
+        ),
+        # pymysql's error for a socket that is already closed.
+        pytest.param(pymysql.err.InterfaceError(0, ''), None, id='closed-socket'),
+    ],
+)
+def test_lost_connection_reconnects_for_the_next_statement(aggregator, dd_run_check, instance_basic, error, code):
     def lose_connection(conn):
         conn.open = False
-        return pymysql.err.OperationalError(2013, 'Lost connection to MySQL server during query')
+        return error
 
     check = _create_check(instance_basic, [_statement('s0', 'SELECT sleep(100)'), _statement('s1', 'SELECT 1')])
     first = FakeConnection({'SELECT sleep(100)': lose_connection})
@@ -430,7 +440,7 @@ def test_lost_connection_reconnects_for_the_next_statement(aggregator, dd_run_ch
     connect = _run(dd_run_check, check, first, second)
 
     lost, succeeded = _events(aggregator)
-    assert lost['error_kind'] == 'connection_error'
+    assert (lost['error_kind'], lost['error_code']) == ('connection_error', code)
     assert succeeded['status'] == 'success'
     assert connect.call_count == 2
 

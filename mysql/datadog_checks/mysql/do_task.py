@@ -309,7 +309,8 @@ class MySQLDataObservabilityTask:
 
 def _error_result(error: Exception, duration: float, connecting: bool = False) -> dict[str, Any]:
     # Same classification as the Data Observability job, so both report one set of error kinds.
-    code = error.args[0] if error.args and isinstance(error.args[0], int) else None
+    # pymysql reports a closed socket as InterfaceError(0, ''); 0 is not a database error code.
+    code = error.args[0] if error.args and isinstance(error.args[0], int) and error.args[0] else None
     if connecting or isinstance(error, pymysql.err.InterfaceError) or code in CONNECTION_ERROR_CODES:
         kind = 'connection_error'
     elif code in STATEMENT_TIMEOUT_ERROR_CODES:
