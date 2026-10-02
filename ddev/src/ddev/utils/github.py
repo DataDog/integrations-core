@@ -129,6 +129,9 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
     ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
 
+    # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#add-labels-to-an-issue
+    ISSUE_LABELS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/labels'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -329,12 +332,21 @@ class GitHubManager:
     def create_milestone(self, title: str) -> None:
         self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
 
-    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> str:
+    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> tuple[int, str]:
+        """Open a pull request and return its number and URL."""
         response = self.__api_post(
             self.PULLS_API.format(repo_id=self.repo_id),
             content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body}),
         )
-        return response.json()['html_url']
+        data = response.json()
+        return data['number'], data['html_url']
+
+    def add_labels(self, issue_number: int, labels: list[str]) -> None:
+        # Pull requests are issues for labeling purposes; the pulls API does not accept labels.
+        self.__api_post(
+            self.ISSUE_LABELS_API.format(repo_id=self.repo_id, issue_number=issue_number),
+            content=json.dumps({'labels': labels}),
+        )
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')

@@ -90,6 +90,16 @@ class TestCreateLabel:
         assert label.json()['color'] == 'ff0000'
 
 
+def test_add_labels_uses_issues_api(github_manager, mocker):
+    """Labels must go through the issues API, since the pulls API silently ignores them."""
+    api_post = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_post')
+
+    github_manager.add_labels(42, ['qa/skip-qa'])
+
+    assert api_post.call_args.args[0].endswith('/issues/42/labels')
+    assert json.loads(api_post.call_args.kwargs['content']) == {'labels': ['qa/skip-qa']}
+
+
 def test_dispatch_workflow_default_returns_none(github_manager, mocker):
     """Default dispatch_workflow keeps the prior fire-and-forget behavior."""
     response = mocker.MagicMock()
