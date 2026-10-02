@@ -1,0 +1,209 @@
+id: "intersystems-iris"
+tests:
+ -
+  sample: "08/06/26-13:55:02:627 (103291) 1 [Generic.Event] ECP: connection from 'PRIMARY:IP-10-1-57-213:IRISAPP' dropped (127.0.0.1:60308)"
+  result:
+    custom:
+      iris:
+        facility: "Generic.Event"
+        pid: 103291
+        severity: 1
+        status: "warning"
+        timestamp: 1786024502627
+    message: "ECP: connection from 'PRIMARY:IP-10-1-57-213:IRISAPP' dropped (127.0.0.1:60308)"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786024502627
+ -
+  sample: "08/06/26-14:02:11:004 (44210) 2 [Utility.Event] License limit exceeded."
+  result:
+    custom:
+      iris:
+        facility: "Utility.Event"
+        pid: 44210
+        severity: 2
+        status: "error"
+        timestamp: 1786024931004
+    message: "License limit exceeded."
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786024931004
+ -
+  sample: "08/06/26-14:02:11:050 (44210) 3 [Utility.Event] LMF Error: No valid license key found."
+  result:
+    custom:
+      iris:
+        facility: "Utility.Event"
+        pid: 44210
+        severity: 3
+        status: "critical"
+        timestamp: 1786024931050
+    message: "LMF Error: No valid license key found."
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786024931050
+ -
+  sample: "08/07/26-00:30:00:075 (141266) 0 [Utility.Event] [MIRRORING] DELETE: /usr/irissys/mgr/journal/MIRROR-IRISLAB-20260804.001"
+  result:
+    custom:
+      iris:
+        facility: "Utility.Event"
+        pid: 141266
+        severity: 0
+        status: "info"
+        timestamp: 1786062600075
+    message: "[MIRRORING] DELETE: /usr/irissys/mgr/journal/MIRROR-IRISLAB-20260804.001"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786062600075
+ -
+  sample: "08/05/26-14:38:42:383 (23153) 0 [Database.StartExpansion] Starting Expansion for database /usr/irissys/mgr/iristemp/. 10 MB requested."
+  result:
+    custom:
+      iris:
+        facility: "Database.StartExpansion"
+        pid: 23153
+        severity: 0
+        status: "info"
+        timestamp: 1785940722383
+    message: "Starting Expansion for database /usr/irissys/mgr/iristemp/. 10 MB requested."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785940722383
+ -
+  sample: |-
+    {
+      "level" : "SEVERE",
+      "pid" : "8540",
+      "text" : "Previous system shutdown was abnormal, system forced down or crashed",
+      "event" : "Utility.Event",
+      "when" : "2019-08-07 14:11:04.904"
+    }
+  result:
+    custom:
+      iris:
+        facility: "Utility.Event"
+        level: "SEVERE"
+        pid: 8540
+        status: "error"
+        timestamp: 1565187064904
+      pid: "8540"
+      when: "2019-08-07 14:11:04.904"
+    message: "Previous system shutdown was abnormal, system forced down or crashed"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1565187064904
+ -
+  sample: |-
+    {
+      "level" : "WARNING",
+      "pid" : "10816",
+      "text" : "CPUusage Warning: CPUusage = 84 ( Warnvalue is 75).",
+      "event" : "System.Monitor",
+      "when" : "2019-08-07 14:16:13.843"
+    }
+  result:
+    custom:
+      iris:
+        facility: "System.Monitor"
+        level: "WARNING"
+        pid: 10816
+        status: "warning"
+        timestamp: 1565187373843
+      pid: "10816"
+      when: "2019-08-07 14:16:13.843"
+    message: "CPUusage Warning: CPUusage = 84 ( Warnvalue is 75)."
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1565187373843
+ -
+  sample: |-
+    {
+      "level" : "INFO",
+      "namespace" : "USER",
+      "pid" : "9001",
+      "text" : "Login failure for user SYSTEM",
+      "source" : "%System",
+      "event" : "Audit.LoginFailure",
+      "type" : "Login",
+      "when" : "2019-08-07 14:20:01.100",
+      "group" : "%System/%Login"
+    }
+  result:
+    custom:
+      group: "%System/%Login"
+      iris:
+        audit_source: "%System"
+        facility: "Audit.LoginFailure"
+        level: "INFO"
+        namespace: "USER"
+        pid: 9001
+        status: "info"
+        timestamp: 1565187601100
+      pid: "9001"
+      type: "Login"
+      when: "2019-08-07 14:20:01.100"
+    message: "Login failure for user SYSTEM"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1565187601100
+ -
+  sample: |-
+    {
+      "instance" : "IRIS",
+      "level" : "FATAL",
+      "host" : "iris-prod-1",
+      "pid" : "9100",
+      "text" : "System has stopped running",
+      "event" : "Generic.Event",
+      "when" : "2019-08-07 14:25:44.007"
+    }
+  result:
+    custom:
+      host: "iris-prod-1"
+      iris:
+        facility: "Generic.Event"
+        instance: "IRIS"
+        level: "FATAL"
+        pid: 9100
+        status: "critical"
+        timestamp: 1565187944007
+      pid: "9100"
+      when: "2019-08-07 14:25:44.007"
+    message: "System has stopped running"
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1565187944007
+ -
+  sample: |-
+    {
+      "level" : "DEBUG",
+      "pid" : "9200",
+      "text" : "Detailed debug trace",
+      "event" : "Generic.Event",
+      "when" : "2019-08-07 14:30:12.500"
+    }
+  result:
+    custom:
+      iris:
+        facility: "Generic.Event"
+        level: "DEBUG"
+        pid: 9200
+        status: "debug"
+        timestamp: 1565188212500
+      pid: "9200"
+      when: "2019-08-07 14:30:12.500"
+    message: "Detailed debug trace"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1565188212500
