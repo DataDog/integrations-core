@@ -27,6 +27,7 @@ from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     COMMON_TESTS_LEAD,
     FAILED_HEADING,
+    INCONCLUSIVE_TEXT,
     PROGRESS_BAR_ASSETS,
     PROGRESS_BAR_WIDTH,
     SHUTDOWN_ALERTS,
@@ -872,6 +873,16 @@ def test_a_collection_error_is_reported_once_against_its_own_target():
             "❌ <code>base</code>: 1 failed target",
             id="failed-and-lost-its-reports",
         ),
+        pytest.param(
+            (attempt(Status.INCONCLUSIVE), attempt(Status.INCONCLUSIVE)),
+            "⚠️ <code>base</code>: 2 inconclusive targets",
+            id="inconclusive",
+        ),
+        pytest.param(
+            (attempt(Status.FAILURE), attempt(Status.INCONCLUSIVE), attempt(error=ProgressError.NO_ARTIFACTS)),
+            "❌ <code>base</code>: 1 failed target, 1 inconclusive target, 1 result unavailable",
+            id="failed-inconclusive-and-unavailable",
+        ),
     ],
 )
 def test_a_group_counts_its_outcomes_in_the_unit_each_one_is_in(attempts, expected: str):
@@ -1318,6 +1329,51 @@ def test_skipped_is_shown_only_when_non_zero():
 
     assert "⏭️ 1 skipped" in render_comment(progress)
     assert "skipped" not in render_comment(uniform_progress(done=True))
+
+
+def test_an_inconclusive_job_is_listed_and_warns_its_batch():
+    """A failed batch whose only unconfirmed job is inconclusive points at that job, not elsewhere."""
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(), target="ntp"),
+                job_progress(attempt(Status.INCONCLUSIVE), target="kafka"),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "## ❌ Dispatcher tests: failed" in body
+    assert _batch_strip_of(body).startswith(f"Batches · ⚠️ [batch-01]({BATCH_RUN_URL}) 2/2")
+    assert _group_summaries_of(body) == ["⚠️ <code>kafka</code>: 1 inconclusive target"]
+    [row] = _target_rows_of(body)
+    assert row.endswith(f"· batch-01 · {INCONCLUSIVE_TEXT}")
+    # The inconclusive job may be what failed, so the batch is not blamed on a step outside the jobs.
+    assert BATCH_FAILURE_TEXT not in body
+    assert "✅ 1 passed" in body
+    assert "❔ 1 inconclusive" in body
+    assert "nothing failed" not in body
+    assert set(_progress_bar_of(body)) == {"passed", "pending"}
+
+
+def test_a_confirmed_failure_keeps_a_batch_with_inconclusive_jobs_failed():
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(Status.FAILURE), target="ntp"),
+                job_progress(attempt(Status.INCONCLUSIVE), target="kafka"),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    assert _batch_strip_of(render_comment(progress)).startswith(f"Batches · ❌ [batch-01]({BATCH_RUN_URL}) 2/2")
 
 
 def test_only_the_latest_attempt_counts_toward_totals():
