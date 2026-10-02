@@ -50,6 +50,7 @@ postgresql.conflicts.snapshot,count,,query,,"Number of queries in this database 
 postgresql.conflicts.tablespace,count,,query,,Number of queries in this database that have been canceled due to dropped tablespaces. This will occur when a temp_tablespace is dropped while being used on a standby. This metric is tagged with db.,-1,postgres,cfl tablespace,,
 postgresql.connections,gauge,,connection,,The number of active connections to this database.,0,postgres,conns,,
 postgresql.connections_by_process,gauge,,connection,,"The number of active connections to this database, broken down by process-level attributes. This metric is tagged with state, application, user, and db. (DBM only)",0,postgres,conns,,
+postgresql.constraint.invalid,gauge,,,,"The amoount of invalid constraints. Tagged by db, schema, table, contype and conname.",-1,postgres,constraint,,
 postgresql.control.checkpoint_delay,gauge,,second,,The time since the last checkpoint.,0,postgres,control checkpoint,,
 postgresql.control.checkpoint_delay_bytes,gauge,,byte,,The amount of WAL bytes written since the last checkpoint.,0,postgres,control checkpoint byte,,
 postgresql.control.redo_delay_bytes,gauge,,byte,,The amount of WAL bytes written since the last redo point.,0,postgres,control redo byte,,
