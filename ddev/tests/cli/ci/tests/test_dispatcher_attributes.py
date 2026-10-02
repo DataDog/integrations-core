@@ -7,6 +7,7 @@ import pytest
 from ddev.cli.ci.tests.dispatcher_attributes import (
     attribute_mapping,
     batch_fields,
+    console_hidden_fields,
     job_fields,
     log_tag_mapping,
     metric_tag_mapping,
@@ -14,7 +15,13 @@ from ddev.cli.ci.tests.dispatcher_attributes import (
 from ddev.cli.ci.tests.dispatcher_attributes import (
     test_tag_mapping as render_test_tags,
 )
+from ddev.utils.github_async.models import WorkflowJobConclusion
 from tests.cli.ci.tests.helpers import make_batch, make_job
+from tests.helpers.github_async import (
+    DEFAULT_DURATION_SECONDS,
+    DEFAULT_QUEUE_DURATION_SECONDS,
+    make_workflow_job,
+)
 
 MAPPING_FIELDS = {
     'repo': 'GitHub.com/DataDog/Integrations-Core',
@@ -134,6 +141,41 @@ def test_log_attributes_keep_native_json_values_while_tag_transports_stringify()
     assert metric_tag_mapping(fields) == {'dispatcher.batch.id': 'batch-01', 'dispatcher.run.is_fork': 'false'}
 
 
+def test_job_attempt_attributes_land_under_batch_job_paths_with_native_durations():
+    """A finished job attempt's record must be queryable by its own identity and range-queryable
+    by its timing, so the durations keep their numeric type rather than stringifying."""
+    fields = job_fields(make_job(), make_workflow_job())
+
+    logs = log_tag_mapping(fields)
+    assert logs['dispatcher.batch.job.conclusion'] == 'success'
+    assert logs['dispatcher.batch.job.id'] == 1
+    assert logs['dispatcher.batch.job.url'] == 'https://github.com/DataDog/integrations-core/actions/runs/123/job/1'
+    assert logs['dispatcher.batch.job.duration_seconds'] == DEFAULT_DURATION_SECONDS
+    assert logs['dispatcher.batch.job.queue_duration_seconds'] == DEFAULT_QUEUE_DURATION_SECONDS
+    assert attribute_mapping(fields)['dispatcher.batch.job.duration_seconds'] == '90.0'
+    # The console line stays readable: the message text already carries the outcome and duration.
+    assert {'job_conclusion', 'job_id', 'job_url', 'job_duration_seconds', 'job_queue_duration_seconds'} <= (
+        console_hidden_fields()
+    )
+
+
+def test_an_attempts_fields_beyond_the_job_stay_out_of_metric_tags():
+    """`job.duration` keeps the dimensions it has today: the attempt's ID, URL and timings are log
+    attributes, not metric tags, so its series do not multiply."""
+    tags = metric_tag_mapping(job_fields(make_job(), make_workflow_job()))
+
+    assert set(tags) == {
+        'dispatcher.batch.job.target',
+        'dispatcher.batch.job.environment',
+        'dispatcher.batch.job.platform',
+        'dispatcher.batch.job.python_version',
+        'dispatcher.batch.job.unit_tests',
+        'dispatcher.batch.job.e2e_tests',
+        'dispatcher.batch.job.minimum_base_package',
+        'dispatcher.batch.job.status',
+    }
+
+
 def test_batch_fields_include_batch_metadata():
     batch = make_batch(make_job(target='redis'), make_job(name='job-2', target='postgres'))
 
@@ -179,3 +221,33 @@ def test_batch_fields_include_batch_metadata():
 )
 def test_job_fields(job, expected):
     assert job_fields(job) == expected
+
+
+@pytest.mark.parametrize(
+    ('conclusion', 'status', 'has_duration'),
+    [
+        pytest.param(WorkflowJobConclusion.SUCCESS, 'success', True, id='finished-running'),
+        pytest.param(WorkflowJobConclusion.SKIPPED, 'skipped', False, id='skipped'),
+        pytest.param(WorkflowJobConclusion.CANCELLED, 'failure', False, id='cancelled'),
+        pytest.param(WorkflowJobConclusion.TIMED_OUT, 'failure', True, id='timed-out'),
+    ],
+)
+def test_job_fields_describe_a_finished_workflow_job(conclusion, status, has_duration):
+    """The workflow job's identity, outcome and timing ride on the job's own fields, so the
+    finished-job report describes one attempt from one definition. A skipped or cancelled attempt
+    never ran on a runner, so it carries no duration."""
+    job = make_job()
+
+    fields = job_fields(job, make_workflow_job(name=job.name, conclusion=conclusion))
+
+    expected = {
+        **job_fields(job),
+        'job_status': status,
+        'job_conclusion': conclusion,
+        'job_id': 1,
+        'job_url': 'https://github.com/DataDog/integrations-core/actions/runs/123/job/1',
+        'job_queue_duration_seconds': DEFAULT_QUEUE_DURATION_SECONDS,
+    }
+    if has_duration:
+        expected['job_duration_seconds'] = DEFAULT_DURATION_SECONDS
+    assert fields == expected
