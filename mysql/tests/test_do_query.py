@@ -5,7 +5,7 @@ import pymysql
 import pytest
 
 from datadog_checks.mysql.cursor import CommenterSSCursor
-from datadog_checks.mysql.do_query import MAX_RESULT_ROWS, DOQuerySession, NoResultSetError
+from datadog_checks.mysql.do_query import FETCH_BATCH_ROWS, MAX_RESULT_ROWS, DOQuerySession, NoResultSetError
 from datadog_checks.mysql.version_utils import parse_version
 
 from .do_fakes import MYSQL_8, FakeConnection, FakeCursor
@@ -33,13 +33,92 @@ def test_query_runs_with_server_side_row_limit():
     assert CommenterSSCursor in conn.cursor_classes
 
 
-def test_row_limit_is_capped():
+def test_run_reads_the_rows_in_one_call():
+    # The monitor path reads its whole capped result with a single fetchmany().
     conn = FakeConnection({'SELECT 1': (['1'], [(1,)])})
 
-    _session(conn).run('shop', 'SELECT 1', 30_000, max_rows=MAX_RESULT_ROWS * 2)
+    _session(conn).run('shop', 'SELECT 1', 30_000, max_rows=MAX_RESULT_ROWS)
 
     assert ('SET SESSION sql_select_limit = %s', (MAX_RESULT_ROWS,)) in _settings(conn)
     assert conn.fetch_sizes == [MAX_RESULT_ROWS]
+
+
+def _rows(count):
+    return [(i,) for i in range(count)]
+
+
+def test_stream_reads_in_batches():
+    conn = FakeConnection({'SELECT id FROM t': (['id'], _rows(2_500))})
+
+    columns, batches = _session(conn).stream('shop', 'SELECT id FROM t', 30_000, max_rows=1_000_000)
+
+    assert columns == ['id']
+    assert [len(batch) for batch in batches] == [1_000, 1_000, 500]
+    assert conn.fetch_sizes == [1_000, 1_000, 1_000]
+
+
+def test_stream_stops_at_max_rows():
+    conn = FakeConnection({'SELECT id FROM t': (['id'], _rows(3_000))})
+
+    _, batches = _session(conn).stream('shop', 'SELECT id FROM t', 30_000, max_rows=2_000)
+
+    assert [row for batch in batches for row in batch] == _rows(2_000)
+    assert conn.fetch_sizes == [1_000, 1_000]
+    assert ('SET SESSION sql_select_limit = %s', (2_000,)) in _settings(conn)
+
+
+def test_stream_never_fetches_everything_at_once():
+    conn = FakeConnection({'SELECT id FROM t': (['id'], _rows(50_000))})
+
+    _, batches = _session(conn).stream('shop', 'SELECT id FROM t', 30_000, max_rows=1_000_000)
+
+    assert sum(len(batch) for batch in batches) == 50_000
+    assert max(conn.fetch_sizes) == FETCH_BATCH_ROWS
+
+
+@pytest.mark.parametrize(
+    'query, results, error',
+    [
+        pytest.param('SET SESSION TRANSACTION READ WRITE', {}, NoResultSetError, id='no-result-set'),
+        pytest.param(
+            'SELECT nope',
+            {'SELECT nope': pymysql.err.OperationalError(1054, "Unknown column 'nope'")},
+            pymysql.err.OperationalError,
+            id='server-error',
+        ),
+    ],
+)
+def test_stream_error_before_result_set_raises_from_stream(query, results, error):
+    with pytest.raises(error):
+        _session(FakeConnection(results)).stream('shop', query, 30_000, max_rows=10)
+
+
+def test_stream_error_while_reading_closes_the_cursor():
+    timeout = pymysql.err.OperationalError(3024, 'maximum statement execution time exceeded')
+    conn = FakeConnection({'SELECT id FROM t': (['id'], _rows(1_000) + [timeout])})
+    session = _session(conn)
+
+    _, batches = session.stream('shop', 'SELECT id FROM t', 30_000, max_rows=1_000_000)
+
+    assert len(next(batches)) == 1_000
+    with pytest.raises(pymysql.err.OperationalError):
+        list(batches)
+    assert not conn.drained
+    # The server ended the result with the error, so the connection can run the next query.
+    assert session.usable
+
+
+def test_stream_closed_early_does_not_drain():
+    conn = FakeConnection({'SELECT id FROM t': (['id'], _rows(5_000))})
+    session = _session(conn)
+
+    _, batches = session.stream('shop', 'SELECT id FROM t', 30_000, max_rows=1_000_000)
+    next(batches)
+    batches.close()
+
+    assert conn.fetch_sizes == [1_000]
+    assert not conn.drained
+    assert not session.usable
 
 
 @pytest.mark.parametrize(
