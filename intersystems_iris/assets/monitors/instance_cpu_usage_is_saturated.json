@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "title": "Instance CPU usage is saturated",
+  "tags": [
+    "integration:intersystems-iris"
+  ],
+  "definition": {
+    "message": "{{#is_alert}}\nIRIS instance {{host.name}} is using {{value}} percent of system CPU. At this level the instance queues work instead of running it, so query and message latency will degrade. Check for runaway jobs or an undersized host.\n{{/is_alert}}\n\n{{#is_warning}}\nIRIS instance {{host.name}} is using {{value}} percent of system CPU. It has not yet crossed the critical threshold, but processing headroom is shrinking.\n{{/is_warning}}\n\n{{#is_recovery}}\nCPU usage on IRIS instance {{host.name}} has dropped back to a healthy level and the instance has processing headroom again.\n{{/is_recovery}}",
+    "name": "[InterSystems IRIS] CPU usage is saturated on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 90,
+        "critical_recovery": 75,
+        "warning": 80,
+        "warning_recovery": 70
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_15m):avg:intersystems_iris.cpu.usage{*} by {host} > 90",
+    "tags": [
+      "integration:intersystems-iris"
+    ],
+    "type": "query alert"
+  },
+  "created_at": "2026-08-17",
+  "description": "Tracks system-wide CPU usage on the host running the IRIS instance. A saturated instance queues work rather than running it, so query latency and message throughput degrade together. Uses `intersystems_iris.cpu.usage`, not `cpu.pct`, which covers only housekeeping processes.",
+  "last_updated_at": "2026-08-17"
+}
