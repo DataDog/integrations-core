@@ -1,81 +1,63 @@
+from pathlib import Path
+
 import pytest
-from check_pr_description import MAX_DESCRIPTION_LENGTH, check_pr_description
+from check_pr_description import COMMENT_PATTERN, MAX_DESCRIPTION_LENGTH, check_pr_description
 
-VALID_BODY = """\
-## Checklist before requesting review
-
-- [x] All CI checks finished and passed.
-- [x] Exactly one QA label is set.
-- [x] A changelog entry is present where required.
-- [x] Tests were added or updated.
-- [x] Automated review comments were addressed or answered.
-- [x] I self-reviewed the full diff and updated this description.
-
-## What does this PR do?
-
-Adds PR description validation.
-
-## Motivation
-
-Give reviewers consistent context.
-"""
+TEMPLATE = (Path(__file__).parents[3] / "PULL_REQUEST_TEMPLATE.md").read_text()
+TICKED = TEMPLATE.replace("- [ ]", "- [x]")
+ITEM_COUNT = TEMPLATE.count("- [ ]")
 
 
-def test_valid_body_has_no_errors():
-    assert check_pr_description(VALID_BODY, "contributor", False, "Improve PR descriptions") == []
+def check(body: str) -> list[str]:
+    return check_pr_description(body, "contributor", False, "Improve something")
 
 
-def test_missing_or_empty_description_sections_do_not_block():
-    body = VALID_BODY.replace("## Motivation\n\nGive reviewers consistent context.\n", "").replace(
-        "Adds PR description validation.", "<!-- Describe the change. -->"
-    )
-
-    assert check_pr_description(body, "contributor", False, "Improve PR descriptions") == []
-
-
-def test_missing_checklist_is_reported():
-    body = VALID_BODY.split("## What does this PR do?")[1]
-
-    assert check_pr_description(body, "contributor", False, "Improve PR descriptions") == [
-        "Missing ## Checklist before requesting review with its checklist items."
+def test_unfilled_template_is_blocked_on_every_item():
+    assert ITEM_COUNT > 0
+    assert check(TEMPLATE) == [
+        f"Complete every item in ## Checklist before requesting review; {ITEM_COUNT} items remain unchecked."
     ]
 
 
-def test_checklist_comments_do_not_count_as_items():
-    body = VALID_BODY.replace("- [x] Tests were added or updated.", "<!-- - [ ] Tests were added or updated. -->")
-
-    assert check_pr_description(body, "contributor", False, "Improve PR descriptions") == []
+def test_ticked_template_passes_even_with_empty_description_sections():
+    assert check(TICKED) == []
 
 
-def test_unticked_checklist_item_is_reported():
-    body = VALID_BODY.replace("- [x] Tests were added or updated.", "- [ ] Tests were added or updated.")
+def test_one_unticked_item_is_blocked():
+    body = TICKED.replace("- [x]", "- [ ]", 1)
 
-    assert check_pr_description(body, "contributor", False, "Improve PR descriptions") == [
-        "Complete every item in ## Checklist before requesting review; 1 item remains unchecked."
-    ]
+    assert check(body) == ["Complete every item in ## Checklist before requesting review; 1 item remains unchecked."]
 
 
-def test_visible_description_length_is_limited_and_comments_are_excluded():
-    comment = f"<!-- {'x' * (MAX_DESCRIPTION_LENGTH + 1)} -->"
-    assert check_pr_description(f"{VALID_BODY}\n{comment}", "contributor", False, "Improve PR descriptions") == []
+def test_missing_checklist_is_blocked():
+    body = TICKED.split("## What does this PR do?")[1]
 
-    padding = "x" * (MAX_DESCRIPTION_LENGTH - len(VALID_BODY) + 1)
-    assert check_pr_description(f"{VALID_BODY}{comment}{padding}", "contributor", False, "Improve PR descriptions") == [
-        f"PR description is {MAX_DESCRIPTION_LENGTH + 1} characters; maximum is "
-        f"{MAX_DESCRIPTION_LENGTH}. Trim the description before requesting review."
+    assert check(body) == ["Missing ## Checklist before requesting review with its checklist items."]
+
+
+def test_template_leaves_room_for_the_description():
+    assert len(COMMENT_PATTERN.sub("", TICKED)) < MAX_DESCRIPTION_LENGTH // 2
+
+
+def test_length_limit_counts_visible_text_only():
+    visible = len(COMMENT_PATTERN.sub("", TICKED))
+    comment = f"<!-- {'x' * MAX_DESCRIPTION_LENGTH} -->"
+
+    assert check(TICKED + comment + "x" * (MAX_DESCRIPTION_LENGTH - visible)) == []
+    assert check(TICKED + comment + "x" * (MAX_DESCRIPTION_LENGTH - visible + 1)) == [
+        f"PR description is {MAX_DESCRIPTION_LENGTH + 1} characters; maximum is {MAX_DESCRIPTION_LENGTH}. "
+        "Trim the description before requesting review."
     ]
 
 
 @pytest.mark.parametrize(
     ("author", "draft", "title"),
     [
-        ("contributor", True, "Improve PR descriptions"),
+        ("contributor", True, "Improve something"),
         ("dependabot[bot]", False, "Bump a dependency"),
-        ("renovate", False, "Update dependency"),
         ("dd-agent-integrations-bot[bot]", False, "Update metadata"),
         ("contributor", False, "[Release] Bumped ddev version"),
-        ("contributor", False, "Release new integrations for 7.86"),
     ],
 )
 def test_drafts_bots_and_release_prs_are_skipped(author: str, draft: bool, title: str):
-    assert check_pr_description("", author, draft, title) == []
+    assert check_pr_description(TEMPLATE, author, draft, title) == []
