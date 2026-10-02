@@ -32,6 +32,6 @@
     "type": "query alert"
   },
   "created_at": "2026-08-17",
-  "description": "Tracks system-wide CPU usage on the host running the IRIS instance. A saturated instance queues work rather than running it, so query latency, message throughput, and write-daemon cycles all degrade together once CPU stays pinned. This monitor uses `intersystems_iris.cpu.usage` rather than `intersystems_iris.cpu.pct`: the latter reports only IRIS housekeeping process types, whose CPU share stays near zero even when the instance is fully loaded.",
+  "description": "Tracks system-wide CPU usage on the host running the IRIS instance. A saturated instance queues work rather than running it, so query latency and message throughput degrade together. Uses `intersystems_iris.cpu.usage`, not `cpu.pct`, which covers only housekeeping processes.",
   "last_updated_at": "2026-08-17"
 }
