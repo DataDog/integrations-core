@@ -541,6 +541,7 @@ def test_vsan_metrics_failure_on_one_cluster_keeps_the_others(vsan_api, failing_
     )
 
     assert len(health_metrics) == 1
+    assert health_metrics[0]['vsphere.vsan.cluster.health.count']['vsphere_cluster'] == 'NHDC01'
     assert len(performance_metrics) == 1
     warnings = logged_warnings(log)
     assert len(warnings) == 1
@@ -572,6 +573,7 @@ def test_vsan_metrics_unexpected_health_payload_skips_only_that_cluster(vsan_api
     )
 
     assert len(health_metrics) == 1
+    assert health_metrics[0]['vsphere.vsan.cluster.health.count']['vsphere_cluster'] == 'NHDC01'
     warnings = logged_warnings(log)
     assert len(warnings) == 1
     assert 'MADC06' in warnings[0]
@@ -598,3 +600,23 @@ def test_vsan_metrics_reports_cluster_by_id_when_its_name_is_unreachable(vsan_ap
     warnings = logged_warnings(log)
     assert len(warnings) == 1
     assert 'domain-c3489' in warnings[0]
+
+
+def test_vsan_metrics_reports_every_failed_cluster_in_a_single_warning(vsan_api):
+    """A dead session fails every cluster; that must stay one warning per run, not one per cluster."""
+    api, perf_manager, log = vsan_api
+    clusters = {}
+    for cluster_name in ('NHDC01', 'PRDC01', 'MADC01'):
+        cluster = MagicMock(spec=vim.ClusterComputeResource)
+        cluster.name = cluster_name
+        clusters[cluster] = ['nested-id-1']
+    perf_manager.QueryClusterHealth.side_effect = vim.fault.NotAuthenticated(msg='Session is not authenticated.')
+
+    health_metrics, _ = api.get_vsan_metrics(clusters, ENTITY_REF_IDS, ID_TO_TAGS, dt.datetime(2024, 1, 1))
+
+    assert len(health_metrics) == 0
+    warnings = logged_warnings(log)
+    assert len(warnings) == 1
+    for cluster_name in ('NHDC01', 'PRDC01', 'MADC01'):
+        assert cluster_name in warnings[0]
+    assert 'Session is not authenticated.' in warnings[0]

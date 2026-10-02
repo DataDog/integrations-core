@@ -422,6 +422,7 @@ class VSphereAPI(object):
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
+        failures = []
         for cluster_reference, nested_ids in cluster_nested_elts.items():
             try:
                 cluster_health_metrics, cluster_performance_metrics = self._get_cluster_vsan_metrics(
@@ -429,15 +430,20 @@ class VSphereAPI(object):
                 )
             except Exception as e:
                 # Keep going so that one unhealthy cluster doesn't cost us vSAN data for the whole vCenter.
-                self.log.warning(
-                    "Unable to fetch vSAN metrics for cluster %s, skipping it: %s",
-                    cluster_display_name(cluster_reference),
-                    e,
-                )
+                failures.append("{}: {}".format(cluster_display_name(cluster_reference), e))
                 continue
             if cluster_health_metrics is not None:
                 health_metrics.append(cluster_health_metrics)
                 performance_metrics.append(cluster_performance_metrics)
+        if failures:
+            # Reported once for the whole run: a dead session fails every cluster, and one warning per
+            # cluster would bury the rest of the check's output.
+            self.log.warning(
+                "Unable to fetch vSAN metrics for %s of %s clusters, skipping them. %s",
+                len(failures),
+                len(cluster_nested_elts),
+                ' | '.join(failures),
+            )
         return [health_metrics, performance_metrics]
 
     def _get_cluster_vsan_metrics(
