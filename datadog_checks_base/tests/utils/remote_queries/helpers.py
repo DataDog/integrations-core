@@ -18,6 +18,19 @@ TRACE_ID = '1234567890123456789'
 PARENT_ID = '9876543210987654321'
 
 
+def as_session_request(request):
+    """Adapt a fake `request(method, url, headers, data, timeout)` to patch `requests.Session.request`.
+
+    The upload client sends each attempt through its own session, so tests intercept the
+    session's request method rather than `requests.request`.
+    """
+
+    def session_request(session, *args, **kwargs):
+        return request(*args, **kwargs)
+
+    return session_request
+
+
 def descriptor(
     columns=(('value', 'text', 'string'),),
     include_schema=False,

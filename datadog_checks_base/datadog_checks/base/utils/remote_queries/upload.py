@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import socket
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -88,6 +89,14 @@ REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS = 55
 REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 300
 
 
+# The longest one socket send may block while the request is written, i.e. how long intake (or
+# a proxy in front of it) may stop draining the body before the attempt is abandoned. The
+# (connect, read) timeout tuple cannot express this: urllib3 keeps the connect timeout on the
+# socket while the body is sent and applies the read timeout only once the response is awaited.
+# Each send is also capped by what remains of the attempt's deadline.
+REMOTE_QUERY_UPLOAD_HTTP_WRITE_TIMEOUT_SECONDS = 30
+
+
 REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT = (
     REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS,
     REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS,
@@ -147,6 +156,84 @@ class DeadlinedPageBody:
         return self._body.tell()
 
 
+def stall_bounded_pool_classes(write_timeout: float, deadline: float | None) -> dict[str, type]:
+    """Build urllib3 pool classes whose connections bound each body send.
+
+    urllib3 leaves the connect timeout on the socket while it writes the request, so a
+    slow-draining peer would be cut off after the connect timeout. Connections from these
+    pools instead raise the socket timeout to `write_timeout` as soon as they are connected,
+    capped by the time left until `deadline` (a `time.monotonic` value, or None for no
+    deadline). urllib3 then restores the read timeout itself once the body is sent.
+    A send that stalls past the deadline raises `UploadAttemptExpired`.
+
+    The classes are built per call because urllib3 constructs connections itself and gives
+    callers no way to hand a per-request value to them.
+    """
+    from urllib3.connection import HTTPConnection, HTTPSConnection
+    from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
+
+    class StallBoundedConnection:
+        def _bound_send_timeout(self) -> None:
+            timeout = float(write_timeout)
+            if deadline is not None:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise UploadAttemptExpired('Page upload attempt exceeded its per-attempt deadline.')
+                timeout = min(timeout, remaining)
+            self.sock.settimeout(timeout)
+
+        def connect(self) -> None:
+            super().connect()
+            self._bound_send_timeout()
+
+        def send(self, data: Any) -> None:
+            # A reused connection is reset to the connect timeout before each request.
+            if self.sock is not None:
+                self._bound_send_timeout()
+            try:
+                super().send(data)
+            except socket.timeout:
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise UploadAttemptExpired('Page upload attempt exceeded its per-attempt deadline.')
+                raise
+
+    class Connection(StallBoundedConnection, HTTPConnection):
+        pass
+
+    class SecureConnection(StallBoundedConnection, HTTPSConnection):
+        pass
+
+    class Pool(HTTPConnectionPool):
+        ConnectionCls = Connection
+
+    class SecurePool(HTTPSConnectionPool):
+        ConnectionCls = SecureConnection
+
+    return {'http': Pool, 'https': SecurePool}
+
+
+def stall_bounded_adapter(write_timeout: float, deadline: float | None) -> Any:
+    """A `requests` adapter that bounds each request-body send; see `stall_bounded_pool_classes`."""
+    from requests.adapters import HTTPAdapter
+    from urllib3.poolmanager import pool_classes_by_scheme
+
+    pool_classes = stall_bounded_pool_classes(write_timeout, deadline)
+
+    class StallBoundedAdapter(HTTPAdapter):
+        def init_poolmanager(self, *args: Any, **kwargs: Any) -> None:
+            super().init_poolmanager(*args, **kwargs)
+            self.poolmanager.pool_classes_by_scheme = pool_classes
+
+        def proxy_manager_for(self, proxy: str, **proxy_kwargs: Any) -> Any:
+            manager = super().proxy_manager_for(proxy, **proxy_kwargs)
+            # SOCKS managers carry their own pool classes, which are left untouched.
+            if manager.pool_classes_by_scheme is pool_classes_by_scheme:
+                manager.pool_classes_by_scheme = pool_classes
+            return manager
+
+    return StallBoundedAdapter()
+
+
 class RequestsUploadClient:
     """Direct HTTP upload client for its-agent-intake. Imports requests lazily."""
 
@@ -154,8 +241,10 @@ class RequestsUploadClient:
         self,
         timeout: tuple[int, int] = REMOTE_QUERY_UPLOAD_HTTP_TIMEOUT,
         tracing: RemoteQueryProducerTracing | None = None,
+        write_timeout: float = REMOTE_QUERY_UPLOAD_HTTP_WRITE_TIMEOUT_SECONDS,
     ) -> None:
         self._timeout = timeout
+        self._write_timeout = write_timeout
         self._tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
 
     def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
@@ -180,7 +269,7 @@ class RequestsUploadClient:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/descriptor'.format(creds.base_url.rstrip('/'), creds.upload_id)
         _status, response_body = upload_with_retry(
-            'POST', url, headers, body, self._timeout, deadline=creds.wall_deadline
+            'POST', url, headers, body, self._timeout, deadline=creds.wall_deadline, write_timeout=self._write_timeout
         )
         return parse_json_object_response(response_body, 'descriptor registration')
 
@@ -217,6 +306,7 @@ class RequestsUploadClient:
             deadline=creds.wall_deadline,
             tracing=self._tracing,
             attempt_spans=True,
+            write_timeout=self._write_timeout,
         )
         if status != REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE:
             raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload answered HTTP {}.'.format(status))
@@ -240,7 +330,14 @@ class RequestsUploadClient:
         backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
         while True:
             status, response_body = upload_with_retry(
-                'POST', url, headers, request_body, self._timeout, deadline=creds.wall_deadline, tracing=self._tracing
+                'POST',
+                url,
+                headers,
+                request_body,
+                self._timeout,
+                deadline=creds.wall_deadline,
+                tracing=self._tracing,
+                write_timeout=self._write_timeout,
             )
             if status == 200:
                 return parse_json_object_response(response_body, 'run finalize')
@@ -261,7 +358,9 @@ class RequestsUploadClient:
             # Abort is cleanup: it must stay possible after the run wall expired (that is
             # exactly when it runs), so it carries no deadline. Its requests carry the
             # abort span's context when the run's producer tracing is active.
-            upload_with_retry('POST', url, headers, b'{}', self._timeout, tracing=self._tracing)
+            upload_with_retry(
+                'POST', url, headers, b'{}', self._timeout, tracing=self._tracing, write_timeout=self._write_timeout
+            )
         except RemoteQueryFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)')
 
@@ -438,8 +537,12 @@ def upload_with_retry(
     deadline: float | None = None,
     tracing: RemoteQueryProducerTracing | None = None,
     attempt_spans: bool = False,
+    write_timeout: float = REMOTE_QUERY_UPLOAD_HTTP_WRITE_TIMEOUT_SECONDS,
 ) -> tuple[int, bytes]:
     """Send one intake request with bounded retries; `deadline` is the run-wide wall.
+
+    `timeout` is the (connect, read) pair; `write_timeout` separately bounds how long one
+    send of the request body may stall, capped by the page attempt's deadline when there is one.
 
     `tracing`, when given, carries the active producer span's context into the request
     headers in place of the manual trace-context trio: with `attempt_spans` (page
@@ -471,6 +574,7 @@ def upload_with_retry(
             # content for the same page index with unchanged declared metadata.
             body.seek(0)
         request_body: bytes | BinaryIO = body
+        attempt_deadline: float | None = None
         if deadline is not None and not isinstance(body, bytes):
             attempt_deadline = min(deadline, time.monotonic() + REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS)
             request_body = DeadlinedPageBody(body, attempt_deadline)
@@ -483,13 +587,19 @@ def upload_with_retry(
         attempt_error: str | None = 'transport'
         attempt_status: int | None = None
         try:
-            resp = requests.request(
-                method,
-                url,
-                headers=page_attempt.inject(headers) if page_attempt is not None else dict(headers),
-                data=request_body,
-                timeout=timeout,
-            )
+            # One session per attempt: its adapter is bound to this attempt's deadline, and a
+            # fresh connection is what lets the write timeout replace the connect timeout.
+            with requests.Session() as session:
+                adapter = stall_bounded_adapter(write_timeout, attempt_deadline)
+                session.mount('http://', adapter)
+                session.mount('https://', adapter)
+                resp = session.request(
+                    method,
+                    url,
+                    headers=page_attempt.inject(headers) if page_attempt is not None else dict(headers),
+                    data=request_body,
+                    timeout=timeout,
+                )
         except UploadAttemptExpired:
             last_failure = 'the page upload attempt exceeded its per-attempt deadline'
         except requests.exceptions.RequestException:

@@ -16,6 +16,7 @@ from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from .helpers import (
     Uploads,
     acceptance_receipt,
+    as_session_request,
     bounded_delivery,
     cell,
     csv_record,
@@ -538,7 +539,7 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
         calls.append((method, url, headers, data))
         return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
 
-    monkeypatch.setattr(requests, 'request', request)
+    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, creds.app_key, 'test-intake')
     client = rq_upload.RequestsUploadClient()
     assert client.finalize_run(creds, 3)['upload_id'] == creds.upload_id
