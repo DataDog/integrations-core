@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from copy import deepcopy
+from typing import Any
 
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 
 from . import transformers
 
@@ -28,6 +30,7 @@ class MetricTransformer:
         self.non_cumulative_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
             config.get('non_cumulative_histogram_buckets', False)
         )
+        self.omit_histogram_bound_tags = self.parse_omit_histogram_bound_tags(config)
 
         # Accessible to every transformer
         self.global_options = {
@@ -35,6 +38,7 @@ class MetricTransformer:
             'collect_histogram_buckets': self.collect_histogram_buckets,
             'histogram_buckets_as_distributions': self.histogram_buckets_as_distributions,
             'non_cumulative_histogram_buckets': self.non_cumulative_histogram_buckets,
+            'omit_histogram_bound_tags': self.omit_histogram_bound_tags,
         }
 
         metrics_config = deepcopy(self.normalize_metric_config(config))
@@ -115,6 +119,22 @@ class MetricTransformer:
             return True
 
         return False
+
+    def parse_omit_histogram_bound_tags(self, config: dict[str, Any]) -> bool:
+        """Parse `omit_histogram_bound_tags` and fail if the Agent cannot submit buckets without bound tags."""
+        if not is_affirmative(config.get('omit_histogram_bound_tags', False)):
+            return False
+
+        if not self.histogram_buckets_as_distributions:
+            self.logger.warning(
+                '`omit_histogram_bound_tags` has no effect unless `histogram_buckets_as_distributions` is enabled'
+            )
+            return False
+
+        if reason := self.check.multiple_histogram_buckets_unsupported_reason():
+            raise ConfigurationError(f'`omit_histogram_bound_tags` {reason}')
+
+        return True
 
     @staticmethod
     def normalize_metric_config(check_config):

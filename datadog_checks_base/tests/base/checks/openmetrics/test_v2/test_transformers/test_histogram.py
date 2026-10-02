@@ -1,8 +1,44 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
+from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.replay.constants import EnvVars
 
 from ..utils import get_check
+
+LATENCY_PAYLOAD = """
+    # HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
+    # TYPE rest_client_request_latency_seconds histogram
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.004"} 702
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.001"} 254
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.002"} 621
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.008"} 727
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.016"} 738
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.032"} 744
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.064"} 748
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.128"} 754
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.256"} 755
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.512"} 755
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="+Inf"} 755
+    rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
+    rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
+    """
+LATENCY_SERIES_TAGS = ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET']
+LATENCY_BUCKETS = [
+    (0, 0.001, 254),
+    (0.001, 0.002, 367),
+    (0.002, 0.004, 81),
+    (0.004, 0.008, 25),
+    (0.008, 0.016, 11),
+    (0.016, 0.032, 6),
+    (0.032, 0.064, 4),
+    (0.064, 0.128, 6),
+    (0.128, 0.256, 1),
+    (0.256, 0.512, 0),
+    (0.512, float('inf'), 0),
+]
 
 
 def assert_metric_counts(aggregator, payload):
@@ -641,3 +677,84 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('collect_counters_with_distributions', [False, True])
+def test_omit_bound_tags(aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions):
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'histogram_buckets_as_distributions': True,
+            'collect_counters_with_distributions': collect_counters_with_distributions,
+            'omit_histogram_bound_tags': True,
+        }
+    )
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+    for bucket in buckets:
+        assert sorted(bucket.tags) == LATENCY_SERIES_TAGS
+        assert bucket.multiple_buckets
+
+    if collect_counters_with_distributions:
+        aggregator.assert_metric(
+            'test.rest_client_request_latency_seconds.sum',
+            2.185820220000001,
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=LATENCY_SERIES_TAGS,
+        )
+        aggregator.assert_metric(
+            'test.rest_client_request_latency_seconds.count',
+            755,
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=LATENCY_SERIES_TAGS,
+        )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_omit_bound_tags_without_distributions(aggregator, dd_run_check, mock_http_response, caplog):
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'omit_histogram_bound_tags': True})
+    dd_run_check(check)
+
+    assert '`omit_histogram_bound_tags` has no effect' in caplog.text
+    assert not aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    aggregator.assert_metric_has_tag('test.rest_client_request_latency_seconds.bucket', 'upper_bound:0.004')
+
+
+def test_omit_bound_tags_unset_on_unsupported_agent(aggregator, dd_run_check, mock_http_response, monkeypatch):
+    monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_buckets_as_distributions': True})
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+
+
+@pytest.mark.parametrize(
+    'setup, message',
+    [
+        pytest.param(
+            lambda monkeypatch: monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi'),
+            'is not supported by this Agent version',
+            id='unsupported agent',
+        ),
+        pytest.param(
+            lambda monkeypatch: monkeypatch.setenv(EnvVars.MESSAGE_INDICATOR, 'indicator'),
+            'cannot be used with `process_isolation`',
+            id='process isolation',
+        ),
+    ],
+)
+def test_omit_bound_tags_rejected(dd_run_check, monkeypatch, setup, message):
+    setup(monkeypatch)
+    check = get_check(
+        {'metrics': ['.+'], 'histogram_buckets_as_distributions': True, 'omit_histogram_bound_tags': True}
+    )
+
+    with pytest.raises(Exception, match=message):
+        dd_run_check(check, extract_message=True)
