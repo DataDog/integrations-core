@@ -70,6 +70,7 @@ kuma.go.gc.duration_seconds.quantile,gauge,,second,,Wall-time pause (stop-the-wo
 kuma.go.gc.duration_seconds.sum,count,,second,,Wall-time pause (stop-the-world) duration in garbage collection cycles. (sum),0,kuma,,,
 kuma.go.goroutines,gauge,,,,Number of goroutines that currently exist.,0,kuma,,,
 kuma.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated in heap and currently in use.,0,kuma,,,
+kuma.go.memstats.alloc_bytes.count,count,,byte,,Total number of bytes allocated in heap even if freed.,0,kuma,,,
 kuma.go.threads,gauge,,thread,,Number of OS threads created.,0,kuma,,,
 kuma.grpc.server.handled_total.count,count,,request,,"Total number of RPCs completed on the server, regardless of success or failure.",0,kuma,,,
 kuma.grpc.server.handling_seconds.bucket,count,,,,Histogram of response latency (seconds) of gRPC that had been application-level handled by the server. (bucket),0,kuma,,,

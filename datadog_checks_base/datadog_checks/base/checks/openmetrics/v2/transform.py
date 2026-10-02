@@ -145,22 +145,6 @@ class MetricTransformer:
         return config
 
 
-def get_native_transformer(check, metric_name, modifiers, global_options):
-    """
-    Uses whatever the endpoint describes as the metric type in the first occurrence.
-    """
-    transformer = None
-
-    def native(metric, sample_data, runtime_data):
-        nonlocal transformer
-        if transformer is None:
-            transformer = NATIVE_TRANSFORMERS[metric.type](check, metric_name, modifiers, global_options)
-
-        transformer(metric, sample_data, runtime_data)
-
-    return native
-
-
 def get_native_dynamic_transformer(check, metric_name, modifiers, global_options):
     """
     Uses whatever the endpoint describes as the metric type.
@@ -189,7 +173,7 @@ NATIVE_TRANSFORMERS = {
 TRANSFORMERS = {
     'counter_gauge': transformers.get_counter_gauge,
     'metadata': transformers.get_metadata,
-    'native': get_native_transformer,
+    'native': get_native_dynamic_transformer,
     'native_dynamic': get_native_dynamic_transformer,
     'rate': transformers.get_rate,
     'service_check': transformers.get_service_check,
