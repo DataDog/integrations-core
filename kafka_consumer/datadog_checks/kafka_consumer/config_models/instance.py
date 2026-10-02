@@ -93,6 +93,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allow_kafka_actions: Optional[bool] = None
     close_admin_client: Optional[bool] = None
     collect_consumer_group_state: Optional[bool] = None
     consumer_groups: Optional[MappingProxyType[str, Any]] = None
