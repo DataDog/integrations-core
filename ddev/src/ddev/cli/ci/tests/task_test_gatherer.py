@@ -182,8 +182,13 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         return True
 
     def _report_final_result(self, progress: BatchProgress) -> None:
-        """Count collected results, not attempts only observed through polling."""
+        """Count collected results, not attempts only observed through polling.
+
+        Passed and failed are counted together at gathering, not against `batches.count` at launch,
+        so both land in the same time bucket for the same batch.
+        """
         metrics = self.monitor.metrics
+        metrics.count('batches.passed', int(progress.status == Status.SUCCESS))
         metrics.count('batches.failed', int(progress.status == Status.FAILURE))
         for job_progress in progress.jobs_progress:
             latest = job_progress.collected_result

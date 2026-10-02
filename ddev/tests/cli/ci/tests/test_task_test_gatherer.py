@@ -485,6 +485,7 @@ def test_an_accepted_final_result_reports_the_batches_outcomes(tmp_path: Path):
     )
 
     drain_queue(gatherer.bus.queue)
+    assert [record.value for record in sink.records_named("batches.passed")] == [0]
     assert [record.value for record in sink.records_named("batches.failed")] == [1]
     failed = [
         (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.failed")
@@ -1474,6 +1475,7 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
     assert {batch.state for batch in final.progress.batches} == {ExecutionState.FINISHED}
     assert (final.progress.passed, final.progress.complete, final.progress.total) == (5, 5, 5)
     # Five concurrent commits, each accepted once: no batch is reported twice.
+    assert [record.value for record in sink.records_named("batches.passed")] == [1] * 5
     assert [record.value for record in sink.records_named("batches.failed")] == [0] * 5
 
 
