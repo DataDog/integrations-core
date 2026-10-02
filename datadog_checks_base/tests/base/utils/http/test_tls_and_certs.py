@@ -18,7 +18,6 @@ from requests.exceptions import SSLError
 
 from datadog_checks.base.utils import http as http_module
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
-from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
 
@@ -476,7 +475,7 @@ class TestAIAChasing:
 
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
-                with pytest.raises(HTTPClientSSLError):
+                with pytest.raises(SSLError):
                     with mock.patch('requests.Session.get', side_effect=SSLError):
                         http.get('https://localhost:{}'.format(port))
 

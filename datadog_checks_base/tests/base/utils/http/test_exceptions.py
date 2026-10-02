@@ -382,7 +382,7 @@ def test_json_parse_error_preserves_requests_compatibility():
 
 
 def test_auth_token_fetch_error_maps_to_agnostic():
-    http = RequestsWrapper({}, {})
+    http = RequestsWrapper({}, {}, agnostic=True)
     http.auth_token_handler = mock.MagicMock()
     http.auth_token_handler.poll.side_effect = requests.exceptions.ConnectionError('token endpoint refused')
     with pytest.raises(HTTPClientConnectionError):
@@ -390,7 +390,7 @@ def test_auth_token_fetch_error_maps_to_agnostic():
 
 
 def test_auth_token_json_error_keeps_decode_semantics():
-    http = RequestsWrapper({}, {})
+    http = RequestsWrapper({}, {}, agnostic=True)
     http.auth_token_handler = mock.MagicMock()
     http.auth_token_handler.poll.side_effect = requests.exceptions.JSONDecodeError(
         'invalid token response', 'not JSON', 0

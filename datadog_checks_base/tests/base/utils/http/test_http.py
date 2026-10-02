@@ -15,7 +15,6 @@ import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
-from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError, HTTPClientTimeoutError
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -202,7 +201,7 @@ class TestTLSCiphers:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
         assert http.session.verify == cert_path  # The session attribute instantiates the SSLContext
-        with pytest.raises(HTTPClientSSLError):
+        with pytest.raises(requests.exceptions.SSLError):
             http.get(url)
 
     def test_http_failure_with_ssl_defaults(self, openssl_https_server):
@@ -219,7 +218,7 @@ class TestTLSCiphers:
         # Mock SSL set_ciphers to disable it and use the default ciphers
         with mock.patch.object(ssl.SSLContext, 'set_ciphers'):
             http = RequestsWrapper(instance, init_config)
-            with pytest.raises(HTTPClientSSLError):
+            with pytest.raises(requests.exceptions.SSLError):
                 http.get(url)
 
 
@@ -314,13 +313,21 @@ class TestSession:
             assert getattr(http.session, key) == value
 
     def test_timeout(self):
-        """Forward the configured timeout and translate backend timeout errors."""
+        """
+        Respect the request timeout.
+
+        Here we test two things:
+        - We pass the timeout option correctly to the requests library.
+        - We let the requests.exceptions.Timeout bubble up from the requests library.
+
+        We trust requests to respect the timeout so we mock its response.
+        """
 
         mock_session = mock.create_autospec(requests.Session)
         mock_session.get.side_effect = requests.exceptions.Timeout()
         http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08}, session=mock_session)
 
-        with pytest.raises(HTTPClientTimeoutError):
+        with pytest.raises(requests.exceptions.Timeout):
             http.get('https://foobar.com')
 
         assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs

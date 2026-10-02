@@ -130,9 +130,10 @@ class RequestsTransport(HTTPAdapter):
 
 
 def create_requests_client(transport: RequestsTransport) -> RequestsWrapper:
+    """Return a client in agnostic mode, which is the contract these tests cover."""
     session = requests.Session()
     session.mount('http://', transport)
-    client = RequestsWrapper({}, {}, session=session)
+    client = RequestsWrapper({}, {}, session=session, agnostic=True)
     client.persist_connections = True
     return client
 
