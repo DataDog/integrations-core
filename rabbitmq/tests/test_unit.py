@@ -6,8 +6,9 @@ import json
 
 import mock
 import pytest
-import requests
 
+from datadog_checks.base.stubs.http import RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import (
@@ -24,14 +25,15 @@ from . import common, metrics
 pytestmark = [pytest.mark.unit, common.requires_management]
 
 
-def test__get_data(check):
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
-        with pytest.raises(RabbitMQException):
-            check._get_data('')
-        with pytest.raises(RabbitMQException):
-            check._get_data('')
+def test__get_data(check, fake_http):
+    fake_http.register_response('GET', '', HTTPClientError("mocked HTTP error"))
+    fake_http.register_response('GET', '', ValueError())
+    with pytest.raises(RabbitMQException):
+        check._get_data('')
+    with pytest.raises(RabbitMQException):
+        check._get_data('')
+    fake_http.assert_requests([RecordedRequest('GET', ''), RecordedRequest('GET', '')])
+    fake_http.assert_all_responses_consumed()
 
 
 def test_status_check(check, aggregator):
@@ -136,24 +138,8 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        check.check(config)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_nodes(aggregator, check):
