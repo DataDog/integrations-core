@@ -4,13 +4,19 @@
 
 from copy import deepcopy
 
+import mock
 import pytest
+import requests
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
-from . import common
+from . import common, metrics
 
 pytestmark = pytest.mark.unit
+
+STATS_URL = "http://{}:{}/servers/localhost/statistics".format(common.HOST, common.PORT)
+STATS_URL_V4 = "http://{}:{}/api/v1/servers/localhost/statistics".format(common.HOST, common.PORT)
 
 
 def test_bad_config(aggregator):
@@ -19,7 +25,7 @@ def test_bad_config(aggregator):
         check.check(common.BAD_CONFIG)
 
     service_check_tags = common._config_sc_tags(common.BAD_CONFIG)
-    aggregator.assert_service_check('powerdns.recursor.can_connect', status=check.CRITICAL, tags=service_check_tags)
+    aggregator.assert_service_check("powerdns.recursor.can_connect", status=check.CRITICAL, tags=service_check_tags)
     assert len(aggregator._metrics) == 0
 
 
@@ -34,8 +40,187 @@ def test_very_bad_config(aggregator):
 
 def test_api_key_headers():
     instance = deepcopy(common.CONFIG)
-    instance.update({'api_key': 'API_KEY', 'headers': {'foo': 'bar'}})
-    expected_headers = {'X-API-Key': 'API_KEY', 'foo': 'bar'}
+    instance.update({"api_key": "API_KEY", "headers": {"foo": "bar"}})
+    expected_headers = {"X-API-Key": "API_KEY", "foo": "bar"}
 
-    check = PowerDNSRecursorCheck('powerdns_recursor', {}, instances=[instance])
-    assert expected_headers == check._http.options['headers']
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, instances=[instance])
+    assert expected_headers == check._http.options["headers"]
+
+
+def test_get_config_missing_param_raises_formatted_exception():
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    with pytest.raises(Exception) as exc_info:
+        check._get_config({"port": common.PORT})
+
+    assert type(exc_info.value) is Exception
+    assert str(exc_info.value) == "powerdns_recursor instance missing host. Skipping."
+
+
+def test_get_config_defaults_none_tags_to_empty_list():
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    config, tags = check._get_config({"host": common.HOST, "port": common.PORT, "tags": None})
+
+    assert config.host == common.HOST
+    assert tags == []
+
+
+def test_get_config_preserves_provided_tags():
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    config, tags = check._get_config({"host": common.HOST, "port": common.PORT, "tags": ["foo:bar"]})
+
+    assert tags == ["foo:bar"]
+
+
+def test_check_v3_only_collects_base_metrics(aggregator):
+    instance = deepcopy(common.CONFIG)
+    stats = [
+        {"name": metrics.GAUGE_METRICS[0], "value": "1"},
+        {"name": metrics.RATE_METRICS[0], "value": "2"},
+        {"name": metrics.GAUGE_METRICS_V4[0], "value": "3"},
+        {"name": metrics.RATE_METRICS_V4[0], "value": "4"},
+    ]
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [instance])
+
+    with mock.patch("requests.Session.get", return_value=MockResponse(json_data=stats)):
+        check.check(instance)
+
+    aggregator.assert_metric(
+        metrics.METRIC_FORMAT.format(metrics.GAUGE_METRICS[0]), count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        metrics.METRIC_FORMAT.format(metrics.RATE_METRICS[0]), count=1, metric_type=aggregator.RATE
+    )
+    aggregator.assert_metric(metrics.METRIC_FORMAT.format(metrics.GAUGE_METRICS_V4[0]), count=0)
+    aggregator.assert_metric(metrics.METRIC_FORMAT.format(metrics.RATE_METRICS_V4[0]), count=0)
+
+
+def test_check_v4_also_collects_v4_metrics(aggregator):
+    instance = deepcopy(common.CONFIG_V4)
+    stats = [
+        {"name": metrics.GAUGE_METRICS[0], "value": "1"},
+        {"name": metrics.RATE_METRICS[0], "value": "2"},
+        {"name": metrics.GAUGE_METRICS_V4[0], "value": "3"},
+        {"name": metrics.RATE_METRICS_V4[0], "value": "4"},
+    ]
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [instance])
+
+    with mock.patch("requests.Session.get", return_value=MockResponse(json_data=stats)):
+        check.check(instance)
+
+    aggregator.assert_metric(
+        metrics.METRIC_FORMAT.format(metrics.GAUGE_METRICS[0]), count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        metrics.METRIC_FORMAT.format(metrics.RATE_METRICS[0]), count=1, metric_type=aggregator.RATE
+    )
+    aggregator.assert_metric(
+        metrics.METRIC_FORMAT.format(metrics.GAUGE_METRICS_V4[0]), count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        metrics.METRIC_FORMAT.format(metrics.RATE_METRICS_V4[0]), count=1, metric_type=aggregator.RATE
+    )
+
+
+def test_get_pdns_response_selects_v4_url_based_on_version():
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+
+    for version, expected_url in [(4, STATS_URL_V4), (3, STATS_URL), (5, STATS_URL)]:
+        config, _ = check._get_config({"host": common.HOST, "port": common.PORT, "version": version})
+        with mock.patch("requests.Session.get", return_value=MockResponse(json_data=[])) as mock_get:
+            check._get_pdns_response(config, STATS_URL, STATS_URL_V4)
+        assert mock_get.call_args[0][0] == expected_url
+
+
+def test_get_pdns_response_falls_back_to_v4_url_after_failure():
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    config, _ = check._get_config({"host": common.HOST, "port": common.PORT, "version": 3})
+    success = MockResponse(json_data={"ok": True})
+
+    with mock.patch(
+        "requests.Session.get", side_effect=[requests.exceptions.ConnectionError("boom"), success]
+    ) as mock_get:
+        response = check._get_pdns_response(config, STATS_URL, STATS_URL_V4)
+
+    assert response.json() == {"ok": True}
+    assert mock_get.call_count == 2
+
+
+def test_get_pdns_response_reraises_without_retry_when_already_v4():
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    config, _ = check._get_config({"host": common.HOST, "port": common.PORT, "version": 4})
+
+    with mock.patch("requests.Session.get", side_effect=[requests.exceptions.ConnectionError("boom")]) as mock_get:
+        with pytest.raises(requests.exceptions.ConnectionError):
+            check._get_pdns_response(config, STATS_URL, STATS_URL_V4)
+
+    assert mock_get.call_count == 1
+
+
+def test_collect_metadata_skipped_when_collection_disabled(datadog_agent):
+    datadog_agent._config["enable_metadata_collection"] = False
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    check.check_id = "test:123"
+    config, _ = check._get_config(common.CONFIG)
+
+    with mock.patch("requests.Session.get") as mock_get:
+        check._collect_metadata(config)
+
+    mock_get.assert_not_called()
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_collect_metadata_logs_on_request_failure(datadog_agent):
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    check.check_id = "test:123"
+    check.log = mock.MagicMock()
+    config, _ = check._get_config(common.CONFIG)
+
+    with mock.patch("requests.Session.get", side_effect=requests.exceptions.Timeout()):
+        check._collect_metadata(config)
+
+    check.log.debug.assert_called_with("Error collecting PowerDNS Recursor version: %s", "")
+
+
+def test_collect_metadata_without_server_header_logs_and_skips(datadog_agent):
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    check.check_id = "test:123"
+    check.log = mock.MagicMock()
+    config, _ = check._get_config(common.CONFIG)
+
+    with mock.patch("requests.Session.get", return_value=MockResponse()):
+        check._collect_metadata(config)
+
+    check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
+
+
+def test_collect_metadata_sets_version_from_server_header(datadog_agent):
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    check.check_id = "test:123"
+    config, _ = check._get_config(common.CONFIG)
+
+    with mock.patch("requests.Session.get", return_value=MockResponse(headers={"Server": "PowerDNS/4.0.9"})):
+        check._collect_metadata(config)
+
+    datadog_agent.assert_metadata(
+        "test:123",
+        {
+            "version.scheme": "semver",
+            "version.major": "4",
+            "version.minor": "0",
+            "version.patch": "9",
+            "version.raw": "4.0.9",
+        },
+    )
+    datadog_agent.assert_metadata_count(5)
+
+
+def test_collect_metadata_logs_on_decode_failure(datadog_agent):
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
+    check.check_id = "test:123"
+    check.log = mock.MagicMock()
+    config, _ = check._get_config(common.CONFIG)
+
+    with mock.patch("requests.Session.get", return_value=MockResponse(headers={"Server": "wrong_stuff"})):
+        check._collect_metadata(config)
+
+    check.log.debug.assert_called_with("Error while decoding PowerDNS Recursor version: %s", "list index out of range")
