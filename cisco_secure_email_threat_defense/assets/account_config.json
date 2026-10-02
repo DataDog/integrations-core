@@ -1,0 +1,57 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and password",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_password",
+          "label": "Client password",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "host_name",
+      "label": "Host name",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "api.us.etd.cisco.com", "label": "api.us.etd.cisco.com" },
+          { "value": "api.au.etd.cisco.com", "label": "api.au.etd.cisco.com" },
+          { "value": "api.de.etd.cisco.com", "label": "api.de.etd.cisco.com" },
+          { "value": "api.in.etd.cisco.com", "label": "api.in.etd.cisco.com" }
+        ]
+      }
+    },
+    {
+      "key": "api_key",
+      "label": "API key",
+      "editable": true,
+      "required": true,
+      "password": {}
+    },
+    {
+      "key": "verdict_delay",
+      "label": "Verdict delay",
+      "help": "Provide a delay (in minutes) for fetching data to allow verdicts to be updated. Default is 30 minutes.",
+      "editable": true,
+      "required": false,
+      "integer": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "cisco-secure-email-threat-defense-logs" }
+  ]
+}
