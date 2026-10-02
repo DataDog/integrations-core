@@ -108,6 +108,7 @@ The one exception is the OpenMetrics base check, which still emits a service che
 
 Make HTTP requests through the backend-neutral HTTP layer in `datadog_checks_base`, documented in `docs/developer/base/http.md`. Checks should not depend on the underlying HTTP library, so another backend can replace it without rewriting every integration and its tests.
 
+- Set `AGNOSTIC_HTTP = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
 - Send requests through `self.http`. Construct additional clients with `AgentCheck.create_http_client()` rather than instantiating `RequestsWrapper` or a `requests.Session`.
 - Catch the exceptions in `datadog_checks.base.utils.http_exceptions` (for example `HTTPClientError`), never `requests.exceptions` types.
 - Use only the `HTTPClient` and `HTTPResponse` members documented in `http.md`. Anything else is an implementation detail of the current backend.

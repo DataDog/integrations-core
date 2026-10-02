@@ -45,6 +45,20 @@ url = 'unix:///var/run/docker.sock'
 response = self.http.get(url)
 ```
 
+## Backend-neutral mode
+
+Set the `AGNOSTIC_HTTP` class attribute to opt a check into the interface this page describes:
+
+```python
+class MyCheck(AgentCheck):
+    AGNOSTIC_HTTP = True
+```
+
+With it set, every client the check creates through `self.http` or `create_http_client()`, including the clients its
+OpenMetrics and Prometheus scrapers build, returns responses that expose only the documented members and raises the
+errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
+responses and raise `requests` exceptions unchanged.
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
@@ -53,8 +67,9 @@ For complete documentation of every option, see the associated configuration tem
 
 ## Errors
 
-A failed request raises one of the backend-agnostic types in `datadog_checks.base.utils.http_exceptions`, never an
-exception class belonging to the underlying HTTP library. Catch these instead:
+With `AGNOSTIC_HTTP` set, a failed request raises one of the backend-agnostic types in
+`datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP library. Catch
+these instead:
 
 | Exception | Raised when |
 | --- | --- |
