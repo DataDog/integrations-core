@@ -268,3 +268,30 @@ def _get_mocked_instance(instance):
     collector._discover_channels = Mock(return_value=None)
     collector._submit_channel_status = Mock(return_value=None)
     return collector
+
+
+def test_wildcard_channels_to_skip_are_matched_as_patterns(instance):
+    """AGENT-16599 issue 5: channels_to_skip holds MQ generic names (e.g. 'YMQU.*'). The wildcard
+    status sweep must skip channels already covered by those patterns; an exact-string comparison
+    never matched, so every channel was polled and submitted twice."""
+    instance['channels'] = ['YMQU.*']
+    with patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute') as mock_pcf:
+        skipped = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: b'YMQU.TO.CAWILY', pymqi.CMQCFC.MQIACH_BATCH_SIZE: 10}
+        kept = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: b'OTHER.CHANNEL', pymqi.CMQCFC.MQIACH_BATCH_SIZE: 20}
+        mock_pcf_instance = Mock()
+        mock_pcf_instance.MQCMD_INQUIRE_CHANNEL_STATUS.return_value = [skipped, kept]
+        mock_pcf.return_value = mock_pcf_instance
+
+        config = IBMMQConfig(instance, {})
+        collector = ChannelMetricCollector(config, service_check=Mock(), gauge=Mock(), log=Mock())
+        # Mimic the wildcard pass: search '*' while skipping channels already covered by config.channels.
+        collector._submit_channel_status(Mock(), '*', config.tags_no_channel, config.channels)
+
+        submitted_channels = {
+            tag.split(':', 1)[1]
+            for call in collector.gauge.call_args_list
+            for tag in call[1]['tags']
+            if tag.startswith('channel:')
+        }
+        assert 'YMQU.TO.CAWILY' not in submitted_channels, "wildcard-matched channel must be skipped, not double-polled"
+        assert 'OTHER.CHANNEL' in submitted_channels
