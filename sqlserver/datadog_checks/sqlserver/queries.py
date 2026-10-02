@@ -51,14 +51,40 @@ GROUP BY object_id
 
 INDEX_QUERY = """
 SELECT
-    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
+    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
+    ISNULL(keys.key_columns, N'') AS key_columns,
+    ISNULL(includes.included_columns, N'') AS included_columns,
+    cols.column_names
 FROM
-    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
-    AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+    sys.indexes i
+    OUTER APPLY (
+        SELECT STRING_AGG(
+            CASE
+                WHEN ic.is_descending_key = 1 THEN CAST(c.name AS NVARCHAR(MAX)) + N' DESC'
+                ELSE CAST(c.name AS NVARCHAR(MAX))
+            END, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) AS key_columns
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+            AND ic.is_included_column = 0 AND ic.key_ordinal > 0
+    ) keys
+    OUTER APPLY (
+        SELECT STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',')
+            WITHIN GROUP (ORDER BY ic.index_column_id) AS included_columns
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+            AND ic.is_included_column = 1
+    ) includes
+    OUTER APPLY (
+        SELECT STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+    ) cols
 WHERE i.object_id = schema_tables.table_id
-GROUP BY i.object_id, i.name, i.type,
-    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
+    AND i.type <> 0
+    AND cols.column_names IS NOT NULL
 """
 
 INDEX_QUERY_PRE_2017 = """
@@ -70,6 +96,22 @@ SELECT
     i.is_primary_key,
     i.is_unique_constraint,
     i.is_disabled,
+    ISNULL(STUFF((
+        SELECT ',' + CASE WHEN ic.is_descending_key = 1 THEN c.name + ' DESC' ELSE c.name END
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+            AND ic.is_included_column = 0 AND ic.key_ordinal > 0
+        ORDER BY ic.key_ordinal
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, ''), '') AS key_columns,
+    ISNULL(STUFF((
+        SELECT ',' + c.name
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+            AND ic.is_included_column = 1
+        ORDER BY ic.index_column_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, ''), '') AS included_columns,
     STUFF((
         SELECT ',' + c.name
         FROM sys.index_columns ic
@@ -79,6 +121,7 @@ SELECT
 FROM
     sys.indexes i
 WHERE i.object_id = schema_tables.table_id
+    AND i.type <> 0
 GROUP BY
     i.object_id,
     i.name,
