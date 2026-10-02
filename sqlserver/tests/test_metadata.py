@@ -387,18 +387,19 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         'id': 'normalized_value',
                         'name': 'key_order',
+                        # a and b are NOT NULL because they are the primary key.
                         'columns': [
                             {
                                 'name': 'a',
                                 'data_type': 'int',
                                 'default': 'None',
-                                'nullable': True,
+                                'nullable': False,
                             },
                             {
                                 'name': 'b',
                                 'data_type': 'int',
                                 'default': 'None',
-                                'nullable': True,
+                                'nullable': False,
                             },
                             {
                                 'name': 'c',
