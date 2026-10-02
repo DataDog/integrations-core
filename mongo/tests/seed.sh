@@ -7,6 +7,13 @@ set -eu
 
 log() { echo "seed: $*"; }
 
+# This script and activity-gen.sh embed the credentials unescaped in mongodb://
+# URIs, so reject URI-reserved characters here with a clear error instead of
+# failing later on a misparsed URI.
+case "${DB_USERNAME}${DB_PASSWORD}" in
+  *[]@:/?#%[]*) log "DB_USERNAME and DB_PASSWORD must not contain @ : / ? # % [ ]"; exit 1 ;;
+esac
+
 log "adding shard01 to the cluster"
 mongosh --quiet --host mongos --eval '
   if (!db.getSiblingDB("config").shards.findOne({_id: "shard01"})) {

@@ -51,7 +51,7 @@ concurrent run.
 | Variable | Default | Purpose |
 |---|---|---|
 | `MONGO_VERSION` | `8.0` | Image tag for every mongo service. Needs 6.0+ (`mongosh`). |
-| `DB_USERNAME` / `DB_PASSWORD` | `datadog` / `datadog` | The monitoring user created by `seed`. |
+| `DB_USERNAME` / `DB_PASSWORD` | `datadog` / `datadog` | The monitoring user created by `seed`. Must not contain `@ : / ? # % [ ]`: the scripts embed them unescaped in `mongodb://` URIs, and `seed` fails fast otherwise. |
 | `ACTIVITY_GEN` | `1` | Set to `0` to keep `activity-gen` running but idle. |
 | `LOCK_DRILL` | `1` | Set to `0` to skip the `fsync` lock and the cluster-wide write block (see [Lock metrics](#lock-metrics)). |
 
