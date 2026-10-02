@@ -7,15 +7,15 @@ Extract the metric coverage target for an integration from the metrics its shipp
 assets put in front of users, and join it against metadata.csv.
 
 The coverage target is *every* metric referenced in the integration's OOTB dashboards
-(``assets/dashboards/*.json``) and its recommended monitors (``assets/monitors/*.json``).
+(`assets/dashboards/*.json`) and its recommended monitors (`assets/monitors/*.json`).
 These are the metrics a user actually sees, so they are the fixture's first-class input.
-Datadog queries name a metric with an aggregator prefix, e.g. ``avg:redis.stats.keyspace_hits{$scope}``
-(dashboards) or ``avg(last_5m):avg:redis.mem.used{*}`` (monitors); that ``agg:metric{`` shape is
+Datadog queries name a metric with an aggregator prefix, e.g. `avg:redis.stats.keyspace_hits{$scope}`
+(dashboards) or `avg(last_5m):avg:redis.mem.used{*}` (monitors); that `agg:metric{` shape is
 what we extract. Formula queries and newer widgets store the metric bare, so the aggregator is
-optional. A single pattern covers dashboard ``q``/``queries[].query`` fields and monitor
-``definition.query`` alike. Only *metric* queries are read: a query's sibling ``data_source`` must
-be ``metrics`` (dashboards) and a monitor's ``type`` must be a metric alert, so log/APM/RUM/DSM
-widgets sharing the same ``query`` key do not leak non-metric tokens into the target.
+optional. A single pattern covers dashboard `q`/`queries[].query` fields and monitor
+`definition.query` alike. Only *metric* queries are read: a query's sibling `data_source` must
+be `metrics` (dashboards) and a monitor's `type` must be a metric alert, so log/APM/RUM/DSM
+widgets sharing the same `query` key do not leak non-metric tokens into the target.
 
 Usage:
     python asset_metrics.py <INTEGRATION_DIR>
