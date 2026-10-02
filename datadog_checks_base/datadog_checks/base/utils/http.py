@@ -719,12 +719,9 @@ class RequestsWrapper(object):
         self.handle_auth_token(method=method, url=url, default_options=self.options)
 
         new_options = ChainMap(options, self.options)
-        request_headers = CaseInsensitiveDict(
-            explicit_headers if explicit_headers is not None else self.options['headers']
-        )
+        # Without extra headers, the caller's headers, including an explicit None, reach requests unchanged.
         if extra_headers is not None:
-            request_headers.update(extra_headers)
-        new_options['headers'] = request_headers
+            new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
@@ -745,12 +742,9 @@ class RequestsWrapper(object):
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    retry_headers = CaseInsensitiveDict(
-                        explicit_headers if explicit_headers is not None else self.options['headers']
-                    )
+                    # Rebuild so the merged headers carry the renewed token.
                     if extra_headers is not None:
-                        retry_headers.update(extra_headers)
-                    new_options['headers'] = retry_headers
+                        new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
@@ -758,6 +752,12 @@ class RequestsWrapper(object):
             if self._agnostic:
                 return requests_adapter.RequestsResponseAdapter(response, self.request_size)
             return ResponseWrapper(response, self.request_size)
+
+    def _merge_extra_headers(self, explicit_headers, extra_headers):
+        """Layer per-request extra headers over the request's headers, or the client's when it sets none."""
+        headers = CaseInsensitiveDict(explicit_headers if explicit_headers is not None else self.options['headers'])
+        headers.update(extra_headers)
+        return headers
 
     def _translate_errors(self):
         """Raise backend-neutral errors in agnostic mode, and requests errors unchanged otherwise."""
