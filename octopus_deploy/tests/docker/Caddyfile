@@ -20,100 +20,46 @@
         rewrite * /GET/api/Spaces-1/projectgroups/high_limit_pg1.json
         file_server
     }
-    @get_projectgroups_1_projects {
+    @get_projects {
         method GET
-        path /api/Spaces-1/projectgroups/ProjectGroups-1/projects
+        path /api/Spaces-1/projects
     }
-    route @get_projectgroups_1_projects {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-1/projects/high_limit_pg1.json
+    route @get_projects {
+        rewrite * /GET/api/Spaces-1/projects/high_limit_pg1.json
         file_server
     }
-    @get_projectgroups_2_projects {
-        method GET
-        path /api/Spaces-1/projectgroups/ProjectGroups-2/projects
-    }
-    route @get_projectgroups_2_projects {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-2/projects/high_limit_pg1.json
-        file_server
-    }
-    @get_projectgroups_3_projects {
-        method GET
-        path /api/Spaces-1/projectgroups/ProjectGroups-3/projects
-    }
-    route @get_projectgroups_3_projects {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/projects/high_limit_pg1.json
-        file_server
-    }
-    @get_running_tasks_project_1 {
+    @get_running_tasks {
         method GET
         path /api/Spaces-1/tasks
-        expression {query.project}.contains("Projects-1") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+        expression {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
-    route @get_running_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/project_1_in_progress_high_limit_pg1.json
+    route @get_running_tasks {
+        rewrite * /GET/api/Spaces-1/tasks/space_in_progress_high_limit_pg1.json
         file_server
     }
-    @get_running_tasks_project_2 {
-        method GET
-        path /api/Spaces-1/tasks
-        expression {query.project}.contains("Projects-2") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
-    }
-    route @get_running_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/project_2_in_progress_high_limit_pg1.json
-        file_server
-    }
-    @get_running_tasks_project_3 {
-        method GET
-        path /api/Spaces-1/tasks
-        expression {query.project}.contains("Projects-3") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
-    }
-    route @get_running_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/project_3_in_progress_high_limit_pg1.json
-        file_server
-    }
-    @get_running_tasks_project_4 {
-        method GET
-        path /api/Spaces-1/tasks
-        expression {query.project}.contains("Projects-4") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
-    }
-    route @get_running_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/project_4_in_progress_high_limit_pg1.json
-        file_server
-    }
-    @get_completed_tasks_project_1 {
+    @get_completed_tasks {
         method GET
         path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-1") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+        expression {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
     }
-    route @get_completed_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/project_1_completed_high_limit_pg1.json
+    route @get_completed_tasks {
+        rewrite * /GET/api/Spaces-1/tasks/space_completed_high_limit_pg1.json
         file_server
     }
-    @get_completed_tasks_project_2 {
+    @get_deployments_bulk {
         method GET
-        path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-2") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+        path /api/Spaces-1/deployments
     }
-    route @get_completed_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/project_2_completed_high_limit_pg1.json
+    route @get_deployments_bulk {
+        rewrite * /GET/api/Spaces-1/deployments/high_limit_pg1.json
         file_server
     }
-    @get_completed_tasks_project_3 {
+    @get_releases_bulk {
         method GET
-        path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-3") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+        path /api/Spaces-1/releases
     }
-    route @get_completed_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/project_3_completed_high_limit_pg1.json
-        file_server
-    }
-    @get_completed_tasks_project_4 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {query.project}.contains("Projects-4") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
-    }
-    route @get_completed_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/project_4_completed_high_limit_pg1.json
+    route @get_releases_bulk {
+        rewrite * /GET/api/Spaces-1/releases/high_limit_pg1.json
         file_server
     }
     @get_octopusservernodes {
