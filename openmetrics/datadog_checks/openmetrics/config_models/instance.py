@@ -140,6 +140,7 @@ class InstanceConfig(BaseModel):
     headers: Optional[MappingProxyType[str, Any]] = None
     health_service_check: Optional[bool] = None
     histogram_buckets_as_distributions: Optional[bool] = None
+    histogram_percentiles: Optional[tuple[Union[float, str], ...]] = None
     hostname_format: Optional[str] = None
     hostname_label: Optional[str] = None
     ignore_connection_errors: Optional[bool] = None
