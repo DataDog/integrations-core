@@ -14,6 +14,7 @@ import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.cursor import CommenterSSCursor
 from datadog_checks.mysql.data_observability import EVENT_TRACK_TYPE, MAX_RESULT_ROWS
 from datadog_checks.mysql.version_utils import MySQLVersion
 
@@ -81,7 +82,7 @@ def _make_mock_conn(rows=None, description=None, open=True):
     result_rows = rows if rows is not None else [(42,)]
     query_cursor.fetchmany.side_effect = lambda size: result_rows[:size]
     mock_conn.cursor.side_effect = lambda cursor_class=None: (
-        query_cursor if cursor_class is pymysql.cursors.SSCursor else timeout_cursor
+        query_cursor if cursor_class and issubclass(cursor_class, pymysql.cursors.SSCursor) else timeout_cursor
     )
     mock_conn.query_cursor = query_cursor
     mock_conn.timeout_cursor = timeout_cursor
@@ -106,6 +107,10 @@ def _setup_and_run(instance_basic, queries=None, config_id='test-config-123', mo
     check.data_observability._db = mock_conn
     check.data_observability.run_job()
     return check, mock_conn, mock_cursor
+
+
+def _timeout_calls(mock_conn):
+    return [c for c in mock_conn.timeout_cursor.execute.call_args_list if 'sql_select_limit' not in c.args[0]]
 
 
 def _get_do_event_calls(mock_epe):
@@ -172,7 +177,7 @@ def test_queries_are_sorted_to_minimize_database_and_timeout_changes(instance_ba
         'SELECT warehouse_30_a',
         'SELECT warehouse_30_b',
     ]
-    assert conn.timeout_cursor.execute.call_args_list == [
+    assert _timeout_calls(conn) == [
         call('SET SESSION max_execution_time = %s', (20_000,)),
         call('SET SESSION max_execution_time = %s', (10_000,)),
         call('SET SESSION max_execution_time = %s', (30_000,)),
@@ -232,8 +237,7 @@ def test_interface_error_propagates(instance_basic):
         check.data_observability.run_job()
 
     assert check.data_observability._db is None
-    assert check.data_observability._current_dbname is None
-    assert check.data_observability._current_query_timeout_ms is None
+    assert check.data_observability._session is None
 
 
 def test_closed_connection_propagates_and_cron_query_is_retried(instance_basic, aggregator, monkeypatch):
@@ -306,7 +310,7 @@ def test_query_timeout_is_applied(instance_basic, is_mariadb, variable, configur
 
     check.data_observability.run_job()
 
-    assert mock_conn.timeout_cursor.execute.call_args_list == [
+    assert _timeout_calls(mock_conn) == [
         call(f'SET SESSION {variable} = %s', (configured_timeout,)),
     ]
 
@@ -319,7 +323,7 @@ def test_mysql_56_executes_query_without_unsupported_session_timeout(instance_ba
 
     check.data_observability.run_job()
 
-    mock_conn.timeout_cursor.execute.assert_not_called()
+    assert _timeout_calls(mock_conn) == []
     assert [call.args[0] for call in cursor.execute.call_args_list] == [
         'USE `test_db`',
         BASE_QUERY['query'],
@@ -351,7 +355,8 @@ def test_streaming_result_is_capped_in_emitted_event(instance_basic):
     assert payload['row_count'] == MAX_RESULT_ROWS
     assert len(payload['rows']) == MAX_RESULT_ROWS
     assert payload['rows'][-1] == [MAX_RESULT_ROWS - 1]
-    conn.cursor.assert_any_call(pymysql.cursors.SSCursor)
+    conn.cursor.assert_any_call(CommenterSSCursor)
+    conn.timeout_cursor.execute.assert_any_call('SET SESSION sql_select_limit = %s', (MAX_RESULT_ROWS,))
 
 
 def test_event_payload_structure(instance_basic):

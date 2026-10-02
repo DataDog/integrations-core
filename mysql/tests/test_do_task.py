@@ -17,15 +17,15 @@ import pytest
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.cursor import BaseCommenterCursor, CommenterSSCursor
 from datadog_checks.mysql.data_observability import EVENT_TRACK_TYPE
-from datadog_checks.mysql.do_task import MAX_EVENT_BYTES, MAX_TASK_STATEMENT_ROWS, _to_text
+from datadog_checks.mysql.do_task import MAX_EVENT_BYTES, MAX_TASK_STATEMENT_ROWS, MySqlTaskCheck, _to_text
 
 from . import common
+from .do_fakes import FakeConnection
 
 pytestmark = pytest.mark.unit
 
 CONFIG_ID = 'do-mysql-once-3f1c2a9e-8b7d-4c1e-9f2a-6d5e4c3b2a10'
 TASK_ID = '3f1c2a9e-8b7d-4c1e-9f2a-6d5e4c3b2a10'
-MYSQL_8 = ('8.0.36', 'MySQL Community Server - GPL')
 
 
 def _statement(statement_id='s0', query='SELECT 1', max_rows=MAX_TASK_STATEMENT_ROWS, dbname='shop'):
@@ -48,72 +48,6 @@ def _create_check(instance_basic, statements, expires_at=None):
     check = MySql(common.CHECK_NAME, {}, [instance])
     check._resolved_hostname = 'mysql.test'
     return check
-
-
-class FakeConnection:
-    """
-    Stands in for a pymysql connection. `results` maps SQL text to `(columns, rows)`, to an
-    exception to raise, or to a callable taking the connection that does either. Any other
-    statement succeeds without a result set.
-    """
-
-    def __init__(self, results=None, version=MYSQL_8):
-        self.results = results or {}
-        self.version = version
-        self.open = True
-        self.executed = []
-        self.fetch_sizes = []
-        self.cursor_classes = []
-
-    def cursor(self, cursor_class=None):
-        self.cursor_classes.append(cursor_class)
-        return FakeCursor(self)
-
-    def close(self):
-        if not self.open:
-            raise pymysql.err.Error('Already closed')
-        self.open = False
-
-
-class FakeCursor:
-    def __init__(self, conn):
-        self.conn = conn
-        self.description = None
-        self.rows = []
-        self.fetched = 0
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.close()
-
-    def execute(self, sql, args=None):
-        self.conn.executed.append(sql if args is None else (sql, args))
-        self.description, self.rows, self.fetched = None, [], 0
-        if sql.startswith('SELECT @@version'):
-            self.description, self.rows = [('@@version',), ('@@version_comment',)], [self.conn.version]
-            return
-        result = self.conn.results.get(sql)
-        if callable(result):
-            result = result(self.conn)
-        if isinstance(result, BaseException):
-            raise result
-        if result is not None:
-            columns, self.rows = result
-            self.description = [(column,) for column in columns]
-
-    def fetchone(self):
-        return self.rows[0]
-
-    def fetchmany(self, size):
-        self.conn.fetch_sizes.append(size)
-        batch = self.rows[self.fetched : self.fetched + size]
-        self.fetched += len(batch)
-        return batch
-
-    def close(self):
-        pass
 
 
 def _run(dd_run_check, check, *connections):
@@ -143,6 +77,16 @@ def _assert_count(aggregator, check, name, *tags, count=1):
     )
 
 
+def test_instance_with_do_task_builds_the_task_check(instance_basic):
+    # The task check must never run the mysql check's own setup: async jobs, health events and
+    # collection would carry the user's instance tags and its SQL.
+    task_check = _create_check(instance_basic, [_statement()])
+    assert isinstance(task_check, MySqlTaskCheck)
+    assert not isinstance(task_check, MySql)
+
+    assert isinstance(MySql(common.CHECK_NAME, {}, [deepcopy(instance_basic)]), MySql)
+
+
 def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, instance_basic):
     check = _create_check(
         instance_basic,
@@ -158,13 +102,14 @@ def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, 
     connect = _run(dd_run_check, check, conn)
 
     assert connect.call_count == 1
-    assert conn.executed[:4] == [
+    assert conn.executed[:6] == [
         'SELECT @@version, @@version_comment',
         'SET SESSION TRANSACTION READ ONLY',
         "SET time_zone = '+00:00'",
         ('SET SESSION max_execution_time = %s', (300_000,)),
+        ('SET SESSION sql_select_limit = %s', (MAX_TASK_STATEMENT_ROWS,)),
+        'USE `shop`',
     ]
-    assert 'USE `shop`' in conn.executed
     assert not conn.open
 
     first, second = _events(aggregator)
@@ -284,17 +229,6 @@ def test_each_execution_gets_a_new_result_id(aggregator, dd_run_check, instance_
     assert first['statement_id'] == second['statement_id'] == 's0'
     assert first['result_id'] != second['result_id']
     assert str(uuid.UUID(first['result_id'])) == first['result_id']
-
-
-def test_database_names_are_quoted(aggregator, dd_run_check, instance_basic):
-    check = _create_check(instance_basic, [_statement('s0', dbname='shop-eu'), _statement('s1', dbname='odd`name')])
-    conn = FakeConnection({'SELECT 1': (['1'], [(1,)])})
-
-    _run(dd_run_check, check, conn)
-
-    assert 'USE `shop-eu`' in conn.executed
-    assert 'USE `odd``name`' in conn.executed
-    assert [event['status'] for event in _events(aggregator)] == ['success', 'success']
 
 
 def test_failed_statement_does_not_stop_the_others(aggregator, dd_run_check, instance_basic):
@@ -512,28 +446,6 @@ def test_large_results_are_split_into_chunks(aggregator, dd_run_check, instance_
     assert len({event['result_id'] for event in events}) == 1
     assert all(event['row_count'] == len(event['rows']) for event in events)
     assert [row for event in events for row in event['rows']] == [[value] for (value,) in rows]
-
-
-@pytest.mark.parametrize(
-    'version, expected',
-    [
-        pytest.param(MYSQL_8, ('SET SESSION max_execution_time = %s', (300_000,)), id='mysql-milliseconds'),
-        pytest.param(
-            ('10.6.12-MariaDB', 'mariadb.org binary distribution'),
-            ('SET SESSION max_statement_time = %s', (300,)),
-            id='mariadb-seconds',
-        ),
-        pytest.param(('5.6.51-log', 'MySQL Community Server (GPL)'), None, id='mysql-without-max-execution-time'),
-    ],
-)
-def test_statement_timeout_uses_the_server_variable(aggregator, dd_run_check, instance_basic, version, expected):
-    check = _create_check(instance_basic, [_statement()])
-    conn = FakeConnection({'SELECT 1': (['1'], [(1,)])}, version=version)
-
-    _run(dd_run_check, check, conn)
-
-    timeouts = [sql for sql in conn.executed if isinstance(sql, tuple)]
-    assert timeouts == ([expected] if expected else [])
 
 
 @pytest.mark.parametrize(

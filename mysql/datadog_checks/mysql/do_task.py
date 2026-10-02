@@ -6,9 +6,10 @@ One-off Data Observability tasks.
 
 The Agent schedules a separate run-once `mysql` check for each task that Remote Configuration
 delivers. That check holds only the connection settings of the matched instance plus a
-`do_task` block, so the user's own check is never touched. The task runs each statement once on
-its own connection and reports every result as `do-query-results` events, which the backend
-joins back to the task by `task_id`, `statement_id` and `result_id`.
+`do_task` block, so the user's own check is never touched. `MySql.__new__` builds it as a
+`MySqlTaskCheck`, which runs each statement once on its own connection and reports every result as
+`do-query-results` events, which the backend joins back to the task by `task_id`, `statement_id`
+and `result_id`.
 """
 
 from __future__ import annotations
@@ -22,20 +23,22 @@ from typing import TYPE_CHECKING, Any
 
 import pymysql
 
+from datadog_checks.base import DatabaseCheck
 from datadog_checks.base.utils.format import json
 
-from .cursor import CommenterCursor, CommenterSSCursor
+from .config_models.instance import DoTask
+from .cursor import CommenterCursor
 from .data_observability import EVENT_TRACK_TYPE
+from .do_query import MAX_RESULT_ROWS, DOQuerySession, NoResultSetError
+from .instance_mixin import MySQLInstanceMixin
 from .util import connect_with_session_variables
 from .version_utils import parse_version
 
 if TYPE_CHECKING:
-    from .config_models.instance import DoTask, Statement
-    from .mysql import MySql
+    from .config_models.instance import Statement
 
-# Hard cap on the rows one statement returns, whatever its max_rows asks for. Like a LIMIT, rows
-# past the limit are not returned.
-MAX_TASK_STATEMENT_ROWS = 10_000
+# Hard cap on the rows one statement returns, whatever its max_rows asks for.
+MAX_TASK_STATEMENT_ROWS = MAX_RESULT_ROWS
 
 # Upper bound on one serialized event. Larger results are split into chunks, which keeps every
 # event well under the intake's per-event limit.
@@ -48,28 +51,32 @@ CONNECTION_ERROR_CODES = frozenset((2002, 2003, 2006, 2013))
 STATEMENT_TIMEOUT_ERROR_CODES = frozenset((3024, 1969))
 LOCK_WAIT_TIMEOUT_ERROR_CODE = 1205
 
-# MySQL added max_execution_time in 5.7.4.
-MAX_EXECUTION_TIME_MIN_VERSION = (5, 7, 4)
 
+class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
+    """
+    Runs the statements of one `do_task` once and reports a result for each of them. It sends no
+    integration metrics, service checks, health events or DBM data: those would carry the tags of
+    the user's own instance, so for example a task that fails to connect would flip that instance's
+    `mysql.can_connect` status. Its only output besides the result events is internal
+    `dd.mysql.do_task.*` metrics.
+    """
 
-class MySQLDataObservabilityTask:
-    """Runs the statements of one `do_task` once and reports a result for each of them."""
+    DBMS = 'mysql'
+    HA_SUPPORTED = True
 
-    def __init__(self, check: MySql, task: DoTask) -> None:
-        self._check = check
-        self._task = task
-        self._log = check.log
-        self._conn: Any = None
-        self._version = None
-        self._current_dbname: str | None = None
-        self._current_timeout_seconds: int | None = None
+    def __init__(self, name, init_config, instances):
+        super().__init__(name, init_config, instances)
+        self._init_instance(init_config)
+        self._task = DoTask.model_validate(self.instance['do_task'])
+        self._session: DOQuerySession | None = None
+        self._server_version = None
         self._metric_tags: list[str] | None = None
 
-    def run(self) -> None:
+    def check(self, _):
         task = self._task
         if time.time() >= task.expires_at:
             # The Agent drops stale tasks too; this catches a task that sat in the queue.
-            self._log.warning("Not running Data Observability task %s: it expired at %d", task.task_id, task.expires_at)
+            self.log.warning("Not running Data Observability task %s: it expired at %d", task.task_id, task.expires_at)
             self._emit_task_error('expired', f'Task expired at {task.expires_at} before it ran')
             self._count('dd.mysql.do_task.runs', ['outcome:expired'])
             return
@@ -77,21 +84,21 @@ class MySQLDataObservabilityTask:
         statements = task.statements
         try:
             for index, statement in enumerate(statements):
-                if self._check.is_cancelled:
+                if self.is_cancelled:
                     # The task's config is gone (cancelled or expired), so nobody waits for the rest.
-                    self._log.debug(
+                    self.log.debug(
                         "Data Observability task %s cancelled, skipping %d statements",
                         task.task_id,
                         len(statements) - index,
                     )
                     self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
                     return
-                if self._conn is None:
+                if self._session is None:
                     try:
                         self._connect()
                     except Exception as error:
                         self._close()
-                        self._log.warning("Data Observability task %s could not connect: %s", task.task_id, error)
+                        self.log.warning("Data Observability task %s could not connect: %s", task.task_id, error)
                         result = _error_result(error, 0.0, connecting=True)
                         for pending in statements[index:]:
                             self._emit_result(pending, result, executed=False)
@@ -103,92 +110,59 @@ class MySQLDataObservabilityTask:
             self._close()
 
     def _connect(self) -> None:
-        self._conn = connect_with_session_variables(mysql_version=self._version, **self._check._get_connection_args())
-        with closing(self._conn.cursor(CommenterCursor)) as cursor:
-            if self._version is None:
-                cursor.execute("SELECT @@version, @@version_comment")
-                raw_version, version_comment = cursor.fetchone()
-                self._version = parse_version(raw_version, version_comment)
-            # Task statements only read. A read-only session makes the server reject any write a
-            # statement attempts, whatever the monitoring user is granted.
-            cursor.execute("SET SESSION TRANSACTION READ ONLY")
-            # Temporal values come back in UTC whatever the server's time zone is.
-            cursor.execute("SET time_zone = '+00:00'")
+        conn = connect_with_session_variables(mysql_version=self._server_version, **self._get_connection_args())
+        try:
+            with closing(conn.cursor(CommenterCursor)) as cursor:
+                if self._server_version is None:
+                    cursor.execute("SELECT @@version, @@version_comment")
+                    raw_version, version_comment = cursor.fetchone()
+                    self._server_version = parse_version(raw_version, version_comment)
+                # Task statements only read. A read-only session makes the server reject any write a
+                # statement attempts, whatever the monitoring user is granted.
+                cursor.execute("SET SESSION TRANSACTION READ ONLY")
+                # Temporal values come back in UTC whatever the server's time zone is.
+                cursor.execute("SET time_zone = '+00:00'")
+        except Exception:
+            _close_quietly(conn, self.log)
+            raise
+        self._session = DOQuerySession(conn, self._server_version, self._server_version.flavor == 'MariaDB')
 
     def _close(self) -> None:
-        conn = self._conn
-        self._conn = None
-        self._current_dbname = None
-        self._current_timeout_seconds = None
-        if conn is not None:
-            try:
-                conn.close()
-            except Exception:
-                self._log.debug("Failed to close Data Observability task connection", exc_info=True)
-
-    def _set_statement_timeout(self, timeout_seconds: int) -> None:
-        is_mariadb = self._version.flavor == 'MariaDB'
-        if not is_mariadb and not self._version.version_compatible(MAX_EXECUTION_TIME_MIN_VERSION):
-            return
-        if timeout_seconds == self._current_timeout_seconds:
-            return
-        if is_mariadb:
-            variable, value = 'max_statement_time', timeout_seconds
-        else:
-            variable, value = 'max_execution_time', timeout_seconds * 1000
-        with closing(self._conn.cursor(CommenterCursor)) as cursor:
-            cursor.execute(f"SET SESSION {variable} = %s", (value,))
-        self._current_timeout_seconds = timeout_seconds
+        session = self._session
+        self._session = None
+        if session is not None:
+            _close_quietly(session.conn, self.log)
 
     def _execute(self, statement: Statement) -> dict[str, Any]:
-        conn = self._conn
-        limit = min(statement.max_rows, MAX_TASK_STATEMENT_ROWS)
-        cursor = None
+        session = self._session
         start = time.time()
         try:
-            self._set_statement_timeout(statement.timeout_seconds)
-            # A streaming cursor fetches rows as fetchmany() asks for them, so the check never holds
-            # more than `limit` of them. Like every other Agent query, statements carry the
-            # service='datadog-agent' comment, which marks them as the Agent's in DBM.
-            cursor = conn.cursor(CommenterSSCursor)
-            if statement.dbname != self._current_dbname:
-                cursor.execute(f"USE {_quote_identifier(statement.dbname)}")
-                self._current_dbname = statement.dbname
-            cursor.execute(statement.query)
-            if cursor.description is None:
-                # Only statements that return rows are supported. Anything else may have changed the
-                # session, its read-only setting included, so the next statement gets a fresh one.
-                self._close()
-                error = pymysql.err.ProgrammingError(
-                    "Query returned no result set — only SELECT statements are supported"
-                )
-                return _error_result(error, time.time() - start)
-            columns = [description[0] for description in cursor.description]
-            rows = cursor.fetchmany(limit)
-            cursor.close()
+            columns, rows = session.run(
+                statement.dbname, statement.query, statement.timeout_seconds * 1000, statement.max_rows
+            )
         except Exception as error:
             duration = time.time() - start
             result = _error_result(error, duration)
-            if not conn.open:
+            if not session.conn.open:
                 result['error_kind'] = 'connection_error'
             # Keep the connection only after a plain server error. Anything else can leave it
-            # mid-result, so the next statement starts on a fresh one.
-            if isinstance(error, pymysql.err.DatabaseError) and result['error_kind'] != 'connection_error':
-                try:
-                    if cursor is not None:
-                        cursor.close()
-                except Exception:
-                    self._close()
-            else:
+            # mid-result, and a statement that returned no result set may have changed the session,
+            # its read-only setting included, so the next statement starts on a fresh one.
+            if (
+                not isinstance(error, pymysql.err.DatabaseError)
+                or isinstance(error, NoResultSetError)
+                or result['error_kind'] == 'connection_error'
+                or not session.usable
+            ):
                 self._close()
-            self._log.warning(
+            self.log.warning(
                 "Data Observability task %s statement %s failed (%.3fs): %s",
                 self._task.task_id,
                 statement.id,
                 duration,
                 error,
             )
-            self._log.debug("Failed statement SQL: %s", statement.query)
+            self.log.debug("Failed statement SQL: %s", statement.query)
             return result
 
         return {
@@ -208,8 +182,8 @@ class MySQLDataObservabilityTask:
             'config_id': self._task.config_id,
             'task_id': self._task.task_id,
             'db_type': 'mysql',
-            'db_host': self._check.reported_hostname,
-            'db_port': self._check._config.port,
+            'db_host': self.reported_hostname,
+            'db_port': self._config.port,
         }
 
     def _emit_result(self, statement: Statement, result: dict[str, Any], executed: bool = True) -> None:
@@ -254,9 +228,9 @@ class MySQLDataObservabilityTask:
 
     def _emit(self, event: dict[str, Any]) -> None:
         try:
-            self._check.event_platform_event(json.encode(event), EVENT_TRACK_TYPE)
+            self.event_platform_event(json.encode(event), EVENT_TRACK_TYPE)
         except Exception as error:
-            self._log.exception(
+            self.log.exception(
                 "Failed to emit Data Observability task %s result for statement %s",
                 self._task.task_id,
                 event.get('statement_id'),
@@ -280,16 +254,16 @@ class MySQLDataObservabilityTask:
 
     def _base_metric_tags(self) -> list[str]:
         if self._metric_tags is None:
-            self._metric_tags = [
-                tag for tag in self._check.tag_manager.get_tags() if not tag.startswith('dd.internal')
-            ] + ['db_type:mysql']
+            self._metric_tags = [tag for tag in self.tag_manager.get_tags() if not tag.startswith('dd.internal')] + [
+                'db_type:mysql'
+            ]
         return self._metric_tags
 
     def _count(self, name: str, tags: list[str] | None = None) -> None:
-        self._submit(self._check.count, name, 1, tags)
+        self._submit(self.count, name, 1, tags)
 
     def _histogram(self, name: str, value: float, tags: list[str] | None = None) -> None:
-        self._submit(self._check.histogram, name, value, tags)
+        self._submit(self.histogram, name, value, tags)
 
     def _submit(self, submit: Any, name: str, value: float, tags: list[str] | None) -> None:
         # Internal metrics must never cost the task a statement or a result.
@@ -298,13 +272,20 @@ class MySQLDataObservabilityTask:
                 name,
                 value,
                 tags=self._base_metric_tags() + (tags or []),
-                hostname=self._check.reported_hostname,
+                hostname=self.reported_hostname,
                 raw=True,
             )
         except Exception:
-            self._log.debug(
+            self.log.debug(
                 "Failed to submit %s for Data Observability task %s", name, self._task.task_id, exc_info=True
             )
+
+
+def _close_quietly(conn: Any, log: Any) -> None:
+    try:
+        conn.close()
+    except Exception:
+        log.debug("Failed to close Data Observability task connection", exc_info=True)
 
 
 def _error_result(error: Exception, duration: float, connecting: bool = False) -> dict[str, Any]:
@@ -332,11 +313,6 @@ def _error_result(error: Exception, duration: float, connecting: bool = False) -
         'error_kind': kind,
         'error_code': str(code) if code is not None else None,
     }
-
-
-def _quote_identifier(name: str) -> str:
-    """Quote a MySQL identifier, doubling any backtick in it, so every database name works as-is."""
-    return '`' + name.replace('`', '``') + '`'
 
 
 def _split_rows(rows: list[list[str | None]], budget: int) -> list[list[list[str | None]]]:
