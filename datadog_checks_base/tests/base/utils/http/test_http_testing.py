@@ -13,17 +13,28 @@ from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, Rec
 from datadog_checks.dev import http as http_testing
 
 
+class FixtureCheck(AgentCheck):
+    AGNOSTIC_HTTP = True
+
+
 class OpenMetricsFixtureCheck(OpenMetricsBaseCheck):
-    pass
+    AGNOSTIC_HTTP = True
 
 
 class PrometheusFixtureCheck(PrometheusCheck):
-    pass
+    AGNOSTIC_HTTP = True
+
+
+def test_fake_http_requires_the_check_to_opt_in(fake_http):
+    check = AgentCheck('test', {}, [{}])
+
+    with pytest.raises(AssertionError, match='AGNOSTIC_HTTP = True'):
+        check.create_http_client()
 
 
 def test_fake_http_does_not_construct_backend_clients(fake_http, mocker):
     backend_client = mocker.patch('datadog_checks.base.utils.http.RequestsWrapper')
-    check = AgentCheck('test', {}, [{}])
+    check = FixtureCheck('test', {}, [{}])
 
     assert isinstance(check.http, FakeHTTPClient)
     assert isinstance(check.create_http_client(), FakeHTTPClient)
@@ -32,7 +43,7 @@ def test_fake_http_does_not_construct_backend_clients(fake_http, mocker):
 
 
 def test_fake_http_creates_isolated_clients(fake_http):
-    check = AgentCheck('test', {}, [{}])
+    check = FixtureCheck('test', {}, [{}])
 
     default_client = check.http
     explicit_client = check.create_http_client()
@@ -57,7 +68,7 @@ def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http):
     second_response = FakeHTTPResponse()
     fake_http.register_response('GET', first_url, first_response)
     fake_http.register_response('GET', second_url, second_response)
-    check = AgentCheck('test', {}, [{}])
+    check = FixtureCheck('test', {}, [{}])
 
     default_client = check.http
     explicit_client = check.create_http_client()
@@ -73,7 +84,7 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
     url = 'https://example.test/items'
     response = FakeHTTPResponse(json_result={'items': []})
     fake_http.register_response('GET', url, response)
-    check = AgentCheck('test', {}, [{}])
+    check = FixtureCheck('test', {}, [{}])
 
     assert check.http.get(url, stream=True) is response
     fake_http.assert_requests([RecordedRequest(method='GET', url=url, options={'stream': True})])
@@ -83,7 +94,7 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
 def test_fake_http_response_builds_and_registers_text_response(fake_http_response: Any):
     url = 'https://example.test/metrics'
     response = fake_http_response(url, 'first\nsecond', match_options={'stream': True})
-    check = AgentCheck('test', {}, [{}])
+    check = FixtureCheck('test', {}, [{}])
 
     assert check.http.get(url, stream=True) is response
     assert response.content == b'first\nsecond'
@@ -111,7 +122,7 @@ def test_fake_http_response_builds_and_registers_json_response(
         match_options={'json': payload},
         reason='Created',
     )
-    check = AgentCheck('test', {}, [{}])
+    check = FixtureCheck('test', {}, [{}])
 
     assert check.http.post(url, json=payload) is response
     assert response.content == expected_content
