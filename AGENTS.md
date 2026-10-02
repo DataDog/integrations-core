@@ -10,6 +10,7 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
 - [Service Checks](#service-checks)
+- [HTTP Requests](#http-requests)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -100,6 +101,18 @@ ddev validate models -s <INTEGRATION_NAME>
 New integrations should not add their own service checks. Use metrics and metric-based monitors instead.
 
 The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
+## HTTP Requests
+
+**Applicable to:** new integrations, and any new or modified HTTP code in existing integrations. Existing code that still uses `requests` directly doesn't need to be migrated as part of an unrelated change.
+
+Make HTTP requests through the backend-neutral HTTP layer in `datadog_checks_base`, documented in `docs/developer/base/http.md`. Checks should not depend on the underlying HTTP library, so another backend can replace it without rewriting every integration and its tests.
+
+- Set `AGNOSTIC_HTTP = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
+- Send requests through `self.http`. Construct additional clients with `AgentCheck.create_http_client()` rather than instantiating `RequestsWrapper` or a `requests.Session`.
+- Catch the exceptions in `datadog_checks.base.utils.http_exceptions` (for example `HTTPClientError`), never `requests.exceptions` types.
+- Use only the `HTTPClient` and `HTTPResponse` members documented in `http.md`. Anything else is an implementation detail of the current backend.
+- In tests, use the `fake_http` and `fake_http_response` fixtures, or `FakeHTTPClient` and `FakeHTTPResponse` from `datadog_checks.base.stubs.http`, instead of patching `requests` or using the legacy `MockResponse`.
 
 ## Development Workflow
 

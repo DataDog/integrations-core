@@ -3,11 +3,18 @@ import os
 import pytest
 import requests
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
 HERE = get_here()
+
+
+@pytest.fixture
+def agnostic_http(monkeypatch):
+    """Opt every check the test builds into AGNOSTIC_HTTP, which the fake_http fixture requires."""
+    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP', True)
 
 
 @pytest.fixture(scope="session")
