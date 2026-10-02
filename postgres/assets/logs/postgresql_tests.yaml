@@ -1,6 +1,6 @@
 # bypass-global-date-remapper-parse-failure-checks
 # Prefixes outside the original parser retain the incoming official timestamp.
-# These cases assert extracted postgres.* attributes and the complete existing output.
+# These cases assert additive enrichment and preservation of existing values.
 id: "postgresql"
 tests:
  -
@@ -11,8 +11,10 @@ tests:
         date: 1510075839000
         severity: "LOG"
       postgres:
+        date: 1510075839000
         error_severity: "LOG"
         message: "incomplete startup packet"
+        severity_category: "info"
         timestamp: "2017-11-07 17:30:39 UTC"
     message: "incomplete startup packet"
     status: "info"
@@ -32,17 +34,24 @@ tests:
         user: "postgres"
       network:
         client:
+          hostname: "[local]"
           ip: "[local]"
       postgres:
         application_name: "psql"
         appname: "psql"
+        client:
+          hostname: "[local]"
+        date: 1510164695727
         dbname: "postgres"
         error_severity: "LOG"
         message: "statement: SELECT * FROM playground;"
+        operation: "SELECT"
         pid: 5237
         proc_id: "5237"
         remote_host: "[local]"
         session_id: "5a0348cd.1475"
+        severity_category: "info"
+        statement: "SELECT * FROM playground;"
         timestamp: "2017-11-08 18:11:35.727 UTC"
         user: "postgres"
     message: "2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;"
@@ -69,13 +78,20 @@ tests:
       postgres:
         application_name: "datadog-agent"
         appname: "datadog-agent"
+        client:
+          ip: "172.28.0.1"
+        date: 1576002465389
         dbname: "datadog_test"
+        duration: 140000.0
         error_severity: "LOG"
         message: "duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
+        operation: "select"
         pid: 114
         proc_id: "114"
         remote_host: "172.28.0.1"
         session_id: "5defc7c5.72"
+        severity_category: "info"
+        statement: "select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
         timestamp: "2019-12-10 18:27:45.389 UTC"
         user: "datadog"
     message: "2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
@@ -100,6 +116,10 @@ tests:
           port: 36378
       postgres:
         appname: "[unknown]"
+        backend_start: 1757962977000
+        client:
+          ip: "10.0.216.218"
+        date: 1757963158892
         dbname: "dbmorders_1"
         error_severity: "LOCATION"
         line_num: 395
@@ -110,6 +130,7 @@ tests:
         remote_port: 36378
         session_id: "68c862e1.4f71"
         session_start: "2025-09-15 19:02:57 UTC"
+        severity_category: "info"
         timestamp: "2025-09-15 19:05:58.892 UTC"
         txid: 0
         user: "shopper_1"
@@ -141,7 +162,12 @@ tests:
       postgres:
         application_name: "pgbench"
         appname: "pgbench"
+        backend_start: 1758047158000
+        client:
+          ip: "192.168.65.1"
+        date: 1758047205429
         dbname: "postgres"
+        duration: 3000.0
         error_severity: "LOG"
         line_num: 34853
         message: "duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
@@ -151,6 +177,7 @@ tests:
         remote_port: 31674
         session_id: "68c9abb6.57"
         session_start: "2025-09-16 18:25:58 UTC"
+        severity_category: "info"
         timestamp: "2025-09-16 18:26:45.429 UTC"
         txid: 2823
         user: "postgres"
@@ -182,7 +209,12 @@ tests:
       postgres:
         application_name: "PostgreSQL JDBC Driver"
         appname: "PostgreSQL JDBC Driver"
+        backend_start: 1763576503000
+        client:
+          ip: "10.198.137.95"
+        date: 1763576830640
         dbname: "service_catalog"
+        duration: 1.626107E9
         error_severity: "LOG"
         line_num: 4
         message: "duration: 1626.107 ms  plan: {}"
@@ -192,6 +224,7 @@ tests:
         remote_port: 54414
         session_id: "691e0ab7.2f742"
         session_start: "2025-11-19 18:21:43 UTC"
+        severity_category: "info"
         timestamp: "2025-11-19 18:27:10.640 UTC"
         txid: 276953619
         user: "service_catalog_rw"
@@ -214,6 +247,8 @@ tests:
         date: 1764791980415
         severity: "LOG"
       postgres:
+        backend_start: 1764791966000
+        date: 1764791980415
         error_severity: "LOG"
         line_num: 1
         message: "automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
@@ -221,6 +256,7 @@ tests:
         proc_id: "1670514"
         session_id: "6930969e.197d72"
         session_start: "2025-12-03 19:59:26 UTC"
+        severity_category: "info"
         timestamp: "2025-12-03 19:59:40.415 UTC"
         txid: 0
         vxid: "20/120887"
@@ -240,10 +276,12 @@ tests:
         date: 1786999599837
         severity: "LOG"
       postgres:
+        date: 1786999599837
         error_severity: "LOG"
         message: "checkpoint starting: shutdown immediate"
         pid: 63
         proc_id: "63"
+        severity_category: "info"
         timestamp: "2026-08-17 20:46:39.837 UTC"
     message: "checkpoint starting: shutdown immediate"
     status: "info"
@@ -254,10 +292,19 @@ tests:
   sample: "2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999545000
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
       postgres:
+        date: 1786999545000
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         session_id: "6a8372f9.6b"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:45:45 UTC"
     message: "2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;"
     tags:
@@ -267,16 +314,35 @@ tests:
   sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999622000
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 45772
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        client:
+          ip: "172.17.0.1"
+        date: 1786999622000
         dbname: "pgllp_db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 107
+        proc_id: "107"
         ps: "idle"
         remote_host: "172.17.0.1"
         remote_port: 45772
         session_id: "6a837346.6b"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:47:02 UTC"
         user: "pgllp_user"
     message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;"
@@ -349,21 +415,44 @@ tests:
   sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        backend_start: 1786999633000
+        date: 1786999633749
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 42336
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        backend_start: 1786999633000
+        client:
+          ip: "172.17.0.1"
+        date: 1786999633749
         dbname: "pgllp_db"
         error_severity: "LOG"
         line_num: 10
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 108
+        proc_id: "108"
         remote_host: "172.17.0.1"
         remote_port: 42336
         session_id: "6a837351.6c"
         session_start: "2026-08-17 20:47:13 UTC"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:47:13.749 UTC"
         txid: 0
         user: "pgllp_user"
         vxid: "4/5"
+        xid: "0"
+      session_lineno: 10
     message: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
     tags:
      - "source:LOGS_SOURCE"
@@ -372,13 +461,31 @@ tests:
   sample: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999512000
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 37472
       postgres:
+        client:
+          ip: "172.17.0.1"
+        date: 1786999512000
         dbname: "pgllp_db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 107
+        proc_id: "107"
         remote_host: "172.17.0.1"
         remote_port: 37472
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:45:12 UTC"
         user: "pgllp_user"
     message: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
@@ -389,15 +496,28 @@ tests:
   sample: "2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999589997
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
       postgres:
         backend_type: "client backend"
+        date: 1786999589997
         dbname: "pgllp_db"
         error_severity: "LOG"
         line_num: 10
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 106
+        proc_id: "106"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:46:29.997 UTC"
         user: "pgllp_user"
+      session_lineno: 10
     message: "2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
     tags:
      - "source:LOGS_SOURCE"
@@ -406,15 +526,33 @@ tests:
   sample: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=db.123host LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999579015
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
+      network:
+        client:
+          hostname: "db.123host"
       postgres:
+        client:
+          hostname: "db.123host"
+        date: 1786999579015
         dbname: "pgllp_db"
         error_severity: "LOG"
         line_num: 10
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 119
+        proc_id: "119"
         remote_host: "db.123host"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:46:19.015 UTC"
         user: "pgllp_user"
+      session_lineno: 10
     message: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=db.123host LOG:  statement: SELECT 2 AS c02;"
     tags:
      - "source:LOGS_SOURCE"
@@ -423,14 +561,27 @@ tests:
   sample: "2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999568111
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
       postgres:
+        date: 1786999568111
         dbname: "pgllp_db"
         error_severity: "LOG"
         line_num: 10
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 118
+        proc_id: "118"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:46:08.111 UTC"
         user: "pgllp_user"
+      session_lineno: 10
     message: "2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
     tags:
      - "source:LOGS_SOURCE"
@@ -439,11 +590,23 @@ tests:
   sample: "2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999601019
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
       postgres:
+        date: 1786999601019
         dbname: "pgllp_db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 118
+        proc_id: "118"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:46:41.019 UTC"
         user: "pgllp_user"
     message: "2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;"
@@ -454,12 +617,25 @@ tests:
   sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999534801
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        date: 1786999534801
         dbname: "pgllp_db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 105
+        proc_id: "105"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:45:34.801 UTC"
         user: "pgllp_user"
     message: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
@@ -470,22 +646,42 @@ tests:
   sample: " sql_error_code = 42601 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" ERROR:  42601: syntax error at or near \"SELEC\""
   result:
     custom:
+      db:
+        backend_start: 1786999633000
+        date: 1786999633749
+        instance: "pgllp_db"
+        severity: "ERROR"
+        user: "pgllp_user"
+      network:
+        client:
+          ip: "172.17.0.1"
+          port: 42336
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        backend_start: 1786999633000
+        client:
+          ip: "172.17.0.1"
+        date: 1786999633749
         dbname: "pgllp_db"
         error_severity: "ERROR"
         line_num: 10
         message: "syntax error at or near \"SELEC\""
         pid: 108
+        proc_id: "108"
         remote_host: "172.17.0.1"
         remote_port: 42336
         session_id: "6a837351.6c"
         session_start: "2026-08-17 20:47:13 UTC"
+        severity_category: "error"
         state_code: "42601"
         timestamp: "2026-08-17 20:47:13.749 UTC"
         txid: 0
         user: "pgllp_user"
         vxid: "4/5"
+        xid: "0"
+      session_lineno: 10
+      sql_state: "42601"
     message: " sql_error_code = 42601 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" ERROR:  42601: syntax error at or near \"SELEC\""
     tags:
      - "source:LOGS_SOURCE"
@@ -507,6 +703,10 @@ tests:
       postgres:
         application_name: "pgbench"
         appname: "pgbench"
+        backend_start: 1758047158000
+        client:
+          ip: "192.168.65.1"
+        date: 1758047205429
         dbname: "postgres"
         error_severity: "ERROR"
         line_num: 34853
@@ -517,6 +717,7 @@ tests:
         remote_port: 31674
         session_id: "68c9abb6.57"
         session_start: "2025-09-16 18:25:58 UTC"
+        severity_category: "error"
         state_code: "42601"
         timestamp: "2025-09-16 18:26:45.429 UTC"
         txid: 2823
@@ -535,12 +736,25 @@ tests:
   sample: "2026-08-17 20:45:34.801 UTC [105] [user=edge@user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999534801
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "edge@user"
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        date: 1786999534801
         dbname: "pgllp_db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 105
+        proc_id: "105"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:45:34.801 UTC"
         user: "edge@user"
     message: "2026-08-17 20:45:34.801 UTC [105] [user=edge@user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
@@ -551,12 +765,25 @@ tests:
   sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=edge@db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999534801
+        instance: "edge@db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        date: 1786999534801
         dbname: "edge@db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 105
+        proc_id: "105"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:45:34.801 UTC"
         user: "pgllp_user"
     message: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=edge@db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
@@ -567,12 +794,25 @@ tests:
   sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=edge@app] LOG:  statement: SELECT 2 AS c02;"
   result:
     custom:
+      db:
+        date: 1786999534801
+        instance: "pgllp_db"
+        operation: "SELECT"
+        severity: "LOG"
+        statement: "SELECT 2 AS c02;"
+        user: "pgllp_user"
       postgres:
         application_name: "edge@app"
+        appname: "edge@app"
+        date: 1786999534801
         dbname: "pgllp_db"
         error_severity: "LOG"
         message: "statement: SELECT 2 AS c02;"
+        operation: "SELECT"
         pid: 105
+        proc_id: "105"
+        severity_category: "info"
+        statement: "SELECT 2 AS c02;"
         timestamp: "2026-08-17 20:45:34.801 UTC"
         user: "pgllp_user"
     message: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=edge@app] LOG:  statement: SELECT 2 AS c02;"
@@ -587,8 +827,10 @@ tests:
         date: 1510075839000
         severity: "LOG"
       postgres:
+        date: 1510075839000
         error_severity: "LOG"
         message: "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
+        severity_category: "info"
         timestamp: "2017-11-07 17:30:39 UTC"
     message: "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
     status: "info"
@@ -599,13 +841,27 @@ tests:
   sample: "pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=fd42::3 LOG:  duration: 12.345 ms"
   result:
     custom:
+      db:
+        instance: "pgllp_db"
+        severity: "LOG"
+        user: "pgllp_user"
+      duration: 1.2345E7
+      network:
+        client:
+          ip: "fd42::3"
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        client:
+          ip: "fd42::3"
         dbname: "pgllp_db"
+        duration: 1.2345E7
         error_severity: "LOG"
         message: "duration: 12.345 ms"
         pid: 107
+        proc_id: "107"
         remote_host: "fd42::3"
+        severity_category: "info"
         user: "pgllp_user"
     message: "pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=fd42::3 LOG:  duration: 12.345 ms"
     tags:
@@ -617,6 +873,7 @@ tests:
     custom:
       postgres:
         message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
+        severity_category: "info_default"
     message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
     tags:
      - "source:LOGS_SOURCE"
@@ -625,16 +882,31 @@ tests:
   sample: "2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database \"missing\" does not exist at character 12"
   result:
     custom:
+      db:
+        date: 1768496400000
+        instance: "postgres"
+        severity: "FATAL"
+        user: "postgres"
+      network:
+        client:
+          ip: "fd42::3"
+          port: 5432
       postgres:
+        client:
+          ip: "fd42::3"
+        date: 1768496400000
         dbname: "postgres"
         error_severity: "FATAL"
         message: "database \"missing\" does not exist"
         pid: 87
+        proc_id: "87"
         remote_host: "fd42::3"
         remote_port: 5432
+        severity_category: "critical"
         state_code: "3D000"
         timestamp: "2026-01-15 12:00:00 EST"
         user: "postgres"
+      sql_state: "3D000"
     message: "2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database \"missing\" does not exist at character 12"
     tags:
      - "source:LOGS_SOURCE"
@@ -643,15 +915,25 @@ tests:
   sample: " sql_error_code = 00000 time_ms = \"2026-08-28 12:19:21.018 \" pid=\"108\" proc_start_time=\"2026-08-28 12:19:20 \" session_id=\"6a837351.6c\" vtid=\"\" tid=\"0\" log_line=\"1\" PANIC:  could not write to log file"
   result:
     custom:
+      db:
+        backend_start: 1787919560000
+        date: 1787919561018
+        severity: "PANIC"
       postgres:
+        backend_start: 1787919560000
+        date: 1787919561018
         error_severity: "PANIC"
         line_num: 1
         message: "could not write to log file"
         pid: 108
+        proc_id: "108"
         session_id: "6a837351.6c"
         session_start: "2026-08-28 12:19:20 "
+        severity_category: "emergency"
         timestamp: "2026-08-28 12:19:21.018 "
         txid: 0
+        xid: "0"
+      session_lineno: 1
     message: " sql_error_code = 00000 time_ms = \"2026-08-28 12:19:21.018 \" pid=\"108\" proc_start_time=\"2026-08-28 12:19:20 \" session_id=\"6a837351.6c\" vtid=\"\" tid=\"0\" log_line=\"1\" PANIC:  could not write to log file"
     tags:
      - "source:LOGS_SOURCE"
@@ -660,17 +942,32 @@ tests:
   sample: "2026-08-28 12:19:21 :db.internal:[unknown]@[unknown]:[87]:1:00000:2026-08-28 12:19:20.018 :5/2050:0:68c9abb6.57:[unknown]:WARNING:  connection warning"
   result:
     custom:
+      db:
+        backend_start: 1787919560018
+        date: 1787919561000
+        severity: "WARNING"
+      network:
+        client:
+          hostname: "db.internal"
       postgres:
+        backend_start: 1787919560018
+        client:
+          hostname: "db.internal"
+        date: 1787919561000
         error_severity: "WARNING"
         line_num: 1
         message: "connection warning"
         pid: 87
+        proc_id: "87"
         remote_host: "db.internal"
         session_id: "68c9abb6.57"
         session_start: "2026-08-28 12:19:20.018 "
+        severity_category: "warning"
         timestamp: "2026-08-28 12:19:21 "
         txid: 0
         vxid: "5/2050"
+        xid: "0"
+      session_lineno: 1
     message: "2026-08-28 12:19:21 :db.internal:[unknown]@[unknown]:[87]:1:00000:2026-08-28 12:19:20.018 :5/2050:0:68c9abb6.57:[unknown]:WARNING:  connection warning"
     tags:
      - "source:LOGS_SOURCE"
@@ -679,20 +976,38 @@ tests:
   sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13.031 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"[local]\" user=\"pgllp_user\" application_name=\"pgllp_app\" DEBUG5:  backend initialized"
   result:
     custom:
+      db:
+        backend_start: 1786999633031
+        date: 1786999633749
+        instance: "pgllp_db"
+        severity: "DEBUG5"
+        user: "pgllp_user"
+      network:
+        client:
+          hostname: "[local]"
       postgres:
         application_name: "pgllp_app"
+        appname: "pgllp_app"
+        backend_start: 1786999633031
+        client:
+          hostname: "[local]"
+        date: 1786999633749
         dbname: "pgllp_db"
         error_severity: "DEBUG5"
         line_num: 10
         message: "backend initialized"
         pid: 108
+        proc_id: "108"
         remote_host: "[local]"
         session_id: "6a837351.6c"
         session_start: "2026-08-17 20:47:13.031 UTC"
+        severity_category: "debug"
         timestamp: "2026-08-17 20:47:13.749 UTC"
         txid: 0
         user: "pgllp_user"
         vxid: "4/5"
+        xid: "0"
+      session_lineno: 10
     message: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13.031 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"[local]\" user=\"pgllp_user\" application_name=\"pgllp_app\" DEBUG5:  backend initialized"
     tags:
      - "source:LOGS_SOURCE"
@@ -705,10 +1020,12 @@ tests:
         date: 1786999599837
         severity: "NOTICE"
       postgres:
+        date: 1786999599837
         error_severity: "NOTICE"
         message: "table \"missing\" does not exist, skipping"
         pid: 63
         proc_id: "63"
+        severity_category: "notice"
         timestamp: "2026-08-17 20:46:39.837 UTC"
     message: "table \"missing\" does not exist, skipping"
     status: "notice"

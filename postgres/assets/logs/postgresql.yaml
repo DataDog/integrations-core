@@ -32,6 +32,16 @@ facets:
     name: Session ID
     path: postgres.session_id
     source: log
+  - groups:
+    - Database
+    name: Statement
+    path: db.statement
+    source: log
+  - groups:
+    - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
 pipeline:
   type: pipeline
   name: Postgresql
@@ -230,3 +240,448 @@ pipeline:
       expression: duration * 1000000
       target: duration
       replaceMissing: false
+    # Enrich after the existing processors so established values take precedence.
+    - type: pipeline
+      name: Enrich PostgreSQL attributes
+      enabled: true
+      filter:
+        query: '@postgres.message:*'
+      processors:
+      - type: attribute-remapper
+        name: Map `timestamp` to `postgres.timestamp`
+        enabled: true
+        sources:
+        - timestamp
+        sourceType: attribute
+        target: postgres.timestamp
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `user` to `postgres.user`
+        enabled: true
+        sources:
+        - user
+        sourceType: attribute
+        target: postgres.user
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `dbname` to `postgres.dbname`
+        enabled: true
+        sources:
+        - dbname
+        sourceType: attribute
+        target: postgres.dbname
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `pid` to `postgres.pid`
+        enabled: true
+        sources:
+        - pid
+        sourceType: attribute
+        target: postgres.pid
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `remote_host` to `postgres.remote_host`
+        enabled: true
+        sources:
+        - remote_host
+        sourceType: attribute
+        target: postgres.remote_host
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `remote_port` to `postgres.remote_port`
+        enabled: true
+        sources:
+        - remote_port
+        sourceType: attribute
+        target: postgres.remote_port
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `session_id` to `postgres.session_id`
+        enabled: true
+        sources:
+        - session_id
+        sourceType: attribute
+        target: postgres.session_id
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `line_num` to `postgres.line_num`
+        enabled: true
+        sources:
+        - line_num
+        sourceType: attribute
+        target: postgres.line_num
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `ps` to `postgres.ps`
+        enabled: true
+        sources:
+        - ps
+        sourceType: attribute
+        target: postgres.ps
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `session_start` to `postgres.session_start`
+        enabled: true
+        sources:
+        - session_start
+        sourceType: attribute
+        target: postgres.session_start
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `vxid` to `postgres.vxid`
+        enabled: true
+        sources:
+        - vxid
+        sourceType: attribute
+        target: postgres.vxid
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `txid` to `postgres.txid`
+        enabled: true
+        sources:
+        - txid
+        sourceType: attribute
+        target: postgres.txid
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `error_severity` to `postgres.error_severity`
+        enabled: true
+        sources:
+        - error_severity
+        sourceType: attribute
+        target: postgres.error_severity
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `state_code` to `postgres.state_code`
+        enabled: true
+        sources:
+        - state_code
+        sourceType: attribute
+        target: postgres.state_code
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `application_name` to `postgres.application_name`
+        enabled: true
+        sources:
+        - application_name
+        sourceType: attribute
+        target: postgres.application_name
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `backend_type` to `postgres.backend_type`
+        enabled: true
+        sources:
+        - backend_type
+        sourceType: attribute
+        target: postgres.backend_type
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: grok-parser
+        name: Parse PostgreSQL timestamp
+        enabled: true
+        source: postgres.timestamp
+        grok:
+          supportRules: ''
+          matchRules: |
+            pg_date_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):postgres.date}
+
+            pg_date %{date("yyyy-MM-dd HH:mm:ss z"):postgres.date}
+
+            pg_date_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):postgres.date}\s*
+
+            pg_date_notz %{date("yyyy-MM-dd HH:mm:ss"):postgres.date}\s*
+        samples:
+        - 2026-08-17 20:45:57.031 UTC
+        - 2026-08-17 20:45:45 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
+      - type: grok-parser
+        name: Parse PostgreSQL session start
+        enabled: true
+        source: postgres.session_start
+        grok:
+          supportRules: ''
+          matchRules: |
+            pg_backend_start_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):postgres.backend_start}
+
+            pg_backend_start %{date("yyyy-MM-dd HH:mm:ss z"):postgres.backend_start}
+
+            pg_backend_start_ms_notz %{date("yyyy-MM-dd HH:mm:ss.SSS"):postgres.backend_start}\s*
+
+            pg_backend_start_notz %{date("yyyy-MM-dd HH:mm:ss"):postgres.backend_start}\s*
+        samples:
+        - 2025-09-15 19:02:57 UTC
+        - 2026-08-17 20:45:57.031 UTC
+        - '2026-08-28 12:19:21.018 '
+        - '2026-08-28 12:19:21 '
+      - type: grok-parser
+        name: Extract PostgreSQL statement and duration
+        enabled: true
+        source: postgres.message
+        grok:
+          supportRules: ''
+          matchRules: |
+            pg_statement (?:duration:\s+%{numberExt:postgres.duration:scale(1000000)}\s+ms\s+)?statement:\s+%{data:postgres.statement}
+
+            pg_duration duration:\s+%{numberExt:postgres.duration:scale(1000000)}\s+ms%{data}
+        samples:
+        - 'duration: 0.140 ms  statement: SELECT * FROM playground;'
+        - 'duration: 0.003 ms  execute <unnamed>: INSERT INTO t VALUES (1);'
+        - 'duration: 12.345 ms'
+        - "duration: 0.5 ms  plan:\n\t{\"Query Text\": \"SELECT 1 -- duration: 99 ms and more\"}"
+        - 'statement: SELECT ''duration: 99 ms'''
+      - type: grok-parser
+        name: Extract PostgreSQL operation
+        enabled: true
+        source: postgres.statement
+        grok:
+          supportRules: ''
+          matchRules: |
+            pg_operation %{word:postgres.operation}(?:\s+%{data}|$)
+        samples:
+        - SELECT * FROM playground;
+        - select checkpoints_timed FROM pg_stat_bgwriter
+      - type: grok-parser
+        name: Classify PostgreSQL client host
+        enabled: true
+        source: postgres.remote_host
+        grok:
+          supportRules: ''
+          matchRules: |
+            # This IP rule must precede the hostname rule, which also accepts dotted numeric values.
+            pg_client_ip %{ip:postgres.client.ip}
+
+            pg_client_local %{regex("\\[local\\]"):postgres.client.hostname}
+
+            pg_client_hostname %{regex("[A-Za-z0-9][A-Za-z0-9_.-]*"):postgres.client.hostname}
+        samples:
+        - 172.17.0.1
+        - fd42::3
+        - '[local]'
+        - db-client.internal
+        - 123host
+        - db.123host
+      - type: category-processor
+        name: Normalize PostgreSQL severity
+        enabled: true
+        target: postgres.severity_category
+        categories:
+        - filter:
+            query: '@postgres.error_severity:PANIC'
+          name: emergency
+        - filter:
+            query: '@postgres.error_severity:FATAL'
+          name: critical
+        - filter:
+            query: '@postgres.error_severity:ERROR'
+          name: error
+        - filter:
+            query: '@postgres.error_severity:WARNING'
+          name: warning
+        - filter:
+            query: '@postgres.error_severity:NOTICE'
+          name: notice
+        - filter:
+            query: '@postgres.error_severity:DEBUG1 OR @postgres.error_severity:DEBUG2 OR @postgres.error_severity:DEBUG3 OR @postgres.error_severity:DEBUG4
+              OR @postgres.error_severity:DEBUG5'
+          name: debug
+        - filter:
+            query: '@postgres.error_severity:INFO OR @postgres.error_severity:LOG OR @postgres.error_severity:DETAIL OR @postgres.error_severity:HINT
+              OR @postgres.error_severity:QUERY OR @postgres.error_severity:STATEMENT OR @postgres.error_severity:CONTEXT OR @postgres.error_severity:LOCATION'
+          name: info
+        - filter:
+            query: '*'
+          name: info_default
+      - type: attribute-remapper
+        name: Map `postgres.date` to `db.date`
+        enabled: true
+        sources:
+        - postgres.date
+        sourceType: attribute
+        target: db.date
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.backend_start` to `db.backend_start`
+        enabled: true
+        sources:
+        - postgres.backend_start
+        sourceType: attribute
+        target: db.backend_start
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.dbname` to `db.instance`
+        enabled: true
+        sources:
+        - postgres.dbname
+        sourceType: attribute
+        target: db.instance
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.user` to `db.user`
+        enabled: true
+        sources:
+        - postgres.user
+        sourceType: attribute
+        target: db.user
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.error_severity` to `db.severity`
+        enabled: true
+        sources:
+        - postgres.error_severity
+        sourceType: attribute
+        target: db.severity
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.statement` to `db.statement`
+        enabled: true
+        sources:
+        - postgres.statement
+        sourceType: attribute
+        target: db.statement
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.operation` to `db.operation`
+        enabled: true
+        sources:
+        - postgres.operation
+        sourceType: attribute
+        target: db.operation
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.duration` to `duration`
+        enabled: true
+        sources:
+        - postgres.duration
+        sourceType: attribute
+        target: duration
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.client.ip` to `network.client.ip`
+        enabled: true
+        sources:
+        - postgres.client.ip
+        sourceType: attribute
+        target: network.client.ip
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.client.hostname` to `network.client.hostname`
+        enabled: true
+        sources:
+        - postgres.client.hostname
+        sourceType: attribute
+        target: network.client.hostname
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.remote_port` to `network.client.port`
+        enabled: true
+        sources:
+        - postgres.remote_port
+        sourceType: attribute
+        target: network.client.port
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.line_num` to `session_lineno`
+        enabled: true
+        sources:
+        - postgres.line_num
+        sourceType: attribute
+        target: session_lineno
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.state_code` to `sql_state`
+        enabled: true
+        sources:
+        - postgres.state_code
+        sourceType: attribute
+        target: sql_state
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.application_name` to `postgres.appname`
+        enabled: true
+        sources:
+        - postgres.application_name
+        sourceType: attribute
+        target: postgres.appname
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+      - type: attribute-remapper
+        name: Map `postgres.pid` to `postgres.proc_id`
+        enabled: true
+        sources:
+        - postgres.pid
+        sourceType: attribute
+        target: postgres.proc_id
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+        targetFormat: string
+      - type: attribute-remapper
+        name: Map `postgres.txid` to `postgres.xid`
+        enabled: true
+        sources:
+        - postgres.txid
+        sourceType: attribute
+        target: postgres.xid
+        targetType: attribute
+        preserveSource: true
+        overrideOnConflict: false
+        targetFormat: string
