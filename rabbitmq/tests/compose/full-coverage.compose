@@ -76,79 +76,64 @@ services:
   # ready rather than unacked, and x-max-length caps it so it cannot grow unbounded.
   # The publish rate alternates above and below the consumer rate so rates and
   # queue depth rise and fall across scrapes instead of plateauing.
+  # Idles with ACTIVITY_GEN=0.
   load:
     image: pivotalrabbitmq/perf-test:latest
     depends_on:
       seed:
         condition: service_completed_successfully
     restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
     command:
-      - --uri
-      - amqp://guest:guest@rabbitmq-broker:5672
-      - --producers
-      - "4"
-      - --consumers
-      - "4"
-      - --queue-pattern
-      - perf-%d
-      - --queue-pattern-from
-      - "1"
-      - --queue-pattern-to
-      - "4"
-      - --auto-delete
-      - "false"
-      - --variable-rate
-      - "30:60"
-      - --variable-rate
-      - "90:60"
-      - --consumer-rate
-      - "45"
-      - --confirm
-      - "10"
-      - --multi-ack-every
-      - "5"
-      - --qos
-      - "50"
-      - --queue-args
-      - x-max-length=2000
-
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 4 --consumers 4 \
+          --queue-pattern perf-%d --queue-pattern-from 1 --queue-pattern-to 4 \
+          --auto-delete false \
+          --variable-rate 30:60 --variable-rate 90:60 --consumer-rate 45 \
+          --confirm 10 --multi-ack-every 5 --qos 50 \
+          --queue-args x-max-length=2000
   # Producer-only publisher to a routing key nothing is bound to, so the
   # unroutable-dropped counters advance. Long-lived AMQP, since the per-channel
-  # counter disappears with the channel.
+  # counter disappears with the channel. Idles with ACTIVITY_GEN=0.
   unroutable:
     image: pivotalrabbitmq/perf-test:latest
     depends_on:
       seed:
         condition: service_completed_successfully
     restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
     command:
-      - --uri
-      - amqp://guest:guest@rabbitmq-broker:5672
-      - --producers
-      - "1"
-      - --consumers
-      - "0"
-      - --exchange
-      - amq.direct
-      - --routing-key
-      - unroutable
-      - --rate
-      - "5"
-
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 0 \
+          --exchange amq.direct --routing-key unroutable --rate 5
   # Short-lived AMQP clients on a loop. The `load` connections live for the whole
   # run, so without this the connection/channel opened/closed counters and the
   # consumer count stay flat after startup. The consumer is not rate-capped, so
   # the queue stays near empty: a backlog here would be requeued on every close,
   # and that 30s sawtooth aliases against the scrape intervals.
+  # Idles with ACTIVITY_GEN=0.
   conn-churn:
     image: pivotalrabbitmq/perf-test:latest
     depends_on:
       seed:
         condition: service_completed_successfully
     restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
     entrypoint: ["sh", "-c"]
     command:
       - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
         while :; do
           java -jar /perf_test/perf-test.jar \
             --uri amqp://guest:guest@rabbitmq-broker:5672 \

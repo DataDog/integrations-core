@@ -38,8 +38,9 @@ sources and are out of scope. Thirteen services:
 - **activity-gen** — periodic queue declare/delete churn (`activity-gen.sh`) so the
   node-wide `rabbitmq.queues.created/declared/deleted.count` counters keep advancing;
   perf-test's long-lived queues do not produce churn. Set `ACTIVITY_GEN=0` (host env) to
-  idle it; the same switch idles `autoack`, `redeliver`, `unacked-swing`, `slow-reader`,
-  and `load3`, and turns off the alarm drill (the containers stay up).
+  idle it; the same switch idles every other workload service (`load`, `unroutable`,
+  `conn-churn`, `autoack`, `redeliver`, `unacked-swing`, `slow-reader`, and `load3`) and
+  turns off the alarm drill. The containers stay up, so `rabbitmq-full` still starts.
 - **unroutable** — a producer-only perf-test publishing to a routing key nothing is bound
   to, so the unroutable-dropped counters advance.
 - **conn-churn** — a looping short-lived perf-test (one producer, one consumer, 20s per
