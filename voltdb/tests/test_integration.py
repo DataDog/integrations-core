@@ -82,21 +82,24 @@ class TestCheck:
 class MockSysInfoClient(Client):
     def __init__(self, client, app):
         # type: (Client, Callable) -> None
-        self._client = client
+        self._delegate = client
         self._app = app
 
     def call_procedure(self, procedure, params=None):
         if procedure == '@SystemInformation':
             return self._app()
-        return self._client.call_procedure(procedure, params=params)
+        return self._delegate.call_procedure(procedure, params)
+
+    def call_procedure_async(self, procedure, params=None):
+        return common.completed_future(self.call_procedure, procedure, params)
 
     def raise_for_status(self, response):
         # Mock responses already have status set by the test app.
         if response.status != Client.SUCCESS:
-            self._client.raise_for_status(response)
+            self._delegate.raise_for_status(response)
 
     def close(self):
-        self._client.close()
+        self._delegate.close()
 
 
 @pytest.mark.integration
