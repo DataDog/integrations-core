@@ -198,6 +198,54 @@ files:
                           - name: entity_id
                             type: string
                 fleet_configurable: false
+          - name: do_task
+            hidden: true
+            fleet_configurable: false
+            description: |
+              One-off Data Observability task. Set automatically by the Datadog Agent
+              when Remote Configuration delivers a task, on a separate run-once check
+              that holds only connection settings; do not set this field manually.
+              When set, the check runs these statements once, reports each result,
+              and collects nothing else.
+            value:
+              type: object
+              required:
+                - config_id
+                - task_id
+                - expires_at
+                - statements
+              properties:
+                - name: config_id
+                  type: string
+                - name: task_id
+                  type: string
+                - name: expires_at
+                  description: Unix time in seconds after which the task must not run.
+                  type: integer
+                - name: statements
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - dbname
+                      - query
+                      - timeout_seconds
+                      - max_rows
+                    properties:
+                      - name: id
+                        type: string
+                      - name: dbname
+                        type: string
+                      - name: query
+                        type: string
+                      - name: timeout_seconds
+                        type: integer
+                      - name: max_rows
+                        description: |
+                          Maximum rows returned for the statement, capped at 10000. Like a LIMIT,
+                          rows past it are not returned.
+                        type: integer
           - name: propagate_agent_tags
             display_priority: 0
             description: |

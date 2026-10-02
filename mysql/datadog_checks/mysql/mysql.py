@@ -28,13 +28,14 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 from datadog_checks.mysql.data_observability import MySQLDataObservability
+from datadog_checks.mysql.do_task import MySQLDataObservabilityTask
 from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig, sanitize
-from .config_models.instance import DataObservability
+from .config_models.instance import DataObservability, DoTask
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -160,12 +161,18 @@ class MySql(DatabaseCheck):
             }
         )
 
+        # A one-off Data Observability task, set only on the separate run-once check the Agent
+        # schedules for it. That check holds just the connection settings of the user's instance.
+        do_task = self.instance.get('do_task')
+        self._do_task = DoTask.model_validate(do_task) if do_task else None
+
         self.statement_metrics = None
         self.statement_samples = None
         self.mysql_metadata = None
         self.query_activity = None
         self.data_observability = None
-        self._register_async_jobs()
+        if self._do_task is None:
+            self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -177,7 +184,9 @@ class MySql(DatabaseCheck):
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
 
-        self._submit_initialization_health_event()
+        # The health event carries the sanitized instance, which for a task includes its SQL.
+        if self._do_task is None:
+            self._submit_initialization_health_event()
 
     def shutdown(self) -> None:
         """Release the resources this check holds for its whole lifetime."""
@@ -406,6 +415,14 @@ class MySql(DatabaseCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        if self._do_task is not None:
+            # A task reports through its do-query-results events and internal dd.mysql.do_task.*
+            # metrics only. It sends no integration metrics and no mysql.can_connect service check:
+            # those carry the tags of the user's own instance, so a task that fails to connect would
+            # flip that instance's status.
+            MySQLDataObservabilityTask(self, self._do_task).run()
+            return
+
         self._submit_initialization_health_event()
 
         if self.instance.get('user'):
