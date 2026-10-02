@@ -243,7 +243,7 @@ files:
                         type: integer
                       - name: max_rows
                         description: |
-                          Maximum rows returned for the statement, capped at 10000. Like a LIMIT,
+                          Maximum rows returned for the statement, capped at 1000000. Like a LIMIT,
                           rows past it are not returned.
                         type: integer
           - name: propagate_agent_tags

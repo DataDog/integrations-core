@@ -7,9 +7,10 @@ One-off Data Observability tasks.
 The Agent schedules a separate run-once `mysql` check for each task that Remote Configuration
 delivers. That check holds only the connection settings of the matched instance plus a
 `do_task` block, so the user's own check is never touched. `MySql.__new__` builds it as a
-`MySqlTaskCheck`, which runs each statement once on its own connection and reports every result as
-`do-query-results` events, which the backend joins back to the task by `task_id`, `statement_id`
-and `result_id`.
+`MySqlTaskCheck`, which runs each statement once on its own connection and streams every result as
+`do-query-results` events: a chunk event each time 4 MiB of rows have been read, then one final
+event per execution. The backend joins them back to the task by `task_id`, `statement_id` and
+`result_id`.
 """
 
 from __future__ import annotations
@@ -29,7 +30,7 @@ from datadog_checks.base.utils.format import json
 from .config_models.instance import DoTask
 from .cursor import CommenterCursor
 from .data_observability import EVENT_TRACK_TYPE
-from .do_query import MAX_RESULT_ROWS, DOQuerySession, NoResultSetError
+from .do_query import DOQuerySession, NoResultSetError
 from .instance_mixin import MySQLInstanceMixin
 from .util import connect_with_session_variables
 from .version_utils import parse_version
@@ -37,12 +38,18 @@ from .version_utils import parse_version
 if TYPE_CHECKING:
     from .config_models.instance import Statement
 
-# Hard cap on the rows one statement returns, whatever its max_rows asks for.
-MAX_TASK_STATEMENT_ROWS = MAX_RESULT_ROWS
+# Hard cap on the rows one statement returns, whatever its max_rows asks for. The DO_QUERY_ACTIONS
+# schema and agenttask enforce the same value.
+MAX_TASK_STATEMENT_ROWS = 1_000_000
 
-# Upper bound on one serialized event. Larger results are split into chunks, which keeps every
-# event well under the intake's per-event limit.
+# Upper bound on one serialized event. Rows are sent in chunks of at most this size, which keeps
+# every event well under the intake's per-event limit.
 MAX_EVENT_BYTES = 4 * 1024 * 1024
+
+# How long the server waits while the check is not reading a result. The check reads continuously,
+# so this is only a margin for pauses such as garbage collection or a throttled Agent container.
+# It does not limit how long a statement runs: timeout_seconds does.
+NET_WRITE_TIMEOUT_SECONDS = 300
 
 # Client errors that mean the connection is gone: can't connect, server gone away, lost
 # connection during a query.
@@ -101,10 +108,18 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                         self.log.warning("Data Observability task %s could not connect: %s", task.task_id, error)
                         result = _error_result(error, 0.0, connecting=True)
                         for pending in statements[index:]:
-                            self._emit_result(pending, result, executed=False)
+                            sender = _ChunkSender(self, pending, str(uuid.uuid4()))
+                            self._emit_final(pending, sender, [], result, executed=False)
                         self._count('dd.mysql.do_task.runs', ['outcome:connection_error'])
                         return
-                self._emit_result(statement, self._execute(statement))
+                if not self._run_statement(statement):
+                    self.log.debug(
+                        "Data Observability task %s cancelled while reading statement %s",
+                        task.task_id,
+                        statement.id,
+                    )
+                    self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
+                    return
             self._count('dd.mysql.do_task.runs', ['outcome:completed'])
         finally:
             self._close()
@@ -122,6 +137,9 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 cursor.execute("SET SESSION TRANSACTION READ ONLY")
                 # Temporal values come back in UTC whatever the server's time zone is.
                 cursor.execute("SET time_zone = '+00:00'")
+                # The server waits this long for the check to read more rows before dropping the
+                # connection, so a short pause while streaming a large result never fails it.
+                cursor.execute("SET SESSION net_write_timeout = %s", (NET_WRITE_TIMEOUT_SECONDS,))
         except Exception:
             _close_quietly(conn, self.log)
             raise
@@ -133,13 +151,35 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
         if session is not None:
             _close_quietly(session.conn, self.log)
 
-    def _execute(self, statement: Statement) -> dict[str, Any]:
+    def _run_statement(self, statement: Statement) -> bool:
+        """
+        Run one statement, streaming its rows as chunk events, then send its final event. Returns
+        False if the check was cancelled during the read, in which case no final event is sent.
+        """
         session = self._session
+        # A new result_id for every execution, so the backend never mixes the chunks of two runs of
+        # a statement, for example before and after an Agent restart.
+        sender = _ChunkSender(self, statement, str(uuid.uuid4()))
         start = time.time()
+        columns: list[str] = []
         try:
-            columns, rows = session.run(
-                statement.dbname, statement.query, statement.timeout_seconds * 1000, statement.max_rows
+            columns, batches = session.stream(
+                statement.dbname,
+                statement.query,
+                statement.timeout_seconds * 1000,
+                min(statement.max_rows, MAX_TASK_STATEMENT_ROWS),
             )
+            for batch in batches:
+                if self.is_cancelled:
+                    # Nobody waits for the result. Closing the iterator marks the session unusable
+                    # without draining the rest of the result; closing the connection makes the
+                    # server abort the statement on its next write.
+                    batches.close()
+                    self._close()
+                    return False
+                for row in batch:
+                    sender.add([_to_text(value) for value in row])
+            sender.flush()
         except Exception as error:
             duration = time.time() - start
             result = _error_result(error, duration)
@@ -163,18 +203,16 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 error,
             )
             self.log.debug("Failed statement SQL: %s", statement.query)
-            return result
-
-        return {
-            'status': 'success',
-            'columns': columns,
-            'rows': [[_to_text(value) for value in row] for row in rows],
-            'row_count': len(rows),
-            'duration_s': time.time() - start,
-            'error': None,
-            'error_kind': None,
-            'error_code': None,
-        }
+        else:
+            result = {
+                'status': 'success',
+                'duration_s': time.time() - start,
+                'error': None,
+                'error_kind': None,
+                'error_code': None,
+            }
+        self._emit_final(statement, sender, columns, result)
+        return True
 
     def _base_event(self) -> dict[str, Any]:
         return {
@@ -186,28 +224,30 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             'db_port': self._config.port,
         }
 
-    def _emit_result(self, statement: Statement, result: dict[str, Any], executed: bool = True) -> None:
-        self._record_statement(result, executed)
-        event = {
-            **self._base_event(),
-            'statement_id': statement.id,
-            # New for every execution, so the backend never mixes the chunks of two runs of a
-            # statement, for example before and after an Agent restart.
-            'result_id': str(uuid.uuid4()),
+    def _emit_final(
+        self,
+        statement: Statement,
+        sender: _ChunkSender,
+        columns: list[str],
+        result: dict[str, Any],
+        executed: bool = True,
+    ) -> None:
+        # Rows read but not yet sent when a read fails are discarded: the final event counts only
+        # the chunks already sent.
+        final = {
+            **sender.routing,
+            'timestamp': int(time.time() * 1000),
+            'kind': 'final',
             'db_name': statement.dbname,
             'query': statement.query,
             'timeout_ms': statement.timeout_seconds * 1000,
+            'chunk_count': sender.sent_chunks,
+            'row_count': sender.sent_rows,
+            'columns': columns if result['status'] == 'success' else [],
             **result,
         }
-        rows = event['rows']
-        # Measure the event without rows, with chunk fields at their widest, to get the space the
-        # rows of one chunk may use.
-        envelope = {**event, 'rows': [], 'chunk_index': MAX_TASK_STATEMENT_ROWS, 'chunk_count': MAX_TASK_STATEMENT_ROWS}
-        chunks = _split_rows(rows, MAX_EVENT_BYTES - len(json.encode_bytes(envelope)))
-        for index, chunk in enumerate(chunks):
-            self._emit(
-                {**event, 'chunk_index': index, 'chunk_count': len(chunks), 'rows': chunk, 'row_count': len(chunk)}
-            )
+        self._record_statement(final, executed)
+        self._emit(final)
 
     def _emit_task_error(self, error_kind: str, message: str) -> None:
         self._emit(
@@ -251,6 +291,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
         self._histogram('dd.mysql.do_task.statement_execution_time', result['duration_s'], [status_tag])
         if result['status'] == 'success':
             self._histogram('dd.mysql.do_task.statement_rows', result['row_count'])
+            self._histogram('dd.mysql.do_task.statement_chunks', result['chunk_count'])
 
     def _base_metric_tags(self) -> list[str]:
         if self._metric_tags is None:
@@ -281,6 +322,47 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             )
 
 
+class _ChunkSender:
+    """Collects one execution's rows and sends a chunk event each time they reach the budget."""
+
+    def __init__(self, check: MySqlTaskCheck, statement: Statement, result_id: str) -> None:
+        self._check = check
+        self.routing = {**check._base_event(), 'statement_id': statement.id, 'result_id': result_id}
+        # Measure a chunk event without rows, with the chunk index at its widest, to get the space
+        # the rows of one chunk may use.
+        envelope = {**self.routing, 'kind': 'chunk', 'chunk_index': MAX_TASK_STATEMENT_ROWS, 'rows': []}
+        self._budget = MAX_EVENT_BYTES - len(json.encode_bytes(envelope))
+        self._rows: list[list[str | None]] = []
+        self._size = 0
+        self.sent_chunks = 0
+        self.sent_rows = 0
+
+    def add(self, row: list[str | None]) -> None:
+        # One more byte for the separating comma. A row larger than the budget gets a chunk of its
+        # own.
+        row_size = len(json.encode_bytes(row)) + 1
+        if self._rows and self._size + row_size > self._budget:
+            self.flush()
+        self._rows.append(row)
+        self._size += row_size
+
+    def flush(self) -> None:
+        if not self._rows:
+            return
+        self._check._emit(
+            {
+                **self.routing,
+                'timestamp': int(time.time() * 1000),
+                'kind': 'chunk',
+                'chunk_index': self.sent_chunks,
+                'rows': self._rows,
+            }
+        )
+        self.sent_chunks += 1
+        self.sent_rows += len(self._rows)
+        self._rows, self._size = [], 0
+
+
 def _close_quietly(conn: Any, log: Any) -> None:
     try:
         conn.close()
@@ -305,32 +387,11 @@ def _error_result(error: Exception, duration: float, connecting: bool = False) -
         message = f'Statement not executed: could not connect to the database: {error}'
     return {
         'status': 'error',
-        'columns': [],
-        'rows': [],
-        'row_count': 0,
         'duration_s': duration,
         'error': message,
         'error_kind': kind,
         'error_code': str(code) if code is not None else None,
     }
-
-
-def _split_rows(rows: list[list[str | None]], budget: int) -> list[list[list[str | None]]]:
-    """
-    Split rows into consecutive chunks whose JSON encoding fits in `budget` bytes. Every chunk
-    holds at least one row, and there is always at least one chunk.
-    """
-    chunks: list[list[list[str | None]]] = [[]]
-    size = 0
-    for row in rows:
-        # One more byte for the separating comma.
-        row_size = len(json.encode_bytes(row)) + 1
-        if chunks[-1] and size + row_size > budget:
-            chunks.append([])
-            size = 0
-        chunks[-1].append(row)
-        size += row_size
-    return chunks
 
 
 def _to_text(value: Any) -> str | None:

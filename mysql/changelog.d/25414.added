@@ -1,1 +1,1 @@
-Add a task mode that runs one-off Data Observability SQL statements once and reports each result as an event.
+Add a task mode that runs one-off Data Observability SQL statements once and streams each result, up to 1,000,000 rows, as events.
