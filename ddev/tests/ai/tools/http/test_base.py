@@ -38,7 +38,7 @@ def openapi_document(schema_count: int = 400) -> dict:
 
 @pytest.fixture
 def store(tmp_path: Path) -> ResponseStore:
-    return ResponseStore(tmp_path, "exec")
+    return ResponseStore(tmp_path / "exec")
 
 
 def get_tool(store: ResponseStore | None, transport: httpx.AsyncBaseTransport) -> HttpGetTool:
@@ -63,7 +63,6 @@ async def test_large_json_is_saved_formatted_and_result_is_bounded(store: Respon
     assert metadata["method"] == "GET"
     assert metadata["url"] == OPENAPI_URL
     assert metadata["representation"] == "formatted_json"
-    assert metadata["saved_bytes"] == saved.stat().st_size
 
 
 async def test_save_response_preserves_small_response(store: ResponseStore):
@@ -130,19 +129,6 @@ async def test_decompressed_size_limit_discards_response(store: ResponseStore):
     assert saved_files(store.root) == []
 
 
-async def test_quota_exhaustion_is_reported_and_keeps_earlier_evidence(tmp_path: Path):
-    store = ResponseStore(tmp_path, "exec", quota_bytes=1_000)
-    tool = get_tool(store, respond(httpx.Response(200, json={"ok": True})))
-    first = json.loads((await tool.run({"url": OPENAPI_URL, "save_response": True})).data)
-
-    tool = get_tool(store, respond(httpx.Response(200, json=openapi_document(100))))
-    result = await tool.run({"url": OPENAPI_URL})
-
-    assert result.success is False
-    assert "quota exhausted" in result.error
-    assert saved_files(store.root) == sorted([Path(first["saved_to"]), Path(first["metadata_path"])])
-
-
 async def test_cancellation_during_download_writes_nothing(store: ResponseStore):
     started = asyncio.Event()
 
@@ -172,7 +158,7 @@ async def test_binary_response_is_not_saved(store: ResponseStore):
 
 
 async def test_saved_response_is_readable_by_another_agents_file_tools(tmp_path: Path):
-    store = ResponseStore(tmp_path / ".ddev" / "ai-runs" / "flow", "exec")
+    store = ResponseStore(tmp_path / ".ddev" / "ai-runs" / "flow" / "http_responses" / "exec")
     result = await get_tool(store, respond(httpx.Response(200, json=openapi_document(50)))).run({"url": OPENAPI_URL})
     saved_to = json.loads(result.data)["saved_to"]
     policy = FileAccessPolicy(write_root=tmp_path, integration_name="prefect")

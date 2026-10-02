@@ -223,7 +223,7 @@ class HttpRequestTool[TInput: HttpRequestInput](BaseTool[TInput]):
             return make_tool_result(success=True, data=data, result=result)
 
         representation, saved_text, parsed, parse_note = _representation(fetched.content_type, text)
-        metadata: dict[str, object] = {
+        metadata: dict[str, JsonValue] = {
             "method": method,
             "url": _safe_url(fetched.url),
             "fetched_at": fetched.fetched_at.isoformat(),
