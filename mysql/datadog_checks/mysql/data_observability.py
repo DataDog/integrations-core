@@ -6,7 +6,6 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Callable, Iterable, Mapping
-from contextlib import closing
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
@@ -16,6 +15,7 @@ from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
+from .do_query import MAX_RESULT_ROWS, DOQuerySession
 from .util import ManagedAuthConnectionMixin
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 EVENT_TRACK_TYPE = 'do-query-results'
 
-MAX_RESULT_ROWS = 10_000
+__all__ = ['EVENT_TRACK_TYPE', 'MAX_RESULT_ROWS', 'MySQLDataObservability']
 
 # Recover cron executions missed during short check restarts.
 CRON_STARTUP_LOOKBACK_SECONDS = 300
@@ -80,8 +80,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0.0
         self._db: Any = None
-        self._current_dbname: str | None = None
-        self._current_query_timeout_ms: int | None = None
+        self._session: DOQuerySession | None = None
 
         collection_interval = do_config.collection_interval
         if not collection_interval or collection_interval <= 0:
@@ -109,8 +108,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
     def _close_db_conn(self) -> None:
         db = self._db
         self._db = None
-        self._current_dbname = None
-        self._current_query_timeout_ms = None
+        self._session = None
         if db:
             try:
                 db.close()
@@ -189,21 +187,10 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             )
         return dbname
 
-    def _set_query_timeout(self, conn: Any, query_timeout_ms: int) -> None:
-        if not self._check.is_mariadb and not self._check.version.version_compatible((5, 7, 4)):
-            # MySQL added max_execution_time in 5.7.4. Older supported servers
-            # must still execute the monitor query without attempting to use it.
-            return
-        if query_timeout_ms == self._current_query_timeout_ms:
-            return
-
-        # This connection belongs only to Data Observability, so its timeout can
-        # remain in place until a later query needs a different value.
-        timeout_variable = "max_statement_time" if self._check.is_mariadb else "max_execution_time"
-        timeout_value = query_timeout_ms / 1000 if self._check.is_mariadb else query_timeout_ms
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(f"SET SESSION {timeout_variable} = %s", (timeout_value,))
-        self._current_query_timeout_ms = query_timeout_ms
+    def _session_for(self, conn: Any) -> DOQuerySession:
+        if self._session is None or self._session.conn is not conn:
+            self._session = DOQuerySession(conn, self._check.version, self._check.is_mariadb)
+        return self._session
 
     def _execute_single_query(self, conn: Any, query_spec: Query) -> dict[str, Any]:
         dbname = self._validate_dbname(query_spec.dbname)
@@ -211,21 +198,9 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
         start = time.time()
         try:
             self._raise_if_cancelled()
-            self._set_query_timeout(conn, query_spec.query_timeout)
-            # SSCursor reads rows as fetchmany() requests them instead of buffering the
-            # full result in execute(). Closing it drains unread rows before the shared
-            # connection is reused for another query.
-            with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
-                if dbname != self._current_dbname:
-                    cursor.execute(f"USE `{dbname}`")
-                    self._current_dbname = dbname
-                cursor.execute(query_spec.query)
-                if cursor.description is None:
-                    raise pymysql.err.ProgrammingError(
-                        "Query returned no result set — only SELECT statements are supported"
-                    )
-                columns = [description[0] for description in cursor.description]
-                rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
+            session = self._session_for(conn)
+            columns, rows = session.run(dbname, query_spec.query, query_spec.query_timeout, MAX_RESULT_ROWS)
+            rows = [list(row) for row in rows]
             duration = time.time() - start
             return {
                 'status': 'success',
@@ -239,6 +214,9 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             if not conn.open:
                 self._close_db_conn()
                 raise
+            if not session.usable:
+                # The connection is mid-result; the next query reconnects.
+                self._close_db_conn()
             duration = time.time() - start
             self._log.warning(
                 "Query failed for monitor_id=%d (%.3fs): %s | SQL: %s",

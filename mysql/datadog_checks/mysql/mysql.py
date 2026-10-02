@@ -21,21 +21,17 @@ from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
 )
-from datadog_checks.base.utils.db.utils import (
-    resolve_db_host as agent_host_resolver,
-)
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 from datadog_checks.mysql.data_observability import MySQLDataObservability
-from datadog_checks.mysql.do_task import MySQLDataObservabilityTask
+from datadog_checks.mysql.do_task import MySqlTaskCheck
 from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
-from .config import MySQLConfig, sanitize
-from .config_models.instance import DataObservability, DoTask
+from .config import sanitize
+from .config_models.instance import DataObservability
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -63,6 +59,7 @@ from .const import (
 from .global_variables import GlobalVariables
 from .index_metrics import MySqlIndexMetrics
 from .innodb_metrics import InnoDBMetrics
+from .instance_mixin import MySQLInstanceMixin
 from .metadata import MySQLMetadata
 from .queries import (
     QUERY_DEADLOCKS,
@@ -104,7 +101,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class MySql(DatabaseCheck):
+class MySql(MySQLInstanceMixin, DatabaseCheck):
     DBMS = 'mysql'
 
     SERVICE_CHECK_NAME = 'mysql.can_connect'
@@ -114,6 +111,14 @@ class MySql(DatabaseCheck):
     DEFAULT_MAX_CUSTOM_QUERIES = 20
     HA_SUPPORTED = True
 
+    def __new__(cls, name, init_config, instances):
+        # The Agent schedules a separate run-once check for each one-off Data Observability task,
+        # holding only connection settings and a do_task block. It runs as its own check class, so
+        # none of the instance setup below applies to it.
+        if instances and instances[0].get('do_task'):
+            return MySqlTaskCheck(name, init_config, instances)
+        return super(MySql, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
         self.health = MySqlHealth(self)
@@ -122,16 +127,11 @@ class MySql(DatabaseCheck):
         self.is_mariadb = None
         self.server_uuid = None
         self.cluster_uuid = None
-        self._resolved_hostname = None
-        self._database_hostname = None
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
         self._initialized_at = int(time.time() * 1000)
-        self._config = MySQLConfig(self.instance, init_config)
-        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
-        self.add_core_tags()
-        self._cloud_metadata = self._config.cloud_metadata
+        self._init_instance(init_config)
 
         # Create a new connection on every check run
         self._conn = None
@@ -145,13 +145,6 @@ class MySql(DatabaseCheck):
         self.check_initializations.append(self._config.configuration_checks)
         self._warnings_by_code = {}
 
-        # Determine if using AWS managed authentication
-        self._uses_aws_managed_auth = (
-            'aws' in self.cloud_metadata
-            and 'managed_authentication' in self.cloud_metadata.get('aws', {})
-            and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
-        )
-
         self._do_config = DataObservability(
             **{
                 'enabled': False,
@@ -161,18 +154,12 @@ class MySql(DatabaseCheck):
             }
         )
 
-        # A one-off Data Observability task, set only on the separate run-once check the Agent
-        # schedules for it. That check holds just the connection settings of the user's instance.
-        do_task = self.instance.get('do_task')
-        self._do_task = DoTask.model_validate(do_task) if do_task else None
-
         self.statement_metrics = None
         self.statement_samples = None
         self.mysql_metadata = None
         self.query_activity = None
         self.data_observability = None
-        if self._do_task is None:
-            self._register_async_jobs()
+        self._register_async_jobs()
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -184,9 +171,7 @@ class MySql(DatabaseCheck):
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
 
-        # The health event carries the sanitized instance, which for a task includes its SQL.
-        if self._do_task is None:
-            self._submit_initialization_health_event()
+        self._submit_initialization_health_event()
 
     def shutdown(self) -> None:
         """Release the resources this check holds for its whole lifetime."""
@@ -247,27 +232,6 @@ class MySql(DatabaseCheck):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
-    def reported_hostname(self):
-        # type: () -> str
-        if self._config.exclude_hostname:
-            return None
-        return self.resolved_hostname
-
-    @property
-    def resolved_hostname(self):
-        # type: () -> str
-        if self._resolved_hostname is None:
-            if self._config.reported_hostname:
-                self._resolved_hostname = self._config.reported_hostname
-            else:
-                self._resolved_hostname = self.resolve_db_host()
-        return self._resolved_hostname
-
-    @property
-    def cloud_metadata(self):
-        return self._cloud_metadata
-
-    @property
     def dbms_version(self) -> str:
         # Mirrors the version string used by the other DBM metadata events
         # (database_instance, mysql_variables). Returns an empty string until
@@ -277,38 +241,11 @@ class MySql(DatabaseCheck):
         return self.version.version + '+' + self.version.build
 
     @property
-    def database_identifier_template(self) -> str:
-        return self._config.database_identifier.get('template') or '$resolved_hostname'
-
-    @property
-    def database_identifier_params(self) -> dict:
-        return {
-            'resolved_hostname': self.resolved_hostname,
-            'host': str(self._config.host),
-            'port': str(self._config.port),
-            'mysql_sock': str(self._config.mysql_sock),
-        }
-
-    @property
-    def database_hostname(self):
-        # type: () -> str
-        if self._database_hostname is None:
-            self._database_hostname = self.resolve_db_host()
-        return self._database_hostname
-
-    @property
     def events_wait_current_enabled(self):
         # type: () -> bool
         if self._events_wait_current_enabled is None:
             self._check_events_wait_current_enabled(self._conn)
         return self._events_wait_current_enabled
-
-    def add_core_tags(self):
-        """
-        Add tags that should be attached to every metric/event but which require check calculations outside the config.
-        """
-        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
-        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -397,9 +334,6 @@ class MySql(DatabaseCheck):
             self._events_wait_current_enabled = events_wait_current_enabled
         return self._events_wait_current_enabled
 
-    def resolve_db_host(self):
-        return agent_host_resolver(self._config.host)
-
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
 
@@ -415,14 +349,6 @@ class MySql(DatabaseCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
-        if self._do_task is not None:
-            # A task reports through its do-query-results events and internal dd.mysql.do_task.*
-            # metrics only. It sends no integration metrics and no mysql.can_connect service check:
-            # those carry the tags of the user's own instance, so a task that fails to connect would
-            # flip that instance's status.
-            MySQLDataObservabilityTask(self, self._do_task).run()
-            return
-
         self._submit_initialization_health_event()
 
         if self.instance.get('user'):
@@ -537,41 +463,9 @@ class MySql(DatabaseCheck):
         return hostkey
 
     def _get_connection_args(self):
-        ssl = dict(self._config.ssl) if self._config.ssl else None
-        connection_args = {
-            'ssl': ssl,
-            'connect_timeout': self._config.connect_timeout,
-            'read_timeout': self._config.read_timeout,
-            'autocommit': True,
-        }
-        if self._config.charset:
-            connection_args['charset'] = self._config.charset
-
-        if self._config.defaults_file != '':
-            connection_args['read_default_file'] = self._config.defaults_file
-            return connection_args
-
-        connection_args.update({'user': self._config.user, 'passwd': self._config.password})
-        if self._uses_aws_managed_auth:
-            # Generate AWS IAM auth token
-            aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-            region = self.cloud_metadata['aws']['region']
-            password = aws.generate_rds_iam_token(
-                host=self._config.host,
-                username=self._config.user,
-                port=self._config.port,
-                region=region,
-                role_arn=aws_managed_authentication.get('role_arn'),
-            )
-            connection_args.update({'user': self._config.user, 'passwd': password})
-        if self._config.mysql_sock != '':
+        connection_args = super()._get_connection_args()
+        if 'unix_socket' in connection_args:
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
-            connection_args.update({'unix_socket': self._config.mysql_sock})
-        else:
-            connection_args.update({'host': self._config.host})
-
-        if self._config.port:
-            connection_args.update({'port': self._config.port})
         return connection_args
 
     def _service_check_tags(self, server=None):
