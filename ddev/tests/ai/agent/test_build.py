@@ -105,6 +105,7 @@ def test_build_runtime_propagates_context_to_tool_registry(file_registry, mocker
         file_registry=file_registry,
         agent_config=config,
         process_factory=sentinel_process_factory,
+        tool_factories=None,
     )
 
 

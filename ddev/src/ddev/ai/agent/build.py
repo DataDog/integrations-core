@@ -4,12 +4,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import AgentConfig
+from ddev.ai.tools.core.protocol import ToolProtocol
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -58,9 +60,11 @@ class AgentRuntimeFactory:
         *,
         provider_registry: AgentProviderRegistry,
         file_registry: FileRegistry,
+        tool_factories: Mapping[str, Callable[[], ToolProtocol]] | None = None,
     ) -> None:
         self._provider_registry = provider_registry
         self._file_registry = file_registry
+        self._tool_factories = tool_factories
 
     def build_runtime(
         self,
@@ -78,6 +82,7 @@ class AgentRuntimeFactory:
             agent_config=agent_config,
             # forwarded untouched to tools that spawn child agents
             process_factory=process_factory,
+            tool_factories=self._tool_factories,
         )
         agent = self._provider_registry.build_agent(
             agent_config,
