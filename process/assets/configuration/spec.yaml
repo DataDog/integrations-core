@@ -131,23 +131,33 @@ files:
             * critical: (optional) List of two values: If the number of processes found is below the first value or
                         above the second one, the process check returns CRITICAL. To make an semi-unbounded interval,
                          use `.inf` for the upper bound.
+
+          Each bound must be a number, or `.inf` for the upper bound. In a local YAML file either `.inf` or the
+          quoted string `'.inf'` works. When the configuration is sent as JSON (for example through Remote Config
+          or Fleet Automation), use the string `'.inf'`, since JSON cannot represent infinity.
         value:
           type: object
           properties:
           - name: warning
             type: array
             items:
-              type: number
+              anyOf:
+              - type: number
+              - type: string
+                enum: ['.inf']
             minItems: 2
           - name: critical
             type: array
             items:
-              type: number
+              anyOf:
+              - type: number
+              - type: string
+                enum: ['.inf']
             minItems: 2
           compact_example: true
           example:
-            warning: [<BELOW_VALUE> , <TOP_VALUE>]
-            critical: [<BELOW_VALUE> , <TOP_VALUE>]
+            warning: [5, 10]
+            critical: [2, '.inf']
         fleet_configurable: true
       - name: collect_children
         description: |

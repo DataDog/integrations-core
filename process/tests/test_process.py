@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
 
 import psutil
 import pytest
@@ -472,10 +473,86 @@ def test_process_service_check(aggregator):
     process._process_service_check(
         'no_top_critical', 0, {'warning': [2, float('inf')], 'critical': [2, float('inf')]}, []
     )
+    # Remote Config sends `.inf` as the string sentinel ".inf" (JSON can't
+    # represent a raw float infinity); it must be coerced the same as the
+    # native float above, not compared directly against `nb_procs`.
+    process._process_service_check('string_inf_ok', 3, {'warning': [2, '.inf'], 'critical': [2, '.inf']}, [])
+    process._process_service_check('string_inf_many', 10_000, {'warning': [2, '.inf'], 'critical': [2, '.inf']}, [])
+    process._process_service_check('string_inf_low', 1, {'warning': [2, '.inf'], 'critical': [0, '.inf']}, [])
+    # An explicit `null` bound (e.g. from Remote Config JSON) falls back to the default `[1, inf]`.
+    process._process_service_check('null_warning', 1, {'warning': None, 'critical': [0, '.inf']}, [])
 
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_ok'], status=process.OK)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_many'], status=process.OK)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_low'], status=process.WARNING)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:null_warning'], status=process.OK)
+
+
+@pytest.mark.parametrize(
+    'thresholds',
+    [
+        pytest.param({'warning': None, 'critical': None}, id='both_null'),
+        pytest.param({'warning': None, 'critical': [1, '.inf']}, id='warning_null'),
+    ],
+)
+@patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
+def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_check, thresholds):
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': thresholds}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
+    expected_tags = generate_expected_tags(instance)
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=ProcessCheck.OK)
+
+
+@pytest.mark.parametrize(
+    'thresholds, expected_status',
+    [
+        pytest.param({'warning': [1, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='within_range'),
+        pytest.param({'warning': [2, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.WARNING, id='below_lower_bound'),
+    ],
+)
+@patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
+def test_thresholds_inf_string_end_to_end(mock_process_iter, aggregator, dd_run_check, thresholds, expected_status):
+    # Goes through config model validation as well as the comparison, unlike `test_process_service_check`.
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': thresholds}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
+    expected_tags = generate_expected_tags(instance)
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=expected_status)
+
+
+NOT_A_NUMBER = "thresholds.warning {} bound must be a number or the string '.inf'"
+
+
+@pytest.mark.parametrize(
+    'warning, expected_error',
+    [
+        pytest.param([1, 'inf'], NOT_A_NUMBER.format('upper'), id='inf'),
+        pytest.param([1, 'Infinity'], NOT_A_NUMBER.format('upper'), id='Infinity'),
+        pytest.param([1, '5'], NOT_A_NUMBER.format('upper'), id='numeric_str'),
+        pytest.param([1, 'NaN'], NOT_A_NUMBER.format('upper'), id='nan_str'),
+        pytest.param([1, float('nan')], NOT_A_NUMBER.format('upper'), id='nan_float'),
+        # What `JSON.stringify([1, Infinity])` produces.
+        pytest.param([1, None], NOT_A_NUMBER.format('upper'), id='null_bound'),
+        pytest.param([True, 5], NOT_A_NUMBER.format('lower'), id='bool'),
+        pytest.param(['.inf', 5], "thresholds.warning lower bound cannot be '.inf'", id='inf_lower'),
+        # Non-list shapes are left to the generated model's own error.
+        pytest.param(5, 'thresholds -> warning', id='not_a_list'),
+        pytest.param('.inf', 'thresholds -> warning', id='bare_inf_str'),
+    ],
+)
+def test_thresholds_rejected_at_config_load(dd_run_check, warning, expected_error):
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': {'warning': warning, 'critical': [1, '.inf']}}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+
+    with pytest.raises(Exception, match=re.escape(expected_error)) as exc_info:
+        dd_run_check(process)
+
+    assert 'ConfigurationError' in str(exc_info.value)
+    assert 'TypeError' not in str(exc_info.value)
 
 
 def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):

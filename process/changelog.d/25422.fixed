@@ -1,0 +1,1 @@
+Accept the `.inf` string for an unbounded `thresholds` upper bound so it survives JSON transport from Remote Config, and reject threshold values the check can't evaluate (non-numeric strings, booleans, NaN) at configuration load instead of crashing the check run.
