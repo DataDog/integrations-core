@@ -66,6 +66,11 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     sinfo_collection_level: Optional[int] = None
     sinfo_path: Optional[str] = None
+    slurm_openapi_version: Optional[str] = None
+    slurm_rest_api_token: Optional[str] = None
+    slurm_rest_api_token_file: Optional[str] = None
+    slurm_rest_api_url: Optional[str] = None
+    slurm_rest_api_user: Optional[str] = None
     squeue_path: Optional[str] = None
     sshare_path: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
