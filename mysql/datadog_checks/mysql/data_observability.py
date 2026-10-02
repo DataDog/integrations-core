@@ -41,7 +41,7 @@ class CronScheduledQuery:
     query: Query
     scheduler: CronScheduler
     pending_retry: DueQuery | None = None
-    reported_connection_error: tuple[str | None, str] | None = None
+    reported_connection_error: tuple[str, str | None] | None = None
 
 
 @dataclass
@@ -51,7 +51,7 @@ class IntervalScheduledQuery:
     interval_seconds: int
     last_execution: float | None = None
     pending_retry: DueQuery | None = None
-    reported_connection_error: tuple[str | None, str] | None = None
+    reported_connection_error: tuple[str, str | None] | None = None
 
 
 ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
@@ -253,7 +253,8 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
 
     @staticmethod
     def _error_result(error: Exception, duration: float, phase: str) -> dict[str, Any]:
-        code = error.args[0] if error.args and isinstance(error.args[0], int) else None
+        # pymysql reports a closed socket as InterfaceError(0, ''); 0 is not a database error code.
+        code = error.args[0] if error.args and isinstance(error.args[0], int) and error.args[0] else None
         if phase != 'execute' or isinstance(error, pymysql.err.InterfaceError) or code in (2002, 2003, 2006, 2013):
             kind = 'connection_error'
         elif code in (3024, 1969):  # MySQL max_execution_time / MariaDB max_statement_time
@@ -395,10 +396,12 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 )
 
             # Connection errors are retried every collection, so an outage would repeat the same
-            # event for every pending query. Send one only when it differs from the last event
-            # handed off for this query. The state is in memory, so a restart sends it again.
+            # event for every pending query. Send one only when its kind and code differ from the
+            # last event handed off for this query; the message is left out because it changes with
+            # the phase and the OS error even within one outage. The state is in memory, so a
+            # restart sends it again.
             connection_error = (
-                (result['error_code'], result['error'])
+                (result['error_kind'], result['error_code'])
                 if result['status'] == 'error' and result['error_kind'] == 'connection_error'
                 else None
             )

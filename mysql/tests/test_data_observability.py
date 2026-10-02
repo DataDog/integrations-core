@@ -802,6 +802,37 @@ def test_connection_error_is_reported_again_after_a_change(instance_basic, monke
     assert [(p['status'], p.get('error_code')) for p in payloads] == expected + [('error', '2003'), ('error', '2003')]
 
 
+def test_one_outage_is_reported_once_per_query_whatever_the_message(instance_basic, monkeypatch):
+    current_time = [1000.0]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    lost_conn, cursor = _make_mock_conn(open=False)
+    cursor.execute.side_effect = [None, pymysql.err.OperationalError(2013, 'Lost connection to MySQL server')]
+    attempts = [
+        # The first query loses the connection mid-execution and the second is blocked behind it.
+        lost_conn,
+        # Same code, different phase and message.
+        pymysql.err.OperationalError(2013, 'Lost connection to MySQL server during handshake'),
+        pymysql.err.OperationalError(2003, "Can't connect to MySQL server (111)"),
+        # Same code, different OS error.
+        pymysql.err.OperationalError(2003, "Can't connect to MySQL server (99)"),
+    ]
+    check.data_observability._get_db_connection = MagicMock(side_effect=attempts)
+    with patch.object(MySql, 'event_platform_event') as events:
+        for elapsed in range(len(attempts)):
+            current_time[0] = 1000.0 + elapsed * 10
+            with pytest.raises(pymysql.err.OperationalError):
+                check.data_observability.run_job()
+
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert [(p['query'], p['error_code']) for p in payloads] == [
+        (MULTI_QUERIES[0]['query'], '2013'),
+        (MULTI_QUERIES[1]['query'], '2013'),
+        (MULTI_QUERIES[0]['query'], '2003'),
+        (MULTI_QUERIES[1]['query'], '2003'),
+    ]
+
+
 def test_connection_error_is_reported_again_after_a_failed_send(instance_basic, monkeypatch):
     current_time = [1000.0]
     monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
@@ -818,25 +849,28 @@ def test_connection_error_is_reported_again_after_a_failed_send(instance_basic, 
 
 
 @pytest.mark.parametrize(
-    'error',
+    'error, code',
     [
-        pymysql.err.OperationalError(2013, 'lost connection'),
-        pymysql.err.OperationalError('server closed the connection'),
-        pymysql.err.OperationalError(1205, 'Lock wait timeout exceeded'),
+        (pymysql.err.OperationalError(2013, 'lost connection'), '2013'),
+        (pymysql.err.OperationalError('server closed the connection'), None),
+        (pymysql.err.OperationalError(1205, 'Lock wait timeout exceeded'), '1205'),
+        # pymysql's error for a socket that is already closed.
+        (pymysql.err.InterfaceError(0, ''), None),
     ],
-    ids=['connection_code', 'no_code', 'lock_timeout_code'],
+    ids=['connection_code', 'no_code', 'lock_timeout_code', 'closed_socket'],
 )
-def test_lost_connection_reports_failed_and_unstarted_queries(instance_basic, aggregator, error):
+def test_lost_connection_reports_failed_and_unstarted_queries(instance_basic, aggregator, error, code):
     check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
     conn, cursor = _make_mock_conn(open=False)
     cursor.execute.side_effect = [None, error]
     check.data_observability._db = conn
     with patch.object(MySql, 'event_platform_event') as events:
-        with pytest.raises(pymysql.err.OperationalError):
+        with pytest.raises(type(error)):
             check.data_observability.run_job()
     payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
     assert [p['error'].startswith('Query not executed:') for p in payloads] == [False, True]
     assert all(p['error_kind'] == 'connection_error' for p in payloads)
+    assert all(p['error_code'] == code for p in payloads)
     assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
     recovered, recovered_cursor = _make_mock_conn()
     check.data_observability._db = recovered
