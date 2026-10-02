@@ -1,1 +1,0 @@
-Add `get_agent_embedded_path` helper to resolve paths under the agent's embedded directory regardless of install location.
