@@ -1,0 +1,1 @@
+Add OpenMetrics collection support via ``use_openmetrics``/``is_jmx: false``, as an alternative to the default JMX collection.
