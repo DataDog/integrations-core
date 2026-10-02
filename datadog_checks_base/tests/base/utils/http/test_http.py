@@ -126,6 +126,11 @@ class TestAttribute:
         empty_default = create_http_client({}, {}).options['timeout']
         assert check.create_http_client({}).options['timeout'] == empty_default
 
+    def test_factory_empty_init_config_override_is_honored(self):
+        check = AgentCheck('test', {'timeout': 7}, [{}])
+
+        assert check.create_http_client(init_config={}).options['timeout'] == (10.0, 10.0)
+
     def test_module_factory_builds_from_given_config(self):
         from datadog_checks.base.utils.http import create_http_client
 
