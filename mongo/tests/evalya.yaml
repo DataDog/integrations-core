@@ -27,11 +27,13 @@ tasks:
         value: datadog
       - name: DB_PASSWORD
         value: datadog
-    # Probes each upstream from the forwarder. The depends_on chain already
-    # guarantees the nodes are healthy and the seed authenticated as
-    # DB_USERNAME; this confirms the forwarded roles are reachable.
+    # Probes each forwarded port, then each upstream. A socat listener that
+    # dies does not stop the container while the others run, and a forked
+    # listener accepts even when its upstream is down, so both are checked.
+    # The depends_on chain already guarantees the nodes are healthy and the
+    # seed authenticated as DB_USERNAME.
     healthcheck:
-      test: ["CMD-SHELL", "for t in mongos shard-a shard-b; do socat -u OPEN:/dev/null TCP:$$t:27017,connect-timeout=2 || exit 1; done"]
+      test: ["CMD-SHELL", "for a in 127.0.0.1:27017 127.0.0.1:27018 127.0.0.1:27019 mongos:27017 shard-a:27017 shard-b:27017; do socat -u OPEN:/dev/null TCP:$$a,connect-timeout=2 || exit 1; done"]
       interval: 10s
       timeout: 10s
       retries: 10
