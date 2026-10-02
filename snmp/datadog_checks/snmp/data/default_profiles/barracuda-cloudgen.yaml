@@ -131,6 +131,7 @@ metrics:
           -1: down
           0: down-disabled
           1: active
+          2: ready
   - MIB: PHION-MIB
     table:
       OID: 1.3.6.1.4.1.10704.1.7
