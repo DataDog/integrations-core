@@ -16,8 +16,8 @@ tasks:
       evalya.io/provides.DB_PORT: "27017"
       evalya.io/provides.MONGO_SHARD_PRIMARY_PORT: "27018"
       evalya.io/provides.MONGO_SHARD_SECONDARY_PORT: "27019"
-      evalya.io/provides.DB_USERNAME: datadog
-      evalya.io/provides.DB_PASSWORD: datadog
+      evalya.io/provides.DB_USERNAME: "${DB_USERNAME:-datadog}"
+      evalya.io/provides.DB_PASSWORD: "${DB_PASSWORD:-datadog}"
     env:
       - name: MONGO_VERSION
         value: "8.0"
