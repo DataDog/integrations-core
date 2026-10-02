@@ -157,7 +157,7 @@ class Statement(BaseModel):
     id: str
     max_rows: int = Field(
         ...,
-        description='Maximum rows returned for the statement, capped at 10000. Like a LIMIT,\nrows past it are not returned.\n',
+        description='Maximum rows returned for the statement, capped at 1000000. Like a LIMIT,\nrows past it are not returned.\n',
     )
     query: str
     timeout_seconds: int
