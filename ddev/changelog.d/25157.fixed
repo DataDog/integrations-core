@@ -1,0 +1,1 @@
+Retry transient connection failures on registry reads
