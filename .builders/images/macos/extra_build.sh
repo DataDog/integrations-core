@@ -15,6 +15,7 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
       VERSION="${kafka_version}" \
       SHA256="14972092e4115f6e99f798a7cb420cbf6daa0c73502b3c52ae42fb5b418eea8f" \
       RELATIVE_PATH="librdkafka-{{version}}" \
+      PATCHES="librdkafka-fix-coord-request-uaf.patch librdkafka-fix-offsetfetch-null-cgrp.patch" \
       bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" --enable-sasl --enable-curl --enable-zstd
 
     # lmdb doesnt't get the actual full path in its install name which means delocate won't find it
