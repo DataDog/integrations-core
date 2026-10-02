@@ -1,12 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import annotations
+
 import contextlib
 import copy
 import functools
 import os
+import threading
 from collections import defaultdict
 from time import time
+from typing import TYPE_CHECKING
 
 import psycopg
 from cachetools import TTLCache
@@ -99,7 +103,16 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+if TYPE_CHECKING:
+    from .remote_query import PostgresRemoteQueryHandler
+
 MAX_CUSTOM_RESULTS = 100
+
+# Bound on one server-side interrupt of a live remote-query statement, sent from the
+# cancellation thread when the check is unscheduled. A cancel request is a single
+# protocol round trip, so this only guards against an unreachable server stalling the
+# unschedule path; a failed interrupt leaves the cooperative run guard as the bound.
+REMOTE_QUERY_CANCEL_REQUEST_TIMEOUT_S = 5.0
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
@@ -117,8 +130,45 @@ class PostgreSql(DatabaseCheck):
 
     HA_SUPPORTED = True
 
+    def get_remote_query_handler(self) -> 'PostgresRemoteQueryHandler':
+        """One remote-query capability handler composed with this check, created per bridge call.
+
+        The function-local import keeps the optional remote-query runtime out of ordinary
+        monitoring startup; the handler itself is cheap to construct and holds only this
+        check, never request state.
+        """
+        from .remote_query import PostgresRemoteQueryHandler
+
+        return PostgresRemoteQueryHandler(self)
+
+    @contextlib.contextmanager
+    def remote_query_connection(self, dbname: str):
+        """One pool connection for a remote query, server-side interruptible while in use.
+
+        The connection is registered for exactly the window the remote query holds it, so
+        `_on_cancel` can send a protocol-level cancel request to a statement that is
+        blocked before its first result row — the cooperative run guard only runs between
+        reads — instead of letting it run to its deadline on a check being unscheduled.
+        Registration ends before the connection returns to the pool. Scheduled monitoring
+        queries never enter this registry, so an unschedule never interrupts them.
+        """
+        with self.db_pool.get_connection(dbname) as conn:
+            with self._remote_query_connections_lock:
+                self._remote_query_connections.add(conn)
+            try:
+                yield conn
+            finally:
+                with self._remote_query_connections_lock:
+                    self._remote_query_connections.discard(conn)
+
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
+        # Live remote-query connections, registered for the whole window a remote query
+        # uses them so the cancellation thread can interrupt the in-flight statement
+        # server-side. Initialized before anything that can raise so the cancel path
+        # always finds usable state.
+        self._remote_query_connections: set[psycopg.Connection] = set()
+        self._remote_query_connections_lock = threading.Lock()
         self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_hostname = None
@@ -485,6 +535,27 @@ class PostgreSql(DatabaseCheck):
             self.metadata_samples = self.register_async_job(PostgresMetadata(self, self._config))
         if self._config.data_observability.enabled:
             self.data_observability = self.register_async_job(PostgresDataObservability(self, self._config))
+
+    def _on_cancel(self) -> None:
+        """Stop the async jobs, then interrupt live remote-query statements server-side.
+
+        A protocol-level cancel request on each registered connection's own cancel key: it
+        needs no privilege beyond the connection itself and never touches the scheduled
+        monitoring queries. This is the only lever that reaches a statement blocked before
+        its first result row, where the cooperative guard has not run yet. Runs on the
+        cancellation thread, outside the lifecycle lock; finalization still waits for the
+        query to unwind.
+        """
+        super()._on_cancel()
+        with self._remote_query_connections_lock:
+            connections = list(self._remote_query_connections)
+        for conn in connections:
+            try:
+                conn.cancel_safe(timeout=REMOTE_QUERY_CANCEL_REQUEST_TIMEOUT_S)
+            except Exception:
+                # Fixed text only: the driver's exception can quote connection strings or
+                # identifiers. A failed interrupt leaves the cooperative run guard as the bound.
+                self.log.debug("Unable to interrupt a remote query statement during cancellation")
 
     def shutdown(self) -> None:
         """Release the resources this check holds for its whole lifetime."""

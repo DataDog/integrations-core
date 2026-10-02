@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import threading
 from abc import abstractmethod
 from string import Template
 from typing import TYPE_CHECKING, Dict, List
@@ -21,6 +20,11 @@ class DatabaseCheck(AgentCheck):
     Base class for Database Monitoring (DBM) integrations.
     """
 
+    #: Engage the base cancellation lifecycle: scheduled runs, remote-query bridge calls,
+    #: and unscheduling share admission, deferred teardown, and the `shutdown()` hook,
+    #: with the DBM async jobs stopped through the lifecycle hooks below.
+    _lifecycle_managed = True
+
     #: Authoritative DBM platform identifier for this integration.
     #: Subclasses should set this explicitly; it is the value surfaced by
     #: :attr:`dbms` and used across DBM payloads, metric name prefixes and async jobs.
@@ -36,12 +40,6 @@ class DatabaseCheck(AgentCheck):
         #: Async jobs owned by this check, keyed by job name, populated via
         #: :meth:`register_async_job`.
         self._async_job_registry: Dict[str, "DBMAsyncJob"] = {}
-        # Guards the cancellation state below, which `cancel()` and `run()` read and write from
-        # different threads.
-        self._cancel_lock = threading.Lock()
-        self._is_running = False
-        self._cancelled = False
-        self._finalized = False
 
     def register_async_job(self, job: "DBMAsyncJob") -> "DBMAsyncJob":
         """
@@ -85,110 +83,29 @@ class DatabaseCheck(AgentCheck):
         Wait for every registered job's loop to finish (:meth:`~DBMAsyncJob.wait_for_completion`)
         and run its teardown (:meth:`~DBMAsyncJob.shutdown`).
 
-        Must not run concurrently with ``check()``.
+        Runs only from the base lifecycle teardown, after every admitted operation —
+        scheduled runs and remote calls included — has unwound.
         """
         for job in self._async_job_registry.values():
             job.wait_for_completion()
             job.shutdown()
 
-    @property
-    def is_cancelled(self) -> bool:
-        """
-        Whether :meth:`cancel` has been signaled.
-
-        ``check()`` implementations should consult this before starting work that would outlive the
-        run, and long-running collection loops should poll it so they stop promptly.
-        """
-        return self._cancelled
-
-    def run(self) -> str:
-        """
-        Run the check, recording whether it is in flight so :meth:`cancel` knows whether it may
-        tear the check down right away.
-
-        Returns an empty error report without running the check once it has been cancelled. When a
-        cancel arrives mid-run, the deferred teardown happens here, after ``check()`` returns.
-        """
-        with self._cancel_lock:
-            if self._cancelled:
-                self.log.debug("run() skipped, check already cancelled")
-                return ''
-            self._is_running = True
-        try:
-            return super().run()
-        finally:
-            with self._cancel_lock:
-                self._is_running = False
-                needs_finalize = self._cancelled
-            if needs_finalize:
-                self.log.debug("Cancel was signaled during the run, finalizing now that run() is complete")
-                self._finalize()
-
-    def cancel(self) -> None:
-        """
-        Signal that the check is being unscheduled.
-
-        The Agent may call this from another thread while ``check()`` is running, so this method
-        does no destructive work itself: closing a connection or dropping state that ``check()``
-        still depends on can crash the underlying client library when the run resumes. It only
-        signals the async jobs and records the cancellation, deferring teardown to
-        :meth:`_finalize`, which runs here when the check is idle and in :meth:`run` otherwise.
-
-        Integrations release their own resources by overriding :meth:`shutdown`, not this method.
-        """
-        self.log.debug("Marking check as cancelled")
-        with self._cancel_lock:
-            self._cancelled = True
-            needs_finalize = not self._is_running
+    def _on_cancel(self) -> None:
+        """Signal the registered async jobs to stop promptly, without waiting or releasing."""
         self.cancel_async_jobs()
-        if needs_finalize:
-            self.log.debug("cancel() finalizing immediately, check is idle")
-            self._finalize()
-        else:
-            self.log.debug("cancel() deferred finalize, check is still running")
+
+    def _stop_background_work(self) -> None:
+        """Wait for the async job loops and tear them down before resources are released."""
+        self.shutdown_async_jobs()
 
     def _finalize(self) -> None:
-        """
-        Tear the check down: stop the async jobs, let the integration release its resources, then
-        drop the state that keeps the check alive.
-
-        Runs at most once, and never concurrently with ``check()`` — :meth:`cancel` and :meth:`run`
-        between them guarantee that.
-        """
-        with self._cancel_lock:
-            if self._finalized:
-                return
-            self._finalized = True
-        self.log.debug("Finalizing check: stopping async jobs and releasing resources")
-        try:
-            self.shutdown_async_jobs()
-        except Exception:
-            self.log.exception("Error stopping async jobs during teardown; continuing")
-        try:
-            self.shutdown()
-        except Exception:
-            self.log.exception("Error in shutdown() during teardown; continuing")
-        # Dropping these breaks the reference cycles that would otherwise keep the check, and
-        # everything it holds, from being reclaimed once the Agent lets go of it. The jobs are
-        # stopped by this point, so releasing them here is safe.
+        """Run the base teardown, then drop the job registry's reference to the stopped jobs."""
+        super()._finalize()
+        # The jobs are stopped by `_stop_background_work` before this runs, so releasing
+        # them here is safe: dropping them breaks the reference cycles that would
+        # otherwise keep the check, and everything it holds, from being reclaimed once the
+        # Agent lets go of it.
         self._async_job_registry.clear()
-        self.check_initializations.clear()
-        if hasattr(self, '_diagnosis'):
-            del self._diagnosis
-        self.log.debug("Check cleanup complete")
-
-    def shutdown(self) -> None:
-        """
-        Release the resources this check holds for its whole lifetime, such as connections,
-        connection pools and clients.
-
-        Called once by :meth:`_finalize` during teardown, after the registered async jobs have
-        stopped and never while ``check()`` is running. Stopping those jobs is handled separately
-        by :meth:`shutdown_async_jobs`; this hook covers only what the check itself owns. To
-        unschedule a check, call :meth:`cancel` rather than this method.
-
-        The default is a no-op.
-        """
 
     def database_monitoring_query_sample(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-samples")

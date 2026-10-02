@@ -225,6 +225,28 @@ files:
       value:
         type: integer
         example: 5000
+    - name: remote_queries
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Configure remote query execution for this instance. Remote queries are read-only
+        queries delivered by Datadog that run on this instance's database and upload their
+        results directly to Datadog.
+      options:
+        - name: timeout_ms
+          display_priority: 0
+          fleet_configurable: true
+          description: |
+            Statement timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+            for remote queries, in milliseconds. This is the customer-database-protective override for this
+            instance: it bounds how long the read-only remote query transaction may hold its snapshot on this
+            instance's database, so a warehouse instance can allow minutes while an OLTP instance allows seconds.
+            When unset, the timeout delivered with each remote query run is used.
+          value:
+            type: integer
+            example: 300000
+            minimum: 1
+            display_default: the timeout delivered with the remote query run
     - name: reported_hostname
       display_priority: 0
       description: |
