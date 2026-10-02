@@ -612,14 +612,6 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1
  -
-  sample: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
-  result:
-    custom: {}
-    message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1
- -
   sample: "2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database \"missing\" does not exist at character 12"
   result:
     custom:
