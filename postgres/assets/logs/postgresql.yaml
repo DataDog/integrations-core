@@ -54,7 +54,6 @@ pipeline:
         - '2026-08-17 20:45:23.980 UTC:172.17.0.1(54222):pgllp_user@pgllp_db:[107]:10:00000:2026-08-17 20:45:23 UTC:4/5:0:6a8372e3.6b:pgllp_app:LOG:  statement: SELECT 2 AS c02;'
         - '2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;'
         - '2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;'
-        - 'custom-prefix|host=db1|LOG:  statement: SELECT 99;'
       grok:
         supportRules: |
           # %p — process ID
@@ -137,9 +136,6 @@ pipeline:
 
           # log_line_prefix = '%t '
           pgprefix_timestamp_only %{_pg_timestamp} %{_pg_body}
-
-          # This fallback rule must be last: the first matching rule wins.
-          pgprefix_unparsed %{data:postgres.message}
     - type: grok-parser
       name: Parsing Postgresql logs
       enabled: true

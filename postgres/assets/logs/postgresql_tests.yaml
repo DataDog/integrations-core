@@ -614,9 +614,7 @@ tests:
  -
   sample: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
   result:
-    custom:
-      postgres:
-        message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
+    custom: {}
     message: "custom-prefix|host=db1|LOG:  statement: SELECT 99;"
     tags:
      - "source:LOGS_SOURCE"
