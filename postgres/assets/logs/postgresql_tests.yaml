@@ -283,6 +283,68 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
+ # pgprefix_bracket: Preserve spaces and parentheses in the process activity.
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle in transaction (aborted)>LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        ps: "idle in transaction (aborted)"
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle in transaction (aborted)>LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ # pgprefix_bracket: An embedded > belongs to the activity, not the end of the prefix.
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b <FASTPATH>>LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        ps: "<FASTPATH>"
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b <FASTPATH>>LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ # pgprefix_bracket: An unavailable process activity must not prevent prefix extraction.
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b >LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b >LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
  -
   sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
   result:
