@@ -1,0 +1,1 @@
+Fix server info URL construction for IPv6 `openmetrics_endpoint` values.
