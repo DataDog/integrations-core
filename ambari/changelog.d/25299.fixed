@@ -1,0 +1,1 @@
+Migrate HTTP error handling and tests to the backend-neutral client.

@@ -1,10 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import requests
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 
 class DruidCheck(AgentCheck):
@@ -60,9 +64,9 @@ class DruidCheck(AgentCheck):
             resp = self.http.get(url)
             resp.raise_for_status()
             return resp.json()
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientConnectTimeoutError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except requests.exceptions.Timeout as e:
+        except HTTPClientTimeoutError as e:
             self.warning("Connection timeout when connecting to %s: %s", url, e)
