@@ -27,8 +27,8 @@
   <!-- Coding agents: never tick this item. Only the human author may tick it. -->
 
 <!--
-  QA label: code owned by @DataDog/agent-integrations (see `.github/CODEOWNERS`) is `qa/skip-qa` by
-  default; use `qa/required` only when the change needs QA validation.
+  QA label: code owned exclusively by @DataDog/agent-integrations (see `.github/CODEOWNERS`) is
+  `qa/skip-qa` by default; use `qa/required` only when the change needs QA validation.
 -->
 
 <!--
