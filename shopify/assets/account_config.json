@@ -1,0 +1,51 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Access token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "access_token",
+          "label": "Access token",
+          "help": "Access Token for your Shopify admin account (Required for legacy API access token authentication).",
+          "editable": true,
+          "required": false,
+          "password": {}
+        }
+      }
+    },
+    {
+      "auth_name": "OAuth Client ID and Secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "help": "Client ID of the shopify app (Required for OAuth authentication).",
+          "editable": true,
+          "required": false,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client Secret",
+          "help": "Secret of the shopify app (Required for OAuth authentication).",
+          "editable": true,
+          "required": false,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "store_name",
+      "label": "Store name",
+      "help": "This is the `xxxx` part of `https://admin.shopify.com/store/xxxx`.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "shopify-logs" }
+  ]
+}
