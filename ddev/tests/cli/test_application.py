@@ -12,6 +12,7 @@ import pytest
 from ddev.cli import ddev as ddev_command
 from ddev.cli.application import Application, AppLoggingHandler, DdevGroup
 from ddev.config.constants import VerbosityLevels
+from ddev.repo.core import Repository
 from ddev.utils.ci import AnnotationLevel, escape_workflow_data, escape_workflow_property
 from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.runner import CliRunner
@@ -267,6 +268,81 @@ def test_github_authentication_error_uses_registered_cli_handler(ddev: CliRunner
     assert 'GitHub denied the requested operation (HTTP 403)' in result.output
     assert 'ddev config set github.token' in result.output
     assert 'Traceback' not in result.output
+
+
+class TestSetRepoGitHubOwner:
+    @pytest.fixture
+    def set_repo_app(self, config_file) -> Application:
+        app = Application(lambda code: None, 0, False, False)
+        app.config_file.path = config_file.path
+        app.config_file.load()
+        return app
+
+    @pytest.fixture
+    def internal_repo(self, mocker):
+        repo = mocker.Mock(full_name='integrations-internal')
+        mocker.patch('ddev.cli.application.Repository', return_value=repo)
+        return repo
+
+    def test_explicit_owner_is_used_outside_ci(self, set_repo_app, internal_repo, monkeypatch):
+        monkeypatch.delenv('GITHUB_REPOSITORY', raising=False)
+
+        set_repo_app.set_repo(True, False, False, False, False, github_owner='ddoghq')
+
+        assert set_repo_app.repo.owner == 'ddoghq'
+        assert set_repo_app.github.repo_id == 'ddoghq/integrations-internal'
+
+    def test_explicit_owner_takes_precedence_over_ci(self, set_repo_app, internal_repo, monkeypatch):
+        monkeypatch.setenv('GITHUB_REPOSITORY', 'some-fork/integrations-internal')
+
+        set_repo_app.set_repo(True, False, False, False, False, github_owner='ddoghq')
+
+        assert set_repo_app.repo.owner == 'ddoghq'
+        assert set_repo_app.github.repo_id == 'ddoghq/integrations-internal'
+
+    def test_matching_ci_repository_owner_is_used(self, set_repo_app, internal_repo, monkeypatch):
+        monkeypatch.setenv('GITHUB_REPOSITORY', 'ddoghq/integrations-internal')
+
+        set_repo_app.set_repo(True, False, False, False, False)
+
+        assert set_repo_app.repo.owner == 'ddoghq'
+        assert set_repo_app.github.repo_id == 'ddoghq/integrations-internal'
+
+    @pytest.mark.parametrize(
+        'github_repository',
+        [
+            'ddoghq/integrations-core',
+            'integrations-internal',
+            '/integrations-internal',
+            'ddoghq/',
+            '',
+        ],
+        ids=['different-repository', 'missing-separator', 'missing-owner', 'missing-name', 'empty-value'],
+    )
+    def test_non_matching_ci_repository_falls_back_to_datadog(
+        self, set_repo_app, internal_repo, monkeypatch, github_repository
+    ):
+        monkeypatch.setenv('GITHUB_REPOSITORY', github_repository)
+
+        set_repo_app.set_repo(True, False, False, False, False)
+
+        assert set_repo_app.repo.owner == 'DataDog'
+        assert set_repo_app.github.repo_id == 'DataDog/integrations-internal'
+
+
+def test_github_owner_option_targets_the_shared_manager(ddev: CliRunner, local_repo):
+    @ddev_command.command('github-owner-probe')
+    @click.pass_obj
+    def github_owner_probe(app: Application) -> None:
+        app.display(f'{app.repo.owner}:{app.github.repo_id}')
+
+    try:
+        result = ddev('--github-owner', 'ddoghq', 'github-owner-probe')
+    finally:
+        ddev_command.commands.pop('github-owner-probe')
+
+    assert result.exit_code == 0
+    assert f"ddoghq:ddoghq/{Repository('core', str(local_repo)).full_name}" in result.output
 
 
 @pytest.mark.parametrize(

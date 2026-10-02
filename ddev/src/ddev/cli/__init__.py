@@ -75,10 +75,27 @@ def display_registered_exception(app: Application, error: Exception) -> None:
     envvar=ConfigEnvVars.CONFIG,
     help='The path to a custom config file to use [env var: `DDEV_CONFIG`]',
 )
+@click.option(
+    '--github-owner',
+    default=None,
+    help='Override the GitHub repository owner for API operations [default: DataDog]',
+)
 @click.version_option(version=__version__, prog_name='ddev')
 @click.pass_context
 def ddev(
-    ctx: click.Context, core, extras, marketplace, agent, here, org, color, interactive, verbose, quiet, config_file
+    ctx: click.Context,
+    core,
+    extras,
+    marketplace,
+    agent,
+    here,
+    org,
+    color,
+    interactive,
+    verbose,
+    quiet,
+    config_file,
+    github_owner,
 ):
     """
     \b
@@ -150,7 +167,7 @@ def ddev(
             app.display_warning(error)
 
     # Do this last
-    app.set_repo(core, extras, marketplace, agent, here)
+    app.set_repo(core, extras, marketplace, agent, here, github_owner)
 
     # TODO: remove this when the old CLI is gone
     app.initialize_old_cli()

@@ -8,7 +8,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
-from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
+from ddev.repo.constants import CONFIG_DIRECTORY, DEFAULT_GITHUB_OWNER, FULL_NAMES
 from ddev.utils.fs import Path
 from ddev.utils.git import Comparison, GitRepository
 
@@ -89,6 +89,7 @@ class Repository:
         self.__git = GitRepository(self.__path)
         self.__full_name = self.__derive_full_name()
         self.__integrations = IntegrationRegistry(self)
+        self.__owner = DEFAULT_GITHUB_OWNER
 
     def __derive_full_name(self) -> str:
         remote_url = _read_origin_url_from_git_config(self.__path)
@@ -105,6 +106,14 @@ class Repository:
     @property
     def full_name(self) -> str:
         return self.__full_name
+
+    @property
+    def owner(self) -> str:
+        return self.__owner
+
+    @owner.setter
+    def owner(self, value: str) -> None:
+        self.__owner = value
 
     @property
     def path(self) -> Path:
