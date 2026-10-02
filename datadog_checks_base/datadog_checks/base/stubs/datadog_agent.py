@@ -182,6 +182,139 @@ class DatadogAgentStub(object):
     def resolve_issue(self, issue_id):
         self._sent_resolved_issues.append(issue_id)
 
+    # Prometheus parser stub — uses the Python prometheus_client library
+    # to implement the same API that Go exposes in production.
+
+    def __init_parser_state(self):
+        if not hasattr(self, '_prometheus_parsers'):
+            self._prometheus_parsers = {}
+            self._prometheus_parser_counter = 0
+
+    def new_prometheus_parser(self, content_type):
+        self.__init_parser_state()
+        self._prometheus_parser_counter += 1
+        parser_id = self._prometheus_parser_counter
+        self._prometheus_parsers[parser_id] = {
+            'content_type': content_type,
+            'buffer': '',
+        }
+        return parser_id
+
+    def feed_prometheus_parser(self, parser_id, chunk):
+        self.__init_parser_state()
+        parser_state = self._prometheus_parsers.get(parser_id)
+        if parser_state is None:
+            raise ValueError(f'Unknown parser id: {parser_id}')
+
+        buf = parser_state['buffer']
+        if buf:
+            buf += '\n' + chunk
+        else:
+            buf = chunk
+
+        # Find the last metric family boundary where a new family starts
+        # (a line beginning with '# HELP' or '# TYPE').  Only split there
+        # if the text *before* the boundary contains at least one sample
+        # line (non-empty, non-comment), otherwise we'd emit an empty
+        # parse and lose the actual family.
+        lines = buf.split('\n')
+        last_boundary = -1
+        for i in range(len(lines) - 1, 0, -1):
+            if lines[i].startswith('# HELP ') or lines[i].startswith('# TYPE '):
+                # Walk backward through consecutive meta-lines (# HELP / # TYPE) so
+                # that the entire block for one family stays together in the buffer.
+                # Without this, a fixture with # TYPE before # HELP would split the
+                # pair — # TYPE lands in `complete` while # HELP + samples land in
+                # the buffer, causing the family to be parsed without its type
+                # declaration and treated as untyped.
+                j = i
+                while j > 0 and (lines[j - 1].startswith('# HELP ') or lines[j - 1].startswith('# TYPE ')):
+                    j -= 1
+                # Check that there is at least one sample line before this block.
+                has_sample = any(line and not line.startswith('#') for line in lines[:j])
+                if has_sample:
+                    last_boundary = j
+                break
+
+        if last_boundary <= 0:
+            # No complete family yet, buffer everything.
+            parser_state['buffer'] = buf
+            return ''
+
+        complete = '\n'.join(lines[:last_boundary])
+        parser_state['buffer'] = '\n'.join(lines[last_boundary:])
+
+        return self._parse_prometheus_text(complete, parser_state['content_type'])
+
+    def finish_prometheus_parser(self, parser_id):
+        self.__init_parser_state()
+        parser_state = self._prometheus_parsers.pop(parser_id, None)
+        if parser_state is None:
+            raise ValueError(f'Unknown parser id: {parser_id}')
+
+        buf = parser_state['buffer']
+        if not buf or not buf.strip():
+            return ''
+
+        return self._parse_prometheus_text(buf, parser_state['content_type'])
+
+    @staticmethod
+    def _is_openmetrics(content_type):
+        media_type = content_type.split(';')[0] if content_type else ''
+        return media_type == 'application/openmetrics-text'
+
+    @staticmethod
+    def _parse_prometheus_text(text, content_type):
+        if DatadogAgentStub._is_openmetrics(content_type):
+            from prometheus_client.openmetrics.parser import text_fd_to_metric_families
+
+            # OpenMetrics format requires # EOF terminator; strip any existing
+            # one and re-add it so intermediate chunks parse correctly.
+            lines = [line for line in text.split('\n') if line.strip() != '# EOF']
+            lines.append('# EOF')
+            text = '\n'.join(lines)
+        else:
+            from prometheus_client.parser import text_fd_to_metric_families
+
+        families = []
+        for metric in text_fd_to_metric_families(iter(text.split('\n'))):
+            samples = []
+            for s in metric.samples:
+                sample = {
+                    'name': s.name if hasattr(s, 'name') else s[0],
+                    'labels': dict(s.labels if hasattr(s, 'labels') else s[1]),
+                    'value': s.value if hasattr(s, 'value') else s[2],
+                }
+                ts = getattr(s, 'timestamp', None) if hasattr(s, 'timestamp') else None
+                if ts is not None:
+                    sample['timestamp'] = ts
+                exemplar = getattr(s, 'exemplar', None) if hasattr(s, 'exemplar') else None
+                if exemplar is not None:
+                    sample['exemplar'] = exemplar
+                samples.append(sample)
+            if samples:
+                # The real Go parser preserves the TYPE-line name verbatim.
+                # For Prometheus format, the Python parser strips "_total"
+                # from counter family names (returning "foo" for
+                # "# TYPE foo_total counter"); restore it here so the JSON
+                # matches the Go parser output.  For OpenMetrics format,
+                # neither parser strips the name, so no adjustment is needed.
+                family_name = metric.name
+                if not DatadogAgentStub._is_openmetrics(content_type) and metric.type == 'counter':
+                    first_sample_name = samples[0]['name']
+                    if first_sample_name == family_name + '_total':
+                        family_name = first_sample_name
+                families.append(
+                    {
+                        'name': family_name,
+                        'type': metric.type,
+                        'help': metric.documentation,
+                        'samples': samples,
+                    }
+                )
+
+        return json.encode(families) if families else ''
+
 
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
