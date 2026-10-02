@@ -7,7 +7,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from .common import (
@@ -20,9 +20,6 @@ from .common import (
     HERE,
     HOST,
 )
-
-# Needed to mount volume for logging
-E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
 
 
 @pytest.fixture(scope="session")
@@ -58,7 +55,7 @@ def dd_environment():
         env_vars=env,
         conditions=conditions,
     ):
-        yield CONFIG, E2E_METADATA
+        yield CONFIG, get_e2e_discovery_metadata()
 
 
 def _mocked_requests_get(*args, **kwargs):
