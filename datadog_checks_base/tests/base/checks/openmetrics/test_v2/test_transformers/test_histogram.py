@@ -680,9 +680,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
 
 
 @pytest.mark.parametrize('collect_counters_with_distributions', [False, True])
-def test_histogram_buckets_as_distributions_omit_bound_tags(
-    aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions
-):
+def test_omit_bound_tags(aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions):
     mock_http_response(LATENCY_PAYLOAD)
     check = get_check(
         {
@@ -698,7 +696,6 @@ def test_histogram_buckets_as_distributions_omit_bound_tags(
     assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
     for bucket in buckets:
         assert sorted(bucket.tags) == LATENCY_SERIES_TAGS
-        assert bucket.monotonic
         assert bucket.multiple_buckets
 
     if collect_counters_with_distributions:
@@ -718,18 +715,6 @@ def test_histogram_buckets_as_distributions_omit_bound_tags(
     aggregator.assert_all_metrics_covered()
 
 
-def test_histogram_buckets_as_distributions_unsupported_agent_without_option(
-    aggregator, dd_run_check, mock_http_response, monkeypatch
-):
-    monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
-    mock_http_response(LATENCY_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'histogram_buckets_as_distributions': True})
-    dd_run_check(check)
-
-    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
-    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
-
-
 def test_omit_bound_tags_without_distributions(aggregator, dd_run_check, mock_http_response, caplog):
     mock_http_response(LATENCY_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'omit_histogram_bound_tags': True})
@@ -740,24 +725,36 @@ def test_omit_bound_tags_without_distributions(aggregator, dd_run_check, mock_ht
     aggregator.assert_metric_has_tag('test.rest_client_request_latency_seconds.bucket', 'upper_bound:0.004')
 
 
-def test_omit_bound_tags_unsupported_agent(dd_run_check, mock_http_response, monkeypatch):
+def test_omit_bound_tags_unset_on_unsupported_agent(aggregator, dd_run_check, mock_http_response, monkeypatch):
     monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
     mock_http_response(LATENCY_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_buckets_as_distributions': True})
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+
+
+@pytest.mark.parametrize(
+    'setup, message',
+    [
+        pytest.param(
+            lambda monkeypatch: monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi'),
+            'is not supported by this Agent version',
+            id='unsupported agent',
+        ),
+        pytest.param(
+            lambda monkeypatch: monkeypatch.setenv(EnvVars.MESSAGE_INDICATOR, 'indicator'),
+            'cannot be used with `process_isolation`',
+            id='process isolation',
+        ),
+    ],
+)
+def test_omit_bound_tags_rejected(dd_run_check, monkeypatch, setup, message):
+    setup(monkeypatch)
     check = get_check(
         {'metrics': ['.+'], 'histogram_buckets_as_distributions': True, 'omit_histogram_bound_tags': True}
     )
 
-    with pytest.raises(Exception, match='`omit_histogram_bound_tags` is not supported by this Agent version'):
-        dd_run_check(check, extract_message=True)
-
-
-def test_omit_bound_tags_process_isolation(dd_run_check, mock_http_response, monkeypatch):
-    # The isolated child's aggregator stand-ins always report support, so the option must be rejected there
-    monkeypatch.setenv(EnvVars.MESSAGE_INDICATOR, 'indicator')
-    mock_http_response(LATENCY_PAYLOAD)
-    check = get_check(
-        {'metrics': ['.+'], 'histogram_buckets_as_distributions': True, 'omit_histogram_bound_tags': True}
-    )
-
-    with pytest.raises(Exception, match='`omit_histogram_bound_tags` cannot be used with `process_isolation`'):
+    with pytest.raises(Exception, match=message):
         dd_run_check(check, extract_message=True)

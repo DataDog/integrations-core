@@ -19,6 +19,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
         if global_options['histogram_buckets_as_distributions']:
             logger = check.log
             omit_histogram_bound_tags = global_options['omit_histogram_bound_tags']
+            # Pass `multiple_buckets` only when needed, so overrides with the older signature keep working
             submit_histogram_bucket_method = (
                 partial(check.submit_histogram_bucket, multiple_buckets=True)
                 if omit_histogram_bound_tags
