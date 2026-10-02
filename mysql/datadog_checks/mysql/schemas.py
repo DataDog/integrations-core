@@ -243,6 +243,8 @@ class MySqlSchemaCollector(SchemaCollector):
         self._metadata = metadata
         self._tables_found = False
         self._database_count = 0
+        self._databases_by_name: dict[str, dict] = {}
+        self._current_database_name: str | None = None
         self._strategy = STRATEGY_CHUNKED
         super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
 
@@ -324,10 +326,12 @@ class MySqlSchemaCollector(SchemaCollector):
             self._execute(cursor, SQL_DATABASES.format(hint=self._query_hint()))
             databases = [dict(row) for row in cursor.fetchall()]
         self._database_count = len(databases)
+        self._databases_by_name = {database["name"]: database for database in databases}
         return CancellableDatabases(databases, self._metadata._raise_if_cancelled)
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name: str):
+        self._current_database_name = database_name
         if self._strategy == STRATEGY_CHUNKED:
             yield _ChunkedTableCursor(self._iter_chunked_tables(database_name))
             return
@@ -342,6 +346,15 @@ class MySqlSchemaCollector(SchemaCollector):
 
     def _get_next(self, cursor):
         return cursor.fetchone()
+
+    def maybe_flush(self, is_last_payload):
+        # Without an entry, a database with no tables flushes an empty payload that names no
+        # database, and the backend cannot sweep the tables it stored for it earlier.
+        if is_last_payload and not self._queued_rows and self._collection_payloads_count == 0:
+            database = self._databases_by_name.get(self._current_database_name)
+            if database is not None:
+                self._queued_rows.append({**database, "tables": []})
+        super().maybe_flush(is_last_payload)
 
     def _map_row(self, database: dict, cursor_row: dict) -> dict:
         self._tables_found = True

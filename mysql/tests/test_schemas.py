@@ -470,6 +470,28 @@ def test_collect_schemas_stops_at_next_database_when_cancelled():
     collector._get_cursor.assert_called_once_with("app")
 
 
+def test_collect_schemas_names_database_without_tables():
+    """The backend sweeps stored tables per reported database, so a database whose tables were
+    all dropped has to be named in its payload rather than sent as an empty one."""
+    empty = {"name": "empty", "default_character_set_name": "utf8mb4", "default_collation_name": "utf8mb4_bin"}
+    app = {"name": "app", "default_character_set_name": "utf8mb4", "default_collation_name": "utf8mb4_bin"}
+    collector = _make_collecting_collector([empty, app])
+    del collector._get_cursor, collector._get_next
+    collector._check.version = MySQLVersion("5.7.44", "MySQL", "unspecified")
+    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
+    # The database list, the empty table list, then app's table list and its four detail queries.
+    db_cursor.fetchall.side_effect = [[empty, app], [], [{"name": "t1"}], [], [], [], []]
+
+    collector.collect_schemas()
+
+    payloads = [json.loads(call.args[0]) for call in collector._check.database_monitoring_metadata.call_args_list]
+    assert payloads[0]["metadata"] == [{**empty, "tables": []}]
+    assert [(db["name"], [table["name"] for table in db["tables"]]) for db in payloads[1]["metadata"]] == [
+        ("app", ["t1"])
+    ]
+    assert [payload["collection_payloads_count"] for payload in payloads] == [1, 1]
+
+
 def test_collect_schemas_warns_when_no_tables_are_visible():
     collector = _make_collecting_collector([{"name": "app"}, {"name": "other"}])
 
