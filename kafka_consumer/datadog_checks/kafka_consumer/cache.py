@@ -16,7 +16,7 @@ class CacheHelper:
 
     Args:
         check: The AgentCheck instance (provides read/write_persistent_cache).
-        log: Logger for debug/warning messages.
+        log: Logger for debug/warning messages. 
         configs_refresh_interval: Base TTL in seconds for fetch cadence.
     """
 
