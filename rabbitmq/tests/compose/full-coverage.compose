@@ -1,0 +1,318 @@
+# Full metric-coverage environment for the rabbitmq check.
+#
+# The rabbitmq OOTB dashboards reference metrics from BOTH check backends: the
+# management API (e.g. rabbitmq.queue.messages_ready, rabbitmq.queue.memory,
+# rabbitmq.queue.messages.*.rate) and the Prometheus/OpenMetrics plugin (e.g.
+# rabbitmq.erlang.*, the *.count counters, rabbitmq.queues.*.count). The
+# `-management` image exposes both endpoints (15672 management API, 15692
+# Prometheus), so a single broker feeds both. A consumer of this fixture must run
+# two check instances against it, one per backend; see ../README.md.
+#
+# Services:
+#   - rabbitmq-broker  the broker (both endpoints).
+#   - seed       one-shot: vhosts, static queues/exchanges/bindings, cluster name.
+#   - load       continuous AMQP workload (perf-test): drives channels,
+#                connections, publish/deliver/ack counters, and queue depth.
+#   - activity-gen  periodic queue declare/delete churn for the
+#                   rabbitmq.queues.created/declared/deleted.count counters.
+#   - unroutable  producer-only publisher to an unbound routing key, for the
+#                 unroutable-dropped counters.
+#   - conn-churn  looping short-lived AMQP clients, for the connection/channel
+#                 opened/closed counters and a varying consumer count.
+#   - unacked-swing  long-lived consumer whose processing latency alternates
+#                    slowly, for a varying unacked count.
+#   - autoack     auto-ack consumer, for the *.messages.delivered.count counters.
+#   - redeliver   nack/requeue consumer on a durable queue, for the redelivery
+#                 counters and rabbitmq.queue.messages.persistent.
+#   - slow-reader  bespoke stdlib AMQP client that reads its consumer socket
+#                  slowly, for rabbitmq.connection.pending_packets.
+#   - rabbitmq3-broker  a second, RabbitMQ 3.13 broker, for the socket metrics
+#                       4.x no longer reports (see ../README.md).
+#   - load3      light AMQP traffic on rabbitmq3-broker.
+#   - rabbitmq-full  fixture entrypoint: forwards both brokers' ports and gates
+#                    on the workload, so depending on it brings up everything.
+#
+# The primary broker also runs ../alarm-drill.sh, which raises and clears the
+# memory and disk alarms on a cycle (ALARM_DRILL=0 turns it off).
+services:
+  # Not named `rabbitmq`: consumers commonly alias this fixture under that task
+  # id, and evalya then gives the entrypoint that hostname, shadowing the broker.
+  rabbitmq-broker:
+    image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    volumes:
+      - ../alarm-drill.sh:/opt/alarm-drill.sh:ro
+    environment:
+      # Set ALARM_DRILL=0 (host env) to keep the broker alarm-free; ACTIVITY_GEN=0
+      # also turns it off. Defaults to on.
+      ALARM_DRILL: "${ALARM_DRILL:-1}"
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    # The drill runs in the broker container so rabbitmqctl reaches the node with
+    # its own cookie and node name.
+    command: ["sh", "-c", "sh /opt/alarm-drill.sh & exec rabbitmq-server"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  seed:
+    image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    depends_on:
+      rabbitmq-broker:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ../seed.sh:/opt/seed.sh:ro
+    environment:
+      RABBITMQ_HOST: rabbitmq-broker
+    command: ["sh", "/opt/seed.sh"]
+
+  # Continuous AMQP traffic. rabbitmqadmin (HTTP) cannot populate channel,
+  # connection, or delivery counters; a real AMQP client is required, and
+  # perf-test is the canonical one. Publishers + acking consumers keep the
+  # publish/deliver/ack counters and queue-depth gauges moving across scrapes.
+  # Publishing faster than consumers ack builds a backlog; --qos keeps most of it
+  # ready rather than unacked, and x-max-length caps it so it cannot grow unbounded.
+  # The publish rate alternates above and below the consumer rate so rates and
+  # queue depth rise and fall across scrapes instead of plateauing.
+  # Idles with ACTIVITY_GEN=0.
+  load:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 4 --consumers 4 \
+          --queue-pattern perf-%d --queue-pattern-from 1 --queue-pattern-to 4 \
+          --auto-delete false \
+          --variable-rate 30:60 --variable-rate 90:60 --consumer-rate 45 \
+          --confirm 10 --multi-ack-every 5 --qos 50 \
+          --queue-args x-max-length=2000
+  # Producer-only publisher to a routing key nothing is bound to, so the
+  # unroutable-dropped counters advance. Long-lived AMQP, since the per-channel
+  # counter disappears with the channel. Idles with ACTIVITY_GEN=0.
+  unroutable:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 0 \
+          --exchange amq.direct --routing-key unroutable --rate 5
+  # Short-lived AMQP clients on a loop. The `load` connections live for the whole
+  # run, so without this the connection/channel opened/closed counters and the
+  # consumer count stay flat after startup. The consumer is not rate-capped, so
+  # the queue stays near empty: a backlog here would be requeued on every close,
+  # and that 30s sawtooth aliases against the scrape intervals.
+  # Idles with ACTIVITY_GEN=0.
+  conn-churn:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        while :; do
+          java -jar /perf_test/perf-test.jar \
+            --uri amqp://guest:guest@rabbitmq-broker:5672 \
+            --producers 1 --consumers 1 --queue churn-conn --auto-delete true \
+            --rate 10 --time 20 >/dev/null 2>&1 || true
+          sleep 10
+        done
+
+  # Long-lived auto-ack consumer. The *.messages.delivered.count counters only
+  # count deliveries in automatic acknowledgement mode, and every other
+  # consumer here acks manually. Idles with ACTIVITY_GEN=0.
+  autoack:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 1 --queue autoack --auto-delete false \
+          --autoack --rate 10
+
+  # Consumer that nacks with requeue, so messages are redelivered: drives
+  # rabbitmq.queue.messages.redeliver.count and .redelivered.count. The
+  # persistent flag makes perf-test declare the queue durable and publish
+  # persistent messages, and since nacked messages never leave, the queue always
+  # holds some, for rabbitmq.queue.messages.persistent. x-max-length bounds it.
+  # Idles with ACTIVITY_GEN=0.
+  redeliver:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 1 --queue redeliver --auto-delete false \
+          --flag persistent --nack --rate 5 --consumer-rate 10 --qos 10 \
+          --queue-args x-max-length=200
+
+  # Drives rabbitmq.queue.messages_unacknowledged.rate: `load`'s unacked count is
+  # pinned at its --qos and conn-churn's stays near 0. Constant 4 msg/s publisher;
+  # the consumer's per-message latency alternates every 120s between 2 msg/s and
+  # 8 msg/s of capacity, so unacked climbs to ~240, drains, and idles near 0 on a
+  # 240s cycle. --qos 300 sits above that peak and caps it, so the backlog is
+  # delivered and unacked rather than ready. One long-lived connection and a
+  # slow cycle keep every scraper's average close. Idles with ACTIVITY_GEN=0.
+  unacked-swing:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq-broker:5672 \
+          --producers 1 --consumers 1 --queue unacked-swing --auto-delete false \
+          --rate 4 --qos 300 \
+          --variable-latency 500000:120 --variable-latency 125000:120
+
+  # Bespoke client (../slow_reader.py): an auto-ack consumer that reads its
+  # socket at ~32 KiB/s while a second connection publishes ~100 KiB/s, so the
+  # broker always has bytes queued on that socket for
+  # rabbitmq.connection.pending_packets. No off-the-shelf client lags on purpose.
+  # Idles with ACTIVITY_GEN=0.
+  slow-reader:
+    image: python:3.13-alpine
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    volumes:
+      - ../slow_reader.py:/opt/slow_reader.py:ro
+    environment:
+      RABBITMQ_HOST: rabbitmq-broker
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    command: ["python3", "/opt/slow_reader.py"]
+
+  # Second broker on RabbitMQ 3.x. 4.0 stopped tracking TCP sockets, so
+  # rabbitmq.node.sockets_used reads 0 and rabbitmq.process.open_tcp_sockets /
+  # max_tcp_sockets are gone; 3.13 still reports all three. Kept separate from
+  # the 4.0 primary, whose endpoints every existing provide points at.
+  rabbitmq3-broker:
+    image: rabbitmq:${RABBITMQ3_VERSION:-3.13}-management
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # A couple of long-lived connections on the 3.13 broker, so the socket gauges
+  # count something. Idles with ACTIVITY_GEN=0.
+  load3:
+    image: pivotalrabbitmq/perf-test:latest
+    depends_on:
+      rabbitmq3-broker:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        [ "$${ACTIVITY_GEN}" = "0" ] && exec sleep infinity
+        exec java -jar /perf_test/perf-test.jar \
+          --uri amqp://guest:guest@rabbitmq3-broker:5672 \
+          --producers 1 --consumers 1 --queue perf3 --auto-delete false --rate 2
+
+  activity-gen:
+    image: rabbitmq:${RABBITMQ_VERSION:-4.0}-management
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    environment:
+      RABBITMQ_HOST: rabbitmq-broker
+      # Set ACTIVITY_GEN=0 (host env) to idle: the container stays up but
+      # generates no queue churn. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    command: ["sh", "/opt/activity-gen.sh"]
+
+  # Fixture entrypoint (published as rabbitmq-full). evalya only starts the
+  # target service and its depends_on chain, and nothing depends on the workload
+  # services, so targeting the broker would run it idle. Gating the entrypoint on
+  # them pulls up the whole environment; socat keeps both brokers reachable at the
+  # entrypoint's hostname, which is what the provides labels advertise.
+  rabbitmq-full:
+    image: alpine/socat:latest
+    depends_on:
+      rabbitmq-broker:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      load:
+        condition: service_started
+      activity-gen:
+        condition: service_started
+      unroutable:
+        condition: service_started
+      conn-churn:
+        condition: service_started
+      autoack:
+        condition: service_started
+      redeliver:
+        condition: service_started
+      unacked-swing:
+        condition: service_started
+      slow-reader:
+        condition: service_started
+      rabbitmq3-broker:
+        condition: service_healthy
+      load3:
+        condition: service_started
+    entrypoint: ["sh", "-c"]
+    # The 3.13 broker's ports are shifted by one (5673, 15673, 15693).
+    command:
+      - |
+        for port in 5672 15672 15692; do
+          socat TCP-LISTEN:$$port,fork,reuseaddr TCP:rabbitmq-broker:$$port &
+          socat TCP-LISTEN:$$((port + 1)),fork,reuseaddr TCP:rabbitmq3-broker:$$port &
+        done
+        wait
