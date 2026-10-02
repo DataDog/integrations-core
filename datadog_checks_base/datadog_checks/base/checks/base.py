@@ -30,6 +30,7 @@ from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.models import validation
+from datadog_checks.base.utils.replay.constants import EnvVars
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -814,6 +815,22 @@ class AgentCheck(object):
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
+
+    def multiple_histogram_buckets_unsupported_reason(self) -> str | None:
+        """Return why `submit_histogram_bucket(..., multiple_buckets=True)` cannot be used, or `None` if it can.
+
+        This probes the module-level aggregator rather than `_aggregator()`, because the discovery proxy
+        implements every builtin and would hide what the running Agent supports.
+        """
+        # An isolated child only sees stand-ins for the aggregator, so it cannot tell whether the Agent supports
+        # the multi-bucket builtin. Fail here instead of erroring mid-run in the parent after partial submission.
+        if EnvVars.MESSAGE_INDICATOR in os.environ:
+            return 'cannot be used with `process_isolation`'
+
+        if not hasattr(aggregator, 'submit_histogram_bucket_multi'):
+            return 'is not supported by this Agent version, upgrade the Agent to use it'
+
+        return None
 
     def submit_histogram_bucket(
         self,
