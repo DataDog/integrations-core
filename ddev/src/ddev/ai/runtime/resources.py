@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import uuid
+from datetime import UTC, datetime
 from functools import cached_property, partial
 from pathlib import Path
+from typing import Final
 
 from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
 from ddev.ai.agent.registry import AgentProviderRegistry
@@ -15,7 +18,14 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.http.http_get import HttpGetTool
 from ddev.ai.tools.http.http_post import HttpPostTool
-from ddev.ai.tools.http.response_store import ResponseStore, new_execution_id
+from ddev.ai.tools.http.response_store import ResponseStore
+
+HTTP_RESPONSES_DIR_NAME: Final = "http_responses"
+
+
+def new_execution_id() -> str:
+    """A sortable, unique ID for one launch or resume of a run."""
+    return f"{datetime.now(UTC):%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:8]}"
 
 
 class RunResources:
@@ -50,7 +60,10 @@ class RunResources:
     @cached_property
     def agent_runtime_factory(self) -> AgentRuntimeFactoryProtocol:
         """Ready-to-use generic runtime factory."""
-        store = ResponseStore(self._run_root, new_execution_id()) if self._run_root is not None else None
+        store = None
+        if self._run_root is not None:
+            # Each launch or resume writes to its own directory, so earlier executions' files are kept.
+            store = ResponseStore(self._run_root / HTTP_RESPONSES_DIR_NAME / new_execution_id())
         return AgentRuntimeFactory(
             provider_registry=self._provider_registry,
             file_registry=self.file_registry,
