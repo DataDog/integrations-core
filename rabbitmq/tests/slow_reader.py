@@ -27,6 +27,7 @@ import socket
 import struct
 import threading
 import time
+from collections.abc import Callable
 
 FRAME_METHOD, FRAME_HEADER, FRAME_BODY = 1, 2, 3
 FRAME_END = b'\xce'
@@ -45,34 +46,34 @@ RECV_BUFFER = 4096
 RECONNECT_SECONDS = 600
 
 
-def log(msg):
+def log(msg: str) -> None:
     print(f'slow-reader: {msg}', flush=True)
 
 
-def shortstr(value):
+def shortstr(value: str) -> bytes:
     data = value.encode()
     return struct.pack('>B', len(data)) + data
 
 
-def longstr(value):
+def longstr(value: bytes) -> bytes:
     return struct.pack('>I', len(value)) + value
 
 
-def table(entries):
+def table(entries: dict[str, int]) -> bytes:
     # Only signed 32-bit integer values ('I') are needed here.
     body = b''.join(shortstr(k) + b'I' + struct.pack('>i', v) for k, v in entries.items())
     return struct.pack('>I', len(body)) + body
 
 
-def frame(frame_type, channel, payload):
+def frame(frame_type: int, channel: int, payload: bytes) -> bytes:
     return struct.pack('>BHI', frame_type, channel, len(payload)) + payload + FRAME_END
 
 
-def method(channel, class_id, method_id, args=b''):
+def method(channel: int, class_id: int, method_id: int, args: bytes = b'') -> bytes:
     return frame(FRAME_METHOD, channel, struct.pack('>HH', class_id, method_id) + args)
 
 
-def recv_exact(sock, size):
+def recv_exact(sock: socket.socket, size: int) -> bytes:
     data = b''
     while len(data) < size:
         chunk = sock.recv(size - len(data))
@@ -82,7 +83,7 @@ def recv_exact(sock, size):
     return data
 
 
-def expect(sock, class_id, method_id):
+def expect(sock: socket.socket, class_id: int, method_id: int) -> bytes:
     """Read frames until the given method arrives and return its arguments."""
     while True:
         frame_type, _, size = struct.unpack('>BHI', recv_exact(sock, 7))
@@ -96,7 +97,7 @@ def expect(sock, class_id, method_id):
             return payload[4:]
 
 
-def connect(rcvbuf=None):
+def connect(rcvbuf: int | None = None) -> socket.socket:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if rcvbuf:
         # Before connect, so the advertised TCP window starts small.
@@ -120,7 +121,7 @@ def connect(rcvbuf=None):
     return sock
 
 
-def publish_forever():
+def publish_forever() -> None:
     sock = connect()
     body = b'x' * MESSAGE_BYTES
     content = (
@@ -135,7 +136,7 @@ def publish_forever():
         time.sleep(1 / PUBLISH_PER_SECOND)
 
 
-def read_slowly():
+def read_slowly() -> None:
     sock = connect(rcvbuf=RECV_BUFFER)
     no_ack = 0b10
     consume = struct.pack('>H', 0) + shortstr(QUEUE) + shortstr('') + struct.pack('>B', no_ack) + table({})
@@ -152,7 +153,7 @@ def read_slowly():
         sock.close()
 
 
-def retry_forever(name, run):
+def retry_forever(name: str, run: Callable[[], None]) -> None:
     while True:
         try:
             run()
@@ -161,7 +162,7 @@ def retry_forever(name, run):
             time.sleep(5)
 
 
-def main():
+def main() -> None:
     if os.environ.get('ACTIVITY_GEN', '1') == '0':
         log('disabled via ACTIVITY_GEN=0; idling')
         while True:
