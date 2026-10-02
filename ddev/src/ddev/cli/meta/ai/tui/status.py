@@ -30,7 +30,9 @@ class RunStatus(StrEnum):
     RUNNING = auto()
     DONE = auto()
     FAILED = auto()
+    CHECKPOINTED = auto()
 
     @property
     def has_started(self) -> bool:
-        return self is not RunStatus.PENDING
+        """Whether this phase produced output in the current run."""
+        return self not in (RunStatus.PENDING, RunStatus.CHECKPOINTED)

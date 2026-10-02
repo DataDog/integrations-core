@@ -28,10 +28,9 @@ from ddev.ai.config.models import (
 )
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.tui.app import TogoApp
-from ddev.cli.meta.ai.tui.theme import togo_theme
+from ddev.cli.meta.ai.tui.theme import STATUS_VARIABLE_KEYS, togo_theme
 
 LARGE_TERMINAL = (120, 50)
-STATUS_VARIABLE_KEYS = ("status-running", "status-pending", "status-done", "status-failed")
 
 
 def export_screenshot_text(app: App[Any]) -> str:

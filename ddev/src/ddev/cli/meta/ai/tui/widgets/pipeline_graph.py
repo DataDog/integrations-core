@@ -19,13 +19,21 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from ddev.ai.config.models import ResolvedFlow
-from ddev.cli.meta.ai.palette import STATUS_CONNECTOR, STATUS_DONE, STATUS_FAILED, STATUS_PENDING, STATUS_RUNNING
+from ddev.cli.meta.ai.palette import (
+    STATUS_CHECKPOINTED,
+    STATUS_CONNECTOR,
+    STATUS_DONE,
+    STATUS_FAILED,
+    STATUS_PENDING,
+    STATUS_RUNNING,
+)
 from ddev.cli.meta.ai.tui.status import RunStatus
 
 COLOR_DONE = STATUS_DONE
 COLOR_RUNNING = STATUS_RUNNING
 COLOR_PENDING = STATUS_PENDING
 COLOR_FAILED = STATUS_FAILED
+COLOR_CHECKPOINTED = STATUS_CHECKPOINTED
 COLOR_CONNECTOR = STATUS_CONNECTOR
 GRAPH_COLUMN_GAP = 6
 GRAPH_ROW_GAP = 5
@@ -44,6 +52,7 @@ NODE_GLYPHS: dict[RunStatus, tuple[str, str]] = {
     RunStatus.DONE: ("○", COLOR_DONE),
     RunStatus.RUNNING: ("◉", COLOR_RUNNING),
     RunStatus.FAILED: ("✕", COLOR_FAILED),
+    RunStatus.CHECKPOINTED: ("◇", COLOR_CHECKPOINTED),
 }
 
 
