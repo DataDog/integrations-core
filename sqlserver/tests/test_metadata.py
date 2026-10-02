@@ -384,6 +384,57 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             },
                         ],
                     },
+                    {
+                        'id': 'normalized_value',
+                        'name': 'key_order',
+                        'columns': [
+                            {
+                                'name': 'a',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                            {
+                                'name': 'b',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                            {
+                                'name': 'c',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                        ],
+                        'foreign_keys': [],
+                        'partitions': {'partition_count': 2},
+                        'indexes': [
+                            {
+                                'name': 'pk_key_order',
+                                'type': 1,
+                                'is_unique': True,
+                                'is_primary_key': True,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # column_names is sorted above. The clustered key stays (b, a).
+                                'key_columns': 'b,a',
+                                'included_columns': '',
+                                'column_names': 'a,b',
+                            },
+                            {
+                                'name': 'ix_desc',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                'key_columns': 'c DESC,a',
+                                'included_columns': '',
+                                'column_names': 'a,c',
+                            },
+                        ],
+                    },
                 ],
             }
         ],

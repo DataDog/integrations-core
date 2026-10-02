@@ -101,6 +101,16 @@ CREATE INDEX ix_include ON datadog_test_schemas.test_schema.index_coverage (c) I
 CREATE INDEX ix_prefix ON datadog_test_schemas.test_schema.index_coverage (c, a) INCLUDE (e);
 GO
 
+-- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
+CREATE TABLE datadog_test_schemas.test_schema.key_order (
+    a INT,
+    b INT,
+    c INT,
+    CONSTRAINT pk_key_order PRIMARY KEY CLUSTERED (b, a)
+);
+CREATE INDEX ix_desc ON datadog_test_schemas.test_schema.key_order (c DESC, a);
+GO
+
 -- Create second test database for integration schema tests
 CREATE DATABASE datadog_test_schemas_second;
 GO
