@@ -2,6 +2,14 @@
 schema-version: v1
 kind: stale-branches
 max_age: 4380h # 6 months
+# Aligned with DataDog/datadog-agent (repository.datadog.yml): the default branch,
+# release branches, the documentation branch and branches explicitly marked as
+# do-not-delete are never cleaned up.
+excludes:
+  - ^master$
+  - ^[0-9]+\.[0-9]+\.x$
+  - ^gh-pages$
+  - ^.*DO-NOT-DELETE$
 ---
 schema-version: v1
 kind: mergequeue
