@@ -1,7 +1,7 @@
 FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
 # Get uv — manages Python installations on demand, no system Python pinning needed
-COPY --from=ghcr.io/astral-sh/uv:0.11.16@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 /uv /usr/local/bin/uv
 
 # Update sources and install required packages
 RUN apt-get update \
