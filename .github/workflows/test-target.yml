@@ -89,6 +89,16 @@ on:
         required: false
         default: 60
         type: number
+      e2e-image-cache-key:
+        description: "When set, cache these Docker images between runs (key suffix, e.g. kuma-2.10.6)"
+        required: false
+        default: ""
+        type: string
+      e2e-image-cache-images:
+        description: "Space-separated Docker images to cache (used with e2e-image-cache-key)"
+        required: false
+        default: ""
+        type: string
 
 defaults:
   run:
@@ -314,6 +324,21 @@ jobs:
     - name: Ensure Docker is running
       run: bash .github/workflows/scripts/ensure-docker.sh
 
+    - name: Restore cached E2E images
+      if: runner.os == 'Linux' && inputs.e2e-image-cache-key != '' && inputs.latest != true
+      id: restore-e2e-images
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ runner.temp }}/e2e-images
+        key: e2e-images-${{ inputs.e2e-image-cache-key }}
+
+    - name: Load cached E2E images into Docker
+      if: runner.os == 'Linux' && inputs.e2e-image-cache-key != '' && inputs.latest != true
+      run: |
+        for f in "${RUNNER_TEMP}/e2e-images"/*.tar; do
+          [ -e "$f" ] && docker load -i "$f"
+        done
+
     - name: Run Unit & Integration tests
       if: inputs.latest != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
@@ -325,6 +350,25 @@ jobs:
       run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
         INPUT_SESSION_NAME: "e2e-tests"
+
+    - name: Save E2E images for cache
+      if: >-
+        runner.os == 'Linux' && inputs.e2e-image-cache-key != '' && inputs.latest != true
+        && steps.restore-e2e-images.outputs.cache-hit != 'true'
+        && ((inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core')
+      run: |
+        mkdir -p "${RUNNER_TEMP}/e2e-images"
+        docker save ${{ inputs.e2e-image-cache-images }} -o "${RUNNER_TEMP}/e2e-images/images.tar"
+
+    - name: Cache E2E images
+      if: >-
+        runner.os == 'Linux' && inputs.e2e-image-cache-key != '' && inputs.latest != true
+        && steps.restore-e2e-images.outputs.cache-hit != 'true'
+        && ((inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core')
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ runner.temp }}/e2e-images
+        key: e2e-images-${{ inputs.e2e-image-cache-key }}
 
     - name: Run benchmarks
       if: inputs.benchmark
