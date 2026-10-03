@@ -2,6 +2,13 @@ name: fluentd
 fleet_configurable: true
 files:
 - name: fluentd.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 24220
+      candidates:
+      - monitor_agent_url: "http://{service.host}:{port.number}/api/plugins.json"
   options:
   - template: init_config
     options:
@@ -52,3 +59,10 @@ files:
         example: plugin_id
     - template: instances/default
     - template: instances/http
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - fluentd
+  - template: auto_conf/discovery
