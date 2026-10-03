@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import ChainMap
 from hashlib import sha256
+from os.path import expanduser
 from struct import pack, unpack
 
 from cryptography.x509.base import load_der_x509_certificate
@@ -48,6 +49,7 @@ class TLSRemoteCheck(object):
         if not self.agent_check._server:
             raise ConfigurationError('You must specify `server` in your configuration file.')
 
+        self._expire_intermediate_certs()
         if self._fetch_intermediate_certs:
             self.fetch_intermediate_certs()
 
@@ -68,9 +70,20 @@ class TLSRemoteCheck(object):
         with sock:
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                with self.agent_check.get_tls_context().wrap_socket(
-                    sock, server_hostname=self.agent_check._server_hostname
-                ) as secure_sock:
+                # Certificate files can rotate while this check instance remains alive.
+                context = self.agent_check.get_tls_context(refresh=hasattr(self.agent_check, '_tls_context_wrapper'))
+                # The shared context factory tolerates missing client files. Load strictly here so
+                # rotation cannot silently downgrade a configured client to unauthenticated TLS.
+                config = self.agent_check._tls_context_wrapper.config
+                if config['tls_cert']:
+                    context.load_cert_chain(
+                        expanduser(config['tls_cert']),
+                        keyfile=expanduser(config['tls_private_key']) if config['tls_private_key'] else None,
+                        password=config['tls_private_key_password'],
+                    )
+                for intermediate_cert in self.agent_check._intermediate_cert_cache.values():
+                    context.load_verify_locations(cadata=intermediate_cert)
+                with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     protocol_version = secure_sock.version()
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
@@ -202,10 +215,21 @@ class TLSRemoteCheck(object):
 
         self.load_intermediate_certs(der_cert)
 
+    def _expire_intermediate_certs(self) -> None:
+        now = get_timestamp()
+        for uri, (access_time, _) in list(self.agent_check._intermediate_cert_uri_cache.items()):
+            if now - access_time >= self._intermediate_cert_refresh_interval:
+                del self.agent_check._intermediate_cert_uri_cache[uri]
+        active_ids = {cert_id for _, cert_id in self.agent_check._intermediate_cert_uri_cache.values()}
+        for cert_id in list(self.agent_check._intermediate_cert_cache):
+            if cert_id not in active_ids:
+                del self.agent_check._intermediate_cert_cache[cert_id]
+
     def load_intermediate_certs(self, der_cert, max_depth=None):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         if max_depth is None:
+            self._expire_intermediate_certs()
             max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
         if max_depth <= 0:
             return
@@ -237,11 +261,11 @@ class TLSRemoteCheck(object):
                 continue
 
             uri = access_description.access_location.value
-            if (
-                uri in self.agent_check._intermediate_cert_uri_cache
-                and get_timestamp() - self.agent_check._intermediate_cert_uri_cache[uri]
-                < self._intermediate_cert_refresh_interval
-            ):
+            if uri in self.agent_check._intermediate_cert_uri_cache:
+                _, cert_id = self.agent_check._intermediate_cert_uri_cache[uri]
+                # An ancestor can expire before this URI. Keep chasing the cached chain
+                # so its expired parents can be fetched again.
+                self.load_intermediate_certs(self.agent_check._intermediate_cert_cache[cert_id], max_depth - 1)
                 continue
 
             intermediate_cert = fetch_intermediate_cert(
@@ -252,14 +276,15 @@ class TLSRemoteCheck(object):
             access_time = get_timestamp()
 
             cert_id = sha256(intermediate_cert).digest()
-            if cert_id not in self.agent_check._intermediate_cert_id_cache:
+            if cert_id not in self.agent_check._intermediate_cert_cache:
                 try:
+                    # Validate with OpenSSL before caching; the handshake uses a refreshed context.
                     # `cadata` accepts DER bytes directly here (the base path uses PEM strings instead).
                     self.agent_check.get_tls_context().load_verify_locations(cadata=intermediate_cert)
                 except Exception as e:
                     self.log.error('Error loading intermediate certificate from `%s`: %s', uri, e)
                     continue
-                self.agent_check._intermediate_cert_id_cache.add(cert_id)
+                self.agent_check._intermediate_cert_cache[cert_id] = intermediate_cert
 
-            self.agent_check._intermediate_cert_uri_cache[uri] = access_time
+            self.agent_check._intermediate_cert_uri_cache[uri] = (access_time, cert_id)
             self.load_intermediate_certs(intermediate_cert, max_depth - 1)
