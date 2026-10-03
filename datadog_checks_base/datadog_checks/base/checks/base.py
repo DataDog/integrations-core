@@ -440,6 +440,12 @@ class AgentCheck(object):
 
     def _get_metric_limit(self, instance=None):
         # type: (InstanceType) -> int
+        if 'max_returned_metrics' in (self.init_config or {}):
+            self.warning(
+                "The 'max_returned_metrics' option is ignored in the 'init_config' section. "
+                "Set it in each instance of the 'instances' section instead."
+            )
+
         if instance is None:
             # NOTE: Agent 6+ will now always pass an instance when calling into a check, but we still need to
             # account for this case due to some tests not always passing an instance on init.
