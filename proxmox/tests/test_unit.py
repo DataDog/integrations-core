@@ -313,6 +313,20 @@ def test_get_hostname_error(dd_run_check, aggregator, instance, caplog):
     )
 
 
+def test_hostname_source_proxmox_name(dd_run_check, aggregator, instance, mock_http_get):
+    instance = copy.deepcopy(instance)
+    instance['hostname_source'] = 'proxmox_name'
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    # Uses the Proxmox-configured VM name directly instead of "debian" (the guest-agent-reported hostname).
+    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="VM 100")
+
+    for call in mock_http_get.call_args_list:
+        called_url = call.args[0] if call.args else call.kwargs.get('url', '')
+        assert 'agent/get-host-name' not in called_url
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
     check = ProxmoxCheck('proxmox', {}, [instance])
