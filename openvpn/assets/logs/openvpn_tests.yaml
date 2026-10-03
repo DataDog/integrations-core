@@ -200,3 +200,44 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 37544386000
+  - sample: "Feb 11 12:32:18 openvpnas2 openvpnas: [-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:65017 SENT CONTROL [openvpn]: 'AUTH_FAILED' (status=1)\""
+    result:
+      custom:
+        log_type: "AUTH_FAILED"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+            port: "65017"
+        syslog:
+          hostname: "openvpnas2"
+          process_name: "openvpnas"
+        syslog_message: "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:65017 SENT CONTROL [openvpn]: 'AUTH_FAILED' (status=1)\""
+        timestamp: 35123538000
+        usr:
+          name: "openvpn"
+      message: "Feb 11 12:32:18 openvpnas2 openvpnas: [-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:65017 SENT CONTROL [openvpn]: 'AUTH_FAILED' (status=1)\""
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 35123538000
+  - sample: "Feb 11 12:32:18 openvpnas2 openvpnas: [-] [OVPN 2] OUT: \"2025-06-12 04:21:09 10.10.10.10:8080 SENT CONTROL [openvpn-user]: 'AUTH_FAILED,TOTP two-factor authentication code is incorrect' (status=1)\""
+    result:
+      custom:
+        log_type: "AUTH_FAILED"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+            port: "8080"
+        reason: "TOTP two-factor authentication code is incorrect"
+        syslog:
+          hostname: "openvpnas2"
+          process_name: "openvpnas"
+        syslog_message: "[-] [OVPN 2] OUT: \"2025-06-12 04:21:09 10.10.10.10:8080 SENT CONTROL [openvpn-user]: 'AUTH_FAILED,TOTP two-factor authentication code is incorrect' (status=1)\""
+        timestamp: 35123538000
+        usr:
+          name: "openvpn-user"
+      message: "Feb 11 12:32:18 openvpnas2 openvpnas: [-] [OVPN 2] OUT: \"2025-06-12 04:21:09 10.10.10.10:8080 SENT CONTROL [openvpn-user]: 'AUTH_FAILED,TOTP two-factor authentication code is incorrect' (status=1)\""
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 35123538000
