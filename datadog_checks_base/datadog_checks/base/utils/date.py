@@ -64,7 +64,7 @@ def parse_rfc3339(s):
     for x in range(6):
         dt[x] = int(groups[x])
     if groups[6] is not None:
-        dt[6] = int(groups[6])
+        dt[6] = int(groups[6][1:7].ljust(6, '0'))
     tz = UTC
     if groups[7] is not None and groups[7] != 'Z' and groups[7] != 'z':
         tz_groups = _re_timezone.search(groups[7]).groups()
