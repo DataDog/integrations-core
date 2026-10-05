@@ -20,72 +20,98 @@
       }
     }
   ],
-  "additional_config_fields": [
+  "additional_config_fields": [],
+  "dataflow_config": [
     {
-      "key": "gateway_performance",
-      "label": "Collect gateway performance metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-gateway-performance-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect gateway performance metrics",
+        "help": "Collects iboss gateway performance metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "gateway_performance",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "bandwidth",
-      "label": "Collect bandwidth metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-bandwidth-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect bandwidth metrics",
+        "help": "Collects iboss bandwidth metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "bandwidth",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "digital_experience",
-      "label": "Collect Digital Experience metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-digital-experience-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect Digital Experience metrics",
+        "help": "Collects iboss Digital Experience metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "digital_experience",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "web",
-      "label": "Collect web metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-web-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect web metrics",
+        "help": "Collects iboss web metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "web",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "casb",
-      "label": "Collect CASB metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-casb-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect CASB metrics",
+        "help": "Collects iboss CASB metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "casb",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "threat",
-      "label": "Collect threat metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-threat-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect threat metrics",
+        "help": "Collects iboss threat metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "threat",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "zero_trust",
-      "label": "Collect Zero Trust metrics",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "iboss-zero-trust-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect Zero Trust metrics",
+        "help": "Collects iboss Zero Trust metrics.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "zero_trust",
+        "should_map_legacy_fields": true
       }
     }
-  ],
-  "dataflow_config": [
-    { "dataflow_id": "iboss-metrics" }
   ]
 }
