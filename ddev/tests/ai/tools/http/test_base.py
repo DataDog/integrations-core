@@ -45,6 +45,18 @@ def get_tool(store: ResponseStore | None, transport: httpx.AsyncBaseTransport) -
     return HttpGetTool(store, transport=transport)
 
 
+@pytest.mark.parametrize("url", ["http://user:pass@localhost:4200/api", "http://tok@127.0.0.1:4200/api"])
+async def test_embedded_credentials_are_rejected_for_every_method(url: str):
+    for tool_cls in (HttpGetTool, HttpPostTool):
+        transport = respond(httpx.Response(200))
+
+        result = await tool_cls(transport=transport).run({"url": url})
+
+        assert result.success is False
+        assert "embedded credentials" in result.error
+        assert transport.requests == []
+
+
 async def test_large_json_is_saved_formatted_and_result_is_bounded(store: ResponseStore):
     document = openapi_document()
 
@@ -115,6 +127,21 @@ async def test_invalid_json_is_saved_as_text(store: ResponseStore):
     assert Path(payload["saved_to"]).read_text() == body
 
 
+async def test_unsavable_response_reports_status_and_excerpt(tmp_path: Path):
+    (tmp_path / "blocked").write_text("not a directory")
+    store = ResponseStore(tmp_path / "blocked" / "exec")
+
+    result = await get_tool(store, respond(httpx.Response(200, json={"ok": True}))).run(
+        {"url": OPENAPI_URL, "save_response": True}
+    )
+
+    assert result.success is False
+    payload = json.loads(result.error)
+    assert payload["status"] == 200
+    assert "not saved" in payload["error"]
+    assert "ok" in payload["excerpt"]
+
+
 async def test_decompressed_size_limit_discards_response(store: ResponseStore):
     compressed = gzip.compress(b"x" * (MAX_BODY_BYTES + 1))
     response = httpx.Response(
@@ -140,11 +167,12 @@ async def test_cancellation_during_download_writes_nothing(store: ResponseStore)
 
     transport = RecordingTransport(lambda request: httpx.Response(200, stream=SlowStream()))
     task = asyncio.create_task(get_tool(store, transport).run({"url": OPENAPI_URL, "save_response": True}))
-    await started.wait()
-    task.cancel()
+    async with asyncio.timeout(5):
+        await started.wait()
+        task.cancel()
 
-    with pytest.raises(asyncio.CancelledError):
-        await task
+        with pytest.raises(asyncio.CancelledError):
+            await task
     assert saved_files(store.root) == []
 
 

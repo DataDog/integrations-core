@@ -222,54 +222,60 @@ class HttpRequestTool[TInput: HttpRequestInput](BaseTool[TInput]):
                 data = f"{data}\n\n[save_response ignored: no response storage is configured for this run]"
             return make_tool_result(success=True, data=data, result=result)
 
-        representation, saved_text, parsed, parse_note = _representation(fetched.content_type, text)
-        metadata: dict[str, JsonValue] = {
-            "method": method,
-            "url": _safe_url(fetched.url),
-            "fetched_at": fetched.fetched_at.isoformat(),
-            "status": fetched.status,
-            "content_type": fetched.content_type,
-            "received_bytes": len(fetched.body),
-            "representation": representation,
-            "complete": True,
-        }
-        if parse_note:
-            metadata["note"] = parse_note
-        if json_body is not None:
-            metadata["request_body"] = _recordable_request_body(json_body)
+        return _save_and_summarize(self._store, method=method, json_body=json_body, fetched=fetched, text=text)
 
-        try:
-            saved = self._store.save(
-                body=saved_text,
-                suffix=".json" if representation == "formatted_json" else ".txt",
-                metadata=metadata,
-                stem=method.lower(),
-            )
-        except ResponseStoreError as e:
-            return ToolResult(
-                success=False,
-                error=_dump(
-                    {
-                        **_base_fields(fetched),
-                        "error": f"Response received but not saved: {e}",
-                        "excerpt": _excerpt(text),
-                    }
-                ),
-            )
 
-        payload: dict[str, object] = {
-            **_base_fields(fetched),
-            "saved_to": str(saved.path),
-            "metadata_path": str(saved.metadata_path),
-            "representation": representation,
-            "complete": True,
-        }
-        if parse_note:
-            payload["note"] = parse_note
-        if fetched.status >= 400:
-            payload["excerpt"] = _excerpt(text)
-        payload["summary"] = _summarize_json(parsed) if parsed is not None else _summarize_text(saved_text)
-        return ToolResult(success=True, data=_fit(payload))
+def _save_and_summarize(
+    store: ResponseStore, *, method: str, json_body: JsonValue, fetched: FetchedResponse, text: str
+) -> ToolResult:
+    representation, saved_text, parsed, parse_note = _representation(fetched.content_type, text)
+    metadata: dict[str, JsonValue] = {
+        "method": method,
+        "url": _safe_url(fetched.url),
+        "fetched_at": fetched.fetched_at.isoformat(),
+        "status": fetched.status,
+        "content_type": fetched.content_type,
+        "received_bytes": len(fetched.body),
+        "representation": representation,
+        "complete": True,
+    }
+    if parse_note:
+        metadata["note"] = parse_note
+    if json_body is not None:
+        metadata["request_body"] = _recordable_request_body(json_body)
+
+    try:
+        saved = store.save(
+            body=saved_text,
+            suffix=".json" if representation == "formatted_json" else ".txt",
+            metadata=metadata,
+            stem=method.lower(),
+        )
+    except ResponseStoreError as e:
+        return ToolResult(
+            success=False,
+            error=_dump(
+                {
+                    **_base_fields(fetched),
+                    "error": f"Response received but not saved: {e}",
+                    "excerpt": _excerpt(text),
+                }
+            ),
+        )
+
+    payload: dict[str, object] = {
+        **_base_fields(fetched),
+        "saved_to": str(saved.path),
+        "metadata_path": str(saved.metadata_path),
+        "representation": representation,
+        "complete": True,
+    }
+    if parse_note:
+        payload["note"] = parse_note
+    if fetched.status >= 400:
+        payload["excerpt"] = _excerpt(text)
+    payload["summary"] = _summarize_json(parsed) if parsed is not None else _summarize_text(saved_text)
+    return ToolResult(success=True, data=_fit(payload))
 
 
 def _base_fields(fetched: FetchedResponse) -> dict[str, object]:
