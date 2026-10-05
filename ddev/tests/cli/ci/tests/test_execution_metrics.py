@@ -90,9 +90,7 @@ def test_cancellation_propagates_without_settling_the_operation():
 
 
 @pytest.mark.parametrize('recovered', [False, True], ids=['escaped', 'recovered'])
-def test_log_failed_operation_names_the_operation_and_picks_the_level_by_recovery(recovered: bool):
-    """One record per failed operation, from the component that owns it: the level says whether
-    the failure escaped the processor or the processor carried on past it."""
+def test_log_failed_operation_level(recovered: bool):
     handler = RecordingJsonHandler()
     monitor = make_monitor('test-runner', handler=handler)
     metrics = MetricsHelper(monitor.metrics)

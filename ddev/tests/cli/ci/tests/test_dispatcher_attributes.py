@@ -141,9 +141,8 @@ def test_log_attributes_keep_native_json_values_while_tag_transports_stringify()
     assert metric_tag_mapping(fields) == {'dispatcher.batch.id': 'batch-01', 'dispatcher.run.is_fork': 'false'}
 
 
-def test_job_attempt_attributes_land_under_batch_job_paths_with_native_durations():
-    """A finished job attempt's record must be queryable by its own identity and range-queryable
-    by its timing, so the durations keep their numeric type rather than stringifying."""
+def test_attempt_fields_keep_numeric_durations():
+    """Numeric durations, so Datadog can range-query them."""
     fields = job_fields(make_job(), make_workflow_job())
 
     logs = log_tag_mapping(fields)
@@ -153,15 +152,14 @@ def test_job_attempt_attributes_land_under_batch_job_paths_with_native_durations
     assert logs['dispatcher.batch.job.duration_seconds'] == DEFAULT_DURATION_SECONDS
     assert logs['dispatcher.batch.job.queue_duration_seconds'] == DEFAULT_QUEUE_DURATION_SECONDS
     assert attribute_mapping(fields)['dispatcher.batch.job.duration_seconds'] == '90.0'
-    # The console line stays readable: the message text already carries the outcome and duration.
+    # Kept off the console line, which already states the outcome and duration.
     assert {'job_conclusion', 'job_id', 'job_url', 'job_duration_seconds', 'job_queue_duration_seconds'} <= (
         console_hidden_fields()
     )
 
 
-def test_an_attempts_fields_beyond_the_job_stay_out_of_metric_tags():
-    """`job.duration` keeps the dimensions it has today: the attempt's ID, URL and timings are log
-    attributes, not metric tags, so its series do not multiply."""
+def test_attempt_fields_are_not_metric_tags():
+    """Per-attempt fields would split `job.duration` into a series per attempt."""
     tags = metric_tag_mapping(job_fields(make_job(), make_workflow_job()))
 
     assert set(tags) == {
@@ -232,10 +230,7 @@ def test_job_fields(job, expected):
         pytest.param(WorkflowJobConclusion.TIMED_OUT, 'failure', True, id='timed-out'),
     ],
 )
-def test_job_fields_describe_a_finished_workflow_job(conclusion, status, has_duration):
-    """The workflow job's identity, outcome and timing ride on the job's own fields, so the
-    finished-job report describes one attempt from one definition. A skipped or cancelled attempt
-    never ran on a runner, so it carries no duration."""
+def test_job_fields_with_a_workflow_job(conclusion, status, has_duration):
     job = make_job()
 
     fields = job_fields(job, make_workflow_job(name=job.name, conclusion=conclusion))

@@ -535,9 +535,7 @@ def test_an_escaped_write_error_fails_the_publication_operation_and_propagates()
 
 
 @pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
-async def test_a_shutdown_report_that_settled_unpublished_warns_with_its_operation(kind: ShutdownKind):
-    """A terminal report that could not land must be findable by operation, like every other
-    failed operation, even though the run is already over."""
+async def test_unpublished_shutdown_report_warns(kind: ShutdownKind):
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", _http_error(500))
     handler = RecordingJsonHandler()
