@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+from pathlib import Path
 from typing import Annotated
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -145,6 +146,18 @@ async def test_run_command_not_found():
     assert result.success is False
     assert "Command not found" in result.error
     assert "nonexistent" in result.error
+
+
+@pytest.mark.parametrize("filename_available", [False, True])
+async def test_run_command_reports_missing_working_directory(tmp_path: Path, filename_available: bool):
+    cwd = str(tmp_path / "missing")
+
+    error = FileNotFoundError(2, "No such file or directory", cwd if filename_available else None)
+    with patch("asyncio.create_subprocess_exec", new=AsyncMock(side_effect=error)):
+        result = await run_command(["cmd"], cwd=cwd)
+
+    assert result.success is False
+    assert result.error == f"Working directory not found: {cwd!r}"
 
 
 async def test_run_command_timeout():

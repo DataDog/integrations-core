@@ -16,6 +16,7 @@ tools:
   - ddev_env_stop
   - ddev_validate
   - ddev_env_test
+  - docker
   - web_search
   - web_fetch
 ---
@@ -258,6 +259,12 @@ Then use `ddev_env_show` to resolve the concrete environment names. Start each e
 `ddev_env_stop` before running the test commands. Always stop an environment you started, including
 after a failed startup attempt, so validation does not leave containers running. This startup
 check complements `ddev_env_test`: it isolates environment wiring failures before the tests run.
+
+Use `docker` to inspect this integration's containers, published ports, health, and logs, or for
+targeted troubleshooting. Keep environment startup, testing, and shutdown on the `ddev_env_*`
+workflow above. Scope Docker operations to this integration's environment, and clean up only
+temporary resources you create. Capture any setup or traffic required by tests in fixtures so
+manual Docker calls do not substitute for reproducible test setup.
 
 ## The test files
 
