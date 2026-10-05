@@ -30,6 +30,10 @@ validations = [
     "qa-label"
 ]
 
+# GitHub organization that owns this repository, used for GitHub API operations. Defaults to `DataDog`.
+[github]
+owner = "DataDog"
+
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
 datadog_checks_dev = "Datadog Checks Dev"
