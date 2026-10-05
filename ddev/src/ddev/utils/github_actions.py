@@ -28,6 +28,7 @@ class EventUser(BaseModel):
     model_config = ConfigDict(extra='ignore')
 
     login: str | None = None
+    type: str | None = None
 
 
 class EventPullRequest(BaseModel):

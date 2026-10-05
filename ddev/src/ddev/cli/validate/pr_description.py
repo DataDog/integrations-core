@@ -40,15 +40,10 @@ def _sections(body: str) -> dict[str, str]:
     return sections
 
 
-def _skip_reason(author: str, title: str, created_at: str | None) -> str | None:
-    normalized_author = author.casefold()
+def _skip_reason(author: str, author_type: str, title: str, created_at: str | None) -> str | None:
     if created_at and datetime.fromisoformat(created_at.replace('Z', '+00:00')) < ENFORCED_SINCE:
         return f'PR opened before {ENFORCED_SINCE:%Y-%m-%d}, when the checklist template was introduced'
-    if (
-        normalized_author.endswith('[bot]')
-        or normalized_author in {'dependabot', 'renovate'}
-        or ('bot' in normalized_author and ('datadog' in normalized_author or normalized_author.startswith('dd-')))
-    ):
+    if author_type == 'Bot':
         return f'bot author {author}'
     if RELEASE_TITLE_PATTERN.match(title):
         return 'release PR'
@@ -104,8 +99,10 @@ def pr_description(app: Application):
         app.display_info('Event payload has no pull request; skipping pr-description validation.')
         return
 
-    author = pull_request.user.login if pull_request.user and pull_request.user.login else ''
-    reason = _skip_reason(author, pull_request.title or '', pull_request.created_at)
+    user = pull_request.user
+    author = (user.login if user else None) or ''
+    author_type = (user.type if user else None) or ''
+    reason = _skip_reason(author, author_type, pull_request.title or '', pull_request.created_at)
     if reason:
         app.display_info(f'Skipping PR description check: {reason}.', markup=False)
         return

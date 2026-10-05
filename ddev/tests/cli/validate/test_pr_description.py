@@ -13,7 +13,7 @@ def _write_event(tmp_path, **overrides):
     pull_request = {
         'body': VALID_BODY,
         'title': 'Improve PR validation',
-        'user': {'login': 'human-author'},
+        'user': {'login': 'human-author', 'type': 'User'},
         'created_at': '2026-10-03T00:00:00Z',
     }
     pull_request.update(overrides)
@@ -122,7 +122,9 @@ def test_fails_when_visible_description_is_too_long(ddev, pr_context, pr_templat
 @pytest.mark.parametrize(
     ('overrides', 'reason'),
     [
-        pytest.param({'user': {'login': 'dependabot[bot]'}}, 'bot author dependabot[bot]', id='bot-author'),
+        pytest.param(
+            {'user': {'login': 'dependabot[bot]', 'type': 'Bot'}}, 'bot author dependabot[bot]', id='bot-author'
+        ),
         pytest.param({'title': '[release] datadog-foo 1.2.3'}, 'release PR', id='release-title'),
         pytest.param(
             {'created_at': '2026-10-01T23:59:59Z'},
