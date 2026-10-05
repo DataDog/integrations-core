@@ -10,6 +10,7 @@ from glob import glob
 
 import pytest
 import yaml
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.kind import kind_run
@@ -20,7 +21,6 @@ from datadog_checks.dev.utils import get_active_env
 from .common import CHECK_NAME, INSTANCE_STATE_KEY, MOCKED_INSTANCE
 from .kube import (
     WAIT_TIMEOUT,
-    apply_remote_manifest,
     kubectl,
     kubectl_output,
     manifest_path,
@@ -269,8 +269,13 @@ def wait_for_queues_active():
 
 def setup_kueue():
     preload_workload_images()
-    apply_remote_manifest(
-        f'https://github.com/kubernetes-sigs/kueue/releases/download/{kueue_version()}/manifests.yaml'
+    retry(stop=stop_after_attempt(5), wait=wait_fixed(10), reraise=True)(kubectl)(
+        [
+            'apply',
+            '--server-side',
+            '-f',
+            f'https://github.com/kubernetes-sigs/kueue/releases/download/{kueue_version()}/manifests.yaml',
+        ]
     )
 
     disable_visibility_server()
