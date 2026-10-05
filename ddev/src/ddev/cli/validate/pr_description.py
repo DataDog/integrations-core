@@ -1,0 +1,134 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+import json
+import os
+import re
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+import click
+from pydantic import ValidationError
+
+from ddev.utils.github_actions import PullRequestEvent
+
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
+
+
+MAX_DESCRIPTION_LENGTH = 3000
+# PRs opened before the checklist template existed are exempt. Set to the merge date of the template change.
+ENFORCED_SINCE = datetime.fromisoformat('2026-10-02T00:00:00+00:00')
+CHECKLIST_HEADING = 'Checklist before requesting review'
+HEADING_PATTERN = re.compile(r'^##[ \t]+(.+?)[ \t]*$', re.MULTILINE)
+COMMENT_PATTERN = re.compile(r'<!--.*?-->', re.DOTALL)
+CHECKBOX_PATTERN = re.compile(r'^[ \t]*-[ \t]*\[([ \txX])\][ \t]*(.+?)[ \t]*$', re.MULTILINE)
+RELEASE_TITLE_PATTERN = re.compile(
+    r'^(?:\[backport\]\s*)?(?:\[release\]\s*|finalize agent release\b|release new integrations\b)',
+    re.IGNORECASE,
+)
+
+
+def _sections(body: str) -> dict[str, str]:
+    headings = list(HEADING_PATTERN.finditer(body))
+    sections = {}
+    for index, heading in enumerate(headings):
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(body)
+        sections[heading.group(1).strip()] = body[heading.end() : end]
+    return sections
+
+
+def _skip_reason(author: str, title: str, created_at: str | None) -> str | None:
+    normalized_author = author.casefold()
+    if created_at and datetime.fromisoformat(created_at.replace('Z', '+00:00')) < ENFORCED_SINCE:
+        return f'PR opened before {ENFORCED_SINCE:%Y-%m-%d}, when the checklist template was introduced'
+    if (
+        normalized_author.endswith('[bot]')
+        or normalized_author in {'dependabot', 'renovate'}
+        or ('bot' in normalized_author and ('datadog' in normalized_author or normalized_author.startswith('dd-')))
+    ):
+        return f'bot author {author}'
+    if RELEASE_TITLE_PATTERN.match(title):
+        return 'release PR'
+    return None
+
+
+def _checklist(body: str) -> dict[str, bool]:
+    """Map each checklist item's text to whether it is ticked, ignoring HTML comments."""
+    section = _sections(COMMENT_PATTERN.sub('', body)).get(CHECKLIST_HEADING, '')
+    return {' '.join(text.split()): bool(mark.strip()) for mark, text in CHECKBOX_PATTERN.findall(section)}
+
+
+def _check_pr_description(body: str, required_items: list[str]) -> list[str]:
+    visible_body = COMMENT_PATTERN.sub('', body)
+    items = _checklist(body)
+    errors = []
+    for item in required_items:
+        if item not in items:
+            errors.append(f'Missing checklist item (restore it from the template): {item}')
+        elif not items[item]:
+            errors.append(f'Unchecked checklist item: {item}')
+
+    description_length = len(visible_body)
+    if description_length > MAX_DESCRIPTION_LENGTH:
+        errors.append(
+            f'PR description is {description_length} characters; maximum is {MAX_DESCRIPTION_LENGTH}. '
+            'Trim the description before requesting review.'
+        )
+
+    return errors
+
+
+@click.command(short_help='Validate the current pull request description')
+@click.pass_obj
+def pr_description(app: Application):
+    """Fail when the PR checklist is incomplete or the description is too long."""
+    if os.environ.get('GITHUB_EVENT_NAME') != 'pull_request':
+        app.display_info('Not running in a pull_request context; skipping pr-description validation.')
+        return
+
+    event_path = os.environ.get('GITHUB_EVENT_PATH')
+    if not event_path:
+        app.display_info('GITHUB_EVENT_PATH is not set; skipping pr-description validation.')
+        return
+
+    try:
+        event = PullRequestEvent.load(event_path)
+    except (OSError, json.JSONDecodeError, ValueError, ValidationError) as exc:
+        app.abort(f'Could not read GitHub event payload: {exc}')
+
+    pull_request = event.pull_request
+    if pull_request is None:
+        app.display_info('Event payload has no pull request; skipping pr-description validation.')
+        return
+
+    author = pull_request.user.login if pull_request.user and pull_request.user.login else ''
+    reason = _skip_reason(author, pull_request.title or '', pull_request.created_at)
+    if reason:
+        app.display_info(f'Skipping PR description check: {reason}.', markup=False)
+        return
+
+    template_path = app.repo.path / '.github' / 'PULL_REQUEST_TEMPLATE.md'
+    try:
+        template = template_path.read_text(encoding='utf-8')
+    except OSError:
+        app.display_info(f'No checklist items found because {template_path} could not be read; skipping validation.')
+        return
+
+    required_items = list(_checklist(template))
+    if not required_items:
+        app.display_info(
+            f'No checklist items found under ## {CHECKLIST_HEADING} in {template_path}; skipping validation.'
+        )
+        return
+
+    errors = _check_pr_description(pull_request.body or '', required_items)
+    if errors:
+        for error in errors:
+            app.display_error(error, markup=False)
+        app.display_info('Update the pull request body using .github/PULL_REQUEST_TEMPLATE.md.')
+        app.abort()
+
+    app.display_success('PR description check passed.')

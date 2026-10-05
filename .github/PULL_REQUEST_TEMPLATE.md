@@ -1,7 +1,7 @@
 ## Checklist before requesting review
 
 <!--
-  The `Check PR description` CI check fails until every item below is ticked and the visible
+  The `pr-description` validation (`Run Validations`) fails until every item below is ticked and the visible
   description (excluding HTML comments) is at most 3,000 characters. CI, the changelog, and the QA
   label have their own checks. Request review only once all checks pass:
   `gh pr checks <PR> --repo DataDog/integrations-core --watch`.
