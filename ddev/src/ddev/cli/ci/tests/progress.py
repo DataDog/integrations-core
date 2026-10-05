@@ -172,6 +172,11 @@ class DispatcherProgress:
         return self._count(Status.SKIPPED)
 
     @property
+    def inconclusive(self) -> int:
+        """Jobs whose outcome could not be confirmed; counted apart from pass and fail."""
+        return self._count(Status.INCONCLUSIVE)
+
+    @property
     def complete(self) -> int:
         """Planned jobs whose latest execution has finished."""
         return sum(job.complete for job in self._jobs_progress)

@@ -1103,7 +1103,8 @@ async def test_final_results_use_jobs_available_after_artifact_collection(tmp_pa
 
 
 @pytest.mark.parametrize("last_listing", ["empty", "failed", "stale"])
-async def test_final_results_preserve_only_completed_observations(tmp_path: Path, last_listing: str):
+async def test_final_results_keep_a_jobs_last_known_state(tmp_path: Path, last_listing: str):
+    """A job never seen completed reaches `BatchFinished` with its last-known workflow job."""
     client = FakeAsyncGitHubClient()
     batch = make_batch()
     batch.job_list.append(make_job("unfinished", environment="py3.12"))
@@ -1130,7 +1131,8 @@ async def test_final_results_preserve_only_completed_observations(tmp_path: Path
     finished = published[-1]
     assert isinstance(finished, BatchFinished)
     assert finished.batch_jobs[0].workflow_job.conclusion is WorkflowJobConclusion.SUCCESS
-    assert finished.batch_jobs[1].workflow_job is None
+    assert finished.batch_jobs[1].workflow_job is not None
+    assert finished.batch_jobs[1].workflow_job.status is WorkflowJobStatus.IN_PROGRESS
 
 
 @pytest.mark.parametrize(

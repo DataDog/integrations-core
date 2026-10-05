@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, message_fields, run_fields
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
@@ -50,17 +51,21 @@ class DispatcherOutcome:
     shutdown: ShutdownRequest | None = None
 
     @property
-    def successful(self) -> bool:
-        """Whether all batches finished without failure and the final report was published.
+    def execution_outcome(self) -> ExecutionOutcome:
+        """The run's single terminal outcome.
 
-        Any shutdown request makes the outcome unsuccessful.
+        Tests only count as failed once the Dispatcher finished every batch and published the final
+        report: a failed batch nobody was told about is a Dispatcher failure.
         """
-        return (
-            self.shutdown is None
-            and self.final_report_published
-            and self.progress.done
-            and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
-        )
+        if self.cancelled:
+            return ExecutionOutcome.CANCELLED
+        if self.timed_out:
+            return ExecutionOutcome.TIMED_OUT
+        if self.shutdown is not None or not (self.final_report_published and self.progress.done):
+            return ExecutionOutcome.FAILED
+        if any(batch.status is Status.FAILURE for batch in self.progress.batches):
+            return ExecutionOutcome.TESTS_FAILED
+        return ExecutionOutcome.PASSED
 
     @property
     def cancelled(self) -> bool:

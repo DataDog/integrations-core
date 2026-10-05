@@ -430,8 +430,9 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         await self._refresh_jobs(run_id, known_jobs, batch.batch_id, "reconciling final workflow jobs")
         # A job first seen here can still have waited for a runner, so it gets its queue sample too.
         self._report_queue_durations(batch, known_jobs.values())
-        # An unfinished job has no result yet. Do not mistake that for a test failure.
-        return [job for job in known_jobs.values() if job.status is WorkflowJobStatus.COMPLETED]
+        # The run is over, so a job not seen COMPLETED is a stale observation. The gatherer decides
+        # what that means.
+        return list(known_jobs.values())
 
     async def _list_jobs(self, run_id: int, batch_id: str, operation: str) -> list[WorkflowJob]:
         """Fetch the run's jobs. If a later page fails, keep the jobs already fetched."""
