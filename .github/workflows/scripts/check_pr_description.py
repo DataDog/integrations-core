@@ -3,8 +3,11 @@
 import os
 import re
 import sys
+from datetime import datetime
 
 MAX_DESCRIPTION_LENGTH = 3000
+# PRs opened before the checklist template existed are exempt. Set to the merge date of the template change.
+ENFORCED_SINCE = datetime.fromisoformat("2026-10-02T00:00:00+00:00")
 CHECKLIST_HEADING = "Checklist before requesting review"
 HEADING_PATTERN = re.compile(r"^##[ \t]+(.+?)[ \t]*$", re.MULTILINE)
 COMMENT_PATTERN = re.compile(r"<!--.*?-->", re.DOTALL)
@@ -24,8 +27,10 @@ def _sections(body: str) -> dict[str, str]:
     return sections
 
 
-def _skip_reason(author: str, draft: bool, title: str) -> str | None:
+def _skip_reason(author: str, draft: bool, title: str, created_at: str) -> str | None:
     normalized_author = author.casefold()
+    if created_at and datetime.fromisoformat(created_at.replace("Z", "+00:00")) < ENFORCED_SINCE:
+        return f"PR opened before {ENFORCED_SINCE:%Y-%m-%d}, when the checklist template was introduced"
     if draft:
         return "draft PR; it runs again when the PR is marked ready for review"
     if (
@@ -69,6 +74,7 @@ def main() -> None:
         author=os.environ.get("PR_AUTHOR", ""),
         draft=os.environ.get("PR_DRAFT", "false").casefold() == "true",
         title=os.environ.get("PR_TITLE", ""),
+        created_at=os.environ.get("PR_CREATED_AT", ""),
     )
     if reason:
         print(f"Skipping PR description check: {reason}.")

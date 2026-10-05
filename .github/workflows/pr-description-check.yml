@@ -26,6 +26,7 @@ jobs:
         env:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
           PR_DRAFT: ${{ github.event.pull_request.draft }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: python .github/workflows/scripts/check_pr_description.py
