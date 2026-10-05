@@ -8,10 +8,10 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
-from datadog_checks.postgres.version_utils import V13, V14, V15
+from datadog_checks.postgres.version_utils import V10, V11, V14, V15
 
 from .common import POSTGRES_VERSION
-from .utils import _get_superconn, requires_over_14, requires_over_15, run_one_check
+from .utils import _get_superconn, requires_over_15, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -76,8 +76,6 @@ def role_catalog(roles_instance):
                 REVOKE SELECT (ssn) ON dd_role_obs.patients FROM dd_role_obs_reader;
                 GRANT SELECT (retired) ON dd_role_obs.patients TO dd_role_obs_reader;
                 ALTER TABLE dd_role_obs.patients DROP COLUMN retired;
-                CREATE TABLE dd_role_obs.partitioned_items (id integer) PARTITION BY RANGE (id);
-                ALTER TABLE dd_role_obs.partitioned_items OWNER TO dd_role_obs_owner;
                 CREATE SEQUENCE dd_role_obs.item_sequence;
                 ALTER SEQUENCE dd_role_obs.item_sequence OWNER TO dd_role_obs_owner;
                 CREATE VIEW dd_role_obs.item_view AS SELECT id FROM dd_role_obs.items;
@@ -91,9 +89,6 @@ def role_catalog(roles_instance):
                 CREATE MATERIALIZED VIEW dd_role_obs.item_summary AS
                     SELECT count(*) AS item_count FROM dd_role_obs.items;
                 ALTER MATERIALIZED VIEW dd_role_obs.item_summary OWNER TO dd_role_obs_owner;
-                CREATE PROCEDURE dd_role_obs.refresh_items()
-                    LANGUAGE sql AS 'DELETE FROM dd_role_obs.items WHERE false';
-                ALTER PROCEDURE dd_role_obs.refresh_items() OWNER TO dd_role_obs_owner;
                 CREATE FOREIGN DATA WRAPPER dd_role_obs_fdw NO HANDLER;
                 CREATE SERVER dd_role_obs_server FOREIGN DATA WRAPPER dd_role_obs_fdw;
                 CREATE FOREIGN TABLE dd_role_obs.foreign_items (id integer) SERVER dd_role_obs_server;
@@ -113,12 +108,7 @@ def role_catalog(roles_instance):
                     LANGUAGE sql
                     AS 'SELECT count(*), max(id) FROM dd_role_obs.items WHERE id >= min_id';
                 ALTER FUNCTION dd_role_obs.item_stats(integer) OWNER TO dd_role_obs_owner;
-                CREATE PROCEDURE dd_role_obs.count_items_from(IN min_id integer, OUT item_count bigint)
-                    LANGUAGE sql
-                    AS 'SELECT count(*) FROM dd_role_obs.items WHERE id >= min_id';
-                ALTER PROCEDURE dd_role_obs.count_items_from(integer) OWNER TO dd_role_obs_owner;
                 GRANT EXECUTE ON FUNCTION dd_role_obs.item_stats(integer) TO dd_role_obs_reader;
-                GRANT EXECUTE ON PROCEDURE dd_role_obs.count_items_from(integer) TO dd_role_obs_reader;
                 CREATE AGGREGATE dd_role_obs.item_total(integer) (
                     SFUNC = int4pl, STYPE = integer, INITCOND = '0'
                 );
@@ -126,6 +116,24 @@ def role_catalog(roles_instance):
                 GRANT EXECUTE ON FUNCTION dd_role_obs.item_total(integer) TO dd_role_obs_reader;
                 DO $$
                 BEGIN
+                    IF current_setting('server_version_num')::integer >= 100000 THEN
+                        EXECUTE 'CREATE TABLE dd_role_obs.partitioned_items (id integer) PARTITION BY RANGE (id)';
+                        EXECUTE 'ALTER TABLE dd_role_obs.partitioned_items OWNER TO dd_role_obs_owner';
+                    END IF;
+                    IF current_setting('server_version_num')::integer >= 110000 THEN
+                        EXECUTE $sql$CREATE PROCEDURE dd_role_obs.refresh_items()
+                            LANGUAGE sql AS 'DELETE FROM dd_role_obs.items WHERE false'$sql$;
+                        EXECUTE 'ALTER PROCEDURE dd_role_obs.refresh_items() OWNER TO dd_role_obs_owner';
+                    END IF;
+                    -- Procedures accept OUT parameters from PostgreSQL 14.
+                    IF current_setting('server_version_num')::integer >= 140000 THEN
+                        EXECUTE $sql$CREATE PROCEDURE dd_role_obs.count_items_from(
+                                IN min_id integer, OUT item_count bigint
+                            ) LANGUAGE sql AS 'SELECT count(*) FROM dd_role_obs.items WHERE id >= min_id'$sql$;
+                        EXECUTE 'ALTER PROCEDURE dd_role_obs.count_items_from(integer) OWNER TO dd_role_obs_owner';
+                        EXECUTE 'GRANT EXECUTE ON PROCEDURE dd_role_obs.count_items_from(integer) '
+                            'TO dd_role_obs_reader';
+                    END IF;
                     IF current_setting('server_version_num')::integer >= 150000 THEN
                         EXECUTE 'ALTER VIEW dd_role_obs.invoker_view SET (security_invoker = true)';
                         -- Postgres stores reloptions verbatim, so each accepted boolean
@@ -227,7 +235,6 @@ def test_role_snapshot_emitter_discard_does_not_complete_partial_snapshot():
     assert 'collection_payloads_count' not in events[0]
 
 
-@requires_over_14
 def test_collect_roles_payload_contract(integration_check, roles_instance, role_catalog, aggregator):
     check = integration_check(roles_instance)
 
@@ -385,12 +392,14 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'foreign_table',
         'function',
         'materialized_view',
-        'partitioned_table',
-        'procedure',
         'sequence',
         'table',
         'view',
     }
+    if check.version >= V10:
+        expected_object_types.add('partitioned_table')
+    if check.version >= V11:
+        expected_object_types.add('procedure')
     assert expected_object_types <= {
         obj['object_type'] for obj in privilege_event['objects'] if obj['schema_name'] == 'dd_role_obs'
     }
@@ -434,7 +443,6 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     )
 
 
-@requires_over_14
 def test_collect_roles_redacts_custom_setting_values(integration_check, roles_instance, role_catalog, aggregator):
     """Values of custom placeholder settings must never be collected.
 
@@ -462,7 +470,6 @@ def test_collect_roles_redacts_custom_setting_values(integration_check, roles_in
     }
 
 
-@requires_over_14
 @pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 16,
     reason='PostgreSQL 16 and later refuse to drop a role that granted a membership',
@@ -514,7 +521,6 @@ def test_collect_roles_keeps_membership_with_dropped_grantor(integration_check, 
                 )
 
 
-@requires_over_14
 def test_collect_roles_names_routines_by_input_types(integration_check, roles_instance, role_catalog, aggregator):
     """Routines are named by their input argument types, the form `GRANT ... ON FUNCTION` accepts.
 
@@ -536,17 +542,17 @@ def test_collect_roles_names_routines_by_input_types(integration_check, roles_in
             if row['schema_name'] == 'dd_role_obs' and row['object_type'] in ('function', 'procedure', 'aggregate')
         }
 
-    granted = {
-        ('function', 'item_stats(integer)'),
-        ('procedure', 'count_items_from(integer)'),
-        ('aggregate', 'item_total(integer)'),
-    }
-    assert routine_names('objects') == granted | {('function', 'count_items()'), ('procedure', 'refresh_items()')}
+    granted = {('function', 'item_stats(integer)'), ('aggregate', 'item_total(integer)')}
+    ungranted = {('function', 'count_items()')}
+    if check.version >= V11:
+        ungranted.add(('procedure', 'refresh_items()'))
+    if check.version >= V14:
+        granted.add(('procedure', 'count_items_from(integer)'))
+    assert routine_names('objects') == granted | ungranted
     # Only routines with explicit grants have privilege rows.
     assert routine_names('object_privileges') == granted
 
 
-@requires_over_14
 def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_instance, role_catalog, aggregator):
     """Objects on default privileges ship no privilege rows; explicitly granted objects ship their complete ACL.
 
@@ -585,7 +591,6 @@ def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_i
     }
 
 
-@requires_over_14
 def test_collect_roles_column_privileges(integration_check, roles_instance, role_catalog, aggregator):
     """Column grants are reported per column, so access to a column such as `ssn` can be answered.
 
@@ -651,17 +656,6 @@ def test_collect_roles_disabled(integration_check, roles_instance, aggregator):
     assert not [event for event in metadata if event['kind'] in {'pg_roles', 'pg_role_privileges'}]
 
 
-def test_collect_roles_unsupported_version(integration_check, roles_instance, aggregator):
-    check = integration_check(roles_instance)
-    check.version = V13
-
-    check.metadata_samples._role_collector.collect_roles([])
-
-    metadata = aggregator.get_event_platform_events('dbm-metadata')
-    assert not [event for event in metadata if event['kind'] in {'pg_roles', 'pg_role_privileges'}]
-
-
-@requires_over_14
 def test_collect_roles_database_failure_has_no_terminal_payload(
     integration_check, roles_instance, aggregator, monkeypatch
 ):
@@ -866,7 +860,6 @@ def test_metadata_schedule_includes_role_collection_interval(integration_check, 
     assert check.metadata_samples.collection_interval == 300
 
 
-@requires_over_14
 def test_collect_roles_database_list_failure_keeps_instance_scope(
     integration_check, roles_instance, aggregator, monkeypatch
 ):

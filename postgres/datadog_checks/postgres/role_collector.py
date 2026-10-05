@@ -18,15 +18,15 @@ from .filters import regex_exclude_clauses, regex_include_clause
 from .role_queries import (
     QUERY_DEFAULT_PRIVILEGES,
     QUERY_OBJECT_DEPENDENCIES,
-    QUERY_OBJECT_PRIVILEGES,
-    QUERY_OBJECTS,
     QUERY_ROLE_SETTINGS,
     QUERY_ROLES,
     list_databases_query,
     memberships_query,
+    object_privileges_query,
+    objects_query,
 )
 from .util import payload_pg_version
-from .version_utils import V14, V16
+from .version_utils import V11, V16
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -115,7 +115,6 @@ class PostgresRoleCollector:
             include_databases=list(role_config.include_databases),
             exclude_databases=list(role_config.exclude_databases),
         )
-        self._unsupported_version_logged = False
         self._resume_from_database: str | None = None
         self._rows_count = 0
         self._payloads_count = 0
@@ -123,15 +122,12 @@ class PostgresRoleCollector:
     def collect_roles(self, tags_no_db: list[str]) -> None:
         """Collect the instance scope and each accessible logical database scope.
 
-        On a supported version, each run reports its outcome through the `status` tag on the
+        Once the server version is known, each run reports its outcome through the `status` tag on the
         `dd.postgres.roles.*` metrics.
         """
-        if self._check.version is None or self._check.version < V14:
-            if not self._unsupported_version_logged:
-                self._log.warning(
-                    "Role collection requires PostgreSQL 14 or later; connected to %s", self._check.version
-                )
-                self._unsupported_version_logged = True
+        # The queries depend on the server version, which is unknown until the check has connected.
+        if self._check.version is None:
+            self._log.debug("Skipping role collection until the PostgreSQL version is known")
             return
 
         started_at = time.time() * 1000
@@ -257,8 +253,11 @@ class PostgresRoleCollector:
                     with conn.cursor(row_factory=dict_row) as cursor:
                         self._configure_transaction(cursor)
                         self._collect_query(cursor, QUERY_DEFAULT_PRIVILEGES, (), "default_privileges", emitter)
-                        self._collect_query(cursor, QUERY_OBJECT_PRIVILEGES, (), "object_privileges", emitter)
-                        self._collect_query(cursor, QUERY_OBJECTS, (), "objects", emitter)
+                        pg11_plus = self._check.version >= V11
+                        self._collect_query(
+                            cursor, object_privileges_query(pg11_plus=pg11_plus), (), "object_privileges", emitter
+                        )
+                        self._collect_query(cursor, objects_query(pg11_plus=pg11_plus), (), "objects", emitter)
                         self._collect_query(cursor, QUERY_OBJECT_DEPENDENCIES, (), "object_dependencies", emitter)
             emitter.flush_terminal()
             status = "success"

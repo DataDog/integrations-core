@@ -266,7 +266,7 @@ FROM (
 
     UNION ALL
 
-    SELECT CASE routine.prokind
+    SELECT CASE {routine_kind}
                WHEN 'p' THEN 'procedure'
                WHEN 'a' THEN 'aggregate'
                ELSE 'function'
@@ -297,7 +297,7 @@ FROM (
       ON grantee.oid = acl.grantee
     LEFT JOIN pg_catalog.pg_roles AS grantor
       ON grantor.oid = acl.grantor
-    WHERE routine.prokind IN ('f', 'p', 'a', 'w')
+    WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
@@ -390,7 +390,7 @@ FROM (
 
     UNION ALL
 
-    SELECT CASE routine.prokind
+    SELECT CASE {routine_kind}
                WHEN 'p' THEN 'procedure'
                WHEN 'a' THEN 'aggregate'
                ELSE 'function'
@@ -412,7 +412,7 @@ FROM (
       ON namespace.oid = routine.pronamespace
     JOIN pg_catalog.pg_roles AS owner
       ON owner.oid = routine.proowner
-    WHERE routine.prokind IN ('f', 'p', 'a', 'w')
+    WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
@@ -433,6 +433,26 @@ FROM (
     WHERE database.datname = current_database()
 ) AS objects
 """
+
+
+# PostgreSQL 11 added procedures and replaced proisagg and proiswindow with prokind. Earlier versions derive the
+# same kind codes, so routine branches report the same object types on every version.
+ROUTINE_KIND_PG11_PLUS = "routine.prokind"
+ROUTINE_KIND_PRE_PG11 = "(CASE WHEN routine.proisagg THEN 'a' WHEN routine.proiswindow THEN 'w' ELSE 'f' END)"
+
+
+def _routine_kind(pg11_plus: bool) -> str:
+    return ROUTINE_KIND_PG11_PLUS if pg11_plus else ROUTINE_KIND_PRE_PG11
+
+
+def object_privileges_query(*, pg11_plus: bool) -> str:
+    """Select the object privilege query for the connected server version."""
+    return QUERY_OBJECT_PRIVILEGES.format(routine_kind=_routine_kind(pg11_plus))
+
+
+def objects_query(*, pg11_plus: bool) -> str:
+    """Select the object query for the connected server version."""
+    return QUERY_OBJECTS.format(routine_kind=_routine_kind(pg11_plus))
 
 
 QUERY_OBJECT_DEPENDENCIES = """
