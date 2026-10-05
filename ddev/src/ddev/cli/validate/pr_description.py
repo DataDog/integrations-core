@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -77,16 +76,27 @@ def _check_pr_description(body: str, required_items: list[str]) -> list[str]:
 
 
 @click.command(short_help='Validate the current pull request description')
+@click.option(
+    '--event-name',
+    envvar='GITHUB_EVENT_NAME',
+    default='',
+    help='GitHub event name; the validation only runs for `pull_request`. Defaults to $GITHUB_EVENT_NAME.',
+)
+@click.option(
+    '--event-path',
+    envvar='GITHUB_EVENT_PATH',
+    default='',
+    help='Path to the GitHub event payload JSON. Defaults to $GITHUB_EVENT_PATH.',
+)
 @click.pass_obj
-def pr_description(app: Application):
+def pr_description(app: Application, event_name: str, event_path: str):
     """Fail when the PR checklist is incomplete or the description is too long."""
-    if os.environ.get('GITHUB_EVENT_NAME') != 'pull_request':
+    if event_name != 'pull_request':
         app.display_info('Not running in a pull_request context; skipping pr-description validation.')
         return
 
-    event_path = os.environ.get('GITHUB_EVENT_PATH')
     if not event_path:
-        app.display_info('GITHUB_EVENT_PATH is not set; skipping pr-description validation.')
+        app.display_info('No GitHub event payload path given; skipping pr-description validation.')
         return
 
     try:
