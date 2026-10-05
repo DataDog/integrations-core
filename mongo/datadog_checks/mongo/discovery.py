@@ -33,8 +33,8 @@ class MongoDBDatabaseAutodiscovery(Discovery):
         databases = []
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._log.debug("Replicaset and arbiter deployment, no databases will be checked")
-        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
-            self._log.debug("Replicaset is in recovering state, will skip reading database names")
+        elif isinstance(deployment, ReplicaSetDeployment) and not deployment.is_readable:
+            self._log.debug("Node is in %s state, will skip reading database names", deployment.replset_state_name)
         else:
             databases = self._check.api_client.list_database_names()
             self.database_count = len(databases)
