@@ -26,6 +26,19 @@ The ClickHouse check is included in the [Datadog Agent][3] package. No additiona
 
 As a best practice, Datadog recommends using a read-only user to monitor your ClickHouse instance. This limits the access granted to the Datadog Agent.
 
+With Database Monitoring enabled, the Agent user also needs to read the cluster topology:
+
+```sql
+GRANT SELECT ON system.macros TO datadog;
+GRANT SELECT ON system.clusters TO datadog;
+GRANT SELECT ON system.settings TO datadog;
+GRANT SELECT ON system.table_engines TO datadog;
+-- Single endpoint mode and ClickHouse Cloud only
+GRANT REMOTE ON *.* TO datadog;
+```
+
+If ClickHouse denies one of these reads, the Agent pauses Database Monitoring collection for the instance and lists the missing grants on the Agent status page. Basic metrics keep being collected. Collection resumes within 5 minutes of the grants being added, without an Agent restart.
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 

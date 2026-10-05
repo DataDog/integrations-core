@@ -15,7 +15,7 @@ from datadog_checks.base.utils.serialization import json
 from . import advanced_queries, queries, utils
 from .__about__ import __version__
 from .config import build_config, sanitize
-from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .health import ClickhouseHealth, ClickhouseHealthEvent, HealthEvent, HealthStatus
 from .metadata import ClickhouseMetadata
 from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
@@ -29,10 +29,16 @@ from .utils import (
     CLUSTER_NAME_QUERY,
     CLUSTER_TAG,
     CONNECT_NODE_QUERY,
+    DBM_BLOCKED_REASON_MISSING_GRANTS,
     HOSTING_TYPE_TAG,
     SHARED_MERGE_TREE_QUERY,
+    DbmCollectionStatus,
     ErrorSanitizer,
     HostingType,
+    ProbeError,
+    ProbeErrorKind,
+    TopologyProbe,
+    classify_probe_error,
     cluster_all_replicas,
     cluster_aware_query,
     cluster_nodes_query,
@@ -40,6 +46,8 @@ from .utils import (
 
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
+
+MISSING_GRANTS_HEALTH_COOLDOWN = 60 * 60
 
 
 class ClickhouseCheck(DatabaseCheck):
@@ -70,6 +78,11 @@ class ClickhouseCheck(DatabaseCheck):
         self._cluster_name = None
         self._cluster_name_resolved = False
         self._hosting_type = None
+        self._probe_errors: dict[str, ProbeError] = {}
+        self._topology: dict = {}
+        self._topology_refreshed_at = 0
+        self._dbm_collection: dict = {}
+        self._dbm_blocked = False
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
@@ -91,6 +104,7 @@ class ClickhouseCheck(DatabaseCheck):
         # Cache query manager per server version to avoid recompiling on every check run
         self._query_manager: QueryManager | None = None
         self._query_manager_version: str | None = None
+        self._query_manager_cluster: str | None = None
 
         # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs).
         # TLS settings must be baked in here: when pool_mgr is provided to get_client(),
@@ -220,13 +234,15 @@ class ClickhouseCheck(DatabaseCheck):
         if current_time - self._database_instance_last_emitted >= DATABASE_INSTANCE_COLLECTION_INTERVAL:
             # Get tags without db: prefix for metadata
             tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+            self._refresh_topology()
 
             metadata = {
                 "dbm": self._config.dbm,
                 "connection_host": self._config.server,
                 "hosting_type": self.hosting_type,
                 "single_endpoint_mode": self.is_single_endpoint_mode,
-                **self._cluster_topology_metadata(),
+                **self._topology,
+                "dbm_collection": self._dbm_collection,
             }
 
             event = {
@@ -252,6 +268,7 @@ class ClickhouseCheck(DatabaseCheck):
     def check(self, _):
         self.connect()
         self._dbms_version = self.select_version()
+        self._refresh_topology()
 
         # Must run before the query manager is built and before the DBM jobs are handed
         # self.tags below, since both snapshot the tag list.
@@ -259,16 +276,136 @@ class ClickhouseCheck(DatabaseCheck):
             self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
         self.tag_manager.set_tag(HOSTING_TYPE_TAG, self.hosting_type, replace=True)
 
-        if self._query_manager is None or self._query_manager_version != self.dbms_version:
+        fanout_cluster = self.fanout_cluster_name
+        if (
+            self._query_manager is None
+            or self._query_manager_version != self.dbms_version
+            or self._query_manager_cluster != fanout_cluster
+        ):
             self._query_manager = self._build_query_manager()
             self._query_manager_version = self.dbms_version
+            self._query_manager_cluster = fanout_cluster
         self._query_manager.execute()
         self.set_version_metadata(self.dbms_version)
 
         # Send database instance metadata
         self._send_database_instance_metadata()
 
+        if self._dbm_blocked:
+            self._report_dbm_blocked()
+            return
         self.run_async_jobs(self.tags)
+
+    def _refresh_topology(self):
+        """Re-read the cluster topology and decide whether DBM may run, at most once per collection interval.
+
+        While DBM is blocked, the cached cluster name and hosting type are dropped first, so adding the
+        missing grants takes effect without an Agent restart.
+        """
+        now = time()
+        if now - self._topology_refreshed_at < DATABASE_INSTANCE_COLLECTION_INTERVAL:
+            return
+        if self._dbm_blocked:
+            self._cluster_name_resolved = False
+            self._hosting_type = None
+            self._probe_errors.clear()
+
+        self._topology_refreshed_at = now
+        self._topology = self._cluster_topology_metadata()
+        self._dbm_collection = self._evaluate_dbm_collection(self._topology, now)
+
+        blocked = self._dbm_collection['status'] == DbmCollectionStatus.BLOCKED
+        if blocked and not self._dbm_blocked:
+            self.log.warning(
+                'Pausing Database Monitoring, topology probes were denied: %s',
+                {
+                    probe: self._error_sanitizer.clean(self._error_sanitizer.scrub(error.message))
+                    for probe, error in sorted(self._probe_errors.items())
+                    if error.kind == ProbeErrorKind.DENIED
+                },
+            )
+        elif self._dbm_blocked and not blocked:
+            self.log.info('Resuming Database Monitoring, the ClickHouse topology is readable again')
+            self.health.submit_health_event(
+                name=ClickhouseHealthEvent.MISSING_GRANTS,
+                status=HealthStatus.OK,
+                data={'blocked': False},
+            )
+        self._dbm_blocked = blocked
+
+    def _evaluate_dbm_collection(self, topology: dict, checked_at: float) -> dict:
+        """The `dbm_collection` record for the database_instance payload.
+
+        DBM is blocked only when a topology field this instance needs is missing and a probe that would
+        have supplied it was denied. Any other failure behind a missing field is reported as degraded.
+        """
+        error_kinds = {
+            self._probe_errors[probe].kind
+            for probe in self._probes_behind_missing_topology(topology)
+            if probe in self._probe_errors
+        }
+        if self._config.dbm and ProbeErrorKind.DENIED in error_kinds:
+            status = DbmCollectionStatus.BLOCKED
+        elif error_kinds:
+            status = DbmCollectionStatus.DEGRADED
+        else:
+            status = DbmCollectionStatus.ACTIVE
+
+        collection: dict = {'status': status}
+        if status == DbmCollectionStatus.BLOCKED:
+            collection['reason'] = DBM_BLOCKED_REASON_MISSING_GRANTS
+        missing_grants = self._missing_grants()
+        if missing_grants:
+            collection['missing_grants'] = missing_grants
+        if self._probe_errors:
+            collection['probe_errors'] = {probe: error.kind for probe, error in sorted(self._probe_errors.items())}
+        collection['checked_at'] = int(checked_at * 1000)
+        return collection
+
+    def _probes_behind_missing_topology(self, topology: dict) -> tuple[str, ...]:
+        """The probes that would have supplied the topology fields this instance needs but does not have."""
+        hosting_type = self.hosting_type
+        if hosting_type == HostingType.UNKNOWN:
+            return (TopologyProbe.CLOUD_MODE, TopologyProbe.SHARED_MERGE_TREE)
+        if hosting_type == HostingType.CLOUD:
+            return () if topology.get('nodes') else (TopologyProbe.NODES,)
+        if not self.is_single_endpoint_mode:
+            return () if topology.get('connect_node') else (TopologyProbe.CONNECT_NODE,)
+        if not topology.get('cluster_name'):
+            return (TopologyProbe.CLUSTER_MACRO, TopologyProbe.CLUSTER_NAME)
+        return () if topology.get('nodes') else (TopologyProbe.NODES,)
+
+    def _missing_grants(self) -> list[str]:
+        return sorted({grant for error in self._probe_errors.values() for grant in error.grants})
+
+    def _report_dbm_blocked(self):
+        """Surface the paused DBM collection on every blocked run, since check warnings are cleared after each run."""
+        missing_grants = self._missing_grants()
+        username = self._config.username or 'default'
+        remediation = [f'GRANT {grant} TO {username};' for grant in missing_grants]
+        self.warning(
+            "Database Monitoring is paused for %s: the Agent user '%s' is missing grants needed to read the "
+            "ClickHouse cluster topology. Run:\n%s\n"
+            "Collection resumes within 5 minutes of the grants being added. No Agent restart is needed.\n"
+            "code=missing-topology-grants",
+            self.database_identifier,
+            username,
+            '\n'.join(f'  {statement}' for statement in remediation),
+        )
+        self.health.submit_health_event(
+            name=ClickhouseHealthEvent.MISSING_GRANTS,
+            status=HealthStatus.WARNING,
+            cooldown_time=MISSING_GRANTS_HEALTH_COOLDOWN,
+            cooldown_values=missing_grants,
+            data={
+                'blocked': True,
+                'missing_grants': missing_grants,
+                'probe_errors': self._dbm_collection.get('probe_errors', {}),
+                'hosting_type': self.hosting_type,
+                'single_endpoint_mode': self.is_single_endpoint_mode,
+                'remediation': remediation,
+            },
+        )
 
     def get_queries(self) -> list[dict]:
         query_list = []
@@ -354,7 +491,8 @@ class ClickhouseCheck(DatabaseCheck):
 
         Requires a live client, so this resolves on the first check run rather than at
         init. The "not found" outcome is cached too: a deployment without a cluster
-        should not re-query on every run.
+        should not re-query on every run. The cache is only dropped while DBM is blocked
+        on a missing grant.
         """
         if not self._cluster_name_resolved:
             self._cluster_name = self._resolve_cluster_name()
@@ -362,12 +500,11 @@ class ClickhouseCheck(DatabaseCheck):
         return self._cluster_name
 
     def _resolve_cluster_name(self) -> str | None:
-        for query in (CLUSTER_MACRO_QUERY, CLUSTER_NAME_QUERY):
-            try:
-                rows = self.execute_query_raw(query)
-            except Exception as e:
-                self.log.debug('Unable to resolve cluster name with %r: %s', query, e)
-                continue
+        for probe, query in (
+            (TopologyProbe.CLUSTER_MACRO, CLUSTER_MACRO_QUERY),
+            (TopologyProbe.CLUSTER_NAME, CLUSTER_NAME_QUERY),
+        ):
+            rows = self._run_probe(probe, query)
             if rows and rows[0] and rows[0][0]:
                 return str(rows[0][0])
         # Deliberately no 'default' fallback: an absent tag is better than a wrong one.
@@ -403,13 +540,19 @@ class ClickhouseCheck(DatabaseCheck):
             metadata["nodes"] = nodes
         return metadata
 
+    def _run_probe(self, probe: str, query: str) -> list | None:
+        """Run a topology probe and record why it failed, returning None when it did."""
+        self._probe_errors.pop(probe, None)
+        try:
+            return self.execute_query_raw(query)
+        except Exception as e:
+            self._probe_errors[probe] = classify_probe_error(probe, e)
+            self.log.debug('Topology probe %s failed with %r: %s', probe, query, e)
+            return None
+
     def _resolve_connect_node(self) -> str | None:
         """The name of the node serving this connection, or None when it cannot be read."""
-        try:
-            rows = self.execute_query_raw(CONNECT_NODE_QUERY)
-        except Exception as e:
-            self.log.debug('Unable to read the connected node name: %s', e)
-            return None
+        rows = self._run_probe(TopologyProbe.CONNECT_NODE, CONNECT_NODE_QUERY)
         return str(rows[0][0]) if rows and rows[0] and rows[0][0] else None
 
     def _resolve_cluster_nodes(self, connect_node: str | None) -> list[str]:
@@ -420,17 +563,16 @@ class ClickhouseCheck(DatabaseCheck):
         """
         cluster = self.fanout_cluster_name
         if not cluster:
+            self._probe_errors.pop(TopologyProbe.NODES, None)
             return [connect_node] if connect_node else []
-        try:
-            rows = self.execute_query_raw(cluster_nodes_query(cluster))
-        except Exception as e:
-            self.log.debug('Unable to enumerate the nodes of cluster %r: %s', cluster, e)
+        rows = self._run_probe(TopologyProbe.NODES, cluster_nodes_query(cluster))
+        if rows is None:
             return []
         return sorted({str(row[0]) for row in rows if row and row[0]})
 
     @property
     def hosting_type(self) -> str:
-        """Whether this instance is ClickHouse Cloud or self-hosted, cached after the first check run."""
+        """Whether this instance is ClickHouse Cloud or self-hosted, cached unless DBM is blocked on a grant."""
         if self._hosting_type is None:
             self._hosting_type = self._resolve_hosting_type()
         return self._hosting_type
@@ -449,23 +591,19 @@ class ClickhouseCheck(DatabaseCheck):
 
     def _probe_cloud_mode(self) -> bool | None:
         """Whether the server reports cloud_mode enabled, or None when the probe failed."""
-        try:
-            rows = self.execute_query_raw(CLOUD_MODE_QUERY)
-            if not rows or not rows[0]:
-                return False
-            return str(rows[0][0]) not in ('', '0')
-        except Exception as e:
-            self.log.debug('Unable to read the cloud_mode setting: %s', e)
+        rows = self._run_probe(TopologyProbe.CLOUD_MODE, CLOUD_MODE_QUERY)
+        if rows is None:
             return None
+        if not rows or not rows[0]:
+            return False
+        return str(rows[0][0]) not in ('', '0')
 
     def _probe_shared_merge_tree(self) -> bool | None:
         """Whether the Cloud-only SharedMergeTree engine exists, or None when the probe failed."""
-        try:
-            rows = self.execute_query_raw(SHARED_MERGE_TREE_QUERY)
-            return bool(rows and rows[0] and int(rows[0][0]) > 0)
-        except Exception as e:
-            self.log.debug('Unable to check for the SharedMergeTree engine: %s', e)
+        rows = self._run_probe(TopologyProbe.SHARED_MERGE_TREE, SHARED_MERGE_TREE_QUERY)
+        if rows is None:
             return None
+        return bool(rows and rows[0] and int(rows[0][0]) > 0)
 
     @property
     def database_identifier_template(self) -> str:
