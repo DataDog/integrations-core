@@ -20,27 +20,33 @@
       }
     }
   ],
-  "additional_config_fields": [
+  "additional_config_fields": [],
+  "dataflow_config": [
     {
-      "key": "collect_activity",
-      "label": "Collect activity logs",
-      "editable": true,
-      "required": true,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "tenable-io-activity-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect activity logs",
+        "help": "Collects Tenable.io activity logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_activity",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "collect_vulnerability",
-      "label": "Collect vulnerability logs",
-      "editable": true,
-      "required": true,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "tenable-io-vulnerability-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect vulnerability logs",
+        "help": "Collects Tenable.io vulnerability logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_vulnerability",
+        "should_map_legacy_fields": true
       }
     }
-  ],
-  "dataflow_config": [
-    { "dataflow_id": "tenable-io-logs" }
   ]
 }
