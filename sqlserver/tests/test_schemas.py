@@ -148,7 +148,7 @@ def _assert_include_split(indexes):
 
 
 def _assert_key_order(indexes):
-    # PRIMARY KEY CLUSTERED (b, a). column_names follows table order; key_ordinal does not.
+    # PRIMARY KEY CLUSTERED (b, a). key_columns follows key order, not table order.
     assert indexes['pk_key_order']['key_columns'] == 'b,a'
     assert indexes['pk_key_order']['included_columns'] == ''
     # (c DESC, a). The suffix is absent from every other fixture.
