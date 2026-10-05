@@ -7,8 +7,40 @@ import httpx
 import pytest
 from pytest_mock import MockerFixture
 
-from ddev.utils.github import GitHubManager, PullRequest
+from ddev.repo.core import Repository
+from ddev.utils.github import GitHubManager, PullRequest, resolve_owner_repo
 from ddev.utils.github_errors import GitHubAuthenticationError
+
+
+class TestGitHubOwner:
+    @pytest.fixture
+    def internal_repo(self, mocker, local_repo) -> Repository:
+        repo = Repository('core', str(local_repo))
+        mocker.patch.object(Repository, 'github_owner', 'ddoghq')
+        return repo
+
+    def test_manager_targets_the_repository_owner(self, internal_repo, config_file, terminal):
+        manager = GitHubManager(
+            internal_repo,
+            user=config_file.model.github.user,
+            token=config_file.model.github.token,
+            status=terminal.status,
+        )
+
+        assert manager.repo_id == f'ddoghq/{internal_repo.full_name}'
+
+    @pytest.mark.parametrize(
+        ('repository', 'expected'),
+        [
+            pytest.param(None, None, id='active-repository'),
+            pytest.param('marketplace', ('ddoghq', 'marketplace'), id='bare-repository'),
+            pytest.param('DataDog/integrations-core', ('DataDog', 'integrations-core'), id='explicit-owner'),
+        ],
+    )
+    def test_resolve_owner_repo(self, mocker, internal_repo, repository, expected):
+        app = mocker.Mock(repo=internal_repo)
+
+        assert resolve_owner_repo(app, repository) == (expected or ('ddoghq', internal_repo.full_name))
 
 
 class TestGetPullRequest:

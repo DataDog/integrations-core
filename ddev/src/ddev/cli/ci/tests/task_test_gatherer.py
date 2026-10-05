@@ -28,7 +28,7 @@ from ddev.cli.ci.tests.progress import (
     JobProgress,
     ProgressError,
 )
-from ddev.cli.ci.tests.status import Status, conclusion_to_status, has_finished_running
+from ddev.cli.ci.tests.status import Status, conclusion_to_status
 from ddev.event_bus.orchestrator import SyncProcessor
 from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
@@ -90,9 +90,6 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         self._progress_by_batch: dict[str, BatchProgress] = {
             batch.batch_id: self._planned_batch(batch) for batch in batches
         }
-        # Job IDs whose duration was already emitted, so a duration reported from a progress update is not
-        # emitted again when the batch finishes. A rerun gets a new job ID, so its duration is still reported.
-        self._durations_reported: set[int] = set()
         self._lock = threading.Lock()
         self._logger = monitor.logger
         self.monitor = monitor
@@ -112,10 +109,6 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         with self._lock:
             if not self._accepts(message.batch_id):
                 return
-            if not self.stopping:
-                # The runner's final job listing reaches the gatherer only on `BatchFinished`, never
-                # through a progress update, so its timing is observed here, before gathering can fail.
-                self._report_job_durations(message)
 
         self._logger.info(
             "Gathering results for batch %s (jobs=%s)",
@@ -128,6 +121,13 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             published = gathered is not None and self._publish_results(message, gathered)
         except Exception:
             self._metrics.record_operation(Operation.GATHER_BATCH_RESULTS, failed=True)
+            self._metrics.log_failed_operation(
+                Operation.GATHER_BATCH_RESULTS,
+                self._logger,
+                "Failed to gather results for batch %s",
+                message.batch_id,
+                exc_info=True,
+            )
             raise
         if published:
             self._metrics.record_operation(Operation.GATHER_BATCH_RESULTS, failed=False)
@@ -182,8 +182,13 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         return True
 
     def _report_final_result(self, progress: BatchProgress) -> None:
-        """Count collected results, not attempts only observed through polling."""
+        """Count collected results, not attempts only observed through polling.
+
+        Passed and failed are counted together at gathering, not against `batches.count` at launch,
+        so both land in the same time bucket for the same batch.
+        """
         metrics = self.monitor.metrics
+        metrics.count('batches.passed', int(progress.status == Status.SUCCESS))
         metrics.count('batches.failed', int(progress.status == Status.FAILURE))
         for job_progress in progress.jobs_progress:
             latest = job_progress.collected_result
@@ -191,42 +196,6 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
                 continue
             metrics.count('jobs.failed', int(latest.status is Status.FAILURE), **job_fields(job_progress.job))
             metrics.count('jobs.skipped', int(latest.status is Status.SKIPPED), **job_fields(job_progress.job))
-
-    def _report_job_durations(self, message: BatchFinished) -> None:
-        """Observe the timing of every planned terminal job. Hold `self._lock` after `_accepts`.
-
-        Only planned jobs contribute durations: the finished-progress merge warns any unplanned
-        survivor, so it must not gain a duration either.
-        """
-        planned_names = {
-            job_progress.job.name for job_progress in self._progress_by_batch[message.batch_id].jobs_progress
-        }
-        for batch_job_result in message.batch_jobs:
-            workflow_job = batch_job_result.workflow_job
-            if workflow_job is not None and batch_job_result.job.name in planned_names:
-                self._report_job_duration(workflow_job, batch_job_result.job)
-
-    def _report_job_duration(self, workflow_job: WorkflowJob, job: BatchJob) -> None:
-        """Emit the GitHub execution time of one completed job attempt. Hold `self._lock`.
-
-        Job IDs are unique per attempt, so the recorded-ID set collapses repeated progress and
-        final-result observations without collapsing reruns. Only a job that finished running says
-        how long it takes: a skipped or cancelled one would add near-zero or partial values. A
-        timed-out job is kept, since a runaway duration is the one that most needs measuring.
-        Unusable timing is omitted rather than zeroed, so a later observation with valid timing still can.
-        """
-        if not has_finished_running(workflow_job) or workflow_job.id in self._durations_reported:
-            return
-        duration = workflow_job.duration_seconds
-        if duration is None:
-            return
-        self._durations_reported.add(workflow_job.id)
-        self.monitor.metrics.distribution(
-            'job.duration',
-            duration,
-            **job_fields(job),
-            job_status=conclusion_to_status(workflow_job.conclusion).value,
-        )
 
     def _observe_progress(self, message: BatchProgressUpdate) -> None:
         with self._lock:
@@ -294,8 +263,6 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             if latest.state is ExecutionState.RUNNING and state is ExecutionState.QUEUED:
                 return job
         finished = state is ExecutionState.FINISHED
-        if finished:
-            self._report_job_duration(workflow_job, job.job)
         status = conclusion_to_status(workflow_job.conclusion) if finished else None
         attempt = JobAttemptProgress(
             attempt=1,
@@ -307,17 +274,6 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             job_url=workflow_job.html_url,
             reports=None,
         )
-        if status is not None and not any(
-            previous.job_id == workflow_job.id and previous.state is ExecutionState.FINISHED
-            for previous in job.attempts
-        ):
-            self._logger.info(
-                "Job %s completed: %s",
-                job.job.name,
-                status.value,
-                job=job.job.name,
-                job_status=status.value,
-            )
         return self._record_attempt(job, attempt, same_run=True)
 
     def _publish_update(self, message_id: str) -> UpdatePRComment:
@@ -493,12 +449,13 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             status, reason = Status.FAILURE, "its artifacts hold failed tests"
         else:
             status, reason = Status.INCONCLUSIVE, "the run did not succeed and no test failed"
+        # Inferred, not observed: the runner already reports every finish GitHub listed.
         self._logger.warning(
             "Job %s has no confirmed final state: reported as %s (%s)",
             batch_job_result.job.name,
             status.value,
             reason,
-            job=batch_job_result.job.name,
+            **job_fields(batch_job_result.job),
             job_status=status.value,
         )
         return status
