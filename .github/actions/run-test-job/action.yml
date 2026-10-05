@@ -163,13 +163,13 @@ runs:
           exit 1
         }
 
-    - name: Prepare for testing
-      shell: bash
-      run: ddev ci setup "$INPUT_TARGET_STR"
-
     - name: Ensure Docker is running
       shell: bash
       run: bash .github/workflows/scripts/ensure-docker.sh
+
+    - name: Prepare for testing
+      shell: bash
+      run: ddev ci setup "$INPUT_TARGET_STR"
 
     - name: Run Unit & Integration tests
       if: inputs.unit_tests == 'true'
