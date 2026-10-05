@@ -2,7 +2,7 @@
 
 ## Overview
 
-Collect custom metrics from read-only PowerShell `Get-*` cmdlets on Windows hosts. The integration maps cmdlet output properties to metrics and tags, allowing you to monitor Windows and application state that is exposed through PowerShell.
+Collect custom metrics from read-only PowerShell `Get-*` cmdlets on Windows hosts. The integration maps cmdlet output properties to metrics and tags. This lets you monitor Windows and application state exposed through PowerShell.
 
 For security, the integration runs only cmdlets and parameters explicitly permitted in an administrator-owned allowlist.
 
