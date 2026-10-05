@@ -105,6 +105,7 @@ PROGRESS_ERROR_TEXT = {
 
 # A batch that failed somewhere no target's job covers: a setup step, an upload, the workflow itself.
 BATCH_FAILURE_TEXT = "failed outside its integration test jobs"
+INCONCLUSIVE_TEXT = "inconclusive"
 
 # Introduces the one group-level list there is. Only tests that failed in every single target of the
 # group go under it, so any target's failures are this list plus that target's own additional ones.
@@ -250,10 +251,13 @@ def summary_line(progress: DispatcherProgress, *, shutdown: ShutdownRequest | No
         state = "complete" if progress.done else "in progress"
     else:
         state = f"stopped ({shutdown.kind.value})"
-    return (
+    summary = (
         f"Dispatcher tests {state}: {progress.complete}/{progress.total} jobs, "
         f"{progress.passed} passed, {progress.failed} failed, {progress.skipped} skipped"
     )
+    if progress.inconclusive:
+        summary += f", {progress.inconclusive} inconclusive"
+    return summary
 
 
 # ---------------------------------------------------------------------------
@@ -280,7 +284,8 @@ def _heading(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None =
         return "## 🔄 Dispatcher tests: in progress"
     if _has_failure(progress):
         return "## ❌ Dispatcher tests: failed"
-    if any(_uncollected_counts(progress)):
+    if any(_uncollected_counts(progress)) or progress.inconclusive:
+        # An inconclusive job is as unknown as an uncollected one, so the run cannot claim a pass.
         return "## ⚠️ Dispatcher tests: results incomplete"
     return "## ✅ Dispatcher tests: passed"
 
@@ -378,12 +383,20 @@ def _totals(progress: DispatcherProgress) -> str:
         counts.append(f"❌ {progress.failed} failed")
     if progress.skipped:
         counts.append(f"⏭️ {progress.skipped} skipped")
+    if progress.inconclusive:
+        counts.append(f"❔ {progress.inconclusive} inconclusive")
     pending = progress.total - progress.complete
     if pending:
         counts.append(f"⏳ {pending} pending")
     # Only worth saying once the run is over, and only when it is the whole truth: alongside results
-    # that never arrived, "nothing failed" is what a reader would remember and it would be wrong.
-    if progress.done and not _has_failure(progress) and not any(_uncollected_counts(progress)):
+    # that never arrived, or an outcome that could not be determined, "nothing failed" is what a
+    # reader would remember and it would be wrong.
+    if (
+        progress.done
+        and not _has_failure(progress)
+        and not progress.inconclusive
+        and not any(_uncollected_counts(progress))
+    ):
         counts.append("nothing failed")
 
     # A non-breaking space, so Markdown does not collapse the gap after the bar.
@@ -399,7 +412,9 @@ def _progress_bar(progress: DispatcherProgress) -> str:
     if not progress.done and not pending and not _collecting_results(progress):
         pending = 1
 
-    counts = (progress.passed, progress.failed, progress.skipped, pending)
+    # An inconclusive job has no outcome of its own to draw, so it takes the pending colour:
+    # leaving it out would hand its share of the width to the passed segment.
+    counts = (progress.passed, progress.failed, progress.skipped, pending + progress.inconclusive)
     total = max(progress.total, sum(counts))
     if total <= 0:
         return ""
@@ -460,13 +475,16 @@ def _batch_link(batch: BatchProgress) -> str:
 def _batch_chip(batch: BatchProgress) -> str:
     """The batch's state, in one glyph.
 
-    `status` is taken verbatim, never re-derived from `jobs_progress`: it is the workflow's own
-    conclusion, so a batch can be failed while every job inside it passed (a setup or upload step).
-    Rolling the jobs up here would render that batch as passed and hide a real failure.
+    `status` is the workflow's own conclusion and is not re-derived from `jobs_progress`: a batch
+    can fail while every job inside it passed (a setup or upload step). The exception is a failed
+    batch where no job confirmed a failure and some job is inconclusive: that job may be the
+    failure, so the batch is a warning rather than a confirmed failure.
     """
     if batch.state is ExecutionState.ARTIFACT_DOWNLOAD:
         return "📥"
     if batch.state is ExecutionState.FINISHED:
+        if batch.status is Status.FAILURE and _failure_is_unattributed(batch):
+            return "⚠️"
         chip = STATUS_CHIP.get(batch.status) if batch.status is not None else None
         return chip if chip is not None else "❔"
     # A rerun is Dispatcher's own business, so at the batch level it is simply unfinished work. Which
@@ -483,7 +501,7 @@ def _batch_chip(batch: BatchProgress) -> str:
 
 @dataclass(frozen=True)
 class FailedTarget:
-    """One of an integration's targets that failed or whose results could not be collected.
+    """One of an integration's targets that failed, was inconclusive, or whose results could not be collected.
 
     The batch travels with the job because a group spans batches: an integration's targets are
     partitioned across them, and the batch is what a reader needs in order to open the right run.
@@ -511,9 +529,18 @@ class FailureGroup:
         return tuple(target for target in self.targets if target.attempt.status is Status.FAILURE)
 
     @property
+    def inconclusive_targets(self) -> tuple[FailedTarget, ...]:
+        """The targets whose outcome could not be confirmed."""
+        return tuple(target for target in self.targets if target.attempt.status is Status.INCONCLUSIVE)
+
+    @property
     def unavailable_targets(self) -> tuple[FailedTarget, ...]:
-        """The targets that did not fail and whose results never arrived either."""
-        return tuple(target for target in self.targets if target.attempt.status is not Status.FAILURE)
+        """The targets that neither failed nor were inconclusive, and whose results never arrived."""
+        return tuple(
+            target
+            for target in self.targets
+            if target.attempt.status is not Status.FAILURE and target.attempt.status is not Status.INCONCLUSIVE
+        )
 
     @property
     def failed(self) -> bool:
@@ -537,14 +564,14 @@ def _failure_groups(progress: DispatcherProgress) -> list[FailureGroup]:
     grouped: dict[str, list[FailedTarget]] = {}
     for batch, job in _jobs_with_batches(progress):
         attempt = job.latest
-        if attempt is None or (attempt.status is not Status.FAILURE and attempt.error is None):
+        if attempt is None or (attempt.status not in (Status.FAILURE, Status.INCONCLUSIVE) and attempt.error is None):
             continue
         grouped.setdefault(job.job.target, []).append(FailedTarget(job, attempt, batch.batch_id))
 
     groups = [FailureGroup(integration, tuple(targets)) for integration, targets in grouped.items()]
     # Real failures first, then most affected targets, then by name so two runs of the same shape
-    # render the same way. Groups holding only uncollected results sort last: they are not
-    # actionable, so they must never displace a failure from the rows a truncated report keeps.
+    # render the same way. Groups holding only uncollected or inconclusive results sort last: they
+    # are not actionable, so they must never displace a failure from the rows a truncated report keeps.
     groups.sort(key=lambda group: (not group.failed, -len(group.targets), group.integration))
     return groups
 
@@ -623,13 +650,19 @@ def _group_counts(group: FailureGroup) -> str:
     Not a test count: a test count over a group whose targets failed differently says nothing about
     any one of them, and it would put a number nobody navigates by where the outcome belongs.
     """
-    failed = len(group.failed_targets)
-    unavailable = len(group.unavailable_targets)
-    if failed and unavailable:
-        return f"{_plural(failed, 'failed target')}, {_plural(unavailable, 'result')} unavailable"
-    if failed:
-        return _plural(failed, "failed target")
-    return f"{'results' if unavailable > 1 else 'result'} unavailable for {_plural(unavailable, 'target')}"
+    counts = []
+    if failed := len(group.failed_targets):
+        counts.append(_plural(failed, "failed target"))
+    if inconclusive := len(group.inconclusive_targets):
+        counts.append(_plural(inconclusive, "inconclusive target"))
+    if unavailable := len(group.unavailable_targets):
+        if counts:
+            counts.append(f"{_plural(unavailable, 'result')} unavailable")
+        else:
+            counts.append(
+                f"{'results' if unavailable > 1 else 'result'} unavailable for {_plural(unavailable, 'target')}"
+            )
+    return ", ".join(counts)
 
 
 def _group_body(group: FailureGroup, *, level: DetailLevel) -> str:
@@ -653,6 +686,8 @@ def _target_rows(group: FailureGroup, *, level: DetailLevel) -> list[str]:
 def _target_row(target: FailedTarget, *, common: list[str], level: DetailLevel) -> str:
     """One target: its link, its batch, what happened to it, and the names that explain it."""
     head, listed = _target_detail(target, common=common, level=level)
+    if target.attempt.status is Status.INCONCLUSIVE:
+        head = f"{INCONCLUSIVE_TEXT} · {head}" if head else INCONCLUSIVE_TEXT
     if target.attempt.error is not None:
         # Said against the target rather than once for the whole group: a reason detached from the
         # links it applies to leaves a reader matching up two lists.
@@ -741,12 +776,13 @@ def _batch_notes(progress: DispatcherProgress) -> list[str]:
     """What went wrong at the batch level, which no target's row can account for."""
     notes = []
     for batch in progress.batches:
-        # A batch whose workflow failed with nothing failing inside it is a real failure with nothing
-        # to group; saying so beats a silent omission.
+        # A batch whose workflow failed with every job confirmed passing is a real failure with
+        # nothing to group; saying so beats a silent omission. An inconclusive job may be the failure,
+        # so its own row accounts for the batch instead.
         if (
             batch.status is Status.FAILURE
             and all(job.complete for job in batch.jobs_progress)
-            and not any(_is_failed(job) for job in batch.jobs_progress)
+            and not any(_is_failed(job) or _is_inconclusive(job) for job in batch.jobs_progress)
         ):
             notes.append(f"❌ {_batch_note_link(batch)}: {BATCH_FAILURE_TEXT}")
         if batch.error is not None and not _batch_error_is_explained(batch):
@@ -833,6 +869,16 @@ def _jobs_with_batches(progress: DispatcherProgress) -> Iterator[tuple[BatchProg
 
 def _is_failed(job: JobProgress) -> bool:
     return job.latest is not None and job.latest.status is Status.FAILURE
+
+
+def _is_inconclusive(job: JobProgress) -> bool:
+    return job.latest is not None and job.latest.status is Status.INCONCLUSIVE
+
+
+def _failure_is_unattributed(batch: BatchProgress) -> bool:
+    """Whether no job confirmed a failure and at least one job's outcome is inconclusive."""
+    jobs = batch.jobs_progress
+    return any(_is_inconclusive(job) for job in jobs) and not any(_is_failed(job) for job in jobs)
 
 
 def _has_failure(progress: DispatcherProgress) -> bool:

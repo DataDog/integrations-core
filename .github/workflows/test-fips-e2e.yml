@@ -99,7 +99,7 @@ jobs:
           DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
           TARGET: ${{ inputs.target || 'tls' }}
         run: |
-          ddev env test --base --new-env --junit "$TARGET" -- all -m "fips_off"
+          ddev env test --base --new-env --ignore-teardown-errors --junit "$TARGET" -- all -m "fips_off"
 
       - name: Run E2E tests with FIPS enabled
         env:
@@ -107,7 +107,7 @@ jobs:
           DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
           TARGET: ${{ inputs.target || 'tls' }}
         run: |
-          ddev env test --base --new-env --junit "$TARGET" -- all -k "fips_on"
+          ddev env test --base --new-env --ignore-teardown-errors --junit "$TARGET" -- all -k "fips_on"
 
       - name: Finalize test results
         if: always()

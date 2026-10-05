@@ -48,26 +48,33 @@ TESTABLE_PATH_PATTERN = re.compile(
 
 # Repository-wide paths that, when changed, trigger the full eligible target set.
 #
-# Deliberately narrower than the `paths` filter of `.github/workflows/pr-all.yml`, which also
-# triggers on `ddev/src/**`, the tooling `pyproject.toml` files, and the workflow definitions.
-# Whether Dispatcher should match those too is still an open decision.
+# A path belongs here only if a pull request's own run uses it from the pull request checkout and a
+# change to it can break some targets but not others, or only shows at full scale. The Dispatcher
+# itself, including this module, runs from master, so a pull request cannot exercise its own changes
+# to it; its unit tests still run through the direct rule on the `ddev` target.
 #
 # TODO(manifest): once ddev no longer depends on `manifest.json`, each integration should declare
 # its own triggers as structured configuration instead of this shared regex.
 REPOSITORY_WIDE_PATTERNS = re.compile(
     r"""
-    # Shared testing framework.
+    # Shared testing framework, including the dependencies it installs into every test environment.
     datadog_checks_base/datadog_checks/.+
+  | datadog_checks_base/pyproject\.toml
   | datadog_checks_dev/datadog_checks/dev/[^/]+\.py
-    # ddev's test planning and execution code. Other ddev tooling is intentionally absent and only
-    # selects the `ddev` target through the direct rule.
+  | datadog_checks_dev/datadog_checks/dev/plugin/.+
+  | datadog_checks_dev/pyproject\.toml
+    # ddev's test execution code, which builds each target's environments and runs its tests. Other
+    # ddev tooling is intentionally absent and only selects the `ddev` target through the direct rule.
   | ddev/src/ddev/cli/test/.+
   | ddev/src/ddev/cli/env/test\.py
   | ddev/src/ddev/testing/.+
   | ddev/src/ddev/utils/hatch\.py
-  | ddev/src/ddev/cli/ci/tests/.+
+  | ddev/src/ddev/plugin/external/hatch/.+
   | ddev/src/ddev/integration/core\.py
   | ddev/src/ddev/repo/core\.py
+    # Dispatcher settings, which the planner reads from the pull request's tree. Batching, rate
+    # limits and retries only show their effect on a full run.
+  | \.ddev/dispatcher\.toml
     """,
     re.VERBOSE,
 )

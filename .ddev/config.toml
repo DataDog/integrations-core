@@ -1,3 +1,8 @@
+# Other files merged into this configuration, relative to `.ddev/`. Each top-level table lives in
+# exactly one file.
+#   dispatcher.toml: `ddev ci dispatch-tests` settings.
+imports = ["dispatcher.toml"]
+
 # Validations to run with `ddev validate all`.
 # Each entry must match a known validation name.
 # Remove an entry to skip that validation for this repo.

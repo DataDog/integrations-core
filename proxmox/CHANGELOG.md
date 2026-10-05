@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.1 / 2026-09-30
+
+***Fixed***:
+
+* Handle null and error Proxmox API responses. Failures on the performance metrics, HA, or task endpoints are reported as check warnings instead of stopping the other collectors, and task collection failures are isolated per node. ([#24693](https://github.com/DataDog/integrations-core/pull/24693))
+
 ## 2.6.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:
