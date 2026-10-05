@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
 import httpx
 import pytest
 
@@ -11,19 +9,6 @@ from ddev.ai.tools.http.http_post import HttpPostTool
 from .helpers import TARGET, respond
 
 FILTER_URL = f"{TARGET}/api/task_runs/filter"
-
-
-async def test_json_body_is_encoded():
-    transport = respond(httpx.Response(200, json=[]))
-    tool = HttpPostTool(transport=transport)
-
-    result = await tool.run({"url": FILTER_URL, "json": {"limit": 1, "sort": None}})
-
-    assert result.success is True
-    (request,) = transport.requests
-    assert request.method == "POST"
-    assert request.headers["content-type"] == "application/json"
-    assert json.loads(request.content) == {"limit": 1, "sort": None}
 
 
 async def test_validation_error_is_preserved_and_not_retried():

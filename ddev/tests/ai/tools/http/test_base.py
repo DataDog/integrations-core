@@ -12,9 +12,9 @@ import pytest
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.fs.read_file import ReadFileTool
-from ddev.ai.tools.http.base import MAX_BODY_BYTES, MAX_OUTPUT_CHARS
 from ddev.ai.tools.http.http_get import HttpGetTool
 from ddev.ai.tools.http.http_post import HttpPostTool
+from ddev.ai.tools.http.response_format import MAX_BODY_BYTES, MAX_OUTPUT_CHARS
 from ddev.ai.tools.http.response_store import ResponseStore
 from ddev.ai.tools.shell.grep import GrepTool
 
@@ -57,6 +57,52 @@ async def test_embedded_credentials_are_rejected_for_every_method(url: str):
         assert transport.requests == []
 
 
+@pytest.mark.parametrize("tool_cls,method", [(HttpGetTool, "GET"), (HttpPostTool, "POST")])
+@pytest.mark.parametrize(
+    "body_input,expected_content,content_type",
+    [
+        ({"json": {"limit": 1, "sort": None}}, b'{"limit":1,"sort":null}', "application/json"),
+        ({"json": None}, b"null", "application/json"),
+        ({"content": "<filter>café</filter>"}, "<filter>café</filter>".encode(), "application/xml"),
+    ],
+)
+async def test_body_and_headers_are_sent_for_each_verb(
+    tool_cls: type[HttpGetTool] | type[HttpPostTool],
+    method: str,
+    body_input: dict,
+    expected_content: bytes,
+    content_type: str,
+):
+    transport = respond(httpx.Response(200, text="ok"))
+    headers = {"Authorization": "Bearer deliberate-token", "Accept": "application/json"}
+    if "content" in body_input:
+        headers["Content-Type"] = content_type
+
+    result = await tool_cls(transport=transport).run({"url": OPENAPI_URL, "headers": headers, **body_input})
+
+    assert result.success is True
+    (request,) = transport.requests
+    assert request.method == method
+    if "json" in body_input:
+        assert json.loads(request.content) == body_input["json"]
+    else:
+        assert request.content == expected_content
+    assert request.headers["authorization"] == headers["Authorization"]
+    assert request.headers["accept"] == headers["Accept"]
+    assert request.headers["content-type"] == content_type
+
+
+@pytest.mark.parametrize("json_body", [{"limit": 1}, None])
+async def test_conflicting_body_inputs_are_rejected(json_body: object):
+    transport = respond(httpx.Response(200))
+
+    result = await HttpGetTool(transport=transport).run({"url": OPENAPI_URL, "json": json_body, "content": "raw"})
+
+    assert result.success is False
+    assert "either json or content" in result.error
+    assert transport.requests == []
+
+
 async def test_large_json_is_saved_formatted_and_result_is_bounded(store: ResponseStore):
     document = openapi_document()
 
@@ -77,12 +123,29 @@ async def test_large_json_is_saved_formatted_and_result_is_bounded(store: Respon
     assert metadata["representation"] == "formatted_json"
 
 
-async def test_save_response_preserves_small_response(store: ResponseStore):
-    result = await get_tool(store, respond(httpx.Response(200, json={"ok": True}))).run(
+@pytest.mark.parametrize("body", ['{"ok":true}', "plain text café", ""])
+async def test_save_response_preserves_small_response_and_returns_body(store: ResponseStore, body: str):
+    response = httpx.Response(200, text=body)
+    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
+
+    assert result.success is True
+    payload = json.loads(result.data)
+    assert payload["body"] == body
+    assert Path(payload["saved_to"]).read_text() == body
+    assert Path(payload["metadata_path"]).is_file()
+    assert len(result.data) <= MAX_OUTPUT_CHARS
+
+
+async def test_saved_body_that_cannot_fit_with_paths_uses_summary(store: ResponseStore):
+    body = "x" * (MAX_OUTPUT_CHARS - 100)
+    result = await get_tool(store, respond(httpx.Response(200, text=body))).run(
         {"url": OPENAPI_URL, "save_response": True}
     )
 
-    assert json.loads(Path(json.loads(result.data)["saved_to"]).read_text()) == {"ok": True}
+    payload = json.loads(result.data)
+    assert payload["summary"]["type"] == "text"
+    assert Path(payload["saved_to"]).read_text() == body
+    assert len(result.data) <= MAX_OUTPUT_CHARS
 
 
 async def test_post_metadata_records_request_without_credentials(store: ResponseStore):
@@ -93,16 +156,32 @@ async def test_post_metadata_records_request_without_credentials(store: Response
             "url": f"{TARGET}/api/task_runs/filter",
             "query": {"api_key": "s3cret", "page": 1},
             "json": {"limit": 1},
+            "headers": {
+                "Authorization": "Bearer auth-secret",
+                "Cookie": "session=cookie-secret",
+                "X-API-Key": "header-secret",
+                "Accept": "application/json",
+            },
             "save_response": True,
         }
     )
 
-    metadata_text = Path(json.loads(result.data)["metadata_path"]).read_text()
-    assert "s3cret" not in metadata_text
+    payload = json.loads(result.data)
+    assert result.success is True
+    assert json.loads(payload["body"]) == []
+    assert json.loads(Path(payload["saved_to"]).read_text()) == []
+    metadata_text = Path(payload["metadata_path"]).read_text()
+    assert all(secret not in metadata_text for secret in ("s3cret", "auth-secret", "cookie-secret", "header-secret"))
     metadata = json.loads(metadata_text)
     assert metadata["method"] == "POST"
     assert metadata["request_body"] == {"limit": 1}
     assert "page=1" in metadata["url"]
+    assert metadata["request_headers"] == {
+        "Authorization": "REDACTED",
+        "Cookie": "REDACTED",
+        "X-API-Key": "REDACTED",
+        "Accept": "application/json",
+    }
 
 
 async def test_large_error_response_keeps_status_and_excerpt(store: ResponseStore):
