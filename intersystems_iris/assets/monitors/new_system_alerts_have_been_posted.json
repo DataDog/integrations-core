@@ -5,7 +5,7 @@
     "integration:intersystems-iris"
   ],
   "definition": {
-    "message": "{{#is_alert}}\nIRIS instance {{host.name}} has posted new system alerts, reported by `intersystems_iris.system.alerts_new`. Review the instance messages log to see what the instance is reporting and whether it needs action.\n{{/is_alert}}\n\n{{#is_recovery}}\nIRIS instance {{host.name}} has stopped posting new system alerts.\n{{/is_recovery}}",
+    "message": "{{#is_alert}}\nIRIS instance {{host.name}} has posted new system alerts, reported by `intersystems_iris.system.alerts_new`. Review the alerts and the instance messages log to see what the instance is reporting and whether it needs action. The flag stays set until the alerts are read through the `/api/monitor/alerts` endpoint.\n{{/is_alert}}\n\n{{#is_recovery}}\nIRIS instance {{host.name}} no longer reports unread system alerts.\n{{/is_recovery}}",
     "name": "[InterSystems IRIS] New system alerts have been posted on {{host.name}}",
     "options": {
       "escalation_message": "",
@@ -18,8 +18,7 @@
       "renotify_interval": 0,
       "require_full_window": true,
       "thresholds": {
-        "critical": 1,
-        "critical_recovery": 0
+        "critical": 1
       },
       "timeout_h": 0
     },

@@ -5,7 +5,7 @@
     "integration:intersystems-iris"
   ],
   "definition": {
-    "message": "{{#is_alert}}\nIRIS instance {{host.name}} is using {{value}} percent of system CPU. At this level the instance queues work instead of running it, so query and message latency will degrade. Check for runaway jobs or an undersized host.\n{{/is_alert}}\n\n{{#is_warning}}\nIRIS instance {{host.name}} is using {{value}} percent of system CPU. It has not yet crossed the critical threshold, but processing headroom is shrinking.\n{{/is_warning}}\n\n{{#is_recovery}}\nCPU usage on IRIS instance {{host.name}} has dropped back to a healthy level and the instance has processing headroom again.\n{{/is_recovery}}",
+    "message": "{{#is_alert}}\nIRIS instance {{host.name}} is using {{value}}% of system CPU. At this level the instance queues work instead of running it, so query and message latency will degrade. Check for runaway jobs or an undersized host.\n{{/is_alert}}\n\n{{#is_warning}}\nIRIS instance {{host.name}} is using {{value}}% of system CPU. It has not yet crossed the critical threshold, but processing headroom is shrinking.\n{{/is_warning}}\n\n{{#is_recovery}}\nCPU usage on IRIS instance {{host.name}} has dropped back to a healthy level and the instance has processing headroom again.\n{{/is_recovery}}",
     "name": "[InterSystems IRIS] CPU usage is saturated on {{host.name}}",
     "options": {
       "escalation_message": "",

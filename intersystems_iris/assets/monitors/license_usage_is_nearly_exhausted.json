@@ -5,7 +5,7 @@
     "integration:intersystems-iris"
   ],
   "definition": {
-    "message": "{{#is_alert}}\nIRIS instance {{host.name}} is consuming {{value}} percent of its licensed capacity. New connections and jobs will be refused once the license is fully consumed. Release idle sessions or raise the licensed capacity.\n{{/is_alert}}\n\n{{#is_warning}}\nLicense usage on IRIS instance {{host.name}} has reached {{value}} percent of licensed capacity. It has not yet crossed the critical threshold, but headroom for new connections is shrinking.\n{{/is_warning}}\n\n{{#is_recovery}}\nLicense usage on IRIS instance {{host.name}} has fallen back to a safe level and the instance has licensed capacity available again.\n{{/is_recovery}}",
+    "message": "{{#is_alert}}\nIRIS instance {{host.name}} is consuming {{value}}% of its licensed capacity. New connections and jobs will be refused once the license is fully consumed. Release idle sessions or raise the licensed capacity.\n{{/is_alert}}\n\n{{#is_warning}}\nLicense usage on IRIS instance {{host.name}} has reached {{value}}% of licensed capacity. It has not yet crossed the critical threshold, but headroom for new connections is shrinking.\n{{/is_warning}}\n\n{{#is_recovery}}\nLicense usage on IRIS instance {{host.name}} has fallen back to a safe level and the instance has licensed capacity available again.\n{{/is_recovery}}",
     "name": "[InterSystems IRIS] License usage is nearly exhausted on {{host.name}}",
     "options": {
       "escalation_message": "",

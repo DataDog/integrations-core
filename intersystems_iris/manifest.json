@@ -5,7 +5,7 @@
   "display_on_public_website": false,
   "tile": {
     "title": "InterSystems IRIS",
-    "description": "Monitor InterSystems IRIS instance health, licensing, mirroring, ECP, and interoperability.",
+    "description": "Monitor InterSystems IRIS instance health, licensing, mirroring, Enterprise Cache Protocol (ECP), and interoperability.",
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",

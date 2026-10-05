@@ -1,6 +1,6 @@
 {
   "title": "InterSystems IRIS Overview",
-  "description": "Overview of InterSystems IRIS instance health, high availability (mirroring), distributed cache (ECP), interoperability, and logs. Mirror, ECP, and outbound HTTP widgets show \"No data\" on deployments that do not use those features.",
+  "description": "Overview of InterSystems IRIS instance health, high availability (mirroring), Enterprise Cache Protocol (ECP) distributed caching, interoperability, and logs. Mirror, ECP, and outbound HTTP widgets show \"No data\" on deployments that do not use those features.",
   "widgets": [
     {
       "definition": {
@@ -31,7 +31,7 @@
           {
             "definition": {
               "background_color": "white",
-              "content": "InterSystems IRIS is a data platform combining a multi-model database, interoperability engine, and analytics runtime. This dashboard tracks instance health, high availability (mirroring), distributed caching (ECP), and interoperability productions.\n\n- **Mirror**, **ECP**, and **outbound HTTP** widgets show *No data* when those features are not in use; this is expected.\n- Event-style signals (failovers, process termination, license warnings) surface in the **Logs** group via the `messages.log` pipeline.\n\n**Useful links:**\n- [Datadog InterSystems IRIS integration documentation](https://docs.datadoghq.com/integrations/intersystems_iris/)\n- [InterSystems IRIS product documentation](https://docs.intersystems.com/)",
+              "content": "InterSystems IRIS is a data platform combining a multi-model database, interoperability engine, and analytics runtime. This dashboard tracks instance health, high availability (mirroring), Enterprise Cache Protocol (ECP) distributed caching, and interoperability productions.\n\n- **Mirror**, **ECP**, and **outbound HTTP** widgets show *No data* when those features are not in use; this is expected.\n- Event-style signals (failovers, process termination, license warnings) surface in the **Logs** group via the `messages.log` pipeline.\n\n**Useful links:**\n- [Datadog InterSystems IRIS integration documentation](https://docs.datadoghq.com/integrations/intersystems_iris/)\n- [InterSystems IRIS product documentation](https://docs.intersystems.com/)",
               "font_size": "14",
               "has_padding": true,
               "text_align": "left",
@@ -402,7 +402,7 @@
         "background_color": "vivid_blue",
         "layout_type": "ordered",
         "show_title": true,
-        "title": "Health at a Glance",
+        "title": "Health at a glance",
         "type": "group",
         "widgets": [
           {
@@ -582,13 +582,13 @@
         "background_color": "vivid_blue",
         "layout_type": "ordered",
         "show_title": true,
-        "title": "Instance Health Trends",
+        "title": "Instance health trends",
         "type": "group",
         "widgets": [
           {
             "definition": {
               "background_color": "blue",
-              "content": "CPU, memory, license consumption, cache efficiency, and write/journal daemon activity over time.",
+              "content": "CPU, memory, license consumption, cache efficiency, and write and journal daemon activity over time.",
               "font_size": "14",
               "has_padding": true,
               "text_align": "center",
@@ -982,7 +982,7 @@
         "background_color": "vivid_blue",
         "layout_type": "ordered",
         "show_title": true,
-        "title": "Mirror (High Availability)",
+        "title": "Mirror (high availability)",
         "type": "group",
         "widgets": [
           {
@@ -1090,7 +1090,7 @@
                   "response_format": "scalar"
                 }
               ],
-              "title": "Mirror members — role, sync status, readiness (per host)",
+              "title": "Mirror members: role, sync status, and readiness (per host)",
               "title_align": "left",
               "title_size": "16",
               "type": "query_table"
@@ -1235,7 +1235,7 @@
         "background_color": "vivid_blue",
         "layout_type": "ordered",
         "show_title": true,
-        "title": "ECP (Distributed Cache)",
+        "title": "ECP (distributed cache)",
         "type": "group",
         "widgets": [
           {
@@ -1476,7 +1476,7 @@
                   "response_format": "scalar"
                 }
               ],
-              "title": "Business hosts — activity and message counts (per interop_host)",
+              "title": "Business hosts: activity and message counts (per interop_host)",
               "title_align": "left",
               "title_size": "16",
               "type": "query_table"
@@ -1668,7 +1668,7 @@
               ],
               "show_legend": true,
               "time": {},
-              "title": "Errors / aborts / discards / suspends (new per interval, per production)",
+              "title": "Errors, aborts, discards, and suspends (new per interval, per production)",
               "type": "timeseries"
             },
             "id": 3120701753621362,
@@ -1699,7 +1699,7 @@
                   "response_format": "scalar"
                 }
               ],
-              "title": "Queue depth by production — deepest now",
+              "title": "Queue depth by production (current)",
               "title_align": "left",
               "title_size": "16",
               "type": "toplist"
@@ -1746,7 +1746,7 @@
               ],
               "show_legend": true,
               "time": {},
-              "title": "Queue depth by production — over time",
+              "title": "Queue depth by production over time",
               "type": "timeseries"
             },
             "id": 8809890414393707,
@@ -1813,7 +1813,7 @@
               ],
               "show_legend": true,
               "time": {},
-              "title": "Outbound HTTP/SOAP latency (per business host; appears only with live outbound traffic)",
+              "title": "Outbound HTTP and SOAP latency (per business host; appears only with live outbound traffic)",
               "type": "timeseries"
             },
             "id": 6848869437558945,
@@ -1885,7 +1885,7 @@
                   "query": {
                     "data_source": "logs_stream",
                     "indexes": [],
-                    "query_string": "source:intersystems_iris $env $host status:(alert OR error OR critical)",
+                    "query_string": "source:intersystems-iris $env $host status:(alert OR error OR critical)",
                     "sort": {
                       "column": "timestamp",
                       "order": "desc"
@@ -1944,7 +1944,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:intersystems_iris $env $host"
+                        "query": "source:intersystems-iris $env $host"
                       },
                       "storage": "hot"
                     }
