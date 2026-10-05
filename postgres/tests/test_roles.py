@@ -308,7 +308,6 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'database_name': 'datadog_test',
         'setting_name': 'statement_timeout',
         'setting_value': '5s',
-        'is_value_redacted': False,
     } in role_event['settings']
 
     privilege_event = privilege_events[0]
@@ -448,11 +447,11 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
 
 
 def test_collect_roles_redacts_custom_setting_values(integration_check, roles_instance, role_catalog, aggregator):
-    """Values of dotted settings are collected only for allowlisted extensions.
+    """Dotted settings are collected only for allowlisted extensions; all others are skipped.
 
     Applications and extensions store secrets such as PostgREST's `pgrst.jwt_secret` or PostgreSQL Anonymizer's
     `anon.salt` in role settings, and a module can register such a setting in `pg_settings`. Built-in settings,
-    including hidden ones such as `role`, keep their values.
+    including hidden ones such as `role`, are always collected.
     """
     # Registers pg_trgm's settings in the agent's sessions, so its setting is known to `pg_settings` but is still
     # not on the allowlist.
@@ -474,16 +473,13 @@ def test_collect_roles_redacts_custom_setting_values(integration_check, roles_in
     role_event = next(event for event in metadata if event['kind'] == 'pg_roles')
 
     assert {
-        setting['setting_name']: (setting['setting_value'], setting['is_value_redacted'])
+        setting['setting_name']: setting['setting_value']
         for setting in role_event['settings']
         if setting['role_name'] == 'dd_role_obs_owner'
     } == {
-        'pgrst.jwt_secret': (None, True),
-        'DdRoleObs.Api_Key': (None, True),
-        'pg_trgm.similarity_threshold': (None, True),
-        'pg_stat_statements.track': ('all', False),
-        'PgAudit.Log': ('none', False),
-        'role': ('dd_role_obs_reader', False),
+        'pg_stat_statements.track': 'all',
+        'PgAudit.Log': 'none',
+        'role': 'dd_role_obs_reader',
     }
 
 

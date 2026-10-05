@@ -80,35 +80,28 @@ def memberships_query(*, pg16_plus: bool) -> str:
 
 # Built-in settings have no dot in their name. Every dotted setting belongs to an extension or application, and
 # those can hold secrets such as `pgrst.jwt_secret` or `anon.salt`, whether or not a loaded module registers them.
-# Their values are kept only for extensions known to hold no secrets; other names are reported as redacted.
+# Dotted settings are collected only for extensions known to hold no secrets; all others are skipped entirely.
 ROLE_SETTING_VALUE_PREFIXES = ("auto_explain", "pg_hint_plan", "pg_stat_statements", "pgaudit", "plpgsql")
 
 # Takes the allowed prefixes as its only parameter. Prefixes are matched case-insensitively because custom setting
 # names keep the case they were written in.
 QUERY_ROLE_SETTINGS = """
-SELECT role_settings.rolname::text AS role_name,
-       role_settings.database_name,
-       role_settings.setting_name,
-       CASE WHEN role_settings.is_value_collected THEN role_settings.setting_value END AS setting_value,
-       NOT role_settings.is_value_collected AS is_value_redacted
-FROM (
-    SELECT role.rolname,
-           COALESCE(database.datname::text, '') AS database_name,
-           parsed.setting_name,
-           parsed.setting_value,
-           strpos(parsed.setting_name, '.') = 0
-               OR lower(split_part(parsed.setting_name, '.', 1)) = ANY(%s) AS is_value_collected
-    FROM pg_catalog.pg_db_role_setting AS settings
-    CROSS JOIN LATERAL unnest(settings.setconfig) AS setting
-    CROSS JOIN LATERAL (
-        SELECT split_part(setting, '=', 1) AS setting_name,
-               substr(setting, strpos(setting, '=') + 1) AS setting_value
-    ) AS parsed
-    JOIN pg_catalog.pg_roles AS role
-      ON role.oid = settings.setrole
-    LEFT JOIN pg_catalog.pg_database AS database
-      ON database.oid = settings.setdatabase
-) AS role_settings
+SELECT role.rolname::text AS role_name,
+       COALESCE(database.datname::text, '') AS database_name,
+       parsed.setting_name,
+       parsed.setting_value
+FROM pg_catalog.pg_db_role_setting AS settings
+CROSS JOIN LATERAL unnest(settings.setconfig) AS setting
+CROSS JOIN LATERAL (
+    SELECT split_part(setting, '=', 1) AS setting_name,
+           substr(setting, strpos(setting, '=') + 1) AS setting_value
+) AS parsed
+JOIN pg_catalog.pg_roles AS role
+  ON role.oid = settings.setrole
+LEFT JOIN pg_catalog.pg_database AS database
+  ON database.oid = settings.setdatabase
+WHERE strpos(parsed.setting_name, '.') = 0
+   OR lower(split_part(parsed.setting_name, '.', 1)) = ANY(%s)
 ORDER BY role_name, database_name, setting_name
 """
 
