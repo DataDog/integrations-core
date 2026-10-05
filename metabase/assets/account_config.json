@@ -1,0 +1,51 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "instance_type",
+      "label": "Instance type",
+      "help": "Default is 'Cloud'.",
+      "editable": true,
+      "required": false,
+      "dropdown": {
+        "options": [
+          { "value": "cloud", "label": "Cloud" },
+          { "value": "self_hosted", "label": "Self-hosted" }
+        ]
+      }
+    },
+    {
+      "key": "dns_alias",
+      "label": "DNS alias",
+      "editable": true,
+      "required": false,
+      "text": {
+        "pattern": "^[a-z0-9-]{3,}$"
+      }
+    },
+    {
+      "key": "self_hosted_instance_domain",
+      "label": "Self-hosted instance domain",
+      "help": "Must be publicly accessible via HTTPS only (e.g., example.com).",
+      "editable": true,
+      "required": false,
+      "domain": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "metabase-logs" }
+  ]
+}
