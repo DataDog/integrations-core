@@ -67,6 +67,7 @@ jobs:
       id-token: write
 
     strategy:
+      fail-fast: false
       matrix:
         package: ${{ fromJson(needs.find-new-integrations.outputs.packages) }}
 

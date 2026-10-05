@@ -129,8 +129,8 @@ rm "${DD_PREFIX_PATH}/bin/curl"
 
 # libpq and pg_config as needed by psycopg
 DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
-VERSION="18.3" \
-SHA256="d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f" \
+VERSION="18.6" \
+SHA256="555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
 # pg_config is reached through ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH. Writing PATH
