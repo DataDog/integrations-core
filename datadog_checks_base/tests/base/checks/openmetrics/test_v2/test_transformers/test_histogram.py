@@ -680,14 +680,15 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
 
 
 @pytest.mark.parametrize('collect_counters_with_distributions', [False, True])
-def test_omit_bound_tags(aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions):
+def test_collect_histograms_as_distributions(
+    aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions
+):
     mock_http_response(LATENCY_PAYLOAD)
     check = get_check(
         {
             'metrics': ['.+'],
-            'histogram_buckets_as_distributions': True,
             'collect_counters_with_distributions': collect_counters_with_distributions,
-            'omit_histogram_bound_tags': True,
+            'collect_histograms_as_distributions': True,
         }
     )
     dd_run_check(check)
@@ -715,17 +716,9 @@ def test_omit_bound_tags(aggregator, dd_run_check, mock_http_response, collect_c
     aggregator.assert_all_metrics_covered()
 
 
-def test_omit_bound_tags_without_distributions(aggregator, dd_run_check, mock_http_response, caplog):
-    mock_http_response(LATENCY_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'omit_histogram_bound_tags': True})
-    dd_run_check(check)
-
-    assert '`omit_histogram_bound_tags` has no effect' in caplog.text
-    assert not aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
-    aggregator.assert_metric_has_tag('test.rest_client_request_latency_seconds.bucket', 'upper_bound:0.004')
-
-
-def test_omit_bound_tags_unset_on_unsupported_agent(aggregator, dd_run_check, mock_http_response, monkeypatch):
+def test_histogram_buckets_as_distributions_on_unsupported_agent(
+    aggregator, dd_run_check, mock_http_response, monkeypatch
+):
     monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
     mock_http_response(LATENCY_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'histogram_buckets_as_distributions': True})
@@ -750,11 +743,9 @@ def test_omit_bound_tags_unset_on_unsupported_agent(aggregator, dd_run_check, mo
         ),
     ],
 )
-def test_omit_bound_tags_rejected(dd_run_check, monkeypatch, setup, message):
+def test_collect_histograms_as_distributions_rejected(dd_run_check, monkeypatch, setup, message):
     setup(monkeypatch)
-    check = get_check(
-        {'metrics': ['.+'], 'histogram_buckets_as_distributions': True, 'omit_histogram_bound_tags': True}
-    )
+    check = get_check({'metrics': ['.+'], 'collect_histograms_as_distributions': True})
 
     with pytest.raises(Exception, match=message):
         dd_run_check(check, extract_message=True)

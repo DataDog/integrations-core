@@ -21,8 +21,12 @@ class MetricTransformer:
         self.collect_counters_with_distributions = is_affirmative(
             config.get('collect_counters_with_distributions', False)
         )
-        self.histogram_buckets_as_distributions = self.collect_counters_with_distributions or is_affirmative(
-            config.get('histogram_buckets_as_distributions', False)
+        # `collect_histograms_as_distributions` sends distributions without bound tags and implies the options below
+        self.omit_histogram_bound_tags = self.parse_collect_histograms_as_distributions(config)
+        self.histogram_buckets_as_distributions = (
+            self.collect_counters_with_distributions
+            or self.omit_histogram_bound_tags
+            or is_affirmative(config.get('histogram_buckets_as_distributions', False))
         )
         self.collect_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
             config.get('collect_histogram_buckets', True)
@@ -30,7 +34,6 @@ class MetricTransformer:
         self.non_cumulative_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
             config.get('non_cumulative_histogram_buckets', False)
         )
-        self.omit_histogram_bound_tags = self.parse_omit_histogram_bound_tags(config)
 
         # Accessible to every transformer
         self.global_options = {
@@ -120,19 +123,13 @@ class MetricTransformer:
 
         return False
 
-    def parse_omit_histogram_bound_tags(self, config: dict[str, Any]) -> bool:
-        """Parse `omit_histogram_bound_tags` and fail if the Agent cannot submit buckets without bound tags."""
-        if not is_affirmative(config.get('omit_histogram_bound_tags', False)):
-            return False
-
-        if not self.histogram_buckets_as_distributions:
-            self.logger.warning(
-                '`omit_histogram_bound_tags` has no effect unless `histogram_buckets_as_distributions` is enabled'
-            )
+    def parse_collect_histograms_as_distributions(self, config: dict[str, Any]) -> bool:
+        """Parse `collect_histograms_as_distributions` and fail if the Agent cannot drop the bound tags."""
+        if not is_affirmative(config.get('collect_histograms_as_distributions', False)):
             return False
 
         if reason := self.check.multiple_histogram_buckets_unsupported_reason():
-            raise ConfigurationError(f'`omit_histogram_bound_tags` {reason}')
+            raise ConfigurationError(f'`collect_histograms_as_distributions` {reason}')
 
         return True
 
