@@ -41,7 +41,7 @@ from ddev.event_bus.orchestrator import (
 )
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import ComponentMonitor, MonitoringRuntime
-from tests.helpers.monitoring import RecordingSink
+from tests.helpers.monitoring import RecordingSink, projector_for
 
 # Test Structure Documentation
 # --------------------------
@@ -404,6 +404,7 @@ def test_default_on_error_with_default_policy_logs_and_continues(
     assert "finalize" in orchestrator.events
     assert orchestrator.finalized_exception is None
     assert "Analyst failed intentionally" in caplog.text
+    assert caplog.text.count("Error processing message by processor 'analyst'") == 1
 
 
 def test_default_on_error_with_fail_fast_stops_bus(secretary: Secretary, analyst: Analyst, manager: Manager):
@@ -533,6 +534,32 @@ def test_orchestrator_hook_failure_surfaces_under_fail_fast(
     assert str(exc_info.value.original_exception) == f"{hook_attr} boom"
     if secretary is not None:
         assert len(secretary.delivered_memos) == 0
+
+
+@pytest.mark.parametrize(
+    ("render", "expected_text"),
+    [
+        pytest.param(str, "Memo 'm-1'", id="message"),
+        pytest.param(
+            lambda message: MessageProcessingError("secretary", message, ValueError("boom")),
+            "Error processing message by processor 'secretary'. Message: Memo 'm-1'. Original error: boom",
+            id="message-processing-error",
+        ),
+        pytest.param(
+            lambda message: OrchestratorHookError(HookName.ON_MESSAGE_RECEIVED, ValueError("boom"), message),
+            "Error in 'on_message_received' orchestrator hook. Message: Memo 'm-1'. Original error: boom",
+            id="orchestrator-hook-error",
+        ),
+        pytest.param(
+            lambda message: ProcessorHookError(HookName.ON_SUCCESS, "secretary", message, ValueError("boom")),
+            "Error in 'on_success' hook for processor 'secretary'. Message: Memo 'm-1'. Original error: boom",
+            id="processor-hook-error",
+        ),
+    ],
+)
+def test_text_identifies_message_by_type_and_id(render: Callable[[Memo], object], expected_text: str):
+    """A message and the errors that wrap it name it by type and id, whatever its payload."""
+    assert str(render(Memo("m-1", content="payload" * 100))) == expected_text
 
 
 def test_initialization_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture):
@@ -1947,7 +1974,7 @@ def test_work_submitted_after_a_stop_request_is_reported_rather_than_lost(
         orchestrator.run()
 
     assert [message.id for message in requester.processed] == ["memo1"]
-    assert "Dropped Memo(after_stop)" in caplog.text
+    assert "Dropped Memo 'after_stop'" in caplog.text
 
 
 def test_a_processor_is_not_dispatched_to_after_a_stop_request(secretary: Secretary):
@@ -2023,7 +2050,7 @@ def make_memo_scope(runtime: MonitoringRuntime) -> Callable[[BaseMessage], Abstr
 
 def test_a_message_scope_covers_processing_and_the_success_and_error_hooks():
     sink = RecordingSink()
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('memo_id', 'tag'))
     orchestrator = MockOrchestrator(
         logging.getLogger("test_scope"), grace_period=0.1, message_scope=make_memo_scope(runtime)
     )
@@ -2034,13 +2061,13 @@ def test_a_message_scope_covers_processing_and_the_success_and_error_hooks():
 
     assert [record.name for record in sink.records] == ["attempted", "handled", "attempted", "confirmed"]
     for record in sink.records:
-        assert record.fields["memo_id"] == record.tags["tag"]
+        assert record.tags["memo_id"] == record.tags["tag"]
     assert runtime.context.fields == {}
 
 
 def test_concurrent_sync_processors_keep_their_message_scopes_apart():
     sink = RecordingSink()
-    runtime = MonitoringRuntime(metrics_sink=sink)
+    runtime = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=projector_for('memo_id', 'tag'))
     overlap = threading.Barrier(2, timeout=5)
 
     class OverlappingWorker(SyncProcessor[Memo]):
@@ -2064,7 +2091,7 @@ def test_concurrent_sync_processors_keep_their_message_scopes_apart():
         orchestrator.submit_message(Memo("memo2"))
         orchestrator.run()
 
-    observed = {(record.fields["memo_id"], record.tags["tag"]) for record in sink.records}
+    observed = {(record.tags["memo_id"], record.tags["tag"]) for record in sink.records}
     assert observed == {("memo1", "memo1"), ("memo2", "memo2")}
     assert len(sink.records) == 2
 

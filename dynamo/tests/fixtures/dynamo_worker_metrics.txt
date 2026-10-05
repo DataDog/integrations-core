@@ -21,6 +21,9 @@ dynamo_component_response_bytes_total{dynamo_component="backend",dynamo_endpoint
 # HELP dynamo_component_inflight_requests component.inflight_requests
 # TYPE dynamo_component_inflight_requests gauge
 dynamo_component_inflight_requests{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_model_load_time_seconds Model load time in seconds.
+# TYPE dynamo_component_model_load_time_seconds gauge
+dynamo_component_model_load_time_seconds{dynamo_component="backend",model="Qwen/Qwen3-0.6B"} 32.31215763092041
 # HELP dynamo_component_request_duration_seconds component.request_duration.seconds
 # TYPE dynamo_component_request_duration_seconds histogram
 dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3

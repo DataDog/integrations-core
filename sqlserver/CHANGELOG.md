@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 23.5.0 / 2026-09-02
+## 23.5.0 / 2026-09-02 / Agent 7.84.0
 
 ***Deprecated***:
 
@@ -28,7 +28,7 @@
 * Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#24998](https://github.com/DataDog/integrations-core/pull/24998))
 * Cache the Agent version instead of resolving it for every payload. ([#25023](https://github.com/DataDog/integrations-core/pull/25023))
 
-## 23.4.0 / 2026-08-05
+## 23.4.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

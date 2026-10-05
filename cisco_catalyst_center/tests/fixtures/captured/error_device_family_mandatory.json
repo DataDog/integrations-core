@@ -1,0 +1,10 @@
+{
+    "response": [
+        {
+            "errorCode": 2600,
+            "message": "deviceFamily is mandatory",
+            "detail": null
+        }
+    ],
+    "version": "1.0"
+}

@@ -179,6 +179,8 @@ class TestBatch(BaseMessage):
     job_list: list[BatchJob]
     jobs_count: int
     integrations: list[str]
+    # Retain accepted launches even when shutdown discards their queued progress updates.
+    run_id: int | None = None
 
 
 @dataclass

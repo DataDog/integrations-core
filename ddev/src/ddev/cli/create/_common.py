@@ -21,9 +21,6 @@ from ddev.cli.create._naming import is_valid_integration_name, normalize_package
 if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.cli.create._scaffold import CheckOnlyPrefillFields
-    from ddev.utils.fs import Path
-
-SUPPORTED_PLATFORMS = ('linux', 'windows', 'mac_os')
 
 
 def create_options(f: Callable[..., Any]) -> Callable[..., Any]:
@@ -31,31 +28,16 @@ def create_options(f: Callable[..., Any]) -> Callable[..., Any]:
     f = click.option(
         '--skip-manifest',
         is_flag=True,
-        help='[DEPRECATED] No-op; manifest-less is now the default. Use `--include-manifest` to opt back in.',
-    )(f)
-    f = click.option(
-        '--include-manifest',
-        is_flag=True,
-        help='Generate a `manifest.json` (legacy behaviour).',
+        help='Do not require an existing `manifest.json` when using `check-only`.',
     )(f)
     f = click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created.')(f)
     f = click.option('--location', '-l', default=None, help='The directory where files will be written.')(f)
-    f = click.option('--platforms', default=None, help='Comma-separated list of `linux,windows,mac_os`.')(f)
-    f = click.option('--metrics-prefix', default=None, help='Metric namespace (e.g. `myintegration.`).')(f)
-    f = click.option('--display-name', default=None, help='Human-readable display name for the integration.')(f)
     return click.argument('name')(f)
 
 
 def dispatch(app: Application, *, integration_type: str, **options: Any) -> None:
-    """Translate click kwargs to ``run_subcommand`` parameters and execute.
-
-    The factory binds the click flag ``--platforms`` to a kwarg named ``platforms``;
-    ``run_subcommand`` takes it as ``platforms_csv``. This wrapper does that one
-    rename so the per-subcommand files can ``**options``-through without thinking
-    about parameter names.
-    """
-    platforms_csv = options.pop('platforms', None)
-    run_subcommand(app, integration_type=integration_type, platforms_csv=platforms_csv, **options)
+    """Execute a create subcommand with its integration type."""
+    run_subcommand(app, integration_type=integration_type, **options)
 
 
 def run_subcommand(
@@ -63,172 +45,35 @@ def run_subcommand(
     *,
     integration_type: str,
     name: str,
-    display_name: str | None,
-    metrics_prefix: str | None,
-    platforms_csv: str | None,
     location: str | None,
     dry_run: bool,
-    include_manifest: bool,
     skip_manifest: bool,
 ) -> None:
     """Single entry point shared by all per-type subcommands."""
     _validate_integration_name(app, name)
 
-    if skip_manifest and include_manifest:
-        app.abort('`--skip-manifest` and `--include-manifest` are mutually exclusive.')
-
-    if skip_manifest:
-        app.display_warning(
-            '`--skip-manifest` is deprecated. The default for new integrations no longer '
-            'includes a `manifest.json`; pass `--include-manifest` to opt in. '
-            '`--skip-manifest` will be removed in the next major release.'
-        )
-
-    extra_fields: CheckOnlyPrefillFields | dict[str, object] = {}
+    extra_fields: dict[str, Any] = {}
     target_integration_dir: str | None = None
     if integration_type == 'check_only':
-        # Read unconditionally (even with --include-manifest): the manifest supplies check_name,
-        # the Python package name consumed by both the manifest-less and manifest paths.
-        extra_fields, target_integration_dir = _resolve_check_only_inputs(app, name, location)
+        if skip_manifest:
+            target_integration_dir = normalize_package_name(name)
+            extra_fields['check_name'] = target_integration_dir
+        else:
+            # The existing manifest supplies check_name, the Python package name consumed by the scaffold.
+            check_only_fields, target_integration_dir = _resolve_check_only_inputs(app, name, location)
+            extra_fields.update(check_only_fields)
 
     from ddev.cli.create._scaffold import render
 
-    render_kwargs: dict[str, Any] = {
-        'location': location,
-        'dry_run': dry_run,
-        'include_manifest': include_manifest,
-        'extra_fields': extra_fields,
-        'target_integration_dir': target_integration_dir,
-    }
-
-    if include_manifest:
-        render(app, integration_type, name, **render_kwargs)
-        return
-
-    # Manifest-less path: resolve overrides and probe config writability before scaffolding
-    # so a malformed config aborts cleanly instead of leaving a half-finished integration on disk.
-    _probe_repo_config_readable(app)
-    resolved_display_name, resolved_metrics_prefix, resolved_platforms = _resolve_manifestless_inputs(
+    render(
         app,
-        name=name,
-        display_name=display_name,
-        metrics_prefix=metrics_prefix,
-        platforms_csv=platforms_csv,
+        integration_type,
+        name,
+        location=location,
+        dry_run=dry_run,
+        extra_fields=extra_fields,
+        target_integration_dir=target_integration_dir,
     )
-
-    result = render(app, integration_type, name, **render_kwargs)
-
-    if dry_run:
-        return
-
-    _write_manifestless_overrides(
-        app,
-        integration_dir=result.integration_dir,
-        override_dir_name=target_integration_dir or result.integration_dir.name,
-        display_name=resolved_display_name,
-        metrics_prefix=resolved_metrics_prefix,
-        platforms=resolved_platforms,
-    )
-
-
-def _write_manifestless_overrides(
-    app: Application,
-    *,
-    integration_dir: Path,
-    override_dir_name: str,
-    display_name: str,
-    metrics_prefix: str,
-    platforms: list[str],
-) -> None:
-    from ddev.cli.create._config_overrides import apply_manifestless_overrides
-
-    try:
-        apply_manifestless_overrides(
-            app,
-            dir_name=override_dir_name,
-            display_name=display_name,
-            metrics_prefix=metrics_prefix,
-            platforms=platforms,
-        )
-    except OSError as exc:
-        # markup=False: the TOML section headers ([overrides.display-name], ...) would
-        # otherwise be parsed by Rich as style tags and stripped from the output, leaving
-        # the user with copy-paste instructions missing their section headers.
-        app.abort(
-            f'Failed to update `.ddev/config.toml`: {exc}\n'
-            f'The integration was scaffolded at `{integration_dir}` but the '
-            f'overrides were not recorded. Add these entries by hand:\n'
-            f'  [overrides.display-name]\n'
-            f'  {override_dir_name} = "{display_name}"\n'
-            f'  [overrides.metrics-prefix]\n'
-            f'  {override_dir_name} = "{metrics_prefix}"\n'
-            f'  [overrides.manifest.platforms]\n'
-            f'  {override_dir_name} = {platforms!r}',
-            markup=False,
-        )
-
-
-def _probe_repo_config_readable(app: Application) -> None:
-    """Ensure ``.ddev/config.toml`` can be loaded before we start scaffolding."""
-    config_file = app.repo.config
-    if not config_file.path.is_file():
-        return
-    try:
-        config_file.load_data()
-    except (OSError, ValueError) as exc:
-        app.abort(f'Failed to read `{config_file.path}`: {exc}. Fix or remove the file before creating an integration.')
-
-
-def _resolve_manifestless_inputs(
-    app: Application,
-    *,
-    name: str,
-    display_name: str | None,
-    metrics_prefix: str | None,
-    platforms_csv: str | None,
-) -> tuple[str, str, list[str]]:
-    suggested_display = name
-    suggested_prefix = f'{normalize_package_name(name)}.'
-    suggested_platforms_csv = ','.join(SUPPORTED_PLATFORMS)
-
-    missing: list[str] = []
-    if display_name is None:
-        if app.interactive:
-            display_name = app.prompt('Display name', default=suggested_display)
-        else:
-            missing.append('--display-name')
-    if metrics_prefix is None:
-        if app.interactive:
-            metrics_prefix = app.prompt('Metrics prefix', default=suggested_prefix)
-        else:
-            missing.append('--metrics-prefix')
-    if platforms_csv is None:
-        if app.interactive:
-            platforms_csv = app.prompt('Platforms (comma-separated)', default=suggested_platforms_csv)
-        else:
-            missing.append('--platforms')
-
-    if missing:
-        app.abort(
-            'Missing required flag(s) while running with `--no-interactive` (or in a non-TTY '
-            'environment): ' + ', '.join(missing)
-        )
-
-    assert display_name is not None
-    assert metrics_prefix is not None
-    assert platforms_csv is not None
-    platforms = _parse_platforms(app, platforms_csv)
-    return display_name, metrics_prefix, platforms
-
-
-def _parse_platforms(app: Application, csv: str) -> list[str]:
-    items = [p.strip() for p in csv.split(',') if p.strip()]
-    if not items:
-        app.abort('`--platforms` must contain at least one platform.')
-    unknown = [p for p in items if p not in SUPPORTED_PLATFORMS]
-    if unknown:
-        app.abort(f'Unknown platform(s): {", ".join(unknown)}. Valid values: {", ".join(SUPPORTED_PLATFORMS)}.')
-    return items
 
 
 def _resolve_check_only_inputs(

@@ -1,0 +1,23 @@
+{
+  "response": {
+    "deviceId": "aa754801-8895-41e8-8ca5-27ee415c9c42",
+    "stackPortInfo": null,
+    "stackSwitchInfo": [
+      {
+        "entPhysicalIndex": "1000",
+        "hwPriority": 0,
+        "macAddress": "52:54:00:02:19:54",
+        "numNextReload": 1,
+        "platformId": "C9KV-UADP-8P",
+        "role": "ACTIVE",
+        "serialNumber": "CML12345UAD",
+        "softwareImage": "17.12.01prd9",
+        "stackMemberNumber": 1,
+        "state": "READY",
+        "switchPriority": 1
+      }
+    ],
+    "svlSwitchInfo": null
+  },
+  "version": "1.0"
+}

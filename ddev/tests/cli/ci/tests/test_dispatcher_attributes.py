@@ -27,9 +27,10 @@ MAPPING_FIELDS = {
     'pr_number': 42,
     'team': 'agent-integrations',
     'component': 'test-runner',
+    'done': False,
     'batch_id': 'batch-01',
     'job_status': 'success',
-    'integration': 'postgres',
+    'target': 'postgres',
     'base_sha': None,
     'unknown': 'diagnostic',
 }
@@ -41,6 +42,7 @@ MAPPING_FIELDS = {
         (
             attribute_mapping,
             {
+                'dispatcher.report.done': 'false',
                 'git.repository.id_v2': 'github.com/datadog/integrations-core',
                 'git.repository_url': 'https://github.com/DataDog/Integrations-Core',
                 'git.commit.sha': 'head-sha',
@@ -53,12 +55,13 @@ MAPPING_FIELDS = {
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
         (
             log_tag_mapping,
             {
+                'dispatcher.report.done': False,
                 'git.repository.id_v2': 'github.com/datadog/integrations-core',
                 'git.repository_url': 'https://github.com/DataDog/Integrations-Core',
                 'git.commit.sha': 'head-sha',
@@ -66,12 +69,12 @@ MAPPING_FIELDS = {
                 'dispatcher.checkout_sha': 'merge-sha',
                 'dispatcher.base_branch': 'master',
                 'dispatcher.context': 'pr',
-                'dispatcher.pr.number': '42',
+                'dispatcher.pr.number': 42,
                 'team': 'agent-integrations',
                 'dispatcher.component': 'test-runner',
                 'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
         (
@@ -83,7 +86,7 @@ MAPPING_FIELDS = {
                 'dispatcher.pr.number': '42',
                 'team': 'agent-integrations',
                 'dispatcher.batch.id': 'batch-01',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
         (
@@ -93,11 +96,11 @@ MAPPING_FIELDS = {
                 'git.branch': 'feature',
                 'dispatcher.base_branch': 'master',
                 'dispatcher.context': 'pr',
-                'dispatcher.pr.number': '42',
                 'team': 'agent-integrations',
                 'dispatcher.component': 'test-runner',
+                'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
-                'dispatcher.batch.job.integration': 'postgres',
+                'dispatcher.batch.job.target': 'postgres',
             },
         ),
     ],
@@ -105,6 +108,30 @@ MAPPING_FIELDS = {
 )
 def test_mapping_renderer_applies_its_policy(mapping, expected):
     assert mapping(MAPPING_FIELDS) == expected
+
+
+def test_log_attributes_keep_native_json_values_while_tag_transports_stringify():
+    """`@dispatcher.batch.integrations:ddev` matches array membership, so the log attribute must
+    stay a native array rather than a serialized string."""
+    fields = {
+        'batch_id': 'batch-01',
+        'pr_number': 42,
+        'is_fork': False,
+        'batch_integrations': ['ntp', 'redis'],
+    }
+
+    logs = log_tag_mapping(fields)
+    assert logs['dispatcher.batch.integrations'] == ['ntp', 'redis']
+    assert logs['dispatcher.pr.number'] == 42
+    assert logs['dispatcher.run.is_fork'] is False
+
+    # Test and metric tags are string transports, so the same fields stringify there.
+    assert render_test_tags(fields) == {
+        'dispatcher.batch.id': 'batch-01',
+        'dispatcher.pr.number': '42',
+        'dispatcher.run.is_fork': 'false',
+    }
+    assert metric_tag_mapping(fields) == {'dispatcher.batch.id': 'batch-01', 'dispatcher.run.is_fork': 'false'}
 
 
 def test_batch_fields_include_batch_metadata():
@@ -125,7 +152,7 @@ def test_batch_fields_include_batch_metadata():
             make_job(e2e_tests=True, agent_image='datadog/agent:latest', minimum_base_package=True),
             {
                 'job': 'job-1',
-                'integration': 'ntp',
+                'target': 'ntp',
                 'environment': 'py3.13',
                 'platform': 'linux',
                 'python_version': '3.13',
@@ -139,7 +166,7 @@ def test_batch_fields_include_batch_metadata():
             make_job(environment='', agent_image=None),
             {
                 'job': 'job-1',
-                'integration': 'ntp',
+                'target': 'ntp',
                 'platform': 'linux',
                 'python_version': '3.13',
                 'unit_tests': True,
