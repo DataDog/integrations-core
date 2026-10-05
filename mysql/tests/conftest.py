@@ -4,6 +4,7 @@
 import copy
 import logging
 import os
+import subprocess
 
 import mock
 import pymysql
@@ -12,6 +13,7 @@ from packaging.version import parse as parse_version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.docker import ComposeFileDown
 from datadog_checks.mysql.version_utils import parse_version as parse_mysql_version
 
 from . import common, tags
@@ -50,6 +52,11 @@ def config_e2e(instance_basic):
     }
 
 
+@pytest.fixture(autouse=True)
+def _startup_only(dd_environment):  # TEMP (do not merge): a startup failure errors here = flake reproduced
+    pytest.skip('MySQL started fine; skipping tests')
+
+
 @pytest.fixture(scope='session')
 def dd_environment(config_e2e):
     logs_path = _mysql_logs_path()
@@ -65,8 +72,25 @@ def dd_environment(config_e2e):
 
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
+        compose_file = os.path.join(common.HERE, 'compose', COMPOSE_FILE)
+
+        def down() -> None:  # TEMP (do not merge): dump state before the retry teardown destroys it
+            compose = ['docker', 'compose', '-f', compose_file]
+            container_ids = subprocess.run([*compose, 'ps', '-aq'], capture_output=True, text=True).stdout.split()
+            commands = [[*compose, 'ps', '-a'], [*compose, 'logs', '--no-color', '--timestamps']]
+            if container_ids:
+                commands.append(['docker', 'inspect', '--format', '{{.Name}} {{json .State}}', *container_ids])
+            for command in commands:
+                out = subprocess.run(command, capture_output=True, text=True)
+                output = '\n```\n{}\nExit code: {}\n{}{}\n```\n'.format(command, out.returncode, out.stdout, out.stderr)
+                print(output, flush=True)  # TEMP (do not merge): retain diagnostics in downloadable raw job logs
+                with open(os.getenv('GITHUB_STEP_SUMMARY', os.devnull), 'a') as f:
+                    f.write(output)
+            ComposeFileDown(compose_file)()
+
         with docker_run(
-            os.path.join(common.HERE, 'compose', COMPOSE_FILE),
+            compose_file,
+            capture=True,  # TEMP (do not merge): retain Compose startup stdout/stderr in failure tracebacks
             env_vars={
                 'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
                 'MYSQL_IMAGE_TAG': MYSQL_IMAGE_TAG,
@@ -80,6 +104,7 @@ def dd_environment(config_e2e):
             conditions=_get_warmup_conditions(),
             attempts=2,
             attempts_wait=10,
+            down=down,
         ):
             yield config_e2e, e2e_metadata
 
@@ -358,8 +383,11 @@ def _get_warmup_conditions():
             init_hybrid_replication,
             populate_database,
         ]
+    conditions = [WaitFor(init_master, wait=2)]
+    if COMPOSE_FILE == 'mysql-official.yaml':  # TEMP (do not merge): start replication only on the final server
+        conditions.append(WaitFor(init_official_replica, wait=2))
     return [
-        WaitFor(init_master, wait=2),
+        *conditions,
         WaitFor(init_slave, wait=2),
         CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
         populate_database,
@@ -521,6 +549,15 @@ def root_conn():
     conn = _get_root_connection()
     yield conn
     conn.close()
+
+
+def init_official_replica() -> None:  # TEMP (do not merge): avoid replication during temporary-server shutdown
+    with pymysql.connect(
+        host=common.HOST, port=common.SLAVE_PORT, user='root', password=common.mysql_root_password()
+    ) as conn:
+        with conn.cursor() as cur:
+            print('TEMP (do not merge): starting replication after final replica TCP connection', flush=True)
+            cur.execute('START REPLICA;')
 
 
 def init_slave():
