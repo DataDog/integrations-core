@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import ibm_db
 from requests import ConnectionError
 
+from datadog_checks.base import to_native_string
 from datadog_checks.base.utils.db.query_metrics import QueryStats, obfuscate_statement
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 COLLECTION_INTERVAL = 10
 NANOSECONDS_PER_MILLISECOND = 1_000_000
-OBFUSCATION_OPTIONS = json.dumps({'obfuscation_mode': 'obfuscate_and_normalize', 'dbms': 'ibm_db2'})
+OBFUSCATION_OPTIONS = to_native_string(json.dumps({'obfuscation_mode': 'obfuscate_and_normalize', 'dbms': 'ibm_db2'}))
 
 QUERY_METRICS = """
 /* DDIGNORE */
