@@ -13,7 +13,7 @@ from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.monitoring.metrics import MetricKind
 from tests.cli.ci.tests.helpers import recording_runtime
 from tests.helpers.clock import FakeClock
-from tests.helpers.monitoring import RecordingSink
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
 OPERATION = 'dispatcher.operation'
 
@@ -87,3 +87,29 @@ def test_cancellation_propagates_without_settling_the_operation():
     assert sink.records_named('operations.count') == []
     assert sink.records_named('operations.failed') == []
     assert values(sink, 'artifacts.download.duration') == [3.0]
+
+
+@pytest.mark.parametrize('recovered', [False, True], ids=['escaped', 'recovered'])
+def test_log_failed_operation_level(recovered: bool):
+    handler = RecordingJsonHandler()
+    monitor = make_monitor('test-runner', handler=handler)
+    metrics = MetricsHelper(monitor.metrics)
+
+    try:
+        raise RuntimeError('boom')
+    except RuntimeError:
+        metrics.log_failed_operation(
+            Operation.REFRESH_JOBS,
+            monitor.logger,
+            'Failed to list workflow jobs for run %s',
+            123,
+            recovered=recovered,
+            exc_info=True,
+        )
+
+    [event] = handler.events
+    assert event['event'] == 'Failed to list workflow jobs for run 123'
+    assert event['level'] == ('warning' if recovered else 'error')
+    assert event['operation'] == 'refresh_jobs'
+    assert event['component'] == 'test-runner'
+    assert 'exception' in event
