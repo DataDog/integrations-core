@@ -20,6 +20,7 @@ from .role_queries import (
     QUERY_OBJECT_DEPENDENCIES,
     QUERY_ROLE_SETTINGS,
     QUERY_ROLES,
+    ROLE_SETTING_VALUE_PREFIXES,
     list_databases_query,
     memberships_query,
     object_privileges_query,
@@ -225,7 +226,9 @@ class PostgresRoleCollector:
                             "memberships",
                             emitter,
                         )
-                        self._collect_query(cursor, QUERY_ROLE_SETTINGS, (), "settings", emitter)
+                        self._collect_query(
+                            cursor, QUERY_ROLE_SETTINGS, (list(ROLE_SETTING_VALUE_PREFIXES),), "settings", emitter
+                        )
             emitter.flush_terminal()
             return True
         except RoleCollectionCancelled:

@@ -66,6 +66,8 @@ def role_catalog(roles_instance):
                 ALTER ROLE dd_role_obs_owner SET pgrst.jwt_secret = 'dd-role-obs-secret';
                 ALTER ROLE dd_role_obs_owner SET "DdRoleObs.Api_Key" = 'dd-role-obs-mixed-case-secret';
                 ALTER ROLE dd_role_obs_owner SET pg_stat_statements.track = 'all';
+                ALTER ROLE dd_role_obs_owner SET "PgAudit.Log" = 'none';
+                ALTER ROLE dd_role_obs_owner SET pg_trgm.similarity_threshold = '0.42';
                 ALTER ROLE dd_role_obs_owner SET role = 'dd_role_obs_reader';
                 CREATE SCHEMA dd_role_obs AUTHORIZATION dd_role_obs_owner;
                 CREATE TABLE dd_role_obs.items (id integer);
@@ -446,14 +448,25 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
 
 
 def test_collect_roles_redacts_custom_setting_values(integration_check, roles_instance, role_catalog, aggregator):
-    """Values of custom placeholder settings must never be collected.
+    """Values of dotted settings are collected only for allowlisted extensions.
 
-    Applications store secrets such as PostgREST's `pgrst.jwt_secret` in role settings. Built-in settings, which
-    include hidden ones such as `role`, and settings registered by a loaded module keep their values.
+    Applications and extensions store secrets such as PostgREST's `pgrst.jwt_secret` or PostgreSQL Anonymizer's
+    `anon.salt` in role settings, and a module can register such a setting in `pg_settings`. Built-in settings,
+    including hidden ones such as `role`, keep their values.
     """
-    check = integration_check(roles_instance)
+    # Registers pg_trgm's settings in the agent's sessions, so its setting is known to `pg_settings` but is still
+    # not on the allowlist.
+    with _get_superconn(roles_instance) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"ALTER ROLE {roles_instance['username']} SET session_preload_libraries = 'pg_trgm'")
+    try:
+        check = integration_check(roles_instance)
 
-    run_one_check(check)
+        run_one_check(check)
+    finally:
+        with _get_superconn(roles_instance) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"ALTER ROLE {roles_instance['username']} RESET session_preload_libraries")
 
     metadata = aggregator.get_event_platform_events('dbm-metadata')
     assert 'dd-role-obs-secret' not in json.dumps(metadata)
@@ -467,7 +480,9 @@ def test_collect_roles_redacts_custom_setting_values(integration_check, roles_in
     } == {
         'pgrst.jwt_secret': (None, True),
         'DdRoleObs.Api_Key': (None, True),
+        'pg_trgm.similarity_threshold': (None, True),
         'pg_stat_statements.track': ('all', False),
+        'PgAudit.Log': ('none', False),
         'role': ('dd_role_obs_reader', False),
     }
 
