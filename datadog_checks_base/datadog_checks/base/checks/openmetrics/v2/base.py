@@ -15,6 +15,7 @@ from requests.exceptions import RequestException
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .scraper import OpenMetricsScraper
@@ -95,7 +96,8 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with self.adopt_namespace(scraper.namespace):
                 try:
                     scraper.scrape()
-                except (ConnectionError, RequestException) as e:
+                # Checks without AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+                except (ConnectionError, RequestException, HTTPClientError) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
 

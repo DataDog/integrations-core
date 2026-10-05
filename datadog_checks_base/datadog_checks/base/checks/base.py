@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.discovery import Service
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPClient
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -174,6 +174,11 @@ class AgentCheck(object):
 
     # Used by `self.http` for an instance of RequestsWrapper
     HTTP_CONFIG_REMAPPER = None
+
+    # Opts the clients from create_http_client into the backend-neutral HTTP contract: responses expose only the
+    # documented HTTPResponse members and errors are raised as datadog_checks.base.utils.http_exceptions types.
+    # Unset, clients return and raise requests objects unchanged.
+    AGNOSTIC_HTTP = False
 
     # Used by `create_tls_context` for an instance of RequestsWrapper
     TLS_CONFIG_REMAPPER = None
@@ -488,19 +493,31 @@ class AgentCheck(object):
         self._log_adapter.set_check_id(value)
 
     @property
-    def http(self) -> RequestsWrapper:
+    def http(self) -> HTTPClient:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
-
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = self.create_http_client()
 
         return self._http
+
+    def create_http_client(
+        self, instance: dict | None = None, *, init_config: dict | None = None, remapper: dict | None = None
+    ) -> HTTPClient:
+        """Construct the HTTP client backing self.http, optionally overriding its instance, init_config and remapper."""
+        # See Performance Optimizations in this package's README.md.
+        from datadog_checks.base.utils.http import create_http_client
+
+        return create_http_client(
+            self.instance if instance is None else instance,
+            self.init_config if init_config is None else init_config,
+            self.HTTP_CONFIG_REMAPPER if remapper is None else remapper,
+            self.log,
+            agnostic=self.AGNOSTIC_HTTP,
+        )
 
     @property
     def logs_enabled(self):

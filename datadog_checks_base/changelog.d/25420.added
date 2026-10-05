@@ -1,0 +1,1 @@
+Add backend-agnostic HTTP protocols, exceptions, and structural test fakes, so checks and their tests can avoid depending on `requests`. Checks opt in by setting `AGNOSTIC_HTTP = True`, and checks that leave it unset keep their current HTTP behavior.

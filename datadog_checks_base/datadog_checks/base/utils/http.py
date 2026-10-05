@@ -10,9 +10,10 @@ import socket
 import warnings
 from collections import ChainMap
 from collections.abc import Mapping
-from contextlib import ExitStack, contextmanager
+from contextlib import ExitStack, contextmanager, nullcontext
 from copy import deepcopy
 from hashlib import sha256
+from types import MethodType
 from typing import TYPE_CHECKING
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
@@ -20,7 +21,9 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
 from requests.exceptions import SSLError
+from requests.structures import CaseInsensitiveDict
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
 
@@ -29,8 +32,27 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils import _http_utils
 
+from . import requests_adapter
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .headers import set_header as set_header_value
+from .http_exceptions import (  # noqa: F401
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientError,
+    HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
+    HTTPClientRequestError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
+from .http_protocol import (  # noqa: F401
+    HTTPClient,
+    HTTPRequest,
+    HTTPRequestSnapshot,
+    HTTPResponse,
+)
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -103,6 +125,7 @@ AIA_TLS_CONFIG_FIELDS = frozenset(
     {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
 )
 AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
+AIA_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
 MAX_AIA_CERT_SIZE = 64 * 1024
 MAX_AIA_REDIRECTS = 10
 DEFAULT_AIA_CHASING_MAX_DEPTH = 5
@@ -201,36 +224,6 @@ def get_tls_config_from_options(new_options):
     return tls_config
 
 
-class _SSLContextAdapter(requests.adapters.HTTPAdapter):
-    """
-    This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
-    """
-
-    def __init__(self, ssl_context, **kwargs):
-        self.ssl_context = ssl_context
-        super().__init__()
-
-    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        pool_kwargs['ssl_context'] = self.ssl_context
-        return super().init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
-
-    def cert_verify(self, conn, url, verify, cert):
-        """
-        This method is overridden to ensure that the SSL context
-        is configured on the integration side.
-        """
-        pass
-
-    def build_connection_pool_key_attributes(self, request, verify, cert=None):
-        """
-        This method is overridden according to the requests library's
-        expectations to ensure that the custom SSL context is passed to urllib3.
-        """
-        # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
-        host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
-        return host_params, {"ssl_context": self.ssl_context}
-
-
 class ResponseWrapper(ObjectProxy):
     def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
@@ -281,7 +274,7 @@ def _is_safe_aia_url(uri: str, logger: logging.Logger | logging.LoggerAdapter) -
 
 
 def _read_capped_content(
-    response: requests.Response, uri: str, logger: logging.Logger | logging.LoggerAdapter
+    response: HTTPResponse, uri: str, logger: logging.Logger | logging.LoggerAdapter
 ) -> bytes | None:
     chunks = []
     total = 0
@@ -318,7 +311,8 @@ def _fetch_aia_content(
     while _is_safe_aia_url(uri, logger):
         response = session.get(uri, **request_options)
         try:
-            if response.is_redirect:
+            is_redirect = getattr(response, 'is_redirect', response.status_code in AIA_REDIRECT_STATUS_CODES)
+            if is_redirect:
                 if not follow_redirects:
                     return None
 
@@ -390,9 +384,32 @@ def _aia_fetch_session(
     return session
 
 
+def suppress_default_auth(request):
+    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
+    return request
+
+
+def _rebuild_auth_without_netrc(
+    session: requests.Session, prepared_request: requests.PreparedRequest, response: requests.Response
+) -> None:
+    original_request = response.request
+    assert original_request is not None
+    # Preserve Requests' cross-host credential stripping while deliberately omitting its .netrc lookup.
+    if 'Authorization' in prepared_request.headers and session.should_strip_auth(
+        original_request.url, prepared_request.url
+    ):
+        del prepared_request.headers['Authorization']
+
+
+def _suppress_netrc_auth(session: requests.Session) -> None:
+    session.rebuild_auth = MethodType(_rebuild_auth_without_netrc, session)
+
+
 class RequestsWrapper(object):
     __slots__ = (
+        '_agnostic',
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -409,7 +426,8 @@ class RequestsWrapper(object):
         'tls_config',
     )
 
-    def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
+    def __init__(self, instance, init_config, remapper=None, logger=None, session=None, *, agnostic=False):
+        self._agnostic = agnostic
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
@@ -587,6 +605,9 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Match an injected session's trust_env; otherwise use the requests default.
+        self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -606,6 +627,55 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close connections; the next request rebuilds a default session."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+        # Adapters own the connection pools and outlive the session, which closes only what it has mounted.
+        for adapter in self._https_adapters.values():
+            adapter.close()
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Return a persistent cookie, or default if it is missing or ambiguous."""
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
+
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether url should bypass any configured proxy under the client's no_proxy rules."""
+        return should_bypass_proxy(url, self.no_proxy_uris or [])
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Return the last case-insensitive match, which requests sends on the wire."""
+        found = default
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                found = value
+        return found
+
+    def set_header(self, name: str, value: str) -> None:
+        set_header_value(self.options['headers'], name, value)
+
+    def disable_auth(self) -> None:
+        """Suppress configured and .netrc auth without disabling other environment settings."""
+        self.options['auth'] = suppress_default_auth
+        if self._session is not None:
+            _suppress_netrc_auth(self._session)
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -639,21 +709,22 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        new_options = ChainMap(options, self.options)
-
-        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug('An unverified HTTPS request is being made to %s', url)
-
         extra_headers = options.pop('extra_headers', None)
-        if extra_headers is not None:
-            new_options['headers'] = new_options['headers'].copy()
-            new_options['headers'].update(extra_headers)
+        explicit_headers = options.get('headers')
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self.options)
+
+        new_options = ChainMap(options, self.options)
+        # Without extra headers, the caller's headers, including an explicit None, reach requests unchanged.
+        if extra_headers is not None:
+            new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
+
+        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
+            self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -671,54 +742,72 @@ class RequestsWrapper(object):
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                    # Rebuild so the merged headers carry the renewed token.
+                    if extra_headers is not None:
+                        new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
+            if self._agnostic:
+                return requests_adapter.RequestsResponseAdapter(response, self.request_size)
             return ResponseWrapper(response, self.request_size)
 
+    def _merge_extra_headers(self, explicit_headers, extra_headers):
+        """Layer per-request extra headers over the request's headers, or the client's when it sets none."""
+        headers = CaseInsensitiveDict(explicit_headers if explicit_headers is not None else self.options['headers'])
+        headers.update(extra_headers)
+        return headers
+
+    def _translate_errors(self):
+        """Raise backend-neutral errors in agnostic mode, and requests errors unchanged otherwise."""
+        return requests_adapter.translate_http_errors() if self._agnostic else nullcontext()
+
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        try:
-            response = request_method(url, **new_options)
-        except SSLError as e:
-            if self.aia_chasing_max_depth <= 0:
-                raise e
-            self.logger.debug(
-                'AIA chasing: request to `%s` failed with an SSLError (%s); attempting to recover missing '
-                'intermediate certificate(s)',
-                url,
-                e,
-            )
-            # fetch the intermediate certs
-            parsed_url = urlparse(url)
-            hostname = parsed_url.hostname
-            port = parsed_url.port
-            certs = self.fetch_intermediate_certs(hostname, port)
-            if not certs:
-                self.logger.error(
-                    'AIA chasing: no intermediate certificate(s) could be recovered for `%s`; raising the '
-                    'original SSLError',
-                    url,
-                )
-                raise e
-            self.logger.debug(
-                'AIA chasing: recovered %d intermediate certificate(s) for `%s`; retrying the request', len(certs), url
-            )
-            session = self.session if persist else self._create_session()
-            if parsed_url.scheme == "https":
-                self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
-            request_method = getattr(session, method)
+        with self._translate_errors():
             try:
                 response = request_method(url, **new_options)
-            except SSLError:
-                self.logger.error(
-                    'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
-                    'certificate(s); the certificate chain is still incomplete',
+            except SSLError as e:
+                if self.aia_chasing_max_depth <= 0:
+                    raise e
+                self.logger.debug(
+                    'AIA chasing: request to `%s` failed with an SSLError (%s); attempting to recover missing '
+                    'intermediate certificate(s)',
                     url,
-                    len(certs),
+                    e,
                 )
-                raise
-        return response
+                # fetch the intermediate certs
+                parsed_url = urlparse(url)
+                hostname = parsed_url.hostname
+                port = parsed_url.port
+                certs = self.fetch_intermediate_certs(hostname, port)
+                if not certs:
+                    self.logger.error(
+                        'AIA chasing: no intermediate certificate(s) could be recovered for `%s`; raising the '
+                        'original SSLError',
+                        url,
+                    )
+                    raise e
+                self.logger.debug(
+                    'AIA chasing: recovered %d intermediate certificate(s) for `%s`; retrying the request',
+                    len(certs),
+                    url,
+                )
+                session = self.session if persist else self._create_session()
+                if parsed_url.scheme == "https":
+                    self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
+                request_method = getattr(session, method)
+                try:
+                    response = request_method(url, **new_options)
+                except SSLError:
+                    self.logger.error(
+                        'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
+                        'certificate(s); the certificate chain is still incomplete',
+                        url,
+                        len(certs),
+                    )
+                    raise
+            return response
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
@@ -853,6 +942,8 @@ class RequestsWrapper(object):
         We leave it to callers to mount any HTTPS adapters if necessary.
         """
         session = requests.Session()
+        if self.options['auth'] is suppress_default_auth:
+            _suppress_netrc_auth(session)
         # Enable Unix Domain Socket (UDS) support.
         # See: https://github.com/msabramo/requests-unixsocket
         session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
@@ -861,6 +952,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
@@ -873,7 +965,8 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            self.auth_token_handler.poll(**request)
+            with self._translate_errors():
+                self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:
@@ -886,34 +979,24 @@ class RequestsWrapper(object):
     def _mount_https_adapter(self, session, tls_config):
         # Reuse existing adapter if it matches the TLS config
         tls_config_key = TlsConfig(**tls_config)
-        if tls_config_key in self._https_adapters:
-            session.mount('https://', self._https_adapters[tls_config_key])
-            return
+        if tls_config_key not in self._https_adapters:
+            self._https_adapters[tls_config_key] = requests_adapter.create_https_adapter(
+                tls_config, use_host_header=self.tls_use_host_header
+            )
 
-        context = create_ssl_context(tls_config)
-        # Enables HostHeaderSSLAdapter if needed
-        # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
-        if self.tls_use_host_header:
-            # Create a combined adapter that supports both TLS context and host headers
-            class SSLContextHostHeaderAdapter(_SSLContextAdapter, _http_utils.HostHeaderSSLAdapter):
-                def __init__(self, ssl_context, **kwargs):
-                    _SSLContextAdapter.__init__(self, ssl_context, **kwargs)
-                    _http_utils.HostHeaderSSLAdapter.__init__(self, **kwargs)
+        session.mount('https://', self._https_adapters[tls_config_key])
 
-                def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-                    # Use TLS context from wrapper
-                    pool_kwargs['ssl_context'] = self.ssl_context
-                    return _http_utils.HostHeaderSSLAdapter.init_poolmanager(
-                        self, connections, maxsize, block=block, **pool_kwargs
-                    )
 
-            https_adapter = SSLContextHostHeaderAdapter(context)
-        else:
-            https_adapter = _SSLContextAdapter(context)
-
-        # Cache the adapter for reuse
-        self._https_adapters[tls_config_key] = https_adapter
-        session.mount('https://', https_adapter)
+def create_http_client(
+    instance: dict | None,
+    init_config: dict,
+    remapper: dict | None = None,
+    logger: logging.Logger | None = None,
+    *,
+    agnostic: bool = False,
+) -> HTTPClient:
+    """Construct the HTTP client, using the backend-neutral contract when agnostic is set."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger, agnostic=agnostic)
 
 
 @contextmanager
