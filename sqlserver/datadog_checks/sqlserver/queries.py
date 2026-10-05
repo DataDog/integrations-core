@@ -49,11 +49,6 @@ WHERE
 GROUP BY object_id
 """
 
-# One pass over sys.index_columns. STRING_AGG allows one ORDER BY list per SELECT,
-# and repeating the CASE inline is rejected as two different orderings. sort_key is
-# key_ordinal for key columns because a clustered index stores index_column_id in
-# table order. Included columns use index_column_id. STRING_AGG skips nulls, so
-# each list keeps that order.
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
