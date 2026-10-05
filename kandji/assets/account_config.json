@@ -20,27 +20,34 @@
       "editable": true,
       "required": true,
       "domain": {}
-    },
-    {
-      "key": "audit",
-      "label": "Collect Audit & Threat logs",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
-      }
-    },
-    {
-      "key": "detection",
-      "label": "Collect Detection logs",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
-      }
     }
   ],
   "dataflow_config": [
-    { "dataflow_id": "kandji-logs" }
+    {
+      "dataflow_id": "kandji-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit & Threat logs",
+        "help": "Collects Kandji audit and threat logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "audit",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "kandji-detection-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Detection logs",
+        "help": "Collects Kandji detection logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "detection",
+        "should_map_legacy_fields": true
+      }
+    }
   ]
 }
