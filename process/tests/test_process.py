@@ -512,7 +512,7 @@ def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_chec
     [
         pytest.param({'warning': [1, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='within_range'),
         pytest.param({'warning': [2, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.WARNING, id='below_lower_bound'),
-        # Only a positive infinite lower bound is rejected; `-inf` means no lower bound.
+        # `-inf` is accepted as an unbounded lower bound.
         pytest.param(
             {'warning': [float('-inf'), '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='unbounded_lower'
         ),
@@ -529,7 +529,7 @@ def test_thresholds_inf_string_end_to_end(mock_process_iter, aggregator, dd_run_
 
 
 NOT_A_NUMBER = "thresholds.warning {} must be a number or the string '.inf'"
-INF_LOWER = "thresholds.warning lower bound cannot be '.inf'"
+INF_LOWER = "thresholds.warning lower bound cannot be infinite"
 
 
 @pytest.mark.parametrize(
@@ -549,6 +549,12 @@ INF_LOWER = "thresholds.warning lower bound cannot be '.inf'"
         pytest.param(['.inf', 5], INF_LOWER, id='inf_lower'),
         # Unquoted YAML `.inf` arrives as a float.
         pytest.param([float('inf'), 5], INF_LOWER, id='inf_float_lower'),
+        # Unquoted YAML `-.inf`: an upper bound every process count exceeds.
+        pytest.param(
+            [1, float('-inf')], "thresholds.warning upper bound cannot be negative infinity", id='neg_inf_upper'
+        ),
+        # Too large for a float: left to the model's error rather than an `OverflowError` here.
+        pytest.param([10**400, 5], 'thresholds -> warning', id='huge_int_lower'),
         # Non-list shapes are left to the generated model's own error.
         pytest.param(5, 'thresholds -> warning', id='not_a_list'),
         pytest.param('.inf', 'thresholds -> warning', id='bare_inf_str'),

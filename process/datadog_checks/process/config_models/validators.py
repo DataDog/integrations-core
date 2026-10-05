@@ -37,7 +37,7 @@ def instance_thresholds(value, **kwargs):
     return value
 
 
-def _validate_threshold_bound(field, index, bound):
+def _validate_threshold_bound(field: str, index: int, bound: object) -> None:
     label = ('lower bound', 'upper bound')[index] if index < 2 else f'bound at index {index}'
 
     if bound != INF_SENTINEL and (
@@ -47,7 +47,10 @@ def _validate_threshold_bound(field, index, bound):
     ):
         raise ValueError(f"thresholds.{field} {label} must be a number or the string '{INF_SENTINEL}', got {bound!r}")
 
-    # An infinite lower bound makes every process count a breach. Unquoted YAML `.inf`
-    # arrives as a float, so reject that as well as the string; `-inf` is a valid lower bound.
-    if index == 0 and (bound == INF_SENTINEL or (math.isinf(bound) and bound > 0)):
-        raise ValueError(f"thresholds.{field} lower bound cannot be '{INF_SENTINEL}'")
+    # A lower bound of `inf` or an upper bound of `-inf` makes every process count a breach.
+    # Unquoted YAML `.inf` arrives as a float, so reject that as well as the string. Comparing
+    # with `math.inf` rather than calling `math.isinf` keeps a huge int from overflowing.
+    if index == 0 and (bound == INF_SENTINEL or bound == math.inf):
+        raise ValueError(f"thresholds.{field} lower bound cannot be infinite, got {bound!r}")
+    if index == 1 and bound == -math.inf:
+        raise ValueError(f"thresholds.{field} upper bound cannot be negative infinity, got {bound!r}")
