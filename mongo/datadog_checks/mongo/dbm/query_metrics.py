@@ -46,13 +46,25 @@ METRICS_FIELD_MAPPING = {
     'keysExamined': ('keys_examined_sum', 'sum'),
     'docsExamined': ('docs_examined_sum', 'sum'),
     'docsReturned': ('docs_returned_sum', 'sum'),
-    # MongoDB 8.0+
+    # Fields vary by MongoDB version
     'bytesRead': ('bytes_read_sum', 'sum'),
     'cpuNanos': ('cpu_nanos_sum', 'sum'),
     'usedDisk': ('used_disk_count', 'true_count'),
     'hasSortStage': ('has_sort_stage_count', 'true_count'),
     'readTimeMicros': ('read_time_micros_sum', 'sum'),
     'workingTimeMillis': ('working_time_millis_sum', 'sum'),
+    'planningTimeMicros': ('planning_time_micros_sum', 'sum'),
+    'fromPlanCache': ('from_plan_cache_count', 'true_count'),
+    'fromMultiPlanner': ('from_multi_planner_count', 'true_count'),
+    'peakTrackedMemBytes': ('peak_tracked_mem_bytes_sum', 'sum'),
+    'clusterPeakTrackedMemBytes': ('cluster_peak_tracked_mem_bytes_sum', 'sum'),
+    # MongoDB 9.0 write counters
+    'nMatched': ('docs_matched_sum', 'sum'),
+    'nUpserted': ('docs_upserted_sum', 'sum'),
+    'nModified': ('docs_modified_sum', 'sum'),
+    'nDeleted': ('docs_deleted_sum', 'sum'),
+    'nInserted': ('docs_inserted_sum', 'sum'),
+    'nUpdateOps': ('update_ops_sum', 'sum'),
 }
 
 
@@ -203,9 +215,23 @@ class MongoQueryMetrics(DBMAsyncJob):
         # Dynamically determine which metric columns exist based on MongoDB version
         metrics_columns = self._get_available_metrics_columns(normalized_rows)
 
-        # Compute derivative metrics
+        # Read and write entries expose different counters. StatementMetrics requires a common schema.
+        row_schemas = {}
+        for row in normalized_rows:
+            row_schemas[get_query_stats_row_key(row)] = tuple(sorted(col for col in metrics_columns if col in row))
+            for column in metrics_columns:
+                row.setdefault(column, 0)
+
+        # Establish a new baseline when the server's metric schema changes or an entry is recreated.
         rows = self._statement_metrics.compute_derivative_rows(
-            normalized_rows, metrics_columns, key=get_query_stats_row_key, execution_indicators=['exec_count']
+            normalized_rows,
+            metrics_columns,
+            key=lambda row: (
+                get_query_stats_row_key(row),
+                row['first_seen_timestamp'],
+                row_schemas[get_query_stats_row_key(row)],
+            ),
+            execution_indicators=['exec_count'],
         )
 
         self._check.gauge(
@@ -244,7 +270,10 @@ class MongoQueryMetrics(DBMAsyncJob):
             try:
                 key = doc.get('key', {})
                 query_shape = key.get('queryShape', {})
-                metrics = doc.get('metrics', {})
+                metrics = doc.get('metrics', {}).copy()
+                # MongoDB 9.0 groups these fields; older versions report them at the top level.
+                for group in ('cursor', 'queryExec', 'queryPlanner', 'writes'):
+                    metrics.update(metrics.pop(group, {}))
 
                 # Extract namespace info
                 cmd_ns = query_shape.get('cmdNs', {})
@@ -371,7 +400,7 @@ class MongoQueryMetrics(DBMAsyncJob):
         tags_no_db = [t for t in tags if not t.startswith('db:')]
 
         for row in rows:
-            query_cache_key = get_query_stats_row_key(row)
+            query_cache_key = (row['query_signature'], row['db_name'], row['collection'])
             if query_cache_key in self._full_statement_text_cache:
                 continue
 

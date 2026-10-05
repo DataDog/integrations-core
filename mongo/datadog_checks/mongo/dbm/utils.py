@@ -310,6 +310,9 @@ QUERY_SHAPE_COPYABLE_FIELDS = [
     'collation',
     'arrayFilters',
     'key',  # for distinct command
+    'query',  # for distinct and count commands
+    'documents',  # for insert commands
+    'allowPartialResults',
 ]
 
 
@@ -378,6 +381,18 @@ def reconstruct_command_from_query_shape(query_shape: dict) -> dict:
         if field in query_shape:
             command[field] = normalize_query_stats_value(query_shape[field])
 
+    # Write statistics describe individual statements, while wire commands use arrays.
+    if command_type in ('update', 'delete'):
+        fields = (
+            ('q', 'u', 'c', 'arrayFilters', 'multi', 'upsert', 'collation')
+            if command_type == 'update'
+            else ('q', 'limit', 'collation')
+        )
+        statement = {field: normalize_query_stats_value(query_shape[field]) for field in fields if field in query_shape}
+        for field in fields:
+            command.pop(field, None)
+        command['updates' if command_type == 'update' else 'deletes'] = [statement]
+
     return command
 
 
@@ -386,6 +401,6 @@ def get_query_stats_row_key(row: dict) -> tuple:
     Generate a unique key for a query metrics row.
     Used for derivative calculation and deduplication.
 
-    Returns: (query_signature, db_name, collection)
+    Keep separate server entries independent, even when obfuscation produces the same signature.
     """
-    return (row.get('query_signature', ''), row.get('db_name', ''), row.get('collection', ''))
+    return (row.get('key_hash') or row.get('query_signature', ''), row.get('db_name', ''), row.get('collection', ''))

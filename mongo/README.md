@@ -13,7 +13,7 @@ You can also create your own metrics using custom `find`, `count` and `aggregate
 
 Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides live and historical query snapshots, slow query metrics, database load, operation execution plans, and collections insights.
 
-**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and Amazon DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
+**Note**: MongoDB v4.4+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and Amazon DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
 **Minimum Agent version:** 6.0.0
 
@@ -24,6 +24,30 @@ Enable [Database Monitoring][28] (DBM) for enhanced insights into query performa
 ### Installation
 
 The MongoDB check is included in the [Datadog Agent][2] package. No additional installation is necessary.
+
+### MongoDB 9.0 compatibility
+
+This integration uses PyMongo 4.18.2. Upgrading the driver raises the minimum MongoDB server version to 4.4; servers below that version cannot connect. This also applies to compatible services that advertise an older wire protocol. See the [PyMongo compatibility table](https://www.mongodb.com/docs/drivers/compatibility/?driver-language=python&python-driver-framework=pymongo) and [driver upgrade changes](https://www.mongodb.com/docs/languages/python/pymongo-driver/current/reference/upgrade/).
+
+MongoDB 9.0 changes several monitoring interfaces:
+
+| Interface | Integration behavior |
+| --- | --- |
+| `$queryStats` metric layout | Reads the new `cursor`, `queryExec`, `queryPlanner`, and `writes` groups while retaining support for older flat responses. Existing metric names and units are preserved. |
+| Write query statistics | Reconstructs insert, update, and delete commands, including statement-level predicates and updates. Collects matched, modified, inserted, deleted, and upserted document totals and update operation totals. |
+| Query performance | Collects planning time, plan-cache and multi-planner counts, and local and cluster peak-memory sums, in addition to existing execution, CPU, scan, sort, and disk metrics. Memory sums describe per-execution peaks, not current memory consumption. |
+| Query identity | Tracks each server `keyHash` independently for interval deltas. Full query text remains deduplicated by the obfuscated query signature. |
+| Server metrics | Adds change stream throughput, open cursors, cursor lifetime and errors; replication bytes sent; query memory limits and failures; and write-conflict retry activity. |
+
+The [MongoDB 9 release notes](https://www.mongodb.com/docs/manual/release-notes/9.0/) and [`$queryStats` reference](https://www.mongodb.com/docs/manual/reference/operator/aggregation/querystats/) describe the new observability fields. Actual MongoDB 9.0.2 responses use aggregate documents with a `sum` for write counts and memory statistics, although some reference-table entries describe scalar values. The collector uses those aggregate sums.
+
+MongoDB 9 samples 1% of read and write operations by default. DBM reports the sampled counts and times without multiplying them to estimate the entire workload. Administrators can adjust `internalQueryStatsSampleRate` and `internalQueryStatsWriteCmdSampleRate`; the integration does not change server sampling settings. Write statistics exclude time-series collections, and query statistics are unavailable for Queryable Encryption queries. The existing `clusterMonitor` role supplies the required query-statistics privileges.
+
+Starting in 8.3, shard servers can also record operations routed through `mongos`. Router and shard statistics describe different execution scopes; do not sum them as independent application requests. MongoDB 9 also changes `keyHash` for aggregate requests that explicitly set `allowPartialResults`; these entries establish a new baseline after upgrading. See [MongoDB 9 compatibility changes](https://www.mongodb.com/docs/manual/release-notes/9.0-compatibility/).
+
+The compatibility review also covered discovery, `buildInfo`, `serverStatus`, database and collection statistics, replication, index statistics, `$currentOp`, explain plans, and slow-query logs. No MongoDB 9 removal requires replacing these collection paths. The driver upgrade requires preserving case-insensitive URI option handling, including `authSource`.
+
+Additional diagnostics in MongoDB 9 include plan-shape counters, optimizer estimates, execution admission statistics, change-stream option histograms, and sharding metadata counters. These are not all exported by this integration. The [serverStatus reference](https://www.mongodb.com/docs/manual/reference/command/serverstatus/) documents their availability and semantics. Renamed `showExpandedEvents` and database sharding metadata fields were not previously collected, so those renames do not remove existing integration metrics.
 
 ### Architecture
 
