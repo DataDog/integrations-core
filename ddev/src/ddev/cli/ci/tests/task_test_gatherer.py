@@ -449,8 +449,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             status, reason = Status.FAILURE, "its artifacts hold failed tests"
         else:
             status, reason = Status.INCONCLUSIVE, "the run did not succeed and no test failed"
-        # The gatherer infers this outcome rather than reading it from GitHub, so its report is the
-        # job's own fields plus the inference; the runner separately reports what it observed.
+        # Inferred, not observed: the runner already reports every finish GitHub listed.
         self._logger.warning(
             "Job %s has no confirmed final state: reported as %s (%s)",
             batch_job_result.job.name,

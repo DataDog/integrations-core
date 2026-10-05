@@ -120,8 +120,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._options = options
         self._runs_in_flight: dict[str, int] = {}
         self._queue_durations_reported: set[int] = set()
-        # Job IDs whose finish was already reported. A distinct event from a queue wait: a job can
-        # start without this process ever seeing it finish, and the reverse.
+        # Separate from `_queue_durations_reported`: a job can be seen starting but never finishing.
         self._finished_jobs_reported: set[int] = set()
         self._logger = monitor.logger
         self.monitor = monitor
@@ -293,12 +292,9 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             self.monitor.metrics.distribution('job.queue.duration', duration, **job_fields(job))
 
     def _report_finished_jobs(self, batch: TestBatch, observed: Iterable[WorkflowJob]) -> None:
-        """Report each planned job's finish once, at its first completed observation.
+        """Report each planned job's finish once per GitHub job ID, at the first listing showing it completed.
 
-        Only planned jobs are reported, and only what GitHub said: the gatherer separately infers
-        the outcome of a job whose finish was never observed. Job IDs are unique per attempt, so
-        the recorded set collapses repeated observations without collapsing reruns. Unusable
-        timing is not retried: a later observation of the same attempt reports nothing further.
+        Unusable timing is not retried on a later listing.
         """
         planned = {job.name: job for job in batch.job_list}
         for workflow_job in observed:
@@ -473,9 +469,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         known_jobs = {job.name: job for job in observed_jobs}
         # The jobs response may lag behind the workflow status. Refresh it after downloading artifacts.
         await self._refresh_jobs(run_id, known_jobs, batch.batch_id, "reconciling final workflow jobs")
-        # A job first seen here can still have waited for a runner, so it gets its queue sample too,
-        # and one first seen finished here gets its finish report, the one polling would have emitted
-        # had the listing not lagged the run.
+        # The listing can lag the run, so a job may first be seen started or finished here.
         self._report_queue_durations(batch, known_jobs.values())
         self._report_finished_jobs(batch, known_jobs.values())
         # The run is over, so a job not seen COMPLETED is a stale observation. The gatherer decides
@@ -550,8 +544,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         """
         artifact_dirs: dict[str, Path] = {}
         failures: list[tuple[int, str]] = []
-        # Artifacts the listing could not offer a usable download for, collected so the operation
-        # gets one record even when no individual download failed.
+        # Listed without a usable download: the operation still needs its one failure record.
         unavailable: list[str] = []
         with self._metrics.time_operation(
             Operation.COLLECT_ARTIFACTS, duration_metric='artifacts.download.duration'
@@ -584,7 +577,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                     exc_info=True,
                 )
                 listing_failed = True
-            # An incomplete or unusable listing degrades the collection like a failed download does.
+            # An incomplete or unusable listing fails the collection like a failed download does.
             result.failed = listing_failed or bool(failures) or bool(unavailable)
         if failures:
             self._metrics.log_failed_operation(
@@ -599,8 +592,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 failed_artifacts=failures,
             )
         elif unavailable and not listing_failed:
-            # A failed listing already produced the operation's record; only a clean listing that
-            # still could not offer every artifact needs its own.
+            # A failed listing already logged the operation's record.
             self._metrics.log_failed_operation(
                 Operation.COLLECT_ARTIFACTS,
                 self._logger,

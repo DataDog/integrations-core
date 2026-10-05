@@ -208,8 +208,7 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         console_tag=True,
         metric_tag=True,
     ),
-    # Per-attempt detail: searchable structured fields, kept off the console line, which the
-    # message text already carries the outcome and duration of.
+    # Off the console line: the finished-job message already states the outcome and duration.
     'job_conclusion': AttributeSpec(
         'dispatcher.batch.job.conclusion',
     ),
@@ -526,12 +525,9 @@ def batch_fields(batch: TestBatch) -> dict[str, Any]:
 
 
 def job_fields(job: BatchJob, workflow_job: WorkflowJob | None = None) -> dict[str, Any]:
-    """Describe a planned job, optionally as the workflow job one attempt of it finished as.
+    """The planned job's fields, plus the attempt's GitHub identity, outcome and timing when `workflow_job` is given.
 
-    Without `workflow_job`, the fields are the job's own, which every metric and log that names a
-    job uses. With it, they gain the attempt's GitHub identity, outcome and timing, which only the
-    finished-job report carries. Timing is omitted when the attempt never finished running on a
-    runner or GitHub's timestamps are unusable.
+    Timing is omitted when the job never ran on a runner or GitHub's timestamps are unusable.
     """
     fields: dict[str, Any] = {
         'job': job.name,

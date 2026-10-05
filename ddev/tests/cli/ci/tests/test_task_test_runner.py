@@ -930,13 +930,10 @@ async def test_a_rerun_gets_its_own_queue_wait_sample(tmp_path: Path):
 
 
 def _finished_records(handler: RecordingJsonHandler) -> list[dict]:
-    """The runner's one-report-per-attempt job completions, excluding the workflow-run log."""
     return [event for event in handler.events if event["event"].startswith("Job ")]
 
 
-async def test_a_finished_job_is_reported_once_across_polls_and_the_reconcile_listing(tmp_path: Path):
-    """The finish is reported at its first completed observation: later polls and the reconcile
-    listing describe the same attempt and report nothing further."""
+async def test_finished_job_reported_once(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run(status="in_progress"), once=True)
     fake.mock_response("get_workflow_run", make_workflow_run())
@@ -967,8 +964,7 @@ async def test_a_finished_job_is_reported_once_across_polls_and_the_reconcile_li
     assert {sample.tags["dispatcher.batch.job.status"] for sample in durations} == {"success"}
 
 
-async def test_a_rerun_gets_its_own_finished_report(tmp_path: Path):
-    """A rerun is a new job attempt with a new ID, so its own finish is a new report."""
+async def test_rerun_gets_its_own_report(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     for run_status in ("in_progress", "completed"):
         fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
@@ -995,9 +991,8 @@ async def test_a_rerun_gets_its_own_finished_report(tmp_path: Path):
     assert [sample.value for sample in sink.records_named("job.duration")] == [DEFAULT_DURATION_SECONDS, 150.0]
 
 
-async def test_a_job_first_seen_completed_in_the_reconcile_listing_is_reported(tmp_path: Path):
-    """A short job can finish between two polls, so the reconcile listing can be the first
-    completed observation, and it reports the finish polling would have."""
+async def test_job_first_seen_finished_in_reconcile_listing(tmp_path: Path):
+    """A short job can finish between two polls."""
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run(), once=True)
     job = make_job()
@@ -1026,10 +1021,10 @@ async def test_a_job_first_seen_completed_in_the_reconcile_listing_is_reported(t
         pytest.param(WorkflowJobConclusion.TIMED_OUT, "failure", "warning", True, id="timed-out"),
     ],
 )
-async def test_the_finished_report_follows_the_attempts_outcome(
+async def test_finished_report_by_outcome(
     tmp_path: Path, conclusion: WorkflowJobConclusion, status: str, level: str, has_duration: bool
 ):
-    """A skipped or cancelled attempt never ran on a runner, so it is reported without a duration."""
+    """Skipped and cancelled jobs never ran, so they have no duration."""
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run())
     job = make_job()
@@ -1049,9 +1044,7 @@ async def test_the_finished_report_follows_the_attempts_outcome(
     assert (len(sink.records_named("job.duration")) == 1) is has_duration
 
 
-async def test_unusable_timing_at_the_first_completed_observation_is_not_retried(tmp_path: Path):
-    """An attempt is reported at its first completed observation: unusable timing leaves the
-    duration omitted, and a later observation with valid timing reports nothing further."""
+async def test_unusable_timing_not_retried(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     for run_status in ("in_progress", "completed"):
         fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
@@ -1565,11 +1558,7 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     ],
 )
 @pytest.mark.asyncio
-async def test_an_escaped_failure_is_logged_once_by_the_owning_component(
-    tmp_path: Path, failure_point: str, operation: str
-):
-    """The orchestrator logs the escaped error under the bus component; the runner must also name
-    the operation, so the failure is findable next to its `operations.failed` metric."""
+async def test_escaped_failure_logged_by_owning_component(tmp_path: Path, failure_point: str, operation: str):
     fake = FakeAsyncGitHubClient()
     fake.mock_response(failure_point, RuntimeError(f"boom-{failure_point}"))
     handler = RecordingJsonHandler()

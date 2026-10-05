@@ -252,9 +252,7 @@ def test_progress_observations_update_planned_jobs_and_suppress_equal_snapshots(
     assert drain_queue(gatherer.bus.queue) == []
 
 
-def test_a_failed_gathering_logs_the_operation_from_the_gatherer(tmp_path: Path):
-    """The bus logs the escaped exception under its own component; the gatherer must also name
-    the operation, so the failure is findable next to its `operations.failed` metric."""
+def test_failed_gathering_logs_its_operation(tmp_path: Path):
     handler = RecordingJsonHandler()
     job = _batch_job("j1")
     gatherer = _make_gatherer(tmp_path, {"batch-1": [job]}, handler=handler)

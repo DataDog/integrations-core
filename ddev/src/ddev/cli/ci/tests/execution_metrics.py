@@ -77,11 +77,9 @@ class MetricsHelper:
         exc_info: bool = False,
         **fields: Any,
     ) -> None:
-        """Emit the one log record a failed operation owes from the component that owns it.
+        """Log a failed operation: an error when it escaped, a warning when the processor recovered.
 
-        The metric outcome is settled where the failure is: `record_operation` at a raise site, or
-        `time_operation` from `result.failed`. A failure the processor recovered from or degraded
-        through warns rather than errors, because the run continues past it.
+        Does not record the metric; `record_operation` or `time_operation` does.
         """
         (logger.warning if recovered else logger.error)(
             message, *args, operation=operation, exc_info=exc_info, **fields
