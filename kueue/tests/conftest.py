@@ -267,9 +267,10 @@ def wait_for_queues_active():
         )
 
 
-def setup_kueue():
-    preload_workload_images()
-    retry(stop=stop_after_attempt(5), wait=wait_fixed(10), reraise=True)(kubectl)(
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(10), reraise=True)
+def apply_kueue_manifests():
+    """Apply the Kueue release manifests, retrying because GitHub release downloads can fail transiently."""
+    kubectl(
         [
             'apply',
             '--server-side',
@@ -278,6 +279,10 @@ def setup_kueue():
         ]
     )
 
+
+def setup_kueue():
+    preload_workload_images()
+    apply_kueue_manifests()
     disable_visibility_server()
 
     # Ensure the controller is ready
