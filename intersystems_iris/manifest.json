@@ -8,7 +8,6 @@
     "description": "Monitor InterSystems IRIS instance health, licensing, mirroring, ECP, and interoperability.",
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
-    "uninstallation": "README.md#Uninstallation",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "media": [
@@ -35,11 +34,10 @@
       "Submitted Data Type::Logs"
     ]
   },
-  "oauth": {},
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
-    "homepage": "https://www.intersystems.com/products/intersystems-iris/",
+    "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com",
     "vendor_id": "datadog"
   },
@@ -77,8 +75,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "source_type_id": 90769250,
-      "supports_ddr_coordinated_failover": false
+      "source_type_id": 90769250
     }
   },
   "owner": "agent-integrations"
