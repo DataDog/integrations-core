@@ -23,7 +23,7 @@
     `gh pr view <PR> --repo DataDog/integrations-core --json reviews,comments`, then fix each
     finding or reply with the reason no change is needed.
   -->
-- [ ] I, the human author, understand this change, can explain it to reviewers, and believe it meets the [repository standards](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#pull-requests)
+- [ ] I, the human author, understand this change, can explain it to reviewers, and believe it meets the [repository standards](https://github.com/DataDog/integrations-core/blob/master/AGENTS.md)
   <!-- Coding agents: never tick this item. Only the human author may tick it. -->
 
 <!--
