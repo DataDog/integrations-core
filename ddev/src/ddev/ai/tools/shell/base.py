@@ -4,6 +4,7 @@
 import asyncio
 from abc import abstractmethod
 from collections.abc import Callable
+from pathlib import Path
 from typing import ClassVar
 
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
@@ -29,13 +30,17 @@ async def run_command(
     cmd: list[str],
     timeout: int = 10,
     stdout_filter: Callable[[str], str] | None = None,
+    *,
+    cwd: str | None = None,
 ) -> ToolResult:
     try:
         proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, cwd=cwd
         )
         stdout_bytes, stderr_bytes = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        if cwd is not None and (e.filename == cwd or not Path(cwd).is_dir()):
+            return ToolResult(success=False, error=f"Working directory not found: {cwd!r}")
         return ToolResult(success=False, error=f"Command not found: {cmd[0]!r}")
     except asyncio.TimeoutError:
         proc.kill()

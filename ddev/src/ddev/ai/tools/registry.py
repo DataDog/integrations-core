@@ -84,6 +84,7 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "copy_path": ToolSpec("fs.copy_path", "CopyPathTool", factory=_file_policy_factory, read_only=False),
     "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory, read_only=True),
     "list_files": ToolSpec("shell.list_files", "ListFilesTool", read_only=True),
+    "docker": ToolSpec("shell.docker", "DockerTool", read_only=False),
     "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory, read_only=False),
     "http_get": ToolSpec("http.http_get", "HttpGetTool", read_only=True),
     # read_only=False because a reviewer must never be able to end the run on its own.
