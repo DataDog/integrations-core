@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import re
 from collections.abc import Iterable, Sequence
 
@@ -114,10 +115,10 @@ def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
     )
 
 
-def recording_runtime() -> tuple[MonitoringRuntime, RecordingSink]:
+def recording_runtime(handler: logging.Handler | None = None) -> tuple[MonitoringRuntime, RecordingSink]:
     """A monitoring runtime delivering every component's metrics into one recording sink."""
     sink = RecordingSink()
-    monitoring = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=metric_tag_mapping)
+    monitoring = MonitoringRuntime(console_handler=handler, metrics_sink=sink, metrics_tag_projector=metric_tag_mapping)
     return monitoring, sink
 
 

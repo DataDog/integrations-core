@@ -156,11 +156,11 @@ ENV NINJA_VERSION="1.13.0"
 RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
-ENV PG_VERSION="18.3"
+ENV PG_VERSION="18.6"
 RUN Get-RemoteFile `
       -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
       -Path postgresql-$Env:PG_VERSION.tar.bz2 `
-      -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
+      -Hash '555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
 RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenSSL'; `

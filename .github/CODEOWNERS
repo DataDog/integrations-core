@@ -225,6 +225,8 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /pdh_check/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /pdh_check/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /pdh_check/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/thermal/                                                            @DataDog/windows-products @DataDog/agent-integrations
+/thermal/*.md                                                        @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /win32_event_log/                                                    @DataDog/windows-products @DataDog/agent-integrations
 /win32_event_log/*.md                                                @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /win32_event_log/manifest.json                                       @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
@@ -657,6 +659,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /vllm/*.md                                                             @DataDog/gpu-monitoring-agent @DataDog/documentation
 /vllm/manifest.json                                                    @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 /vllm/metadata.csv                                                     @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+
+/sglang/                                                               @DataDog/gpu-monitoring-agent
+/sglang/*.md                                                           @DataDog/gpu-monitoring-agent @DataDog/documentation
+/sglang/manifest.json                                                  @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+/sglang/metadata.csv                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation
