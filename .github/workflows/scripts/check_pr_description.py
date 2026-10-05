@@ -24,21 +24,23 @@ def _sections(body: str) -> dict[str, str]:
     return sections
 
 
-def _should_skip(author: str, draft: bool, title: str) -> bool:
+def _skip_reason(author: str, draft: bool, title: str) -> str | None:
     normalized_author = author.casefold()
-    is_bot = (
+    if draft:
+        return "draft PR; it runs again when the PR is marked ready for review"
+    if (
         normalized_author.endswith("[bot]")
         or normalized_author in {"dependabot", "renovate"}
         or ("bot" in normalized_author and ("datadog" in normalized_author or normalized_author.startswith("dd-")))
-    )
-    return draft or is_bot or RELEASE_TITLE_PATTERN.match(title) is not None
+    ):
+        return f"bot author {author}"
+    if RELEASE_TITLE_PATTERN.match(title):
+        return "release PR"
+    return None
 
 
-def check_pr_description(body: str, author: str, draft: bool, title: str) -> list[str]:
-    """Return actionable validation errors, or no errors for valid and skipped PRs."""
-    if _should_skip(author, draft, title):
-        return []
-
+def check_pr_description(body: str) -> list[str]:
+    """Return actionable validation errors for the PR body."""
     visible_body = COMMENT_PATTERN.sub("", body)
     sections = _sections(visible_body)
     errors = []
@@ -63,12 +65,16 @@ def check_pr_description(body: str, author: str, draft: bool, title: str) -> lis
 
 
 def main() -> None:
-    errors = check_pr_description(
-        body=os.environ.get("PR_BODY", ""),
+    reason = _skip_reason(
         author=os.environ.get("PR_AUTHOR", ""),
         draft=os.environ.get("PR_DRAFT", "false").casefold() == "true",
         title=os.environ.get("PR_TITLE", ""),
     )
+    if reason:
+        print(f"Skipping PR description check: {reason}.")
+        return
+
+    errors = check_pr_description(os.environ.get("PR_BODY", ""))
     if errors:
         for error in errors:
             print(f"Error: {error}", file=sys.stderr)
@@ -77,6 +83,7 @@ def main() -> None:
             file=sys.stderr,
         )
         raise SystemExit(1)
+    print("PR description check passed.")
 
 
 if __name__ == "__main__":
