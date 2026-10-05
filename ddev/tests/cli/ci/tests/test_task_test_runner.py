@@ -925,6 +925,154 @@ async def test_a_rerun_gets_its_own_queue_wait_sample(tmp_path: Path):
 
 
 # ---------------------------------------------------------------------------
+# process_message — finished-job reporting
+# ---------------------------------------------------------------------------
+
+
+def _finished_records(handler: RecordingJsonHandler) -> list[dict]:
+    """The runner's one-report-per-attempt job completions, excluding the workflow-run log."""
+    return [event for event in handler.events if event["event"].startswith("Job ")]
+
+
+async def test_a_finished_job_is_reported_once_across_polls_and_the_reconcile_listing(tmp_path: Path):
+    """The finish is reported at its first completed observation: later polls and the reconcile
+    listing describe the same attempt and report nothing further."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run(status="in_progress"), once=True)
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    job = make_job()
+    mock_jobs(fake, [make_workflow_job(name=job.name)])
+    mock_artifacts(fake, [])
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    [record] = _finished_records(handler)
+    assert record["event"] == f"Job {job.name} completed: success in 90s"
+    assert record["level"] == "info"
+    assert record["component"] == "test-runner"
+    assert record["run_id"] == 123
+    assert record["job"] == job.name
+    assert record["target"] == "ntp"
+    assert record["job_status"] == "success"
+    assert record["job_conclusion"] == "success"
+    assert record["job_url"] == "https://github.com/DataDog/integrations-core/actions/runs/123/job/1"
+    assert record["job_duration_seconds"] == DEFAULT_DURATION_SECONDS
+    assert record["job_queue_duration_seconds"] == DEFAULT_QUEUE_DURATION_SECONDS
+    durations = sink.records_named("job.duration")
+    assert [sample.value for sample in durations] == [DEFAULT_DURATION_SECONDS]
+    assert {sample.tags["dispatcher.component"] for sample in durations} == {"test-runner"}
+    assert {sample.tags["dispatcher.batch.job.status"] for sample in durations} == {"success"}
+
+
+async def test_a_rerun_gets_its_own_finished_report(tmp_path: Path):
+    """A rerun is a new job attempt with a new ID, so its own finish is a new report."""
+    fake = FakeAsyncGitHubClient()
+    for run_status in ("in_progress", "completed"):
+        fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
+    job = make_job()
+    first = make_workflow_job(id=1, name=job.name)
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([first])), once=True)
+    rerun = make_workflow_job(
+        id=2,
+        name=job.name,
+        conclusion=WorkflowJobConclusion.FAILURE,
+        started_at="2026-09-24T16:00:00Z",
+        completed_at="2026-09-24T16:02:30Z",
+    )
+    mock_jobs(fake, [rerun])
+    mock_artifacts(fake, [])
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    records = _finished_records(handler)
+    assert [(record["job_id"], record["level"]) for record in records] == [(1, "info"), (2, "warning")]
+    assert [sample.value for sample in sink.records_named("job.duration")] == [DEFAULT_DURATION_SECONDS, 150.0]
+
+
+async def test_a_job_first_seen_completed_in_the_reconcile_listing_is_reported(tmp_path: Path):
+    """A short job can finish between two polls, so the reconcile listing can be the first
+    completed observation, and it reports the finish polling would have."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run(), once=True)
+    job = make_job()
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list()), once=True)
+    settled = make_response(make_workflow_jobs_list([make_workflow_job(name=job.name)]))
+    fake.mock_response("list_workflow_jobs", settled, once=True)
+    mock_artifacts(fake, [])
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+
+    await runner.process_message(batch_with(job))
+
+    [record] = _finished_records(handler)
+    assert record["target"] == "ntp"
+    assert record["job_status"] == "success"
+    assert record["job_duration_seconds"] == DEFAULT_DURATION_SECONDS
+
+
+@pytest.mark.parametrize(
+    ("conclusion", "status", "level", "has_duration"),
+    [
+        pytest.param(WorkflowJobConclusion.SUCCESS, "success", "info", True, id="success"),
+        pytest.param(WorkflowJobConclusion.SKIPPED, "skipped", "info", False, id="skipped"),
+        pytest.param(WorkflowJobConclusion.FAILURE, "failure", "warning", True, id="failure"),
+        pytest.param(WorkflowJobConclusion.CANCELLED, "failure", "warning", False, id="cancelled"),
+        pytest.param(WorkflowJobConclusion.TIMED_OUT, "failure", "warning", True, id="timed-out"),
+    ],
+)
+async def test_the_finished_report_follows_the_attempts_outcome(
+    tmp_path: Path, conclusion: WorkflowJobConclusion, status: str, level: str, has_duration: bool
+):
+    """A skipped or cancelled attempt never ran on a runner, so it is reported without a duration."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run())
+    job = make_job()
+    mock_jobs(fake, [make_workflow_job(name=job.name, conclusion=conclusion)])
+    mock_artifacts(fake, [])
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    [record] = _finished_records(handler)
+    assert record["level"] == level
+    assert record["job_status"] == status
+    assert record["job_conclusion"] == conclusion.value
+    assert ("job_duration_seconds" in record) is has_duration
+    assert (len(sink.records_named("job.duration")) == 1) is has_duration
+
+
+async def test_unusable_timing_at_the_first_completed_observation_is_not_retried(tmp_path: Path):
+    """An attempt is reported at its first completed observation: unusable timing leaves the
+    duration omitted, and a later observation with valid timing reports nothing further."""
+    fake = FakeAsyncGitHubClient()
+    for run_status in ("in_progress", "completed"):
+        fake.mock_response("get_workflow_run", make_workflow_run(status=run_status), once=True)
+    job = make_job()
+    unusable = make_workflow_job(name=job.name, completed_at="not-a-timestamp")
+    fake.mock_response("list_workflow_jobs", make_response(make_workflow_jobs_list([unusable])), once=True)
+    mock_jobs(fake, [make_workflow_job(name=job.name)])
+    mock_artifacts(fake, [])
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    await runner.process_message(batch_with(job))
+
+    [record] = _finished_records(handler)
+    assert record["event"] == f"Job {job.name} completed: success"
+    assert "job_duration_seconds" not in record
+    assert sink.records_named("job.duration") == []
+
+
+# ---------------------------------------------------------------------------
 # process_message — correlation
 # ---------------------------------------------------------------------------
 
@@ -1016,7 +1164,8 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
     fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [])
     fake.mock_response("list_workflow_jobs", RuntimeError("boom-list-jobs"))
-    monitoring, sink = recording_runtime()
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     # A failure listing jobs must not abort the batch: BatchFinished is still emitted, each
@@ -1031,6 +1180,11 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
         for record in sink.records_named("operations.failed")
         if record.tags["dispatcher.operation"] == "refresh_jobs"
     ] == [1, 1]
+    # Two failed `refresh_jobs` attempts (poll and reconcile), each leaving one warning record.
+    warnings = [event for event in handler.events if event.get("operation") == "refresh_jobs"]
+    assert [warning["level"] for warning in warnings] == ["warning", "warning"]
+    assert [warning["event"] for warning in warnings] == ["Failed to list workflow jobs"] * 2
+    assert all("exception" in warning for warning in warnings)
 
 
 @pytest.mark.parametrize(
@@ -1147,7 +1301,8 @@ async def test_unavailable_artifacts_degrade_collection(tmp_path: Path, unavaila
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run())
     mock_artifacts(fake, [make_artifact(id=1), unavailable])
-    monitoring, sink = recording_runtime()
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     await runner.process_message(
@@ -1159,6 +1314,9 @@ async def test_unavailable_artifacts_degrade_collection(tmp_path: Path, unavaila
     assert download_calls[0].kwargs["archive_download_url"] == "https://api.github.com/artifact/1/zip"
     assert failed_by_operation(sink)["collect_artifacts"] == 1
     assert [finished.status for finished in finished_messages(runner)] == [Status.SUCCESS]
+    [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
+    assert warning["level"] == "warning"
+    assert warning["event"] == "Skipped 1 unavailable artifact for workflow run 123 (expired or without a download URL)"
 
 
 @pytest.mark.asyncio
@@ -1166,7 +1324,8 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run())
     fake.mock_response("list_workflow_run_artifacts", RuntimeError("boom-list-artifacts"))
-    monitoring, sink = recording_runtime()
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     # A failure listing artifacts must not abort the batch: exactly one BatchFinished is still
@@ -1184,6 +1343,10 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
         "collect_artifacts": 1,
     }
     assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
+    assert warning["level"] == "warning"
+    assert warning["event"] == "Failed to list workflow run artifacts"
+    assert "exception" in warning
 
 
 @pytest.mark.asyncio
@@ -1196,7 +1359,8 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
         RuntimeError("download failure for artifact 2"),
         archive_download_url="https://api.github.com/artifact/2/zip",
     )
-    monitoring, sink = recording_runtime()
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
 
     await runner.process_message(make_batch())
@@ -1213,6 +1377,10 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     assert submitted[0].status == "success"
     assert failed_by_operation(sink)["collect_artifacts"] == 1
     assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
+    assert warning["level"] == "warning"
+    assert warning["event"] == "Failed to download 1 artifact for workflow run 123"
+    assert warning["failure_count"] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -1369,6 +1537,10 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     assert "WorkflowJobsList" in reason
     assert "See logs for details." in reason
     assert exc_info.value.__cause__ is unparsable
+    [invalid] = [event for event in handler.events if event['event'].startswith('Invalid GitHub response while')]
+    assert invalid['level'] == 'error'
+    assert invalid['operation'] == 'refresh_jobs'
+    assert invalid['component'] == 'test-runner'
     log_text = '\n'.join(event['event'] for event in handler.events)
     assert "listing workflow jobs" in log_text
     assert "batch-err" in log_text
@@ -1383,6 +1555,35 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
 # ---------------------------------------------------------------------------
 # Error paths
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("failure_point", "operation"),
+    [
+        pytest.param("create_workflow_dispatch", "dispatch_batch", id="dispatch"),
+        pytest.param("get_workflow_run", "fetch_workflow", id="poll"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_an_escaped_failure_is_logged_once_by_the_owning_component(
+    tmp_path: Path, failure_point: str, operation: str
+):
+    """The orchestrator logs the escaped error under the bus component; the runner must also name
+    the operation, so the failure is findable next to its `operations.failed` metric."""
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response(failure_point, RuntimeError(f"boom-{failure_point}"))
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+
+    with pytest.raises(RuntimeError, match=f"boom-{failure_point}"):
+        await runner.process_message(make_batch())
+
+    failures = [event for event in handler.events if event.get("operation") == operation]
+    assert len(failures) == 1
+    [failure] = failures
+    assert failure["level"] == "error"
+    assert failure["component"] == "test-runner"
+    assert "exception" in failure
 
 
 @pytest.mark.parametrize("failure_point", ["create_workflow_dispatch", "get_workflow_run"])

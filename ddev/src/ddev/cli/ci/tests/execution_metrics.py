@@ -10,6 +10,9 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum, auto
+from typing import Any
+
+from structlog.stdlib import BoundLogger
 
 from ddev.monitoring.metrics import Metrics
 
@@ -63,6 +66,26 @@ class MetricsHelper:
         """Emit one logical operation's outcome after retries and fallbacks settle."""
         self._metrics.count('operations.count', 1, operation=operation)
         self._metrics.count('operations.failed', int(failed), operation=operation)
+
+    def log_failed_operation(
+        self,
+        operation: Operation,
+        logger: BoundLogger,
+        message: str,
+        *args: Any,
+        recovered: bool = False,
+        exc_info: bool = False,
+        **fields: Any,
+    ) -> None:
+        """Emit the one log record a failed operation owes from the component that owns it.
+
+        The metric outcome is settled where the failure is: `record_operation` at a raise site, or
+        `time_operation` from `result.failed`. A failure the processor recovered from or degraded
+        through warns rather than errors, because the run continues past it.
+        """
+        (logger.warning if recovered else logger.error)(
+            message, *args, operation=operation, exc_info=exc_info, **fields
+        )
 
     @contextmanager
     def time_operation(self, operation: Operation, *, duration_metric: str) -> Iterator[OperationResult]:
