@@ -15,11 +15,18 @@ from ddev.monitoring.metrics import Metrics
 
 
 class ExecutionOutcome(StrEnum):
-    """Terminal command outcomes, including modes that skip execution."""
+    """Terminal command outcomes, including modes that skip execution.
+
+    `TESTS_FAILED` is a run the Dispatcher carried through whose tests failed. `FAILED` is a run the
+    Dispatcher itself could not carry through: a crash, a batch it lost track of or a report it could
+    not publish.
+    """
 
     NO_OP = 'no-op'
     PASSED = auto()
+    TESTS_FAILED = 'tests-failed'
     FAILED = auto()
+    TIMED_OUT = 'timed-out'
     CANCELLED = auto()
     PLANNING_FAILED = 'planning-failed'
     RESOLVED = auto()
