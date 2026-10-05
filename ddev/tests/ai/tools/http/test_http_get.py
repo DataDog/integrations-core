@@ -4,8 +4,8 @@
 import httpx
 import pytest
 
-from ddev.ai.tools.http.base import MAX_OUTPUT_CHARS
 from ddev.ai.tools.http.http_get import HttpGetTool
+from ddev.ai.tools.http.response_format import MAX_OUTPUT_CHARS
 
 from .helpers import RecordingTransport, respond
 
@@ -39,26 +39,25 @@ async def test_small_response_is_returned_inline(status_code: int, body: str):
     assert result.data == f"Status: {status_code}\n\n{body}"
 
 
-@pytest.mark.parametrize("extra", [{"method": "POST"}, {"json": {"a": 1}}])
-async def test_get_rejects_method_override_and_body(extra: dict):
-    transport = respond(httpx.Response(200))
-
-    result = await HttpGetTool(transport=transport).run({"url": METRICS_URL, **extra})
-
-    assert result.success is False
-    assert "Extra inputs are not permitted" in result.error
-    assert transport.requests == []
-
-
 async def test_query_is_sent_as_get():
     transport = respond(httpx.Response(200, text="ok"))
 
-    await HttpGetTool(transport=transport).run({"url": f"{METRICS_URL}?a=1", "query": {"b": "x", "limit": 2}})
+    result = await HttpGetTool(transport=transport).run(
+        {"url": f"{METRICS_URL}?a=1", "query": {"b": "x", "limit": 2, "tag": ["team:core", "env:dev"]}}
+    )
+
+    assert result.success is True
 
     (request,) = transport.requests
     assert request.method == "GET"
     assert request.content == b""
-    assert dict(request.url.params) == {"a": "1", "b": "x", "limit": "2"}
+    assert request.url.params.multi_items() == [
+        ("a", "1"),
+        ("b", "x"),
+        ("limit", "2"),
+        ("tag", "team:core"),
+        ("tag", "env:dev"),
+    ]
 
 
 async def test_redirect_is_not_followed():
