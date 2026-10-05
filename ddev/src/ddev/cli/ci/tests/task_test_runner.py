@@ -21,7 +21,13 @@ from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, te
 from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
-from ddev.cli.ci.tests.status import Status, conclusion_to_status, has_started_running, is_queued
+from ddev.cli.ci.tests.status import (
+    Status,
+    batch_status,
+    has_started_running,
+    is_queued,
+    job_status,
+)
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.monitoring import ComponentMonitor
@@ -29,6 +35,7 @@ from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 from ddev.utils.github_async.retry import SAFE_RETRY, on_status
+from ddev.utils.platform import PlatformName
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
@@ -119,6 +126,9 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._artifact_client = artifact_client
         self._options = options
         self._runs_in_flight: dict[str, int] = {}
+        # Each batch's latest queued/running counts by platform, so the gauges can sum concurrent
+        # batches; a completed batch keeps its platforms at zero.
+        self._job_activity_by_batch: dict[str, dict[PlatformName, list[int]]] = {}
         self._queue_durations_reported: set[int] = set()
         # Separate from `_queue_durations_reported`: a job can be seen starting but never finishing.
         self._finished_jobs_reported: set[int] = set()
@@ -227,7 +237,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
         jobs = await self._reconcile_final_jobs(run_id, message, jobs)
         batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
-        status = conclusion_to_status(conclusion)
+        status = batch_status(conclusion, jobs)
         self.submit_message(
             BatchFinished(
                 id=message.id,
@@ -251,9 +261,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             metrics.count('jobs.count', 1, **job_fields(job))
 
     def _report_job_activity(self, batch: TestBatch, known_jobs: Mapping[str, WorkflowJob]) -> None:
-        """Gauge the batch's planned jobs waiting for a runner or running, by platform.
+        """Gauge the run's planned jobs waiting for a runner or running, totaled by platform.
 
-        Every platform the batch plans gets a sample, so an empty queue is a zero rather than a gap.
+        The gauges have no batch tag, so each batch's latest counts are kept and summed. Every
+        platform planned so far gets a sample, so an empty queue is a zero rather than a gap.
         """
         planned = {job.name: job.platform for job in batch.job_list}
         counts = {platform: [0, 0] for platform in planned.values()}
@@ -264,9 +275,16 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 counts[platform][0] += 1
             elif workflow_job.status is WorkflowJobStatus.IN_PROGRESS:
                 counts[platform][1] += 1
-        for platform, (queued, running) in counts.items():
-            self.monitor.metrics.gauge('jobs.queued', queued, platform=platform, batch_id=batch.batch_id)
-            self.monitor.metrics.gauge('jobs.running', running, platform=platform, batch_id=batch.batch_id)
+        self._job_activity_by_batch[batch.batch_id] = counts
+        totals: dict[PlatformName, list[int]] = {}
+        for per_batch in self._job_activity_by_batch.values():
+            for platform, (queued, running) in per_batch.items():
+                total = totals.setdefault(platform, [0, 0])
+                total[0] += queued
+                total[1] += running
+        for platform, (queued, running) in totals.items():
+            self.monitor.metrics.gauge('jobs.queued', queued, platform=platform)
+            self.monitor.metrics.gauge('jobs.running', running, platform=platform)
 
     def _report_queue_durations(self, batch: TestBatch, observed: Iterable[WorkflowJob]) -> None:
         """Emit each planned job's runner wait once, at its first observation of having started.
@@ -292,7 +310,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             self.monitor.metrics.distribution('job.queue.duration', duration, **job_fields(job))
 
     def _report_finished_jobs(self, batch: TestBatch, observed: Iterable[WorkflowJob]) -> None:
-        """Report each planned job's finish once per GitHub job ID, at the first listing showing it completed.
+        """Report each planned job's duration and completion once per GitHub job ID, at the first listing
+        showing it completed.
 
         Unusable timing is not retried on a later listing.
         """
@@ -310,8 +329,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             duration = fields.get('job_duration_seconds')
             if duration is not None:
                 self.monitor.metrics.distribution('job.duration', duration, **fields)
-            status = conclusion_to_status(workflow_job.conclusion)
-            log = self._logger.info if status in (Status.SUCCESS, Status.SKIPPED) else self._logger.warning
+            status = job_status(workflow_job)
+            log = (
+                self._logger.info
+                if status in (Status.SUCCESS, Status.SKIPPED, Status.CANCELLED)
+                else self._logger.warning
+            )
             summary = status.value if duration is None else f"{status.value} in {duration:g}s"
             log("Job %s completed: %s", job.name, summary, **fields)
 
@@ -389,7 +412,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 previous_state = progress.state
             await self._refresh_jobs(run_id, known_jobs, message.batch_id, "listing workflow jobs")
             # A completed workflow has nothing queued or running, whatever a failed or lagging final
-            # listing left in `known_jobs`, and this is the batch series' last point.
+            # listing left in `known_jobs`, and this is the batch's last sample.
             self._report_job_activity(message, {} if completed else known_jobs)
             self._report_queue_durations(message, known_jobs.values())
             self._report_finished_jobs(message, known_jobs.values())
@@ -426,7 +449,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             run_id=run_id,
             workflow_url=run.html_url,
             state=state,
-            status=conclusion_to_status(run.conclusion) if run.is_completed else None,
+            status=batch_status(run.conclusion, known_jobs.values()) if run.is_completed else None,
             sequence=sequence,
             jobs=tuple(known_jobs.values()),
         )

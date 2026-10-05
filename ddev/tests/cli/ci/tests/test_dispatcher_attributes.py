@@ -105,7 +105,6 @@ MAPPING_FIELDS = {
                 'dispatcher.context': 'pr',
                 'team': 'agent-integrations',
                 'dispatcher.component': 'test-runner',
-                'dispatcher.batch.id': 'batch-01',
                 'dispatcher.batch.job.status': 'success',
                 'dispatcher.batch.job.target': 'postgres',
             },
@@ -138,7 +137,7 @@ def test_log_attributes_keep_native_json_values_while_tag_transports_stringify()
         'dispatcher.pr.number': '42',
         'dispatcher.run.is_fork': 'false',
     }
-    assert metric_tag_mapping(fields) == {'dispatcher.batch.id': 'batch-01', 'dispatcher.run.is_fork': 'false'}
+    assert metric_tag_mapping(fields) == {'dispatcher.run.is_fork': 'false'}
 
 
 def test_attempt_fields_keep_numeric_durations():
@@ -222,18 +221,22 @@ def test_job_fields(job, expected):
 
 
 @pytest.mark.parametrize(
-    ('conclusion', 'status', 'has_duration'),
+    ('conclusion', 'runner_name', 'status', 'has_duration'),
     [
-        pytest.param(WorkflowJobConclusion.SUCCESS, 'success', True, id='finished-running'),
-        pytest.param(WorkflowJobConclusion.SKIPPED, 'skipped', False, id='skipped'),
-        pytest.param(WorkflowJobConclusion.CANCELLED, 'failure', False, id='cancelled'),
-        pytest.param(WorkflowJobConclusion.TIMED_OUT, 'failure', True, id='timed-out'),
+        pytest.param(WorkflowJobConclusion.SUCCESS, 'github-actions-runner', 'success', True, id='finished-running'),
+        pytest.param(WorkflowJobConclusion.SKIPPED, None, 'skipped', False, id='skipped'),
+        pytest.param(
+            WorkflowJobConclusion.CANCELLED, 'github-actions-runner', 'cancelled', True, id='cancelled-after-running'
+        ),
+        pytest.param(WorkflowJobConclusion.CANCELLED, None, 'cancelled', False, id='cancelled-while-queued'),
+        pytest.param(WorkflowJobConclusion.TIMED_OUT, 'github-actions-runner', 'failure', True, id='timed-out'),
     ],
 )
-def test_job_fields_with_a_workflow_job(conclusion, status, has_duration):
+def test_job_fields_with_a_workflow_job(conclusion, runner_name, status, has_duration):
+    """Only a job a runner was assigned to has a duration of its own."""
     job = make_job()
 
-    fields = job_fields(job, make_workflow_job(name=job.name, conclusion=conclusion))
+    fields = job_fields(job, make_workflow_job(name=job.name, conclusion=conclusion, runner_name=runner_name))
 
     expected = {
         **job_fields(job),
