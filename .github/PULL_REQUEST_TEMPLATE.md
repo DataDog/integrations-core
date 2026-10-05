@@ -9,17 +9,16 @@
 
 - [ ] I self-reviewed the full diff, and this description matches the final change
   <!--
-    Validation: Run `gh pr diff <PR> --repo DataDog/integrations-core`, review every changed line,
+    How to verify: run `gh pr diff <PR> --repo DataDog/integrations-core`, review every changed line,
     and compare the final diff with the description below.
   -->
 - [ ] Tests cover the change, or this description explains why none are needed
   <!--
-    Validation: Check the diff for relevant tests and run the focused test command from `AGENTS.md`,
-    such as `ddev --no-interactive test <INTEGRATION>`.
+    How to verify: check the diff for relevant tests and run them as described in `AGENTS.md`.
   -->
 - [ ] Automated review comments, including Codex review, were addressed or answered
   <!--
-    Validation: Run `gh api repos/DataDog/integrations-core/pulls/<PR>/comments` and
+    How to verify: run `gh api repos/DataDog/integrations-core/pulls/<PR>/comments` and
     `gh pr view <PR> --repo DataDog/integrations-core --json reviews,comments`, then fix each
     finding or reply with the reason no change is needed.
   -->
@@ -31,20 +30,16 @@
   `.github/CODEOWNERS`) always use `qa/skip-qa`, never `qa/required`.
 -->
 
-<!--
-If this PR needs a backport, add the `backport/<branch-name>` label. A backport PR will be opened
-automatically after this PR merges.
--->
-
 ## What does this PR do?
 
-<!--
-  Give a minimal but complete description of the intended changes. Link only the references a
-  reviewer needs (e.g. Jira ticket, upstream docs or changelog, related PRs).
--->
+<!-- Give a minimal but complete description of the change and how it works. -->
 
 
 
 ## Motivation
 
-<!-- Briefly explain why these changes are needed. -->
+<!--
+  Briefly explain why this change is needed and how it fits in: is it part of a bigger project, and
+  how does it fit into it? Are there related or follow-up PRs? Link only the references a reviewer
+  needs (e.g. Jira ticket, design doc, upstream docs or changelog, related PRs).
+-->
