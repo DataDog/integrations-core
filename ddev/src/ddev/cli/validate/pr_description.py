@@ -131,7 +131,13 @@ def pr_description(app: Application, event_name: str, event_path: str):
         )
         return
 
-    errors = _check_pr_description(pull_request.body or '', required_items)
+    # Re-runs reuse the original event payload, so read the current description from the API.
+    body = app.github.get_pull_request_body(pull_request.number) if pull_request.number else None
+    if body is None:
+        app.display_warning('Could not fetch the current PR description; using the event payload, which may be stale.')
+        body = pull_request.body or ''
+
+    errors = _check_pr_description(body, required_items)
     if errors:
         for error in errors:
             app.display_error(error, markup=False)

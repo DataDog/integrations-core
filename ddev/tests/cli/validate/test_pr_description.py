@@ -96,8 +96,15 @@ def pr_template(fake_repo):
     return template_path
 
 
+@pytest.fixture
+def current_body(mocker):
+    """Mock the PR description fetched from the GitHub API; defaults to a valid body."""
+    return mocker.patch('ddev.utils.github.GitHubManager.get_pull_request_body', return_value=VALID_BODY)
+
+
 def _event_args(tmp_path, **overrides):
     pull_request = {
+        'number': 1234,
         'body': VALID_BODY,
         'title': 'Improve PR validation',
         'user': {'login': 'human-author', 'type': 'User'},
@@ -109,18 +116,41 @@ def _event_args(tmp_path, **overrides):
     return ['--event-name', 'pull_request', '--event-path', str(event_path)]
 
 
-def test_cli_passes_with_ticked_checklist(ddev, tmp_path, pr_template):
+def test_cli_passes_with_ticked_checklist(ddev, tmp_path, pr_template, current_body):
     result = ddev('validate', 'pr-description', *_event_args(tmp_path))
+
+    assert result.exit_code == 0, result.output
+    assert 'PR description check passed' in result.output
+    current_body.assert_called_once_with(1234)
+
+
+def test_cli_fails_and_reports_errors(ddev, tmp_path, pr_template, current_body):
+    current_body.return_value = ''
+
+    result = ddev('validate', 'pr-description', *_event_args(tmp_path))
+
+    assert result.exit_code == 1, result.output
+    assert 'Missing checklist item (restore it from the template): First required item' in result.output
+
+
+def test_cli_uses_current_description_over_stale_payload(ddev, tmp_path, pr_template, current_body):
+    stale_body = VALID_BODY.replace('- [x] Second', '- [ ] Second')
+
+    result = ddev('validate', 'pr-description', *_event_args(tmp_path, body=stale_body))
 
     assert result.exit_code == 0, result.output
     assert 'PR description check passed' in result.output
 
 
-def test_cli_fails_and_reports_errors(ddev, tmp_path, pr_template):
-    result = ddev('validate', 'pr-description', *_event_args(tmp_path, body=None))
+def test_cli_falls_back_to_payload_when_fetch_fails(ddev, tmp_path, pr_template, current_body):
+    current_body.return_value = None
+    stale_body = VALID_BODY.replace('- [x] Second', '- [ ] Second')
+
+    result = ddev('validate', 'pr-description', *_event_args(tmp_path, body=stale_body))
 
     assert result.exit_code == 1, result.output
-    assert 'Missing checklist item (restore it from the template): First required item' in result.output
+    assert 'Could not fetch the current PR description' in result.output
+    assert 'Unchecked checklist item: Second required item' in result.output
 
 
 def test_cli_logs_skip_reason(ddev, tmp_path, pr_template):

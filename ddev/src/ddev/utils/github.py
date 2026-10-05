@@ -260,6 +260,18 @@ class GitHubManager:
             return None
         return [label['name'] for label in response.json().get('labels', [])]
 
+    def get_pull_request_body(self, pr_number: int) -> str | None:
+        """Return the current body of the given PR ('' if empty), or None if it could not be fetched."""
+        from httpx import HTTPStatusError
+
+        try:
+            response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except GitHubAuthenticationError:
+            raise
+        except HTTPStatusError:
+            return None
+        return response.json().get('body') or ''
+
     @overload
     def dispatch_workflow(
         self,
