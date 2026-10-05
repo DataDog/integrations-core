@@ -512,6 +512,10 @@ def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_chec
     [
         pytest.param({'warning': [1, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='within_range'),
         pytest.param({'warning': [2, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.WARNING, id='below_lower_bound'),
+        # Only a positive infinite lower bound is rejected; `-inf` means no lower bound.
+        pytest.param(
+            {'warning': [float('-inf'), '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='unbounded_lower'
+        ),
     ],
 )
 @patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
@@ -524,21 +528,27 @@ def test_thresholds_inf_string_end_to_end(mock_process_iter, aggregator, dd_run_
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=expected_status)
 
 
-NOT_A_NUMBER = "thresholds.warning {} bound must be a number or the string '.inf'"
+NOT_A_NUMBER = "thresholds.warning {} must be a number or the string '.inf'"
+INF_LOWER = "thresholds.warning lower bound cannot be '.inf'"
 
 
 @pytest.mark.parametrize(
     'warning, expected_error',
     [
-        pytest.param([1, 'inf'], NOT_A_NUMBER.format('upper'), id='inf'),
-        pytest.param([1, 'Infinity'], NOT_A_NUMBER.format('upper'), id='Infinity'),
-        pytest.param([1, '5'], NOT_A_NUMBER.format('upper'), id='numeric_str'),
-        pytest.param([1, 'NaN'], NOT_A_NUMBER.format('upper'), id='nan_str'),
-        pytest.param([1, float('nan')], NOT_A_NUMBER.format('upper'), id='nan_float'),
+        pytest.param([1, 'inf'], NOT_A_NUMBER.format('upper bound'), id='inf'),
+        pytest.param([1, 'Infinity'], NOT_A_NUMBER.format('upper bound'), id='Infinity'),
+        pytest.param([1, '5'], NOT_A_NUMBER.format('upper bound'), id='numeric_str'),
+        pytest.param([1, 'NaN'], NOT_A_NUMBER.format('upper bound'), id='nan_str'),
+        pytest.param([1, float('nan')], NOT_A_NUMBER.format('upper bound'), id='nan_float'),
         # What `JSON.stringify([1, Infinity])` produces.
-        pytest.param([1, None], NOT_A_NUMBER.format('upper'), id='null_bound'),
-        pytest.param([True, 5], NOT_A_NUMBER.format('lower'), id='bool'),
-        pytest.param(['.inf', 5], "thresholds.warning lower bound cannot be '.inf'", id='inf_lower'),
+        pytest.param([1, None], NOT_A_NUMBER.format('upper bound'), id='null_bound'),
+        pytest.param([True, 5], NOT_A_NUMBER.format('lower bound'), id='bool'),
+        # The model accepts lists longer than two, so extra elements are checked too.
+        pytest.param([1, 2, 'inf'], NOT_A_NUMBER.format('bound at index 2'), id='extra_inf_str'),
+        pytest.param([1, 2, float('nan')], NOT_A_NUMBER.format('bound at index 2'), id='extra_nan_float'),
+        pytest.param(['.inf', 5], INF_LOWER, id='inf_lower'),
+        # Unquoted YAML `.inf` arrives as a float.
+        pytest.param([float('inf'), 5], INF_LOWER, id='inf_float_lower'),
         # Non-list shapes are left to the generated model's own error.
         pytest.param(5, 'thresholds -> warning', id='not_a_list'),
         pytest.param('.inf', 'thresholds -> warning', id='bare_inf_str'),

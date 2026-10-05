@@ -29,23 +29,25 @@ def instance_thresholds(value, **kwargs):
         if not isinstance(bounds, (list, tuple)):
             continue
 
-        for position, bound in zip(('lower', 'upper'), bounds):
-            _validate_threshold_bound(field, position, bound)
+        # Check every element: the model accepts lists longer than two, and would parse extra
+        # strings like 'inf' with the same lax float handling.
+        for index, bound in enumerate(bounds):
+            _validate_threshold_bound(field, index, bound)
 
     return value
 
 
-def _validate_threshold_bound(field, position, bound):
-    if bound == INF_SENTINEL:
-        if position == 'lower':
-            raise ValueError(f"thresholds.{field} lower bound cannot be '{INF_SENTINEL}'")
-        return
+def _validate_threshold_bound(field, index, bound):
+    label = ('lower bound', 'upper bound')[index] if index < 2 else f'bound at index {index}'
 
-    if (
+    if bound != INF_SENTINEL and (
         isinstance(bound, bool)
         or not isinstance(bound, (int, float))
         or (isinstance(bound, float) and math.isnan(bound))
     ):
-        raise ValueError(
-            f"thresholds.{field} {position} bound must be a number or the string '{INF_SENTINEL}', got {bound!r}"
-        )
+        raise ValueError(f"thresholds.{field} {label} must be a number or the string '{INF_SENTINEL}', got {bound!r}")
+
+    # An infinite lower bound makes every process count a breach. Unquoted YAML `.inf`
+    # arrives as a float, so reject that as well as the string; `-inf` is a valid lower bound.
+    if index == 0 and (bound == INF_SENTINEL or (math.isinf(bound) and bound > 0)):
+        raise ValueError(f"thresholds.{field} lower bound cannot be '{INF_SENTINEL}'")
