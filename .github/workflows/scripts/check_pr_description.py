@@ -1,4 +1,4 @@
-"""Block merge when the PR checklist is incomplete or the description is too long."""
+"""Fail when the PR checklist is incomplete or the description is too long."""
 
 import os
 import re

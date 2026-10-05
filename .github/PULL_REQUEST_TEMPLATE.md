@@ -1,9 +1,9 @@
 ## Checklist before requesting review
 
 <!--
-  Merge is blocked until every item below is ticked and the visible description (excluding HTML
-  comments) is at most 3,000 characters. CI, the changelog, and the QA label are enforced by their
-  own checks. Request review only once all checks pass:
+  The `Check PR description` CI check fails until every item below is ticked and the visible
+  description (excluding HTML comments) is at most 3,000 characters. CI, the changelog, and the QA
+  label have their own checks. Request review only once all checks pass:
   `gh pr checks <PR> --repo DataDog/integrations-core --watch`.
 -->
 
