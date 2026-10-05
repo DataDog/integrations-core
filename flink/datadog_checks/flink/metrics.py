@@ -117,3 +117,41 @@ METRIC_MAP = {
     'flink_taskmanager_job_task_operator_numRecordsOutPerSecond': 'operator.numRecordsOutPerSec',
     'flink_taskmanager_job_task_operator_numSplitsProcessed': 'operator.numSplitsProcessed',
 }
+
+# Raw Prometheus names that are Flink Counters (per Flink's own metric type docs:
+# https://nightlies.apache.org/flink/flink-docs-stable/docs/ops/metrics/). Flink's
+# `flink-metrics-prometheus` reporter maps Counter, Gauge, and Meter alike to a
+# Prometheus Gauge collector -- "Prometheus counters cannot be decremented" -- so
+# every metric's scraped `# TYPE` line reads `gauge` regardless of its real Flink
+# type. That line can't be used to tell them apart; this list has to be hardcoded
+# and submitted as `monotonic_count` explicitly (see check.py).
+#
+# Flink's docs classify numberOfCompletedCheckpoints/numberOfFailedCheckpoints/
+# totalNumberOfCheckpoints as Gauge too, but Flink's own CheckpointStatsCounts
+# (flink-runtime) only ever increments them -- same doc/reality mismatch as
+# numSplitsProcessed -- and metadata.csv already types them `count`. numRestarts
+# and numberOfInProgressCheckpoints stay excluded: the latter genuinely
+# decrements (a completed/failed checkpoint leaves the in-progress set), and
+# there's no evidence to override Gauge for the former.
+COUNTER_METRICS = frozenset(
+    {
+        'flink_taskmanager_job_task_numRecordsIn',
+        'flink_taskmanager_job_task_numRecordsOut',
+        'flink_taskmanager_job_task_numBytesOut',
+        'flink_taskmanager_job_task_numBuffersOut',
+        'flink_taskmanager_job_task_numLateRecordsDropped',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInLocal',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBytesInRemote',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInLocal',
+        'flink_taskmanager_job_task_Shuffle_Netty_Input_numBuffersInRemote',
+        'flink_taskmanager_job_task_operator_numRecordsIn',
+        'flink_taskmanager_job_task_operator_numRecordsOut',
+        'flink_taskmanager_job_task_operator_numLateRecordsDropped',
+        'flink_taskmanager_job_task_operator_numSplitsProcessed',
+        'flink_taskmanager_job_task_operator_commitsSucceeded',
+        'flink_taskmanager_job_task_operator_commitsFailed',
+        'flink_jobmanager_job_numberOfCompletedCheckpoints',
+        'flink_jobmanager_job_numberOfFailedCheckpoints',
+        'flink_jobmanager_job_totalNumberOfCheckpoints',
+    }
+)

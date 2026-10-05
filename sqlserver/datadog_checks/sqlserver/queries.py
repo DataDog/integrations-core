@@ -51,16 +51,39 @@ GROUP BY object_id
 
 INDEX_QUERY = """
 SELECT
-    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
+    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
+    ISNULL(STRING_AGG(
+        CASE
+            WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN
+                CASE
+                    WHEN ic.is_descending_key = 1 THEN CAST(c.name AS NVARCHAR(MAX)) + N' DESC'
+                    ELSE CAST(c.name AS NVARCHAR(MAX))
+                END
+        END, ',') WITHIN GROUP (ORDER BY sk.sort_key, ic.index_column_id), N'') AS key_columns,
+    ISNULL(STRING_AGG(
+        CASE WHEN ic.is_included_column = 1 THEN CAST(c.name AS NVARCHAR(MAX)) END,
+        ',') WITHIN GROUP (ORDER BY sk.sort_key, ic.index_column_id), N'') AS included_columns,
+    STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',')
+        WITHIN GROUP (ORDER BY sk.sort_key, ic.index_column_id) AS column_names
 FROM
-    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
-    AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+    sys.indexes i
+    JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+    JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+    CROSS APPLY (
+        SELECT CASE
+            WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN ic.key_ordinal
+            ELSE ic.index_column_id
+        END AS sort_key
+    ) sk
 WHERE i.object_id = schema_tables.table_id
-GROUP BY i.object_id, i.name, i.type,
+    AND i.type <> 0
+GROUP BY
+    i.object_id, i.index_id, i.name, i.type,
     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
 """
 
+# Same single catalog read as INDEX_QUERY. STRING_AGG is unavailable here, so the
+# index columns are read once into XML. @k is key_ordinal and @i is index_column_id.
 INDEX_QUERY_PRE_2017 = """
 SELECT
     i.object_id AS id,
@@ -70,24 +93,47 @@ SELECT
     i.is_primary_key,
     i.is_unique_constraint,
     i.is_disabled,
+    ISNULL(STUFF((
+        SELECT ',' + col.value('(k/text())[1]', 'nvarchar(max)')
+        FROM cols.x.nodes('/c') AS T(col)
+        WHERE col.value('(k/text())[1]', 'nvarchar(max)') IS NOT NULL
+        ORDER BY col.value('@k', 'int')
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, ''), '') AS key_columns,
+    ISNULL(STUFF((
+        SELECT ',' + col.value('(inc/text())[1]', 'nvarchar(max)')
+        FROM cols.x.nodes('/c') AS T(col)
+        WHERE col.value('(inc/text())[1]', 'nvarchar(max)') IS NOT NULL
+        ORDER BY col.value('@i', 'int')
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, ''), '') AS included_columns,
     STUFF((
-        SELECT ',' + c.name
-        FROM sys.index_columns ic
-        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+        SELECT ',' + col.value('(n/text())[1]', 'nvarchar(max)')
+        FROM cols.x.nodes('/c') AS T(col)
+        ORDER BY col.value('@i', 'int')
         FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
 FROM
     sys.indexes i
+    CROSS APPLY (
+        SELECT ISNULL(raw.x, CAST('<r/>' AS XML)) AS x
+        FROM (
+            SELECT (
+                SELECT
+                    ic.key_ordinal AS [@k],
+                    ic.index_column_id AS [@i],
+                    CASE
+                        WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN
+                            CASE WHEN ic.is_descending_key = 1 THEN c.name + ' DESC' ELSE c.name END
+                    END AS k,
+                    CASE WHEN ic.is_included_column = 1 THEN c.name END AS inc,
+                    c.name AS n
+                FROM sys.index_columns ic
+                JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+                FOR XML PATH('c'), TYPE
+            ) AS x
+        ) raw
+    ) AS cols
 WHERE i.object_id = schema_tables.table_id
-GROUP BY
-    i.object_id,
-    i.name,
-    i.index_id,
-    i.type,
-    i.is_unique,
-    i.is_primary_key,
-    i.is_unique_constraint,
-    i.is_disabled
+    AND i.type <> 0
 """
 
 FOREIGN_KEY_QUERY = """
