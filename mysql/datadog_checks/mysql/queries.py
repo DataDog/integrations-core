@@ -90,15 +90,17 @@ SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
 # Alisases add to homogenize fields across different database types like SQLServer, PostgreSQL
+# The schema collection templates take a `{hint}` right after SELECT for an optimizer hint such as
+# MAX_EXECUTION_TIME; format it with an empty string when no hint applies.
 SQL_DATABASES = """
-SELECT schema_name as `name`,
+SELECT {hint} schema_name as `name`,
        default_character_set_name as `default_character_set_name`,
        default_collation_name as `default_collation_name`
        FROM information_schema.SCHEMATA
        WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
 
 SQL_TABLES = """\
-SELECT table_name as `name`,
+SELECT {hint} table_name as `name`,
        engine as `engine`,
        row_format as `row_format`,
        create_time as `create_time`
@@ -107,7 +109,7 @@ SELECT table_name as `name`,
 """
 
 SQL_COLUMNS = """\
-SELECT table_name as `table_name`,
+SELECT {hint} table_name as `table_name`,
        column_name as `name`,
        column_type as `column_type`,
        column_default as `default`,
@@ -116,11 +118,11 @@ SELECT table_name as `table_name`,
        column_key as `column_key`,
        extra as `extra`
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE table_schema = %s AND table_name IN ({});
+WHERE table_schema = %s AND table_name IN ({placeholders});
 """
 
 SQL_INDEXES = """\
-SELECT
+SELECT {hint}
     table_name as `table_name`,
     index_name as `name`,
     collation as `collation`,
@@ -134,11 +136,11 @@ SELECT
     non_unique as `non_unique`,
     NULL as `expression`
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_schema = %s AND table_name IN ({});
+WHERE table_schema = %s AND table_name IN ({placeholders});
 """
 
 SQL_INDEXES_8_0_13 = """\
-SELECT
+SELECT {hint}
     table_name as `table_name`,
     index_name as `name`,
     collation as `collation`,
@@ -152,11 +154,11 @@ SELECT
     non_unique as `non_unique`,
     expression as `expression`
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_schema = %s AND table_name IN ({});
+WHERE table_schema = %s AND table_name IN ({placeholders});
 """
 
 SQL_FOREIGN_KEYS = """\
-SELECT
+SELECT {hint}
     kcu.constraint_schema as constraint_schema,
     kcu.constraint_name as name,
     kcu.table_name as table_name,
@@ -173,7 +175,7 @@ LEFT JOIN
     ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
     AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
 WHERE
-    kcu.table_schema = %s AND kcu.table_name in ({})
+    kcu.table_schema = %s AND kcu.table_name in ({placeholders})
     AND kcu.referenced_table_name is not null
 GROUP BY
     kcu.constraint_schema,
@@ -186,7 +188,7 @@ GROUP BY
 """
 
 SQL_PARTITION = """\
-SELECT
+SELECT {hint}
     table_name as `table_name`,
     partition_name as `name`,
     subpartition_name as `subpartition_name`,
@@ -201,7 +203,7 @@ SELECT
     data_length as `data_length`
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
-    table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
+    table_schema = %s AND table_name in ({placeholders}) AND partition_name IS NOT NULL
 """
 
 QUERY_DEADLOCKS = {
@@ -301,13 +303,140 @@ def show_replica_status_query(version, is_mariadb: bool, channel: str = '') -> t
         return (base_query, ())
 
 
-def get_indexes_query(version, is_mariadb, placeholders):
+def get_indexes_query(version, is_mariadb, placeholders, hint=""):
     """
     Get the appropriate indexes query based on MySQL version and flavor.
     The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
     MariaDB doesn't support functional indexes.
     """
     if not is_mariadb and version.version_compatible((8, 0, 13)):
-        return SQL_INDEXES_8_0_13.format(placeholders)
+        return SQL_INDEXES_8_0_13.format(hint=hint, placeholders=placeholders)
     else:
-        return SQL_INDEXES.format(placeholders)
+        return SQL_INDEXES.format(hint=hint, placeholders=placeholders)
+
+
+# Single-query "v2" schema collection (shape A).
+#
+# Returns one row per base table for a single schema, with the table's columns, indexes,
+# foreign keys, and partitions aggregated server-side into JSON arrays via JSON_ARRAYAGG /
+# JSON_OBJECT. Each information_schema source is aggregated in its own subquery (grouped by
+# table_name) before being joined to the table list, which avoids the row explosion a single
+# multi-way join would cause. The five `%s` placeholders are all the schema (database) name, in
+# order: columns, indexes, foreign keys, partitions, tables.
+#
+# Subqueries are filtered by schema only, so each scans a full information_schema view; callers
+# must gate on MYSQL_MIN_SINGLE_QUERY_VERSION.
+# JSON_ARRAYAGG does not guarantee element order, so the collector re-sorts columns, index key
+# parts, and partitions after parsing.
+SQL_SCHEMA_JSON = """\
+SELECT {hint}
+    t.table_name AS `name`,
+    t.engine AS `engine`,
+    t.row_format AS `row_format`,
+    t.create_time AS `create_time`,
+    c.columns_json AS `columns_json`,
+    i.indexes_json AS `indexes_json`,
+    fk.foreign_keys_json AS `foreign_keys_json`,
+    p.partitions_json AS `partitions_json`
+FROM information_schema.tables t
+LEFT JOIN (
+    SELECT table_name,
+        JSON_ARRAYAGG(JSON_OBJECT(
+            'name', column_name,
+            'column_type', column_type,
+            'default', column_default,
+            'nullable', is_nullable,
+            'ordinal_position', ordinal_position,
+            'column_key', column_key,
+            'extra', extra
+        )) AS columns_json
+    FROM information_schema.columns
+    WHERE table_schema = %s
+    GROUP BY table_name
+) c ON c.table_name = t.table_name
+LEFT JOIN (
+    SELECT table_name,
+        JSON_ARRAYAGG(JSON_OBJECT(
+            'name', index_name,
+            'collation', collation,
+            'cardinality', cardinality,
+            'index_type', index_type,
+            'seq_in_index', seq_in_index,
+            'column_name', column_name,
+            'sub_part', sub_part,
+            'packed', packed,
+            'nullable', nullable,
+            'non_unique', non_unique,
+            'expression', {expression_col}
+        )) AS indexes_json
+    FROM information_schema.statistics
+    WHERE table_schema = %s
+    GROUP BY table_name
+) i ON i.table_name = t.table_name
+LEFT JOIN (
+    SELECT table_name,
+        JSON_ARRAYAGG(JSON_OBJECT(
+            'constraint_schema', constraint_schema,
+            'name', name,
+            'table_name', table_name,
+            'column_names', column_names,
+            'referenced_table_schema', referenced_table_schema,
+            'referenced_table_name', referenced_table_name,
+            'referenced_column_names', referenced_column_names,
+            'update_action', update_action,
+            'delete_action', delete_action
+        )) AS foreign_keys_json
+    FROM (
+        SELECT
+            kcu.table_name AS table_name,
+            kcu.constraint_schema AS constraint_schema,
+            kcu.constraint_name AS name,
+            GROUP_CONCAT(kcu.column_name ORDER BY kcu.ordinal_position ASC) AS column_names,
+            kcu.referenced_table_schema AS referenced_table_schema,
+            kcu.referenced_table_name AS referenced_table_name,
+            GROUP_CONCAT(kcu.referenced_column_name) AS referenced_column_names,
+            rc.update_rule AS update_action,
+            rc.delete_rule AS delete_action
+        FROM information_schema.key_column_usage kcu
+        LEFT JOIN information_schema.referential_constraints rc
+            ON kcu.constraint_schema = rc.constraint_schema
+            AND kcu.constraint_name = rc.constraint_name
+        WHERE kcu.table_schema = %s AND kcu.referenced_table_name IS NOT NULL
+        GROUP BY
+            kcu.constraint_schema, kcu.constraint_name, kcu.table_name,
+            kcu.referenced_table_schema, kcu.referenced_table_name,
+            rc.update_rule, rc.delete_rule
+    ) fk_inner
+    GROUP BY table_name
+) fk ON fk.table_name = t.table_name
+LEFT JOIN (
+    SELECT table_name,
+        JSON_ARRAYAGG(JSON_OBJECT(
+            'name', partition_name,
+            'subpartition_name', subpartition_name,
+            'partition_ordinal_position', partition_ordinal_position,
+            'subpartition_ordinal_position', subpartition_ordinal_position,
+            'partition_method', partition_method,
+            'subpartition_method', subpartition_method,
+            'partition_expression', partition_expression,
+            'subpartition_expression', subpartition_expression,
+            'partition_description', partition_description,
+            'table_rows', table_rows,
+            'data_length', data_length
+        )) AS partitions_json
+    FROM information_schema.partitions
+    WHERE table_schema = %s AND partition_name IS NOT NULL
+    GROUP BY table_name
+) p ON p.table_name = t.table_name
+WHERE t.table_schema = %s AND t.table_type = 'BASE TABLE'
+"""
+
+
+def get_schema_json_query(version, hint=""):
+    """Build the MySQL single-query (shape A) schema collection SQL for one schema.
+
+    The returned query has five `%s` placeholders, all the schema name.
+    """
+    # Functional-index expressions only exist on MySQL >= 8.0.13.
+    expression_col = "expression" if version.version_compatible((8, 0, 13)) else "NULL"
+    return SQL_SCHEMA_JSON.format(hint=hint, expression_col=expression_col)

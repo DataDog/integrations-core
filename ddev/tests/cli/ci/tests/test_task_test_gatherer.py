@@ -485,6 +485,7 @@ def test_an_accepted_final_result_reports_the_batches_outcomes(tmp_path: Path):
     )
 
     drain_queue(gatherer.bus.queue)
+    assert [record.value for record in sink.records_named("batches.passed")] == [0]
     assert [record.value for record in sink.records_named("batches.failed")] == [1]
     failed = [
         (record.value, record.tags["dispatcher.batch.job.target"]) for record in sink.records_named("jobs.failed")
@@ -1038,19 +1039,50 @@ def test_malformed_junit_is_swallowed(tmp_path: Path):
     assert result.reports == ()  # malformed junit skipped; coverage.xml is not a JUnit report
 
 
-def test_missing_workflow_job_raises(tmp_path: Path):
-    # Correlation is the runner's job; a job without a workflow job on a non-timed-out batch is a bug.
+@pytest.mark.parametrize(
+    ("run_status", "job_status", "junit", "expected"),
+    [
+        pytest.param(Status.SUCCESS, None, JUNIT_PASSING, Status.SUCCESS, id="successful-run"),
+        pytest.param(Status.FAILURE, None, JUNIT_FAILING, Status.FAILURE, id="failed-tests-in-artifacts"),
+        pytest.param(Status.FAILURE, None, None, Status.INCONCLUSIVE, id="no-artifacts"),
+        pytest.param(Status.FAILURE, WorkflowJobStatus.IN_PROGRESS, JUNIT_PASSING, Status.INCONCLUSIVE, id="stale-job"),
+    ],
+)
+def test_an_unconfirmed_job_is_resolved_from_the_run_and_its_artifacts(
+    tmp_path: Path,
+    run_status: Status,
+    job_status: WorkflowJobStatus | None,
+    junit: str | None,
+    expected: Status,
+):
+    """A job never seen completed takes its status from the run's conclusion and its artifacts."""
     artifacts = tmp_path / "artifacts" / "100"
-    job_dir = _make_job_tree(artifacts, "j1")
-    monitoring, sink = recording_runtime()
-    gatherer = _make_gatherer(tmp_path, monitor=monitoring.component("test-gatherer"))
+    job_dir = _make_job_tree(artifacts, "j1", junit=junit, e2e=False) if junit is not None else None
+    workflow_job = None if job_status is None else make_workflow_job(name="j1", status=job_status)
+    handler = RecordingJsonHandler()
+    gatherer = _make_gatherer(tmp_path, handler=handler)
 
-    with pytest.raises(ValueError, match="No workflow job correlated"):
-        gatherer.process_message(
-            _batch_finished(artifacts, batch_jobs=[_batch_job_result(make_job("j1"), None, job_dir)])
+    gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status=run_status,
+            batch_jobs=[_batch_job_result(make_job("j1"), workflow_job, job_dir)],
         )
+    )
 
-    assert [record.value for record in sink.records_named("operations.failed")] == [1]
+    result = gatherer._results_by_batch["batch-1"][0]
+    assert result.status is expected
+    assert result.failed_steps == []
+    [update] = drain_queue(gatherer.bus.queue)
+    assert (update.progress.passed, update.progress.failed, update.progress.inconclusive) == (
+        expected is Status.SUCCESS,
+        expected is Status.FAILURE,
+        expected is Status.INCONCLUSIVE,
+    )
+    warnings = [event for event in handler.events if "no confirmed final state" in event["event"]]
+    [warning] = warnings
+    assert warning["job"] == "j1"
+    assert warning["job_status"] == expected.value
 
 
 def test_empty_batch_jobs_has_no_entry_in_the_registry(tmp_path: Path) -> None:
@@ -1443,6 +1475,7 @@ def test_concurrent_batches_produce_one_revision_each(tmp_path: Path) -> None:
     assert {batch.state for batch in final.progress.batches} == {ExecutionState.FINISHED}
     assert (final.progress.passed, final.progress.complete, final.progress.total) == (5, 5, 5)
     # Five concurrent commits, each accepted once: no batch is reported twice.
+    assert [record.value for record in sink.records_named("batches.passed")] == [1] * 5
     assert [record.value for record in sink.records_named("batches.failed")] == [0] * 5
 
 

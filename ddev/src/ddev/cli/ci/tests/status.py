@@ -4,10 +4,10 @@
 """Internal status vocabulary for the ci/tests task pipeline.
 
 GitHub's workflow-run/-job conclusions are a wide set of strings (see the models in
-``ddev.utils.github_async.models``). ``Status`` is the narrow, binary vocabulary the batch
-and PR-comment layers use internally, and ``conclusion_to_status`` is the single place that
-collapses a GitHub conclusion into it. The job-state helpers below say where a job is in its
-life on a runner, for the metrics that measure queueing and execution.
+`ddev.utils.github_async.models`). `Status` is the narrow vocabulary the batch and PR-comment
+layers use internally, and `conclusion_to_status` is the single place that collapses a GitHub
+conclusion into it. The job-state helpers below say where a job is in its life on a runner, for
+the metrics that measure queueing and execution.
 """
 
 from __future__ import annotations
@@ -18,11 +18,16 @@ from ddev.utils.github_async.models.workflow import WorkflowJob, WorkflowJobConc
 
 
 class Status(StrEnum):
-    """Binary outcome of a batch, job, or test as reported internally."""
+    """Outcome of a batch, job, or test as reported internally.
+
+    `INCONCLUSIVE` never comes from GitHub: the gatherer assigns it to a job whose final state it
+    could not confirm, and consumers treat it as neither passed nor failed.
+    """
 
     SUCCESS = auto()
     FAILURE = auto()
     SKIPPED = auto()
+    INCONCLUSIVE = auto()
 
 
 def conclusion_to_status(conclusion: str | None) -> Status:
