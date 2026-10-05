@@ -285,7 +285,9 @@ def _base_fields(fetched: FetchedResponse) -> dict[str, object]:
         "received_bytes": len(fetched.body),
     }
     if fetched.location is not None:
-        fields["redirect_not_followed"] = fetched.location
+        # A server-controlled header; bound it like any other response-derived text so it can't
+        # push a result past MAX_OUTPUT_CHARS on its own.
+        fields["redirect_not_followed"] = _excerpt(fetched.location)
     return fields
 
 
