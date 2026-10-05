@@ -116,6 +116,18 @@ async def test_large_error_response_keeps_status_and_excerpt(store: ResponseStor
     assert json.loads(Path(payload["saved_to"]).read_text()) == detail
 
 
+async def test_huge_redirect_location_header_does_not_bypass_output_cap(store: ResponseStore):
+    huge_location = "http://elsewhere/" + "x" * (MAX_OUTPUT_CHARS * 2)
+    response = httpx.Response(302, json={"ok": True}, headers={"location": huge_location})
+
+    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
+
+    assert result.success is True
+    assert len(result.data) <= MAX_OUTPUT_CHARS
+    payload = json.loads(result.data)
+    assert len(payload["redirect_not_followed"]) < len(huge_location)
+
+
 async def test_invalid_json_is_saved_as_text(store: ResponseStore):
     body = "{not json" + "x" * MAX_OUTPUT_CHARS
     response = httpx.Response(200, content=body.encode(), headers={"content-type": "application/json"})
