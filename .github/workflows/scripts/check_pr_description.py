@@ -4,14 +4,16 @@ import os
 import re
 import sys
 from datetime import datetime
+from pathlib import Path
 
+TEMPLATE_PATH = Path(__file__).resolve().parents[2] / "PULL_REQUEST_TEMPLATE.md"
 MAX_DESCRIPTION_LENGTH = 3000
 # PRs opened before the checklist template existed are exempt. Set to the merge date of the template change.
 ENFORCED_SINCE = datetime.fromisoformat("2026-10-02T00:00:00+00:00")
 CHECKLIST_HEADING = "Checklist before requesting review"
 HEADING_PATTERN = re.compile(r"^##[ \t]+(.+?)[ \t]*$", re.MULTILINE)
 COMMENT_PATTERN = re.compile(r"<!--.*?-->", re.DOTALL)
-CHECKBOX_PATTERN = re.compile(r"^[ \t]*-[ \t]*\[([ \txX])\]", re.MULTILINE)
+CHECKBOX_PATTERN = re.compile(r"^[ \t]*-[ \t]*\[([ \txX])\][ \t]*(.+?)[ \t]*$", re.MULTILINE)
 RELEASE_TITLE_PATTERN = re.compile(
     r"^(?:\[backport\]\s*)?(?:\[release\]\s*|finalize agent release\b|release new integrations\b)",
     re.IGNORECASE,
@@ -44,20 +46,22 @@ def _skip_reason(author: str, draft: bool, title: str, created_at: str) -> str |
     return None
 
 
-def check_pr_description(body: str) -> list[str]:
+def _checklist(body: str) -> dict[str, bool]:
+    """Map each checklist item's text to whether it is ticked, ignoring HTML comments."""
+    section = _sections(COMMENT_PATTERN.sub("", body)).get(CHECKLIST_HEADING, "")
+    return {" ".join(text.split()): bool(mark.strip()) for mark, text in CHECKBOX_PATTERN.findall(section)}
+
+
+def check_pr_description(body: str, required_items: list[str]) -> list[str]:
     """Return actionable validation errors for the PR body."""
     visible_body = COMMENT_PATTERN.sub("", body)
-    sections = _sections(visible_body)
+    items = _checklist(body)
     errors = []
-    boxes = CHECKBOX_PATTERN.findall(sections.get(CHECKLIST_HEADING, ""))
-    unchecked_count = sum(1 for box in boxes if not box.strip())
-    if not boxes:
-        errors.append(f"Missing ## {CHECKLIST_HEADING} with its checklist items.")
-    elif unchecked_count:
-        noun = "item remains" if unchecked_count == 1 else "items remain"
-        errors.append(
-            f"Complete every item in ## Checklist before requesting review; {unchecked_count} {noun} unchecked."
-        )
+    for item in required_items:
+        if item not in items:
+            errors.append(f"Missing checklist item (restore it from the template): {item}")
+        elif not items[item]:
+            errors.append(f"Unchecked checklist item: {item}")
 
     description_length = len(visible_body)
     if description_length > MAX_DESCRIPTION_LENGTH:
@@ -80,7 +84,11 @@ def main() -> None:
         print(f"Skipping PR description check: {reason}.")
         return
 
-    errors = check_pr_description(os.environ.get("PR_BODY", ""))
+    required_items = list(_checklist(TEMPLATE_PATH.read_text()))
+    if not required_items:
+        raise SystemExit(f"Error: no checklist items found under ## {CHECKLIST_HEADING} in {TEMPLATE_PATH}.")
+
+    errors = check_pr_description(os.environ.get("PR_BODY", ""), required_items)
     if errors:
         for error in errors:
             print(f"Error: {error}", file=sys.stderr)
