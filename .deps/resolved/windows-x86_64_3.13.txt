@@ -80,7 +80,7 @@ pyasn1 @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}
 pycparser @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pycparser/pycparser-3.0-py3-none-any.whl#sha256=b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992
 pydantic @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pydantic/pydantic-2.13.4-py3-none-any.whl#sha256=45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba
 pydantic-core @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pydantic-core/pydantic_core-2.46.4-cp313-cp313-win_amd64.whl#sha256=6b3ace8194b0e5204818c92802dcdca7fc6d88aabbb799d7c795540d9cd6d292
-pyjwt @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pyjwt/pyjwt-2.13.0-py3-none-any.whl#sha256=66adcc2aff09b3f1bbd95fc1e1577df8ac8723c978552fd43304c8a290ac5728
+pyjwt @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pyjwt/pyjwt-2.14.0-py3-none-any.whl#sha256=ad0cef71c756a56e74863c2919cf0985f72decbcfcb550ee2f422e7c62b5eedc
 pymysql @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pymysql/pymysql-1.1.2-py3-none-any.whl#sha256=e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9
 pynacl @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pynacl/pynacl-1.6.2-cp38-abi3-win_amd64.whl#sha256=62985f233210dee6548c223301b6c25440852e13d59a8b81490203c3227c5ba0
 pyodbc @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/pyodbc/pyodbc-5.3.0-cp313-cp313-win_amd64.whl#sha256=01166162149adf2b8a6dc21a212718f205cabbbdff4047dc0c415af3fd85867e
