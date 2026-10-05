@@ -19,8 +19,6 @@ can be properly tracked.
 
 Have you fixed a bug or written a new check and want to share it? Many thanks!
 
-These are the standards every pull request is held to, whoever (or whatever) wrote the code:
-
 * Fill in the [pull request template][9]. Merge is blocked until every item in its
   _Checklist before requesting review_ is ticked and the description is at most 3,000
   characters (HTML comments excluded).
