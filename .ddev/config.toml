@@ -27,7 +27,8 @@ validations = [
     "readmes",
     "saved-views",
     "version",
-    "qa-label"
+    "qa-label",
+    "pr-description"
 ]
 
 [overrides.display-name]
