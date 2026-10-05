@@ -10,7 +10,7 @@ from glob import glob
 
 import pytest
 import yaml
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, stop_before_delay, wait_fixed
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.kind import kind_run
@@ -267,7 +267,7 @@ def wait_for_queues_active():
         )
 
 
-@retry(stop=stop_after_attempt(5), wait=wait_fixed(10), reraise=True)
+@retry(stop=stop_before_delay(240), wait=wait_fixed(10), reraise=True)
 def apply_kueue_manifests():
     """Apply the Kueue release manifests, retrying because GitHub release downloads can fail transiently."""
     kubectl(
