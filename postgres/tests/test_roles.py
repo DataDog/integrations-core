@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import json
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.postgres import metadata as metadata_module
 from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
 from datadog_checks.postgres.version_utils import V10, V11, V14, V15
 
@@ -836,20 +838,36 @@ def test_collect_roles_cancelled_before_start_reports_cancelled(integration_chec
     aggregator.assert_metric_has_tag('dd.postgres.roles.rows_count', 'status:cancelled', count=1)
 
 
-def test_collect_roles_updates_timestamp_on_failure(integration_check, roles_instance, monkeypatch):
+@pytest.mark.parametrize('fails', [False, True], ids=['success', 'failure'])
+def test_collect_roles_runs_once_per_collection_interval(integration_check, roles_instance, monkeypatch, fails):
+    """Roles are collected on the first tick at least one collection interval after the previous collection.
+
+    A collection's own duration must not push the next one back by a whole tick, and a failed collection must not
+    be retried on every tick.
+    """
     check = integration_check(roles_instance)
     job = check.metadata_samples
     job._tags_no_db = []
+    clock = {'now': 0.0}
+    monkeypatch.setattr(metadata_module.time, 'time', lambda: clock['now'])
+    collected_at = []
 
-    def fail(_tags):
-        raise RuntimeError("injected collection failure")
+    def collect(_tags):
+        collected_at.append(clock['now'])
+        clock['now'] += 5
+        if fails:
+            raise RuntimeError("injected collection failure")
 
-    monkeypatch.setattr(job._role_collector, 'collect_roles', fail)
+    monkeypatch.setattr(job._role_collector, 'collect_roles', collect)
 
-    with pytest.raises(RuntimeError, match="injected collection failure"):
-        job._collect_postgres_roles()
+    # The collection interval is 600 seconds; the job ticks every 300.
+    for tick in (1000, 1300, 1600, 1900, 2200):
+        clock['now'] = tick
+        job._rate_limiter.last_event = tick
+        with contextlib.suppress(RuntimeError):
+            job.report_postgres_metadata()
 
-    assert job._last_roles_query_time > 0
+    assert collected_at == [1000, 1600, 2200]
 
 
 def test_metadata_schedule_includes_role_collection_interval(integration_check, roles_instance):

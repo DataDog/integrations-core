@@ -242,7 +242,10 @@ class PostgresMetadata(DBMAsyncJob):
         ):
             self._collect_column_statistics()
 
-        if self._collect_roles_enabled and time.time() - self._last_roles_query_time > self.roles_collection_interval:
+        if (
+            self._collect_roles_enabled
+            and self._rate_limiter.last_event - self._last_roles_query_time >= self.roles_collection_interval
+        ):
             self._collect_postgres_roles()
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -305,7 +308,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_roles(self):
-        try:
-            self._role_collector.collect_roles(self._tags_no_db)
-        finally:
-            self._last_roles_query_time = time.time()
+        # Record the tick that started this job run rather than the current time. Ticks are at least one period
+        # apart, so neither this collection's duration nor the collectors that ran before it in this run can push
+        # the next collection back by a whole tick.
+        self._last_roles_query_time = self._rate_limiter.last_event
+        self._role_collector.collect_roles(self._tags_no_db)
