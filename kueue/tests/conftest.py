@@ -20,6 +20,7 @@ from datadog_checks.dev.utils import get_active_env
 from .common import CHECK_NAME, INSTANCE_STATE_KEY, MOCKED_INSTANCE
 from .kube import (
     WAIT_TIMEOUT,
+    apply_remote_manifest,
     kubectl,
     kubectl_output,
     manifest_path,
@@ -268,13 +269,8 @@ def wait_for_queues_active():
 
 def setup_kueue():
     preload_workload_images()
-    kubectl(
-        [
-            'apply',
-            '--server-side',
-            '-f',
-            f'https://github.com/kubernetes-sigs/kueue/releases/download/{kueue_version()}/manifests.yaml',
-        ]
+    apply_remote_manifest(
+        f'https://github.com/kubernetes-sigs/kueue/releases/download/{kueue_version()}/manifests.yaml'
     )
 
     disable_visibility_server()
