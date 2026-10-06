@@ -4,7 +4,7 @@
 
 import uuid
 from datetime import UTC, datetime
-from functools import cached_property, partial
+from functools import cached_property
 from pathlib import Path
 from typing import Final
 
@@ -16,8 +16,6 @@ from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.http.http_get import HttpGetTool
-from ddev.ai.tools.http.http_post import HttpPostTool
 from ddev.ai.tools.http.response_store import ResponseStore
 
 HTTP_RESPONSES_DIR_NAME: Final = "http_responses"
@@ -37,7 +35,7 @@ class RunResources:
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
         callbacks: Callbacks,
-        run_root: Path | None = None,
+        run_root: Path,
     ) -> None:
         self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
@@ -58,19 +56,18 @@ class RunResources:
             raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
 
     @cached_property
+    def response_store(self) -> ResponseStore:
+        """Run-wide HTTP response store."""
+        # Each launch or resume writes to its own directory, so earlier executions' files are kept.
+        return ResponseStore(self._run_root / HTTP_RESPONSES_DIR_NAME / new_execution_id())
+
+    @cached_property
     def agent_runtime_factory(self) -> AgentRuntimeFactoryProtocol:
         """Ready-to-use generic runtime factory."""
-        store = None
-        if self._run_root is not None:
-            # Each launch or resume writes to its own directory, so earlier executions' files are kept.
-            store = ResponseStore(self._run_root / HTTP_RESPONSES_DIR_NAME / new_execution_id())
         return AgentRuntimeFactory(
             provider_registry=self._provider_registry,
             file_registry=self.file_registry,
-            tool_factories={
-                "http_get": partial(HttpGetTool, store=store),
-                "http_post": partial(HttpPostTool, store=store),
-            },
+            response_store=self.response_store,
         )
 
     @cached_property
