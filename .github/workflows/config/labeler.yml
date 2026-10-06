@@ -157,6 +157,10 @@ integration/authorize_net:
 - changed-files:
   - any-glob-to-any-file:
     - authorize_net/**/*
+integration/automox:
+- changed-files:
+  - any-glob-to-any-file:
+    - automox/**/*
 integration/avast:
 - changed-files:
   - any-glob-to-any-file:
