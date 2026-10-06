@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
 import inspect
+import json
 import weakref
 
 import mock
 import pytest
-from clickhouse_connect.driver.exceptions import Error, OperationalError
+from clickhouse_connect.driver.exceptions import DatabaseError, Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -21,7 +22,9 @@ from datadog_checks.clickhouse.utils import (
     CLUSTER_TAG,
     CONNECT_NODE_QUERY,
     HOSTING_TYPE_TAG,
+    REMOTE_GRANT,
     SHARED_MERGE_TREE_QUERY,
+    DbmCollectionStatus,
     HostingType,
     cluster_aware_query,
     cluster_nodes_query,
@@ -545,12 +548,12 @@ def test_get_system_table(instance, single_endpoint_mode, fanout_cluster, expect
         assert check.get_system_table('query_log') == expected
 
 
-def make_query_replaying_check(query_results):
+def make_query_replaying_check(query_results, instance=BASE_INSTANCE):
     """Build a check whose execute_query_raw replays query_results keyed by SQL.
 
     An Exception value is raised instead of returned, to simulate a failed probe.
     """
-    check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
+    check = ClickhouseCheck('clickhouse', {}, [instance])
 
     def execute(query):
         result = query_results[query]
@@ -795,6 +798,7 @@ def test_database_instance_payload_carries_cluster_topology(aggregator, instance
         'cluster_name',
         'connect_node',
         'nodes',
+        'dbm_collection',
     }
 
 
@@ -825,7 +829,14 @@ def test_database_instance_payload_omits_the_topology_when_every_probe_fails(agg
 
     metadata = emitted_metadata(aggregator)
 
-    assert set(metadata) == {'dbm', 'connection_host', 'hosting_type', 'single_endpoint_mode', 'cluster_name'}
+    assert set(metadata) == {
+        'dbm',
+        'connection_host',
+        'hosting_type',
+        'single_endpoint_mode',
+        'cluster_name',
+        'dbm_collection',
+    }
     assert metadata['hosting_type'] == HostingType.UNKNOWN
 
 
@@ -960,6 +971,237 @@ def test_check_always_emits_a_hosting_type_tag(instance):
                 check.check({})
 
     assert f'{HOSTING_TYPE_TAG}:{HostingType.UNKNOWN}' in check.tags
+
+
+def access_denied(grant):
+    return DatabaseError(
+        "Code: 497. DB::Exception: datadog: Not enough privileges. "
+        f"To execute this query, it's necessary to have the grant {grant}. (ACCESS_DENIED)"
+    )
+
+
+SELF_HOSTED_CLUSTER = {
+    CLUSTER_MACRO_QUERY: [['prod_cluster']],
+    CLUSTER_NAME_QUERY: [['prod_cluster']],
+    CLOUD_MODE_QUERY: [],
+    SHARED_MERGE_TREE_QUERY: [[0]],
+    CONNECT_NODE_QUERY: [['node-a']],
+    cluster_nodes_query('prod_cluster'): [['node-a'], ['node-b']],
+}
+CLOUD_SERVICE = {
+    **SELF_HOSTED_CLUSTER,
+    CLUSTER_MACRO_QUERY: [],
+    CLUSTER_NAME_QUERY: [['default']],
+    CLOUD_MODE_QUERY: [['1']],
+    SHARED_MERGE_TREE_QUERY: [[1]],
+    cluster_nodes_query('default'): [['node-a'], ['node-b']],
+}
+NO_CLUSTER = {**SELF_HOSTED_CLUSTER, CLUSTER_MACRO_QUERY: [], CLUSTER_NAME_QUERY: []}
+DBM_SINGLE_ENDPOINT = {**BASE_INSTANCE, 'dbm': True, 'single_endpoint_mode': True}
+DBM_DIRECT = {**BASE_INSTANCE, 'dbm': True}
+
+
+@pytest.mark.parametrize(
+    'instance, query_results, expected_status, expected_grants',
+    [
+        pytest.param(DBM_SINGLE_ENDPOINT, SELF_HOSTED_CLUSTER, DbmCollectionStatus.ACTIVE, None, id='healthy'),
+        pytest.param(
+            DBM_SINGLE_ENDPOINT,
+            {**NO_CLUSTER, CLUSTER_MACRO_QUERY: access_denied('SELECT(substitution) ON system.macros')},
+            DbmCollectionStatus.BLOCKED,
+            ['SELECT ON system.macros'],
+            id='macros-denied-and-no-cluster-listed',
+        ),
+        pytest.param(
+            DBM_SINGLE_ENDPOINT,
+            {**NO_CLUSTER, CLUSTER_NAME_QUERY: access_denied('SELECT(cluster) ON system.clusters')},
+            DbmCollectionStatus.BLOCKED,
+            ['SELECT ON system.clusters'],
+            id='clusters-denied',
+        ),
+        pytest.param(DBM_SINGLE_ENDPOINT, NO_CLUSTER, DbmCollectionStatus.ACTIVE, None, id='no-cluster-configured'),
+        pytest.param(
+            DBM_SINGLE_ENDPOINT,
+            {**SELF_HOSTED_CLUSTER, cluster_nodes_query('prod_cluster'): access_denied('REMOTE ON *.*')},
+            DbmCollectionStatus.BLOCKED,
+            [REMOTE_GRANT],
+            id='fan-out-denied',
+        ),
+        pytest.param(
+            DBM_SINGLE_ENDPOINT,
+            {**SELF_HOSTED_CLUSTER, cluster_nodes_query('prod_cluster'): OperationalError('Read timed out.')},
+            DbmCollectionStatus.DEGRADED,
+            None,
+            id='fan-out-timeout',
+        ),
+        pytest.param(
+            DBM_SINGLE_ENDPOINT,
+            {**SELF_HOSTED_CLUSTER, CLOUD_MODE_QUERY: access_denied('SELECT(value) ON system.settings')},
+            DbmCollectionStatus.ACTIVE,
+            ['SELECT ON system.settings'],
+            id='denied-probe-that-did-not-matter',
+        ),
+        pytest.param(
+            DBM_SINGLE_ENDPOINT,
+            {**CLOUD_SERVICE, CLOUD_MODE_QUERY: access_denied('SELECT(value) ON system.settings')},
+            DbmCollectionStatus.BLOCKED,
+            ['SELECT ON system.settings'],
+            id='hosting-type-undecided',
+        ),
+        pytest.param(DBM_SINGLE_ENDPOINT, CLOUD_SERVICE, DbmCollectionStatus.ACTIVE, None, id='cloud'),
+        pytest.param(
+            DBM_DIRECT,
+            {**CLOUD_SERVICE, cluster_nodes_query('default'): access_denied('READ ON REMOTE')},
+            DbmCollectionStatus.BLOCKED,
+            [REMOTE_GRANT],
+            id='cloud-fan-out-denied',
+        ),
+        pytest.param(
+            DBM_DIRECT,
+            {
+                **SELF_HOSTED_CLUSTER,
+                CLUSTER_MACRO_QUERY: access_denied('SELECT(substitution) ON system.macros'),
+                CLUSTER_NAME_QUERY: access_denied('SELECT(cluster) ON system.clusters'),
+            },
+            DbmCollectionStatus.ACTIVE,
+            ['SELECT ON system.clusters', 'SELECT ON system.macros'],
+            id='direct-connection-is-never-blocked',
+        ),
+        pytest.param(
+            {**DBM_SINGLE_ENDPOINT, 'dbm': False},
+            {**NO_CLUSTER, CLUSTER_MACRO_QUERY: access_denied('SELECT(substitution) ON system.macros')},
+            DbmCollectionStatus.DEGRADED,
+            ['SELECT ON system.macros'],
+            id='dbm-disabled',
+        ),
+    ],
+)
+def test_database_instance_payload_reports_dbm_collection(
+    aggregator, instance, query_results, expected_status, expected_grants
+):
+    check = make_query_replaying_check(query_results, instance)
+
+    check._send_database_instance_metadata()
+
+    dbm_collection = emitted_metadata(aggregator)['dbm_collection']
+    assert dbm_collection['status'] == expected_status
+    assert dbm_collection.get('missing_grants') == expected_grants
+    assert (dbm_collection.get('reason') == 'missing_grants') is (expected_status == DbmCollectionStatus.BLOCKED)
+
+
+def test_dbm_collection_reports_error_kinds_without_server_text(aggregator):
+    denied = access_denied('SELECT(substitution) ON system.macros')
+    check = make_query_replaying_check({**NO_CLUSTER, CLUSTER_MACRO_QUERY: denied}, DBM_SINGLE_ENDPOINT)
+
+    check._send_database_instance_metadata()
+
+    metadata = emitted_metadata(aggregator)
+    assert metadata['dbm'] is True
+    assert metadata['dbm_collection']['probe_errors'] == {'cluster_macro': 'denied'}
+    assert 'DB::Exception' not in json.dumps(metadata)
+
+
+def replay_probes(check, query_results):
+    """Answer probes from query_results, which a test may mutate between runs; other queries return no rows."""
+
+    def execute(query):
+        result = query_results.get(query, [])
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    check.execute_query_raw = mock.Mock(side_effect=execute)
+
+
+def run_check_at(check, now):
+    """Run check() at a fixed wall clock time and return the warnings it raised, as the Agent collects them."""
+    with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
+        with mock.patch('datadog_checks.clickhouse.clickhouse.time', return_value=now):
+            check.check({})
+    return check.get_warnings()
+
+
+def missing_grants_health_events(aggregator):
+    return [
+        (event['status'], event['data'].get('missing_grants'))
+        for event in aggregator.get_event_platform_events('dbm-health')
+        if event['name'] == 'missing_grants'
+    ]
+
+
+FAN_OUT_DENIED = {**SELF_HOSTED_CLUSTER, cluster_nodes_query('prod_cluster'): access_denied('REMOTE ON *.*')}
+
+
+def test_blocked_check_keeps_basic_metrics_and_skips_dbm(aggregator):
+    check = ClickhouseCheck('clickhouse', {}, [DBM_SINGLE_ENDPOINT])
+    replay_probes(check, dict(FAN_OUT_DENIED))
+    warnings = []
+    metrics_reads = []
+    with mock.patch.object(ClickhouseCheck, 'run_async_jobs') as run_async_jobs:
+        for now in (1000, 1015):
+            warnings.append(run_check_at(check, now))
+            executed = [call.args[0] for call in check.execute_query_raw.call_args_list]
+            metrics_reads.append(sum('system.metrics' in query for query in executed))
+
+    run_async_jobs.assert_not_called()
+    assert [len(run_warnings) for run_warnings in warnings] == [1, 1]
+    assert 'GRANT REMOTE ON *.* TO default;' in warnings[-1][0]
+    assert 0 < metrics_reads[0] < metrics_reads[1]
+    assert missing_grants_health_events(aggregator) == [('warning', [REMOTE_GRANT])]
+
+
+def test_adding_the_grant_resumes_dbm_without_a_restart(aggregator):
+    check = ClickhouseCheck('clickhouse', {}, [DBM_SINGLE_ENDPOINT])
+    query_results = dict(FAN_OUT_DENIED)
+    replay_probes(check, query_results)
+    with mock.patch.object(ClickhouseCheck, 'run_async_jobs') as run_async_jobs:
+        run_check_at(check, 1000)
+        query_results.update(SELF_HOSTED_CLUSTER)
+        run_check_at(check, 1015)
+
+        run_async_jobs.assert_not_called()
+
+        warnings = run_check_at(check, 1300)
+
+        run_async_jobs.assert_called_once()
+    assert warnings == []
+    assert missing_grants_health_events(aggregator) == [('warning', [REMOTE_GRANT]), ('ok', None)]
+
+
+def test_blocked_check_re_resolves_cached_topology_only_at_the_refresh_interval():
+    check = ClickhouseCheck('clickhouse', {}, [DBM_SINGLE_ENDPOINT])
+    replay_probes(check, {**NO_CLUSTER, CLUSTER_MACRO_QUERY: access_denied('SELECT(substitution) ON system.macros')})
+    macro_probes = []
+    with mock.patch.object(ClickhouseCheck, 'run_async_jobs'):
+        for now in (1000, 1015, 1300):
+            run_check_at(check, now)
+            macro_probes.append(check.execute_query_raw.call_args_list.count(mock.call(CLUSTER_MACRO_QUERY)))
+
+    assert macro_probes == [1, 1, 2]
+
+
+def test_unblocked_check_keeps_the_cached_topology():
+    check = ClickhouseCheck('clickhouse', {}, [DBM_SINGLE_ENDPOINT])
+    replay_probes(check, dict(SELF_HOSTED_CLUSTER))
+    with mock.patch.object(ClickhouseCheck, 'run_async_jobs'):
+        run_check_at(check, 1000)
+        run_check_at(check, 1300)
+
+    assert check.execute_query_raw.call_args_list.count(mock.call(CLUSTER_MACRO_QUERY)) == 1
+
+
+def test_fan_out_follows_a_cluster_name_resolved_after_a_re_probe(aggregator):
+    """Basic metrics in single endpoint mode switch to the cluster once the macros grant is added."""
+    check = ClickhouseCheck('clickhouse', {}, [DBM_SINGLE_ENDPOINT])
+    query_results = {**NO_CLUSTER, CLUSTER_MACRO_QUERY: access_denied('SELECT(substitution) ON system.macros')}
+    replay_probes(check, query_results)
+    with mock.patch.object(ClickhouseCheck, 'run_async_jobs'):
+        run_check_at(check, 1000)
+        query_results.update(SELF_HOSTED_CLUSTER)
+        run_check_at(check, 1300)
+
+    executed = [call.args[0] for call in check.execute_query_raw.call_args_list]
+    assert any("clusterAllReplicas('prod_cluster', system.metrics)" in query for query in executed)
 
 
 ALL_DBM_JOBS = {

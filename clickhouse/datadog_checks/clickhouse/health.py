@@ -28,6 +28,7 @@ class ClickhouseHealthEvent(Enum):
 
     QUERY_LOG_ERROR = 'query_log_error'
     CONNECTION_ERROR = 'connection_error'
+    MISSING_GRANTS = 'missing_grants'
 
 
 class ClickhouseHealth(Health):

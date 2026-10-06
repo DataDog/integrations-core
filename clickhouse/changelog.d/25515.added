@@ -1,0 +1,1 @@
+Pause Database Monitoring collection and report the missing grants when the Agent user cannot read the ClickHouse cluster topology.

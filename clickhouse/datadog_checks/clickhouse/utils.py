@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from dataclasses import dataclass
+
+from clickhouse_connect.driver.exceptions import OperationalError
 
 # We tell the server to not send the stack trace but
 # the library leaves the start indication regardless.
@@ -116,6 +119,91 @@ CLOUD_MODE_QUERY = "SELECT value FROM system.settings WHERE name = 'cloud_mode'"
 
 # table_engines lists supported engines even before any tables exist; exact match avoids a LIKE regex compile.
 SHARED_MERGE_TREE_QUERY = "SELECT count() FROM system.table_engines WHERE name = 'SharedMergeTree'"
+
+
+class TopologyProbe:
+    CLUSTER_MACRO = 'cluster_macro'
+    CLUSTER_NAME = 'cluster_name'
+    CLOUD_MODE = 'cloud_mode'
+    SHARED_MERGE_TREE = 'shared_merge_tree'
+    CONNECT_NODE = 'connect_node'
+    NODES = 'nodes'
+
+
+class ProbeErrorKind:
+    DENIED = 'denied'
+    UNKNOWN_CLUSTER = 'unknown_cluster'
+    AUTHENTICATION_FAILED = 'authentication_failed'
+    TIMEOUT = 'timeout'
+    CONNECTION = 'connection'
+    ERROR = 'error'
+
+
+class DbmCollectionStatus:
+    ACTIVE = 'active'
+    BLOCKED = 'blocked'
+    DEGRADED = 'degraded'
+
+
+DBM_BLOCKED_REASON_MISSING_GRANTS = 'missing_grants'
+
+REMOTE_GRANT = 'REMOTE ON *.*'
+
+PROBE_DEFAULT_GRANTS = {
+    TopologyProbe.CLUSTER_MACRO: 'SELECT ON system.macros',
+    TopologyProbe.CLUSTER_NAME: 'SELECT ON system.clusters',
+    TopologyProbe.CLOUD_MODE: 'SELECT ON system.settings',
+    TopologyProbe.SHARED_MERGE_TREE: 'SELECT ON system.table_engines',
+    TopologyProbe.NODES: REMOTE_GRANT,
+}
+
+MISSING_GRANT_PATTERN = re.compile(r"necessary to have (?:the )?grant (?P<privilege>.+?) ON (?P<target>[^\s(]+)")
+GRANT_COLUMN_LIST = re.compile(r'\([^)]*\)')
+
+
+@dataclass(frozen=True)
+class ProbeError:
+    kind: str
+    grants: tuple[str, ...] = ()
+    message: str = ''
+
+
+def missing_grants(message: str) -> tuple[str, ...]:
+    """The table-level grants an ACCESS_DENIED message names, one per privilege, sorted.
+
+    Column lists are dropped, and the REMOTE table function grant is reported in one spelling
+    whether the server phrases it as `REMOTE ON *.*` or `READ ON REMOTE`.
+    """
+    match = MISSING_GRANT_PATTERN.search(message)
+    if match is None:
+        return ()
+    target = match['target'].rstrip('.')
+    grants = set()
+    for privilege in GRANT_COLUMN_LIST.sub('', match['privilege']).split(','):
+        privilege = privilege.strip()
+        if 'REMOTE' in (privilege, target):
+            grants.add(REMOTE_GRANT)
+        elif privilege:
+            grants.add(f'{privilege} ON {target}')
+    return tuple(sorted(grants))
+
+
+def classify_probe_error(probe: str, error: Exception) -> ProbeError:
+    """Why a topology probe failed. Only ACCESS_DENIED is `denied`; every other failure keeps its own kind."""
+    message = str(error)
+    lowered = message.lower()
+    if 'code: 497' in lowered or 'access_denied' in lowered or 'not enough privileges' in lowered:
+        default_grants = (PROBE_DEFAULT_GRANTS[probe],) if probe in PROBE_DEFAULT_GRANTS else ()
+        return ProbeError(ProbeErrorKind.DENIED, missing_grants(message) or default_grants, message)
+    if 'code: 701' in lowered or 'cluster_doesnt_exist' in lowered or 'requested cluster' in lowered:
+        return ProbeError(ProbeErrorKind.UNKNOWN_CLUSTER, message=message)
+    if 'code: 516' in lowered or 'authentication_failed' in lowered:
+        return ProbeError(ProbeErrorKind.AUTHENTICATION_FAILED, message=message)
+    if isinstance(error, TimeoutError) or 'timeout' in lowered or 'timed out' in lowered:
+        return ProbeError(ProbeErrorKind.TIMEOUT, message=message)
+    if isinstance(error, OperationalError) and 'code: ' not in lowered:
+        return ProbeError(ProbeErrorKind.CONNECTION, message=message)
+    return ProbeError(ProbeErrorKind.ERROR, message=message)
 
 
 def cluster_aware_query(base: dict, cluster: str) -> dict:

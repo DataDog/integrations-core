@@ -103,6 +103,12 @@ files:
       description: |
         Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
         This feature provides deep observability into query performance.
+
+        DBM collection pauses when the Agent user is denied a grant it needs to read the cluster topology:
+        `SELECT` on `system.macros`, `system.clusters`, `system.settings`, and `system.table_engines`, and
+        `REMOTE ON *.*` for single endpoint mode and ClickHouse Cloud. Basic metrics keep being collected,
+        and the Agent status page lists the missing `GRANT` statements. Collection resumes within 5 minutes
+        of the grants being added, without an Agent restart.
       value:
         type: boolean
         example: false
