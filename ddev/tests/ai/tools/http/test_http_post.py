@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import httpx
 import pytest
 
 from ddev.ai.tools.http.http_post import HttpPostTool
 from ddev.ai.tools.http.response_store import ResponseStore
 
-from .helpers import TARGET, respond
+from .helpers import TARGET, parse_result, respond
 
 FILTER_URL = f"{TARGET}/api/task_runs/filter"
 
@@ -20,8 +22,9 @@ async def test_validation_error_is_preserved_and_not_retried(store: ResponseStor
     result = await tool.run({"url": FILTER_URL, "json": {"task_runs": {"end_time": {}}}})
 
     assert result.success is True
-    assert result.data.startswith("Status: 422")
-    assert "end_time" in result.data
+    fields, body = parse_result(result.data)
+    assert fields["status"] == 422
+    assert json.loads(body) == detail
     assert len(transport.requests) == 1
 
 
