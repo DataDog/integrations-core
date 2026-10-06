@@ -716,6 +716,23 @@ def test_collect_histograms_as_distributions(
     aggregator.assert_all_metrics_covered()
 
 
+def test_collect_histograms_as_distributions_with_renamed_upper_bound(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'collect_histograms_as_distributions': True,
+            'rename_labels': {'upper_bound': 'bucket_limit'},
+        }
+    )
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+    for bucket in buckets:
+        assert sorted(bucket.tags) == LATENCY_SERIES_TAGS
+
+
 def test_histogram_buckets_as_distributions_on_unsupported_agent(
     aggregator, dd_run_check, mock_http_response, monkeypatch
 ):

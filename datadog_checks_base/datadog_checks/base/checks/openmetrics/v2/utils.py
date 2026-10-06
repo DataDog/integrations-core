@@ -4,12 +4,11 @@
 from prometheus_client.samples import Sample
 
 NEGATIVE_INFINITY = float('-inf')
-BOUND_TAG_PREFIXES = ('upper_bound:', 'lower_bound:')
 
 
-def remove_bound_tags(tags: list[str]) -> list[str]:
-    """Return the tags without the histogram bucket `upper_bound` and `lower_bound` tags."""
-    return [tag for tag in tags if not tag.startswith(BOUND_TAG_PREFIXES)]
+def remove_bound_tags(tags: list[str], bound_tag_prefixes: tuple[str, ...]) -> list[str]:
+    """Return the tags without the histogram bucket bound tags."""
+    return [tag for tag in tags if not tag.startswith(bound_tag_prefixes)]
 
 
 def decumulate_histogram_buckets(sample_data):
