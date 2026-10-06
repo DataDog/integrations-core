@@ -294,14 +294,18 @@ FROM (
            relation.oid::bigint AS object_oid,
            relation.relowner::bigint AS owner_oid,
            false AS is_security_definer,
-           COALESCE(
-               (
-                   SELECT option_value::boolean
-                   FROM pg_catalog.pg_options_to_table(relation.reloptions)
-                   WHERE option_name = 'security_invoker'
-               ),
-               false
-           ) AS security_invoker,
+           -- Only views can set security_invoker; skip parsing reloptions for every other relation.
+           CASE
+               WHEN relation.relkind = 'v' THEN COALESCE(
+                   (
+                       SELECT option_value::boolean
+                       FROM pg_catalog.pg_options_to_table(relation.reloptions)
+                       WHERE option_name = 'security_invoker'
+                   ),
+                   false
+               )
+               ELSE false
+           END AS security_invoker,
            relation.relacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_class AS relation
     JOIN pg_catalog.pg_namespace AS namespace

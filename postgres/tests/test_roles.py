@@ -442,6 +442,8 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         if obj['schema_name'] == 'dd_role_obs' and obj['object_name'] == 'invoker_view'
     )
     assert invoker_view['security_invoker'] is (check.version >= V15)
+    # Only views can be security invokers; every other object reports false rather than null.
+    assert {obj['security_invoker'] for obj in privilege_event['objects'] if obj['object_type'] != 'view'} == {False}
     assert any(
         dependency['dependent_schema_name'] == 'dd_role_obs'
         and dependency['dependent_object_name'] == 'item_view'
