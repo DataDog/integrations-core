@@ -31,7 +31,7 @@
           {
             "definition": {
               "background_color": "white",
-              "content": "InterSystems IRIS is a data platform combining a multi-model database, interoperability engine, and analytics runtime. This dashboard tracks instance health, high availability (mirroring), Enterprise Cache Protocol (ECP) distributed caching, and interoperability productions.\n\n- **Mirror**, **ECP**, and **outbound HTTP** widgets show *No data* when those features are not in use; this is expected.\n- Event-style signals (failovers, process termination, license warnings) surface in the **Logs** group via the `messages.log` pipeline.\n\n**Useful links:**\n- [Datadog InterSystems IRIS integration documentation](https://docs.datadoghq.com/integrations/intersystems_iris/)\n- [InterSystems IRIS product documentation](https://docs.intersystems.com/)",
+              "content": "InterSystems IRIS is a data platform combining a multi-model database, interoperability engine, and analytics runtime. This dashboard tracks instance health, high availability (mirroring), Enterprise Cache Protocol (ECP) distributed caching, and interoperability productions.\n\n- **Mirror**, **ECP**, and **outbound HTTP** widgets show *No data* when those features are not in use; this is expected.\n- Event-style signals (failovers, process termination, license warnings) surface in the **Logs** group, which parses both `messages.log` and `structured.log`.\n\n**Useful links:**\n- [Datadog InterSystems IRIS integration documentation](https://docs.datadoghq.com/integrations/intersystems_iris/)\n- [InterSystems IRIS product documentation](https://docs.intersystems.com/)",
               "font_size": "14",
               "has_padding": true,
               "text_align": "left",
@@ -67,7 +67,7 @@
           {
             "definition": {
               "background_color": "blue",
-              "content": "Instance-wide health and the state of this integration's monitors. **System state:** -1 hung, 0 OK, 1 warning, 2 alert. **Mirror status:** 2 primary, 3 backup, 5 transition, 8 stopped, 9 crashed.",
+              "content": "Instance-wide health and the state of this integration's monitors. **System state:** -1 hung, 0 OK, 1 warning, 2 alert. **Mirror status:** 1 not initialized, 2 primary, 3 backup, 4 connected, 5 transition, 6 synchronizing, 7 waiting, 8 stopped, 9 crashed.",
               "font_size": "14",
               "has_padding": true,
               "text_align": "center",
@@ -1241,7 +1241,7 @@
           {
             "definition": {
               "background_color": "blue",
-              "content": "Enterprise Cache Protocol connections, with this instance acting as both application server and data server. Shows no data when ECP is not in use.",
+              "content": "Enterprise Cache Protocol connections. An instance usually acts as either an application server (client) or a data server, so expect only one set of widgets to report. Shows no data when ECP is not in use.",
               "font_size": "14",
               "has_padding": true,
               "text_align": "center",
@@ -1458,25 +1458,25 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "idle",
-                      "query": "max:intersystems_iris.interop.last_activity{$env,$host,$production,$interop_host} by {interop_host}"
+                      "query": "max:intersystems_iris.interop.last_activity{$env,$host,$production,$interop_host} by {host,production,interop_host}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "count",
-                      "query": "sum:intersystems_iris.interop.messages.count{$env,$host,$production,$interop_host} by {interop_host}"
+                      "query": "sum:intersystems_iris.interop.messages.count{$env,$host,$production,$interop_host} by {host,production,interop_host}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "errored",
-                      "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production,$interop_host} by {interop_host}"
+                      "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production,$interop_host} by {host,production,interop_host}"
                     }
                   ],
                   "response_format": "scalar"
                 }
               ],
-              "title": "Business hosts: activity and message counts (per interop_host)",
+              "title": "Business hosts: activity and message counts (per business host)",
               "title_align": "left",
               "title_size": "16",
               "type": "query_table"
@@ -1544,7 +1544,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:intersystems_iris.interop.messages.per_sec{$env,$host,$production,$interop_host} by {interop_host}"
+                      "query": "sum:intersystems_iris.interop.messages.per_sec{$env,$host,$production,$interop_host} by {host,production,interop_host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1589,7 +1589,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production} by {production}"
+                      "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production} by {host,production}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1611,7 +1611,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:intersystems_iris.interop.messages.aborted{$env,$host,$production} by {production}"
+                      "query": "sum:intersystems_iris.interop.messages.aborted{$env,$host,$production} by {host,production}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1633,7 +1633,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:intersystems_iris.interop.messages.discarded{$env,$host,$production} by {production}"
+                      "query": "sum:intersystems_iris.interop.messages.discarded{$env,$host,$production} by {host,production}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1655,7 +1655,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:intersystems_iris.interop.messages.suspended{$env,$host,$production} by {production}"
+                      "query": "sum:intersystems_iris.interop.messages.suspended{$env,$host,$production} by {host,production}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1693,7 +1693,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {production}"
+                      "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {host,production}"
                     }
                   ],
                   "response_format": "scalar"
@@ -1733,7 +1733,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {production}"
+                      "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {host,production}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1778,7 +1778,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:intersystems_iris.interop.http.avg_ttfc{$env,$host,$production,$interop_host} by {interop_host}"
+                      "query": "avg:intersystems_iris.interop.http.avg_ttfc{$env,$host,$production,$interop_host} by {host,production,interop_host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1800,7 +1800,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:intersystems_iris.interop.http.avg_ttlc{$env,$host,$production,$interop_host} by {interop_host}"
+                      "query": "avg:intersystems_iris.interop.http.avg_ttlc{$env,$host,$production,$interop_host} by {host,production,interop_host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1845,7 +1845,7 @@
           {
             "definition": {
               "background_color": "blue",
-              "content": "Error and critical entries from `messages.log`, alongside total log volume broken down by status.",
+              "content": "Error and critical entries from the IRIS logs (`messages.log` and `structured.log`), alongside total log volume broken down by status.",
               "font_size": "14",
               "has_padding": true,
               "text_align": "center",
@@ -1895,7 +1895,7 @@
                   "response_format": "event_list"
                 }
               ],
-              "title": "Error and critical logs (messages.log)",
+              "title": "Error and critical logs",
               "title_align": "left",
               "title_size": "16",
               "type": "list_stream"
