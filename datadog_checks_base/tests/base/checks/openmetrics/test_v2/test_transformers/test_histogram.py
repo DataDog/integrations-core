@@ -535,9 +535,13 @@ def test_histogram_buckets_as_distributions_with_zero_bucket(aggregator, dd_run_
     aggregator.assert_all_metrics_covered()
 
 
-def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregator, dd_run_check, mock_http_response):
-    # A first bucket with a negative upper bound must not keep a -Inf lower bound; it collapses to a point at its
-    # upper bound, mirroring how the Agent handles the +Inf top bucket. Otherwise its count is dropped downstream.
+@pytest.mark.parametrize('collect_counters_with_distributions', [False, True])
+def test_histogram_buckets_as_distributions_with_negative_first_bucket(
+    aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions
+):
+    # The Agent drops sketch buckets with an infinite bound, so the open-ended [-inf, -1.0] bucket is submitted
+    # collapsed to a point at its upper bound, mirroring how the Agent handles the +Inf top bucket. The
+    # lower_bound tag keeps the real -inf bound.
     payload = """
         # HELP req_ms request duration
         # TYPE req_ms histogram
@@ -552,6 +556,7 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
             'metrics': ['.+'],
             'histogram_buckets_as_distributions': True,
             'collect_histogram_buckets': True,
+            'collect_counters_with_distributions': collect_counters_with_distributions,
         }
     )
     dd_run_check(check)
@@ -563,7 +568,7 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
         -1.0,
         True,
         '',
-        ['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-1.0'],
+        ['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-inf'],
     )
     aggregator.assert_histogram_bucket(
         'test.req_ms',
@@ -583,6 +588,42 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
         '',
         ['endpoint:test', 'upper_bound:inf', 'lower_bound:5.0'],
     )
+    if collect_counters_with_distributions:
+        aggregator.assert_metric(
+            'test.req_ms.count', 10, metric_type=aggregator.MONOTONIC_COUNT, tags=['endpoint:test']
+        )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_non_cumulative_histogram_buckets_with_negative_first_bucket(aggregator, dd_run_check, mock_http_response):
+    # Outside distributions, buckets are plain counts and lower_bound is only a tag, so the open-ended first
+    # bucket keeps its real -inf bound.
+    payload = """
+        # HELP req_ms request duration
+        # TYPE req_ms histogram
+        req_ms_bucket{le="-1.0"} 4
+        req_ms_bucket{le="5.0"} 10
+        req_ms_bucket{le="+Inf"} 10
+        req_ms_count 10
+        """
+    mock_http_response(payload)
+    check = get_check({'metrics': ['.+'], 'non_cumulative_histogram_buckets': True})
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.req_ms.bucket',
+        4,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-inf'],
+    )
+    aggregator.assert_metric(
+        'test.req_ms.bucket',
+        6,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'upper_bound:5.0', 'lower_bound:-1.0'],
+    )
+    aggregator.assert_metric('test.req_ms.count', 10, metric_type=aggregator.MONOTONIC_COUNT, tags=['endpoint:test'])
 
     aggregator.assert_all_metrics_covered()
 
