@@ -5,7 +5,7 @@
     "integration:intersystems-iris"
   ],
   "definition": {
-    "message": "{{#is_alert}}\nMirror member on IRIS instance {{host.name}} has left its healthy state, with `intersystems_iris.mirror.status` reporting {{value}} (5:TRANSITION, 6:SYNCHRONIZING, 7:WAITING, 8:STOPPED, 9:CRASHED). Failover protection is reduced until the member returns to primary, backup, or connected.\n{{/is_alert}}\n\n{{#is_recovery}}\nMirror member on IRIS instance {{host.name}} has returned to a healthy state and is participating normally in the mirror again.\n{{/is_recovery}}",
+    "message": "{{#is_alert}}\nMirror member on IRIS instance {{host.name}} has left its healthy state: `intersystems_iris.mirror.status` is outside primary (2), backup (3), and connected (4). Check the metric for the current state (1:NOTINIT, 5:TRANSITION, 6:SYNCHRONIZING, 7:WAITING, 8:STOPPED, 9:CRASHED). Failover protection is reduced until the member returns to primary, backup, or connected.\n{{/is_alert}}\n\n{{#is_recovery}}\nMirror member on IRIS instance {{host.name}} has returned to a healthy state and is participating normally in the mirror again.\n{{/is_recovery}}",
     "name": "[InterSystems IRIS] Mirror member is in a degraded state on {{host.name}}",
     "options": {
       "escalation_message": "",
@@ -18,17 +18,17 @@
       "renotify_interval": 0,
       "require_full_window": true,
       "thresholds": {
-        "critical": 4
+        "critical": 1
       },
       "timeout_h": 0
     },
-    "query": "max(last_15m):max:intersystems_iris.mirror.status{*} by {host} > 4",
+    "query": "max(last_15m):abs(max:intersystems_iris.mirror.status{*} by {host} - 3) > 1",
     "tags": [
       "integration:intersystems-iris"
     ],
     "type": "query alert"
   },
   "created_at": "2026-08-17",
-  "description": "Tracks the mirror member state of the IRIS instance. A member that leaves the primary, backup, or connected states is no longer participating normally in the mirror, which means failover protection is reduced or absent until the member returns to a healthy state. Status 1 (NOTINIT) is deliberately not covered: an instance configured for mirroring that has never joined a mirror reports 1 persistently, so alerting on it would make this monitor fire continuously from installation.",
+  "description": "Tracks the mirror member state of the IRIS instance. A member that leaves the primary, backup, or connected states is no longer participating normally in the mirror, which means failover protection is reduced or absent until the member returns to a healthy state. The query alerts on any deviation of more than one from backup (3), which covers not-initialized (1) alongside the transition, synchronizing, waiting, stopped, and crashed states (5-9). Instances that are not mirror members do not report this metric at all, so the monitor stays silent on them.",
   "last_updated_at": "2026-08-17"
 }
