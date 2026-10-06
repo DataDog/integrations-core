@@ -39,7 +39,7 @@ async def test_buffer_threshold_preserves_complete_body(tmp_path: Path, size: in
 
     assert result.success is True
     payload = json.loads(result.data)
-    assert Path(payload["saved_to"]).read_text() == body
+    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
     assert payload["received_bytes"] == size
     if size <= 8:
         assert payload["body"] == body
@@ -66,13 +66,13 @@ async def test_spill_retains_prefix_and_decodes_split_characters(
 
     assert result.success is True
     payload = json.loads(result.data)
-    assert Path(payload["saved_to"]).read_text() == expected
+    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == expected
     assert payload["excerpt"] == expected
     assert payload["summary"] == {
         "type": "text",
         "first_line": expected.split("\n", 1)[0],
     }
-    metadata = json.loads(Path(payload["metadata_path"]).read_text())
+    metadata = json.loads(Path(payload["metadata_path"]).read_text(encoding="utf-8"))
     assert metadata["received_bytes"] == len(body)
     assert metadata["complete"] is True
     assert len(transport.requests) == 1
@@ -88,7 +88,7 @@ async def test_spilled_json_is_saved_without_parsing_or_formatting(tmp_path: Pat
     ).run({"url": TARGET})
 
     payload = json.loads(result.data)
-    assert Path(payload["saved_to"]).read_text() == body
+    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
     assert payload["representation"] == "text"
     assert payload["summary"]["type"] == "text"
 

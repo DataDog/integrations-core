@@ -113,9 +113,9 @@ async def test_large_json_is_saved_formatted_and_result_is_bounded(store: Respon
     assert payload["complete"] is True
     assert payload["summary"]["keys"] == ["openapi", "info", "components"]
     saved = Path(payload["saved_to"])
-    assert json.loads(saved.read_text()) == document
-    assert saved.read_text().count("\n") > len(document["components"]["schemas"])
-    metadata = json.loads(Path(payload["metadata_path"]).read_text())
+    assert json.loads(saved.read_text(encoding="utf-8")) == document
+    assert saved.read_text(encoding="utf-8").count("\n") > len(document["components"]["schemas"])
+    metadata = json.loads(Path(payload["metadata_path"]).read_text(encoding="utf-8"))
     assert metadata["method"] == "GET"
     assert metadata["url"] == OPENAPI_URL
     assert metadata["representation"] == "formatted_json"
@@ -129,7 +129,7 @@ async def test_save_response_preserves_small_response_and_returns_body(store: Re
     assert result.success is True
     payload = json.loads(result.data)
     assert payload["body"] == body
-    assert Path(payload["saved_to"]).read_text() == body
+    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
     assert Path(payload["metadata_path"]).is_file()
     assert len(result.data) <= MAX_OUTPUT_CHARS
 
@@ -142,7 +142,7 @@ async def test_saved_body_that_cannot_fit_with_paths_uses_summary(store: Respons
 
     payload = json.loads(result.data)
     assert payload["summary"]["type"] == "text"
-    assert Path(payload["saved_to"]).read_text() == body
+    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
     assert len(result.data) <= MAX_OUTPUT_CHARS
 
 
@@ -167,8 +167,8 @@ async def test_post_metadata_records_request_without_credentials(store: Response
     payload = json.loads(result.data)
     assert result.success is True
     assert json.loads(payload["body"]) == []
-    assert json.loads(Path(payload["saved_to"]).read_text()) == []
-    metadata_text = Path(payload["metadata_path"]).read_text()
+    assert json.loads(Path(payload["saved_to"]).read_text(encoding="utf-8")) == []
+    metadata_text = Path(payload["metadata_path"]).read_text(encoding="utf-8")
     assert all(secret not in metadata_text for secret in ("s3cret", "auth-secret", "cookie-secret", "header-secret"))
     metadata = json.loads(metadata_text)
     assert metadata["method"] == "POST"
@@ -190,7 +190,7 @@ async def test_large_error_response_keeps_status_and_excerpt(store: ResponseStor
     payload = json.loads(result.data)
     assert payload["status"] == 422
     assert "end_time" in payload["excerpt"]
-    assert json.loads(Path(payload["saved_to"]).read_text()) == detail
+    assert json.loads(Path(payload["saved_to"]).read_text(encoding="utf-8")) == detail
 
 
 async def test_huge_redirect_location_header_does_not_bypass_output_cap(store: ResponseStore):
@@ -213,7 +213,7 @@ async def test_invalid_json_is_saved_as_text(store: ResponseStore):
 
     assert payload["representation"] == "text"
     assert "not valid JSON" in payload["note"]
-    assert Path(payload["saved_to"]).read_text() == body
+    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
 
 
 async def test_unsavable_response_reports_status_and_excerpt(tmp_path: Path):

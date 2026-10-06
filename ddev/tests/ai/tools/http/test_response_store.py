@@ -21,8 +21,8 @@ def save(store: ResponseStore, body: str = "{}", metadata: dict | None = None) -
 def test_save_writes_body_and_metadata(tmp_path: Path):
     saved = save(ResponseStore(tmp_path / "exec"), '{"a": 1}\n')
 
-    assert saved.path.read_text() == '{"a": 1}\n'
-    assert json.loads(saved.metadata_path.read_text()) == {"status": 200}
+    assert saved.path.read_text(encoding="utf-8") == '{"a": 1}\n'
+    assert json.loads(saved.metadata_path.read_text(encoding="utf-8")) == {"status": 200}
     assert saved.path.parent == tmp_path / "exec"
 
 
@@ -50,7 +50,7 @@ async def test_existing_file_is_never_overwritten_and_failed_save_leaves_nothing
             else:
                 save(store, "new")
 
-    assert existing.read_text() == "earlier evidence"
+    assert existing.read_text(encoding="utf-8") == "earlier evidence"
     assert saved_files(store.root) == [existing]
 
 
@@ -71,5 +71,5 @@ def test_lone_surrogates_are_saved_as_json_escapes(tmp_path: Path):
         metadata={"request_body": value},
     )
 
-    assert json.loads(saved.path.read_text()) == value
-    assert json.loads(saved.metadata_path.read_text()) == {"request_body": value}
+    assert json.loads(saved.path.read_text(encoding="utf-8")) == value
+    assert json.loads(saved.metadata_path.read_text(encoding="utf-8")) == {"request_body": value}

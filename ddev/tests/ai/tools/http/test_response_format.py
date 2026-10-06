@@ -64,7 +64,7 @@ def test_media_type_controls_response_preservation(
     else:
         assert payload["representation"] == representation
         assert payload["body"] == body.decode()
-        saved = Path(payload["saved_to"]).read_text()
+        saved = Path(payload["saved_to"]).read_text(encoding="utf-8")
         if representation == "formatted_json":
             assert json.loads(saved) == json.loads(body)
         else:
@@ -123,7 +123,7 @@ def test_metadata_redacts_credential_names_and_preserves_ordinary_names(tmp_path
         store=ResponseStore(tmp_path),
     )
 
-    metadata = json.loads(Path(json.loads(result.data)["metadata_path"]).read_text())
+    metadata = json.loads(Path(json.loads(result.data)["metadata_path"]).read_text(encoding="utf-8"))
     assert httpx.URL(metadata["url"]).params.get_list(name) == (
         ["REDACTED", "REDACTED"] if sensitive else ["first", "second"]
     )
