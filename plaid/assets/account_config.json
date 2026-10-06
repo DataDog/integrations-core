@@ -1,0 +1,44 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret",
+          "label": "Secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "api_base_url",
+      "label": "API base URL",
+      "help": "For example: production.plaid.com",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "access_token",
+      "label": "Access token",
+      "editable": true,
+      "required": true,
+      "password": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "plaid-logs" },
+    { "dataflow_id": "plaid-metrics" }
+  ]
+}
