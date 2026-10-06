@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import uuid
+from collections.abc import AsyncIterator
 from pathlib import Path
 from unittest.mock import patch
 
@@ -26,16 +27,28 @@ def test_save_writes_body_and_metadata(tmp_path: Path):
 
 
 @pytest.mark.parametrize("existing_suffix", [".json", ".meta.json"])
-def test_existing_file_is_never_overwritten_and_failed_save_leaves_nothing(tmp_path: Path, existing_suffix: str):
+@pytest.mark.parametrize("streamed", [False, True])
+async def test_existing_file_is_never_overwritten_and_failed_save_leaves_nothing(
+    tmp_path: Path, existing_suffix: str, streamed: bool
+):
     store = ResponseStore(tmp_path / "exec")
     fixed = uuid.UUID(int=0)
-    existing = store.root / f"0001-get-{fixed.hex[:8]}{existing_suffix}"
+    suffix = ".txt" if streamed and existing_suffix == ".json" else existing_suffix
+    existing = store.root / f"0001-get-{fixed.hex[:8]}{suffix}"
     existing.parent.mkdir(parents=True)
     existing.write_text("earlier evidence")
 
+    async def chunks() -> AsyncIterator[bytes]:
+        yield b"new"
+
     with patch("ddev.ai.tools.http.response_store.uuid.uuid4", return_value=fixed):
         with pytest.raises(ResponseStoreError, match="overwrite"):
-            save(store, "new")
+            if streamed:
+                await store.save_stream(
+                    chunks=chunks(), charset=None, metadata={"status": 200}, stem="get", max_bytes=64
+                )
+            else:
+                save(store, "new")
 
     assert existing.read_text() == "earlier evidence"
     assert saved_files(store.root) == [existing]
