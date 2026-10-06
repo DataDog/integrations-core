@@ -29,6 +29,21 @@ FROM
     sys.tables
 """
 
+VIEWS_QUERY = """
+SELECT
+    v.object_id AS view_id,
+    v.name AS view_name,
+    v.schema_id,
+    CONVERT(varchar(33), v.create_date, 126) AS create_date,
+    CONVERT(varchar(33), v.modify_date, 126) AS modify_date,
+    m.definition
+FROM
+    sys.views v
+    LEFT JOIN sys.sql_modules m ON v.object_id = m.object_id
+WHERE
+    v.is_ms_shipped = 0
+"""
+
 COLUMN_QUERY = """
 SELECT
     c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
@@ -37,6 +52,21 @@ FROM
     INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
     LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
 WHERE c.object_id = schema_tables.table_id
+"""
+
+VIEW_COLUMN_QUERY = """
+SELECT
+    c.name,
+    t.name AS data_type,
+    coalesce(dc.definition, 'None') AS "default",
+    c.is_nullable AS nullable,
+    CONVERT(varchar(10), c.column_id) AS ordinal_position
+FROM
+    sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
+WHERE c.object_id = schema_views.view_id
+ORDER BY c.column_id
 """
 
 PARTITIONS_QUERY = """
