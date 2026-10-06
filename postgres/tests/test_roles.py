@@ -5,11 +5,17 @@ import contextlib
 import json
 from concurrent.futures.thread import ThreadPoolExecutor
 
+import psycopg
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres import metadata as metadata_module
-from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
+from datadog_checks.postgres.role_collector import (
+    DATABASE_ARRAYS,
+    INSTANCE_ARRAYS,
+    PostgresRoleCollector,
+    RoleSnapshotEmitter,
+)
 from datadog_checks.postgres.version_utils import V10, V11, V14, V15, V16
 
 from .common import POSTGRES_VERSION
@@ -732,14 +738,14 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
     check = integration_check(roles_instance)
     collector = check.metadata_samples._role_collector
     collector._config.payload_chunk_size = 1
-    original_collect_query = PostgresRoleCollector._collect_query
+    original_emit_rows = PostgresRoleCollector._emit_rows
 
-    def fail_after_privileges(self, cursor, query, params, array_name, emitter):
+    def fail_after_privileges(self, cursor, array_name, emitter):
         if array_name == 'objects':
             raise RuntimeError("injected object collection failure")
-        return original_collect_query(self, cursor, query, params, array_name, emitter)
+        return original_emit_rows(self, cursor, array_name, emitter)
 
-    monkeypatch.setattr(PostgresRoleCollector, '_collect_query', fail_after_privileges)
+    monkeypatch.setattr(PostgresRoleCollector, '_emit_rows', fail_after_privileges)
 
     run_one_check(check)
 
@@ -864,15 +870,38 @@ def test_collect_roles_skips_databases_without_connect_privilege(integration_che
     aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:success', count=1)
 
 
-def _fail_in_database(monkeypatch, database_name, failure):
-    original_collect_query = PostgresRoleCollector._collect_query
+def test_collect_roles_emits_rows_after_the_snapshot_ends(integration_check, roles_instance, aggregator, monkeypatch):
+    """Rows are converted and submitted only after the collection transaction ends.
 
-    def collect_query(self, cursor, query, params, array_name, emitter):
+    The REPEATABLE READ snapshot holds back vacuum while it is open, so it must cover only the queries, not the
+    serialization and submission of their results.
+    """
+    roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-1]$']
+    check = integration_check(roles_instance)
+    statuses = []
+    original_emit_rows = PostgresRoleCollector._emit_rows
+
+    def emit_rows(self, cursor, array_name, emitter):
+        statuses.append((array_name, cursor.connection.info.transaction_status))
+        return original_emit_rows(self, cursor, array_name, emitter)
+
+    monkeypatch.setattr(PostgresRoleCollector, '_emit_rows', emit_rows)
+
+    run_one_check(check)
+
+    assert len(statuses) == len(INSTANCE_ARRAYS) + 2 * len(DATABASE_ARRAYS)
+    assert {status for _, status in statuses} == {psycopg.pq.TransactionStatus.IDLE}
+
+
+def _fail_in_database(monkeypatch, database_name, failure):
+    original_execute = PostgresRoleCollector._execute
+
+    def execute(self, cursor, query, params):
         if cursor.connection.info.dbname == database_name:
             failure(self)
-        return original_collect_query(self, cursor, query, params, array_name, emitter)
+        return original_execute(self, cursor, query, params)
 
-    monkeypatch.setattr(PostgresRoleCollector, '_collect_query', collect_query)
+    monkeypatch.setattr(PostgresRoleCollector, '_execute', execute)
 
 
 def test_collect_roles_database_failure_does_not_affect_other_databases(

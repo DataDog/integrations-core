@@ -7,6 +7,7 @@ import json
 import threading
 import time
 from collections.abc import Callable
+from contextlib import ExitStack
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -212,21 +213,18 @@ class PostgresRoleCollector:
     def _collect_instance_scope(self, tags_no_db: list[str]) -> bool:
         emitter = self._new_emitter("pg_roles", INSTANCE_ARRAYS, tags_no_db)
         try:
-            with self._check._get_main_db() as conn:
-                with conn.transaction():
-                    with conn.cursor(row_factory=dict_row) as cursor:
-                        self._configure_transaction(cursor)
-                        self._collect_query(cursor, QUERY_ROLES, (), "roles", emitter)
-                        self._collect_query(
-                            cursor,
-                            memberships_query(pg16_plus=self._check.version >= V16),
-                            (),
-                            "memberships",
-                            emitter,
-                        )
-                        self._collect_query(
-                            cursor, QUERY_ROLE_SETTINGS, (list(ROLE_SETTING_VALUE_PREFIXES),), "settings", emitter
-                        )
+            with self._check._get_main_db() as conn, ExitStack() as cursors:
+                results = self._execute_in_snapshot(
+                    conn,
+                    cursors,
+                    [
+                        ("roles", QUERY_ROLES, ()),
+                        ("memberships", memberships_query(pg16_plus=self._check.version >= V16), ()),
+                        ("settings", QUERY_ROLE_SETTINGS, (list(ROLE_SETTING_VALUE_PREFIXES),)),
+                    ],
+                )
+                for array_name, cursor in results:
+                    self._emit_rows(cursor, array_name, emitter)
             emitter.flush_terminal()
             return True
         except RoleCollectionCancelled:
@@ -249,17 +247,20 @@ class PostgresRoleCollector:
         started_at = time.time() * 1000
         status = "error"
         try:
-            with self._check.db_pool.get_connection(database_name) as conn:
-                with conn.transaction():
-                    with conn.cursor(row_factory=dict_row) as cursor:
-                        self._configure_transaction(cursor)
-                        self._collect_query(cursor, QUERY_DEFAULT_PRIVILEGES, (), "default_privileges", emitter)
-                        pg11_plus = self._check.version >= V11
-                        self._collect_query(
-                            cursor, object_privileges_query(pg11_plus=pg11_plus), (), "object_privileges", emitter
-                        )
-                        self._collect_query(cursor, objects_query(pg11_plus=pg11_plus), (), "objects", emitter)
-                        self._collect_query(cursor, QUERY_OBJECT_DEPENDENCIES, (), "object_dependencies", emitter)
+            pg11_plus = self._check.version >= V11
+            with self._check.db_pool.get_connection(database_name) as conn, ExitStack() as cursors:
+                results = self._execute_in_snapshot(
+                    conn,
+                    cursors,
+                    [
+                        ("default_privileges", QUERY_DEFAULT_PRIVILEGES, ()),
+                        ("object_privileges", object_privileges_query(pg11_plus=pg11_plus), ()),
+                        ("objects", objects_query(pg11_plus=pg11_plus), ()),
+                        ("object_dependencies", QUERY_OBJECT_DEPENDENCIES, ()),
+                    ],
+                )
+                for array_name, cursor in results:
+                    self._emit_rows(cursor, array_name, emitter)
             emitter.flush_terminal()
             status = "success"
             return True
@@ -333,22 +334,36 @@ class PostgresRoleCollector:
         # a routine's name does not depend on how the agent is configured.
         cursor.execute("SELECT pg_catalog.set_config('search_path', 'pg_catalog', true)")
 
-    def _collect_query(
-        self,
-        cursor: Any,
-        query: str,
-        params: tuple[Any, ...],
-        array_name: str,
-        emitter: RoleSnapshotEmitter,
-    ) -> None:
+    def _execute_in_snapshot(
+        self, conn: Any, cursors: ExitStack, queries: list[tuple[str, str, tuple[Any, ...]]]
+    ) -> list[tuple[str, Any]]:
+        """Run the queries in one REPEATABLE READ snapshot and return each array name with its executed cursor.
+
+        Each query gets its own client-side cursor, which holds its complete result once executed. The transaction
+        is committed before the rows are read, so the snapshot holds back vacuum only while the queries run, not
+        while rows are converted, serialized, and submitted.
+        """
+        results = []
+        with conn.transaction():
+            for array_name, query, params in queries:
+                cursor = cursors.enter_context(conn.cursor(row_factory=dict_row))
+                if not results:
+                    self._configure_transaction(cursor)
+                self._execute(cursor, query, params)
+                results.append((array_name, cursor))
+        return results
+
+    def _execute(self, cursor: Any, query: str, params: tuple[Any, ...]) -> None:
         self._check_cancelled()
         if params:
             cursor.execute(query, params)
         else:
             cursor.execute(query)
+
+    def _emit_rows(self, cursor: Any, array_name: str, emitter: RoleSnapshotEmitter) -> None:
         for row in cursor:
             self._check_cancelled()
-            emitter.append(array_name, dict(row))
+            emitter.append(array_name, row)
 
     def _new_emitter(
         self,
