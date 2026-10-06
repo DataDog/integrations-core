@@ -15,7 +15,8 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.runtime.resources import HTTP_RESPONSES_DIR_NAME, RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.ai.tools.http.base import FetchedResponse, HttpRequestInput, HttpRequestTool
+from ddev.ai.tools.http.base import HttpRequestInput, HttpRequestTool
+from ddev.ai.tools.http.response_format import BufferedResponse
 from tests.ai.config.utils import make_agent_config
 
 
@@ -48,14 +49,14 @@ async def test_http_artifacts_are_shared_across_agent_runtimes_and_preserved_on_
         tool_input: HttpRequestInput,
         *,
         method: str,
-        json_body: object,
-    ) -> FetchedResponse:
-        body = json.dumps({"method": method, "body": json_body}).encode()
-        return FetchedResponse(
+    ) -> BufferedResponse:
+        body = json.dumps({"method": method, "body": tool_input.json_body}).encode()
+        return BufferedResponse(
             url=httpx.URL(tool_input.url),
             status=200,
             content_type="application/json",
             location=None,
+            received_bytes=len(body),
             body=body,
             charset="utf-8",
             complete=True,
