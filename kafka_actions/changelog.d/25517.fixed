@@ -1,1 +1,0 @@
-Upgrade the shared PyMongo dependency to 4.18.2 for BSON deserialization.

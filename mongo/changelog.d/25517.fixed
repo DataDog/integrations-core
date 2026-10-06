@@ -1,1 +1,0 @@
-Skip the profiler collection when collecting schemas because its records cannot be sampled reliably.
