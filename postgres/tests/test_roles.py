@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres import metadata as metadata_module
 from datadog_checks.postgres.role_collector import PostgresRoleCollector, RoleSnapshotEmitter
-from datadog_checks.postgres.version_utils import V10, V11, V14, V15
+from datadog_checks.postgres.version_utils import V10, V11, V14, V15, V16
 
 from .common import POSTGRES_VERSION
 from .utils import _get_superconn, requires_over_15, run_one_check
@@ -148,7 +148,7 @@ def role_catalog(roles_instance):
                             'GRANT USAGE ON SCHEMAS TO dd_role_obs_reader WITH GRANT OPTION';
                     END IF;
                     IF current_setting('server_version_num')::integer >= 160000 THEN
-                        EXECUTE 'GRANT dd_role_obs_reader TO dd_role_obs_member WITH INHERIT FALSE';
+                        EXECUTE 'GRANT dd_role_obs_reader TO dd_role_obs_member WITH INHERIT FALSE, SET FALSE';
                     END IF;
                 END
                 $$;
@@ -275,6 +275,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'grantor_role_name',
         'admin_option',
         'member_can_inherit',
+        'member_can_set',
     }
     reader = next(role for role in role_event['roles'] if role['role_name'] == 'dd_role_obs_reader')
     assert reader['can_inherit'] is False
@@ -297,12 +298,16 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     )
     assert member_grant['admin_option'] is True
     assert member_grant['member_can_inherit'] is False
-    assert any(
-        membership['group_role_name'] == 'dd_role_obs_reader'
-        and membership['member_role_name'] == 'dd_role_obs_granted'
-        and membership['grantor_role_name'] == 'dd_role_obs_grantor'
+    # Only PostgreSQL 16 and later can grant a membership without SET ROLE.
+    assert member_grant['member_can_set'] is (check.version < V16)
+    granted_grant = next(
+        membership
         for membership in role_event['memberships']
+        if membership['group_role_name'] == 'dd_role_obs_reader'
+        and membership['member_role_name'] == 'dd_role_obs_granted'
     )
+    assert granted_grant['grantor_role_name'] == 'dd_role_obs_grantor'
+    assert granted_grant['member_can_set'] is True
     assert {
         'role_name': 'dd_role_obs_reader',
         'database_name': 'datadog_test',
