@@ -566,6 +566,55 @@ def test_collect_roles_names_routines_by_input_types(integration_check, roles_in
     assert routine_names('object_privileges') == granted
 
 
+def test_collect_roles_names_routines_independently_of_search_path(integration_check, roles_instance, aggregator):
+    """A routine's name must not depend on the agent role's search_path.
+
+    Argument types are written unqualified when the session's search_path finds them, so with two same-named
+    types an unqualified name would point at a different overload depending on how the agent is configured.
+    """
+    username = roles_instance['username']
+    with _get_superconn(roles_instance) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                f"""
+                CREATE SCHEMA dd_role_obs_path_a;
+                CREATE SCHEMA dd_role_obs_path_b;
+                CREATE TYPE dd_role_obs_path_a.t AS (x integer);
+                CREATE TYPE dd_role_obs_path_b.t AS (x integer);
+                CREATE FUNCTION dd_role_obs_path_a.f(dd_role_obs_path_a.t) RETURNS integer
+                    LANGUAGE sql AS 'SELECT 1';
+                CREATE FUNCTION dd_role_obs_path_a.f(dd_role_obs_path_b.t) RETURNS integer
+                    LANGUAGE sql AS 'SELECT 2';
+                -- A schema is only part of the effective search_path for roles with USAGE on it.
+                GRANT USAGE ON SCHEMA dd_role_obs_path_b TO {username};
+                ALTER ROLE {username} SET search_path = dd_role_obs_path_b, public;
+                """
+            )
+    try:
+        check = integration_check(roles_instance)
+
+        run_one_check(check)
+    finally:
+        with _get_superconn(roles_instance) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    ALTER ROLE {username} RESET search_path;
+                    DROP SCHEMA dd_role_obs_path_a CASCADE;
+                    DROP SCHEMA dd_role_obs_path_b CASCADE;
+                    """
+                )
+
+    privilege_event = next(
+        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    )
+    assert {
+        obj['object_name']
+        for obj in privilege_event['objects']
+        if obj['schema_name'] == 'dd_role_obs_path_a' and obj['object_type'] == 'function'
+    } == {'f(dd_role_obs_path_a.t)', 'f(dd_role_obs_path_b.t)'}
+
+
 def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_instance, role_catalog, aggregator):
     """Objects on default privileges ship no privilege rows; explicitly granted objects ship their complete ACL.
 

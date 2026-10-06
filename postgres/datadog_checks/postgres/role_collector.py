@@ -326,6 +326,10 @@ class PostgresRoleCollector:
             "SELECT pg_catalog.set_config('statement_timeout', %s, true)",
             (str(int(self._config.max_query_duration * 1000)),),
         )
+        # Routine names format argument types relative to the session's search_path, which the agent role's or
+        # database's settings can change. With only pg_catalog searched, every other type is schema-qualified, so
+        # a routine's name does not depend on how the agent is configured.
+        cursor.execute("SELECT pg_catalog.set_config('search_path', 'pg_catalog', true)")
 
     def _collect_query(
         self,
