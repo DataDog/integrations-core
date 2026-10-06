@@ -1,5 +1,19 @@
 {
-  "supported_auth_methods": [],
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_token",
+          "label": "API Token",
+          "help": "A Cato Networks service API key. In the Cato platform, go to Resources > Service API Keys, create a key for a Service Principal with the API Permission set to Downgrade to View, and copy the token.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
   "additional_config_fields": [
     {
       "key": "cato_account_id",
@@ -8,14 +22,6 @@
       "editable": true,
       "required": true,
       "text": {}
-    },
-    {
-      "key": "api_token",
-      "label": "API Token",
-      "help": "A Cato Networks service API key. In the Cato platform, go to Resources > Service API Keys, create a key for a Service Principal with the API Permission set to Downgrade to View, and copy the token.",
-      "editable": true,
-      "required": true,
-      "password": {}
     },
     {
       "key": "region",
