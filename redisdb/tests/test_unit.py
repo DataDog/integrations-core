@@ -257,3 +257,22 @@ def test_info_command_fallback(check, redis_instance, caplog):
             redis_check._check_db()
     mock_conn.info.assert_has_calls((mock.call(section='all'), mock.call(), mock.call('keyspace')))
     assert any(msg.startswith('`INFO all` command failed, falling back to `INFO`:') for msg in caplog.messages)
+
+
+def test_empty_db_in_keyspace(check, aggregator, redis_instance):
+    """
+    Redis-compatible servers such as Dragonfly report empty databases in INFO keyspace (keys=0)
+    """
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.info.return_value = {'db0': {'keys': 0, 'expires': 0}, 'db1': {'keys': 4, 'expires': 1}}
+    conn.config_get.return_value = {}
+
+    with mock.patch.object(redis_check, '_get_conn', return_value=conn):
+        redis_check._check_db()
+
+    aggregator.assert_metric('redis.persist', value=0, tags=redis_check.tags + ['redis_db:db0'])
+    aggregator.assert_metric('redis.persist.percent', count=0, tags=redis_check.tags + ['redis_db:db0'])
+    aggregator.assert_metric('redis.expires.percent', count=0, tags=redis_check.tags + ['redis_db:db0'])
+    aggregator.assert_metric('redis.persist.percent', value=75, tags=redis_check.tags + ['redis_db:db1'])
+    aggregator.assert_metric('redis.expires.percent', value=25, tags=redis_check.tags + ['redis_db:db1'])

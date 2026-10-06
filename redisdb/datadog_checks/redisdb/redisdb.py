@@ -173,8 +173,11 @@ class Redis(AgentCheck):
                 total_keys = info[key]["keys"]
                 persist_keys = total_keys - expires_keys
                 self.gauge("redis.persist", persist_keys, tags=db_tags)
-                self.gauge("redis.persist.percent", 100 * persist_keys / total_keys, tags=db_tags)
-                self.gauge("redis.expires.percent", 100 * expires_keys / total_keys, tags=db_tags)
+                # Redis omits empty databases from INFO keyspace, but some compatible
+                # servers (e.g. Dragonfly) report them with keys=0
+                if total_keys:
+                    self.gauge("redis.persist.percent", 100 * persist_keys / total_keys, tags=db_tags)
+                    self.gauge("redis.expires.percent", 100 * expires_keys / total_keys, tags=db_tags)
 
                 for subkey in self.subkeys:
                     # Old redis module on ubuntu 10.04 (python-redis 0.6.1) does not
