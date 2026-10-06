@@ -140,6 +140,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': False,
                                 'is_unique_constraint': False,
                                 'is_disabled': False,
+                                'key_columns': 'name',
+                                'included_columns': '',
                                 'column_names': 'name',
                             }
                         ],
@@ -193,6 +195,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': True,
                                 'is_unique_constraint': False,
                                 'is_disabled': False,
+                                'key_columns': 'id',
+                                'included_columns': '',
                                 'column_names': 'id',
                             },
                             {
@@ -202,6 +206,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': False,
                                 'is_unique_constraint': False,
                                 'is_disabled': False,
+                                # id is the table partitioning column, not part of this index key.
+                                'key_columns': 'population',
+                                'included_columns': '',
                                 'column_names': 'id,population',
                             },
                             {
@@ -211,6 +218,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': False,
                                 'is_unique_constraint': False,
                                 'is_disabled': False,
+                                'key_columns': 'id,name',
+                                'included_columns': '',
                                 'column_names': 'id,name',
                             },
                         ],
@@ -316,8 +325,115 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': False,
                                 'is_unique_constraint': True,
                                 'is_disabled': False,
+                                # column_names is sorted above; key_columns stays in constraint order.
+                                'key_columns': 'RestaurantName,District',
+                                'included_columns': '',
                                 'column_names': 'District,RestaurantName',
                             }
+                        ],
+                    },
+                    {
+                        'id': 'normalized_value',
+                        'name': 'index_coverage',
+                        'columns': [
+                            {
+                                'name': 'a',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                            {
+                                'name': 'c',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                            {
+                                'name': 'e',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                        ],
+                        'foreign_keys': [],
+                        'partitions': {'partition_count': 3},
+                        'indexes': [
+                            {
+                                'name': 'ix_include',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # (c) INCLUDE (a, e). column_names matches ix_prefix; included_columns does not.
+                                'key_columns': 'c',
+                                'included_columns': 'a,e',
+                                'column_names': 'a,c,e',
+                            },
+                            {
+                                'name': 'ix_prefix',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # (c, a) INCLUDE (e).
+                                'key_columns': 'c,a',
+                                'included_columns': 'e',
+                                'column_names': 'a,c,e',
+                            },
+                        ],
+                    },
+                    {
+                        'id': 'normalized_value',
+                        'name': 'key_order',
+                        # a and b are NOT NULL because they are the primary key.
+                        'columns': [
+                            {
+                                'name': 'a',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': False,
+                            },
+                            {
+                                'name': 'b',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': False,
+                            },
+                            {
+                                'name': 'c',
+                                'data_type': 'int',
+                                'default': 'None',
+                                'nullable': True,
+                            },
+                        ],
+                        'foreign_keys': [],
+                        'partitions': {'partition_count': 2},
+                        'indexes': [
+                            {
+                                'name': 'pk_key_order',
+                                'type': 1,
+                                'is_unique': True,
+                                'is_primary_key': True,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # column_names is sorted above. The clustered key stays (b, a).
+                                'key_columns': 'b,a',
+                                'included_columns': '',
+                                'column_names': 'a,b',
+                            },
+                            {
+                                'name': 'ix_desc',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                'key_columns': 'c DESC,a',
+                                'included_columns': '',
+                                'column_names': 'a,c',
+                            },
                         ],
                     },
                 ],
