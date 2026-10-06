@@ -14,15 +14,14 @@ from pytest import MonkeyPatch
 
 from ddev.ai.tools.http import base
 from ddev.ai.tools.http.http_get import HttpGetTool
-from ddev.ai.tools.http.response_format import MAX_OUTPUT_CHARS
 from ddev.ai.tools.http.response_store import ResponseStore
 
-from .helpers import TARGET, respond, saved_files
+from .helpers import TARGET, parse_result, respond, saved_files
 
 
 @pytest.fixture
 def small_limits(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr(base, "MAX_BODY_BYTES", 8)
+    monkeypatch.setattr(base, "MAX_BUFFER_BYTES", 8)
     monkeypatch.setattr(base, "MAX_DOWNLOAD_BYTES", 64)
     monkeypatch.setattr(base, "STREAM_CHUNK_BYTES", 3)
 
@@ -33,18 +32,12 @@ async def test_buffer_threshold_preserves_complete_body(tmp_path: Path, size: in
     body = "x" * size
     transport = respond(httpx.Response(200, text=body))
 
-    result = await HttpGetTool(ResponseStore(tmp_path / "responses"), transport=transport).run(
-        {"url": TARGET, "save_response": True}
-    )
+    result = await HttpGetTool(ResponseStore(tmp_path / "responses"), transport=transport).run({"url": TARGET})
 
     assert result.success is True
-    payload = json.loads(result.data)
-    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
-    assert payload["received_bytes"] == size
-    if size <= 8:
-        assert payload["body"] == body
-    else:
-        assert payload["summary"] == {"type": "text", "first_line": body}
+    fields, _ = parse_result(result.data)
+    assert Path(fields["saved_to"]).read_text(encoding="utf-8") == body
+    assert fields["received_bytes"] == size
     assert len(transport.requests) == 1
 
 
@@ -65,18 +58,15 @@ async def test_spill_retains_prefix_and_decodes_split_characters(
     result = await HttpGetTool(ResponseStore(tmp_path / "responses"), transport=transport).run({"url": TARGET})
 
     assert result.success is True
-    payload = json.loads(result.data)
-    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == expected
-    assert payload["excerpt"] == expected
-    assert payload["summary"] == {
-        "type": "text",
-        "first_line": expected.split("\n", 1)[0],
-    }
-    metadata = json.loads(Path(payload["metadata_path"]).read_text(encoding="utf-8"))
+    fields, inline = parse_result(result.data)
+    assert inline is None
+    assert Path(fields["saved_to"]).read_text(encoding="utf-8") == expected
+    assert fields["status"] == 422
+    assert fields["lines"] == expected.count("\n") + 1
+    metadata = json.loads(Path(fields["metadata_path"]).read_text(encoding="utf-8"))
     assert metadata["received_bytes"] == len(body)
     assert metadata["complete"] is True
     assert len(transport.requests) == 1
-    assert len(result.data) <= MAX_OUTPUT_CHARS
 
 
 @pytest.mark.usefixtures("small_limits")
@@ -87,10 +77,10 @@ async def test_spilled_json_is_saved_without_parsing_or_formatting(tmp_path: Pat
         transport=respond(httpx.Response(200, content=body, headers={"content-type": "application/json"})),
     ).run({"url": TARGET})
 
-    payload = json.loads(result.data)
-    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
-    assert payload["representation"] == "text"
-    assert payload["summary"]["type"] == "text"
+    fields, _ = parse_result(result.data)
+    assert Path(fields["saved_to"]).read_text(encoding="utf-8") == body
+    assert fields["representation"] == "json"
+    assert fields["lines"] == 1
 
 
 @pytest.mark.usefixtures("small_limits")

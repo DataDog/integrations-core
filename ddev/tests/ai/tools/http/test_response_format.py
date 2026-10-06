@@ -9,8 +9,11 @@ import httpx
 import pytest
 
 from ddev.ai.tools.http.base import HttpRequestInput
+from ddev.ai.tools.http.http_get import HttpGetTool
 from ddev.ai.tools.http.response_format import BufferedResponse, format_response
 from ddev.ai.tools.http.response_store import ResponseStore
+
+from .helpers import parse_result, respond
 
 
 @pytest.mark.parametrize(
@@ -33,38 +36,22 @@ from ddev.ai.tools.http.response_store import ResponseStore
         ("", b"user: 1", "text"),
     ],
 )
-def test_media_type_controls_response_preservation(
-    tmp_path: Path, content_type: str, body: bytes, representation: str | None
+async def test_media_type_controls_response_preservation(
+    store: ResponseStore, content_type: str, body: bytes, representation: str | None
 ):
-    store = ResponseStore(tmp_path / "responses")
-    fetched = BufferedResponse(
-        url=httpx.URL("http://localhost/api"),
-        status=200,
-        content_type=content_type,
-        location=None,
-        body=body,
-        charset=None,
-        complete=True,
-        fetched_at=datetime.now(UTC),
-        received_bytes=len(body),
-    )
+    response = httpx.Response(200, content=body, headers={"content-type": content_type})
 
-    result = format_response(
-        HttpRequestInput(url=str(fetched.url), save_response=True),
-        method="GET",
-        fetched=fetched,
-        store=store,
-    )
+    result = await HttpGetTool(store, transport=respond(response)).run({"url": "http://localhost/api"})
 
     assert result.success is True
-    payload = json.loads(result.data)
     if representation is None:
-        assert "not supported" in payload["note"]
+        assert "not downloaded" in json.loads(result.data)["note"]
         assert not store.root.exists()
     else:
-        assert payload["representation"] == representation
-        assert payload["body"] == body.decode()
-        saved = Path(payload["saved_to"]).read_text(encoding="utf-8")
+        fields, inline = parse_result(result.data)
+        assert fields["representation"] == representation
+        assert inline == body.decode()
+        saved = Path(fields["saved_to"]).read_text(encoding="utf-8")
         if representation == "formatted_json":
             assert json.loads(saved) == json.loads(body)
         else:
@@ -112,18 +99,17 @@ def test_metadata_redacts_credential_names_and_preserves_ordinary_names(tmp_path
         location=None,
         body=b"ok",
         charset=None,
-        complete=True,
         fetched_at=datetime.now(UTC),
         received_bytes=2,
     )
     result = format_response(
-        HttpRequestInput(url=str(fetched.url), headers={name: "header-value"}, save_response=True),
+        HttpRequestInput(url=str(fetched.url), headers={name: "header-value"}),
         method="GET",
         fetched=fetched,
         store=ResponseStore(tmp_path),
     )
 
-    metadata = json.loads(Path(json.loads(result.data)["metadata_path"]).read_text(encoding="utf-8"))
+    metadata = json.loads(Path(parse_result(result.data)[0]["metadata_path"]).read_text(encoding="utf-8"))
     assert httpx.URL(metadata["url"]).params.get_list(name) == (
         ["REDACTED", "REDACTED"] if sensitive else ["first", "second"]
     )

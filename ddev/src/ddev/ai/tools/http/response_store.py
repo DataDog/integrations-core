@@ -10,11 +10,8 @@ import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final
 
 from pydantic import JsonValue
-
-MAX_ERROR_EXCERPT_CHARS: Final = 1500
 
 
 class ResponseStoreError(Exception):
@@ -25,6 +22,7 @@ class ResponseStoreError(Exception):
 class SavedResponse:
     path: Path
     metadata_path: Path
+    lines: int
 
 
 class ResponseStore:
@@ -55,7 +53,7 @@ class ResponseStore:
         except ResponseStoreError:
             path.unlink(missing_ok=True)
             raise
-        return SavedResponse(path=path, metadata_path=metadata_path)
+        return SavedResponse(path=path, metadata_path=metadata_path, lines=_count_lines(body))
 
     async def save_stream(
         self,
@@ -65,11 +63,11 @@ class ResponseStore:
         metadata: dict[str, JsonValue],
         stem: str,
         max_bytes: int,
-    ) -> tuple[SavedResponse, int, str]:
+    ) -> tuple[SavedResponse, int]:
         """Decode chunks to a new text file, publishing metadata only on completion.
 
-        Return saved paths, byte count, and a bounded excerpt without rereading or parsing the
-        body. Interruptions remove owned partial files. The cap counts bytes after HTTP
+        Return the saved paths and line count, plus the byte count, without rereading or parsing
+        the body. Interruptions remove owned partial files. The cap counts bytes after HTTP
         decompression, before charset decoding.
         """
         try:
@@ -80,7 +78,8 @@ class ResponseStore:
         path, metadata_path = self._paths(suffix=".txt", stem=stem)
         owned = False
         complete = False
-        excerpt = ""
+        newlines = 0
+        last_char = ""
         try:
             with path.open("xb") as file:
                 owned = True
@@ -92,14 +91,18 @@ class ResponseStore:
                         )
                     text = decoder.decode(chunk)
                     file.write(_encode(text))
-                    excerpt += text[: max(0, MAX_ERROR_EXCERPT_CHARS - len(excerpt))]
+                    newlines += text.count("\n")
+                    last_char = text[-1:] or last_char
                 tail = decoder.decode(b"", final=True)
                 file.write(_encode(tail))
-                excerpt += tail[: max(0, MAX_ERROR_EXCERPT_CHARS - len(excerpt))]
+                newlines += tail.count("\n")
+                last_char = tail[-1:] or last_char
             metadata = {**metadata, "received_bytes": received_bytes, "complete": True}
             _write_new(metadata_path, _encode(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n"))
             complete = True
-            return SavedResponse(path, metadata_path), received_bytes, excerpt
+            # A final line without a trailing newline still counts as a line.
+            lines = newlines + (1 if last_char not in ("", "\n") else 0)
+            return SavedResponse(path, metadata_path, lines), received_bytes
         except FileExistsError as e:
             raise ResponseStoreError(f"Refusing to overwrite existing response file {path}") from e
         except OSError as e:
@@ -118,6 +121,11 @@ class ResponseStore:
             raise ResponseStoreError(f"Cannot create response directory: {e}") from e
 
         return path, metadata_path
+
+
+def _count_lines(text: str) -> int:
+    """Count lines the way `grep` numbers them: a final line without a trailing newline counts."""
+    return text.count("\n") + (1 if text and not text.endswith("\n") else 0)
 
 
 def _encode(text: str) -> bytes:

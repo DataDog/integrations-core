@@ -14,16 +14,16 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.fs.read_file import ReadFileTool
 from ddev.ai.tools.http.http_get import HttpGetTool
 from ddev.ai.tools.http.http_post import HttpPostTool
-from ddev.ai.tools.http.response_format import MAX_BODY_BYTES, MAX_OUTPUT_CHARS
+from ddev.ai.tools.http.response_format import MAX_BUFFER_BYTES, MAX_INLINE_CHARS, MAX_LOCATION_CHARS
 from ddev.ai.tools.http.response_store import ResponseStore
 from ddev.ai.tools.shell.grep import GrepTool
 
-from .helpers import TARGET, RecordingTransport, respond, saved_files
+from .helpers import TARGET, RecordingTransport, parse_result, respond, saved_files
 
 OPENAPI_URL = f"{TARGET}/api/openapi.json"
 
 
-def openapi_document(schema_count: int = 400) -> dict:
+def openapi_document(schema_count: int = 1000) -> dict:
     return {
         "openapi": "3.1.0",
         "info": {"title": "Prefect", "version": "3"},
@@ -101,49 +101,47 @@ async def test_conflicting_body_inputs_are_rejected(json_body: object, store: Re
     assert transport.requests == []
 
 
-async def test_large_json_is_saved_formatted_and_result_is_bounded(store: ResponseStore):
+async def test_large_json_is_saved_formatted_and_only_metadata_is_returned(store: ResponseStore):
     document = openapi_document()
 
     result = await get_tool(store, respond(httpx.Response(200, json=document))).run({"url": OPENAPI_URL})
 
     assert result.success is True
-    assert len(result.data) <= MAX_OUTPUT_CHARS
-    payload = json.loads(result.data)
-    assert payload["status"] == 200
-    assert payload["complete"] is True
-    assert payload["summary"]["keys"] == ["openapi", "info", "components"]
-    saved = Path(payload["saved_to"])
-    assert json.loads(saved.read_text(encoding="utf-8")) == document
-    assert saved.read_text(encoding="utf-8").count("\n") > len(document["components"]["schemas"])
-    metadata = json.loads(Path(payload["metadata_path"]).read_text(encoding="utf-8"))
+    fields, body = parse_result(result.data)
+    assert body is None
+    assert fields["status"] == 200
+    assert fields["representation"] == "formatted_json"
+    saved = Path(fields["saved_to"])
+    saved_text = saved.read_text(encoding="utf-8")
+    assert json.loads(saved_text) == document
+    assert fields["lines"] == saved_text.count("\n") > len(document["components"]["schemas"])
+    metadata = json.loads(Path(fields["metadata_path"]).read_text(encoding="utf-8"))
     assert metadata["method"] == "GET"
     assert metadata["url"] == OPENAPI_URL
     assert metadata["representation"] == "formatted_json"
 
 
 @pytest.mark.parametrize("body", ['{"ok":true}', "plain text café", ""])
-async def test_save_response_preserves_small_response_and_returns_body(store: ResponseStore, body: str):
-    response = httpx.Response(200, text=body)
-    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
+async def test_small_response_is_saved_and_returned_inline(store: ResponseStore, body: str):
+    result = await get_tool(store, respond(httpx.Response(200, text=body))).run({"url": OPENAPI_URL})
 
     assert result.success is True
-    payload = json.loads(result.data)
-    assert payload["body"] == body
-    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
-    assert Path(payload["metadata_path"]).is_file()
-    assert len(result.data) <= MAX_OUTPUT_CHARS
+    fields, inline = parse_result(result.data)
+    assert inline == body
+    assert Path(fields["saved_to"]).read_text(encoding="utf-8") == body
+    assert Path(fields["metadata_path"]).is_file()
 
 
-async def test_saved_body_that_cannot_fit_with_paths_uses_summary(store: ResponseStore):
-    body = "x" * (MAX_OUTPUT_CHARS - 100)
-    result = await get_tool(store, respond(httpx.Response(200, text=body))).run(
-        {"url": OPENAPI_URL, "save_response": True}
-    )
+@pytest.mark.parametrize("size,inlined", [(MAX_INLINE_CHARS, True), (MAX_INLINE_CHARS + 1, False)])
+async def test_inline_limit_counts_body_characters(store: ResponseStore, size: int, inlined: bool):
+    # Multi-byte characters: the limit is on decoded characters, not bytes.
+    body = "é" * size
 
-    payload = json.loads(result.data)
-    assert payload["summary"]["type"] == "text"
-    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
-    assert len(result.data) <= MAX_OUTPUT_CHARS
+    result = await get_tool(store, respond(httpx.Response(200, text=body))).run({"url": OPENAPI_URL})
+
+    fields, inline = parse_result(result.data)
+    assert inline == (body if inlined else None)
+    assert Path(fields["saved_to"]).read_text(encoding="utf-8") == body
 
 
 async def test_post_metadata_records_request_without_credentials(store: ResponseStore):
@@ -160,15 +158,14 @@ async def test_post_metadata_records_request_without_credentials(store: Response
                 "X-API-Key": "header-secret",
                 "Accept": "application/json",
             },
-            "save_response": True,
         }
     )
 
-    payload = json.loads(result.data)
+    fields, body = parse_result(result.data)
     assert result.success is True
-    assert json.loads(payload["body"]) == []
-    assert json.loads(Path(payload["saved_to"]).read_text(encoding="utf-8")) == []
-    metadata_text = Path(payload["metadata_path"]).read_text(encoding="utf-8")
+    assert json.loads(body) == []
+    assert json.loads(Path(fields["saved_to"]).read_text(encoding="utf-8")) == []
+    metadata_text = Path(fields["metadata_path"]).read_text(encoding="utf-8")
     assert all(secret not in metadata_text for secret in ("s3cret", "auth-secret", "cookie-secret", "header-secret"))
     metadata = json.loads(metadata_text)
     assert metadata["method"] == "POST"
@@ -182,68 +179,63 @@ async def test_post_metadata_records_request_without_credentials(store: Response
     }
 
 
-async def test_large_error_response_keeps_status_and_excerpt(store: ResponseStore):
-    detail = {"detail": [{"loc": ["body", "task_runs", "end_time"], "msg": "Extra inputs"}] * 200}
-
-    result = await get_tool(store, respond(httpx.Response(422, json=detail))).run({"url": OPENAPI_URL})
-
-    payload = json.loads(result.data)
-    assert payload["status"] == 422
-    assert "end_time" in payload["excerpt"]
-    assert json.loads(Path(payload["saved_to"]).read_text(encoding="utf-8")) == detail
-
-
-async def test_huge_redirect_location_header_does_not_bypass_output_cap(store: ResponseStore):
-    huge_location = "http://elsewhere/" + "x" * (MAX_OUTPUT_CHARS * 2)
+async def test_huge_redirect_location_header_is_bounded(store: ResponseStore):
+    huge_location = "http://elsewhere/" + "x" * (MAX_LOCATION_CHARS * 2)
     response = httpx.Response(302, json={"ok": True}, headers={"location": huge_location})
 
-    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
+    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL})
 
     assert result.success is True
-    assert len(result.data) <= MAX_OUTPUT_CHARS
-    payload = json.loads(result.data)
-    assert len(payload["redirect_not_followed"]) < len(huge_location)
+    fields, _ = parse_result(result.data)
+    assert fields["redirect_not_followed"].startswith(huge_location[:MAX_LOCATION_CHARS])
+    assert len(fields["redirect_not_followed"]) < len(huge_location)
 
 
 async def test_invalid_json_is_saved_as_text(store: ResponseStore):
-    body = "{not json" + "x" * MAX_OUTPUT_CHARS
+    body = "{not json"
     response = httpx.Response(200, content=body.encode(), headers={"content-type": "application/json"})
 
-    payload = json.loads((await get_tool(store, respond(response)).run({"url": OPENAPI_URL})).data)
+    fields, _ = parse_result((await get_tool(store, respond(response)).run({"url": OPENAPI_URL})).data)
 
-    assert payload["representation"] == "text"
-    assert "not valid JSON" in payload["note"]
-    assert Path(payload["saved_to"]).read_text(encoding="utf-8") == body
+    assert fields["representation"] == "text"
+    assert "not valid JSON" in fields["note"]
+    assert Path(fields["saved_to"]).read_text(encoding="utf-8") == body
 
 
-async def test_unsavable_response_reports_status_and_excerpt(tmp_path: Path):
+@pytest.mark.parametrize("fits", [True, False])
+async def test_unsavable_response_returns_body_only_when_it_fits(tmp_path: Path, fits: bool):
     (tmp_path / "blocked").write_text("not a directory")
     store = ResponseStore(tmp_path / "blocked" / "exec")
+    body = "x" * (MAX_INLINE_CHARS if fits else MAX_INLINE_CHARS + 1)
 
-    result = await get_tool(store, respond(httpx.Response(200, json={"ok": True}))).run(
-        {"url": OPENAPI_URL, "save_response": True}
-    )
+    result = await get_tool(store, respond(httpx.Response(200, text=body))).run({"url": OPENAPI_URL})
 
-    assert result.success is False
-    payload = json.loads(result.error)
-    assert payload["status"] == 200
-    assert "not saved" in payload["error"]
-    assert "ok" in payload["excerpt"]
+    if fits:
+        assert result.success is True
+        fields, inline = parse_result(result.data)
+        assert inline == body
+        assert "saved_to" not in fields
+        assert "Cannot create response directory" in fields["save_error"]
+    else:
+        assert result.success is False
+        fields = json.loads(result.error)
+        assert fields["status"] == 200
+        assert "not saved" in fields["error"]
 
 
 async def test_decompressed_response_spills_to_disk(store: ResponseStore):
-    compressed = gzip.compress(b"x" * (MAX_BODY_BYTES + 1))
+    compressed = gzip.compress(b"x" * (MAX_BUFFER_BYTES + 1))
     response = httpx.Response(
         200, content=compressed, headers={"content-encoding": "gzip", "content-type": "text/plain"}
     )
 
-    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
+    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL})
 
     assert result.success is True
-    payload = json.loads(result.data)
-    assert payload["received_bytes"] == MAX_BODY_BYTES + 1
-    assert Path(payload["saved_to"]).read_bytes() == b"x" * (MAX_BODY_BYTES + 1)
-    assert len(compressed) < MAX_BODY_BYTES
+    fields, _ = parse_result(result.data)
+    assert fields["received_bytes"] == MAX_BUFFER_BYTES + 1
+    assert Path(fields["saved_to"]).read_bytes() == b"x" * (MAX_BUFFER_BYTES + 1)
+    assert len(compressed) < MAX_BUFFER_BYTES
 
 
 async def test_cancellation_during_download_writes_nothing(store: ResponseStore):
@@ -256,7 +248,7 @@ async def test_cancellation_during_download_writes_nothing(store: ResponseStore)
             await asyncio.Event().wait()
 
     transport = RecordingTransport(lambda request: httpx.Response(200, stream=SlowStream()))
-    task = asyncio.create_task(get_tool(store, transport).run({"url": OPENAPI_URL, "save_response": True}))
+    task = asyncio.create_task(get_tool(store, transport).run({"url": OPENAPI_URL}))
     async with asyncio.timeout(5):
         await started.wait()
         task.cancel()
@@ -266,19 +258,31 @@ async def test_cancellation_during_download_writes_nothing(store: ResponseStore)
     assert saved_files(store.root) == []
 
 
-async def test_binary_response_is_not_saved(store: ResponseStore):
-    response = httpx.Response(200, content=b"\x89PNG", headers={"content-type": "image/png"})
+async def test_binary_response_body_is_never_read(store: ResponseStore):
+    class UnreadableStream(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            raise AssertionError("binary body was read")
+            yield b""
 
-    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
+    response = httpx.Response(
+        200, stream=UnreadableStream(), headers={"content-type": "image/png", "content-length": "123456"}
+    )
 
-    assert "not supported" in json.loads(result.data)["note"]
+    result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL})
+
+    assert result.success is True
+    fields = json.loads(result.data)
+    assert fields["status"] == 200
+    assert fields["content_type"] == "image/png"
+    assert fields["content_length"] == "123456"
+    assert "not downloaded" in fields["note"]
     assert saved_files(store.root) == []
 
 
 async def test_saved_response_is_readable_by_another_agents_file_tools(tmp_path: Path):
     store = ResponseStore(tmp_path / ".ddev" / "ai-runs" / "flow" / "http_responses" / "exec")
     result = await get_tool(store, respond(httpx.Response(200, json=openapi_document(50)))).run({"url": OPENAPI_URL})
-    saved_to = json.loads(result.data)["saved_to"]
+    saved_to = parse_result(result.data)[0]["saved_to"]
     policy = FileAccessPolicy(write_root=tmp_path, integration_name="prefect")
 
     grep = await GrepTool(policy).run({"pattern": "Schema7_", "path": saved_to, "recursive": False})

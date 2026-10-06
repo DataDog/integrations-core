@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import codecs
-import itertools
 import json
 import re
 from dataclasses import dataclass
@@ -14,29 +13,22 @@ from typing import TYPE_CHECKING, Final
 import httpx
 from pydantic import JsonValue
 
+from ddev.ai.tools.core.truncation import MAX_CHARS
 from ddev.ai.tools.core.types import ToolResult
 
-from .response_store import (
-    MAX_ERROR_EXCERPT_CHARS,
-    ResponseStore,
-    ResponseStoreError,
-    SavedResponse,
-)
+from .response_store import ResponseStore, ResponseStoreError, SavedResponse
 
 if TYPE_CHECKING:
     from .base import HttpRequestInput
 
-# Upper bound on the text any HTTP tool result returns to the model.
-MAX_OUTPUT_CHARS: Final = 4096
-MAX_BODY_BYTES: Final = 4 * 1024 * 1024
+# Bodies up to this many characters are returned inline, matching the other tools' output budget.
+MAX_INLINE_CHARS: Final = MAX_CHARS
+# Largest body held in memory, where JSON can be parsed and pretty-printed before saving.
+MAX_BUFFER_BYTES: Final = 4 * 1024 * 1024
 # Pretty-printing expands JSON; above this the compact wire text is saved instead.
-MAX_FORMATTED_CHARS: Final = 4 * MAX_BODY_BYTES
+MAX_FORMATTED_CHARS: Final = 4 * MAX_BUFFER_BYTES
 MAX_RECORDED_REQUEST_BODY_CHARS: Final = 2048
-
-SUMMARY_MAX_DEPTH: Final = 2
-SUMMARY_MAX_KEYS: Final = 25
-SUMMARY_MAX_FIELDS: Final = 10
-SUMMARY_MAX_STRING: Final = 80
+MAX_LOCATION_CHARS: Final = 2048
 
 TEXTUAL_APPLICATION_TYPES: Final = frozenset(
     {
@@ -93,7 +85,7 @@ SENSITIVE_NAMES: Final = frozenset(
 
 @dataclass
 class HttpResponse:
-    """Metadata shared by buffered responses and responses saved during download."""
+    """Metadata shared by every kind of fetched response."""
 
     url: httpx.URL
     status: int
@@ -105,129 +97,100 @@ class HttpResponse:
 
 @dataclass
 class BufferedResponse(HttpResponse):
-    """A response held in memory; incomplete downloads are rejected before formatting."""
+    """A complete textual response held in memory."""
 
     body: bytes
     charset: str | None
-    complete: bool
 
 
 @dataclass
 class StreamedResponse(HttpResponse):
-    """A completed response streamed to disk, with only a preview retained in memory."""
+    """A completed textual response streamed to disk without being held in memory."""
 
     saved: SavedResponse
-    excerpt: str
+
+
+@dataclass
+class UnsupportedResponse(HttpResponse):
+    """A response whose content type is not supported; its body was never read."""
+
+    content_length: str | None
 
 
 def format_response(
-    tool_input: HttpRequestInput, *, method: str, fetched: BufferedResponse | StreamedResponse, store: ResponseStore
+    tool_input: HttpRequestInput,
+    *,
+    method: str,
+    fetched: BufferedResponse | StreamedResponse | UnsupportedResponse,
+    store: ResponseStore,
 ) -> ToolResult:
-    """Return a complete response inline, or save it when requested or too large.
+    """Save every textual response and return its body inline when it fits.
 
-    Saved results include artifact paths and the body when it fits, otherwise a summary.
-    Spilled responses already have completed artifacts; their summaries require no body reread.
-    Binary bodies are neither returned nor saved.
+    The result starts with a JSON metadata line. When the body has at most `MAX_INLINE_CHARS`
+    characters it follows the metadata after a blank line, unescaped; larger bodies are left in
+    the saved file for inspection with file tools.
     """
-    if not is_textual(fetched.content_type):
-        return ToolResult(
-            success=True,
-            data=_dump(
-                {
-                    **_base_fields(fetched),
-                    "complete": True,
-                    "note": "Binary response bodies are not supported; the body was not returned or saved.",
-                }
-            ),
-        )
-
-    if isinstance(fetched, StreamedResponse):
-        return _format_streamed_response(fetched)
+    match fetched:
+        case UnsupportedResponse():
+            fields = _base_fields(fetched)
+            if fetched.content_length is not None:
+                fields["content_length"] = fetched.content_length
+            fields["note"] = "Unsupported content type; the body was not downloaded or saved."
+            return ToolResult(success=True, data=_dump(fields))
+        case StreamedResponse():
+            fields = _saved_fields(fetched, fetched.saved, representation=stream_representation(fetched.content_type))
+            return ToolResult(success=True, data=_render(fields, body=None))
     return _format_buffered_response(tool_input, method=method, fetched=fetched, store=store)
-
-
-def _format_streamed_response(fetched: StreamedResponse) -> ToolResult:
-    """Describe completed artifacts using the retained preview, without rereading their body."""
-    return _saved_result(
-        fetched,
-        fetched.saved,
-        representation="text",
-        summary={"type": "text", "first_line": fetched.excerpt.split("\n", 1)[0][:SUMMARY_MAX_STRING]},
-        error_excerpt=fetched.excerpt,
-    )
 
 
 def _format_buffered_response(
     tool_input: HttpRequestInput, *, method: str, fetched: BufferedResponse, store: ResponseStore
 ) -> ToolResult:
-    """Return the buffered body inline, or save it and describe the resulting artifact."""
+    """Save the buffered body, returning it inline as well when it fits."""
     body_text = _decode(fetched.body, fetched.charset)
-    inline = _inline_output(fetched, body_text)
-    fits_inline = len(inline) <= MAX_OUTPUT_CHARS
-    if not tool_input.save_response and fits_inline:
-        return ToolResult(success=True, data=inline)
-
-    error_excerpt = _excerpt(body_text)
-    representation, saved_text, parsed, parse_note = _representation(fetched.content_type, body_text)
+    inline = body_text if len(body_text) <= MAX_INLINE_CHARS else None
+    representation, saved_text, note = _representation(fetched.content_type, body_text)
     try:
         saved = store.save(
             body=saved_text,
             suffix=".json" if representation == "formatted_json" else ".txt",
             metadata=response_metadata(
-                tool_input, method=method, fetched=fetched, representation=representation, note=parse_note
+                tool_input, method=method, fetched=fetched, representation=representation, note=note
             ),
             stem=method.lower(),
         )
     except ResponseStoreError as e:
-        return ToolResult(
-            success=False,
-            error=_dump(
-                {
-                    **_base_fields(fetched),
-                    "error": f"Response received but not saved: {e}",
-                    "excerpt": error_excerpt,
-                }
-            ),
-        )
-    return _saved_result(
-        fetched,
-        saved,
-        representation=representation,
-        summary=_summarize_json(parsed) if parsed is not None else _summarize_text(saved_text),
-        error_excerpt=error_excerpt,
-        inline_body=body_text if fits_inline else None,
-        note=parse_note,
-    )
+        fields = {**_base_fields(fetched), "received_bytes": fetched.received_bytes}
+        if inline is None:
+            return ToolResult(success=False, error=_dump({**fields, "error": f"Response received but not saved: {e}"}))
+        # Saving is a convenience when the body fits; the agent still gets the complete response.
+        return ToolResult(success=True, data=_render({**fields, "save_error": str(e)}, body=inline))
+    fields = _saved_fields(fetched, saved, representation=representation, note=note)
+    return ToolResult(success=True, data=_render(fields, body=inline))
 
 
-def _saved_result(
-    fetched: HttpResponse,
-    saved: SavedResponse,
-    *,
-    representation: str,
-    summary: dict[str, object],
-    error_excerpt: str,
-    inline_body: str | None = None,
-    note: str | None = None,
-) -> ToolResult:
-    """Build a saved result with the full body if it fits, otherwise its summary and error excerpt."""
-    payload: dict[str, object] = {
+def _saved_fields(
+    fetched: HttpResponse, saved: SavedResponse, *, representation: str, note: str | None = None
+) -> dict[str, object]:
+    """Describe a saved artifact well enough to choose between grep, read_file, and JSON tools."""
+    fields: dict[str, object] = {
         **_base_fields(fetched),
+        "received_bytes": fetched.received_bytes,
+        "lines": saved.lines,
+        "representation": representation,
         "saved_to": str(saved.path),
         "metadata_path": str(saved.metadata_path),
-        "representation": representation,
-        "complete": True,
     }
     if note:
-        payload["note"] = note
-    if inline_body is not None:
-        output = _dump({**payload, "body": inline_body})
-        if len(output) <= MAX_OUTPUT_CHARS:
-            return ToolResult(success=True, data=output)
-    if fetched.status >= 400:
-        payload["excerpt"] = error_excerpt
-    payload["summary"] = summary
-    return ToolResult(success=True, data=_fit(payload))
+        fields["note"] = note
+    return fields
+
+
+def _render(fields: dict[str, object], *, body: str | None) -> str:
+    fields["body_inline"] = body is not None
+    output = _dump(fields)
+    # JSON-encoding the body would escape every quote and newline, so it follows the metadata raw.
+    return output if body is None else f"{output}\n\n{body}"
 
 
 def response_metadata(
@@ -259,22 +222,13 @@ def response_metadata(
 
 
 def _base_fields(fetched: HttpResponse) -> dict[str, object]:
-    fields: dict[str, object] = {
-        "status": fetched.status,
-        "content_type": fetched.content_type,
-        "received_bytes": fetched.received_bytes,
-    }
-    if fetched.location is not None:
+    fields: dict[str, object] = {"status": fetched.status, "content_type": fetched.content_type}
+    if (location := fetched.location) is not None:
         # Bound server-controlled headers so they cannot exhaust the output budget on their own.
-        fields["redirect_not_followed"] = _excerpt(fetched.location)
+        if len(location) > MAX_LOCATION_CHARS:
+            location = f"{location[:MAX_LOCATION_CHARS]}… [{len(location) - MAX_LOCATION_CHARS} more characters]"
+        fields["redirect_not_followed"] = location
     return fields
-
-
-def _inline_output(fetched: HttpResponse, text: str) -> str:
-    header = f"Status: {fetched.status}"
-    if fetched.location is not None:
-        header = f"{header}\nRedirect not followed: {fetched.location}"
-    return f"{header}\n\n{text}"
 
 
 def is_textual(content_type: str) -> bool:
@@ -293,6 +247,11 @@ def _is_json(content_type: str) -> bool:
     return media_type == "application/json" or media_type.endswith("+json")
 
 
+def stream_representation(content_type: str) -> str:
+    """Name a streamed body, which is saved as received without parsing or formatting."""
+    return "json" if _is_json(content_type) else "text"
+
+
 def _decode(body: bytes, charset: str | None) -> str:
     try:
         codecs.lookup(charset or "utf-8")
@@ -301,27 +260,29 @@ def _decode(body: bytes, charset: str | None) -> str:
     return body.decode(charset or "utf-8", errors="replace")
 
 
-def _representation(content_type: str, text: str) -> tuple[str, str, JsonValue | None, str | None]:
+def _representation(content_type: str, text: str) -> tuple[str, str, str | None]:
     """Prefer formatted JSON when feasible, falling back to the received text.
 
-    Return the representation name, text to save, parsed JSON or None, and any fallback note.
+    Return the representation name, text to save, and any fallback note. `json` means a JSON
+    body saved as received, typically on a single line; `text` covers everything else, including
+    bodies that claim to be JSON but do not parse.
     """
     if not _is_json(content_type):
-        return "text", text, None, None
+        return "text", text, None
     try:
         parsed = json.loads(text)
     except RecursionError:
-        return "text", text, None, "JSON nesting too deep to parse; saved as received text"
+        return "json", text, "JSON nesting too deep to parse; saved as received"
     except ValueError:
-        return "text", text, None, "Content-Type is JSON but the body is not valid JSON; saved as received text"
+        return "text", text, "Content-Type is JSON but the body is not valid JSON; saved as received text"
     try:
         formatted = json.dumps(parsed, indent=2, ensure_ascii=False) + "\n"
     except RecursionError:
-        return "text", text, parsed, "JSON nesting too deep to format; saved as received text"
+        return "json", text, "JSON nesting too deep to format; saved as received"
     if len(formatted) > MAX_FORMATTED_CHARS:
-        return "text", text, parsed, "Formatted JSON exceeded the size limit; saved as received text"
+        return "json", text, "Formatted JSON exceeded the size limit; saved as received"
     # A formatted representation, not an exact wire-byte capture.
-    return "formatted_json", formatted, parsed, None
+    return "formatted_json", formatted, None
 
 
 def _is_sensitive_name(name: str) -> bool:
@@ -349,61 +310,5 @@ def _recordable_request_body(json_body: JsonValue) -> JsonValue | str:
     return json_body
 
 
-def _excerpt(text: str) -> str:
-    if len(text) <= MAX_ERROR_EXCERPT_CHARS:
-        return text
-    return f"{text[:MAX_ERROR_EXCERPT_CHARS]}… [{len(text) - MAX_ERROR_EXCERPT_CHARS} more characters]"
-
-
-def _summarize_json(value: JsonValue, depth: int = SUMMARY_MAX_DEPTH) -> dict[str, object]:
-    """Describe JSON structure with limited nesting, keys, fields, and string samples."""
-    match value:
-        case dict():
-            summary: dict[str, object] = {"type": "object", "keys": list(value)[:SUMMARY_MAX_KEYS]}
-            if len(value) > SUMMARY_MAX_KEYS:
-                summary["key_count"] = len(value)
-            if depth > 1:
-                summary["fields"] = {
-                    k: _summarize_json(v, depth - 1) for k, v in itertools.islice(value.items(), SUMMARY_MAX_FIELDS)
-                }
-            return summary
-        case list():
-            summary = {"type": "array", "length": len(value)}
-            if value and depth > 1:
-                summary["first_item"] = _summarize_json(value[0], depth - 1)
-            return summary
-        case str():
-            return {"type": "string", "length": len(value), "sample": value[:SUMMARY_MAX_STRING]}
-        case bool():
-            return {"type": "boolean", "value": value}
-        case None:
-            return {"type": "null"}
-        case _:
-            return {"type": "number", "value": value}
-
-
-def _summarize_text(text: str) -> dict[str, object]:
-    first_line = text.split("\n", 1)[0]
-    return {"type": "text", "lines": text.count("\n") + 1, "first_line": first_line[:SUMMARY_MAX_STRING]}
-
-
 def _dump(payload: dict[str, object]) -> str:
     return json.dumps(payload, ensure_ascii=False, default=str)
-
-
-def _fit(payload: dict[str, object]) -> str:
-    """Shrink summaries and excerpts toward the output budget, retaining response metadata."""
-    output = _dump(payload)
-    if len(output) <= MAX_OUTPUT_CHARS:
-        return output
-    summary = payload.get("summary")
-    if isinstance(summary, dict) and "fields" in summary:
-        payload["summary"] = {k: v for k, v in summary.items() if k != "fields"}
-        output = _dump(payload)
-    if len(output) > MAX_OUTPUT_CHARS:
-        payload["summary"] = {"omitted": "summary too large; inspect the saved file with grep/read_file"}
-        output = _dump(payload)
-    if len(output) > MAX_OUTPUT_CHARS and "excerpt" in payload:
-        payload["excerpt"] = _excerpt(str(payload["excerpt"]))[:500]
-        output = _dump(payload)
-    return output

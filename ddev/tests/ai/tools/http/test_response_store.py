@@ -73,3 +73,30 @@ def test_lone_surrogates_are_saved_as_json_escapes(tmp_path: Path):
 
     assert json.loads(saved.path.read_text(encoding="utf-8")) == value
     assert json.loads(saved.metadata_path.read_text(encoding="utf-8")) == {"request_body": value}
+
+
+@pytest.mark.parametrize(
+    "chunks,lines",
+    [
+        ([], 0),
+        ([b"a"], 1),
+        ([b"a\n"], 1),
+        ([b"a\nb"], 2),
+        ([b"a", b"\n", b"b\n"], 2),
+        ([b"a\n", b""], 1),
+    ],
+)
+@pytest.mark.parametrize("streamed", [False, True])
+async def test_line_count_matches_grep_numbering(tmp_path: Path, chunks: list[bytes], lines: int, streamed: bool):
+    store = ResponseStore(tmp_path / "exec")
+
+    async def stream() -> AsyncIterator[bytes]:
+        for chunk in chunks:
+            yield chunk
+
+    if streamed:
+        saved, _ = await store.save_stream(chunks=stream(), charset=None, metadata={}, stem="get", max_bytes=64)
+    else:
+        saved = save(store, b"".join(chunks).decode())
+
+    assert saved.lines == lines

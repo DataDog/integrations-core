@@ -7,7 +7,7 @@ import pytest
 from ddev.ai.tools.http.http_get import HttpGetTool
 from ddev.ai.tools.http.response_store import ResponseStore
 
-from .helpers import RecordingTransport, respond
+from .helpers import RecordingTransport, parse_result, respond
 
 METRICS_URL = "http://localhost:9090/metrics"
 
@@ -36,7 +36,9 @@ async def test_small_response_is_returned_inline(status_code: int, body: str, st
     result = await tool.run({"url": METRICS_URL})
 
     assert result.success is True
-    assert result.data == f"Status: {status_code}\n\n{body}"
+    fields, inline = parse_result(result.data)
+    assert fields["status"] == status_code
+    assert inline == body
 
 
 async def test_query_is_sent_as_get(store: ResponseStore):
@@ -66,7 +68,9 @@ async def test_redirect_is_not_followed(store: ResponseStore):
     result = await HttpGetTool(store, transport=transport).run({"url": METRICS_URL})
 
     assert len(transport.requests) == 1
-    assert result.data.startswith("Status: 302\nRedirect not followed: http://elsewhere/")
+    fields, _ = parse_result(result.data)
+    assert fields["status"] == 302
+    assert fields["redirect_not_followed"] == "http://elsewhere/"
 
 
 async def test_request_timeout(store: ResponseStore):

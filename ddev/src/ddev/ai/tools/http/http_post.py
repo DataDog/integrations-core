@@ -9,10 +9,11 @@ from .base import HttpRequestInput, HttpRequestTool
 class HttpPostTool(HttpRequestTool):
     """Performs an HTTP POST request with an optional JSON or raw text body to localhost or a literal
     loopback IP address. Use it to verify that a documented local API request shape is accepted.
-    Error responses such as 422 are returned with their status and a bounded body excerpt, not
-    retried. Responses are returned inline when small, or saved to a run artifact file (always
-    when save_response is true) with a JSON result containing the saved_to path and the full body
-    when it fits, otherwise a summary. Inspect saved files with grep and read_file. Redirects are not followed."""
+    Error responses such as 422 are returned with their status and body, not retried.
+    Every text response is saved to a run artifact file. The result starts with a JSON metadata line
+    (status, content_type, received_bytes, lines, representation, saved_to, body_inline). When the
+    body has at most 50,000 characters it follows after a blank line; otherwise inspect saved_to with
+    grep and read_file. Redirects are not followed."""
 
     @property
     def name(self) -> str:
