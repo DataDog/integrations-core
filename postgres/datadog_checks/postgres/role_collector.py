@@ -225,6 +225,7 @@ class PostgresRoleCollector:
                 )
                 for array_name, cursor in results:
                     self._emit_rows(cursor, array_name, emitter)
+                    cursor.close()
             emitter.flush_terminal()
             return True
         except RoleCollectionCancelled:
@@ -261,6 +262,7 @@ class PostgresRoleCollector:
                 )
                 for array_name, cursor in results:
                     self._emit_rows(cursor, array_name, emitter)
+                    cursor.close()
             emitter.flush_terminal()
             status = "success"
             return True
@@ -341,7 +343,8 @@ class PostgresRoleCollector:
 
         Each query gets its own client-side cursor, which holds its complete result once executed. The transaction
         is committed before the rows are read, so the snapshot holds back vacuum only while the queries run, not
-        while rows are converted, serialized, and submitted.
+        while rows are converted, serialized, and submitted. Callers close each cursor once its rows are emitted;
+        `cursors` closes any left open when a query or emit fails.
         """
         results = []
         with conn.transaction():
