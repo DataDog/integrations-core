@@ -35,43 +35,33 @@ ORDER BY role_name
 """
 
 
-# Before PostgreSQL 16, dropping a role leaves memberships it granted pointing at its OID, so the grantor is
-# reported by OID rather than dropping a membership that is still in effect. Inheritance is a property of the
-# member, and every membership allows SET ROLE to the group.
+# Before PostgreSQL 16, inheritance is a property of the member, and every membership allows SET ROLE to the
+# group. Dropping a role also leaves memberships it granted pointing at its OID, so a grantor OID can be missing
+# from `roles`.
 QUERY_MEMBERSHIPS_PRE_PG16 = """
-SELECT group_role.rolname::text AS group_role_name,
-       member_role.rolname::text AS member_role_name,
-       COALESCE(grantor_role.rolname::text, membership.grantor::text) AS grantor_role_name,
+SELECT membership.roleid::bigint AS group_role_oid,
+       membership.member::bigint AS member_role_oid,
+       membership.grantor::bigint AS grantor_role_oid,
        membership.admin_option AS admin_option,
        member_role.rolinherit AS member_can_inherit,
        true AS member_can_set
 FROM pg_catalog.pg_auth_members AS membership
-JOIN pg_catalog.pg_roles AS group_role
-  ON group_role.oid = membership.roleid
 JOIN pg_catalog.pg_roles AS member_role
   ON member_role.oid = membership.member
-LEFT JOIN pg_catalog.pg_roles AS grantor_role
-  ON grantor_role.oid = membership.grantor
-ORDER BY group_role_name, member_role_name, grantor_role_name
+ORDER BY group_role_oid, member_role_oid, grantor_role_oid
 """
 
 
 # PostgreSQL 16 records whether each membership allows inheriting the group's privileges and SET ROLE to it.
 QUERY_MEMBERSHIPS_PG16_PLUS = """
-SELECT group_role.rolname::text AS group_role_name,
-       member_role.rolname::text AS member_role_name,
-       COALESCE(grantor_role.rolname::text, membership.grantor::text) AS grantor_role_name,
+SELECT membership.roleid::bigint AS group_role_oid,
+       membership.member::bigint AS member_role_oid,
+       membership.grantor::bigint AS grantor_role_oid,
        membership.admin_option AS admin_option,
        membership.inherit_option AS member_can_inherit,
        membership.set_option AS member_can_set
 FROM pg_catalog.pg_auth_members AS membership
-JOIN pg_catalog.pg_roles AS group_role
-  ON group_role.oid = membership.roleid
-JOIN pg_catalog.pg_roles AS member_role
-  ON member_role.oid = membership.member
-LEFT JOIN pg_catalog.pg_roles AS grantor_role
-  ON grantor_role.oid = membership.grantor
-ORDER BY group_role_name, member_role_name, grantor_role_name
+ORDER BY group_role_oid, member_role_oid, grantor_role_oid
 """
 
 
@@ -90,7 +80,7 @@ ROLE_SETTING_VALUE_PREFIXES = ("auto_explain", "pg_hint_plan", "pg_stat_statemen
 # Takes the allowed prefixes as its only parameter. Prefixes are matched case-insensitively because custom setting
 # names keep the case they were written in.
 QUERY_ROLE_SETTINGS = """
-SELECT role.rolname::text AS role_name,
+SELECT settings.setrole::bigint AS role_oid,
        COALESCE(database.datname::text, '') AS database_name,
        parsed.setting_name,
        parsed.setting_value
@@ -100,18 +90,20 @@ CROSS JOIN LATERAL (
     SELECT split_part(setting, '=', 1) AS setting_name,
            substr(setting, strpos(setting, '=') + 1) AS setting_value
 ) AS parsed
-JOIN pg_catalog.pg_roles AS role
-  ON role.oid = settings.setrole
 LEFT JOIN pg_catalog.pg_database AS database
   ON database.oid = settings.setdatabase
-WHERE strpos(parsed.setting_name, '.') = 0
-   OR lower(split_part(parsed.setting_name, '.', 1)) = ANY(%s)
-ORDER BY role_name, database_name, setting_name
+-- setrole 0 holds settings that apply to every role in a database.
+WHERE settings.setrole <> 0
+  AND (
+      strpos(parsed.setting_name, '.') = 0
+      OR lower(split_part(parsed.setting_name, '.', 1)) = ANY(%s)
+  )
+ORDER BY role_oid, database_name, setting_name
 """
 
 
 QUERY_DEFAULT_PRIVILEGES = """
-SELECT owner.rolname::text AS owner_name,
+SELECT default_acl.defaclrole::bigint AS owner_oid,
        COALESCE(namespace.nspname::text, '') AS schema_name,
        CASE default_acl.defaclobjtype
            WHEN 'r' THEN 'table'
@@ -120,23 +112,14 @@ SELECT owner.rolname::text AS owner_name,
            WHEN 'T' THEN 'type'
            WHEN 'n' THEN 'schema'
        END AS object_type,
-       CASE
-           WHEN acl.grantee = 0 THEN 'PUBLIC'
-           ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
-       END AS grantee_name,
-       COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+       acl.grantee::bigint AS grantee_oid,
+       acl.grantor::bigint AS grantor_oid,
        acl.privilege_type::text AS privilege,
        acl.is_grantable AS is_grantable
 FROM pg_catalog.pg_default_acl AS default_acl
-JOIN pg_catalog.pg_roles AS owner
-  ON owner.oid = default_acl.defaclrole
 LEFT JOIN pg_catalog.pg_namespace AS namespace
   ON namespace.oid = default_acl.defaclnamespace
 CROSS JOIN LATERAL pg_catalog.aclexplode(default_acl.defaclacl) AS acl
-LEFT JOIN pg_catalog.pg_roles AS grantee
-  ON grantee.oid = acl.grantee
-LEFT JOIN pg_catalog.pg_roles AS grantor
-  ON grantor.oid = acl.grantor
 WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
   AND (
       default_acl.defaclnamespace = 0
@@ -159,11 +142,11 @@ SELECT privileges.object_type,
        privileges.schema_name,
        privileges.object_name,
        privileges.column_name,
-       privileges.grantee_name,
-       privileges.grantor_name,
+       privileges.grantee_oid,
+       privileges.grantor_oid,
        privileges.privilege,
        privileges.is_grantable,
-       privileges.owner_name
+       privileges.owner_oid
 FROM (
     SELECT CASE relation.relkind
                WHEN 'r' THEN 'table'
@@ -176,24 +159,15 @@ FROM (
            namespace.nspname::text AS schema_name,
            relation.relname::text AS object_name,
            ''::text AS column_name,
-           CASE
-               WHEN acl.grantee = 0 THEN 'PUBLIC'
-               ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
-           END AS grantee_name,
-           COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+           acl.grantee::bigint AS grantee_oid,
+           acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
            acl.is_grantable AS is_grantable,
-           owner.rolname::text AS owner_name
+           relation.relowner::bigint AS owner_oid
     FROM pg_catalog.pg_class AS relation
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = relation.relnamespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = relation.relowner
     CROSS JOIN LATERAL pg_catalog.aclexplode(relation.relacl) AS acl
-    LEFT JOIN pg_catalog.pg_roles AS grantee
-      ON grantee.oid = acl.grantee
-    LEFT JOIN pg_catalog.pg_roles AS grantor
-      ON grantor.oid = acl.grantor
     WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
@@ -211,26 +185,17 @@ FROM (
            namespace.nspname::text AS schema_name,
            relation.relname::text AS object_name,
            attribute.attname::text AS column_name,
-           CASE
-               WHEN acl.grantee = 0 THEN 'PUBLIC'
-               ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
-           END AS grantee_name,
-           COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+           acl.grantee::bigint AS grantee_oid,
+           acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
            acl.is_grantable AS is_grantable,
-           owner.rolname::text AS owner_name
+           relation.relowner::bigint AS owner_oid
     FROM pg_catalog.pg_attribute AS attribute
     JOIN pg_catalog.pg_class AS relation
       ON relation.oid = attribute.attrelid
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = relation.relnamespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = relation.relowner
     CROSS JOIN LATERAL pg_catalog.aclexplode(attribute.attacl) AS acl
-    LEFT JOIN pg_catalog.pg_roles AS grantee
-      ON grantee.oid = acl.grantee
-    LEFT JOIN pg_catalog.pg_roles AS grantor
-      ON grantor.oid = acl.grantor
     WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f')
       AND attribute.attnum > 0
       AND NOT attribute.attisdropped
@@ -245,22 +210,13 @@ FROM (
            namespace.nspname::text AS schema_name,
            namespace.nspname::text AS object_name,
            ''::text AS column_name,
-           CASE
-               WHEN acl.grantee = 0 THEN 'PUBLIC'
-               ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
-           END AS grantee_name,
-           COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+           acl.grantee::bigint AS grantee_oid,
+           acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
            acl.is_grantable AS is_grantable,
-           owner.rolname::text AS owner_name
+           namespace.nspowner::bigint AS owner_oid
     FROM pg_catalog.pg_namespace AS namespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = namespace.nspowner
     CROSS JOIN LATERAL pg_catalog.aclexplode(namespace.nspacl) AS acl
-    LEFT JOIN pg_catalog.pg_roles AS grantee
-      ON grantee.oid = acl.grantee
-    LEFT JOIN pg_catalog.pg_roles AS grantor
-      ON grantor.oid = acl.grantor
     WHERE namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
@@ -280,24 +236,15 @@ FROM (
                || ')'
            )::text AS object_name,
            ''::text AS column_name,
-           CASE
-               WHEN acl.grantee = 0 THEN 'PUBLIC'
-               ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
-           END AS grantee_name,
-           COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+           acl.grantee::bigint AS grantee_oid,
+           acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
            acl.is_grantable AS is_grantable,
-           owner.rolname::text AS owner_name
+           routine.proowner::bigint AS owner_oid
     FROM pg_catalog.pg_proc AS routine
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = routine.pronamespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = routine.proowner
     CROSS JOIN LATERAL pg_catalog.aclexplode(routine.proacl) AS acl
-    LEFT JOIN pg_catalog.pg_roles AS grantee
-      ON grantee.oid = acl.grantee
-    LEFT JOIN pg_catalog.pg_roles AS grantor
-      ON grantor.oid = acl.grantor
     WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
@@ -309,22 +256,13 @@ FROM (
            ''::text AS schema_name,
            database.datname::text AS object_name,
            ''::text AS column_name,
-           CASE
-               WHEN acl.grantee = 0 THEN 'PUBLIC'
-               ELSE COALESCE(grantee.rolname::text, acl.grantee::text)
-           END AS grantee_name,
-           COALESCE(grantor.rolname::text, acl.grantor::text) AS grantor_name,
+           acl.grantee::bigint AS grantee_oid,
+           acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
            acl.is_grantable AS is_grantable,
-           owner.rolname::text AS owner_name
+           database.datdba::bigint AS owner_oid
     FROM pg_catalog.pg_database AS database
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = database.datdba
     CROSS JOIN LATERAL pg_catalog.aclexplode(database.datacl) AS acl
-    LEFT JOIN pg_catalog.pg_roles AS grantee
-      ON grantee.oid = acl.grantee
-    LEFT JOIN pg_catalog.pg_roles AS grantor
-      ON grantor.oid = acl.grantor
     WHERE database.datname = current_database()
 ) AS privileges
 """
@@ -335,7 +273,7 @@ SELECT objects.object_type,
        objects.schema_name,
        objects.object_name,
        objects.object_oid,
-       objects.owner_name,
+       objects.owner_oid,
        objects.is_security_definer,
        objects.security_invoker,
        objects.has_default_acl
@@ -351,7 +289,7 @@ FROM (
            namespace.nspname::text AS schema_name,
            relation.relname::text AS object_name,
            relation.oid::bigint AS object_oid,
-           owner.rolname::text AS owner_name,
+           relation.relowner::bigint AS owner_oid,
            false AS is_security_definer,
            COALESCE(
                (
@@ -365,8 +303,6 @@ FROM (
     FROM pg_catalog.pg_class AS relation
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = relation.relnamespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = relation.relowner
     WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
@@ -378,13 +314,11 @@ FROM (
            namespace.nspname::text AS schema_name,
            namespace.nspname::text AS object_name,
            namespace.oid::bigint AS object_oid,
-           owner.rolname::text AS owner_name,
+           namespace.nspowner::bigint AS owner_oid,
            false AS is_security_definer,
            false AS security_invoker,
            namespace.nspacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_namespace AS namespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = namespace.nspowner
     WHERE namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
@@ -404,15 +338,13 @@ FROM (
                || ')'
            )::text AS object_name,
            routine.oid::bigint AS object_oid,
-           owner.rolname::text AS owner_name,
+           routine.proowner::bigint AS owner_oid,
            routine.prosecdef AS is_security_definer,
            false AS security_invoker,
            routine.proacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_proc AS routine
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = routine.pronamespace
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = routine.proowner
     WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
       AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
@@ -424,13 +356,11 @@ FROM (
            ''::text AS schema_name,
            database.datname::text AS object_name,
            database.oid::bigint AS object_oid,
-           owner.rolname::text AS owner_name,
+           database.datdba::bigint AS owner_oid,
            false AS is_security_definer,
            false AS security_invoker,
            database.datacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_database AS database
-    JOIN pg_catalog.pg_roles AS owner
-      ON owner.oid = database.datdba
     WHERE database.datname = current_database()
 ) AS objects
 """

@@ -251,6 +251,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     assert len(privilege_events) == 1
 
     role_event = role_events[0]
+    oid = _role_oids(role_event)
     assert role_event['database_instance']
     assert role_event['collection_payloads_count'] == 1
     assert role_event['collection_interval'] == 600
@@ -270,9 +271,9 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'valid_until',
     }
     assert set(role_event['memberships'][0]) == {
-        'group_role_name',
-        'member_role_name',
-        'grantor_role_name',
+        'group_role_oid',
+        'member_role_oid',
+        'grantor_role_oid',
         'admin_option',
         'member_can_inherit',
         'member_can_set',
@@ -293,8 +294,8 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     member_grant = next(
         membership
         for membership in role_event['memberships']
-        if membership['group_role_name'] == 'dd_role_obs_reader'
-        and membership['member_role_name'] == 'dd_role_obs_member'
+        if membership['group_role_oid'] == oid['dd_role_obs_reader']
+        and membership['member_role_oid'] == oid['dd_role_obs_member']
     )
     assert member_grant['admin_option'] is True
     assert member_grant['member_can_inherit'] is False
@@ -303,13 +304,13 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     granted_grant = next(
         membership
         for membership in role_event['memberships']
-        if membership['group_role_name'] == 'dd_role_obs_reader'
-        and membership['member_role_name'] == 'dd_role_obs_granted'
+        if membership['group_role_oid'] == oid['dd_role_obs_reader']
+        and membership['member_role_oid'] == oid['dd_role_obs_granted']
     )
-    assert granted_grant['grantor_role_name'] == 'dd_role_obs_grantor'
+    assert granted_grant['grantor_role_oid'] == oid['dd_role_obs_grantor']
     assert granted_grant['member_can_set'] is True
     assert {
-        'role_name': 'dd_role_obs_reader',
+        'role_oid': oid['dd_role_obs_reader'],
         'database_name': 'datadog_test',
         'setting_name': 'statement_timeout',
         'setting_value': '5s',
@@ -325,28 +326,28 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'schema_name',
         'object_name',
         'column_name',
-        'grantee_name',
-        'grantor_name',
+        'grantee_oid',
+        'grantor_oid',
         'privilege',
         'is_grantable',
-        'owner_name',
+        'owner_oid',
     }
     assert set(privilege_event['objects'][0]) == {
         'object_type',
         'schema_name',
         'object_name',
         'object_oid',
-        'owner_name',
+        'owner_oid',
         'is_security_definer',
         'security_invoker',
         'has_default_acl',
     }
     assert set(privilege_event['default_privileges'][0]) == {
-        'owner_name',
+        'owner_oid',
         'schema_name',
         'object_type',
-        'grantee_name',
-        'grantor_name',
+        'grantee_oid',
+        'grantor_oid',
         'privilege',
         'is_grantable',
     }
@@ -362,28 +363,28 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         privilege['object_type'] == 'view'
         and privilege['schema_name'] == 'dd_role_obs'
         and privilege['object_name'] == 'item_view'
-        and privilege['grantee_name'] == 'PUBLIC'
+        and privilege['grantee_oid'] == oid['PUBLIC']
         and privilege['privilege'] == 'SELECT'
         for privilege in privilege_event['object_privileges']
     )
     assert any(
         privilege['schema_name'] == 'dd_role_obs'
         and privilege['object_name'] == 'items'
-        and privilege['grantee_name'] == 'dd_role_obs_reader'
+        and privilege['grantee_oid'] == oid['dd_role_obs_reader']
         and privilege['privilege'] == 'SELECT'
         and privilege['is_grantable']
         for privilege in privilege_event['object_privileges']
     )
     assert any(
         privilege['schema_name'] == 'dd_role_obs'
-        and privilege['owner_name'] == 'dd_role_obs_owner'
-        and privilege['grantee_name'] == 'dd_role_obs_reader'
+        and privilege['owner_oid'] == oid['dd_role_obs_owner']
+        and privilege['grantee_oid'] == oid['dd_role_obs_reader']
         for privilege in privilege_event['default_privileges']
     )
     assert any(
         privilege['schema_name'] == ''
         and privilege['object_type'] == 'function'
-        and privilege['grantee_name'] == 'dd_role_obs_reader'
+        and privilege['grantee_oid'] == oid['dd_role_obs_reader']
         and privilege['is_grantable']
         for privilege in privilege_event['default_privileges']
     )
@@ -391,7 +392,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         assert any(
             privilege['schema_name'] == ''
             and privilege['object_type'] == 'schema'
-            and privilege['grantee_name'] == 'dd_role_obs_reader'
+            and privilege['grantee_oid'] == oid['dd_role_obs_reader']
             and privilege['is_grantable']
             for privilege in privilege_event['default_privileges']
         )
@@ -425,7 +426,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         privilege['schema_name'] == 'dd_role_obs'
         and privilege['object_name'] == 'item_total(integer)'
         and privilege['object_type'] == 'aggregate'
-        and privilege['grantee_name'] == 'dd_role_obs_reader'
+        and privilege['grantee_oid'] == oid['dd_role_obs_reader']
         and privilege['privilege'] == 'EXECUTE'
         for privilege in privilege_event['object_privileges']
     )
@@ -476,11 +477,12 @@ def test_collect_roles_redacts_custom_setting_values(integration_check, roles_in
     assert 'dd-role-obs-secret' not in json.dumps(metadata)
     assert 'dd-role-obs-mixed-case-secret' not in json.dumps(metadata)
     role_event = next(event for event in metadata if event['kind'] == 'pg_roles')
+    oid = _role_oids(role_event)
 
     assert {
         setting['setting_name']: setting['setting_value']
         for setting in role_event['settings']
-        if setting['role_name'] == 'dd_role_obs_owner'
+        if setting['role_oid'] == oid['dd_role_obs_owner']
     } == {
         'pg_stat_statements.track': 'all',
         'PgAudit.Log': 'none',
@@ -522,12 +524,13 @@ def test_collect_roles_keeps_membership_with_dropped_grantor(integration_check, 
         role_event = next(
             event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_roles'
         )
+        oid = _role_oids(role_event)
         assert [
-            membership['grantor_role_name']
+            membership['grantor_role_oid']
             for membership in role_event['memberships']
-            if membership['group_role_name'] == 'dd_role_obs_orphan_group'
-            and membership['member_role_name'] == 'dd_role_obs_orphan_member'
-        ] == [str(grantor_oid)]
+            if membership['group_role_oid'] == oid['dd_role_obs_orphan_group']
+            and membership['member_role_oid'] == oid['dd_role_obs_orphan_member']
+        ] == [grantor_oid]
     finally:
         with _get_superconn(roles_instance) as conn:
             with conn.cursor() as cursor:
@@ -630,9 +633,9 @@ def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_i
 
     run_one_check(check)
 
-    privilege_event = next(
-        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
-    )
+    metadata = aggregator.get_event_platform_events('dbm-metadata')
+    privilege_event = next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    role_name = {v: k for k, v in _role_oids(next(e for e in metadata if e['kind'] == 'pg_roles')).items()}
 
     def find_object(name):
         return next(
@@ -643,7 +646,7 @@ def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_i
 
     def privileges(name):
         return {
-            (privilege['grantee_name'], privilege['privilege'])
+            (role_name[privilege['grantee_oid']], privilege['privilege'])
             for privilege in privilege_event['object_privileges']
             if privilege['schema_name'] == 'dd_role_obs' and privilege['object_name'] == name
         }
@@ -668,16 +671,16 @@ def test_collect_roles_column_privileges(integration_check, roles_instance, role
 
     run_one_check(check)
 
-    privilege_event = next(
-        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
-    )
+    metadata = aggregator.get_event_platform_events('dbm-metadata')
+    privilege_event = next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    role_name = {v: k for k, v in _role_oids(next(e for e in metadata if e['kind'] == 'pg_roles')).items()}
 
     assert {
-        (privilege['column_name'], privilege['grantee_name'], privilege['privilege'])
+        (privilege['column_name'], role_name[privilege['grantee_oid']], privilege['privilege'])
         for privilege in privilege_event['object_privileges']
         if privilege['schema_name'] == 'dd_role_obs'
         and privilege['object_name'] == 'patients'
-        and privilege['grantee_name'] in ('dd_role_obs_member', 'dd_role_obs_reader')
+        and role_name[privilege['grantee_oid']] in ('dd_role_obs_member', 'dd_role_obs_reader')
     } == {
         ('', 'dd_role_obs_member', 'SELECT'),
         ('id', 'dd_role_obs_reader', 'SELECT'),
@@ -746,6 +749,11 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
     assert all('collection_payloads_count' not in event for event in privilege_events)
     assert any(event['kind'] == 'pg_roles' for event in metadata)
     assert _database_time_statuses(aggregator) == [('datadog_test', 'error')]
+
+
+def _role_oids(role_event):
+    """Map role names to the OIDs the payloads use, with PUBLIC as 0."""
+    return {'PUBLIC': 0, **{role['role_name']: role['role_oid'] for role in role_event['roles']}}
 
 
 def _collected_databases(aggregator):
