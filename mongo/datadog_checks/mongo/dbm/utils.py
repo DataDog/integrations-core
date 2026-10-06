@@ -401,6 +401,6 @@ def get_query_stats_row_key(row: dict) -> tuple:
     Generate a unique key for a query metrics row.
     Used for derivative calculation and deduplication.
 
-    Keep separate server entries independent, even when obfuscation produces the same signature.
+    Returns: (query_signature, db_name, collection)
     """
-    return (row.get('key_hash') or row.get('query_signature', ''), row.get('db_name', ''), row.get('collection', ''))
+    return (row.get('query_signature', ''), row.get('db_name', ''), row.get('collection', ''))

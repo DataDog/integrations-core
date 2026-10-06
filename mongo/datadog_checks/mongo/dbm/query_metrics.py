@@ -216,22 +216,13 @@ class MongoQueryMetrics(DBMAsyncJob):
         metrics_columns = self._get_available_metrics_columns(normalized_rows)
 
         # Read and write entries expose different counters. StatementMetrics requires a common schema.
-        row_schemas = {}
         for row in normalized_rows:
-            row_schemas[get_query_stats_row_key(row)] = tuple(sorted(col for col in metrics_columns if col in row))
             for column in metrics_columns:
                 row.setdefault(column, 0)
 
-        # Establish a new baseline when the server's metric schema changes or an entry is recreated.
+        # Compute derivative metrics
         rows = self._statement_metrics.compute_derivative_rows(
-            normalized_rows,
-            metrics_columns,
-            key=lambda row: (
-                get_query_stats_row_key(row),
-                row['first_seen_timestamp'],
-                row_schemas[get_query_stats_row_key(row)],
-            ),
-            execution_indicators=['exec_count'],
+            normalized_rows, metrics_columns, key=get_query_stats_row_key, execution_indicators=['exec_count']
         )
 
         self._check.gauge(
@@ -400,7 +391,7 @@ class MongoQueryMetrics(DBMAsyncJob):
         tags_no_db = [t for t in tags if not t.startswith('db:')]
 
         for row in rows:
-            query_cache_key = (row['query_signature'], row['db_name'], row['collection'])
+            query_cache_key = get_query_stats_row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
 
