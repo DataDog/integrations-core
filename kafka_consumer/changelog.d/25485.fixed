@@ -1,0 +1,1 @@
+Look up a consumer group's coordinator again after a `NOT_COORDINATOR` or `COORDINATOR_NOT_AVAILABLE` error, so that with `close_admin_client: false` the group's offsets resume on the next check run after its coordinator moves to another broker.

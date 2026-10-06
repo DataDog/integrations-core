@@ -6,10 +6,12 @@ import json
 import logging
 import marshal
 from collections import defaultdict
+from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka import ConsumerGroupTopicPartitions, KafkaError, KafkaException, TopicPartition
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -1247,3 +1249,34 @@ def test_get_partition_offsets_drops_negative_offsets():
     results = client.get_partition_offsets([("healthy_topic", 0), ("wrapped_topic", 0)])
 
     assert results == [("healthy_topic", 0, 100)]
+
+
+@pytest.mark.parametrize(
+    'error_code',
+    [
+        pytest.param(KafkaError.NOT_COORDINATOR, id='not coordinator'),
+        pytest.param(KafkaError.COORDINATOR_NOT_AVAILABLE, id='coordinator not available'),
+    ],
+)
+def test_list_consumer_group_offsets_given_coordinator_error_returns_offsets_on_next_call(error_code):
+    """After a group coordinator error, the next call looks the coordinator up again and returns the offsets."""
+    stale_offsets = Future()
+    stale_offsets.set_exception(KafkaException(KafkaError(error_code)))
+    fresh_offsets = Future()
+    fresh_offsets.set_result(ConsumerGroupTopicPartitions('consumer_group1', [TopicPartition('topic1', 0, 5)]))
+    # AdminClient is the network boundary. A broker can't be made to hand a group to another coordinator on
+    # demand, and librdkafka keeps sending to the coordinator it cached, so only a new AdminClient finds the new one.
+    stale_admin_client = mock.MagicMock()
+    stale_admin_client.list_consumer_group_offsets.return_value = {'consumer_group1': stale_offsets}
+    fresh_admin_client = mock.MagicMock()
+    fresh_admin_client.list_consumer_group_offsets.return_value = {'consumer_group1': fresh_offsets}
+    client = KafkaClient(mock.MagicMock(), logging.getLogger(__name__))
+    groups = [('consumer_group1', [('topic1', 0)])]
+
+    with mock.patch(
+        'datadog_checks.kafka_consumer.client.AdminClient', side_effect=[stale_admin_client, fresh_admin_client]
+    ):
+        client.list_consumer_group_offsets(groups)
+        offsets = client.list_consumer_group_offsets(groups)
+
+    assert offsets == [('consumer_group1', [('topic1', 0, 5)])]
