@@ -861,8 +861,9 @@ def test_database_instance_payload_reports_the_connection_mode_when_unset(aggreg
     assert emitted_metadata(aggregator)['single_endpoint_mode'] is False
 
 
-def test_database_instance_is_emitted_when_metric_queries_fail(aggregator, instance):
+def test_metadata_is_emitted_when_metric_queries_fail(aggregator, datadog_agent, instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test:123'
     failing_query_manager = mock.MagicMock()
     failing_query_manager.execute.side_effect = Exception('Not enough privileges')
     with mock.patch.object(ClickhouseCheck, '_build_query_manager', return_value=failing_query_manager):
@@ -872,6 +873,7 @@ def test_database_instance_is_emitted_when_metric_queries_fail(aggregator, insta
 
     events = aggregator.get_event_platform_events('dbm-metadata')
     assert [e['kind'] for e in events] == ['database_instance']
+    datadog_agent.assert_metadata('test:123', {'version.scheme': 'calver', 'version.raw': MOCK_CLICKHOUSE_VERSION})
 
 
 def test_check_tags_with_cluster(instance):

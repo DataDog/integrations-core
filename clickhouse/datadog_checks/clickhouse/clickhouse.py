@@ -252,6 +252,7 @@ class ClickhouseCheck(DatabaseCheck):
     def check(self, _):
         self.connect()
         self._dbms_version = self.select_version()
+        self.set_version_metadata(self.dbms_version)
 
         # Must run before the query manager is built and before the DBM jobs are handed
         # self.tags below, since both snapshot the tag list.
@@ -265,7 +266,6 @@ class ClickhouseCheck(DatabaseCheck):
             self._query_manager = self._build_query_manager()
             self._query_manager_version = self.dbms_version
         self._query_manager.execute()
-        self.set_version_metadata(self.dbms_version)
 
         self.run_async_jobs(self.tags)
 
