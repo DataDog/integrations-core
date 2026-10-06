@@ -310,7 +310,11 @@ class PostgresRoleCollector:
                         cursor.execute(query, params)
                     else:
                         cursor.execute(query)
-                    return [row["database_name"] for row in cursor]
+                    rows = cursor.fetchall()
+        skipped = [row["database_name"] for row in rows if not row["can_connect"]]
+        if skipped:
+            self._log.debug("Skipping role collection for databases without CONNECT privilege: %s", skipped)
+        return [row["database_name"] for row in rows if row["can_connect"]]
 
     def _rotate_databases(self, databases: list[str]) -> list[str]:
         """Start from the database the previous run stopped at, or from the beginning if it no longer exists."""

@@ -3,8 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+# Databases the agent lacks CONNECT on (for example after REVOKE CONNECT ... FROM PUBLIC) are reported so the
+# collector can skip them instead of failing to connect on every run.
 QUERY_LIST_DATABASES = """
-SELECT d.datname::text AS database_name
+SELECT d.datname::text AS database_name,
+       pg_catalog.has_database_privilege(d.oid, 'CONNECT') AS can_connect
 FROM pg_catalog.pg_database AS d
 WHERE d.datallowconn
   AND NOT d.datistemplate

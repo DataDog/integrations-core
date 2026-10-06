@@ -844,6 +844,26 @@ def test_collect_roles_database_filters(
     assert _collected_databases(aggregator) == expected_databases
 
 
+def test_collect_roles_skips_databases_without_connect_privilege(integration_check, roles_instance, aggregator):
+    """A database the agent may not connect to is skipped rather than failing on every run."""
+    roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-2]$']
+    with _get_superconn(roles_instance) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("REVOKE CONNECT ON DATABASE dogs_1 FROM PUBLIC")
+    try:
+        check = integration_check(roles_instance)
+
+        run_one_check(check)
+    finally:
+        with _get_superconn(roles_instance) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("GRANT CONNECT ON DATABASE dogs_1 TO PUBLIC")
+
+    assert _collected_databases(aggregator) == ['dogs_0', 'dogs_2']
+    assert _database_time_statuses(aggregator) == [('dogs_0', 'success'), ('dogs_2', 'success')]
+    aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:success', count=1)
+
+
 def _fail_in_database(monkeypatch, database_name, failure):
     original_collect_query = PostgresRoleCollector._collect_query
 
