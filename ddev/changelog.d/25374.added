@@ -1,1 +1,0 @@
-Test the targets in `dispatcher.batching.test_infrastructure_targets` when a pull request changes the shared test CI actions.

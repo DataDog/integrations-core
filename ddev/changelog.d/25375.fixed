@@ -1,1 +1,0 @@
-Test every Dispatcher target only for changes that pull request test jobs run, and no longer for changes to the Dispatcher itself.
