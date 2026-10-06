@@ -1283,6 +1283,23 @@ def test_consumer_groups_regex_prefilter_excludes_prefix_sharing_groups(check, k
     mock_client.list_consumer_group_offsets.assert_called_once_with([('orders', None)])
 
 
+def test_consumer_groups_regex_prefilter_excludes_comma_crossing_patterns(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'a,.': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = False
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = ['a']
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+    kafka_consumer_check.get_consumer_offsets()
+
+    # Group patterns cannot extend across the group/topic delimiter.
+    mock_client.list_consumer_group_offsets.assert_called_once_with([])
+
+
 def test_consumer_groups_regex_prefilter_combines_explicit_and_regex_groups(check, kafka_instance):
     kafka_instance['consumer_groups'] = {'critical-orders': {}}
     kafka_instance['consumer_groups_regex'] = {'prod-.+': {}}
