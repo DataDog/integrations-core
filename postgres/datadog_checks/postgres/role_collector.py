@@ -84,15 +84,13 @@ class RoleSnapshotEmitter:
         self._clear_buffers()
 
     def _clear_buffers(self) -> None:
-        for rows in self._buffers.values():
-            rows.clear()
+        self._buffers = {name: [] for name in self._array_names}
         self._buffered_rows_count = 0
 
     def _flush(self, is_last: bool) -> None:
         event = dict(self._base_event)
         event["timestamp"] = now_ms()
-        for name, rows in self._buffers.items():
-            event[name] = list(rows)
+        event.update(self._buffers)
 
         self.payloads_count += 1
         if is_last:
