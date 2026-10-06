@@ -269,7 +269,10 @@ def wait_for_queues_active():
 
 @retry(stop=stop_before_delay(240), wait=wait_fixed(10), reraise=True)
 def apply_kueue_manifests():
-    """Apply the Kueue release manifests, retrying because GitHub release downloads can fail transiently."""
+    """Download Kueue's release YAML from GitHub and apply it to the test cluster.
+
+    Retry the whole kubectl command because fetching the YAML can fail transiently.
+    """
     kubectl(
         [
             'apply',
