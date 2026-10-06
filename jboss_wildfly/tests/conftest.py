@@ -16,7 +16,7 @@ E2E_METADATA = {
     'start_commands': [
         'mkdir /opt/jboss',
         'curl -o /opt/jboss/jboss-client.jar '
-        'https://ddintegrations.blob.core.windows.net/jboss-wildfly/jboss-client.jar',
+        'https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/jboss-wildfly/jboss-client.jar',
     ],
 }
 

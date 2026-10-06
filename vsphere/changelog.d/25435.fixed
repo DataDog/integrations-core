@@ -1,0 +1,1 @@
+Do not stop vSAN collection for an entire vCenter when a single cluster fails, and log the real error instead of the retry failure that masked it.

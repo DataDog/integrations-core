@@ -15,9 +15,10 @@ def get_histogram(check, metric_name, modifiers, global_options):
     https://prometheus.io/docs/concepts/metric_types/#histogram
     https://github.com/OpenObservability/OpenMetrics/blob/master/specification/OpenMetrics.md#histogram-1
     """
+    logger = check.log
+
     if global_options['collect_histogram_buckets']:
         if global_options['histogram_buckets_as_distributions']:
-            logger = check.log
             omit_histogram_bound_tags = global_options['omit_histogram_bound_tags']
             bound_tag_prefixes = global_options['histogram_bound_tag_prefixes']
             # Pass `multiple_buckets` only when needed, so overrides with the older signature keep working
@@ -58,7 +59,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         sample_name = sample.name
                         if sample_name.endswith('_sum'):
                             monotonic_count_method(
@@ -84,7 +85,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         if sample.name.endswith('_bucket'):
                             submit_bucket(sample, tags, hostname, flush_first_value)
 
@@ -99,7 +100,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         sample_name = sample.name
                         if sample_name.endswith('_sum'):
                             monotonic_count_method(

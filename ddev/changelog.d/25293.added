@@ -1,0 +1,1 @@
+Read the GitHub owner from `[github] owner` in `.ddev/config.toml` so GitHub operations support repositories outside the DataDog organization.

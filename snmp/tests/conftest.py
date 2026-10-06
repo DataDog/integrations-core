@@ -29,7 +29,7 @@ from .common import (
 pytest.register_assert_rewrite("tests.test_e2e_core_profiles.utils")
 
 FILES = [
-    "https://ddintegrations.blob.core.windows.net/snmp/cisco-3850.snmprec",
+    "https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/snmp/cisco-3850.snmprec",
 ]
 
 E2E_METADATA = {

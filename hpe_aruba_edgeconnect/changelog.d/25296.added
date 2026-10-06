@@ -1,0 +1,1 @@
+Add an `orchestrator_login_type` option so the Orchestrator can authenticate accounts defined on a RADIUS or TACACS+ server.
