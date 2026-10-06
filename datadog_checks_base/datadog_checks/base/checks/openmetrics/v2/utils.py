@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from prometheus_client.samples import Sample
 
+NEGATIVE_INFINITY = float('-inf')
+
 
 def decumulate_histogram_buckets(sample_data, logger=None, metric_name=None):
     """
@@ -51,12 +53,10 @@ def decumulate_histogram_buckets(sample_data, logger=None, metric_name=None):
             if i == 0:
                 if context not in bucket_tuples_by_context_upper_bound:
                     bucket_tuples_by_context_upper_bound[context] = {}
-                # The first bucket is [-inf, upper_b], but the agent discards buckets with an infinite bound,
-                # so keep the lower bound finite: non-negative buckets start at zero, negative ones collapse
-                # to a point at upper_b (as the agent already does for the +inf top bucket). Negative
-                # thresholds are valid input, not malformed input we can reject:
+                # The first bucket is [-inf, upper_b]: non-negative buckets start at zero, negative ones keep
+                # their real -inf bound. Negative thresholds are valid input, not malformed input we can reject:
                 # https://github.com/OpenObservability/OpenMetrics/blob/v1.0.0/specification/OpenMetrics.md#L250
-                lower_b = 0 if upper_b >= 0 else upper_b
+                lower_b = 0 if upper_b >= 0 else NEGATIVE_INFINITY
                 bucket_tuples_by_context_upper_bound[context][upper_b] = (
                     lower_b,
                     upper_b,
