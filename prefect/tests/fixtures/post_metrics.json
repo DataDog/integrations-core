@@ -165,6 +165,40 @@
       "last_heartbeat_time": "2026-01-20T15:01:50Z"
     }
   ],
+  "/v2/concurrency_limits/filter": [
+    {
+      "id": "cl-1",
+      "name": "db-connections",
+      "limit": 5,
+      "active_slots": 2,
+      "active": true,
+      "slot_decay_per_second": 0.0
+    },
+    {
+      "id": "cl-2",
+      "name": "inactive-limit",
+      "limit": 3,
+      "active_slots": 0,
+      "active": false,
+      "slot_decay_per_second": 0.0
+    },
+    {
+      "id": "cl-3",
+      "name": "tag:etl",
+      "limit": 4,
+      "active_slots": 1,
+      "active": true,
+      "slot_decay_per_second": 0.0
+    }
+  ],
+  "/concurrency_limits/filter": [
+    {
+      "id": "cl-3",
+      "tag": "etl",
+      "concurrency_limit": 4,
+      "active_slots": ["tr-1"]
+    }
+  ],
   "/deployments/filter": [
     {
       "id": "d-1",

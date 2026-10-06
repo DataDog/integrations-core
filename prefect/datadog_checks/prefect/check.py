@@ -154,6 +154,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
         self._collect_work_queue_metrics(now)
 
+        self._collect_concurrency_limit_metrics()
+
         self._collect_deployment_metrics()
 
         self._collect_flow_run_metrics(now_iso, now)
@@ -256,6 +258,34 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     'id': qid,
                     'concurrency_limit': (q.get('concurrency_limit') or 0.0),
                 }
+
+    def _collect_concurrency_limit_metrics(self):
+        """
+        Collects concurrency_limit.limit and active_slots for global and task run (tag) limits.
+
+        Global limits come from the v2 endpoint. Prefect 3 also stores task run limits there as
+        `tag:<tag>`, so those entries are skipped to avoid double counting. Task run limits are read
+        from the v1 endpoint instead, which also returns tag limits not yet migrated to v2.
+        """
+        for cl in self.client.paginate_filter("/v2/concurrency_limits/filter"):
+            if cl.get('name', '').startswith('tag:'):
+                continue
+            cltags = [
+                f"concurrency_limit_id:{cl.get('id', '')}",
+                f"concurrency_limit_name:{cl.get('name', '')}",
+                f"is_active:{cl.get('active', '')}",
+            ]
+            self._clean_and_emit_metric("concurrency_limit.limit", cl.get('limit', 0), cltags)
+            self._clean_and_emit_metric("concurrency_limit.active_slots", cl.get('active_slots', 0), cltags)
+
+        for cl in self.client.paginate_filter("/concurrency_limits/filter"):
+            cltags = [
+                f"concurrency_limit_id:{cl.get('id', '')}",
+                f"concurrency_limit_name:{cl.get('tag', '')}",
+            ]
+            self._clean_and_emit_metric("concurrency_limit.limit", cl.get('concurrency_limit', 0), cltags)
+            # v1 returns the IDs of the task runs holding a slot rather than a count
+            self._clean_and_emit_metric("concurrency_limit.active_slots", len(cl.get('active_slots') or []), cltags)
 
     def _collect_worker_metrics(self, now: datetime, pool: dict):
         pname = pool['name']

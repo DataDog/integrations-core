@@ -18,6 +18,11 @@ WP1_WORKER_TAGS = ["work_pool_id:wp-1", "work_pool_name:default-pool", "worker_i
 WP2_WORKER_TAGS = ["work_pool_id:wp-2", "work_pool_name:paused-pool", "worker_id:w-6", "worker_name:worker-6"]
 WP3_WORKER_TAGS = ["work_pool_id:wp-3", "work_pool_name:not-ready-pool", "worker_id:w-8", "worker_name:worker-8"]
 
+CL1_TAGS = ["concurrency_limit_id:cl-1", "concurrency_limit_name:db-connections", "is_active:True"]
+CL2_TAGS = ["concurrency_limit_id:cl-2", "concurrency_limit_name:inactive-limit", "is_active:False"]
+CL3_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:etl"]
+NI_CL_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:tag:etl", "is_active:True"]
+
 WQ1_TAGS = [
     "work_queue_id:wq-1",
     "work_queue_name:default-queue",
@@ -181,6 +186,8 @@ class ExcludedEventCase(NamedTuple):
 
 
 NOT_INCLUDED_METRICS = [
+    # --- task run limits are not double-reported from the v2 endpoint ---
+    ExcludedMetricCase(name="prefect.server.concurrency_limit.limit", tags=NI_CL_TAGS, mid="ni-cl-tag-limit"),
     # --- excluded by work_pool_names ---
     ExcludedMetricCase(name="prefect.server.work_pool.is_ready", tags=NI_WP_TAGS, mid="ni-wp-is_ready"),
     ExcludedMetricCase(
@@ -345,6 +352,37 @@ ALL_METRIC_CASES = [
         value=0.2,
         tags=WQ1_STATUS_TAGS,
         mid="wq1-concurrency_in_use",
+        expected_count=1,
+    ),
+    # --- concurrency limit metrics ---
+    MetricCase(
+        name="prefect.server.concurrency_limit.limit", value=5, tags=CL1_TAGS, mid="cl1-limit", expected_count=1
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.active_slots",
+        value=2,
+        tags=CL1_TAGS,
+        mid="cl1-active_slots",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.limit", value=3, tags=CL2_TAGS, mid="cl2-limit", expected_count=1
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.active_slots",
+        value=0,
+        tags=CL2_TAGS,
+        mid="cl2-active_slots",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.limit", value=4, tags=CL3_TAGS, mid="cl3-limit", expected_count=1
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.active_slots",
+        value=1,
+        tags=CL3_TAGS,
+        mid="cl3-active_slots",
         expected_count=1,
     ),
     # --- work queue backlog metrics ---
