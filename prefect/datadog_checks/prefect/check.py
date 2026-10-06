@@ -71,6 +71,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             work_pool_names=_to_dict(self.config.work_pool_names),
             work_queue_names=_to_dict(self.config.work_queue_names),
             deployment_names=_to_dict(self.config.deployment_names),
+            flow_names=_to_dict(self.config.flow_names),
             event_names=_to_dict(self.config.event_names),
         )
 
@@ -310,8 +311,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
     def _collect_flows(self):
         # Flow runs and deployments only reference flows by ID, so resolve names once per check run
-        for f in self.client.paginate_filter("/flows/filter"):
+        flows = self.client.paginate_filter("/flows/filter")
+        for f in flows:
             self.flows_by_id[f.get('id', '')] = f.get('name', '')
+
+        # Populates the flow filter cache used by deployments, flow runs, task runs and events
+        self.filter_metrics.filter_flows(flows)
 
     def _collect_deployment_metrics(self):
         all_deployments = self.client.paginate_filter("/deployments/filter")
@@ -320,7 +325,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         for d in all_deployments:
             self.deployments_by_id[d.get('id', '')] = d.get('name', '')
 
-        deployments = self.filter_metrics.filter_deployments(all_deployments)
+        deployments = self.filter_metrics.filter_deployments(all_deployments, self.flows_by_id)
 
         for d in deployments:
             dtags = [
@@ -358,7 +363,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         if type == "flow_runs":
             for fr in all_runs:
                 self._define_flow_run_tags(fr)
-            return self.filter_metrics.filter_flow_runs(all_runs, self.deployments_by_id)
+            return self.filter_metrics.filter_flow_runs(all_runs, self.deployments_by_id, self.flows_by_id)
         else:
             return self.filter_metrics.filter_task_runs(all_runs, self.flow_runs_tags)
 
@@ -794,6 +799,7 @@ class PrefectFilterMetrics:
         work_queue_names: dict[str, list[str]] | None = None,
         deployment_names: dict[str, list[str]] | None = None,
         event_names: dict[str, list[str]] | None = None,
+        flow_names: dict[str, list[str]] | None = None,
     ):
         self.log = log
 
@@ -801,10 +807,12 @@ class PrefectFilterMetrics:
         self.work_queue_names = work_queue_names or {}
         self.deployment_names = deployment_names or {}
         self.event_names = event_names or {}
+        self.flow_names = flow_names or {}
 
         self.work_pool_cache: dict[str, bool] = {}
         self.work_queue_cache: dict[str, bool] = {}
         self.deployment_cache: dict[str, bool] = {}
+        self.flow_cache: dict[str, bool] = {}
         self.flow_run_cache: dict[str, bool] = {}
         self.task_run_cache: dict[str, bool] = {}
         self.event_cache: dict[str, bool] = {}
@@ -826,19 +834,29 @@ class PrefectFilterMetrics:
             },
         )
 
-    def filter_deployments(self, deployments: list[dict[str, str]]) -> list[dict[str, str]]:
+    def filter_flows(self, flows: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            self.flow_names,
+            flows,
+            {"name": (self.flow_cache, True, None)},
+        )
+
+    def filter_deployments(
+        self, deployments: list[dict[str, str]], flows_by_id: dict[str, str]
+    ) -> list[dict[str, str]]:
         return self._filter_metric(
             self.deployment_names,
             deployments,
             {
                 "work_pool_name": (self.work_pool_cache, False, None),
                 "work_queue_name": (self.work_queue_cache, False, None),
+                "flow_name": (self.flow_cache, False, lambda e: flows_by_id.get(e.get('flow_id', ''))),
                 "name": (self.deployment_cache, True, None),
             },
         )
 
     def filter_flow_runs(
-        self, flow_runs: list[dict[str, str]], deployments_by_id: dict[str, str]
+        self, flow_runs: list[dict[str, str]], deployments_by_id: dict[str, str], flows_by_id: dict[str, str]
     ) -> list[dict[str, str]]:
         return self._filter_metric(
             None,
@@ -851,6 +869,7 @@ class PrefectFilterMetrics:
                     False,
                     lambda e: deployments_by_id.get(e.get('deployment_id', '')),
                 ),
+                "flow_name": (self.flow_cache, False, lambda e: flows_by_id.get(e.get('flow_id', ''))),
             },
         )
 
@@ -868,6 +887,7 @@ class PrefectFilterMetrics:
                 "work_pool_name": (self.work_pool_cache, False, lambda e: _resolve_from_tags(e, "work_pool_name")),
                 "work_queue_name": (self.work_queue_cache, False, lambda e: _resolve_from_tags(e, "work_queue_name")),
                 "deployment_name": (self.deployment_cache, False, lambda e: _resolve_from_tags(e, "deployment_name")),
+                "flow_name": (self.flow_cache, False, lambda e: _resolve_from_tags(e, "flow_name")),
             },
         )
 
@@ -888,6 +908,10 @@ class PrefectFilterMetrics:
         if deployment_name:
             fields["deployment_name"] = deployment_name
             caches["deployment_name"] = (self.deployment_cache, False, None)
+        flow_name = event.event_related.get("flow", {}).get("name")
+        if flow_name:
+            fields["flow_name"] = flow_name
+            caches["flow_name"] = (self.flow_cache, False, None)
 
         return bool(
             self._filter_metric(

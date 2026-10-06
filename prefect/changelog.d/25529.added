@@ -1,1 +1,1 @@
-Add concurrency limit metrics for global and task run concurrency limits, and a `flow_name` tag wherever `flow_id` is set.
+Add concurrency limit metrics for global and task run concurrency limits, a `flow_name` tag wherever `flow_id` is set, and a `flow_names` option to filter by flow.

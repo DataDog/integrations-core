@@ -174,6 +174,29 @@ NID_FLOW_TAGS = [
 ]
 NID_TASK_TAGS = NID_FLOW_TAGS + ["task_key:task-nid"]
 
+NIF_DEPLOY_TAGS = [
+    "deployment_id:d-8",
+    "deployment_name:deployment-8",
+    "flow_id:f-8",
+    "flow_name:not_included_flow",
+    "work_pool_name:default-pool",
+    "work_pool_id:wp-1",
+    "work_queue_name:default-queue",
+    "work_queue_id:wq-1",
+    "is_paused:False",
+]
+NIF_FLOW_TAGS = [
+    "work_pool_id:wp-1",
+    "work_pool_name:default-pool",
+    "work_queue_id:wq-1",
+    "work_queue_name:default-queue",
+    "deployment_id:d-8",
+    "deployment_name:deployment-8",
+    "flow_id:f-8",
+    "flow_name:not_included_flow",
+]
+NIF_TASK_TAGS = NIF_FLOW_TAGS + ["task_key:task-nif"]
+
 
 class MetricCase(NamedTuple):
     name: str
@@ -226,6 +249,14 @@ NOT_INCLUDED_METRICS = [
     ),
     ExcludedMetricCase(
         name="prefect.server.task_runs.completed.count", tags=NID_TASK_TAGS, mid="nid-task_runs-completed"
+    ),
+    # --- excluded by flow_names ---
+    ExcludedMetricCase(name="prefect.server.deployment.is_ready", tags=NIF_DEPLOY_TAGS, mid="nif-deploy-is_ready"),
+    ExcludedMetricCase(
+        name="prefect.server.flow_runs.completed.count", tags=NIF_FLOW_TAGS, mid="nif-flow_runs-completed"
+    ),
+    ExcludedMetricCase(
+        name="prefect.server.task_runs.completed.count", tags=NIF_TASK_TAGS, mid="nif-task_runs-completed"
     ),
 ]
 
@@ -634,6 +665,7 @@ NOT_INCLUDED_EVENTS = [
     ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-ni-completed -> Completed", mid="ni-evt-excluded-pool"),
     ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-niq-completed -> Completed", mid="niq-evt-excluded-queue"),
     ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-nid-completed -> Completed", mid="nid-evt-excluded-deploy"),
+    ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-nif-completed -> Completed", mid="nif-evt-excluded-flow"),
     ExcludedEventCase(
         msg_title="[PREFECT] [worker.process] ProcessWorker worker-1 -> executed-flow-run",
         mid="ni-evt-excluded-event-name",

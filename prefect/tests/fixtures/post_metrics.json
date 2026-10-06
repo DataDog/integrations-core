@@ -227,6 +227,10 @@
     {
       "id": "f-7",
       "name": "flow-7"
+    },
+    {
+      "id": "f-8",
+      "name": "not_included_flow"
     }
   ],
   "/deployments/filter": [
@@ -288,6 +292,15 @@
       "id": "d-7",
       "name": "not_included_deployment",
       "flow_id": "f-7",
+      "work_pool_name": "default-pool",
+      "work_queue_name": "default-queue",
+      "status": "READY",
+      "paused": false
+    },
+    {
+      "id": "d-8",
+      "name": "deployment-8",
+      "flow_id": "f-8",
       "work_pool_name": "default-pool",
       "work_queue_name": "default-queue",
       "status": "READY",
@@ -577,6 +590,19 @@
       "expected_start_time": "2026-01-20T15:00:00Z",
       "start_time": "2026-01-20T15:00:03Z",
       "end_time": "2026-01-20T15:00:11Z"
+    },
+    {
+      "id": "fr-nif-completed",
+      "work_pool_id": "wp-1",
+      "work_pool_name": "default-pool",
+      "work_queue_id": "wq-1",
+      "work_queue_name": "default-queue",
+      "deployment_id": "d-8",
+      "flow_id": "f-8",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:00Z",
+      "start_time": "2026-01-20T15:00:03Z",
+      "end_time": "2026-01-20T15:00:11Z"
     }
   ],
 
@@ -767,6 +793,15 @@
       "id": "tr-nid-1",
       "task_key": "task-nid",
       "flow_run_id": "fr-nid-completed",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:04Z",
+      "start_time": "2026-01-20T15:00:04Z",
+      "end_time": "2026-01-20T15:00:10Z"
+    },
+    {
+      "id": "tr-nif-1",
+      "task_key": "task-nif",
+      "flow_run_id": "fr-nif-completed",
       "state_type": "COMPLETED",
       "expected_start_time": "2026-01-20T15:00:04Z",
       "start_time": "2026-01-20T15:00:04Z",
@@ -1621,6 +1656,33 @@
               "id": "evt-nid-0001",
               "follows": null,
               "received": "2026-01-20T15:01:19.050000Z"
+            },
+            {
+              "occurred": "2026-01-20T15:01:20.000000Z",
+              "event": "prefect.flow-run.Completed",
+              "resource": {
+                "prefect.resource.id": "prefect.flow-run.fr-nif-completed",
+                "prefect.resource.name": "fr-nif-completed",
+                "prefect.run-count": "1",
+                "prefect.state-name": "Completed",
+                "prefect.state-type": "COMPLETED",
+                "prefect.state-message": "",
+                "prefect.state-timestamp": "2026-01-20T15:01:20.000000+00:00"
+              },
+              "related": [
+                { "prefect.resource.id": "prefect.flow.f-8", "prefect.resource.role": "flow", "prefect.resource.name": "not_included_flow" },
+                { "prefect.resource.id": "prefect.deployment.d-8", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-8" },
+                { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+                { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool", "prefect.work-pool.type": "process" }
+              ],
+              "payload": {
+                "initial_state": { "name": "Running", "type": "RUNNING" },
+                "intended": { "from": "RUNNING", "to": "COMPLETED" },
+                "validated_state": { "name": "Completed", "type": "COMPLETED" }
+              },
+              "id": "evt-nif-0001",
+              "follows": null,
+              "received": "2026-01-20T15:01:20.050000Z"
             }
         
       ]

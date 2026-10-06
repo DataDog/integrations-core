@@ -53,6 +53,15 @@ class EventNames(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class FlowNames(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -110,6 +119,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     event_names: Optional[EventNames] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
+    flow_names: Optional[FlowNames] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None

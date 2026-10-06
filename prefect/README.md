@@ -34,6 +34,8 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][7].
 
+To limit collection to part of your Prefect deployment, use the `work_pool_names`, `work_queue_names`, `deployment_names`, and `flow_names` options. Each takes `include` and `exclude` lists of regular expressions, and excluding a resource also drops the metrics and events of everything that runs under it. For example, excluding a flow drops its deployments, flow runs, task runs, and events.
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `prefect` under the Checks section.
