@@ -199,6 +199,36 @@
       "active_slots": ["tr-1"]
     }
   ],
+  "/flows/filter": [
+    {
+      "id": "f-1",
+      "name": "flow-1"
+    },
+    {
+      "id": "f-2",
+      "name": "flow-2"
+    },
+    {
+      "id": "f-3",
+      "name": "flow-3"
+    },
+    {
+      "id": "f-4",
+      "name": "flow-4"
+    },
+    {
+      "id": "f-5",
+      "name": "flow-5"
+    },
+    {
+      "id": "f-6",
+      "name": "flow-6"
+    },
+    {
+      "id": "f-7",
+      "name": "flow-7"
+    }
+  ],
   "/deployments/filter": [
     {
       "id": "d-1",

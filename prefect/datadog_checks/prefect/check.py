@@ -45,6 +45,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.queues_by_name = {}
         self.pools_by_name = {}
         self.deployments_by_id = {}
+        self.flows_by_id: dict[str, str] = {}
         self.completed_flow_runs: set[str] = set()
 
     def _parse_config(self):
@@ -138,6 +139,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.queues_by_name = {}
         self.pools_by_name = {}
         self.deployments_by_id = {}
+        self.flows_by_id = {}
 
         try:
             self.set_metadata('version', self.client.get("/version"))
@@ -155,6 +157,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self._collect_work_queue_metrics(now)
 
         self._collect_concurrency_limit_metrics()
+
+        self._collect_flows()
 
         self._collect_deployment_metrics()
 
@@ -304,6 +308,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
             self._add_worker_heartbeat_age_seconds(w, now, wtags)
 
+    def _collect_flows(self):
+        # Flow runs and deployments only reference flows by ID, so resolve names once per check run
+        for f in self.client.paginate_filter("/flows/filter"):
+            self.flows_by_id[f.get('id', '')] = f.get('name', '')
+
     def _collect_deployment_metrics(self):
         all_deployments = self.client.paginate_filter("/deployments/filter")
 
@@ -318,6 +327,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 f"deployment_id:{d.get('id', '')}",
                 f"deployment_name:{d.get('name', '')}",
                 f"flow_id:{d.get('flow_id', '')}",
+                f"flow_name:{self.flows_by_id.get(d.get('flow_id', ''), '')}",
                 f"work_pool_name:{d.get('work_pool_name', '')}",
                 f"work_pool_id:{self.pools_by_name.get(d.get('work_pool_name', ''), {}).get('id', '')}",
                 f"work_queue_name:{d.get('work_queue_name', '')}",
@@ -364,6 +374,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             f"deployment_id:{d_id}",
             f"deployment_name:{d_name}",
             f"flow_id:{fr.get('flow_id', '')}",
+            f"flow_name:{self.flows_by_id.get(fr.get('flow_id', ''), '')}",
         ]
         if fr_id not in self.flow_runs_tags:
             self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
@@ -994,6 +1005,7 @@ class Event:
                 f"deployment_id:{self.event_related.get('deployment', {}).get('id', '')}",
                 f"deployment_name:{self.event_related.get('deployment', {}).get('name', '')}",
                 f"flow_id:{self.event_related.get('flow', {}).get('id', '')}",
+                f"flow_name:{self.event_related.get('flow', {}).get('name', '')}",
             ]
         else:
             return []

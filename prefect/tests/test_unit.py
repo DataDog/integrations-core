@@ -57,6 +57,7 @@ TAGS_F1 = [
     "deployment_id:d-1",
     "deployment_name:deployment-1",
     "flow_id:f-1",
+    "flow_name:flow-1",
 ]
 
 TAGS_F2 = [
@@ -67,6 +68,7 @@ TAGS_F2 = [
     "deployment_id:d-2",
     "deployment_name:deployment-2",
     "flow_id:f-2",
+    "flow_name:flow-2",
 ]
 
 TAGS_F3 = [
@@ -77,6 +79,7 @@ TAGS_F3 = [
     "deployment_id:d-3",
     "deployment_name:deployment-3",
     "flow_id:f-3",
+    "flow_name:flow-3",
 ]
 
 TAGS_TR1 = TAGS_F1 + ["task_key:task-1"]
@@ -99,6 +102,7 @@ NI_DEPLOY_TAGS = [
     "deployment_id:d-5",
     "deployment_name:deployment-5",
     "flow_id:f-5",
+    "flow_name:flow-5",
     "work_pool_name:not_included_pool",
     "work_pool_id:wp-4",
     "work_queue_name:not-included-queue",
@@ -113,6 +117,7 @@ NI_FLOW_TAGS = [
     "deployment_id:d-5",
     "deployment_name:deployment-5",
     "flow_id:f-5",
+    "flow_name:flow-5",
 ]
 NI_TASK_TAGS = NI_FLOW_TAGS + ["task_key:task-ni"]
 
@@ -127,6 +132,7 @@ NIQ_DEPLOY_TAGS = [
     "deployment_id:d-6",
     "deployment_name:deployment-6",
     "flow_id:f-6",
+    "flow_name:flow-6",
     "work_pool_name:default-pool",
     "work_pool_id:wp-1",
     "work_queue_name:not_included_queue",
@@ -141,6 +147,7 @@ NIQ_FLOW_TAGS = [
     "deployment_id:d-6",
     "deployment_name:deployment-6",
     "flow_id:f-6",
+    "flow_name:flow-6",
 ]
 NIQ_TASK_TAGS = NIQ_FLOW_TAGS + ["task_key:task-niq"]
 
@@ -148,6 +155,7 @@ NID_DEPLOY_TAGS = [
     "deployment_id:d-7",
     "deployment_name:not_included_deployment",
     "flow_id:f-7",
+    "flow_name:flow-7",
     "work_pool_name:default-pool",
     "work_pool_id:wp-1",
     "work_queue_name:default-queue",
@@ -162,6 +170,7 @@ NID_FLOW_TAGS = [
     "deployment_id:d-7",
     "deployment_name:not_included_deployment",
     "flow_id:f-7",
+    "flow_name:flow-7",
 ]
 NID_TASK_TAGS = NID_FLOW_TAGS + ["task_key:task-nid"]
 
@@ -436,6 +445,7 @@ ALL_METRIC_CASES = [
             "deployment_id:d-1",
             "deployment_name:deployment-1",
             "flow_id:f-1",
+            "flow_name:flow-1",
             "work_pool_name:default-pool",
             "work_pool_id:wp-1",
             "work_queue_name:default-queue",
@@ -452,6 +462,7 @@ ALL_METRIC_CASES = [
             "deployment_id:d-2",
             "deployment_name:deployment-2",
             "flow_id:f-2",
+            "flow_name:flow-2",
             "work_pool_name:paused-pool",
             "work_pool_id:wp-2",
             "work_queue_name:queue-paused-pool",

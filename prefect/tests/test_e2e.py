@@ -20,6 +20,7 @@ DEPLOYMENT_TAG_KEYS = [
     "deployment_id:",
     "deployment_name:",
     "flow_id:",
+    "flow_name:",
     "work_pool_name:",
     "work_pool_id:",
     "work_queue_name:",
@@ -35,6 +36,7 @@ FLOW_RUN_TAG_KEYS = [
     "deployment_id:",
     "deployment_name:",
     "flow_id:",
+    "flow_name:",
 ]
 
 TASK_RUN_TAG_KEYS = FLOW_RUN_TAG_KEYS + ["task_key:"]
