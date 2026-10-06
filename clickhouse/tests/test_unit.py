@@ -861,6 +861,19 @@ def test_database_instance_payload_reports_the_connection_mode_when_unset(aggreg
     assert emitted_metadata(aggregator)['single_endpoint_mode'] is False
 
 
+def test_database_instance_is_emitted_when_metric_queries_fail(aggregator, instance):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    failing_query_manager = mock.MagicMock()
+    failing_query_manager.execute.side_effect = Exception('Not enough privileges')
+    with mock.patch.object(ClickhouseCheck, '_build_query_manager', return_value=failing_query_manager):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
+            with pytest.raises(Exception, match='Not enough privileges'):
+                check.check({})
+
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    assert [e['kind'] for e in events] == ['database_instance']
+
+
 def test_check_tags_with_cluster(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with mock.patch.object(ClickhouseCheck, 'cluster_name', new_callable=mock.PropertyMock) as cluster_name:
