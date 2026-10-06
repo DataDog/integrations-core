@@ -55,6 +55,11 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 )
                                 continue
 
+                            if math.isinf(lower_bound):
+                                # the agent drops buckets with an infinite bound; collapse the open-ended bottom
+                                # bucket to its upper bound, as the agent already does for the +Inf top bucket
+                                lower_bound = upper_bound
+
                             submit_histogram_bucket_method(
                                 metric_name,
                                 sample.value,
@@ -84,6 +89,11 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 'Metric: %s has bucket boundaries equal, skipping: %s', metric_name, sample.labels
                             )
                             continue
+
+                        if math.isinf(lower_bound):
+                            # the agent drops buckets with an infinite bound; collapse the open-ended bottom
+                            # bucket to its upper bound, as the agent already does for the +Inf top bucket
+                            lower_bound = upper_bound
 
                         submit_histogram_bucket_method(
                             metric_name,
