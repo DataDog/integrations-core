@@ -1,2 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 dns.response_time,gauge,,second,,"The response time for DNS query for a given record, tagged by hostname, e.g. 'hostname:example.com'.",-1,dns,dns resp time,
+dns.can_connect,gauge,,,"","Indicates if the DNS check can connect to the DNS server (1 for yes, 0 for no).",0,dns,dns can connect,
+dns.cant_connect,gauge,,,"","Indicates if the DNS check cannot connect to the DNS server (1 for yes, 0 for no).",0,dns,dns cant connect,
