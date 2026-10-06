@@ -14,10 +14,14 @@ from typing import TYPE_CHECKING, Final
 import httpx
 from pydantic import JsonValue
 
-from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
-from .response_store import ResponseStore, ResponseStoreError
+from .response_store import (
+    MAX_ERROR_EXCERPT_CHARS,
+    ResponseStore,
+    ResponseStoreError,
+    SavedResponse,
+)
 
 if TYPE_CHECKING:
     from .base import HttpRequestInput
@@ -27,7 +31,6 @@ MAX_OUTPUT_CHARS: Final = 4096
 MAX_BODY_BYTES: Final = 4 * 1024 * 1024
 # Pretty-printing expands JSON; above this the compact wire text is saved instead.
 MAX_FORMATTED_CHARS: Final = 4 * MAX_BODY_BYTES
-MAX_ERROR_EXCERPT_CHARS: Final = 1500
 MAX_RECORDED_REQUEST_BODY_CHARS: Final = 2048
 
 SUMMARY_MAX_DEPTH: Final = 2
@@ -89,26 +92,44 @@ SENSITIVE_NAMES: Final = frozenset(
 
 
 @dataclass
-class FetchedResponse:
+class HttpResponse:
+    """Metadata shared by buffered responses and responses saved during download."""
+
     url: httpx.URL
     status: int
     content_type: str
     location: str | None
+    fetched_at: datetime
+    received_bytes: int
+
+
+@dataclass
+class BufferedResponse(HttpResponse):
+    """A response held in memory; incomplete downloads are rejected before formatting."""
+
     body: bytes
     charset: str | None
     complete: bool
-    fetched_at: datetime
+
+
+@dataclass
+class StreamedResponse(HttpResponse):
+    """A completed response streamed to disk, with only a preview retained in memory."""
+
+    saved: SavedResponse
+    excerpt: str
 
 
 def format_response(
-    tool_input: HttpRequestInput, *, method: str, fetched: FetchedResponse, store: ResponseStore | None
+    tool_input: HttpRequestInput, *, method: str, fetched: BufferedResponse | StreamedResponse, store: ResponseStore
 ) -> ToolResult:
     """Return a complete response inline, or save it when requested or too large.
 
     Saved results include artifact paths and the body when it fits, otherwise a summary.
-    Without storage, large text is truncated; binary bodies are neither returned nor saved.
+    Spilled responses already have completed artifacts; their summaries require no body reread.
+    Binary bodies are neither returned nor saved.
     """
-    if not _is_textual(fetched.content_type):
+    if not is_textual(fetched.content_type):
         return ToolResult(
             success=True,
             data=_dump(
@@ -120,54 +141,41 @@ def format_response(
             ),
         )
 
-    text = _decode(fetched.body, fetched.charset)
-    inline = _inline_output(fetched, text)
-    store_needed = tool_input.save_response or len(inline) > MAX_OUTPUT_CHARS
-    if not store_needed:
+    if isinstance(fetched, StreamedResponse):
+        return _format_streamed_response(fetched)
+    return _format_buffered_response(tool_input, method=method, fetched=fetched, store=store)
+
+
+def _format_streamed_response(fetched: StreamedResponse) -> ToolResult:
+    """Describe completed artifacts using the retained preview, without rereading their body."""
+    return _saved_result(
+        fetched,
+        fetched.saved,
+        representation="text",
+        summary={"type": "text", "first_line": fetched.excerpt.split("\n", 1)[0][:SUMMARY_MAX_STRING]},
+        error_excerpt=fetched.excerpt,
+    )
+
+
+def _format_buffered_response(
+    tool_input: HttpRequestInput, *, method: str, fetched: BufferedResponse, store: ResponseStore
+) -> ToolResult:
+    """Return the buffered body inline, or save it and describe the resulting artifact."""
+    body_text = _decode(fetched.body, fetched.charset)
+    inline = _inline_output(fetched, body_text)
+    fits_inline = len(inline) <= MAX_OUTPUT_CHARS
+    if not tool_input.save_response and fits_inline:
         return ToolResult(success=True, data=inline)
 
-    if store is None:
-        # No artifact storage: return bounded output and say what was omitted.
-        result = truncate(inline, max_chars=MAX_OUTPUT_CHARS)
-        data = result.output
-        if tool_input.save_response:
-            data = f"{data}\n\n[save_response ignored: no response storage is configured for this run]"
-        return make_tool_result(success=True, data=data, result=result)
-
-    return _save_and_summarize(store, tool_input=tool_input, method=method, fetched=fetched, text=text)
-
-
-def _save_and_summarize(
-    store: ResponseStore, *, tool_input: HttpRequestInput, method: str, fetched: FetchedResponse, text: str
-) -> ToolResult:
-    """Save response text and metadata, then return paths with its body or structural summary."""
-    representation, saved_text, parsed, parse_note = _representation(fetched.content_type, text)
-    metadata: dict[str, JsonValue] = {
-        "method": method,
-        "url": _safe_url(fetched.url),
-        "fetched_at": fetched.fetched_at.isoformat(),
-        "status": fetched.status,
-        "content_type": fetched.content_type,
-        "received_bytes": len(fetched.body),
-        "representation": representation,
-        "complete": True,
-    }
-    if parse_note:
-        metadata["note"] = parse_note
-    if "json_body" in tool_input.model_fields_set:
-        metadata["request_body"] = _recordable_request_body(tool_input.json_body)
-    elif tool_input.content is not None:
-        metadata["request_body"] = _recordable_request_body(tool_input.content)
-    if tool_input.headers:
-        metadata["request_headers"] = {
-            name: "REDACTED" if _is_sensitive_name(name) else value for name, value in tool_input.headers.items()
-        }
-
+    error_excerpt = _excerpt(body_text)
+    representation, saved_text, parsed, parse_note = _representation(fetched.content_type, body_text)
     try:
         saved = store.save(
             body=saved_text,
             suffix=".json" if representation == "formatted_json" else ".txt",
-            metadata=metadata,
+            metadata=response_metadata(
+                tool_input, method=method, fetched=fetched, representation=representation, note=parse_note
+            ),
             stem=method.lower(),
         )
     except ResponseStoreError as e:
@@ -177,11 +185,32 @@ def _save_and_summarize(
                 {
                     **_base_fields(fetched),
                     "error": f"Response received but not saved: {e}",
-                    "excerpt": _excerpt(text),
+                    "excerpt": error_excerpt,
                 }
             ),
         )
+    return _saved_result(
+        fetched,
+        saved,
+        representation=representation,
+        summary=_summarize_json(parsed) if parsed is not None else _summarize_text(saved_text),
+        error_excerpt=error_excerpt,
+        inline_body=body_text if fits_inline else None,
+        note=parse_note,
+    )
 
+
+def _saved_result(
+    fetched: HttpResponse,
+    saved: SavedResponse,
+    *,
+    representation: str,
+    summary: dict[str, object],
+    error_excerpt: str,
+    inline_body: str | None = None,
+    note: str | None = None,
+) -> ToolResult:
+    """Build a saved result with the full body if it fits, otherwise its summary and error excerpt."""
     payload: dict[str, object] = {
         **_base_fields(fetched),
         "saved_to": str(saved.path),
@@ -189,24 +218,51 @@ def _save_and_summarize(
         "representation": representation,
         "complete": True,
     }
-    if parse_note:
-        payload["note"] = parse_note
-    if len(_inline_output(fetched, text)) <= MAX_OUTPUT_CHARS:
-        inline_payload = {**payload, "body": text}
-        output = _dump(inline_payload)
+    if note:
+        payload["note"] = note
+    if inline_body is not None:
+        output = _dump({**payload, "body": inline_body})
         if len(output) <= MAX_OUTPUT_CHARS:
             return ToolResult(success=True, data=output)
     if fetched.status >= 400:
-        payload["excerpt"] = _excerpt(text)
-    payload["summary"] = _summarize_json(parsed) if parsed is not None else _summarize_text(saved_text)
+        payload["excerpt"] = error_excerpt
+    payload["summary"] = summary
     return ToolResult(success=True, data=_fit(payload))
 
 
-def _base_fields(fetched: FetchedResponse) -> dict[str, object]:
+def response_metadata(
+    tool_input: HttpRequestInput, *, method: str, fetched: HttpResponse, representation: str, note: str | None = None
+) -> dict[str, JsonValue]:
+    """Describe the saved response and request, redacting credential-like URL and header fields."""
+    metadata: dict[str, JsonValue] = {
+        "method": method,
+        "url": _safe_url(fetched.url),
+        "fetched_at": fetched.fetched_at.isoformat(),
+        "status": fetched.status,
+        "content_type": fetched.content_type,
+        "received_bytes": fetched.received_bytes,
+        "representation": representation,
+        "complete": True,
+    }
+    if note:
+        metadata["note"] = note
+    if "json_body" in tool_input.model_fields_set:
+        metadata["request_body"] = _recordable_request_body(tool_input.json_body)
+    elif tool_input.content is not None:
+        metadata["request_body"] = _recordable_request_body(tool_input.content)
+    if tool_input.headers:
+        metadata["request_headers"] = {
+            name: "REDACTED" if _is_sensitive_name(name) else value for name, value in tool_input.headers.items()
+        }
+
+    return metadata
+
+
+def _base_fields(fetched: HttpResponse) -> dict[str, object]:
     fields: dict[str, object] = {
         "status": fetched.status,
         "content_type": fetched.content_type,
-        "received_bytes": len(fetched.body),
+        "received_bytes": fetched.received_bytes,
     }
     if fetched.location is not None:
         # Bound server-controlled headers so they cannot exhaust the output budget on their own.
@@ -214,14 +270,14 @@ def _base_fields(fetched: FetchedResponse) -> dict[str, object]:
     return fields
 
 
-def _inline_output(fetched: FetchedResponse, text: str) -> str:
+def _inline_output(fetched: HttpResponse, text: str) -> str:
     header = f"Status: {fetched.status}"
     if fetched.location is not None:
         header = f"{header}\nRedirect not followed: {fetched.location}"
     return f"{header}\n\n{text}"
 
 
-def _is_textual(content_type: str) -> bool:
+def is_textual(content_type: str) -> bool:
     """Recognize supported text media types, treating a missing content type as text."""
     media_type = content_type.split(";", 1)[0].strip().lower()
     return (

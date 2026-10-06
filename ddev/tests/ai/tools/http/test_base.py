@@ -36,21 +36,16 @@ def openapi_document(schema_count: int = 400) -> dict:
     }
 
 
-@pytest.fixture
-def store(tmp_path: Path) -> ResponseStore:
-    return ResponseStore(tmp_path / "exec")
-
-
-def get_tool(store: ResponseStore | None, transport: httpx.AsyncBaseTransport) -> HttpGetTool:
+def get_tool(store: ResponseStore, transport: httpx.AsyncBaseTransport) -> HttpGetTool:
     return HttpGetTool(store, transport=transport)
 
 
 @pytest.mark.parametrize("url", ["http://user:pass@localhost:4200/api", "http://tok@127.0.0.1:4200/api"])
-async def test_embedded_credentials_are_rejected_for_every_method(url: str):
+async def test_embedded_credentials_are_rejected_for_every_method(url: str, store: ResponseStore):
     for tool_cls in (HttpGetTool, HttpPostTool):
         transport = respond(httpx.Response(200))
 
-        result = await tool_cls(transport=transport).run({"url": url})
+        result = await tool_cls(store, transport=transport).run({"url": url})
 
         assert result.success is False
         assert "embedded credentials" in result.error
@@ -72,13 +67,14 @@ async def test_body_and_headers_are_sent_for_each_verb(
     body_input: dict,
     expected_content: bytes,
     content_type: str,
+    store: ResponseStore,
 ):
     transport = respond(httpx.Response(200, text="ok"))
     headers = {"Authorization": "Bearer deliberate-token", "Accept": "application/json"}
     if "content" in body_input:
         headers["Content-Type"] = content_type
 
-    result = await tool_cls(transport=transport).run({"url": OPENAPI_URL, "headers": headers, **body_input})
+    result = await tool_cls(store, transport=transport).run({"url": OPENAPI_URL, "headers": headers, **body_input})
 
     assert result.success is True
     (request,) = transport.requests
@@ -93,10 +89,12 @@ async def test_body_and_headers_are_sent_for_each_verb(
 
 
 @pytest.mark.parametrize("json_body", [{"limit": 1}, None])
-async def test_conflicting_body_inputs_are_rejected(json_body: object):
+async def test_conflicting_body_inputs_are_rejected(json_body: object, store: ResponseStore):
     transport = respond(httpx.Response(200))
 
-    result = await HttpGetTool(transport=transport).run({"url": OPENAPI_URL, "json": json_body, "content": "raw"})
+    result = await HttpGetTool(store, transport=transport).run(
+        {"url": OPENAPI_URL, "json": json_body, "content": "raw"}
+    )
 
     assert result.success is False
     assert "either json or content" in result.error
@@ -233,7 +231,7 @@ async def test_unsavable_response_reports_status_and_excerpt(tmp_path: Path):
     assert "ok" in payload["excerpt"]
 
 
-async def test_decompressed_size_limit_discards_response(store: ResponseStore):
+async def test_decompressed_response_spills_to_disk(store: ResponseStore):
     compressed = gzip.compress(b"x" * (MAX_BODY_BYTES + 1))
     response = httpx.Response(
         200, content=compressed, headers={"content-encoding": "gzip", "content-type": "text/plain"}
@@ -241,10 +239,11 @@ async def test_decompressed_size_limit_discards_response(store: ResponseStore):
 
     result = await get_tool(store, respond(response)).run({"url": OPENAPI_URL, "save_response": True})
 
-    assert result.success is False
-    assert json.loads(result.error)["complete"] is False
+    assert result.success is True
+    payload = json.loads(result.data)
+    assert payload["received_bytes"] == MAX_BODY_BYTES + 1
+    assert Path(payload["saved_to"]).read_bytes() == b"x" * (MAX_BODY_BYTES + 1)
     assert len(compressed) < MAX_BODY_BYTES
-    assert saved_files(store.root) == []
 
 
 async def test_cancellation_during_download_writes_nothing(store: ResponseStore):

@@ -9,7 +9,7 @@ import httpx
 import pytest
 
 from ddev.ai.tools.http.base import HttpRequestInput
-from ddev.ai.tools.http.response_format import FetchedResponse, format_response
+from ddev.ai.tools.http.response_format import BufferedResponse, format_response
 from ddev.ai.tools.http.response_store import ResponseStore
 
 
@@ -37,7 +37,7 @@ def test_media_type_controls_response_preservation(
     tmp_path: Path, content_type: str, body: bytes, representation: str | None
 ):
     store = ResponseStore(tmp_path / "responses")
-    fetched = FetchedResponse(
+    fetched = BufferedResponse(
         url=httpx.URL("http://localhost/api"),
         status=200,
         content_type=content_type,
@@ -46,6 +46,7 @@ def test_media_type_controls_response_preservation(
         charset=None,
         complete=True,
         fetched_at=datetime.now(UTC),
+        received_bytes=len(body),
     )
 
     result = format_response(
@@ -104,7 +105,7 @@ def test_media_type_controls_response_preservation(
     + [(name, False) for name in ("keyword", "author", "monkey", "Accept", "Content-Type")],
 )
 def test_metadata_redacts_credential_names_and_preserves_ordinary_names(tmp_path: Path, name: str, sensitive: bool):
-    fetched = FetchedResponse(
+    fetched = BufferedResponse(
         url=httpx.URL("http://localhost/api", params=[(name, "first"), (name, "second")]),
         status=200,
         content_type="text/plain",
@@ -113,6 +114,7 @@ def test_metadata_redacts_credential_names_and_preserves_ordinary_names(tmp_path
         charset=None,
         complete=True,
         fetched_at=datetime.now(UTC),
+        received_bytes=2,
     )
     result = format_response(
         HttpRequestInput(url=str(fetched.url), headers={name: "header-value"}, save_response=True),

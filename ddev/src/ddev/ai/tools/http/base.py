@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import json
+from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import Annotated, Final, Self
 
@@ -15,11 +16,22 @@ from pydantic import AfterValidator, Field, JsonValue, model_validator
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
-from .response_format import MAX_BODY_BYTES, FetchedResponse, format_response
-from .response_store import ResponseStore
+from .response_format import (
+    MAX_BODY_BYTES,
+    BufferedResponse,
+    StreamedResponse,
+    format_response,
+    is_textual,
+    response_metadata,
+)
+from .response_store import ResponseStore, ResponseStoreError
 
 DEFAULT_TIMEOUT: Final = 10.0
 MAX_TIMEOUT: Final = 60.0
+
+# Engineering default for the decoded-download ceiling, independent of the buffering threshold.
+MAX_DOWNLOAD_BYTES: Final = 64 * 1024 * 1024
+STREAM_CHUNK_BYTES: Final = 64 * 1024
 
 
 class HttpDestinationError(Exception):
@@ -111,7 +123,7 @@ class HttpRequestTool(BaseTool[HttpRequestInput]):
 
     def __init__(
         self,
-        store: ResponseStore | None = None,
+        store: ResponseStore,
         *,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
@@ -123,6 +135,8 @@ class HttpRequestTool(BaseTool[HttpRequestInput]):
         try:
             async with asyncio.timeout(timeout):
                 fetched = await self._fetch(tool_input, method=method)
+        except ResponseStoreError as e:
+            return ToolResult(success=False, error=f"Response could not be saved: {e}")
         except HttpDestinationError as e:
             return ToolResult(success=False, error=f"Request blocked: {e}")
         except (TimeoutError, httpx.TimeoutException):
@@ -132,14 +146,14 @@ class HttpRequestTool(BaseTool[HttpRequestInput]):
         except httpx.RequestError as e:
             return ToolResult(success=False, error=f"Request failed for {tool_input.url}: {e}")
 
-        if not fetched.complete:
+        if isinstance(fetched, BufferedResponse) and not fetched.complete:
             return ToolResult(
                 success=False,
                 error=json.dumps(
                     {
                         "status": fetched.status,
                         "content_type": fetched.content_type,
-                        "received_bytes": len(fetched.body),
+                        "received_bytes": fetched.received_bytes,
                         "complete": False,
                         "error": f"Response exceeded the {MAX_BODY_BYTES}-byte download limit and was discarded. "
                         "Narrow the request (filters, limit/pagination, a more specific endpoint).",
@@ -148,7 +162,16 @@ class HttpRequestTool(BaseTool[HttpRequestInput]):
             )
         return format_response(tool_input, method=method, fetched=fetched, store=self._store)
 
-    async def _fetch(self, tool_input: HttpRequestInput, *, method: str) -> FetchedResponse:
+    async def _fetch(self, tool_input: HttpRequestInput, *, method: str) -> BufferedResponse | StreamedResponse:
+        """Download once, buffering text up to 4 MiB and streaming larger bodies to disk.
+
+        Text responses up to 4 MiB return as `BufferedResponse`; `format_response` returns
+        them inline if status and body fit 4,096 characters, otherwise saves them. Explicit
+        `save_response` also saves small bodies, returning their content and paths when they fit.
+        Above 4 MiB, save the buffered prefix and remaining chunks as text, up to 64 MiB;
+        exceeding that download cap raises an error and removes the partial file.
+        Binary bodies are unsupported and are consumed only up to the 4 MiB limit.
+        """
         async with httpx.AsyncClient(
             timeout=tool_input.timeout,
             follow_redirects=False,
@@ -169,24 +192,63 @@ class HttpRequestTool(BaseTool[HttpRequestInput]):
             request = client.build_request(method, url, headers=headers, json=tool_input.json_body, content=content)
             _check_destination(method, request.url)
             response = await client.send(request, stream=True)
+            fetched = BufferedResponse(
+                url=request.url,
+                status=response.status_code,
+                content_type=response.headers.get("content-type", ""),
+                location=response.headers.get("location"),
+                body=b"",
+                charset=response.charset_encoding,
+                complete=True,
+                fetched_at=datetime.now(UTC),
+                received_bytes=0,
+            )
+            body = bytearray()
+            chunks = response.aiter_bytes(chunk_size=STREAM_CHUNK_BYTES)
+            textual = is_textual(fetched.content_type)
             try:
-                body = bytearray()
-                complete = True
-                # aiter_bytes yields decompressed content, so the limit bounds memory, not wire size.
-                async for chunk in response.aiter_bytes():
-                    body.extend(chunk)
-                    if len(body) > MAX_BODY_BYTES:
-                        complete = False
+                async for chunk in chunks:
+                    fetched.received_bytes += len(chunk)
+                    if textual and fetched.received_bytes > MAX_BODY_BYTES:
+                        saved, received_bytes, excerpt = await self._store.save_stream(
+                            chunks=_with_prefix(body, chunk, chunks),
+                            charset=fetched.charset,
+                            metadata=response_metadata(
+                                tool_input,
+                                method=method,
+                                fetched=fetched,
+                                representation="text",
+                                note="Streamed response saved as received text without JSON parsing or formatting",
+                            ),
+                            stem=method.lower(),
+                            max_bytes=MAX_DOWNLOAD_BYTES,
+                        )
+                        return StreamedResponse(
+                            url=fetched.url,
+                            status=fetched.status,
+                            content_type=fetched.content_type,
+                            location=fetched.location,
+                            fetched_at=fetched.fetched_at,
+                            received_bytes=received_bytes,
+                            saved=saved,
+                            excerpt=excerpt,
+                        )
+                    if fetched.received_bytes > MAX_BODY_BYTES:
+                        fetched.complete = False
                         break
+                    if textual:
+                        body.extend(chunk)
+                fetched.body = bytes(body)
+                return fetched
             finally:
                 await response.aclose()
-        return FetchedResponse(
-            url=request.url,
-            status=response.status_code,
-            content_type=response.headers.get("content-type", ""),
-            location=response.headers.get("location"),
-            body=bytes(body),
-            charset=response.charset_encoding,
-            complete=complete,
-            fetched_at=datetime.now(UTC),
-        )
+
+
+async def _with_prefix(prefix: bytearray, first_chunk: bytes, chunks: AsyncIterator[bytes]) -> AsyncIterator[bytes]:
+    # Flush retained bytes in small pieces; HTTPX's upstream decompression buffers are independent.
+    for offset in range(0, len(prefix), STREAM_CHUNK_BYTES):
+        yield bytes(prefix[offset : offset + STREAM_CHUNK_BYTES])
+    prefix.clear()
+    yield first_chunk
+    async for chunk in chunks:
+        yield chunk
